@@ -99,7 +99,7 @@ export default function UnsubscribePage({ token }: { token: string }) {
   }
 
   return (
-    <Card className="mx-auto w-full max-w-xl pb-0 shadow-2xl">
+    <Card className="mx-auto w-full max-w-xl pb-0 shadow-[0_5px_50px_1px_--theme(--color-foreground/25%)] ring-ring/10">
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardHeader>
           <CardTitle>Unsubscribe</CardTitle>

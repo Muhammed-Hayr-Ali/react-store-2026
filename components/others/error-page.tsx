@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 
 export default function ErrorPage({ errorMessage }: { errorMessage: string }) {
     return (
-      <Card className="mx-auto w-full max-w-sm pb-0 shadow-2xl">
+      <Card className="mx-auto w-full max-w-sm pb-0 shadow-[0_5px_50px_1px_--theme(--color-foreground/25%)] ring-ring/10">
         <CardHeader>
           <CardTitle>Authentication Failed</CardTitle>
           <CardDescription>

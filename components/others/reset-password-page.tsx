@@ -45,9 +45,12 @@ export default function ResetPasswordForm({
     getValues,
   } = useForm<Inputs>();
 
-
   const onSubmit: SubmitHandler<Inputs> = async (formData) => {
-    const { error } = await updatePassword({ token, resetTokenData, password: formData.password });
+    const { error } = await updatePassword({
+      token,
+      resetTokenData,
+      password: formData.password,
+    });
 
     if (error) {
       toast.error(error);
@@ -56,11 +59,10 @@ export default function ResetPasswordForm({
     toast.success("Password updated successfully");
     router.refresh();
     router.push("/auth/login");
-
   };
 
   return (
-    <Card className="mx-auto w-full max-w-sm pb-0 shadow-2xl">
+    <Card className="mx-auto w-full max-w-sm pb-0 shadow-[0_5px_50px_1px_--theme(--color-foreground/25%)] ring-ring/10">
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardHeader>
           <CardTitle>Update Password</CardTitle>

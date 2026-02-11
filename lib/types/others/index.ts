@@ -12,9 +12,3 @@ export type UnsubscribeResult = {
   error: { message: string } | null;
 };
 
-
-
-export type VerifyMfaResult = {
-  data: AuthResponse["data"] | null;
-  error: AuthError | null;
-};

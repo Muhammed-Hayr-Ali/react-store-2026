@@ -1,6 +1,6 @@
 import { AuthMFAVerifyResponseData, Factor } from "@supabase/supabase-js";
-import { createBrowserClient } from "../supabase/createBrowserClient";
 import { v4 as uuidv4 } from "uuid";
+import { createServerClient } from "../supabase/createServerClient";
 
 // ===============================================================================
 // File Name: mfa.ts
@@ -35,7 +35,7 @@ export interface EnrollmentData {
 // Get MFA Factors
 //===============================================================================
 export async function getMfaFactors(): Promise<MfaResponse<Factor | null>> {
-  const supabase = createBrowserClient();
+  const supabase = await createServerClient();
   const { data: listFactorsData, error: listFactorsError } =
     await supabase.auth.mfa.listFactors();
 
@@ -43,7 +43,6 @@ export async function getMfaFactors(): Promise<MfaResponse<Factor | null>> {
     console.error("Error listing MFA factors:", listFactorsError.message);
     return { data: null, error: listFactorsError.message };
   }
-
 
   if (!listFactorsData) {
     return { data: null, error: "No MFA factors found" };
@@ -67,7 +66,7 @@ export async function verifyMfa(
   factorId: string,
   code: string,
 ): Promise<MfaResponse<AuthMFAVerifyResponseData | null>> {
-  const supabase = createBrowserClient();
+  const supabase = await createServerClient();
 
   const { data: challengeData, error: challengeError } =
     await supabase.auth.mfa.challenge({
@@ -99,7 +98,7 @@ export async function verifyMfa(
 export async function unenrollMfa(
   factorId: string,
 ): Promise<MfaResponse<{ id: string } | null>> {
-  const supabase = createBrowserClient();
+  const supabase = await createServerClient();
   const { data, error } = await supabase.auth.mfa.unenroll({
     factorId,
   });
@@ -117,7 +116,7 @@ export async function enrollMfa(): Promise<MfaResponse<EnrollmentData | null>> {
   // generate a friendly name from uuid
   const friendlyName = uuidv4();
 
-  const supabase = createBrowserClient();
+  const supabase = await createServerClient();
   const { data: enrollData, error: enrollError } =
     await supabase.auth.mfa.enroll({
       factorType: "totp",

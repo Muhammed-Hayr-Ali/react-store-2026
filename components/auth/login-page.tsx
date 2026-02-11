@@ -69,7 +69,9 @@ export function LoginPage({}: React.ComponentProps<"div">) {
     <form className="p-6 md:p-8" onSubmit={handleSubmit(onSubmit)}>
       <FieldGroup>
         <div className="flex flex-col items-center gap-2 text-center">
-          <AppLogo />
+          <Link href="/">
+            <AppLogo />
+          </Link>
           <h1 className="text-2xl font-bold mt-4">Welcome back</h1>
           <p className="text-muted-foreground text-balance">
             Login to your Acme Inc account
@@ -81,7 +83,7 @@ export function LoginPage({}: React.ComponentProps<"div">) {
             id="email"
             type="email"
             placeholder="you@domain.com"
-            required
+            aria-invalid={errors.email ? "true" : "false"}
             {...register("email", {
               required: "Email is required",
               pattern: {
@@ -105,7 +107,7 @@ export function LoginPage({}: React.ComponentProps<"div">) {
           <Input
             id="password"
             type="password"
-            required
+            aria-invalid={errors.password ? "true" : "false"}
             {...register("password", {
               required: "Password is required",
               maxLength: {

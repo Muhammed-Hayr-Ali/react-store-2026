@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
   if (error) {
     console.error("Auth Callback Error:", error);
     // في حالة الفشل، أعد التوجيه إلى صفحة خطاء
-    return NextResponse.redirect(`${origin}/error?error=${error}`);
+    return NextResponse.redirect(`${origin}/auth-error?error=${error}`);
   }
 
   // بعد النجاح (أو إذا لم يكن هناك رمز)، أعد التوجيه إلى الصفحة الرئيسية

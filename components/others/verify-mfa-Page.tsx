@@ -41,7 +41,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { verifyMfaForLogin } from "@/lib/actions/verify-mfa-actions";
+import { verifyMfaForLogin } from "@/lib/actions/login-verify-mfa-actions";
 
 type SupportRequestInputs = {
   email: string;
@@ -50,12 +50,16 @@ type SupportRequestInputs = {
 };
 
 export default function VerifyMfaPage() {
+
+
   const router = useRouter();
 
   const [code, setCode] = React.useState("");
   const [isProcessing, setIsProcessing] = React.useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
+
+    
     e.preventDefault();
     if (!code || code.length < 6) {
       toast.warning("Please enter a valid 6-digit code.");
@@ -66,7 +70,7 @@ export default function VerifyMfaPage() {
     const { data, error } = await verifyMfaForLogin(code);
 
     if (error) {
-      console.error("Error verifying MFA code:", error.message);
+      console.error("Error verifying MFA code:", error);
       toast.error("Verification failed. The code may be incorrect or expired.");
       setIsProcessing(false);
       setCode("");
@@ -81,7 +85,7 @@ export default function VerifyMfaPage() {
   };
 
   return (
-    <Card className="mx-auto w-full max-w-sm pb-0 shadow-2xl">
+    <Card className="mx-auto w-full max-w-sm pb-0 shadow-[0_5px_50px_1px_--theme(--color-foreground/25%)] ring-ring/10">
       <CardHeader>
         <CardTitle>Two-Factor Authentication</CardTitle>
         <CardDescription>
