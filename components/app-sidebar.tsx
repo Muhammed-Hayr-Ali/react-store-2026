@@ -37,7 +37,6 @@ import {
 import { TooltipProvider } from "./ui/tooltip";
 import { AppLogo } from "./custom-ui/app-logo";
 import Link from "next/link";
-import { useAuth } from "@/lib/provider/auth-provider";
 
 // This is sample data.
 const data = {
@@ -146,12 +145,12 @@ const data = {
     },
     {
       title: "My Cart",
-      url: "/dashboard/cart",
+      url: "/cart",
       icon: <ShoppingCart />,
     },
     {
       title: "Wishlist",
-      url: "/dashboard/wishlist",
+      url: "/wishlist",
       icon: <Heart />,
     },
     {
@@ -195,7 +194,6 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { user } = useAuth();
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -219,7 +217,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </TooltipProvider>
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} />
+        <NavUser user={null} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

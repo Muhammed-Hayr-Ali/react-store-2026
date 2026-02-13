@@ -1,6 +1,8 @@
+// lib\actions\support.ts
+
 "use server";
 import { PostgrestError } from "@supabase/supabase-js";
-import { createServerClient } from "./supabase/createServerClient";
+import { createServerClient } from "../supabase/createServerClient";
 
 export type SubmitSupportRequestResult = {
   data: { success: true } | null;
@@ -25,14 +27,13 @@ export type SubmitSupportRequestResult = {
 //   return { data, error };
 // }
 
-
 export async function submitSupportRequest(
   subject: string,
   details: string,
   contactEmail: string,
 ) {
   const supabase = await createServerClient();
-  const { error } = await supabase.rpc('create_support_request', {
+  const { error } = await supabase.rpc("create_support_request", {
     subject_text: subject,
     details_text: details,
     contact_email_text: contactEmail,

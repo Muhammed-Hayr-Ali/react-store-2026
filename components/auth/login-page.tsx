@@ -17,8 +17,9 @@ import Link from "next/link";
 import React from "react";
 import { useLocale } from "next-intl";
 import { AppLogo } from "../custom-ui/app-logo";
-import { signInWithPassword } from "@/lib/actions/signIn-with-password-action";
 import { signInWithGoogle } from "@/lib/actions/signIn-with-google";
+import { signInWithPassword } from "@/lib/actions/auth";
+import { getMfaFactors } from "@/lib/actions/mfa";
 
 type Inputs = {
   email: string;
@@ -36,23 +37,27 @@ export function LoginPage({}: React.ComponentProps<"div">) {
   } = useForm<Inputs>();
 
   const onSubmit: SubmitHandler<Inputs> = async (formData) => {
-    const { data, error, mfaData } = await signInWithPassword(
+    const { data: signInData, error: signInError } = await signInWithPassword(
       formData.email,
       formData.password,
     );
 
-    if (error) {
-      toast.error(error.message);
+    if (signInError || !signInData) {
+      toast.error(signInError);
       return;
     }
 
-    if (mfaData) {
-      router.push(`/${locale}/verify`);
+    const { data: mfaFactorData } = await getMfaFactors();
+
+    if (
+      mfaFactorData?.factor_type === "totp" &&
+      mfaFactorData?.status === "verified"
+    ) {
+      router.push(`/verify`);
+      return;
     }
-    if (data) {
-      router.refresh();
-      router.push("/");
-    }
+
+    router.refresh();
   };
 
   const handleGoogleSignIn = async () => {

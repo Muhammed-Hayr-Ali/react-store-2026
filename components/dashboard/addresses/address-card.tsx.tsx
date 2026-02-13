@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { UserAddress } from "@/lib/types/account/address";
-import { deleteAddress } from "@/lib/actions/address-actions";
+import { deleteAddress } from "@/lib/actions/address";
 
 interface AddressCardProps {
   address: UserAddress;

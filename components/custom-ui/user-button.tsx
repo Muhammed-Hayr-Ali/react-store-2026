@@ -1,4 +1,4 @@
-import { useAuth } from "@/lib/provider/auth-provider"; // <-- 1. استورد الخطاف (تأكد من المسار)
+"use client";
 import {
   FileTextIcon,
   HelpCircleIcon,
@@ -36,41 +36,32 @@ import { useLocale } from "next-intl";
 import { siteConfig } from "@/lib/config/site";
 import { useUserDisplay } from "@/hooks/useUserDisplay";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { signOut } from "@/lib/actions/auth";
+import { toast } from "sonner";
+import { useUser } from "@/lib/provider/user-provider";
 
 export const UserButton = () => {
+  const { user } = useUser();
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const locale = useLocale();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { user, signOut } = useAuth();
   const { fullName, avatarUrl, email } = useUserDisplay(user);
 
   const handleChangeLocale = (selectedLocale: string) => {
     if (selectedLocale && selectedLocale !== locale) {
-      const newPath = pathname.replace(`/${locale}`, "");
+      const newPath = pathname.replace(``, "");
       const params = new URLSearchParams(searchParams.toString());
       router.push(`/${selectedLocale}${newPath}?${params.toString()}`);
     }
   };
 
-  if (!user) {
-    return (
-      <Button
-        variant={"ghost"}
-        asChild
-        className="flex rounded-sm h-8 items-center  hover:bg-[#EBEBEB] dark:hover:bg-[#1F1F1F] justify-between w-fit px-2 py-2"
-      >
-        <Link href={`/${locale}/auth/login`} className="flex-1">
-          <UserIcon size={16} />
-        </Link>
-      </Button>
-    );
-  }
-
-  const handleLogout = () => {
-    signOut();
+  const handleLogout = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast.error(error);
+    }
     router.refresh();
   };
 
@@ -95,7 +86,7 @@ export const UserButton = () => {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem className="text-xs" asChild>
-            <Link href={`/${locale}/dashboard/orders`}>
+            <Link href={`/dashboard/orders`}>
               <Package />
               Oreders
               <DropdownMenuShortcut>⌘O</DropdownMenuShortcut>
@@ -179,7 +170,7 @@ export const UserButton = () => {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuLabel className="text-xs">Account</DropdownMenuLabel>
-          <Link href={`/${locale}/dashboard`}>
+          <Link href={`/dashboard`}>
             <DropdownMenuItem className="text-xs">
               <LayoutDashboard />
               Dashboard

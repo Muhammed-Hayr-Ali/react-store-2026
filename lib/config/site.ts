@@ -25,8 +25,8 @@ export const siteConfig = {
 
   userMenuItems: [
     { icon: Home, label: "Home", href: "" },
-    { icon: ShoppingCart, label: "Cart", href: "/dashboard/cart" },
-    { icon: Heart, label: "Wishlist", href: "/dashboard/wishlist" },
+    { icon: ShoppingCart, label: "Cart", href: "/cart" },
+    { icon: Heart, label: "Wishlist", href: "/wishlist" },
     { icon: Package, label: "Orders", href: "/dashboard/orders" },
     { icon: Ticket, label: "My Coupons", href: "coupons" },
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },

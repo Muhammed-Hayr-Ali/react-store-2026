@@ -5,64 +5,86 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useTransition } from "react";
-import { type CartItem } from "@/types";
-import { removeItem, updateItemQuantity } from "@/lib/actions/cart";
+import { CartItem, removeItem, updateItemQuantity } from "@/lib/actions/cart";
 import { X, Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/lib/provider/cart-provider";
+import { useCartCount } from "@/lib/provider/cart-provider";
+// import { useCart } from "@/lib/provider/cart-provider";
 
 interface CartItemCardProps {
   item: CartItem;
 }
 
 export function CartItemCard({ item }: CartItemCardProps) {
-  // ✅ الخطوة 1: إنشاء حالتي انتقال منفصلتين
-  const { refreshCart } = useCart();
+  // React Hooks For Refreshing Cart
+  const { refreshCount } = useCartCount();
+  // Update and Remove State
   const [isUpdatePending, startUpdateTransition] = useTransition();
   const [isRemovePending, startRemoveTransition] = useTransition();
 
+  // Item Data
   const variant = item.product_variants;
+  const varintOptionValues = variant?.variant_option_values;
   const product = variant?.products;
 
   if (!variant || !product) {
     return null;
   }
 
+  // Calculate Total
   const price = variant.discount_price ?? variant.price;
 
+  // Calculate Options
   const options =
-    variant.variant_option_values
+    varintOptionValues
       ?.map((vov) => vov?.product_option_values?.value)
       .filter(Boolean)
       .join(" / ") || "";
 
-  // ✅ الخطوة 2: استخدام startUpdateTransition لتحديث الكمية
+  // Update Item Quantity
   const handleQuantityChange = (newQuantity: number) => {
     startUpdateTransition(async () => {
       if (newQuantity < 1) return;
-      await updateItemQuantity(item.id, newQuantity);
-      toast.success("Cart updated");
-      refreshCart();
+      const { data: updated, error: updateError } = await updateItemQuantity(
+        item.id,
+        newQuantity,
+      );
+
+      if (updateError || !updated) {
+        toast.error("Failed to update quantity.");
+        return;
+      }
+
+      // update cart state
+      refreshCount();
     });
   };
 
-  // ✅ الخطوة 3: استخدام startRemoveTransition للحذف
+  //  Remove Item From Cart
   const handleRemoveItem = () => {
     startRemoveTransition(async () => {
-      await removeItem(item.id);
-      toast.success("Item removed from cart");
-      refreshCart();
+      const { data: removed, error: removeError } = await removeItem(item.id);
+
+      if (removeError || !removed) {
+        toast.error("Failed to remove item from cart.");
+        return;
+      }
+
+      toast.success("Item removed from cart.");
+      // update cart state
+      refreshCount();
     });
   };
 
-  // ✅ الخطوة 4: دمج الحالتين لتعطيل الأزرار بشكل عام عند أي عملية
+  // Check if update or remove is pending
   const isProcessing = isUpdatePending || isRemovePending;
 
   return (
-    <div className="flex gap-4 border-b pb-6">
-      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md border bg-muted">
+    <div className="relative flex gap-4 mb-6 bg-background p-2 lg:p-4 rounded-lg">
+      {/* Image */}
+      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md">
         <Image
           src={product.main_image_url || "/placeholder.svg"}
           alt={product.name}
@@ -71,61 +93,62 @@ export function CartItemCard({ item }: CartItemCardProps) {
           className="object-contain p-1"
         />
       </div>
-      <div className="flex flex-1 flex-col">
-        <div className="flex justify-between">
-          <div>
-            <Link
-              href={`/products/${product.slug}`}
-              className="font-semibold hover:underline"
-            >
-              {product.name}
-            </Link>
-            <p className="text-sm text-muted-foreground">{options}</p>
-          </div>
-          <p className="font-semibold">${(price * item.quantity).toFixed(2)}</p>
-        </div>
-        <div className="flex items-center justify-between mt-auto">
-          <div className="flex items-center border rounded-md">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 rounded-r-none"
-              onClick={() => handleQuantityChange(item.quantity - 1)}
-              disabled={isProcessing || item.quantity <= 1}
-            >
-              <Minus className="h-4 w-4" />
-            </Button>
-            <span className="px-3 font-semibold text-sm">
-              {/* ✅ عرض أيقونة التحميل فقط عند تحديث الكمية */}
-              {isUpdatePending ? <Spinner /> : item.quantity}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 rounded-l-none"
-              onClick={() => handleQuantityChange(item.quantity + 1)}
-              disabled={isProcessing}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleRemoveItem}
-            disabled={isProcessing}
-            className="text-muted-foreground hover:text-destructive"
+      {/* ditails */}
+      <div className="flex flex-1 justify-between  flex-col">
+        {/* Product Name */}
+        <div>
+          <Link
+            href={`/products/${product.slug}`}
+            className="font-semibold hover:underline"
           >
-            {/* ✅ عرض أيقونة التحميل فقط عند الحذف */}
-            {isRemovePending ? (
-              <Spinner className="h-4 w-4 mr-1 " />
-            ) : (
-              <X className="h-4 w-4 mr-1" />
-            )}
-            Remove
-          </Button>
+            {product.name}
+          </Link>
+          <p className="text-sm text-muted-foreground">{options}</p>
+        </div>
+
+        <div className="flex items-center justify-between">
+          {/* Price */}
+          <p className="font-semibold">${(price * item.quantity).toFixed(2)}</p>
+
+          {/* Quantity */}
+          <div className="flex items-center justify-between mt-auto">
+            <div className="flex items-center rtl:flex-row-reverse bg-foreground  text-background rounded-full">
+              <Button
+                variant={"ghost"}
+                size={"icon-xs"}
+                onClick={() => handleQuantityChange(item.quantity - 1)}
+                disabled={isProcessing || item.quantity <= 1}
+                className="hover:bg-transparent  text-background hover:text-background "
+              >
+                <Minus />
+              </Button>
+              <span className="font-semibold text-xs min-w-4 text-center">
+                {isUpdatePending ? <Spinner /> : item.quantity}
+              </span>
+              <Button
+                variant={"ghost"}
+                size={"icon-xs"}
+                onClick={() => handleQuantityChange(item.quantity + 1)}
+                disabled={isProcessing}
+                className="hover:bg-transparent  text-background hover:text-background "
+              >
+                <Plus size={12} />
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
+      {/* Remove */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleRemoveItem}
+        disabled={isProcessing}
+        className="text-muted-foreground hover:bg-tr hover:text-destructive top-0 right-0 rtl:right-auto rtl:left-0 absolute"
+      >
+        <span className="hidden lg:block">Remove</span>
+        {isRemovePending ? <Spinner /> : <X />}
+      </Button>{" "}
     </div>
   );
 }

@@ -9,7 +9,7 @@ export const WishlistButton = () => {
         asChild
         className="flex rounded-sm h-8 items-center hover:bg-[#EBEBEB] dark:hover:bg-[#1F1F1F] justify-between w-fit px-2 py-2"
       >
-        <Link href="/account/wishlist">
+        <Link href="/wishlist">
           <Heart size={16} />
         </Link>
       </Button>

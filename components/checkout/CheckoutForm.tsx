@@ -9,15 +9,21 @@ import { createOrder } from "@/lib/actions/order"; // استيراد وظيفة 
 import { PlusCircle } from "lucide-react";
 import { AddressForm } from "../shared/address-form";
 import { AddressCard } from "./address-card";
-import { UserAddress } from "@/lib/types/account/address";
+import { UserAddress } from "@/lib/actions";
+import { useCartCount } from "@/lib/provider/cart-provider";
+import { ro } from "date-fns/locale";
+import { useRouter } from "next/navigation";
 // نوع بيانات النموذج، يستخدم snake_case ليتوافق مع قاعدة البيانات
-
 
 interface CheckoutFormProps {
   savedAddresses: UserAddress[];
 }
 
 export function CheckoutForm({ savedAddresses }: CheckoutFormProps) {
+  const { refreshCount } = useCartCount();
+
+  const router = useRouter();
+
   const [view, setView] = useState<"list" | "form">(
     savedAddresses.length > 0 ? "list" : "form",
   );
@@ -33,11 +39,17 @@ export function CheckoutForm({ savedAddresses }: CheckoutFormProps) {
       return;
     }
     startPlaceOrderTransition(async () => {
-      const result = await createOrder(selectedAddress);
-      if (result?.error) {
-        toast.error(result.error);
+      const { data: orderId, error: orderError } =
+        await createOrder(selectedAddress);
+
+      if (orderError || !orderId) {
+        toast.error(orderError);
+        return;
       }
-      // لا حاجة لمعالجة النجاح، لأن `redirect` في `createOrder` سيتولى الأمر
+
+      refreshCount();
+      toast.success("Order placed successfully.");
+      router.push(`/order-confirmation?order_id=${orderId}`);
     });
   };
 

@@ -21,12 +21,13 @@ import { ShoppingCart, Minus, Plus, Heart } from "lucide-react";
 
 // --- استيرادات الأنواع و Server Actions ---
 import { type FullProduct } from "@/types";
-import { addItemToCart, type CartActionState } from "@/lib/actions/cart";
+import { addItemToCart, ApiResponse } from "@/lib/actions/cart";
 import { addToWishlist, removeFromWishlist } from "@/lib/actions/wishlist";
 
 // --- استيرادات أخرى ---
-import { useCart } from "@/lib/provider/cart-provider";
 import { StarRating } from "../reviews/star-rating";
+import { useCartCount } from "@/lib/provider/cart-provider";
+import { useRouter } from "next/navigation";
 
 // ... (دالة getOrganizedOptions لم تتغير) ...
 const getOrganizedOptions = (variants: FullProduct["variants"]) => {
@@ -133,7 +134,8 @@ export function ProductInfo({
   averageRating,
   totalReviews,
 }: ProductInfoProps) {
-  const { refreshCart } = useCart();
+  const { refreshCount } = useCartCount();
+  const router = useRouter();
   const organizedOptions = useMemo(
     () => getOrganizedOptions(product.variants),
     [product.variants],
@@ -190,17 +192,18 @@ export function ProductInfo({
     });
   };
 
-  const initialState: CartActionState = { success: false, message: "" };
+  const initialState: ApiResponse<boolean> = { data: false, error: "" };
   const [state, formAction] = useActionState(addItemToCart, initialState);
 
   useEffect(() => {
-    if (state.success) {
-      toast.success(state.message);
-      refreshCart();
-    } else if (state.message) {
-      toast.error(state.message);
+    if (state.data) {
+      toast.success("Item added to cart.");
+      refreshCount();
+    } else if (state.error) {
+      if(state.error === "Auth session missing!") {router.push("/auth/login");};
+      toast.error(state.error);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]); // أضفت refreshCart إلى مصفوفة الاعتماديات
 
   return (

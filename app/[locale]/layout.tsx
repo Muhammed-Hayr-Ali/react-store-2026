@@ -15,8 +15,10 @@ import {
 } from "@/lib/config/fonts";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { AuthProvider } from "@/lib/provider/auth-provider";
-import { CartProvider } from "@/lib/provider/cart-provider";
+import { CartCountProvider } from "@/lib/provider/cart-provider";
+import { getTotalCartQuantity } from "@/lib/actions";
+import { getUser } from "@/lib/actions/get-user-action";
+import { UserProvider } from "@/lib/provider/user-provider";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -36,11 +38,14 @@ const isRtlLocale = (locale: string) => {
 
 export default async function RootLayout({ children, params }: Props) {
   const { locale } = await params;
+
   const dir = isRtlLocale(locale) ? "rtl" : "ltr";
 
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
+  const { data: initialCartCount } = await getTotalCartQuantity();
+  const { data: initialUser } = await getUser();
 
   return (
     <html
@@ -51,20 +56,20 @@ export default async function RootLayout({ children, params }: Props) {
     >
       <body>
         <NextIntlClientProvider>
-          <AuthProvider>
-            <CartProvider>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="system"
-                enableSystem
-                disableTransitionOnChange
-              >
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <UserProvider initialUser={initialUser || null}>
+              <CartCountProvider initialCount={initialCartCount || 0}>
                 {children}
-              </ThemeProvider>
-            </CartProvider>
-          </AuthProvider>
+              </CartCountProvider>
+            </UserProvider>
+          </ThemeProvider>
         </NextIntlClientProvider>
-        <Toaster position="top-center" />
+        <Toaster position="bottom-right" />
       </body>
     </html>
   );

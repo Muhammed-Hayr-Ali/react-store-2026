@@ -1,24 +1,25 @@
-import { ShoppingBag } from "lucide-react";
 import Link from "next/link";
-import { CartItemCard } from "./CartItemCard";
 import { OrderSummary } from "./OrderSummary";
-import { type CartItem } from "@/types";
-import { getCart } from "@/lib/actions";
+import { CartItem } from "@/lib/actions";
+import { CartItemCard } from "./CartItemCard";
 
-export default async function Cart() {
-  const cart = await getCart();
-  const items: CartItem[] = (cart?.cart_items as CartItem[]) || [];
+export default async function CartPage({
+  cartItems,
+}: {
+  cartItems: CartItem[];
+}) {
 
+  const items = cartItems;
   const subtotal = items.reduce((acc, item) => {
     const variant = item.product_variants;
-    const price = variant?.discount_price ?? variant?.price ?? 0;
+    const price = variant.discount_price ?? variant?.price ?? 0;
     return acc + price * item.quantity;
   }, 0);
 
-  
+
   if (items.length === 0)
     return (
-      <div className="flex flex-1 h-full items-center justify-center rounded-lg border border-dashed">
+      <div className="flex flex-1 flex-col h-full items-center justify-center rounded-lg border border-dashed">
         <div className="flex flex-col items-center gap-2 text-center">
           <h2 className="text-xl font-semibold">Your cart is empty</h2>
           <p className="text-muted-foreground mt-2">
@@ -37,13 +38,12 @@ export default async function Cart() {
   // --- نهاية الجزء المعدل ---
 
   return (
-    <main className="container mx-auto py-12">
-      <h1 className="text-3xl font-bold mb-8">Your Cart ({items.length})</h1>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+    <main className="container mx-auto">
+      <h1 className="text-3xl font-bold">Your Cart ({items.length})</h1>
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-12 py-6">
         <div className="lg:col-span-2 space-y-6">
-          {items.map((item) => (
-            <CartItemCard key={item.id} item={item} />
-          ))}
+          {items &&
+            items.map((item) => <CartItemCard key={item.id} item={item} />)}
         </div>
         <div className="lg:col-span-1">
           <OrderSummary subtotal={subtotal} />

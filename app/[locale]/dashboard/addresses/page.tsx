@@ -1,5 +1,5 @@
 import AddressesPage from "@/components/dashboard/addresses/addresses-page";
-import { getUserAddresses } from "@/lib/actions/address-actions";
+import { getUserAddresses } from "@/lib/actions/address";
 import { createMetadata } from "@/lib/metadata";
 
 export const metadata = createMetadata({
@@ -9,5 +9,5 @@ export const metadata = createMetadata({
 
 export default async function Page() {
   const addresses = await getUserAddresses();
-  return <AddressesPage addresses={addresses} />;
+  return <AddressesPage addresses={addresses.data || []} />;
 }

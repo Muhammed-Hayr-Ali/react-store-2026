@@ -21,7 +21,7 @@ export function OrderSummary({ cart }: OrderSummaryProps) {
   const total = subtotal + shippingCosts + taxes;
 
   return (
-    <Card className="sticky top-24 h-fit bg-linear-to-br from-muted/50 to-muted/10">
+    <Card className="lg:sticky lg:top-24 h-fit bg-background">
       <CardHeader>
         <CardTitle>Order Summary</CardTitle>
       </CardHeader>
@@ -81,15 +81,12 @@ export function OrderSummary({ cart }: OrderSummaryProps) {
         </div>
 
         {/* الإجمالي النهائي */}
-        <div className="flex justify-between border-t pt-4 text-lg font-bold border-dashed">
+      </CardContent>
+      <CardFooter>
+        <div className="flex w-full items-center justify-between border-t pt-4 text-lg font-bold border-dashed">
           <p>Total</p>
           <p>${total.toFixed(2)}</p>
         </div>
-      </CardContent>
-      <CardFooter className="flex justify-center">
-        <p className="text-xs text-muted-foreground">
-          Secure payment processing.
-        </p>
       </CardFooter>
     </Card>
   );

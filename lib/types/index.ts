@@ -86,12 +86,3 @@ export type CartWithDetails = {
   cart_items: CartItemWithDetails[];
 };
 
-// هذا هو النوع القديم، يمكنك إما تحديثه أو الاحتفاظ به إذا كان مستخدمًا في مكان آخر
-export type CartItem = {
-  id:string;
-  // ...
-}
-export type Cart = {
-  id:string;
-  // ...
-}

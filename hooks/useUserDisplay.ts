@@ -93,7 +93,7 @@ export type UserDisplayData = {
  * console.log(data.initials); // "فز"
  * ```
  */
-export function useUserDisplay(user: User | null): UserDisplayData {
+export function useUserDisplay(user: User | null | undefined): UserDisplayData {
   /**
    * Extracts two-letter initials from a full name.
    * Handles:

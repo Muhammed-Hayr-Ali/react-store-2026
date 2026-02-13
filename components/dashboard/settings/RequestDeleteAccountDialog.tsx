@@ -22,7 +22,7 @@ import {
   FieldDescription,
 } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
-import { submitSupportRequest } from "@/lib/support";
+import { submitSupportRequest } from "@/lib/actions/support";
 
 /**
  * 1. أنواع مدخلات النموذج.
@@ -58,7 +58,6 @@ export function RequestDeleteAccountDialog({
     setError,
     formState: { errors, isSubmitting, isSubmitSuccessful },
   } = useForm<DeleteRequestInputs>();
-
 
   const onSubmit: SubmitHandler<DeleteRequestInputs> = async (formData) => {
     if (!email) return;
@@ -125,7 +124,7 @@ export function RequestDeleteAccountDialog({
                   <Input
                     id="email"
                     type="email"
-                    value={email || ''} // القيمة تأتي من الخاصية
+                    value={email || ""} // القيمة تأتي من الخاصية
                     readOnly // جعله للقراءة فقط لمنع التعديل
                     className="bg-muted/50 cursor-not-allowed focus-visible:ring-0" // تصميم مرئي للإشارة إلى أنه غير قابل للتعديل
                   />

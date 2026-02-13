@@ -72,7 +72,7 @@ const FADE_UP_ANIMATION_VARIANTS = {
 export const BestSellers = () => {
   return (
     <section className="py-16 sm:py-24 bg-background/50">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto">
         {/* --- العنوان الرئيسي للقسم --- */}
         <motion.div
           initial="hidden"

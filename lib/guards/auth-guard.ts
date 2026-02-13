@@ -11,5 +11,6 @@ export async function AuthGuard() {
     return redirect("/auth/login");
   }
 
+  
   return null;
 }

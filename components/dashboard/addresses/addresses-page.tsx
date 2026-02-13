@@ -13,7 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import { AddressForm } from "@/components/shared/address-form";
 import { AddressCard } from "./address-card.tsx";
-import { UserAddress } from "@/lib/types/account/address.js";
+import { UserAddress } from "@/lib/actions/address.js";
 
 export default function AddressesPage({
   addresses,

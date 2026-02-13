@@ -4,31 +4,36 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { sendEmail } from "@/lib/actions/email";
 import { createServerClient } from "../supabase/createServerClient";
-import { CartWithDetails, ResponseStatus } from "../types";
+import { CartWithDetails } from "../types";
 import OrderConfirmationEmail from "@/emails/OrderConfirmationEmail";
 import { OrderWithDetails } from "../types/order";
+import { revalidatePath } from "next/cache";
+import { getUser } from "./get-user-action";
+import { da } from "date-fns/locale";
+
+export type ApiResponse<T> = {
+  data?: T;
+  error?: string;
+};
 
 //=====================================================================
 // Create Order
 //=====================================================================
-export async function createOrder(selectedAddressId: string): Promise<ResponseStatus> { 
-
+export async function createOrder(
+  selectedAddressId: string,
+): Promise<ApiResponse<string>> {
   const supabase = await createServerClient();
   const adminSupabase = createAdminClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Get User ID
+  const { data: user, error: userError } = await getUser();
 
-  if (!user) {
-    return {
-      success: false,
-      error: "Authentication Error",
-      message: "You must be logged in to place an order.",
-    };
+  if (userError || !user) {
+    console.error("Error fetching user:", userError);
+    return { error: "You must be logged in to place an order." };
   }
 
-  // 2. جلب السلة
+  // Get Cart Items
   const { data: cart, error: cartError } = await supabase
     .from("carts")
     .select("*, cart_items(*, product_variants(*, products(*)))")
@@ -36,14 +41,13 @@ export async function createOrder(selectedAddressId: string): Promise<ResponseSt
     .single<CartWithDetails>();
 
   if (cartError || !cart || cart.cart_items.length === 0) {
+    console.error("Error fetching cart:", cartError);
     return {
-      success: false,
-      error: "Cart Error",
-      message: "Please add items to your cart before creating an order.",
+      error: "Please add items to your cart before creating an order.",
     };
   }
 
-  // 3. جلب العنوان
+  // Get Address
   const { data: address, error: addressError } = await supabase
     .from("user_addresses")
     .select("*")
@@ -52,14 +56,13 @@ export async function createOrder(selectedAddressId: string): Promise<ResponseSt
     .single();
 
   if (addressError || !address) {
+    console.error("Address Error:", cartError);
     return {
-      success: false,
-      error: "Address Error",
-      message: "Please select a valid address.",
+      error: "Please select a valid address.",
     };
   }
 
-  // 4. حساب الأسعار
+  // Calculate Order Details
   const subtotal = cart.cart_items.reduce((acc, item) => {
     const price =
       item.product_variants?.discount_price ??
@@ -71,6 +74,7 @@ export async function createOrder(selectedAddressId: string): Promise<ResponseSt
   const taxes = subtotal * 0.1;
   const totalAmount = subtotal + shippingCost + taxes;
 
+  // Insert Order Using Admin Supabase
   const { data: newOrder, error: orderError } = await adminSupabase
     .from("orders")
     .insert({
@@ -86,14 +90,13 @@ export async function createOrder(selectedAddressId: string): Promise<ResponseSt
     .single();
 
   if (orderError || !newOrder) {
+    console.error("Error creating order:", cartError);
     return {
-      success: false,
-      error: "Order Error",
-      message: "Failed to create the order.",
+      error: "Failed to create the order.",
     };
   }
 
-  // 6. تحضير وإضافة عناصر الطلب
+  // Insert Order Items
   const orderItems = cart.cart_items.map((item) => {
     const variant = item.product_variants!;
     const product = variant.products!;
@@ -112,18 +115,14 @@ export async function createOrder(selectedAddressId: string): Promise<ResponseSt
     .insert(orderItems);
 
   if (itemsError) {
+    console.error("Error creating order items:", itemsError);
     return {
-      success: false,
-      error: "Order Items Error",
-      message: "Failed to create the order items.",
+      error: "Failed to create the order items.",
     };
   }
 
-  // =================================================================
-  // ✅ الخطوة الجديدة: إرسال بريد إلكتروني للتأكيد
-  // =================================================================
+  // Try to send the order confirmation email
   try {
-    // جلب الطلب الكامل مع تفاصيله لتمريره إلى قالب البريد الإلكتروني
     const { data: fullOrderDetails } = await adminSupabase
       .from("orders")
       .select(`*, order_items(*)`)
@@ -133,24 +132,25 @@ export async function createOrder(selectedAddressId: string): Promise<ResponseSt
     if (fullOrderDetails) {
       await sendEmail({
         to: user.email!,
-        subject: `Your Marketna Order Confirmation #${newOrder.id.substring(0, 8)}`, // ✅ تم تحديث الموضوع
+        subject: `Your Marketna Order Confirmation #${newOrder.id.substring(0, 8)}`,
         react: OrderConfirmationEmail({ order: fullOrderDetails }),
       });
     }
-  } catch {
+  } catch (error) {
+    console.error("Failed to send email.", error);
     return {
-      success: false,
-      error: "Email Error",
-      message: "Failed to send the order confirmation email.",
+      error: "Failed to send the order confirmation email.",
     };
   }
   // =================================================================
 
-  // 8. حذف السلة
+  // Delete Cart
   await adminSupabase.from("carts").delete().eq("id", cart.id);
+  revalidatePath("/cart");
 
-  // 9. إعادة التوجيه
-  redirect(`/order-confirmation?order_id=${newOrder.id}`);
+  return {
+    data: newOrder.id,
+  };
 }
 
 //=====================================================================
@@ -158,18 +158,15 @@ export async function createOrder(selectedAddressId: string): Promise<ResponseSt
 //=====================================================================
 export async function getOrderDetails(
   orderId: string,
-): Promise<ResponseStatus<OrderWithDetails | null>> {
+): Promise<ApiResponse<OrderWithDetails | null>> {
   const supabase = await createServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
-  if (!user) {
-    return {
-      success: false,
-      error: "User Error",
-      message: "User not found.",
-    };
+  // Get User ID
+  const { data: user, error: userError } = await getUser();
+
+  if (userError || !user) {
+    console.error("Error fetching user:", userError);
+    return { error: "You must be logged in to place an order." };
   }
 
   const { data: order, error } = await supabase
@@ -199,15 +196,13 @@ export async function getOrderDetails(
 
   if (error) {
     console.error("Failed to fetch order details:", error);
+
     return {
-      success: false,
-      error: "Order Error",
-      message: "Failed to fetch order details.",
+      error: "Failed to fetch order details.",
     };
   }
 
   return {
-    success: true,
     data: order,
   };
 }

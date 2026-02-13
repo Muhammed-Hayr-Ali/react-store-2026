@@ -32,7 +32,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { submitSupportRequest } from "@/lib/support";
+import { submitSupportRequest } from "@/lib/actions/support";
 import {
   Card,
   CardContent,
@@ -41,7 +41,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { verifyMfaForLogin } from "@/lib/actions/login-verify-mfa-actions";
+import { getMfaFactors, verifyMfa } from "@/lib/actions/mfa";
 
 type SupportRequestInputs = {
   email: string;
@@ -50,37 +50,46 @@ type SupportRequestInputs = {
 };
 
 export default function VerifyMfaPage() {
-
-
   const router = useRouter();
 
   const [code, setCode] = React.useState("");
   const [isProcessing, setIsProcessing] = React.useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-
-    
     e.preventDefault();
+
+    // check if code is valid
     if (!code || code.length < 6) {
       toast.warning("Please enter a valid 6-digit code.");
       return;
     }
 
     setIsProcessing(true);
-    const { data, error } = await verifyMfaForLogin(code);
+    const { data: factor, error: factorError } = await getMfaFactors();
 
-    if (error) {
-      console.error("Error verifying MFA code:", error);
-      toast.error("Verification failed. The code may be incorrect or expired.");
+    if (factorError || !factor) {
+      console.error("Error getting MFA factor:", factorError);
       setIsProcessing(false);
-      setCode("");
+      return;
+    }
+    const factorId = factor.id;
+
+    const { data: verifyData, error: verifyError } = await verifyMfa(
+      factorId,
+      code,
+    );
+
+    if (verifyError) {
+      console.error("Error verifying MFA:", verifyError);
+      toast.error(verifyError);
+      setIsProcessing(false);
+      return;
     }
 
-    if (data) {
-      toast.success("Login successful!");
+    if (verifyData) {
+      toast.success("MFA verification successful!");
       setIsProcessing(false);
       router.refresh();
-      router.push("/");
     }
   };
 

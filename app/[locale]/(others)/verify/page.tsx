@@ -10,6 +10,7 @@ export function generateMetadata() {
 }
 
 export default async function Page() {
+
   return (
     <>
       <VerifyMfaGuard />

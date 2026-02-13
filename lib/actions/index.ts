@@ -1,5 +1,5 @@
 // lib/actions/index.ts
-export * from "./address-actions";
+export * from "./address";
 export * from "./cart";
 export * from "./order";
 export * from "./products";

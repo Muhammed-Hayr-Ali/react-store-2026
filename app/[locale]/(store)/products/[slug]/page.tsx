@@ -8,6 +8,7 @@ import { checkWishlistStatus } from "@/lib/actions/wishlist";
 
 // ✅ 1. استيراد دالة جلب التقييمات فقط
 import { getReviewsByProductId } from "@/lib/actions/reviews";
+import { getUser } from "@/lib/actions/get-user-action";
 
 // ... (دالة generateMetadata لم تتغير) ...
 export async function generateMetadata({
@@ -40,6 +41,7 @@ type Props = {
 export default async function Page({ params }: Props) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
+  const user = await getUser();
 
   if (!product) {
     notFound();
@@ -65,6 +67,7 @@ export default async function Page({ params }: Props) {
     <main className="container mx-auto py-8 md:py-12 px-4">
       {/* ✅ 4. تمرير جميع البيانات اللازمة إلى ProductDetails */}
       <ProductDetails
+        user={user.data}
         product={product}
         isInitiallyWishlisted={isInitiallyWishlisted}
         reviews={reviews || []}

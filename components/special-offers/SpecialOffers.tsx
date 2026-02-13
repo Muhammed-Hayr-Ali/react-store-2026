@@ -22,7 +22,7 @@ export async function SpecialOffers() {
 
   return (
     <section className="w-full py-12 md:py-20">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto">
         {/* البطاقة الرئيسية الكبيرة */}
         <div className="relative rounded-2xl border bg-card shadow-2xl overflow-hidden p-8 md:p-12">
           {/* خلفية متدرجة */}

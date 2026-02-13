@@ -1,11 +1,13 @@
+//lib\actions\get-user-action.ts
+
 "use server";
 
 import { createServerClient } from "@/lib/supabase/createServerClient";
 import { User } from "@supabase/supabase-js";
 
-export type GetUserResponse<T> = {
-  error?: string;
+export type ApiResponse<T> = {
   data?: T;
+  error?: string;
 };
 
 export type Profile = {
@@ -17,7 +19,7 @@ export type Profile = {
   updated_at: string;
 };
 
-export async function getUser(): Promise<GetUserResponse<User>> {
+export async function getUser(): Promise<ApiResponse<User | null>> {
   const supabase = await createServerClient();
 
   const {
@@ -26,20 +28,16 @@ export async function getUser(): Promise<GetUserResponse<User>> {
   } = await supabase.auth.getUser();
 
   if (error) {
-    console.error("Error fetching user:", error.message);
-    return { error: error.message };
-  }
-  const data = user;
-  if (!data) {
-    return { error: "User not found" };
+    console.error("Error fetching session:", error.message);
+    return { data: undefined, error: error.message };
   }
 
-  return { data, error: "" };
+  return { data: user };
 }
 
 export async function getUserProfileByEmail(
   email: string,
-): Promise<GetUserResponse<Profile | null>> {
+): Promise<ApiResponse<Profile | null>> {
   const supabase = await createServerClient();
 
   const { data: profile, error: profileError } = await supabase

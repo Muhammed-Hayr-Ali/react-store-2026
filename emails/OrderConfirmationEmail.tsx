@@ -119,7 +119,7 @@ export const OrderConfirmationEmail = ({
 
       <Section className="mt-8 text-center">
         <Link
-          href={`${baseUrl}/account/orders`}
+          href={`${baseUrl}/dashboard/orders`}
           className="text-blue-600 underline"
         >
           View My Orders

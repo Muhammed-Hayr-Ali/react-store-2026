@@ -12,8 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { UserAddress } from "@/lib/types/account/address";
-import { addAddress, updateAddress } from "@/lib/actions/address-actions";
+import { addAddress, updateAddress, UserAddress } from "@/lib/actions/address";
 
 type AddressInputs = Omit<UserAddress, "id" | "user_id" | "created_at">;
 
@@ -27,40 +26,33 @@ interface AddressFormProps {
 export function AddressForm({
   mode = "add",
   addressToEdit,
-  onFormSubmit,
   onCancel,
 }: AddressFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   // تهيئة النموذج بالبيانات الحالية إذا كنا في وضع التعديل
   const {
     register,
     handleSubmit,
-    formState: { errors },
-    reset,
+    formState: { errors, isSubmitting },
   } = useForm<AddressInputs>({
     defaultValues: mode === "edit" ? addressToEdit : {},
   });
 
   const onSubmit: SubmitHandler<AddressInputs> = async (formData) => {
-    setIsSubmitting(true);
-
-    const result =
+    const { data: addressResult, error: addressError } =
       mode === "edit" && addressToEdit
         ? await updateAddress(addressToEdit.id, formData) // استدعاء دالة التعديل
         : await addAddress(formData); // استدعاء دالة الإضافة
 
-    setIsSubmitting(false);
-
-    if (result.error) {
-      toast.error(result.error);
-    } else {
+    if (addressError) {
+      toast.error(addressError);
+      return;
+    }
+    if (addressResult) {
       toast.success(
-        result.message ||
-          `Address ${mode === "edit" ? "updated" : "added"} successfully!`,
+        mode === "edit"
+          ? "Address updated successfully."
+          : "Address added successfully.",
       );
-      if (mode === "add") reset(); // مسح النموذج فقط في وضع الإضافة
-      onFormSubmit?.(); // استدعاء الدالة إذا كانت موجودة
     }
   };
 
@@ -74,8 +66,16 @@ export function AddressForm({
           <Input
             id="address_nickname"
             disabled={isSubmitting}
-            {...register("address_nickname")}
+            aria-invalid={errors.address_nickname ? "true" : "false"}
+            {...register("address_nickname", {
+              required: "Nickname is required",
+            })}
           />
+          {errors.address_nickname && (
+            <FieldDescription>
+              {errors.address_nickname.message}
+            </FieldDescription>
+          )}
         </Field>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field>
@@ -83,6 +83,7 @@ export function AddressForm({
             <Input
               id="first_name"
               disabled={isSubmitting}
+              aria-invalid={errors.first_name ? "true" : "false"}
               {...register("first_name", {
                 required: "First name is required",
               })}
@@ -96,6 +97,7 @@ export function AddressForm({
             <Input
               id="last_name"
               disabled={isSubmitting}
+              aria-invalid={errors.last_name ? "true" : "false"}
               {...register("last_name", { required: "Last name is required" })}
             />
             {errors.last_name && (
@@ -108,6 +110,7 @@ export function AddressForm({
           <Input
             id="address"
             disabled={isSubmitting}
+            aria-invalid={errors.address ? "true" : "false"}
             {...register("address", { required: "Address is required" })}
           />
           {errors.address && (
@@ -120,6 +123,7 @@ export function AddressForm({
             <Input
               id="city"
               disabled={isSubmitting}
+              aria-invalid={errors.city ? "true" : "false"}
               {...register("city", { required: "City is required" })}
             />
             {errors.city && (
@@ -131,6 +135,7 @@ export function AddressForm({
             <Input
               id="state"
               disabled={isSubmitting}
+              aria-invalid={errors.state ? "true" : "false"}
               {...register("state", { required: "State is required" })}
             />
             {errors.state && (
@@ -142,6 +147,7 @@ export function AddressForm({
             <Input
               id="zip"
               disabled={isSubmitting}
+              aria-invalid={errors.zip ? "true" : "false"}
               {...register("zip", { required: "ZIP code is required" })}
             />
             {errors.zip && (
@@ -154,6 +160,7 @@ export function AddressForm({
           <Input
             id="country"
             disabled={isSubmitting}
+            aria-invalid={errors.country ? "true" : "false"}
             {...register("country", { required: "Country is required" })}
           />
           {errors.country && (

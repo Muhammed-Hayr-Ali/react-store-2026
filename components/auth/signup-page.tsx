@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AppLogo } from "../custom-ui/app-logo";
 import { signInWithGoogle } from "@/lib/actions/signIn-with-google";
-import { signUpWithPassword } from "@/lib/actions/signup-actions";
+import { signUpWithPassword } from "@/lib/actions/auth";
 
 type Inputs = {
   first_name: string;

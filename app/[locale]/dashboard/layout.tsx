@@ -41,7 +41,7 @@ export default async function Layout({ params, children }: Props) {
           </header>
 
           {/* ✅ 3. المحتوى الرئيسي (الأطفال): يأخذ المساحة المتبقية ويكون هو القابل للتمرير */}
-          <main className="flex-1 overflow-y-auto p-4">{children}</main>
+          <main className="flex-1 overflow-y-auto p-4 bg-muted">{children}</main>
         </SidebarInset>
       </SidebarProvider>
     </AuthProvider>

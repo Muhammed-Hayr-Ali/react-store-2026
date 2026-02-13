@@ -18,13 +18,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/lib/provider/auth-provider";
 import { StarRating } from "../reviews/star-rating";
 import { AddReviewForm } from "../reviews/add-review-form";
 import { ReviewCard } from "../reviews/review-card";
+import { User } from "@supabase/supabase-js";
 
 
 interface ProductDetailsProps {
+  user: User | undefined
   product: FullProduct;
   isInitiallyWishlisted: boolean;
   reviews: ReviewWithAuthor[];
@@ -34,6 +35,7 @@ interface ProductDetailsProps {
 }
 
 export function ProductDetails({
+  user,
   product,
   isInitiallyWishlisted,
   reviews,
@@ -48,8 +50,6 @@ export function ProductDetails({
   );
   const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
 
-  // ✅ 2. الحصول على بيانات المستخدم الحالي من الـ provider
-  const { user } = useAuth();
 
   return (
     <>

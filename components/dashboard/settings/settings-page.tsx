@@ -171,11 +171,14 @@ export default function SettingsPage({ email }: { email: string | null }) {
   };
 
   const handleSignOut = async () => {
-    const error = await signOut();
+    const {error} = await signOut();
     if (error) {
-      toast.error(error.message);
+      toast.error(error);
     } else {
       toast.success("You have been signed out.");
+      router.refresh();
+      // delay navigation
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       router.push("/");
     }
     setActiveDialog(null);

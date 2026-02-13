@@ -1,6 +1,5 @@
 "use client";
 
-import { DashboardSummary } from "@/lib/types/account/dashboard-summary";
 import {
   Heart,
   Inbox,
@@ -22,6 +21,7 @@ import { User } from "@supabase/supabase-js";
 import React from "react";
 import { ProfileCard } from "./ui/profile-card";
 import { DashboardCard } from "./ui/dashboard-card";
+import { DashboardSummary } from "@/lib/actions/dashboard";
 
 interface DashboardProps {
   dashboardSummary: DashboardSummary | null;
@@ -37,7 +37,6 @@ function NoData({ title }: { title: string }) {
   );
 }
 
-// --- 2. مكون لعرض "أحدث عنصر" بتصميم موحد ---
 function LatestItem({
   title,
   children,

@@ -18,17 +18,20 @@ import { User } from "@supabase/supabase-js";
 import { useAuth } from "@/lib/provider/auth-provider";
 import { ProfileForm } from "./ProfileForm";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { signOut } from "@/lib/actions/auth";
+import { toast } from "sonner";
+import { ro } from "date-fns/locale";
+import { useRouter } from "next/navigation";
 
 // ... (مكون ProfileView يبقى كما هو، فهو ممتاز)
 interface ProfileViewProps {
-  user: User | null;
+  user: User | undefined;
   onEdit: () => void;
   onSignOut: () => void;
 }
 
 function ProfileView({ user, onEdit, onSignOut }: ProfileViewProps) {
   const { fullName, avatarUrl, email } = useUserDisplay(user);
-
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader className="text-center">
@@ -76,19 +79,19 @@ function ProfileView({ user, onEdit, onSignOut }: ProfileViewProps) {
 // ====================================================================
 // المكون الرئيسي للصفحة
 // ====================================================================
-export default function Profile() {
-  const { user, signOut, loading, session } = useAuth();
+export default function Profile({ user }: { user: User | undefined }) {
+  const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Spinner />
-      </div>
-    );
-  }
+  const handleSignOut = async () => {
+    const error = await signOut();
+    if (error) {
+      toast.error(error.error);
+    }
+    router.refresh();
+  };
 
-  if (!user || !session) {
+  if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <p>Please sign in to view your profile.</p>
@@ -137,7 +140,7 @@ export default function Profile() {
       <ProfileView
         user={user}
         onEdit={() => setIsEditing(true)}
-        onSignOut={signOut}
+        onSignOut={handleSignOut}
       />
     </div>
   );

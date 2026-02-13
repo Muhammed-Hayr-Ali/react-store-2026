@@ -1,87 +1,85 @@
-// lib/provider/cart-provider.tsx
-
 "use client";
 
 import {
   createContext,
   useContext,
-  useReducer,
-  useEffect,
+  useState,
   ReactNode,
+  useCallback,
+  useEffect, // 1. استيراد useEffect
 } from "react";
-import { type Cart } from "@/types";
-import { getCart } from "@/lib/actions/cart";
+import { getTotalCartQuantity } from "@/lib/actions/cart";
+import { createBrowserClient } from "@/lib/supabase/createBrowserClient"; // 2. استيراد عميل المتصفح
 
-// 1. تعريف شكل الحالة والسياق
-interface CartState {
-  cart: Cart | null;
+// ... (تعريف السياق يبقى كما هو)
+interface CartCountContextType {
+  count: number;
   loading: boolean;
-  error: string | null;
+  refreshCount: () => Promise<void>;
 }
 
-interface CartContextType extends CartState {
-  dispatch: React.Dispatch<Action>;
-  refreshCart: () => Promise<void>;
-}
+const CartCountContext = createContext<CartCountContextType | undefined>(
+  undefined,
+);
 
-const CartContext = createContext<CartContextType | undefined>(undefined);
+export const CartCountProvider = ({
+  children,
+  initialCount,
+}: {
+  children: ReactNode;
+  initialCount: number;
+}) => {
+  const [count, setCount] = useState(initialCount);
+  const [loading, setLoading] = useState(false);
+  const supabase = createBrowserClient(); // 3. إنشاء نسخة من عميل المتصفح
 
-// 2. تعريف الإجراءات (Actions) التي يمكن تنفيذها
-type Action =
-  | { type: "FETCH_START" }
-  | { type: "FETCH_SUCCESS"; payload: Cart | null }
-  | { type: "FETCH_ERROR"; payload: string };
-
-// 3. إنشاء الـ Reducer لإدارة تحديثات الحالة
-const cartReducer = (state: CartState, action: Action): CartState => {
-  switch (action.type) {
-    case "FETCH_START":
-      return { ...state, loading: true, error: null };
-    case "FETCH_SUCCESS":
-      return { ...state, loading: false, cart: action.payload };
-    case "FETCH_ERROR":
-      return { ...state, loading: false, error: action.payload };
-    default:
-      return state;
-  }
-};
-
-// 4. إنشاء المكون Provider
-export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const initialState: CartState = {
-    cart: null,
-    loading: true,
-    error: null,
-  };
-
-  const [state, dispatch] = useReducer(cartReducer, initialState);
-
-  const refreshCart = async () => {
-    dispatch({ type: "FETCH_START" });
+  const refreshCount = useCallback(async () => {
+    setLoading(true);
     try {
-      const cartData = await getCart();
-      dispatch({ type: "FETCH_SUCCESS", payload: cartData });
-    } catch (e) {
-      dispatch({ type: "FETCH_ERROR", payload: "Failed to fetch cart." });
-    }
-  };
+      const { data, error } = await getTotalCartQuantity();
+      if (error || !data) {
+        setCount(0);
+        return;
+      }
 
-  useEffect(() => {
-    refreshCart();
+      setCount(data ?? 0); // استخدام `?? 0` للأمان
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  // 4. ✅ الحل: استخدام useEffect للاستماع إلى تغييرات المصادقة
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      // نستمع إلى حدثي SIGNED_IN و SIGNED_OUT
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
+        // عندما يتغير المستخدم، نقوم بإعادة جلب عدد السلة
+        // هذا سيجلب العدد الصحيح للمستخدم الجديد أو يعيده إلى 0 للزائر
+        console.log(`Auth event: ${event}. Refreshing cart count.`);
+        refreshCount();
+      }
+    });
+
+    // دالة التنظيف: إلغاء الاشتراك عند تفكيك المكون لمنع تسرب الذاكرة
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase, refreshCount]); // إضافة التبعيات الصحيحة
+
   return (
-    <CartContext.Provider value={{ ...state, dispatch, refreshCart }}>
+    <CartCountContext.Provider value={{ count, loading, refreshCount }}>
       {children}
-    </CartContext.Provider>
+    </CartCountContext.Provider>
   );
 };
 
-// 5. إنشاء Hook مخصص لسهولة الاستخدام
-export const useCart = () => {
-  const context = useContext(CartContext);
+// ... (الهوك useCartCount يبقى كما هو)
+export const useCartCount = () => {
+  const context = useContext(CartCountContext);
   if (context === undefined) {
-    throw new Error("useCart must be used within a CartProvider");
+    throw new Error("useCartCount must be used within a CartCountProvider");
   }
   return context;
 };
