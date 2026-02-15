@@ -1,18 +1,17 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-// ✅ --- مكون فرعي لتقليد بطاقة المنتج بنفس بنية البطاقات الأخرى --- ✅
+// مكون لتقليد بطاقة منتج واحدة
 function WishlistItemSkeleton() {
   return (
-    // ✅ --- تم استبدال التصميم القديم ببنية البطاقة القياسية --- ✅
-    <div className="border rounded-lg overflow-hidden flex flex-col">
+    <div className="border bg-card rounded-xl overflow-hidden flex flex-col">
       {/* يطابق صورة المنتج */}
       <Skeleton className="aspect-square w-full" />
-      <div className="p-4 flex flex-col flex-grow">
+      <div className="flex flex-col grow">
         {/* يطابق اسم المنتج */}
-        <Skeleton className="h-6 w-3/4" />
+        <Skeleton className="h-5 w-3/4 mb-2" />
         {/* يطابق السعر */}
-        <Skeleton className="h-7 w-1/2 mt-2" />
-        {/* يطابق زر الحذف */}
+        <Skeleton className="h-6 w-1/2" />
+        {/* يطابق زر الإضافة للسلة */}
         <div className="mt-auto pt-4">
           <Skeleton className="h-10 w-full" />
         </div>
@@ -21,20 +20,18 @@ function WishlistItemSkeleton() {
   );
 }
 
-// هذا هو مكون التحميل الذي سيتم عرضه تلقائيًا لصفحة قائمة الرغبات
+// مكون التحميل الرئيسي لصفحة المفضلة
 export default function WishlistLoading() {
   return (
-    <div>
+    <main className="container mx-auto min-h-[50vh] px-4 mb-8">
       {/* يطابق عنوان الصفحة */}
-      <Skeleton className="h-9 w-48 mb-8" />
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {/* 
-          نكرر الهيكل العظمي 8 مرات لإعطاء انطباع بوجود شبكة منتجات.
-        */}
+      <Skeleton className="h-9 w-48" />
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 py-6">
+        {/* ✅ التحسين: عرض عدد مناسب من الهياكل العظمية (e.g., 8) */}
         {[...Array(8)].map((_, index) => (
           <WishlistItemSkeleton key={index} />
         ))}
       </div>
-    </div>
+    </main>
   );
 }

@@ -2,34 +2,20 @@
 
 "use client";
 
-import {
-  useState,
-  useMemo,
-  useEffect,
-  useTransition,
-  useActionState,
-} from "react";
-import { useFormStatus } from "react-dom";
+import { useState, useMemo, useTransition } from "react";
 import { toast } from "sonner";
-import Link from "next/link"; // ✅ 1. استيراد Link
-
-// --- استيرادات الواجهة والأيقونات ---
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { ShoppingCart, Minus, Plus, Heart } from "lucide-react";
-
-// --- استيرادات الأنواع و Server Actions ---
+import { Minus, Plus, Heart } from "lucide-react";
 import { type FullProduct } from "@/types";
-import { addItemToCart, ApiResponse } from "@/lib/actions/cart";
 import { addToWishlist, removeFromWishlist } from "@/lib/actions/wishlist";
-
-// --- استيرادات أخرى ---
 import { StarRating } from "../reviews/star-rating";
 import { useCartCount } from "@/lib/provider/cart-provider";
 import { useRouter } from "next/navigation";
+import { addItemToCart } from "@/lib/actions";
 
-// ... (دالة getOrganizedOptions لم تتغير) ...
 const getOrganizedOptions = (variants: FullProduct["variants"]) => {
   const optionsMap = new Map<string, Set<string>>();
   variants.forEach((variant) => {
@@ -50,36 +36,13 @@ const getOrganizedOptions = (variants: FullProduct["variants"]) => {
   }));
 };
 
-function AddToCartButton({ disabled }: { disabled: boolean }) {
-  const { pending } = useFormStatus();
-  return (
-    <Button
-      size={"lg"}
-      className="grow h-10"
-      type="submit"
-      disabled={disabled || pending}
-    >
-      {pending ? (
-        <Spinner />
-      ) : (
-        <>
-          <ShoppingCart className="mr-2 h-5 w-5" />
-          Add to Cart
-        </>
-      )}
-    </Button>
-  );
-}
-
-interface WishlistButtonProps {
-  productId: string;
-  initialIsWishlisted: boolean;
-}
-
 function WishlistButton({
   productId,
   initialIsWishlisted,
-}: WishlistButtonProps) {
+}: {
+  productId: string;
+  initialIsWishlisted: boolean;
+}) {
   const [isWishlisted, setIsWishlisted] = useState(initialIsWishlisted);
   const [isPending, startTransition] = useTransition();
 
@@ -120,7 +83,44 @@ function WishlistButton({
   );
 }
 
-// ✅ 3. تحديث الواجهة (Props) لتشمل ملخص التقييمات
+function AddToCartButton({
+  variantId,
+  quantity,
+}: {
+  variantId: string;
+  quantity: number;
+}) {
+  const { refreshCount } = useCartCount();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const handleAddToCart = async () => {
+    if (quantity < 1 || !Number.isInteger(quantity) || !variantId) {
+      toast.error("Add to cart failed. Invalid quantity or variant ID.");
+      return;
+    }
+
+    setIsLoading(true);
+    const result = await addItemToCart({ variantId, quantity });
+    if (result.error) {
+      toast.error(result.error);
+    } else {
+      refreshCount();
+      toast.success("Item added to cart successfully.");
+    }
+    setIsLoading(false);
+  };
+
+  return (
+    <Button
+      size={"lg"}
+      className="grow h-10"
+      type="submit"
+      onClick={handleAddToCart}
+    >
+      {isLoading ? <Spinner /> : "Add to Cart"}
+    </Button>
+  );
+}
+
 interface ProductInfoProps {
   product: FullProduct;
   isInitiallyWishlisted: boolean;
@@ -134,8 +134,6 @@ export function ProductInfo({
   averageRating,
   totalReviews,
 }: ProductInfoProps) {
-  const { refreshCount } = useCartCount();
-  const router = useRouter();
   const organizedOptions = useMemo(
     () => getOrganizedOptions(product.variants),
     [product.variants],
@@ -192,19 +190,7 @@ export function ProductInfo({
     });
   };
 
-  const initialState: ApiResponse<boolean> = { data: false, error: "" };
-  const [state, formAction] = useActionState(addItemToCart, initialState);
-
-  useEffect(() => {
-    if (state.data) {
-      toast.success("Item added to cart.");
-      refreshCount();
-    } else if (state.error) {
-      if(state.error === "Auth session missing!") {router.push("/auth/login");};
-      toast.error(state.error);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state]); // أضفت refreshCart إلى مصفوفة الاعتماديات
+  // Add To Cart
 
   return (
     <div className="space-y-6">
@@ -289,43 +275,44 @@ export function ProductInfo({
         </p>
       )}
 
-      <form action={formAction} className="space-y-4">
-        <div className="flex items-stretch gap-2">
-          <div className="flex items-center border rounded-md h-10">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-full rounded-r-none"
-              onClick={() => handleQuantityChange(-1)}
-              disabled={!isAvailable || quantity <= 1}
-            >
-              <Minus className="h-4 w-4" />
-            </Button>
-            <span className="px-4 font-semibold text-center">{quantity}</span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-full rounded-l-none"
-              onClick={() => handleQuantityChange(1)}
-              disabled={!isAvailable || quantity >= stock}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <div className="grow flex gap-2">
-            <AddToCartButton disabled={!isAvailable} />
-            <WishlistButton
-              productId={product.id}
-              initialIsWishlisted={isInitiallyWishlisted}
-            />
-          </div>
+      <div className="flex items-stretch gap-2">
+        <div className="flex items-center border rounded-md h-10">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-full rounded-r-none"
+            onClick={() => handleQuantityChange(-1)}
+            disabled={!isAvailable || quantity <= 1}
+          >
+            <Minus className="h-4 w-4" />
+          </Button>
+          <span className="px-4 font-semibold text-center">{quantity}</span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-full rounded-l-none"
+            onClick={() => handleQuantityChange(1)}
+            disabled={!isAvailable || quantity >= stock}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
         </div>
-        <input type="hidden" name="variantId" value={activeVariant?.id || ""} />
-        <input type="hidden" name="quantity" value={quantity} />
-      </form>
+
+        <div className="grow flex gap-2">
+          <AddToCartButton
+            variantId={activeVariant?.id || ""}
+            quantity={quantity}
+          />
+          <WishlistButton
+            productId={product.id}
+            initialIsWishlisted={isInitiallyWishlisted}
+          />
+        </div>
+      </div>
+      <input type="hidden" name="variantId" value={activeVariant?.id || ""} />
+      <input type="hidden" name="quantity" value={quantity} />
 
       {product.description && (
         <div className="border-t pt-6">

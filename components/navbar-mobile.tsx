@@ -11,19 +11,28 @@ import React from "react";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { CartIcon } from "./custom-ui/CartIcon";
 import { signOut } from "@/lib/actions";
 import { toast } from "sonner";
 import { SearchDialog } from "./custom-ui/search-dialog";
 import { useUser } from "@/lib/provider/user-provider";
+import { CartButton } from "./custom-ui/cart_button";
+import { useCartCount } from "@/lib/provider/cart-provider";
 
 export const NavbarMobile = () => {
+  const { count, loading } = useCartCount();
+
   return (
     <nav className="flex items-center lg:hidden">
-        <Button variant={"ghost"} size={"icon"}>
-          <Search />
+      <SearchDialog>
+        <Button
+          variant={"ghost"}
+          asChild
+          className="flex rounded-sm h-8 items-center hover:bg-[#EBEBEB] dark:hover:bg-[#1F1F1F] justify-between w-fit px-2 py-2"
+        >
+          <Search size={16} />
         </Button>
-      <CartIcon />
+      </SearchDialog>
+      <CartButton count={count} isloading={loading} />
       <MobileMenu />
     </nav>
   );

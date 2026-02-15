@@ -158,28 +158,7 @@ export type Cart = {
 /**
  * يمثل بنية عنصر قائمة الرغبات كما هو مخزن في قاعدة البيانات.
  */
-export type WishlistItem = {
-  id: string;
-  created_at: string;
-  user_id: string;
-  product_id: string;
-};
 
-/**
- * يمثل عنصر قائمة الرغبات مع تفاصيل المنتج الكاملة المضمنة.
- * هذا هو النوع الذي سنستخدمه في الواجهة الأمامية لعرض بطاقات المنتجات.
- */
-export type WishlistItemWithProduct = WishlistItem & {
-  products: {
-    id?: string;
-    name?: string;
-    slug?: string;
-    main_image_url?: string | null;
-    price?: number;
-    discount_price?: number | null;
-  } | null;
-  //
-};
 
 /**
  * /**

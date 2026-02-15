@@ -137,3 +137,44 @@ export async function getProductBySlug(
     reviews: data.reviews || [],
   };
 }
+
+
+
+
+export interface VariantData {
+  price: number;
+  stock_quantity: number;
+  options: Record<string, string>;
+}
+
+export interface ProductFormData {
+  name: string;
+  slug: string;
+  description: string;
+  category_id: string;
+  brand_id: string;
+  variants: VariantData[];
+}
+
+
+// lib/actions/products.ts
+export async function createProduct(formData: ProductFormData) {
+  const supabase = await createServerClient();
+  try {
+    const { error } = await supabase.rpc("create_full_product", {
+      p_name: formData.name,
+      p_slug: formData.slug,
+      p_description: formData.description,
+      p_category_id: formData.category_id,
+      p_brand_id: formData.brand_id,
+      p_variants: formData.variants, // تمرير JSON مباشرة
+    });
+
+    if (error) {
+      return { error: error.message };
+    }
+    return { success: true };
+  } catch (e) {
+    return { error: "An unexpected error occurred." };
+  }
+}

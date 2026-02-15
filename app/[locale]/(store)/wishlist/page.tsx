@@ -1,6 +1,6 @@
 // File: app/[locale]/(store)/(account)/wishlist/page.tsx
 
-import { WishlistPage } from "@/components/dashboard/wishlist/wishlist-page";
+import { WishlistPage } from "@/components/wishlist/wishlist-page";
 import { getWishlistItems } from "@/lib/actions/wishlist";
 import { createMetadata } from "@/lib/metadata";
 
@@ -15,5 +15,5 @@ export default async function Page() {
   const wishlistItems = await getWishlistItems();
 
   // 2. تمرير البيانات إلى مكون العميل
-  return <WishlistPage initialItems={wishlistItems} />;
+  return <WishlistPage initialItems={wishlistItems.data || []} />;
 }

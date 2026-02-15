@@ -5,13 +5,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useTransition } from "react";
-import { CartItem, removeItem, updateItemQuantity } from "@/lib/actions/cart";
+import { CartItem, Product, ProductVariant, removeItem, updateItemQuantity } from "@/lib/actions/cart";
 import { X, Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { useCartCount } from "@/lib/provider/cart-provider";
-// import { useCart } from "@/lib/provider/cart-provider";
 
 interface CartItemCardProps {
   item: CartItem;
@@ -25,9 +24,9 @@ export function CartItemCard({ item }: CartItemCardProps) {
   const [isRemovePending, startRemoveTransition] = useTransition();
 
   // Item Data
-  const variant = item.product_variants;
-  const varintOptionValues = variant?.variant_option_values;
-  const product = variant?.products;
+  const variant: ProductVariant = item.product_variants;
+  const varintOptionValues: ProductVariant["variant_option_values"] = variant?.variant_option_values;
+  const product: Product = variant?.products;
 
   if (!variant || !product) {
     return null;
@@ -82,7 +81,10 @@ export function CartItemCard({ item }: CartItemCardProps) {
   const isProcessing = isUpdatePending || isRemovePending;
 
   return (
-    <div className="relative flex gap-4 mb-6 bg-background p-2 lg:p-4 rounded-lg">
+    <div
+      key={item.id}
+      className="relative flex gap-4 mb-6 bg-muted/50 p-2 lg:p-4 rounded-lg"
+    >
       {/* Image */}
       <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md">
         <Image

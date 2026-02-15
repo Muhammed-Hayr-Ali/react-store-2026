@@ -2,24 +2,59 @@
 
 import { revalidatePath } from "next/cache";
 import { createServerClient } from "../supabase/createServerClient";
-import {
-  type ServerActionResponse,
-  type WishlistItemWithProduct,
-} from "@/types";
+import { type ServerActionResponse } from "@/types";
 import { unstable_noStore as noStore } from "next/cache";
+import { getUser } from "./get-user-action";
+
+// 1. تعريف النوع لمتغير المنتج الواحد (Product Variant)
+// يمثل كل تركيبة ممكنة من المنتج (مثل لون وحجم معين)
+export type Variants = {
+  id: string;
+  price: number;
+  discount_price: number | null;
+  stock_quantity: number;
+  discount_expires_at: string | null;
+};
+
+// 2. تعريف النوع للمنتج الأساسي (Product)
+// يحتوي على المعلومات العامة للمنتج ومصفوفة من متغيراته
+
+// 3. تعريف النوع لعنصر قائمة المفضلة (WishlistItem)
+// يربط بين المستخدم والمنتج، ويحتوي على كائن المنتج المتداخل
+export type WishlistProduct = {
+  id: string;
+  name: string;
+  slug: string;
+  main_image_url: string | null;
+  variants: Variants[];
+};
+
+export type WishlistItem = {
+  id: string;
+  created_at: string;
+  product_id: string;
+  user_id: string;
+  product: WishlistProduct;
+};
+
+export type ApiResponse<T> = {
+  data?: T;
+  error?: string;
+};
 
 // =================================================================
 // 1. جلب عناصر قائمة الرغبات (Get Wishlist Items)
 // =================================================================
 
-export async function getWishlistItems(): Promise<WishlistItemWithProduct[]> {
+export async function getWishlistItems(): Promise<
+  ApiResponse<WishlistItem[]|[]>
+> {
   const supabase = await createServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: user, error: userError } = await getUser();
 
-  if (!user) {
-    return [];
+  if (userError || !user) {
+    console.error("Error fetching user:", userError);
+    return { error: "Failed to fetch wishlist items." };
   }
 
   const { data, error } = await supabase
@@ -30,54 +65,31 @@ export async function getWishlistItems(): Promise<WishlistItemWithProduct[]> {
       created_at,
       product_id,
       user_id, 
-      products (
+      product:products (
         id,
         name,
         slug,
         main_image_url,
-        product_variants (
+        variants:product_variants (
+        id,
           price,
-          discount_price
+          discount_price,
+          discount_expires_at,
+          stock_quantity
         )
       )
     `,
     )
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
-  if (error) {
+  if (error || !data) {
     console.error("Error fetching wishlist items:", error.message);
-    return [];
+    return { error: "Failed to fetch wishlist items." };
   }
 
-  const transformedItems = data
-    .map((item) => {
-      if (!item.products) return null;
-
-      const productDetails = Array.isArray(item.products)
-        ? item.products[0]
-        : item.products;
-
-      const defaultVariant = productDetails.product_variants?.[0];
-
-      return {
-        id: item.id,
-        created_at: item.created_at,
-        user_id: item.user_id,
-        product_id: item.product_id,
-        products: {
-          id: productDetails.id,
-          name: productDetails.name,
-          slug: productDetails.slug,
-          main_image_url: productDetails.main_image_url,
-          price: defaultVariant?.price,
-          discount_price: defaultVariant?.discount_price,
-        },
-      };
-    })
-    .filter(Boolean); // إزالة أي قيم null من المصفوفة
-
   // الآن يمكننا بأمان أن نقول أن المصفوفة من النوع المطلوب
-  return transformedItems as WishlistItemWithProduct[];
+  return { data: data as unknown as WishlistItem[] };
 }
 
 // =================================================================

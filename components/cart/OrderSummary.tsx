@@ -17,7 +17,7 @@ interface OrderSummaryProps {
 
 export function OrderSummary({ subtotal }: OrderSummaryProps) {
   return (
-    <Card className="sticky bg-background">
+    <Card className="sticky bg-muted/50">
       <CardHeader>
         <CardTitle>Order Summary</CardTitle>
       </CardHeader>

@@ -176,21 +176,24 @@ export async function getCart(): Promise<ApiResponse<Cart>> {
 // ====================================================================
 // Add Item To Cart
 // ====================================================================
-export async function addItemToCart(
-  prevState: ApiResponse<boolean> | null,
-  formData: FormData,
-): Promise<ApiResponse<boolean>> {
+export async function addItemToCart({
+  variantId,
+  quantity,
+}: {
+  variantId: string;
+  quantity: number;
+}): Promise<ApiResponse<boolean>> {
   const supabase = await createServerClient();
 
+  // 1. التحقق من وجود جلسة مستخدم
   const { data: user, error: userError } = await getUser();
-
   if (userError || !user) {
-    console.error("Error fetching user:", userError);
-    return { error: userError };
+    console.error("addItemToCart Error: Auth session missing!", userError);
+    // إرجاع خطأ واضح يمكن للواجهة الأمامية التعامل معه
+    return { error: "Auth session missing!" };
   }
 
-  const variantId = formData.get("variantId") as string;
-  const quantity = Number(formData.get("quantity"));
+  // 2. استخراج والتحقق من صحة البيانات من FormData
 
   if (
     !variantId ||
@@ -198,26 +201,28 @@ export async function addItemToCart(
       variantId,
     )
   ) {
-    console.error("Invalid variant ID specified.");
-    return { data: false, error: "Invalid variant ID specified." };
+    console.error("Invalid variant ID specified:", variantId);
+    return { data: false, error: "Invalid product variant specified." };
   }
+
   if (isNaN(quantity) || !Number.isInteger(quantity) || quantity < 1) {
-    console.error("Invalid quantity specified.");
+    console.error("Invalid quantity specified:", quantity);
     return { data: false, error: "Invalid quantity specified." };
   }
 
-  // !! Database Functions (For Getting or Creating a Cart for the User)
+  // 3. تنفيذ العمليات على قاعدة البيانات
   try {
+    // استدعاء دالة RPC للحصول على سلة المستخدم أو إنشائها
     const { data: cartId, error: cartError } = await supabase.rpc(
       "get_or_create_user_cart",
     );
 
     if (cartError || !cartId) {
       console.error("Error getting or creating the cart:", cartError);
-      return { data: false, error: "Could not get or create the cart." };
+      return { data: false, error: "Could not access the cart." };
     }
 
-    // !! Database Functions (For Adding an Item to the Cart)
+    // استدعاء دالة RPC لإضافة المنتج إلى السلة
     const { error: upsertError } = await supabase.rpc("add_item_to_cart", {
       p_cart_id: cartId,
       p_variant_id: variantId,
@@ -226,17 +231,19 @@ export async function addItemToCart(
 
     if (upsertError) {
       console.error("Error adding item to the cart:", upsertError);
-      return { data: false, error: "Could not add item to the cart." };
+      // يمكنك هنا إضافة منطق لمعالجة أخطاء معينة، مثل "المنتج غير متوفر"
+      return { data: false, error: "Could not add the item to the cart." };
     }
 
-    // revalidatePath("/products/[slug]", "layout");
-
+    // 4. إعادة التحقق من صحة المسارات (Revalidation)
+    // هذا يخبر Next.js بتحديث البيانات في الصفحات المتأثرة
     revalidatePath("/cart");
 
+    // 5. إرجاع نتيجة النجاح
     return { data: true };
   } catch (error) {
-    console.error("Error adding item to the cart:", error);
-    return { data: false, error: "Could not add item to the cart." };
+    console.error("An unexpected error occurred in addItemToCart:", error);
+    return { data: false, error: "An unexpected error occurred." };
   }
 }
 

@@ -1,3 +1,4 @@
+"use client";
 
 import * as React from "react";
 import { toast } from "sonner";
@@ -6,7 +7,6 @@ import { Kbd } from "@/components/ui/kbd";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -197,20 +197,47 @@ const SearchDialogContent = ({ onClose }: { onClose: () => void }) => {
 // 3. المكون الرئيسي المبسط (آمن للعرض من جانب الخادم)
 //================================================================================
 export const SearchDialog = ({ children }: SearchDialogProps) => {
+  const [isOpen, setIsOpen] = React.useState(false);
 
+  React.useEffect(() => {
+    // اختصار لوحة المفاتيح لفتح النافذة
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setIsOpen((open) => !open);
+      }
+    };
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
 
   return (
-    <Dialog>
-      <DialogTrigger>{children}</DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Are you absolutely sure?</DialogTitle>
-          <DialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
-          </DialogDescription>
-        </DialogHeader>
-      </DialogContent>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      {isOpen && <SearchDialogContent onClose={() => setIsOpen(false)} />}
     </Dialog>
   );
 };
+
+//  <div>
+//     {size === "deafult" ? (
+//       <Button
+//         variant={"ghost"}
+//         className="flex rounded-sm h-12 lg:h-8 items-center bg-[#F2F2F2] hover:bg-[#EBEBEB] dark:bg-[#1A1A1A] dark:hover:bg-[#1F1F1F] justify-between min-w-3xs px-1.5 py-2"
+//       >
+//         <div className="flex items-center gap-2">
+//           <Search className="h-4 w-4 text-muted-foreground block lg:hidden" />
+//           <span className="text-xs font-mono font-normal">
+//             Search Products...
+//           </span>
+//         </div>
+//         <Kbd dir="ltr" className="bg-background hidden lg:block">
+//           ⌘K
+//         </Kbd>
+//       </Button>
+//     ) : (
+//       <Button variant={"ghost"} size={"icon"}>
+//         <Search/>
+//       </Button>
+//     )}
+//     </div>

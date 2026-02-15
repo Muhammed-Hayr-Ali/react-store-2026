@@ -17,7 +17,7 @@ export function generateMetadata() {
 
 export default function Page() {
   return (
-    <main>
+    <main className="container mx-auto px-4">
       <Hero />
       <FeaturedCategories />
       <BestSellers />
