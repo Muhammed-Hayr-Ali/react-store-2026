@@ -3,7 +3,6 @@ import {
   DM_Sans,
   Geist,
   Geist_Mono,
-  Almarai,
   Rubik,
   Comfortaa,
   Urbanist,
@@ -24,11 +23,6 @@ export const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const almarai = Almarai({
-  weight: ["300", "400", "700", "800"],
-  subsets: ["arabic"],
-  variable: "--font-almarai",
-});
 
 export const rubik = Rubik({
   weight: ["300", "400", "500", "600", "700", "800", "900"],

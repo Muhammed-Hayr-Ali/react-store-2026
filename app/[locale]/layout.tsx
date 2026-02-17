@@ -5,7 +5,6 @@ import { hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import {
-  almarai,
   dmSans,
   geistMono,
   geistSans,
@@ -52,7 +51,7 @@ export default async function RootLayout({ children, params }: Props) {
       lang={locale}
       dir={dir}
       suppressHydrationWarning
-      className={`${dmSans.variable} ${geistSans.variable} ${geistMono.variable} ${almarai.variable} ${rubik.variable} ${comfortaa.variable} ${urbanist.variable} antialiased`}
+      className={`${dmSans.variable} ${geistSans.variable} ${geistMono.variable} ${rubik.variable} ${comfortaa.variable} ${urbanist.variable} antialiased`}
     >
       <body>
         <NextIntlClientProvider>
