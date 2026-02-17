@@ -1,4 +1,5 @@
-'use client'
+"use client";
+
 import { addToWishlist, removeFromWishlist } from "@/lib/actions/wishlist";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";

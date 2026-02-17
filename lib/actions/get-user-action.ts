@@ -28,8 +28,8 @@ export async function getUser(): Promise<ApiResponse<User | null>> {
   } = await supabase.auth.getUser();
 
   if (error) {
-    console.error("Error fetching session:", error.message);
-    return { data: undefined, error: error.message };
+    // console.error("Error fetching session:", error.message);
+    return { error: error.message };
   }
 
   return { data: user };

@@ -34,7 +34,7 @@ export async function getReviewsByProductId(
     return { error: "Failed to fetch reviews." };
   }
 
-  return { data: reviews as Review[], error: null };
+  return { data: reviews as Review[] };
 }
 
 // =================================================================

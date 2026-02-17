@@ -8,7 +8,8 @@ import { checkWishlistStatus } from "@/lib/actions/wishlist";
 // ✅ 1. استيراد دالة جلب التقييمات فقط
 import { getReviewsByProductId } from "@/lib/actions/reviews";
 import { getUser } from "@/lib/actions/get-user-action";
-import ProductDetails, { ProductInfo } from "@/components/products/ProductDetails";
+import ProductDetails from "@/components/products/ProductDetails";
+
 
 // ... (دالة generateMetadata لم تتغير) ...
 export async function generateMetadata({

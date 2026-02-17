@@ -1,3 +1,6 @@
+"use client";
+
+
 import { addItemToCart } from "@/lib/actions";
 import { useCartCount } from "@/lib/provider/cart-provider";
 import { useEffect, useState } from "react";
@@ -47,8 +50,6 @@ export default function AddToCartButton({
     document.addEventListener("keydown", handleKeyPress);
     return () => document.removeEventListener("keydown", handleKeyPress);
   });
-
-
 
   return (
     <Button

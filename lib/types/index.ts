@@ -12,7 +12,7 @@ export type ApiResponse<T = unknown> = {
   /** البيانات المرجعة من الطلب */
   data?: T;
   /** رسالة الخطأ إن وجدت */
-  error?: string | null;
+  error?: string;
   /** أي حقول إضافية يمكن إضافتها حسب الحاجة */
   [key: string]: unknown;
 };

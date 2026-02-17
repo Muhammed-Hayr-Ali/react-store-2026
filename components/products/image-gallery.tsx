@@ -1,4 +1,5 @@
-'use client'
+"use client";
+
 import { FullProduct, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -133,12 +134,12 @@ export function ImageGallery({
 
         {/* الصورة الرئيسية */}
         <div
-          className="relative grow w-full h-64 md:h-96 lg:h-auto aspect-square rounded-lg border bg-card overflow-hidden cursor-zoom-in"
+          className="relative grow w-full max-h-125 h-auto aspect-square rounded-lg border bg-card overflow-hidden cursor-zoom-in"
           onClick={openLightbox}
         >
           {!imageLoaded && (
             <div className="absolute inset-0 flex items-center justify-center bg-muted">
-              <Spinner  />
+              <Spinner />
             </div>
           )}
           <Image
@@ -147,7 +148,7 @@ export function ImageGallery({
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
             className={cn(
-              "object-contain p-4 transition-transform duration-300 hover:scale-105",
+              "object-contain transition-transform duration-300 hover:scale-105",
               imageLoaded ? "opacity-100" : "opacity-0",
             )}
             onLoadingComplete={() => setImageLoaded(true)}

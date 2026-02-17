@@ -1,34 +1,30 @@
 // lib/actions/products.ts
 
 "use server";
-
-import { revalidatePath } from "next/cache";
 import { ProductFormData } from "../types/product";
 import { createServerClient } from "../supabase/createServerClient";
+import { isAdmin } from "./get-user-action";
 
 export async function createProduct(
   formData: ProductFormData
 ): Promise<{ success: boolean; productId?: string; error?: string }> {
   try {
     const supabase = await createServerClient();
-
-    // ============================================
-    // التحقق من المصادقة
-    // ============================================
     const {  data:{ user } } = await supabase.auth.getUser();
     
     if (!user) {
       return { success: false, error: "User not authenticated" };
     }
     
-    // ============================================
-    // التحقق من صلاحيات المشرف
-    // ============================================
-    // const {   data: isAdminData  } = await supabase.rpc('is_user_admin');
-    
-    // if (!isAdminData || !isAdminData[0]?.exists) {
-    //   return { success: false, error: "Admin privileges required" };
-    // }
+  
+  
+  
+    const data = await isAdmin();
+   
+   
+    if (!data) {
+      return { success: false, error: "Unauthorized: Admins only" };
+    }
 
     // ============================================
     // إنشاء المنتج الرئيسي
@@ -85,7 +81,6 @@ export async function createProduct(
         .single();
 
       if (variantError) {
-        // Rollback: حذف المنتج إذا فشل إنشاء أي متغير
         await supabase.from("products").delete().eq("id", productId);
         console.error("Variant creation error:", variantError);
         return { success: false, error: variantError.message };
@@ -107,19 +102,13 @@ export async function createProduct(
 
           if (linkError) {
             console.error("Option link error:", linkError);
-            // لا نقوم بالـ rollback هنا لأن المتغير تم إنشاؤه بنجاح
-            // يمكن معالجة الخطأ لاحقًا في واجهة الإدارة
           }
         }
       }
     }
 
-    // ============================================
-    // تحديث الواجهة
-    // ============================================
-    revalidatePath("/admin/products");
-    revalidatePath(`/admin/products/${productId}`);
 
+    
     return { success: true, productId };
   } catch (error) {
     console.error("Unexpected error creating product:", error);

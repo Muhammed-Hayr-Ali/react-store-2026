@@ -27,8 +27,8 @@ export async function getTotalCartQuantity(): Promise<
   const { data: user, error: userError } = await getUser();
 
   if (userError || !user) {
-    console.error("Error fetching user:", userError);
-    return { data: undefined, error: userError };
+    // console.error("Error fetching user:", userError);
+    return { error: userError };
   }
 
   // --- ✅ The RPC Way ---

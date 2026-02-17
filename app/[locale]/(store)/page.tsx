@@ -7,6 +7,7 @@ import { BestSellers } from "@/components/landing/best-sellers";
 import { WhyChooseUs } from "@/components/landing/why-choose-us";
 import { NewsletterSignup } from "@/components/landing/newsletter-signup";
 import { SpecialOffers } from "@/components/special-offers/SpecialOffers";
+import { NewlyAddedProducts } from "@/components/landing/newly-added-products/min";
 
 export function generateMetadata() {
   return createMetadata({
@@ -19,6 +20,7 @@ export default function Page() {
   return (
     <main className="container mx-auto px-4">
       <Hero />
+      <NewlyAddedProducts />
       <FeaturedCategories />
       <BestSellers />
       <SpecialOffers />
