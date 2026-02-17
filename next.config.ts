@@ -73,7 +73,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "cdn.mafrservices.com",
+        hostname: "zouqsweet.net",
         port: "",
         pathname: "/**",
       },
