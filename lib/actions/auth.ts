@@ -6,6 +6,7 @@ import { createDiscountCode } from "./discounts";
 import { sendEmail } from "./email";
 import WelcomeEmail from "@/emails/welcome-email";
 import { createBrowserClient } from "../supabase/createBrowserClient";
+import { ApiResponse } from "../types";
 
 // ===============================================================================
 // File Name: auth.ts
@@ -17,27 +18,7 @@ import { createBrowserClient } from "../supabase/createBrowserClient";
 // Copyright (c) 2023 Mohammed Kher Ali
 // ===============================================================================
 
-// ===============================================================================
-// Api Response Type
-// ===============================================================================
-export type ApiResponse<T> = {
-  data?: T;
-  error?: string;
-  [key: string]: unknown;
-};
 
-// ===============================================================================
-// MFA Factor Type
-// ===============================================================================
-export type MfaFactor = {
-  id: string;
-  friendly_name?: string | undefined;
-  factor_type: "totp" | "phone" | "webauthn";
-  status: "verified" | "unverified";
-  created_at: string;
-  updated_at: string;
-  last_challenged_at?: string | undefined;
-};
 
 // ===============================================================================
 // Sign Up Payload

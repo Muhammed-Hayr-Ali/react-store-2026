@@ -1,14 +1,14 @@
-// app/[locale]/(store)/products/[slug]/page.tsx
+// app\[locale]\(store)\products\[slug]\page.tsx
 
 import { getProductBySlug } from "@/lib/actions/products";
 import { createMetadata } from "@/lib/metadata";
-import { ProductDetails } from "@/components/products/ProductDetails";
 import { notFound } from "next/navigation";
 import { checkWishlistStatus } from "@/lib/actions/wishlist";
 
 // ✅ 1. استيراد دالة جلب التقييمات فقط
 import { getReviewsByProductId } from "@/lib/actions/reviews";
 import { getUser } from "@/lib/actions/get-user-action";
+import ProductDetails, { ProductInfo } from "@/components/products/ProductDetails";
 
 // ... (دالة generateMetadata لم تتغير) ...
 export async function generateMetadata({
@@ -17,19 +17,21 @@ export async function generateMetadata({
   params: Promise<{ slug: string; locale: string }>;
 }) {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+
+  const data = await getProductBySlug(slug);
+  const product = data.data;
 
   if (!product) {
     return createMetadata({
       title: "Product Not Found",
-      description: "The requested product could not be found.",
+      description: "Product not found",
     });
   }
 
   return createMetadata({
-    title: product.name,
-    description: product.short_description || product.description,
-    image: product.main_image_url || undefined,
+    title: product?.name ?? "",
+    description: product?.description ?? "",
+    image: product?.main_image_url ?? "",
   });
 }
 
@@ -39,41 +41,48 @@ type Props = {
 };
 
 export default async function Page({ params }: Props) {
+  // Get slug from params
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
-  const user = await getUser();
+
+  // Get product by slug
+  const data = await getProductBySlug(slug);
+  const product = data.data;
 
   if (!product) {
     notFound();
   }
 
-  // --- جلب البيانات الإضافية ---
-  const wishlistStatus = await checkWishlistStatus([product.id]);
+  // Get user data
+  const user = await getUser();
+
+  // import checkWishlistStatus
+  const wishlistStatus = (await checkWishlistStatus([product.id]));
+
+  // Check if the product is initially wishlisted
   const isInitiallyWishlisted = wishlistStatus[product.id] || false;
 
-  // ✅ 2. جلب بيانات التقييمات
-  const { data: reviews, error: reviewsError } = await getReviewsByProductId(
-    product.id,
-  );
+  // Get reviews
+  const { data: dataReviews, error: errorReviews } =
+    await getReviewsByProductId(product.id);
 
-  // ✅ 3. حساب ملخص التقييمات
-  const totalReviews = reviews?.length || 0;
+  // Calculate average rating
+  const totalReviews = dataReviews?.length || 0;
   const averageRating =
     totalReviews > 0
-      ? reviews!.reduce((acc, review) => acc + review.rating, 0) / totalReviews
+      ? dataReviews!.reduce((acc, review) => acc + review.rating, 0) /
+        totalReviews
       : 0;
 
   return (
-    <main className="container mx-auto py-8 md:py-12 px-4">
-      {/* ✅ 4. تمرير جميع البيانات اللازمة إلى ProductDetails */}
+    <main className="container mx-auto pb-8 md:pb-12 px-4">
       <ProductDetails
         user={user.data}
         product={product}
         isInitiallyWishlisted={isInitiallyWishlisted}
-        reviews={reviews || []}
         averageRating={averageRating}
         totalReviews={totalReviews}
-        reviewsError={reviewsError}
+        reviews={dataReviews || []}
+        errorReviews={errorReviews}
       />
     </main>
   );

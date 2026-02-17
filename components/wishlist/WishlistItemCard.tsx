@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   calculateDiscountPercentage,
   getExpiryMessage,
-} from "@/lib/actions/calculate-functions";
+} from "@/lib/actions/convert-functions";
 import { useCartCount } from "@/lib/provider/cart-provider";
 
 

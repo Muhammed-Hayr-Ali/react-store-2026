@@ -3,6 +3,7 @@
 import { createServerClient } from "@/lib/supabase/createServerClient";
 import { revalidatePath } from "next/cache";
 import { getUser } from "./get-user-action";
+import { ApiResponse, Cart, CartItem } from "../types";
 
 // ===============================================================================
 // File Name: cart.ts
@@ -14,85 +15,6 @@ import { getUser } from "./get-user-action";
 // Copyright (c) 2023 Mohammed Kher Ali
 // ===============================================================================
 
-// ===============================================================================
-// // Api Response Type
-// ===============================================================================
-export type ApiResponse<T> = {
-  data?: T;
-  error?: string;
-  [key: string]: unknown;
-};
-
-// ===============================================================================
-// Cart Types
-// ===============================================================================
-export type Cart = {
-  id: string;
-  user_id: string;
-  cart_items: CartItem[];
-  [key: string]: unknown;
-};
-
-// ===============================================================================
-// Cart Item Types
-// ===============================================================================
-export type CartItem = {
-  id: string;
-  cart_id: string;
-  quantity: number;
-  created_at: string;
-  updated_at: string;
-  variant_id: string;
-  product_variants: ProductVariant;
-};
-
-// ===============================================================================
-// Product Variant Types
-// ===============================================================================
-export type ProductVariant = {
-  id: string;
-  sku: string;
-  price: number;
-  products: Product;
-  image_url: string | null;
-  created_at: string;
-  is_default: boolean;
-  product_id: string;
-  discount_price: number | null;
-  stock_quantity: number;
-  discount_expires_at: string | null;
-  variant_option_values: VariantOptionValues[];
-};
-
-export type VariantOptionValues = {
-  variant_id: string;
-  option_value_id: string;
-  product_option_values: {
-    id: string;
-    value: string;
-    option_id: string;
-  };
-};
-
-// ===============================================================================
-// Product Types
-// ===============================================================================
-export type Product = {
-  id: string;
-  name: string;
-  slug: string;
-  tags: string | null;
-  brand_id: string;
-  created_at: string;
-  image_urls: string | null;
-  updated_at: string;
-  category_id: string;
-  description: string;
-  is_featured: boolean;
-  is_available: boolean;
-  main_image_url: string;
-  short_description: string;
-};
 
 // ====================================================================
 // Get Items Count

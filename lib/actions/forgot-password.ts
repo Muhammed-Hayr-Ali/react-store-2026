@@ -4,17 +4,14 @@ import { createServerClient } from "../supabase/createServerClient";
 import { sendEmail } from "./email";
 import PasswordResetEmail from "@/emails/PasswordResetEmail";
 import { siteConfig } from "../config/site";
+import { ApiResponse } from "../types";
 
-export type GPRLResponse<T> = {
-  data?: T;
-  error?: string | null;
-};
 
 export async function generatePasswordResetLink(
   userId: string,
   email: string,
   locale: "ar" | "en" | undefined
-): Promise<GPRLResponse<null>> {
+): Promise<ApiResponse<null>> {
   try {
     const supabase = await createServerClient();
 

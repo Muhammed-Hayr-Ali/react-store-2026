@@ -2,7 +2,6 @@
 
 "use server";
 
-import { createServerClient } from "@/lib/supabase/createServerClient";
 import { generateRandomCode } from "./generate-discount-code";
 import { createAdminClient } from "../supabase/admin";
 

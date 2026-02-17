@@ -1,7 +1,8 @@
 import { AddProductForm } from "@/components/dashboard-admin/products/AddProductForm/add-product-form";
 import { createServerClient } from "@/lib/supabase/createServerClient";
 
-// دالة لجلب البيانات من الخادم
+
+
 async function getInitialData() {               
   const supabase = await createServerClient();
   const categoriesData = await supabase.from("categories").select("id, name");

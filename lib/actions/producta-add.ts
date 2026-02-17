@@ -3,16 +3,36 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { ProductFormData } from "@/lib/types/product";
+import { ProductFormData } from "../types/product";
 import { createServerClient } from "../supabase/createServerClient";
 
 export async function createProduct(
-  formData: ProductFormData,
+  formData: ProductFormData
 ): Promise<{ success: boolean; productId?: string; error?: string }> {
   try {
     const supabase = await createServerClient();
 
+    // ============================================
+    // التحقق من المصادقة
+    // ============================================
+    const {  data:{ user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      return { success: false, error: "User not authenticated" };
+    }
+    
+    // ============================================
+    // التحقق من صلاحيات المشرف
+    // ============================================
+    // const {   data: isAdminData  } = await supabase.rpc('is_user_admin');
+    
+    // if (!isAdminData || !isAdminData[0]?.exists) {
+    //   return { success: false, error: "Admin privileges required" };
+    // }
+
+    // ============================================
     // إنشاء المنتج الرئيسي
+    // ============================================
     const { data: productData, error: productError } = await supabase
       .from("products")
       .insert([
@@ -20,8 +40,8 @@ export async function createProduct(
           name: formData.name,
           slug: formData.slug,
           description: formData.description,
-          short_description: formData.short_description,
-          main_image_url: formData.main_image_url,
+          short_description: formData.short_description ?? null,
+          main_image_url: formData.main_image_url ?? null,
           image_urls: formData.image_urls ?? [],
           category_id: formData.category_id,
           brand_id: formData.brand_id,
@@ -34,46 +54,78 @@ export async function createProduct(
       .single();
 
     if (productError) {
-      throw productError;
+      console.error("Product creation error:", productError);
+      return { success: false, error: productError.message };
     }
 
     const productId = productData.id;
 
-    // إنشاء المتغيرات
+    // ============================================
+    // إنشاء المتغيرات وربط الخيارات
+    // ============================================
     for (const variant of formData.variants) {
-      const { error: variantError } = await supabase
+      // إنشاء المتغير
+      const { data:  variantData, error: variantError } = await supabase
         .from("product_variants")
         .insert([
           {
             product_id: productId,
             sku: variant.sku,
             price: variant.price,
-            discount_price: variant.discount_price,
-            discount_expires_at: variant.discount_expires_at
-              ? new Date(variant.discount_expires_at).toISOString()
+            discount_price: variant.discount_price ?? null,
+            discount_expires_at: variant.discount_expires_at 
+              ? new Date(variant.discount_expires_at).toISOString() 
               : null,
             stock_quantity: variant.stock_quantity,
-            image_url: variant.image_url,
+            image_url: variant.image_url ?? null,
             is_default: variant.is_default,
           },
-        ]);
+        ])
+        .select("id")
+        .single();
 
       if (variantError) {
-        // Rollback: حذف المنتج إذا فشل إنشاء المتغيرات
+        // Rollback: حذف المنتج إذا فشل إنشاء أي متغير
         await supabase.from("products").delete().eq("id", productId);
-        throw variantError;
+        console.error("Variant creation error:", variantError);
+        return { success: false, error: variantError.message };
+      }
+
+      const variantId = variantData.id;
+
+      // ربط خيارات المتغير (إذا وجدت)
+      if (variant.variant_options && variant.variant_options.length > 0) {
+        for (const option of variant.variant_options) {
+          const { error: linkError } = await supabase
+            .from("variant_option_values")
+            .insert([
+              {
+                variant_id: variantId,
+                option_value_id: option.option_value.id,
+              },
+            ]);
+
+          if (linkError) {
+            console.error("Option link error:", linkError);
+            // لا نقوم بالـ rollback هنا لأن المتغير تم إنشاؤه بنجاح
+            // يمكن معالجة الخطأ لاحقًا في واجهة الإدارة
+          }
+        }
       }
     }
 
+    // ============================================
+    // تحديث الواجهة
+    // ============================================
     revalidatePath("/admin/products");
     revalidatePath(`/admin/products/${productId}`);
 
     return { success: true, productId };
   } catch (error) {
-    console.error("Error creating product:", error);
+    console.error("Unexpected error creating product:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : "Unknown error occurred",
     };
   }
 }

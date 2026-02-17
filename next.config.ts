@@ -35,10 +35,51 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "encrypted-tbn0.gstatic.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "caphore.sy",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "images.b3na.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "emdadx.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "encrypted-tbn0.gstatic.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "tadirjanu.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.mafrservices.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
 };
 
 const withNextIntl = createNextIntlPlugin();
 export default withNextIntl(nextConfig);
-// https://imagedelivery.net/AXBOLKJ2nB6B4T-JIYE73g/f129e_urban_classics_heavy_oversized_t-shirt_urban_classics_heavy_oversized_t-shirt_green_front/width=538,height=415,quality=90,fit=pad,format=webp

@@ -1,37 +1,25 @@
-// lib/actions/reviews.ts
-
 "use server";
 
 import { unstable_noStore as noStore, revalidatePath } from "next/cache";
-import { type Review } from "@/types";
 import { createServerClient } from "../supabase/createServerClient";
-
-// =================================================================
-// TYPES AND DATA FETCHING
-// =================================================================
-
-// نوع التقييم مع بيانات المؤلف
-export type ReviewWithAuthor = Review & {
-  author: {
-    first_name: string | null;
-    last_name: string | null;
-    avatar_url: string | null;
-  } | null;
-};
+import { ApiResponse, Review } from "../types";
 
 // دالة جلب التقييمات لمنتج معين
 export async function getReviewsByProductId(
   productId: string,
-): Promise<{ data: ReviewWithAuthor[] | null; error: string | null }> {
+): Promise<ApiResponse<Review[] | []>> {
+  //Don't cache this route
   noStore();
+
   const supabase = await createServerClient(); // بدون await
 
-  const { data, error } = await supabase
+  const { data: reviews, error: errorReviews } = await supabase
     .from("reviews")
     .select(
       `
       *,
       author:profiles (
+        id,
         first_name,
         last_name,
         avatar_url
@@ -41,12 +29,12 @@ export async function getReviewsByProductId(
     .eq("product_id", productId)
     .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("Error fetching reviews:", error.message);
-    return { data: null, error: "Failed to fetch reviews." };
+  if (errorReviews) {
+    console.error("Error fetching reviews:", errorReviews.message);
+    return { error: "Failed to fetch reviews." };
   }
 
-  return { data, error: null };
+  return { data: reviews as Review[], error: null };
 }
 
 // =================================================================
@@ -185,7 +173,6 @@ export async function addReview(
     };
   }
 
-
   // 5. إعادة التحقق من المسار لتحديث الواجهة
   revalidatePath(`/products/${productSlug}`);
   revalidatePath(`/[locale]/products/${productSlug}`);
@@ -198,7 +185,6 @@ export async function addReview(
 
 // getAllUserReviews;
 
-
 // =================================================================
 // REVIEW DELETION ACTION
 // =================================================================
@@ -209,19 +195,24 @@ export async function deleteReview(
   const supabase = await createServerClient();
 
   // 1. التحقق من وجود مستخدم مسجل
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) {
-    return { success: false, message: "You must be logged in to perform this action." };
+    return {
+      success: false,
+      message: "You must be logged in to perform this action.",
+    };
   }
 
   // 2. استخراج البيانات من النموذج
   const reviewId = formData.get("reviewId");
   const productSlug = formData.get("productSlug");
 
-  if (!reviewId || typeof reviewId !== 'string') {
+  if (!reviewId || typeof reviewId !== "string") {
     return { success: false, message: "Invalid review ID." };
   }
-  if (!productSlug || typeof productSlug !== 'string') {
+  if (!productSlug || typeof productSlug !== "string") {
     return { success: false, message: "Product slug is missing." };
   }
 
@@ -238,7 +229,10 @@ export async function deleteReview(
 
   if (error) {
     console.error("Error deleting review:", error);
-    return { success: false, message: "Failed to delete your review. Please try again." };
+    return {
+      success: false,
+      message: "Failed to delete your review. Please try again.",
+    };
   }
 
   // 4. إعادة التحقق من المسار لتحديث الواجهة فورًا
@@ -248,19 +242,9 @@ export async function deleteReview(
   return { success: true, message: "Your review has been deleted." };
 }
 
-
-
-
-// getAllUserReviews;
-
-
-import {  } from "../supabase/createServerClient";
-
 // =================================================================
 // TYPES AND DATA FETCHING
 // =================================================================
-
-
 
 // ✅ --- تعريف نوع جديد لتقييمات المستخدم ---
 export type UserReview = Review & {
@@ -271,8 +255,6 @@ export type UserReview = Review & {
   };
 };
 
-
-
 // ✅ --- الدالة المفقودة التي سنقوم بإضافتها الآن --- ✅
 /**
  * يجلب جميع التقييمات التي كتبها المستخدم الحالي.
@@ -282,21 +264,25 @@ export async function getAllUserReviews(): Promise<UserReview[]> {
   noStore();
   const supabase = await createServerClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) {
     return []; // إذا لم يكن هناك مستخدم، أرجع مصفوفة فارغة
   }
 
   const { data, error } = await supabase
     .from("reviews")
-    .select(`
+    .select(
+      `
       *,
       product:products!inner (
         name,
         slug,
         main_image_url
       )
-    `)
+    `,
+    )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -308,11 +294,6 @@ export async function getAllUserReviews(): Promise<UserReview[]> {
   // Supabase قد يُرجع null حتى لو لم يكن هناك خطأ، لذلك نتحقق من ذلك
   return data || [];
 }
-
-
-
-
-
 
 // =================================================================
 // GET USER REVIEWS SUMMARY
@@ -330,4 +311,3 @@ export type ReviewsSummary = {
     };
   } | null;
 };
-

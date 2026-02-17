@@ -3,11 +3,16 @@
 "use server";
 
 import { createServerClient } from "@/lib/supabase/createServerClient";
-import { type FullProduct } from "@/types";
+import { cache } from "react";
+import { ApiResponse, FullProduct } from "../types";
 
-// ====================================================================
-// 1. دالة لجلب منتجات العروض الخاصة
-// ====================================================================
+
+
+
+const SELECT_FULL_PRODUCT_QUERY = `*,brand:brands(*),category:categories(*),variants:product_variants (*, variant_option_values ( product_option_values (*, product_options(*) ) ) ) `;
+
+
+
 
 export type ProductWithVariant = {
   variant_id: string;
@@ -95,51 +100,25 @@ export async function getSpecialOfferProducts(): Promise<ProductWithVariant[]> {
 // 2. دالة لجلب منتج واحد بكل تفاصيله باستخدام الـ slug
 // ====================================================================
 
-export async function getProductBySlug(
-  slug: string,
-): Promise<FullProduct | null> {
+export const getProductBySlug = cache(async (slug: string): Promise<ApiResponse<FullProduct | null>> => {
+
+
   const supabase = await createServerClient();
 
-  const { data, error } = await supabase
+  const { data: product, error: productError } = await supabase
     .from("products")
-    .select(
-      `
-      *,
-      category:categories (*),
-      brand:brands (*),
-      variants:product_variants (
-        *,
-        variant_options:variant_option_values (
-          option_value:product_option_values (
-            *,
-            option:product_options (*)
-          )
-        )
-      ),
-      reviews:reviews (*)
-    `,
+    .select(SELECT_FULL_PRODUCT_QUERY
     )
     .eq("slug", slug)
     .single();
 
-  if (error) {
-    if (error.code !== "PGRST116") {
-      console.error(`Error fetching product by slug "${slug}":`, error);
-    }
-    return null;
+  if (productError) {
+    console.error("Error fetching product by slug:", productError);
+    return { error: "Failed to fetch product by slug." };
   }
 
-  return {
-    ...data,
-    category: Array.isArray(data.category) ? data.category[0] : data.category,
-    brand: Array.isArray(data.brand) ? data.brand[0] : data.brand,
-    variants: data.variants || [],
-    reviews: data.reviews || [],
-  };
-}
-
-
-
+  return { data: product, error: null };
+});
 
 export interface VariantData {
   price: number;
@@ -154,27 +133,4 @@ export interface ProductFormData {
   category_id: string;
   brand_id: string;
   variants: VariantData[];
-}
-
-
-// lib/actions/products.ts
-export async function createProduct(formData: ProductFormData) {
-  const supabase = await createServerClient();
-  try {
-    const { error } = await supabase.rpc("create_full_product", {
-      p_name: formData.name,
-      p_slug: formData.slug,
-      p_description: formData.description,
-      p_category_id: formData.category_id,
-      p_brand_id: formData.brand_id,
-      p_variants: formData.variants, // تمرير JSON مباشرة
-    });
-
-    if (error) {
-      return { error: error.message };
-    }
-    return { success: true };
-  } catch (e) {
-    return { error: "An unexpected error occurred." };
-  }
 }

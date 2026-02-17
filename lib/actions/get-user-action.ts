@@ -53,3 +53,15 @@ export async function getUserProfileByEmail(
 
   return { data: profile, error: "" };
 }
+
+export async function isAdmin(): Promise<boolean> {
+  const supabase = await createServerClient();
+
+  const { data: result, error } = await supabase.rpc("is_admin");
+
+  if (error) {
+    return false;
+  }
+
+  return result;
+}

@@ -30,7 +30,12 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 
 // --- استيرادات الأنواع ---
-import { ProductFormData, ProductOption, ProductOptionValue, ProductVariantOptionValue } from "@/lib/types/product";
+import {
+  ProductFormData,
+  ProductOption,
+  ProductOptionValue,
+  VariantOptionValue,
+} from "@/lib/types/product";
 import { createProduct } from "@/lib/actions/producta-add";
 
 // =================================================================
@@ -71,10 +76,10 @@ export function AddProductForm({
       description: "",
       short_description: "",
       main_image_url: "",
-      image_urls: [],
+      image_urls: null,
       category_id: null,
       brand_id: null,
-      tags: [],
+      tags: null,
       is_available: true,
       is_featured: false,
       variants: [
@@ -83,7 +88,7 @@ export function AddProductForm({
           price: 0,
           stock_quantity: 0,
           is_default: true,
-          option_values: [],
+          variant_options: [],
         },
       ],
     },
@@ -132,9 +137,18 @@ export function AddProductForm({
   // --- دالة الإرسال ---
   const onSubmit: SubmitHandler<ProductFormData> = async (formData) => {
     try {
+      console.log(
+        "Form Data before submit:",
+        JSON.stringify(formData, null, 2),
+      );
+
       // التحقق من وجود صورة رئيسية
-      if (!formData.main_image_url && (formData.image_urls?.length ?? 0) > 0) {
-        formData.main_image_url = formData.image_urls![0];
+      if (
+        !formData.main_image_url &&
+        formData.image_urls &&
+        formData.image_urls.length > 0
+      ) {
+        formData.main_image_url = formData.image_urls[0];
       }
 
       // التحقق من المتغير الافتراضي
@@ -145,10 +159,15 @@ export function AddProductForm({
         formData.variants[0].is_default = true;
       }
 
+      // التحقق من variant_options
+      formData.variants.forEach((variant, index) => {
+        console.log(`Variant ${index} options:`, variant.variant_options);
+      });
+
       // إنشاء المنتج
       const result = await createProduct(formData);
 
-      if (result.success) {
+      if (result.success && result.productId) {
         toast.success("Product created successfully!");
         router.refresh();
       } else {
@@ -181,7 +200,7 @@ export function AddProductForm({
                   },
                 })}
                 disabled={isSubmitting}
-                placeholder="e.g., Urban Classic T-Shirt"
+                placeholder="e.g., SmartPhone V10"
               />
               {errors.name && (
                 <p className="text-sm text-red-500 mt-1">
@@ -202,7 +221,7 @@ export function AddProductForm({
                   },
                 })}
                 disabled={isSubmitting}
-                placeholder="e.g., urban-classic-t-shirt"
+                placeholder="e.g., smartphone-v10"
               />
               {errors.slug && (
                 <p className="text-sm text-red-500 mt-1">
@@ -279,7 +298,7 @@ export function AddProductForm({
                       .split("\n")
                       .map((url) => url.trim())
                       .filter(Boolean);
-                    field.onChange(urls);
+                    field.onChange(urls.length > 0 ? urls : null);
                   }}
                   disabled={isSubmitting}
                   placeholder="Enter one URL per line..."
@@ -464,7 +483,7 @@ export function AddProductForm({
                 price: 0,
                 stock_quantity: 0,
                 is_default: false,
-                option_values: [],
+                variant_options: [],
               })
             }
             disabled={isSubmitting}
@@ -511,7 +530,7 @@ export function AddProductForm({
                     {...register(`variants.${index}.sku`, {
                       required: "SKU is required.",
                     })}
-                    placeholder="e.g., TSHIRT-RED-L"
+                    placeholder="e.g., SPV10-BLK"
                     disabled={isSubmitting}
                   />
                   {errors.variants?.[index]?.sku && (
@@ -610,25 +629,52 @@ export function AddProductForm({
                       <div key={option.id} className="space-y-1">
                         <Label>{option.name}</Label>
                         <Controller
-                          name={`variants.${index}.option_values`}
+                          name={`variants.${index}.variant_options`}
                           control={control}
                           render={({ field }) => {
                             const currentValue = (
-                              field.value as ProductVariantOptionValue[]
-                            )?.find((v) => v.option_id === option.id)?.value;
+                              field.value as VariantOptionValue[]
+                            )?.find(
+                              (v) =>
+                                v.option_value.product_options.id === option.id,
+                            )?.option_value.value;
 
                             return (
                               <Select
                                 value={currentValue}
                                 onValueChange={(value) => {
-                                  const updatedValues = (
-                                    (field.value as ProductVariantOptionValue[]) ??
-                                    []
-                                  ).filter((v) => v.option_id !== option.id);
+                                  const selectedValue = availableValues.find(
+                                    (v) => v.value === value,
+                                  );
+                                  if (!selectedValue) return;
+
+                                  // Get current values or initialize empty array
+                                  let updatedValues =
+                                    (field.value as VariantOptionValue[]) || [];
+
+                                  // Remove existing option for this product option
+                                  updatedValues = updatedValues.filter(
+                                    (v) =>
+                                      v.option_value.product_options.id !==
+                                      option.id,
+                                  );
+
+                                  // Add new option value with full structure
                                   updatedValues.push({
-                                    option_id: option.id,
-                                    value,
+                                    option_value: {
+                                      id: selectedValue.id,
+                                      value: selectedValue.value,
+                                      product_options: {
+                                        id: option.id,
+                                        name: option.name,
+                                      },
+                                    },
                                   });
+
+                                  console.log(
+                                    `Updated variant ${index} options:`,
+                                    updatedValues,
+                                  );
                                   field.onChange(updatedValues);
                                 }}
                                 disabled={isSubmitting}

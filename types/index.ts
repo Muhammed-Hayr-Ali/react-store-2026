@@ -1,4 +1,3 @@
-
 // =================================================================
 // القسم 1: الأنواع العامة والأدوات المساعدة
 // =================================================================
@@ -22,7 +21,6 @@ export type ServerActionResponse = {
  * يمثل بنية عنوان المستخدم كما هي مخزنة في قاعدة البيانات.
  */
 
-
 // =================================================================
 // القسم 3: أنواع بيانات المنتجات وتفاصيلها
 // =================================================================
@@ -34,9 +32,9 @@ export type Category = {
   id: string;
   name: string;
   slug: string;
-  description: string | null;
   image_url: string | null;
   parent_id: string | null;
+  description: string | null;
   created_at: string;
 };
 
@@ -47,8 +45,8 @@ export type Brand = {
   id: string;
   name: string;
   slug: string;
-  description: string | null;
   logo_url: string | null;
+  description: string | null;
   created_at: string;
 };
 
@@ -79,37 +77,36 @@ export type ProductOption = {
   name: string;
 };
 
-export type ProductOptionValue = {
-  id: string;
-  option_id: string;
-  value: string;
-  option: ProductOption;
-};
+
 
 export type VariantOptionValue = {
-  variant_id: string;
-  value_id: string;
-  option_value: ProductOptionValue;
+  id: string;
+  value: string;
+  option_id: string;
+  product_options: ProductOption;
+
 };
 
 export type ProductVariant = {
   id: string;
-  product_id: string;
   sku: string;
   price: number;
-  stock_quantity: number;
-  is_default: boolean;
   image_url: string | null;
+  is_default: boolean;
+  product_id: string;
   discount_price: number | null;
-  variant_options?: VariantOptionValue[];
+  stock_quantity: number;
+  discount_expires_at: string | null;
+  variant_option_values: VariantOptionValue[];
+  created_at: string;
 };
 
 /**
  * يمثل المنتج الكامل مع جميع علاقاته المتداخلة.
  */
 export type FullProduct = Product & {
-  category: Category | null;
   brand: Brand | null;
+  category: Category | null;
   variants: ProductVariant[];
   reviews: Review[];
 };
@@ -159,7 +156,6 @@ export type Cart = {
  * يمثل بنية عنصر قائمة الرغبات كما هو مخزن في قاعدة البيانات.
  */
 
-
 /**
  * /**
  * يمثل جدول التقييمات (reviews).
@@ -177,7 +173,6 @@ export type Review = {
     name: string;
     slug: string;
     main_image_url: string | null;
-    
-  }
+  };
   is_verified_purchase: boolean;
 };

@@ -140,7 +140,7 @@ const data = {
     },
     {
       title: "New Product",
-      url: "/admin-dashboard/products/add",
+      url: "/dashboard-admin/products/add",
       icon: <Package />,
     },
     {

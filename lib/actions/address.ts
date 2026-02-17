@@ -3,6 +3,7 @@
 import { createServerClient } from "../supabase/createServerClient";
 import { revalidatePath } from "next/cache";
 import { getUser } from "./get-user-action";
+import { ApiResponse, UserAddress } from "../types";
 
 // ===============================================================================
 // File Name: address.ts
@@ -13,33 +14,6 @@ import { getUser } from "./get-user-action";
 // Version: 1.0
 // Copyright (c) 2026 Mohammed Kher Ali
 // ===============================================================================
-
-// ===============================================================================
-// Api Response Type
-// ===============================================================================
-export type ApiResponse<T> = {
-  data?: T;
-  error?: string | null;
-  [key: string]: unknown;
-};
-
-// ===============================================================================
-// User Address Type
-// ===============================================================================
-export type UserAddress = {
-  id: string;
-  user_id: string;
-  address_nickname: string | null;
-  first_name: string;
-  last_name: string;
-  address: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
-  created_at: string;
-  [key: string]: unknown;
-};
 
 // ===============================================================================
 // Address Payload Type

@@ -11,9 +11,15 @@ export interface ProductOptionValue {
   value: string;
 }
 
-export interface ProductVariantOptionValue {
-  option_id: string;
-  value: string;
+export interface VariantOptionValue {
+  option_value: {
+    id: string;
+    value: string;
+    product_options: {
+      id: string;
+      name: string;
+    };
+  };
 }
 
 export interface ProductVariantFormData {
@@ -24,7 +30,7 @@ export interface ProductVariantFormData {
   stock_quantity: number;
   image_url?: string;
   is_default: boolean;
-  option_values: ProductVariantOptionValue[];
+  variant_options: VariantOptionValue[];
 }
 
 export interface ProductFormData {
@@ -33,10 +39,10 @@ export interface ProductFormData {
   description: string;
   short_description?: string;
   main_image_url?: string;
-  image_urls?: string[];
+  image_urls?: string[] | null;
   category_id: string | null;
   brand_id: string | null;
-  tags?: string[];
+  tags?: string[] | null;
   is_available: boolean;
   is_featured: boolean;
   variants: ProductVariantFormData[];
