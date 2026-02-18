@@ -4,6 +4,8 @@
 
 import { createServerClient } from "@/lib/supabase/createServerClient";
 import { User } from "@supabase/supabase-js";
+import { unstable_noStore as noStore } from "next/cache";
+import { getCurrentUserRoles } from "./user_roles";
 
 export type ApiResponse<T> = {
   data?: T;
@@ -18,6 +20,34 @@ export type Profile = {
   avatar_url: string;
   updated_at: string;
 };
+
+export async function getUserWithRole(): Promise<{  user?: User; role?: "admin" | "user" , error?: string}> {
+  const supabase = await createServerClient();
+  noStore();
+
+const [
+  userResponse,
+  roleResponse,
+] = await Promise.all([
+  supabase.auth.getUser(),
+  getCurrentUserRoles(),
+]);
+
+  const  user = userResponse;
+  const  roles = roleResponse;
+
+if (user.error) {
+    return { error: user.error.message };
+  }
+
+  return  {
+      user: user.data.user,
+      role: roles.includes("admin") ? "admin" : "user",
+    
+  };
+}
+
+
 
 export async function getUser(): Promise<ApiResponse<User | null>> {
   const supabase = await createServerClient();
@@ -34,6 +64,9 @@ export async function getUser(): Promise<ApiResponse<User | null>> {
 
   return { data: user };
 }
+
+
+
 
 export async function getUserProfileByEmail(
   email: string,

@@ -6,6 +6,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { getUserWithRole } from "@/lib/actions/get-user-action";
 import { AuthGuard } from "@/lib/guards/auth-guard";
 import { AuthProvider } from "@/lib/provider/auth-provider";
 
@@ -19,14 +20,26 @@ const isRtlLocale = (locale: string) => {
 };
 
 export default async function Layout({ params, children }: Props) {
+
   const { locale } = await params;
   const side = isRtlLocale(locale) ? "right" : "left";
+  const data = await getUserWithRole();  
+
+  
+
+
+
+
 
   return (
     <AuthProvider>
       <AuthGuard />
       <SidebarProvider>
-        <AppSidebar side={side} />
+        <AppSidebar 
+        side={side}
+        user={data.user}
+        role={data.role }
+         />
 
         {/* ✅ 1. تحويل SidebarInset إلى حاوية Flex عمودية تأخذ ارتفاع الشاشة بالكامل */}
         <SidebarInset className="flex flex-col h-screen">

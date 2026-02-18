@@ -159,6 +159,7 @@ export function useUserDisplay(user: User | null | undefined): UserDisplayData {
 
   // Derive display name from multiple possible sources
   const fullName =
+    `${user.user_metadata?.first_name || ""} ${user.user_metadata?.last_name || ""}` ||
     user.user_metadata.name ||
     user.app_metadata.full_name ||
     email?.split("@")[0] ||

@@ -1,22 +1,11 @@
 "use client";
 
 import { useState, ReactNode } from "react";
-import { Button } from "@/components/ui/button";
 import { FullProduct, Review, ProductVariant } from "@/lib/types";
 import { User } from "@supabase/supabase-js";
 import { Option } from "react-day-picker";
-import { StarRating } from "../reviews/star-rating";
 import { ImageGallery } from "./image-gallery";
-import { ReviewCard } from "../reviews/review-card";
 import { Separator } from "../ui/separator";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
-import { AddReviewForm } from "../reviews/add-review-form";
 import ProductInfo from "./productInfo";
 import { Variants } from "./variants";
 import SummaryReviews from "./summary-reviews";
@@ -132,6 +121,18 @@ export default function ProductDetails({
         </ProductInfo>
       </div>
 
+      {/* Separator */}
+      <Separator className="my-12 lg:my-16" />
+
+      {product.description && (
+        <div>
+          <h3 className="text-xl font-semibold mb-2">Product Description</h3>
+          <div
+            className="prose dark:prose-invert max-w-none"
+            dangerouslySetInnerHTML={{ __html: product.description }}
+          />
+        </div>
+      )}
       {/* Separator */}
       <Separator className="my-12 lg:my-16" />
 

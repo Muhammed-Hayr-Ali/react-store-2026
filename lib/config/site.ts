@@ -11,7 +11,14 @@ import {
   Ticket,
   Truck,
   UserIcon,
+  User,
+  MapPin,
+  MessageSquareQuote,
+  Settings,
 } from "lucide-react";
+
+
+
 
 export type SiteConfig = typeof siteConfig;
 
@@ -22,6 +29,99 @@ export const siteConfig = {
   url: "https://markatna.com",
 
   defaultLocale: "ar",
+
+  // dashboard menu items
+   adminNavMain: [
+      {
+        title: "Dashboard",
+        url: "/dashboard",
+        icon: LayoutDashboard,
+        isActive: true,
+      },
+      {
+        title: "Add New Product",
+        url: "/dashboard/products/add",
+        icon: Package,
+      },
+      {
+        title: "My Orders",
+        url: "/dashboard/orders",
+        icon: Package,
+      },
+      {
+        title: "My Cart",
+        url: "/cart",
+        icon: ShoppingCart,
+      },
+      {
+        title: "Wishlist",
+        url: "/wishlist",
+        icon: Heart,
+      },
+      {
+        title: "My Reviews",
+        url: "/dashboard/reviews",
+        icon: MessageSquareQuote,
+      },
+      {
+        title: "Addresses",
+        url: "/dashboard/addresses",
+        icon: MapPin,
+      },
+      {
+        title: "Profile",
+        url: "/dashboard/profile",
+        icon: User,
+      },
+      {
+        title: "Settings",
+        url: "/dashboard/settings",
+        icon: Settings,
+      },
+    ],
+    userNavMain: [
+      {
+        title: "Dashboard",
+        url: "/dashboard",
+        icon: LayoutDashboard,
+        isActive: true,
+      },
+      {
+        title: "My Orders",
+        url: "/dashboard/orders",
+        icon: Package,
+      },
+      {
+        title: "My Cart",
+        url: "/cart",
+        icon: ShoppingCart,
+      },
+      {
+        title: "Wishlist",
+        url: "/wishlist",
+        icon: Heart,
+      },
+      {
+        title: "My Reviews",
+        url: "/dashboard/reviews",
+        icon: MessageSquareQuote,
+      },
+      {
+        title: "Addresses",
+        url: "/dashboard/addresses",
+        icon: MapPin,
+      },
+      {
+        title: "Profile",
+        url: "/dashboard/profile",
+        icon: User,
+      },
+      {
+        title: "Settings",
+        url: "/dashboard/settings",
+        icon: Settings,
+      },
+    ],
 
   userMenuItems: [
     { icon: Home, label: "Home", href: "" },
@@ -108,40 +208,40 @@ export const siteConfig = {
     },
   ],
 
-  navMenuItems: [
-    {
-      label: "Profile",
-      href: "/profile",
-    },
-    {
-      label: "Dashboard",
-      href: "/dashboard",
-    },
-    {
-      label: "Projects",
-      href: "/projects",
-    },
-    {
-      label: "Team",
-      href: "/team",
-    },
-    {
-      label: "Calendar",
-      href: "/calendar",
-    },
-    {
-      label: "Settings",
-      href: "/settings",
-    },
-    {
-      label: "Help & Feedback",
-      href: "/help-feedback",
-    },
-    {
-      label: "Logout",
-      href: "/logout",
-    },
-  ],
+  // navMenuItems: [
+  //   {
+  //     label: "Profile",
+  //     href: "/profile",
+  //   },
+  //   {
+  //     label: "Dashboard",
+  //     href: "/dashboard",
+  //   },
+  //   {
+  //     label: "Projects",
+  //     href: "/projects",
+  //   },
+  //   {
+  //     label: "Team",
+  //     href: "/team",
+  //   },
+  //   {
+  //     label: "Calendar",
+  //     href: "/calendar",
+  //   },
+  //   {
+  //     label: "Settings",
+  //     href: "/settings",
+  //   },
+  //   {
+  //     label: "Help & Feedback",
+  //     href: "/help-feedback",
+  //   },
+  //   {
+  //     label: "Logout",
+  //     href: "/logout",
+  //   },
+  // ],
   links: {
     github: "https://github.com/heroui-inc/heroui",
     twitter: "https://twitter.com/hero_ui",

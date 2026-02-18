@@ -73,7 +73,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "zouqsweet.net",
+        hostname: "www.damsouq.com",
         port: "",
         pathname: "/**",
       },

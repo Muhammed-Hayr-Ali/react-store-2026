@@ -241,15 +241,6 @@ export default function ProductInfo({
         </div>
       </div>
 
-      {product.description && (
-        <div className="border-t pt-6">
-          <h3 className="text-xl font-semibold mb-2">Product Description</h3>
-          <div
-            className="prose dark:prose-invert max-w-none"
-            dangerouslySetInnerHTML={{ __html: product.description }}
-          />
-        </div>
-      )}
     </div>
   );
 }

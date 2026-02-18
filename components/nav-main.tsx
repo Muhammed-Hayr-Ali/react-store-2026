@@ -1,55 +1,51 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
   SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { ChevronRightIcon } from "lucide-react";
+import { LucideIcon} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export function NavMain({
+  label,
   items,
 }: {
+  label?: string;
   items: {
     title: string;
     url: string;
-    icon?: React.ReactNode;
-    isActive?: boolean;
-    items?: {
-      title: string;
-      url: string;
-    }[];
+    icon?: LucideIcon;
   }[];
 }) {
   const pathname = usePathname();
-
   return (
     <SidebarGroup>
-      {/* <SidebarGroupLabel>Platform</SidebarGroupLabel> */}
-      <SidebarMenu className="">
+      {label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
+      <SidebarMenu>
         {items.map((item) => {
           const isActive =
             item.url === "/dashboard"
               ? pathname === item.url
               : pathname.startsWith(item.url);
-
           return (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
                 tooltip={item.title}
                 isActive={isActive}
-                className=" py-5"
                 asChild
               >
                 <Link href={item.url}>
-                  {item.icon}
+                  {item.icon && <item.icon />}
                   <span>{item.title}</span>
-                  <ChevronRightIcon className="ml-auto rtl:ml-0 rtl:mr-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180" />
                 </Link>
-              </SidebarMenuButton>
+              </SidebarMenuButton>{" "}
             </SidebarMenuItem>
           );
         })}
