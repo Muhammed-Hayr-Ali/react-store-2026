@@ -117,7 +117,7 @@ export const getProductBySlug = cache(async (slug: string): Promise<ApiResponse<
     return { error: "Failed to fetch product by slug." };
   }
 
-  return { data: product, error: null };
+  return { data: product, };
 });
 
 export interface VariantData {

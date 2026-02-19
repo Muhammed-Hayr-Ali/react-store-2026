@@ -5,7 +5,6 @@ import {
   useFieldArray,
   SubmitHandler,
   Controller,
-  useWatch,
 } from "react-hook-form";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -44,8 +43,8 @@ import {
   Plus,
   FolderPlus,
   Store,
-  Palette,
   ListPlus,
+  ImageIcon,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -65,6 +64,7 @@ import { createCategory } from "@/lib/actions/categories";
 // ⚠️ تأكد من وجود هذين الملفين في lib/actions/
 import { createProductOption } from "@/lib/actions/product-options";
 import { createProductOptionValue } from "@/lib/actions/product-option-values";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 
 // =================================================================
 // واجهة المكون (Props)
@@ -355,135 +355,192 @@ export function AddProductForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* --- القسم 1: المعلومات الأساسية --- */}
+      {/* General Information */}
       <Card>
         <CardHeader>
-          <CardTitle>المعلومات الأساسية</CardTitle>
+          <CardTitle>General Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Product Name & Slug */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <Label htmlFor="name">اسم المنتج *</Label>
+            <Field>
+              <FieldLabel htmlFor="name">Product Name *</FieldLabel>
               <Input
                 id="name"
+                type="text"
                 {...register("name", {
-                  required: "اسم المنتج مطلوب.",
+                  required: "product name is required.",
                   minLength: {
                     value: 3,
-                    message: "يجب أن يكون الاسم 3 أحرف على الأقل.",
+                    message: "product name must be at least 3 characters.",
                   },
                 })}
                 disabled={isSubmitting}
-                placeholder="مثال: هاتف ذكي V10"
+                placeholder="e.g., Smartphone V10"
               />
-              {errors.name && (
-                <p className="text-sm text-red-500 mt-1">
-                  {errors.name.message}
-                </p>
-              )}
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="slug">رابط URL *</Label>
+              <FieldError>{errors.name?.message}</FieldError>
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="slug">Product Slug *</FieldLabel>
               <Input
                 id="slug"
                 {...register("slug", {
-                  required: "الرابط مطلوب.",
+                  required: "product slug is required.",
                   pattern: {
                     value: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
                     message:
-                      "يجب أن يحتوي الرابط على أحرف إنجليزية صغيرة وأرقام وشرطات فقط.",
+                      "product slug must contain only lowercase letters, numbers, and hyphens.",
                   },
                 })}
                 disabled={isSubmitting}
                 placeholder="e.g., smartphone-v10"
               />
-              {errors.slug && (
-                <p className="text-sm text-red-500 mt-1">
-                  {errors.slug.message}
-                </p>
-              )}
-            </div>
+              <FieldError>{errors.slug?.message}</FieldError>
+            </Field>
           </div>
 
-          <div className="space-y-1">
-            <Label htmlFor="short_description">وصف مختصر</Label>
+          {/* Short Description */}
+          <Field>
+            <FieldLabel htmlFor="short_description">
+              Short Description
+            </FieldLabel>
             <Textarea
               id="short_description"
-              {...register("short_description")}
+              {...register("short_description", {
+                required: "short description is required.",
+              })}
               disabled={isSubmitting}
-              placeholder="وصف موجز يظهر في قوائم المنتجات..."
+              placeholder="a brief description that appears in product lists..."
               rows={3}
             />
-          </div>
+            <FieldError>{errors.short_description?.message}</FieldError>
+          </Field>
 
-          <div className="space-y-1">
-            <Label htmlFor="description">الوصف الكامل *</Label>
+          {/* Description */}
+          <Field>
+            <Label htmlFor="description">Full Description *</Label>
             <Textarea
               id="description"
               {...register("description", {
-                required: "الوصف الكامل مطلوب.",
+                required: "full description is required.",
                 minLength: {
                   value: 10,
-                  message: "يجب أن يكون الوصف 10 أحرف على الأقل.",
+                  message: "full description must be at least 10 characters.",
                 },
               })}
               disabled={isSubmitting}
-              placeholder="وصف تفصيلي للمنتج..."
+              placeholder="a detailed description of the product..."
               rows={6}
             />
-            {errors.description && (
-              <p className="text-sm text-red-500 mt-1">
-                {errors.description.message}
-              </p>
-            )}
-          </div>
+            <FieldError>{errors.description?.message}</FieldError>
+          </Field>
         </CardContent>
       </Card>
 
-      {/* --- القسم 2: الوسائط --- */}
+      {/* Media */}
       <Card>
         <CardHeader>
           <CardTitle>
-            <Image className="mr-2 h-5 w-5 inline" />
-            الوسائط
+            <ImageIcon className="mr-2 rtl:mr-auto rtl:ml-2 h-5 w-5 inline" />
+            Media
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-1">
-            <Label htmlFor="main_image_url">رابط الصورة الرئيسية</Label>
+          <Field>
+            <FieldLabel htmlFor="main_image_url">Main Image URL</FieldLabel>
             <Input
               id="main_image_url"
-              {...register("main_image_url")}
+              {...register("main_image_url", {
+                required: "main image url is required.",
+                pattern: {
+                  value:
+                    /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp|bmp|svg))$/i,
+                  message: "main image url must be a valid image URL.",
+                },
+              })}
               disabled={isSubmitting}
               placeholder="https://example.com/image.jpg"
             />
-          </div>
+            <FieldError>{errors.main_image_url?.message}</FieldError>
+          </Field>
 
-          <div className="space-y-1">
-            <Label>روابط صور إضافية</Label>
-            <Controller
-              name="image_urls"
-              control={control}
-              render={({ field }) => (
-                <Textarea
-                  value={field.value?.join("\n") || ""}
-                  onChange={(e) => {
-                    const urls = e.target.value
-                      .split("\n")
-                      .map((url) => url.trim())
-                      .filter(Boolean);
-                    field.onChange(urls.length > 0 ? urls : []);
-                  }}
-                  disabled={isSubmitting}
-                  placeholder="أدخل رابطًا واحدًا في كل سطر..."
-                  rows={4}
-                />
+          <Field>
+            <div className="flex items-center justify-between">
+              <FieldLabel>Additional Image URLs</FieldLabel>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const currentUrls = watch("image_urls") || [];
+                  setValue("image_urls", [...currentUrls, ""], {
+                    shouldValidate: true,
+                  });
+                }}
+                disabled={isSubmitting}
+                className="h-7 text-xs"
+              >
+                <Plus className="mr-1 h-3 w-3" />
+                Add Image
+              </Button>
+            </div>
+
+            <div className="space-y-2 mt-2">
+              {watch("image_urls")?.length === 0 ? (
+                <p className="text-sm text-muted-foreground italic">
+                  No additional images added yet. Click &quot;Add Image&quot; to
+                  start.
+                </p>
+              ) : (
+                watch("image_urls")?.map((_, index) => (
+                  <div key={index} className="flex gap-2 items-start">
+                    <div className="flex-1">
+                      <Input
+                        id={`image_urls.${index}`}
+                        value={watch("image_urls")?.[index] || ""}
+                        onChange={(e) => {
+                          const currentUrls = watch("image_urls") || [];
+                          const newUrls = [...currentUrls];
+                          newUrls[index] = e.target.value;
+                          setValue("image_urls", newUrls, {
+                            shouldValidate: true,
+                          });
+                        }}
+                        disabled={isSubmitting}
+                        placeholder={`https://example.com/image${index + 1}.jpg`}
+                        className="font-mono text-sm"
+                      />
+                      {/* عرض الخطأ لكل حقل على حدة إذا أردت */}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        const currentUrls = watch("image_urls") || [];
+                        const newUrls = currentUrls.filter(
+                          (_, i) => i !== index,
+                        );
+                        setValue("image_urls", newUrls, {
+                          shouldValidate: true,
+                        });
+                      }}
+                      disabled={isSubmitting}
+                      className="h-9 w-9 text-destructive hover:bg-destructive/10 shrink-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))
               )}
-            />
-            <p className="text-sm text-muted-foreground">
-              أضف صورًا متعددة، واحدًا في كل سطر
+            </div>
+
+            <FieldError>{errors.image_urls?.message}</FieldError>
+            <p className="text-xs text-muted-foreground mt-1">
+              Add multiple image URLs. Each URL will be displayed as a separate
+              field.
             </p>
-          </div>
+          </Field>
         </CardContent>
       </Card>
 
@@ -951,8 +1008,7 @@ export function AddProductForm({
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>إضافة نوع خيار جديد</DialogTitle>
-                        <DialogDescription>
-                        </DialogDescription>
+                        <DialogDescription></DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4 py-4">
                         <div className="space-y-2">
@@ -1041,8 +1097,7 @@ export function AddProductForm({
                                 <DialogTitle>
                                   اضافة قيمة ل{option.name}
                                 </DialogTitle>
-                                <DialogDescription>
-                                </DialogDescription>
+                                <DialogDescription></DialogDescription>
                               </DialogHeader>
                               <div className="space-y-4 py-4">
                                 <div className="space-y-2">

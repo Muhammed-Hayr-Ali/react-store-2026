@@ -61,19 +61,19 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "encrypted-tbn0.gstatic.com",
-        port: "",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "tadirjanu.com",
-        port: "",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
         hostname: "www.damsouq.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.mafrservices.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "miro.medium.com",
         port: "",
         pathname: "/**",
       },
