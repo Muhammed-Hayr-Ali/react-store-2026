@@ -55,7 +55,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "emdadx.com",
+        hostname: "cdn.moshtare.com",
         port: "",
         pathname: "/**",
       },

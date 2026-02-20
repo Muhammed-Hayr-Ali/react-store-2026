@@ -13,6 +13,7 @@ import {
   getNewlyAddedProducts,
   ProcessedProduct,
 } from "@/lib/actions/newly-added-products";
+import { Badge } from "../ui/badge";
 /**
  * @description قسم يعرض أحدث المنتجات المضافة في المتجر.
  * هذا مكون خادم (Server Component) يقوم بجلب البيانات مباشرة.
@@ -56,29 +57,33 @@ export const NewlyAddedProducts = async () => {
 export function ProductCard({ product }: { product: ProcessedProduct }) {
   return (
     <Item key={product.name} variant="outline" className="p-0">
-      <ItemHeader>
+      <ItemHeader className="relative">
         <Image
           src={product.main_image_url || "/placeholder.svg"}
           alt={product.name}
           width={128}
           height={128}
           className="aspect-square w-full rounded-t-sm object-cover"
-        />
+        />{" "}
+        {product.discountPercentage && (
+          <Badge className="absolute top-2 left-2 z-10">
+            {product.discountPercentage}%
+          </Badge>
+        )}
       </ItemHeader>
       <ItemContent className="p-3.5">
         <ItemTitle>{product.name}</ItemTitle>
         <ItemDescription className="flex gap-1">
-          <div className="mb-1 text-sm font-semibold text-primary">
-            {product.discount_price && product.discount_price < product.price
-              ? product.discount_price.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                })
-              : product.price.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                })}
-          </div>
+          {product.discountPercentage ? (
+            <>
+              <p>{product.discount_price}</p>
+              <span className="line-through text-muted-foreground">
+                {product.price.toFixed(2)}
+              </span>
+            </>
+          ) : (
+            <p>{product.price.toFixed(2)}</p>
+          )}
 
           <Button size="icon-sm">
             <Plus />

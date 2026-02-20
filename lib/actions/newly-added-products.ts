@@ -19,6 +19,7 @@ type ProductRaw = {
   main_image_url: string | null;
   created_at: string;
   variants: {
+    id: string;
     price: number;
     discount_price: number | null;
     is_default: boolean;
@@ -36,6 +37,8 @@ export type ProcessedProduct = {
   short_description: string | null;
   main_image_url: string | null;
   created_at: string;
+
+  variant_id: string;
 
   // ✅ بيانات محسوبة من المتغير الافتراضي
   price: number;
@@ -72,6 +75,7 @@ export async function getNewlyAddedProducts(
       main_image_url,
       created_at,
       variants:product_variants (
+        id,
         price,
         discount_price,
         is_default,
@@ -84,7 +88,6 @@ export async function getNewlyAddedProducts(
     `,
     )
     .order("created_at", { ascending: false })
-    // .filter("variants.is_default", "eq", true) // ⚠️ قد تسبب خطأ، يفضل الفلترة يدوياً
     .limit(limit);
 
   if (error || !data) {
@@ -92,15 +95,15 @@ export async function getNewlyAddedProducts(
     return { data: null, error: "Error fetching products" }; // ✅ استخدام 'data'
   }
 
-  // ✅ معالجة المصفوفة وتحويل ProductRaw -> ProcessedProduct
   const processedProducts: ProcessedProduct[] = data.map(
     (product: ProductRaw) => {
-      // ✅ 1. فلترة المتغير الافتراضي (يدوياً لضمان العمل)
       const defaultVariant = product.variants?.find(
         (v) => v.is_default === true,
       );
 
-      // ✅ 2. حساب التقييمات
+
+       const variantId = defaultVariant?.id || "";
+
       const reviews = product.reviews || [];
       const averageRating =
         reviews.length > 0
@@ -108,7 +111,6 @@ export async function getNewlyAddedProducts(
             reviews.length
           : 0;
 
-      // ✅ 3. بناء الكائن النهائي (بدون التعديل على المنتج الأصلي)
       return {
         id: product.id,
         name: product.name,
@@ -117,13 +119,12 @@ export async function getNewlyAddedProducts(
         main_image_url: product.main_image_url,
         created_at: product.created_at,
 
-        // بيانات المتغير الافتراضي
+        variant_id: variantId, 
         price: defaultVariant?.price || 0,
         discount_price: defaultVariant?.discount_price ?? null,
         stock_quantity: defaultVariant?.stock_quantity || 0,
         variant_image: defaultVariant?.image_url || null,
 
-        // نسبة الخصم
         discountPercentage:
           defaultVariant?.discount_price && defaultVariant?.price
             ? Math.floor(
@@ -140,6 +141,14 @@ export async function getNewlyAddedProducts(
     },
   );
 
-  // ✅ الإرجاع الصحيح باستخدام خاصية 'data'
+
   return { data: processedProducts, error: null };
 }
+
+
+
+
+
+
+
+
