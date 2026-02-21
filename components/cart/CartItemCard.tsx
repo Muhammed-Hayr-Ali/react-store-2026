@@ -5,12 +5,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useTransition } from "react";
-import { CartItem, Product, ProductVariant, removeItem, updateItemQuantity } from "@/lib/actions/cart";
 import { X, Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { useCartCount } from "@/lib/provider/cart-provider";
+import { CartItem, ProductVariants, Products, removeItem, updateItemQuantity } from "@/lib/actions";
 
 interface CartItemCardProps {
   item: CartItem;
@@ -24,9 +24,10 @@ export function CartItemCard({ item }: CartItemCardProps) {
   const [isRemovePending, startRemoveTransition] = useTransition();
 
   // Item Data
-  const variant: ProductVariant = item.product_variants;
-  const varintOptionValues: ProductVariant["variant_option_values"] = variant?.variant_option_values;
-  const product: Product = variant?.products;
+  const variant: ProductVariants = item.product_variants;
+  const varintOptionValues: ProductVariants["variant_option_values"] =
+    variant?.variant_option_values;
+  const product: Products = variant?.products;
 
   if (!variant || !product) {
     return null;

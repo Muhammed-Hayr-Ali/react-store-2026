@@ -3,7 +3,81 @@
 import { createServerClient } from "@/lib/supabase/createServerClient";
 import { revalidatePath } from "next/cache";
 import { getUser } from "./get-user-action";
-import { ApiResponse, Cart, CartItem } from "../types";
+import { User } from "@supabase/supabase-js";
+
+
+export type ApiResponse<T> = {
+  data?: T;
+  error?: string;
+};
+
+
+
+export type UserCart = {
+  id: string;
+  user_id: string;
+  created_at: Date;
+  updated_at: Date;
+  cart_items: CartItem[];
+}
+
+export type CartItem = {
+  id: string;
+  cart_id: string;
+  quantity: number;
+  created_at: Date;
+  updated_at: Date;
+  variant_id: string;
+  product_variants: ProductVariants;
+}
+
+export type ProductVariants = {
+
+  id: string;
+  sku: string;
+  price: number;
+  products: Products;
+  image_url: string;
+  created_at: Date;
+  is_default: boolean;
+  product_id: string;
+  discount_price: number | null;
+  stock_quantity: number;
+  discount_expires_at: null;
+  variant_option_values: VariantOptionValue[];
+}
+
+export type Products = {
+  id: string;
+  name: string;
+  slug: string;
+  tags: string[];
+  brand_id: string;
+  created_at: Date;
+  image_urls: string[];
+  updated_at: Date;
+  category_id: string;
+  description: string;
+  is_featured: boolean;
+  is_available: boolean;
+  main_image_url: string;
+  short_description: string;
+}
+
+export type VariantOptionValue = {
+  variant_id: string;
+  option_value_id: string;
+  product_option_values: ProductOptionValues;
+}
+
+export type ProductOptionValues = {
+  id: string;
+  value: string;
+  option_id: string;
+}
+
+
+
 
 // ===============================================================================
 // File Name: cart.ts
@@ -46,7 +120,7 @@ export async function getTotalCartQuantity(): Promise<
 // ====================================================================
 // Get Cart & Cart Items
 // ====================================================================
-export async function getCart(): Promise<ApiResponse<Cart>> {
+export async function getCart(): Promise<ApiResponse<UserCart | null>> {
   const supabase = await createServerClient();
 
   const { data: user, error: userError } = await getUser();

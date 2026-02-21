@@ -11,8 +11,10 @@ export const metadata = createMetadata({
 });
 
 export default async function Page() {
-  const { data: cart } = await getCart();
-  const items = cart?.cart_items || [];
+  const { data } = await getCart();
 
-  return <CartPage cartItems={items} />;
+
+   const cartItems = data?.cart_items || [];
+
+  return <CartPage cartItems={cartItems} />;
 }

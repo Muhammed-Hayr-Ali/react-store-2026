@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { OrderSummary } from "./OrderSummary";
-import { CartItem } from "@/lib/actions";
 import { CartItemCard } from "./CartItemCard";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +13,7 @@ import {
 import {
   ShoppingCart,
 } from "lucide-react";
+import { CartItem } from "@/lib/actions";
 
 export default async function CartPage({
   cartItems,
