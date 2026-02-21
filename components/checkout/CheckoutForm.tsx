@@ -9,10 +9,9 @@ import { createOrder } from "@/lib/actions/order"; // استيراد وظيفة 
 import { PlusCircle } from "lucide-react";
 import { AddressForm } from "../shared/address-form";
 import { AddressCard } from "./address-card";
-import { UserAddress } from "@/lib/actions";
 import { useCartCount } from "@/lib/provider/cart-provider";
-import { ro } from "date-fns/locale";
 import { useRouter } from "next/navigation";
+import { UserAddress } from "@/lib/types";
 // نوع بيانات النموذج، يستخدم snake_case ليتوافق مع قاعدة البيانات
 
 interface CheckoutFormProps {

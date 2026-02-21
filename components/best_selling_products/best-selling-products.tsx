@@ -60,8 +60,7 @@ function AddToCartButton({ product }: { product: BestSellingProduct }) {
   return (
     <Button
       size="icon-sm"
-      variant={"ghost"}
-      className="cursor-pointer rounded-full border-foreground"
+      className="cursor-pointer"
       onClick={handleAddToCart}
       disabled={isAdding}
     >

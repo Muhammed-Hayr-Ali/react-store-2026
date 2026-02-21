@@ -1,5 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { Building, ShieldQuestion } from "lucide-react";
+import { Building } from "lucide-react";
 
 // مكون فرعي لتقليد صف المعلومات (لم يتغير، لكنه جيد)
 function InfoRowSkeleton() {

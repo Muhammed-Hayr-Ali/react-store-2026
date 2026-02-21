@@ -1,4 +1,4 @@
-import type { AuthError, AuthResponse } from "@supabase/supabase-js";
+import type { AuthError } from "@supabase/supabase-js";
 
 export type ResetPasswordResult = {
   error: AuthError | null;

@@ -2,10 +2,9 @@
 
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useUserDisplay } from "@/hooks/useUserDisplay";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 import {
   Card,
   CardContent,
@@ -15,12 +14,10 @@ import {
 } from "@/components/ui/card";
 import { Mail, Phone, LogOut, Edit, User2, UserIcon } from "lucide-react";
 import { User } from "@supabase/supabase-js";
-import { useAuth } from "@/lib/provider/auth-provider";
 import { ProfileForm } from "./ProfileForm";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { signOut } from "@/lib/actions/auth";
 import { toast } from "sonner";
-import { ro } from "date-fns/locale";
 import { useRouter } from "next/navigation";
 
 // ... (مكون ProfileView يبقى كما هو، فهو ممتاز)

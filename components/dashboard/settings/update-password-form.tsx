@@ -36,12 +36,11 @@ export function UpdatePasswordForm({ onFormSubmit }: UpdatePasswordFormProps) {
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
-    watch,
     reset,
   } = useForm<FormInputs>();
 
-  const newPasswordValue = watch("newPassword");
 
   const onSubmit: SubmitHandler<FormInputs> = async (formData) => {
     setIsSubmitting(true);
@@ -127,7 +126,7 @@ export function UpdatePasswordForm({ onFormSubmit }: UpdatePasswordFormProps) {
             {...register("confirmPassword", {
               required: "Please confirm your new password.",
               validate: (value) =>
-                value === newPasswordValue || "The passwords do not match.",
+                value === getValues().newPassword || "The passwords do not match.",
             })}
           />
           {errors.confirmPassword && (

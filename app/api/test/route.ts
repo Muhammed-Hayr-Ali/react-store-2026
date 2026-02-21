@@ -14,13 +14,14 @@ export type BestSellingProductm = {
 };
 
 export async function GET(request: NextRequest) {
-  // const { searchParams } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
 
   // const slug = searchParams.get("slug");
+  const limit_count = searchParams.get("limit_count");
   const supabase = await createServerClient();
 
   const { data, error } = await supabase.rpc("get_best_selling_products", {
-    limit_count: 4,
+    limit_count: parseInt(limit_count || "4"),
   });
 
   if (error) {

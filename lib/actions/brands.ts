@@ -1,7 +1,5 @@
 "use server";
 
-
-import slugify from "slugify";
 import { createServerClient } from "../supabase/createServerClient";
 
 export async function createBrand(data: { name: string; slug: string }) {
@@ -21,6 +19,6 @@ export async function createBrand(data: { name: string; slug: string }) {
     return { success: true, brandId: brand.id };
   } catch (error) {
     console.error("Error creating brand:", error);
-    return { success: false, error: "فشل إنشاء العلامة التجارية" };
+    return { success: false, error: "Failed to create brand." };
   }
 }

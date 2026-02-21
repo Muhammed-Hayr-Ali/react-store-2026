@@ -28,6 +28,11 @@ export const siteConfig = {
   defaultRobots: "index, follow",
   url: "https://markatna.com",
 
+
+  shippingCost: 5.0,
+  taxes: 0.1,
+
+
   defaultLocale: "ar",
 
   // dashboard menu items
