@@ -4,27 +4,45 @@
 
 import React from "react";
 import { sendEmail } from "@/lib/actions/email";
-import { WelcomeEmail } from "@/emails/welcome-email";
 import { createUnsubscribeLink } from "./utils"; // استيراد دالة إنشاء الرابط من ملفها الصحيح
 import { createServerClient } from "@/lib/supabase/createServerClient";
+import NewsletterConfirmationEmail from "@/emails/newsletter-confirmation-email";
 
-// ====================================================================
-// 1. دالة الاشتراك في النشرة البريدية
-// ====================================================================
+// ===============================================================================
+// File Name: newsletter.ts
+// Description: Newsletter Management Actions
+// status: Active ✅
+// Author: Mohammed Kher Ali
+// Date: 2026-02-010
+// Version: 1.0
+// Copyright (c) 2023 Mohammed Kher Ali
+// ===============================================================================
 
-export type SubscribeResult = {
-  data: { message: string } | null;
-  error: { message: string } | null;
+// ===============================================================================
+// Api Response Type
+// ===============================================================================
+export type ApiResponse<T> = {
+  data?: T;
+  error?: string;
 };
 
+// ==============================================================================
+// Subscribe to Newsletter Action
+// ==============================================================================
+export interface SubscribeToNewsletterPayload {
+  email: string;
+  locale: "ar" | "en" | undefined;
+}
 export async function subscribeToNewsletter(
-  email: string,
-): Promise<SubscribeResult> {
+  payload: SubscribeToNewsletterPayload,
+): Promise<ApiResponse<string>> {
+  // Create a Supabase Server client
   const supabase = await createServerClient();
 
+  // Insert or update the subscription in the database
   const { error } = await supabase.from("newsletter_subscriptions").upsert(
     {
-      email: email,
+      email: payload.email,
       status: "subscribed",
       unsubscribe_reason: null,
       unsubscribed_at: null,
@@ -34,41 +52,31 @@ export async function subscribeToNewsletter(
     },
   );
 
-
   if (error) {
-    console.log(error);
-    console.error("Newsletter Subscription DB Error:", error);
+    console.error("Error subscribing to newsletter:", error);
     return {
-      data: null,
-      error: { message: "An unexpected error occurred. Please try again." },
+      error: "Failed to subscribe to newsletter. Please try again later.",
     };
   }
 
-  // في حالة النجاح، قم بإرسال بريد الترحيب
+  
   try {
-    const unsubscribeUrl = createUnsubscribeLink(email);
+    const unsubscribeUrl = createUnsubscribeLink(payload.email);
 
     await sendEmail({
-      to: email,
-      subject: "أهلاً بك في Marketna! إليك هديتك 🎁",
-      react: React.createElement(WelcomeEmail, {
-        discountCode: "WELCOME10", // يمكنك إنشاء كود ديناميكي لاحقًا
+      to: payload.email,
+      subject: payload.locale === "ar" ? "اشترك في النشرة البريدية" : "Newsletter Subscription",
+      react: React.createElement(NewsletterConfirmationEmail, {
+        userName: payload.email,
         unsubscribeUrl: unsubscribeUrl,
+        locale: payload.locale,
       }),
     });
   } catch (emailError) {
     console.error("Failed to send welcome email:", emailError);
-    // لا تفشل عملية الاشتراك بأكملها إذا فشل البريد الإلكتروني.
-    // يمكن تسجيل الخطأ للمراجعة لاحقًا.
-    // سنرجع رسالة نجاح للمستخدم لأنه تم اشتراكه بالفعل في قاعدة البيانات.
   }
 
   return {
-    data: {
-      message:
-        "Thank you for subscribing! Please check your inbox for a welcome gift.",
-    },
-    error: null,
+    data: "Successfully subscribed to newsletter",
   };
 }
-

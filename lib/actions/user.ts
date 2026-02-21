@@ -2,7 +2,25 @@
 
 import { revalidatePath } from "next/cache";
 import { createServerClient } from "../supabase/createServerClient";
-import { type ServerActionResponse } from "../types";
+import { getUser } from "./get-user-action";
+
+// ===============================================================================
+// File Name: newsletter.ts
+// Description: Newsletter Management Actions
+// status: Active ✅
+// Author: Mohammed Kher Ali
+// Date: 2026-02-010
+// Version: 1.0
+// Copyright (c) 2023 Mohammed Kher Ali
+// ===============================================================================
+
+// ===============================================================================
+// Api Response Type
+// ===============================================================================
+export type ApiResponse<T> = {
+  data?: T;
+  error?: string;
+};
 
 // =================================================================
 // 1. تحديث الملف الشخصي (البيانات الوصفية)
@@ -21,12 +39,16 @@ type ProfilePayload = Partial<UserMetadataUpdatable>;
 
 export async function updateUserProfile(
   payload: ProfilePayload,
-): Promise<ServerActionResponse> {
+): Promise<ApiResponse<boolean>> {
+  // Initialize Supabase client for server-side operations
   const supabase = await createServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "User not authenticated." };
+  // Fetch the currently authenticated user to ensure we have a valid session and user ID
+  const { data: user, error: userError } = await getUser();
+  // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
+  if (userError || !user) {
+    console.error("Error fetching user:", userError);
+    return { error: "Authentication failed." };
+  }
 
   const dataToUpdate: ProfilePayload = {};
   if (payload.first_name !== undefined)
@@ -41,18 +63,19 @@ export async function updateUserProfile(
     dataToUpdate.status_message = payload.status_message;
 
   if (Object.keys(dataToUpdate).length === 0) {
-    return { success: false, error: "No data provided to update." };
+    console.error("No data provided to update.");
+    return { error: "No data provided to update." };
   }
 
   const { error } = await supabase.auth.updateUser({ data: dataToUpdate });
 
   if (error) {
     console.error("Profile update error:", error.message);
-    return { success: false, error: "Failed to update profile." };
+    return { error: "Failed to update profile." };
   }
 
   revalidatePath("/profile");
-  return { success: true, message: "Profile updated successfully." };
+  return { data: true };
 }
 
 // =================================================================
@@ -66,20 +89,27 @@ type PasswordPayload = {
 
 export async function updateUserPassword(
   payload: PasswordPayload,
-): Promise<ServerActionResponse> {
+): Promise<ApiResponse<boolean>> {
+  // Initialize Supabase client for server-side operations
   const supabase = await createServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user || !user.email) return { success: false, error: "User not found." };
+  // Fetch the currently authenticated user to ensure we have a valid session and user ID
+  const { data: user, error: userError } = await getUser();
+  // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
+  if (userError || !user) {
+    console.error("Error fetching user:", userError);
+    return { error: "Authentication failed." };
+  }
+
+  const email = user.email;
 
   const { error: signInError } = await supabase.auth.signInWithPassword({
-    email: user.email,
+    email: email!,
     password: payload.currentPassword,
   });
 
   if (signInError) {
-    return { success: false, error: "Incorrect current password." };
+    console.error("Current password verification error:", signInError.message);
+    return { error: "Incorrect current password." };
   }
 
   const { error: updateError } = await supabase.auth.updateUser({
@@ -89,17 +119,20 @@ export async function updateUserPassword(
   if (updateError) {
     if (updateError.message.includes("requires a recent login")) {
       return {
-        success: false,
         error: "For security, a confirmation link has been sent to your email.",
-        requiresReauthentication: true,
+      };
+    }
+    if (updateError.message.includes("requires re-authentication")) {
+      return {
+        error: "For security, a confirmation link has been sent to your email.",
       };
     }
     console.error("Password update error:", updateError.message);
-    return { success: false, error: "Failed to update password." };
+    return { error: "Failed to update password." };
   }
 
   revalidatePath("/profile");
-  return { success: true, message: "Password updated successfully." };
+  return { data: true };
 }
 
 // =================================================================
@@ -110,15 +143,19 @@ const AVATARS_BUCKET = "avatars";
 
 export async function uploadProfilePicture(
   formData: FormData,
-): Promise<ServerActionResponse> {
+): Promise<ApiResponse<boolean>> {
+  // Initialize Supabase client for server-side operations
   const supabase = await createServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "User not authenticated." };
+  // Fetch the currently authenticated user to ensure we have a valid session and user ID
+  const { data: user, error: userError } = await getUser();
+  // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
+  if (userError || !user) {
+    console.error("Error fetching user:", userError);
+    return { error: "Authentication failed." };
+  }
 
   const file = formData.get("avatar") as File;
-  if (!file) return { success: false, error: "No file provided." };
+  if (!file) return { error: "No file provided." };
 
   const oldAvatarUrl =
     user.user_metadata.avatar_url || user.user_metadata.avatar;
@@ -144,7 +181,7 @@ export async function uploadProfilePicture(
 
   if (uploadError) {
     console.error("Upload Avatar Error:", uploadError.message);
-    return { success: false, error: "Failed to upload new profile picture." };
+    return { error: "Failed to upload new profile picture." };
   }
 
   const {
@@ -159,25 +196,26 @@ export async function uploadProfilePicture(
   if (updateUserError) {
     console.error("Update User Avatar URL Error:", updateUserError.message);
     return {
-      success: false,
       error: "Failed to update profile with new picture.",
     };
   }
 
   revalidatePath("/profile");
-  return { success: true, message: "Profile picture updated successfully." };
+  return { data: true };
 }
 
-export async function deleteProfilePicture(): Promise<ServerActionResponse> {
+export async function deleteProfilePicture(): Promise<ApiResponse<boolean>> {
+  // Initialize Supabase client for server-side operations
   const supabase = await createServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "User not authenticated." };
-
+  // Fetch the currently authenticated user to ensure we have a valid session and user ID
+  const { data: user, error: userError } = await getUser();
+  // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
+  if (userError || !user) {
+    console.error("Error fetching user:", userError);
+    return { error: "Authentication failed." };
+  }
   const avatarUrl = user.user_metadata.avatar_url || user.user_metadata.avatar;
-  if (!avatarUrl)
-    return { success: false, error: "No profile picture to delete." };
+  if (!avatarUrl) return { error: "No profile picture to delete." };
 
   const isSupabaseAvatar = avatarUrl.includes(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -192,15 +230,12 @@ export async function deleteProfilePicture(): Promise<ServerActionResponse> {
       if (removeError) {
         console.error("Delete Avatar Error:", removeError.message);
         return {
-          success: false,
           error: "Failed to delete profile picture from storage.",
         };
       }
     }
   }
 
-  // ✅ --- هذا هو التصحيح الحاسم ---
-  // تحديث بيانات المستخدم لإزالة كلا الحقلين المحتملين للصورة
   const { error: updateUserError } = await supabase.auth.updateUser({
     data: {
       avatar_url: null, // مسح حقلنا المخصص
@@ -212,19 +247,15 @@ export async function deleteProfilePicture(): Promise<ServerActionResponse> {
   if (updateUserError) {
     console.error("Remove User Avatar URL Error:", updateUserError.message);
     return {
-      success: false,
       error: "Failed to update profile after deleting picture.",
     };
   }
 
   revalidatePath("/profile");
-  return { success: true, message: "Profile picture deleted successfully." };
+  return { data: true };
 }
 
-
 type SignOutResponse = { success: boolean; error?: string };
-
-
 
 export async function signOut(): Promise<SignOutResponse> {
   const supabase = await createServerClient();

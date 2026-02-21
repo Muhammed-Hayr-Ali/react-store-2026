@@ -52,22 +52,11 @@ export type ProcessedProduct = {
   total_reviews: number;
 };
 
-//================================================================================
-// Server Action
-//================================================================================
-export async function getRecentProducts(
-  limit: number = 4,
-): Promise<ApiResponse<ProcessedProduct[]>> {
-  // ✅ تحديد نوع الإرجاع بوضوح
+// ================================================================================
+//  Products Query
+// ================================================================================
 
-  const supabase = await createServerClient();
-
-  // ⚠️ ملاحظة: الفلترة على العلاقات المتداخلة قد لا تعمل في جميع إصدارات Supabase
-  // إذا لم تعمل، قم بإزالة .filter() واعتمد على الفلترة داخل الكود (في الأسفل)
-  const { data, error } = await supabase
-    .from("products")
-    .select(
-      `
+const PRODUCTS_QUERY = `
       id,
       name,
       slug,
@@ -85,8 +74,23 @@ export async function getRecentProducts(
       reviews:reviews (
         rating
       )
-    `,
-    )
+    `;
+
+//================================================================================
+// Server Action
+//================================================================================
+export async function getRecentProducts(
+  limit: number = 4,
+): Promise<ApiResponse<ProcessedProduct[]>> {
+  // ✅ تحديد نوع الإرجاع بوضوح
+
+  const supabase = await createServerClient();
+
+  // ⚠️ ملاحظة: الفلترة على العلاقات المتداخلة قد لا تعمل في جميع إصدارات Supabase
+  // إذا لم تعمل، قم بإزالة .filter() واعتمد على الفلترة داخل الكود (في الأسفل)
+  const { data, error } = await supabase
+    .from("products")
+    .select(PRODUCTS_QUERY)
     .order("created_at", { ascending: false })
     .limit(limit);
 
