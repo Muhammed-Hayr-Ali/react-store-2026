@@ -18,8 +18,6 @@ import { ApiResponse } from "../types";
 // Copyright (c) 2023 Mohammed Kher Ali
 // ===============================================================================
 
-
-
 // ===============================================================================
 // Sign Up Payload
 // ===============================================================================
@@ -68,12 +66,14 @@ export async function signUpWithPassword({
   const welcomeDiscountCode = `WELCOME-${generateRandomCode(6)}`;
 
   // Create a new discount code
+
   const discountPayload = {
     code: welcomeDiscountCode,
     discount_type: "percentage" as const,
     discount_value: 10,
-    usage_limit: 1,
     expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // ينتهي بعد 30 يومًا
+    usage_limit: 1,
+    is_active: true,
   };
 
   // Create the discount code for the new user

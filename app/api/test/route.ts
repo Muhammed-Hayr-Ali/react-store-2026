@@ -1,4 +1,4 @@
-import { getCart, getTotalCartQuantity } from "@/lib/actions";
+import { getUserWithRole } from "@/lib/actions/get-user-action";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
 
   console.log("Received limit_count:", limit_count);
 
-  const { data, error } = await getTotalCartQuantity();
+  const { data, error } = await getUserWithRole();
 
   if (error) {
     return NextResponse.json(

@@ -2,9 +2,7 @@
 
 import { unstable_noStore as noStore } from "next/cache";
 import { createServerClient } from "@/lib/supabase/createServerClient";
-
-
-
+import { getUser } from "./get-user-action";
 
 // ===============================================================================
 // File Name: dashboard.ts
@@ -16,101 +14,103 @@ import { createServerClient } from "@/lib/supabase/createServerClient";
 // Copyright (c) 2023 Mohammed Kher Ali
 // ===============================================================================
 
-
-
-// =================================================================
-// 1. TYPES Orders Summary
-// =================================================================
-export type OrdersSummary = {
-  totalOrders: number;
-  latestOrder: {
-    id: string;
-    status: string;
-    created_at: string;
-    total_amount: number;
-  } | null;
+// ===============================================================================
+// Api Response Type
+// ===============================================================================
+export type ApiResponse<T> = {
+  data?: T;
+  error?: string;
 };
 
-//=================================================================
-// 2. TYPES Cart Summary
-//=================================================================
+// ===============================================================================
+// 1.  Dashboard Summary Types
+// ===============================================================================
+export type DashboardSummary = {
+  addressesSummary: { totalAddresses: number; latestAddress: LatestAddress | null };
+  cartSummary: { totalItems: number; totalPrice: number };
+  ordersSummary: { totalOrders : number; latestOrder: LatestOrder | null };
+  reviewsSummary: { totalReviews: number; latestReview: LatestReview | null };
+  wishlistSummary: WishlistSummary;
+};
+
+export type AddressesSummary = {
+  totalAddresses: number;
+  latestAddress: LatestAddress;
+};
+
+export type LatestAddress = {
+  address_nickname: string;
+  first_name: string;
+  last_name: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+};
+
 export type CartSummary = {
   totalItems: number;
   totalPrice: number;
 };
 
-//=================================================================
-// 3. TYPES Wishlist Summary
-//=================================================================
-  export type WishlistSummary = {
-    totalItems: number;
-    recentItems: {
-      id: string;
-      products: {
-        name: string;
-        slug: string;
-        main_image_url: string;
-      };
-    }[];
-  }
+export type OrdersSummary = {
+  totalOrders: number;
+  latestOrder: LatestOrder;
+};
 
+export type LatestOrder = {
+  id: string;
+  status: string;
+  created_at: Date;
+  total_amount: number;
+};
 
-//=================================================================
-// 4. TYPES Reviews Summary
-//=================================================================
 export type ReviewsSummary = {
   totalReviews: number;
-  latestReview: {
-    rating: number;
-    title: string | null;
-    product: {
+  latestReview: LatestReview;
+};
+
+export type LatestReview = {
+  rating: number;
+  title: string;
+  product: Product;
+};
+
+export type Product = {
+  name: string;
+  slug: string;
+};
+
+export type WishlistSummary = {
+  totalItems: number;
+  recentItems: {
+    id: string;
+    products: {
       name: string;
       slug: string;
+      main_image_url: string;
     };
-  } | null;
+  }[];
 };
-
-//=================================================================
-// 5. TYPES Addresses Summary
-//=================================================================
-export type AddressesSummary = {
-  totalAddresses: number;
-  latestAddress: {
-    address_nickname: string | null;
-    first_name: string;
-    last_name: string;
-    address: string;
-    city: string;
-    state: string;
-    zip: string;
-    country: string;
-  } | null;
-};
-
-//=================================================================
-// 6. TYPES Dashboard Summary
-//=================================================================
-export type DashboardSummary = {
-  ordersSummary: OrdersSummary;
-  cartSummary: CartSummary;
-  wishlistSummary: WishlistSummary;
-  reviewsSummary: ReviewsSummary;
-  addressesSummary: AddressesSummary;
-  [key: string]: unknown;
-};
-
-
-
-
-
 
 // ====================================================================
 // Main Function
 // ====================================================================
-export async function getDashboardSummary(
-  userId: string,
-): Promise<DashboardSummary | null> {
+export async function getDashboardSummary(): Promise<
+  ApiResponse<DashboardSummary>
+> {
   noStore();
+  // Fetch the currently authenticated user to ensure we have a valid session and user ID
+  const { data: user, error: userError } = await getUser();
+  // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
+  if (userError || !user) {
+    console.error("Error fetching user:", userError);
+    return { error: "Authentication failed." };
+  }
+
+  const userId = user.id;
+
   const [
     ordersSummary,
     cartSummary,
@@ -126,18 +126,20 @@ export async function getDashboardSummary(
   ]);
 
   return {
-    ordersSummary,
-    cartSummary,
-    wishlistSummary,
-    reviewsSummary,
-    addressesSummary,
+    data: {
+      ordersSummary,
+      cartSummary,
+      wishlistSummary,
+      reviewsSummary,
+      addressesSummary,
+    },
   };
 }
 
 // ====================================================================
 //  Get Orders Summary
 // ====================================================================
-async function getOrdersSummary(userId: string): Promise<OrdersSummary> {
+async function getOrdersSummary(userId: string): Promise<{ totalOrders : number; latestOrder: LatestOrder | null }> {
   const supabase = await createServerClient();
   const [countResult, latestOrderResult] = await Promise.all([
     supabase
@@ -161,7 +163,7 @@ async function getOrdersSummary(userId: string): Promise<OrdersSummary> {
 // ====================================================================
 //  Get Cart Summary
 // ====================================================================
-async function getCartSummary(userId: string): Promise<CartSummary> {
+async function getCartSummary(userId: string): Promise<{ totalItems: number; totalPrice: number }> {
   const supabase = await createServerClient();
   const { data: cart, error } = await supabase
     .from("carts")
@@ -215,7 +217,7 @@ async function getWishlistSummary(userId: string): Promise<WishlistSummary> {
 // ====================================================================
 //  Get Reviews Summary
 // ====================================================================
-async function getReviewsSummary(userId: string): Promise<ReviewsSummary> {
+async function getReviewsSummary(userId: string): Promise<{ totalReviews: number; latestReview: LatestReview | null }> {
   const supabase = await createServerClient();
   const [totalReviewsResult, latestReviewResult] = await Promise.all([
     supabase
@@ -232,14 +234,14 @@ async function getReviewsSummary(userId: string): Promise<ReviewsSummary> {
   ]);
   return {
     totalReviews: totalReviewsResult.count ?? 0,
-    latestReview: latestReviewResult.data as ReviewsSummary["latestReview"],
+    latestReview: latestReviewResult.data as unknown as LatestReview | null,
   };
 }
 
 // ====================================================================
 //  Get Addresses Summary
 // ====================================================================
-async function getAddressesSummary(userId: string): Promise<AddressesSummary> {
+async function getAddressesSummary(userId: string): Promise<{ totalAddresses: number; latestAddress: LatestAddress | null }> {
   const supabase = await createServerClient();
   const [totalAddressesResult, latestAddressResult] = await Promise.all([
     supabase

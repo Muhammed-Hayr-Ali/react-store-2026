@@ -139,14 +139,11 @@ export async function deleteBrand(
   return { data: true };
 }
 
-
-
-
 //================================================================================
 // Search Brand
 //================================================================================
 export async function searchBrand(
-  field: BrandsSearchField | "name",
+  field: BrandsSearchField,
   query: string,
 ): Promise<ApiResponse<Brand[]>> {
   // Critical validation: Ensure we have a valid search query before attempting to search addresses

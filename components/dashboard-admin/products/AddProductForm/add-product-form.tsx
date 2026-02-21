@@ -59,7 +59,7 @@ import {
 } from "@/lib/types/product";
 import { createProduct } from "@/lib/actions/producta-add";
 import { createBrand } from "@/lib/actions/brands";
-import { createCategory } from "@/lib/actions/categories";
+import { createCategory } from "@/lib/actions/category";
 // ⚠️ تأكد من وجود هذين الملفين في lib/actions/
 import { createProductOption } from "@/lib/actions/product-options";
 import { createProductOptionValue } from "@/lib/actions/product-option-values";

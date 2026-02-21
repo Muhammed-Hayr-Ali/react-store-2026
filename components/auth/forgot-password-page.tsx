@@ -14,7 +14,6 @@ import { toast } from "sonner";
 import Link from "next/link";
 import React from "react";
 import { AppLogo } from "../custom-ui/app-logo";
-import { getUserProfileByEmail } from "@/lib/actions/get-user-action";
 import { generatePasswordResetLink } from "@/lib/actions/forgot-password";
 import { useLocale } from "next-intl";
 
@@ -52,21 +51,10 @@ export function ForgotPasswordPage({
       return;
     }
 
-    const { data, error: getUserError } = await getUserProfileByEmail(
-      formData.email,
-    );
-
-    if (getUserError || !data) {
-      console.error(getUserError);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success("Send reset password link sccessfully");
-      return;
-    }
-    const { error } = await generatePasswordResetLink(
-      data.id,
-      formData.email,
-      locale as "ar" | "en",
-    );
+    const { error } = await generatePasswordResetLink({
+      email: formData.email,
+      locale: locale as "ar" | "en" | undefined,
+    });
 
     if (error) {
       console.error(error);
