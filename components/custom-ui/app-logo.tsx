@@ -27,7 +27,7 @@ export function AppLogo({
 
   return (
     <>
-      <Logo size={logoSize} className={cn("text-primary", className)} />
+      <Logo size={logoSize} />
       {withoutText ? null : <span> {siteConfig.name}</span>}
       <span className="sr-only">{siteConfig.name}.</span>
     </>
