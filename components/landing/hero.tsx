@@ -23,7 +23,7 @@ export const Hero = () => {
   } as const; // <-- الحل هنا
 
   return (
-    <section className="relative isolate container flex items-center justify-center mx-auto w-full min-h-[calc(100vh-64px)] overflow-hidden">
+    <section className="relative isolate container flex items-center justify-center mx-auto w-full min-h-screen overflow-hidden">
       {/* الخلفيات (تبقى كما هي) */}
       <div
         className="

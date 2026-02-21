@@ -1,11 +1,9 @@
-import { getNewlyAddedProducts } from "@/lib/actions/newly-added-products";
+import { getRecentProducts } from "@/lib/actions/recent-products";
 import { RecentProducts } from "./recent-products";
 
 export async function RecentProductsServer() {
-  // ✅ جلب البيانات في الخادم
-  const { data: products, error } = await getNewlyAddedProducts(4);
+  const { data: products, error } = await getRecentProducts(4);
 
-  // ✅ تمرير البيانات فقط (بدون أي دوال!)
   return (
     <RecentProducts
       products={products || []}

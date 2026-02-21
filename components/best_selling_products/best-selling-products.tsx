@@ -3,28 +3,25 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ShoppingCart, Star } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import Image from "next/image";
 import {
   Card,
-  CardAction,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "../ui/badge";
 import { AspectRatio } from "../ui/aspect-ratio";
 import { Spinner } from "../ui/spinner";
 import { addItemToCart } from "@/lib/actions";
-import { ProcessedProduct } from "@/lib/actions/recent-products";
 import { useCartCount } from "@/lib/provider/cart-provider";
 import { motion } from "framer-motion";
+import { BestSellingProduct } from "@/lib/actions/best_selling_products";
 
-interface RecentProductsProps {
-  products: ProcessedProduct[];
+interface BestSellingProductsProps {
+  products: BestSellingProduct[];
   isLoading?: boolean;
   error?: string | null;
   basePath?: string;
@@ -36,16 +33,16 @@ const FADE_UP_ANIMATION_VARIANTS = {
   show: { opacity: 1, y: 0, transition: { type: "spring" } },
 } as const;
 
-function AddToCartButton({ product }: { product: ProcessedProduct }) {
+function AddToCartButton({ product }: { product: BestSellingProduct }) {
   const { refreshCount } = useCartCount();
   const [isAdding, setIsAdding] = useState(false);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (product.stock_quantity <= 0) {
-      toast.error("Sorry, this product is out of stock.");
-      return;
-    }
+    // if (product.stock_quantity <= 0) {
+    //   toast.error("Sorry, this product is out of stock.");
+    //   return;
+    // }
     setIsAdding(true);
     const { error } = await addItemToCart({
       variantId: product.variant_id,
@@ -67,7 +64,6 @@ function AddToCartButton({ product }: { product: ProcessedProduct }) {
       className="cursor-pointer rounded-full border-foreground"
       onClick={handleAddToCart}
       disabled={isAdding}
-      
     >
       {isAdding ? <Spinner /> : <ShoppingCart />}
     </Button>
@@ -81,7 +77,7 @@ function ProductCard({
   product,
   basePath = "/products",
 }: {
-  product: ProcessedProduct;
+  product: BestSellingProduct;
   basePath?: string;
 }) {
   const router = useRouter(); // ✅ استخدام الروتر داخلياً
@@ -98,14 +94,14 @@ function ProductCard({
     >
       <AspectRatio
         key={product.id}
-        ratio={1 / 1}
+        ratio={4/3}
         className="relative bg-muted overflow-hidden rounded-lg"
       >
-        {product.discountPercentage && (
+        {/* {product.discountPercentage && (
           <Badge variant="default" className="absolute top-2 left-2 z-10">
             Discount {`${product.discountPercentage}%`}
           </Badge>
-        )}
+        )} */}
         <Image
           src={product.main_image_url || "/placeholder.svg"}
           alt="Photo"
@@ -115,7 +111,7 @@ function ProductCard({
       </AspectRatio>
       <CardHeader className="px-2 pt-2">
         <CardTitle className="text-lg font-bold">{product.name}</CardTitle>
-        {product.total_reviews > 0 && (
+        {/* {product.total_reviews > 0 && (
           <CardAction>
             <Badge variant="secondary">
               <div className="flex items-center gap-1 text-sm text-yellow-500">
@@ -126,11 +122,11 @@ function ProductCard({
               </div>
             </Badge>
           </CardAction>
-        )}
+        )} */}
       </CardHeader>
-      <CardDescription className="px-2 grow">
+      {/* <CardDescription className="px-2 grow">
         {product.short_description}
-      </CardDescription>
+      </CardDescription> */}
       <CardFooter className="flex justify-between items-center px-2 pb-2 ">
         <div className="space-x-2">
           {product.discount_price ? (
@@ -155,12 +151,12 @@ function ProductCard({
 // ================================================================================
 // المكون الرئيسي
 // ================================================================================
-export function RecentProducts({
+export function BestSellingProducts({
   products,
   isLoading = false,
   error = null,
   basePath = "/products",
-}: RecentProductsProps) {
+}: BestSellingProductsProps) {
   if (error)
     return (
       <div className="p-8 text-center text-destructive">
@@ -199,24 +195,14 @@ export function RecentProducts({
           whileInView="show"
           viewport={{ once: true }}
           variants={FADE_UP_ANIMATION_VARIANTS}
-          className="flex items-center justify-between"
+          className="text-center mb-12"
         >
-          <div>
-            <h2
-              id="new-products-heading"
-              className="text-2xl md:text-3xl font-bold tracking-tight"
-            >
-              ✨ أحدث المنتجات
-            </h2>
-            <p className="text-muted-foreground mt-1">
-              اكتشف تشكيلتنا الجديدة المختارة بعناية
-            </p>
-          </div>
-          {/* زر عرض الكل (اختياري) */}
-          <Button variant="ghost" className="hidden sm:flex items-center gap-1">
-            عرض الكل
-            <span className="text-xs">→</span>
-          </Button>
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tighter">
+            Our Best Sellers
+          </h2>
+          <p className="mt-2 text-lg text-muted-foreground max-w-2xl mx-auto">
+            Discover the products our customers love the most.
+          </p>
         </motion.div>
         <motion.div
           initial="hidden"
@@ -232,7 +218,10 @@ export function RecentProducts({
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
         >
           {products.map((product) => (
-            <motion.div key={product.slug} variants={FADE_UP_ANIMATION_VARIANTS}>
+            <motion.div
+              key={product.slug}
+              variants={FADE_UP_ANIMATION_VARIANTS}
+            >
               <ProductCard product={product} basePath={basePath} />
             </motion.div>
           ))}

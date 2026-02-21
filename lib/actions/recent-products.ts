@@ -55,7 +55,7 @@ export type ProcessedProduct = {
 //================================================================================
 // Server Action
 //================================================================================
-export async function getNewlyAddedProducts(
+export async function getRecentProducts(
   limit: number = 4,
 ): Promise<ApiResponse<ProcessedProduct[]>> {
   // ✅ تحديد نوع الإرجاع بوضوح

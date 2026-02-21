@@ -1,3 +1,6 @@
+
+
+
 "use client";
 
 import {
@@ -52,7 +55,7 @@ export const CartCountProvider = ({
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange((event) => {
       // نستمع إلى حدثي SIGNED_IN و SIGNED_OUT
       if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
         // عندما يتغير المستخدم، نقوم بإعادة جلب عدد السلة
