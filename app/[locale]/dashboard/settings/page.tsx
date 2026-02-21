@@ -10,7 +10,7 @@ export const metadata = createMetadata({
 export default async function Page() {
 
   const user = await getUser();
-  const email = user?.email || null;  
+  const email = user.data?.email || "";
 
   return <SettingsPage email={email} />;
 }
