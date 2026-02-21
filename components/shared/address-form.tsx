@@ -11,7 +11,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { addAddress, updateAddress, UserAddress } from "@/lib/actions/address";
+import {
+  createAddress,
+  updateAddress,
+  UserAddress,
+} from "@/lib/actions/address";
 
 type AddressInputs = Omit<UserAddress, "id" | "user_id" | "created_at">;
 
@@ -40,7 +44,7 @@ export function AddressForm({
     const { data: addressResult, error: addressError } =
       mode === "edit" && addressToEdit
         ? await updateAddress(addressToEdit.id, formData) // استدعاء دالة التعديل
-        : await addAddress(formData); // استدعاء دالة الإضافة
+        : await createAddress(formData); // استدعاء دالة الإضافة
 
     if (addressError) {
       toast.error(addressError);

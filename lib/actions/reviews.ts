@@ -4,7 +4,12 @@ import { unstable_noStore as noStore, revalidatePath } from "next/cache";
 import { createServerClient } from "../supabase/createServerClient";
 import { ApiResponse, Review } from "../types";
 
-// دالة جلب التقييمات لمنتج معين
+
+
+
+
+
+
 export async function getReviewsByProductId(
   productId: string,
 ): Promise<ApiResponse<Review[] | []>> {

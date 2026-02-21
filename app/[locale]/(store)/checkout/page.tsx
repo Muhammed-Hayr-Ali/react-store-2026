@@ -1,14 +1,14 @@
 import { getCart } from "@/lib/actions/cart";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
-import { getUserAddresses, UserAddress } from "@/lib/actions";
+import { getAddresses, UserAddress } from "@/lib/actions";
 import { redirect } from "next/navigation";
 
 export default async function CheckoutPage() {
   const [
     { data: cart, error: cartError },
     { data: userAddresses, error: userAddressesError },
-  ] = await Promise.all([getCart(), getUserAddresses()]);
+  ] = await Promise.all([getCart(), getAddresses()]);
 
   if (cartError || !cart || cart.cart_items.length === 0) {
     redirect("/dashboard/cart");

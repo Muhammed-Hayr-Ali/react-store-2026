@@ -1,6 +1,5 @@
 // components/reviews/ReviewCard.tsx
 
-import { type ReviewWithAuthor } from "@/lib/actions/reviews";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StarRating } from "./star-rating";
 import { formatDistanceToNow } from "date-fns";

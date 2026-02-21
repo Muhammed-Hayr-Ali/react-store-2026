@@ -3,24 +3,39 @@
 import { createServerClient } from "@/lib/supabase/createServerClient";
 import { revalidatePath } from "next/cache";
 import { getUser } from "./get-user-action";
-import { User } from "@supabase/supabase-js";
 
+// ===============================================================================
+// File Name: cart.ts
+// Description: User Cart Management Actions
+// status: Active ✅
+// Author: Mohammed Kher Ali
+// Date: 2026-02-21
+// Version: 1.0
+// Copyright (c) 2023 Mohammed Kher Ali
+// ===============================================================================
 
+// ====================================================================
+// Api Response Type
+// ====================================================================
 export type ApiResponse<T> = {
   data?: T;
   error?: string;
 };
 
-
-
+// ====================================================================
+// Cart Types
+// ====================================================================
 export type UserCart = {
   id: string;
   user_id: string;
   created_at: Date;
   updated_at: Date;
   cart_items: CartItem[];
-}
+};
 
+// ====================================================================
+// Cart Item Types
+// ====================================================================
 export type CartItem = {
   id: string;
   cart_id: string;
@@ -29,10 +44,12 @@ export type CartItem = {
   updated_at: Date;
   variant_id: string;
   product_variants: ProductVariants;
-}
+};
 
+// ====================================================================
+// Product Variant Types
+// ====================================================================
 export type ProductVariants = {
-
   id: string;
   sku: string;
   price: number;
@@ -45,8 +62,11 @@ export type ProductVariants = {
   stock_quantity: number;
   discount_expires_at: null;
   variant_option_values: VariantOptionValue[];
-}
+};
 
+// ====================================================================
+// Product Types
+// ====================================================================
 export type Products = {
   id: string;
   name: string;
@@ -62,78 +82,30 @@ export type Products = {
   is_available: boolean;
   main_image_url: string;
   short_description: string;
-}
+};
 
+// ====================================================================
+// Variant Option Value Types
+// ====================================================================
 export type VariantOptionValue = {
   variant_id: string;
   option_value_id: string;
   product_option_values: ProductOptionValues;
-}
+};
 
+// ====================================================================
+// Product Option Value Types
+// ====================================================================
 export type ProductOptionValues = {
   id: string;
   value: string;
   option_id: string;
-}
-
-
-
-
-// ===============================================================================
-// File Name: cart.ts
-// Description: User Cart Management Actions
-// status: Active ✅
-// Author: Mohammed Kher Ali
-// Date: 2026-02-010
-// Version: 1.0
-// Copyright (c) 2023 Mohammed Kher Ali
-// ===============================================================================
-
+};
 
 // ====================================================================
-// Get Items Count
+// Get Cart Query
 // ====================================================================
-export async function getTotalCartQuantity(): Promise<
-  ApiResponse<number | null>
-> {
-  const supabase = await createServerClient();
-
-  const { data: user, error: userError } = await getUser();
-
-  if (userError || !user) {
-    // console.error("Error fetching user:", userError);
-    return { error: userError };
-  }
-
-  // --- ✅ The RPC Way ---
-  const { data, error } = await supabase.rpc("get_my_total_cart_quantity");
-
-  if (error) {
-    console.error("Error calling RPC:", error.message);
-    return { data: null, error: error.message };
-  }
-
-  // The result of the RPC call is directly the count.
-  return { data };
-}
-
-// ====================================================================
-// Get Cart & Cart Items
-// ====================================================================
-export async function getCart(): Promise<ApiResponse<UserCart | null>> {
-  const supabase = await createServerClient();
-
-  const { data: user, error: userError } = await getUser();
-
-  if (userError || !user) {
-    console.error("Error fetching user:", userError);
-    return { data: undefined, error: userError };
-  }
-
-  const { data: cart, error: cartError } = await supabase
-    .from("carts")
-    .select(
-      `
+const GET_CART_QUERY = `
       *,
       cart_items (
         *,
@@ -150,16 +122,35 @@ export async function getCart(): Promise<ApiResponse<UserCart | null>> {
           )
         )
       )
-    `,
-    )
+    `;
+
+// ====================================================================
+// Get Cart & Cart Items
+// ====================================================================
+export async function getCart(): Promise<ApiResponse<UserCart>> {
+  // Initialize Supabase client for server-side operations
+  const supabase = await createServerClient();
+  // Fetch the currently authenticated user to ensure we have a valid session and user ID
+  const { data: user, error: userError } = await getUser();
+  // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
+  if (userError || !user) {
+    console.error("Error fetching user:", userError);
+    return { error: "Authentication failed." };
+  }
+  // Fetch cart for the authenticated user using a single query that retrieves the cart and its related items and product details
+  const { data: cart, error: cartError } = await supabase
+    .from("carts")
+    .select(GET_CART_QUERY)
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (cartError || !cart) {
-    // console.error("Error fetching cart:", cartError);
-    return { error: cartError?.message };
+  // Error handling for cart fetching: If there's an error fetching the cart, we log it and return a user-friendly error message
+  if (cartError) {
+    console.error("Error fetching cart:", cartError);
+    return { error: "Failed to fetch cart." };
   }
 
+  // Sort cart items by created_at timestamp to ensure they are displayed in the order they were added to the cart
   if (cart && cart.cart_items) {
     cart.cart_items.sort(
       (a: CartItem, b: CartItem) =>
@@ -169,12 +160,34 @@ export async function getCart(): Promise<ApiResponse<UserCart | null>> {
 
   return { data: cart };
 }
+
+// ====================================================================
+// Get Items Count
+// ====================================================================
+export async function getTotalCartQuantity(): Promise<ApiResponse<number>> {
+  // Initialize Supabase client for server-side operations
+  const supabase = await createServerClient();
+  // Fetch the currently authenticated user to ensure we have a valid session and user ID
+  const { data: user, error: userError } = await getUser();
+  // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
+  if (userError || !user) {
+    console.error("Error fetching user:", userError);
+    return { error: "Authentication failed." };
+  }
+  // Call the RPC function to get the total quantity of items in the user's cart. This function should return a single value representing the total quantity.
+  const { data, error } = await supabase.rpc("get_my_total_cart_quantity");
+
+  if (error) {
+    console.error("Error calling RPC:", error.message);
+    return { error: error.message };
+  }
+  // The result of the RPC call is directly the count.
+  return { data };
+}
+
 // ====================================================================
 // Add Item To Cart
 // ====================================================================
-
-
-
 export async function addItemToCart({
   variantId,
   quantity,
@@ -182,18 +195,17 @@ export async function addItemToCart({
   variantId: string;
   quantity: number;
 }): Promise<ApiResponse<boolean>> {
+  // Initialize Supabase client for server-side operations
   const supabase = await createServerClient();
-
-  // 1. التحقق من وجود جلسة مستخدم
+  // Fetch the currently authenticated user to ensure we have a valid session and user ID
   const { data: user, error: userError } = await getUser();
+  // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
-    console.error("addItemToCart Error: Auth session missing!", userError);
-    // إرجاع خطأ واضح يمكن للواجهة الأمامية التعامل معه
-    return { error: "Auth session missing!" };
+    console.error("Error fetching user:", userError);
+    return { error: "Authentication failed." };
   }
 
-  // 2. استخراج والتحقق من صحة البيانات من FormData
-
+  // Critical validation: Ensure that the variant ID is provided and is in a valid UUID format,
   if (
     !variantId ||
     !/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(
@@ -204,41 +216,41 @@ export async function addItemToCart({
     return { data: false, error: "Invalid product variant specified." };
   }
 
+  // Critical validation: Ensure that the quantity is provided and is a positive integer
   if (isNaN(quantity) || !Number.isInteger(quantity) || quantity < 1) {
     console.error("Invalid quantity specified:", quantity);
     return { data: false, error: "Invalid quantity specified." };
   }
 
-  // 3. تنفيذ العمليات على قاعدة البيانات
+  // Get or create the user's cart.
   try {
-    // استدعاء دالة RPC للحصول على سلة المستخدم أو إنشائها
     const { data: cartId, error: cartError } = await supabase.rpc(
       "get_or_create_user_cart",
     );
 
+    // Critical error handling: If there's an error fetching or creating the cart, we log it and return a user-friendly error message. This is critical because without a cart, we cannot add items.
     if (cartError || !cartId) {
       console.error("Error getting or creating the cart:", cartError);
       return { data: false, error: "Could not access the cart." };
     }
 
-    // استدعاء دالة RPC لإضافة المنتج إلى السلة
+    // Call the RPC function to add the item to the cart. This function should handle both inserting a new item or updating the quantity if the item already exists in the cart.
     const { error: upsertError } = await supabase.rpc("add_item_to_cart", {
       p_cart_id: cartId,
       p_variant_id: variantId,
       p_quantity: quantity,
     });
 
+    // Critical error handling: If there's an error adding the item to the cart, we log it and return a user-friendly error message. This is critical because it directly affects the user's ability to add items to their cart, which is a core functionality of the application.
     if (upsertError) {
       console.error("Error adding item to the cart:", upsertError);
-      // يمكنك هنا إضافة منطق لمعالجة أخطاء معينة، مثل "المنتج غير متوفر"
       return { data: false, error: "Could not add the item to the cart." };
     }
 
-    // 4. إعادة التحقق من صحة المسارات (Revalidation)
-    // هذا يخبر Next.js بتحديث البيانات في الصفحات المتأثرة
+    // Revalidate the cart page to ensure that the UI reflects the updated cart state after adding an item. This is important for providing immediate feedback to the user that their action was successful.
     revalidatePath("/cart");
 
-    // 5. إرجاع نتيجة النجاح
+    // Return a success response indicating that the item was successfully added to the cart
     return { data: true };
   } catch (error) {
     console.error("An unexpected error occurred in addItemToCart:", error);
@@ -252,15 +264,17 @@ export async function addItemToCart({
 export async function removeItem(
   itemId: string,
 ): Promise<ApiResponse<boolean>> {
+  // Initialize Supabase client for server-side operations
   const supabase = await createServerClient();
-
+  // Fetch the currently authenticated user to ensure we have a valid session and user ID
   const { data: user, error: userError } = await getUser();
-
+  // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
     console.error("Error fetching user:", userError);
-    return { error: userError };
+    return { error: "Authentication failed." };
   }
 
+  // Check if the item belongs to the authenticated user
   const { data: checkedItem, error: errorCheck } = await supabase
     .from("cart_items")
     .select("id, cart:carts!inner(user_id)")
@@ -268,17 +282,22 @@ export async function removeItem(
     .eq("carts.user_id", user.id)
     .single();
 
+  // Critical error handling: If there's an error checking the item, we log it and return a user-friendly error message
   if (errorCheck || !checkedItem) {
     console.error("Error checking item:", errorCheck);
     return { error: errorCheck?.message };
   }
 
+  // Delete the item
   const { error } = await supabase.from("cart_items").delete().eq("id", itemId);
 
+  // Critical error handling: If there's an error deleting the item, we log it and return a user-friendly error message
   if (error) {
     console.error("Error deleting item:", error.message);
     return { error: error.message };
   }
+
+  // Revalidate the cart page to ensure that the UI reflects the updated cart state after removing an item
   revalidatePath("/cart");
   return { data: true };
 }
@@ -290,15 +309,17 @@ export async function updateItemQuantity(
   itemId: string,
   quantity: number,
 ): Promise<ApiResponse<boolean>> {
+  // Initialize Supabase client for server-side operations
   const supabase = await createServerClient();
-
+  // Fetch the currently authenticated user to ensure we have a valid session and user ID
   const { data: user, error: userError } = await getUser();
-
+  // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
     console.error("Error fetching user:", userError);
-    return { error: userError };
+    return { error: "Authentication failed." };
   }
 
+  // Critical validation: Ensure that the quantity is a positive integer. This is important to prevent invalid data from being saved to the database, which could lead to issues with order processing and inventory management.
   if (quantity < 1 || !Number.isInteger(quantity)) {
     console.error("Invalid quantity.");
     return { error: "Invalid quantity." };
@@ -312,6 +333,7 @@ export async function updateItemQuantity(
     .eq("carts.user_id", user.id)
     .single();
 
+  // Critical error handling: If there's an error validating the cart item, we log it and return a user-friendly error message
   if (validationError || !cartItem) {
     console.error("Error validating cart item:", validationError);
     return { error: validationError?.message };
@@ -323,12 +345,14 @@ export async function updateItemQuantity(
     .update({ quantity: quantity })
     .eq("id", itemId);
 
+  // Critical error handling: If there's an error updating the cart item quantity, we log it and return a user-friendly error message
   if (error) {
     console.error("Error updating cart item quantity:", error.message);
     return { error: error.message };
   }
 
+  // Revalidate the cart page to ensure that the UI reflects the updated cart state
   revalidatePath("/cart");
-
+  // Return a success response indicating that the item quantity was successfully updated
   return { data: true };
 }

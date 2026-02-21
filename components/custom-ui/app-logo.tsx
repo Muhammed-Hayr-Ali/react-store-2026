@@ -1,7 +1,6 @@
 // src/components/site-logo.tsx
 "use client";
 
-import { cn } from "@/lib/utils"; // إذا كنت تستخدم shadcn
 import { siteConfig } from "@/lib/config/site";
 import { Logo } from "./icons";
 
@@ -13,7 +12,6 @@ interface AppLogoProps {
 
 export function AppLogo({
   size = "md",
-  className,
   withoutText = true,
 }: AppLogoProps) {
   // تحديد الأحجام حسب الحالة
