@@ -30,7 +30,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"; // ✅ 2. استيراد Tooltip
-import { deleteAddress, UserAddress } from "@/lib/actions";
+import { deleteAddress, UserAddress } from "@/lib/actions/address";
 
 interface AddressCardProps {
   address: UserAddress;

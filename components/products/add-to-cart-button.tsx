@@ -1,12 +1,12 @@
 "use client";
 
 
-import { addItemToCart } from "@/lib/actions";
 import { useCartCount } from "@/lib/provider/cart-provider";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Spinner } from "../ui/spinner";
 import { Button } from "../ui/button";
+import { addItemToCart } from "@/lib/actions/cart";
 
 export default function AddToCartButton({
   variantId,

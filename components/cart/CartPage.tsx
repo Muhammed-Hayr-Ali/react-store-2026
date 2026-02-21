@@ -13,7 +13,7 @@ import {
 import {
   ShoppingCart,
 } from "lucide-react";
-import { CartItem } from "@/lib/actions";
+import { CartItem } from "@/lib/actions/cart";
 
 export default async function CartPage({
   cartItems,

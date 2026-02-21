@@ -1,4 +1,4 @@
-import { checkWishlistStatus } from "@/lib/actions/wishlist";
+import { getTotalCartQuantity } from "@/lib/actions/cart";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -7,11 +7,7 @@ export async function GET(request: NextRequest) {
 
   console.log("Received limit_count:", limit_count);
 
-  const { data, error } = await checkWishlistStatus([
-    "54156e72-89ba-4225-9cc9-e1212473a798",
-    "2",
-    "3",
-  ]);
+  const { data: initialCartCount, error } = await getTotalCartQuantity();
 
   if (error) {
     return NextResponse.json(
@@ -20,5 +16,5 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  return NextResponse.json(data);
+  return NextResponse.json(initialCartCount);
 }

@@ -15,9 +15,9 @@ import {
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { CartCountProvider } from "@/lib/provider/cart-provider";
-import { getTotalCartQuantity } from "@/lib/actions";
-import { getUser } from "@/lib/actions/get-user-action";
 import { UserProvider } from "@/lib/provider/user-provider";
+import { getTotalCartQuantity } from "@/lib/actions/cart";
+import { getUser } from "@/lib/actions/get-user-action";
 
 export const viewport: Viewport = {
   width: "device-width",

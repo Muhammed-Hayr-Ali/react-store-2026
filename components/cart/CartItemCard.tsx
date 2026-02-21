@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { useCartCount } from "@/lib/provider/cart-provider";
-import { CartItem, ProductVariants, Products, removeItem, updateItemQuantity } from "@/lib/actions";
+import { CartItem, Products, ProductVariants, removeItem, updateItemQuantity } from "@/lib/actions/cart";
 
 interface CartItemCardProps {
   item: CartItem;

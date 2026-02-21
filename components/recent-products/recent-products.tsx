@@ -18,10 +18,10 @@ import {
 import { Badge } from "../ui/badge";
 import { AspectRatio } from "../ui/aspect-ratio";
 import { Spinner } from "../ui/spinner";
-import { addItemToCart } from "@/lib/actions";
 import { ProcessedProduct } from "@/lib/actions/recent-products";
 import { useCartCount } from "@/lib/provider/cart-provider";
 import { motion } from "framer-motion";
+import { addItemToCart } from "@/lib/actions/cart";
 
 interface RecentProductsProps {
   products: ProcessedProduct[];

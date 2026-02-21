@@ -15,10 +15,10 @@ import {
 } from "@/components/ui/card";
 import { AspectRatio } from "../ui/aspect-ratio";
 import { Spinner } from "../ui/spinner";
-import { addItemToCart } from "@/lib/actions";
 import { useCartCount } from "@/lib/provider/cart-provider";
 import { motion } from "framer-motion";
 import { BestSellingProduct } from "@/lib/actions/best_selling_products";
+import { addItemToCart } from "@/lib/actions/cart";
 
 interface BestSellingProductsProps {
   products: BestSellingProduct[];
@@ -92,7 +92,7 @@ function ProductCard({
       className=" h-full overflow-hidden  p-1  transition-all duration-300 hover:shadow-lg hover:-translate-y-1 gap-3"
     >
       <AspectRatio
-        key={product.id}
+        key={product.slug}
         ratio={4/3}
         className="relative bg-muted overflow-hidden rounded-lg"
       >

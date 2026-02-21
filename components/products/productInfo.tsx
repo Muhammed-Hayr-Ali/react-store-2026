@@ -7,7 +7,12 @@ import WishlistButton from "./wishlist-button";
 import { StarRating } from "../reviews/star-rating";
 import Link from "next/link";
 import { Badge } from "../ui/badge";
-import { getOrganizedOptions, ProductInfoProps, VariantsChildProps } from "./ProductDetails";
+import { FullProduct, ProductVariant } from "@/lib/types";
+import {
+  getOrganizedOptions,
+  ProductInfoProps,
+  VariantsChildProps,
+} from "./ProductDetails";
 
 import {
   useState,
@@ -18,7 +23,6 @@ import {
   ReactElement,
   useEffect,
 } from "react";
-
 
 export default function ProductInfo({
   product,
@@ -198,20 +202,7 @@ export default function ProductInfo({
       )}
 
       <div className="flex items-stretch gap-2">
-        <div className="flex rtl:flex-row-reverse items-center border rounded-md h-10">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-full rounded-r-none"
-            onClick={() => handleQuantityChange(-1)}
-            disabled={!isAvailable || quantity <= 1}
-          >
-            <Minus className="h-4 w-4" />
-          </Button>
-          <span className="px-2 font-semibold text-center  min-w-13 ">
-            {quantity}
-          </span>
+        <div className="flex items-center border rounded-md h-10">
           <Button
             type="button"
             variant="ghost"
@@ -221,6 +212,19 @@ export default function ProductInfo({
             disabled={!isAvailable || (stock > 0 && quantity >= stock)}
           >
             <Plus className="h-4 w-4" />
+          </Button>
+          <span className="px-2 font-semibold text-center  min-w-13 ">
+            {quantity}
+          </span>{" "}
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-full rounded-r-none"
+            onClick={() => handleQuantityChange(-1)}
+            disabled={!isAvailable || quantity <= 1}
+          >
+            <Minus className="h-4 w-4" />
           </Button>
         </div>
 
@@ -239,7 +243,6 @@ export default function ProductInfo({
           />
         </div>
       </div>
-
     </div>
   );
 }

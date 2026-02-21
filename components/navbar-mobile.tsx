@@ -11,12 +11,13 @@ import React from "react";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { signOut } from "@/lib/actions";
+
 import { toast } from "sonner";
 import { SearchDialog } from "./custom-ui/search-dialog";
 import { useUser } from "@/lib/provider/user-provider";
 import { CartButton } from "./custom-ui/cart_button";
 import { useCartCount } from "@/lib/provider/cart-provider";
+import { signOut } from "@/lib/actions/user";
 
 export const NavbarMobile = () => {
   const { count, loading } = useCartCount();

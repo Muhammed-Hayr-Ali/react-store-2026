@@ -1,7 +1,7 @@
 // File: app/[locale]/(store)/(account)/wishlist/page.tsx
 
 import { WishlistPage } from "@/components/wishlist/wishlist-page";
-import { getWishlistItems } from "@/lib/actions/wishlist";
+import { getWishlist } from "@/lib/actions/wishlist";
 import { createMetadata } from "@/lib/metadata";
 
 export const metadata = createMetadata({
@@ -12,8 +12,8 @@ export const metadata = createMetadata({
 // هذه الصفحة هي Server Component
 export default async function Page() {
   // 1. جلب البيانات من الخادم
-  const wishlistItems = await getWishlistItems();
+  const wishlistItems = await getWishlist();
 
   // 2. تمرير البيانات إلى مكون العميل
-  return <WishlistPage initialItems={wishlistItems.data || []} />;
+  return <WishlistPage wishlistItems={wishlistItems.data || []} />;
 }

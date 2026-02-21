@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { getOrderDetails } from "@/lib/actions";
+import { getOrderDetails } from "@/lib/actions/order";
 
 // مكون الصفحة الرئيسي
 export default async function OrderDetailsPage({

@@ -53,14 +53,27 @@ export default async function Page({ params }: Props) {
     notFound();
   }
 
-  // Get user data
-  const user = await getUser();
+  const userResponse = await getUser();
+  const user = userResponse.data;
 
-  // import checkWishlistStatus
-  const wishlistStatus = (await checkWishlistStatus([product.id]));
+  let isInitiallyWishlisted = false;
 
-  // Check if the product is initially wishlisted
-  const isInitiallyWishlisted = wishlistStatus[product.id] || false;
+  // ✅ 2. التحقق من قائمة الأمنيات فقط إذا كان المستخدم مسجلاً
+  if (user) {
+    // استدعاء الدالة مع مصفوفة تحتوي على ID المنتج
+    const wishlistResponse = await checkWishlistStatus([product.id]);
+
+    // ✅ التصحيح الهام: الوصول إلى .data أولاً، ثم التعامل مع النتيجة
+    if (!wishlistResponse.error && wishlistResponse.data) {
+      isInitiallyWishlisted = wishlistResponse.data[product.id] || false;
+    } else {
+      console.warn("Failed to check wishlist status:", wishlistResponse.error);
+      // في حالة الخطأ، نفترض أن المنتج غير موجود في القائمة لتجنب تعطيل الصفحة
+      isInitiallyWishlisted = false;
+    }
+  }
+
+
 
   // Get reviews
   const { data: dataReviews, error: errorReviews } =
@@ -77,7 +90,7 @@ export default async function Page({ params }: Props) {
   return (
     <main className="container mx-auto pb-8 md:pb-12 px-4">
       <ProductDetails
-        user={user.data}
+        user={user}
         product={product}
         isInitiallyWishlisted={isInitiallyWishlisted}
         averageRating={averageRating}
