@@ -12,8 +12,8 @@ export const metadata = createMetadata({
 // هذه الصفحة هي Server Component
 export default async function Page() {
   // 1. جلب البيانات من الخادم
-  const wishlistItems = await getWishlist();
-
+const { data: wishlistItems } = await getWishlist();
+  
   // 2. تمرير البيانات إلى مكون العميل
-  return <WishlistPage wishlistItems={wishlistItems.data || []} />;
+  return <WishlistPage wishlistItems={wishlistItems || []} />;
 }
