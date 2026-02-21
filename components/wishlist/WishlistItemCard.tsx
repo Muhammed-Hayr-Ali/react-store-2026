@@ -1,6 +1,5 @@
 "use client";
 
-import { addItemToCart, removeFromWishlist, WishlistItem, WishlistProduct } from "@/lib/actions";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,8 @@ import {
   getExpiryMessage,
 } from "@/lib/actions/convert-functions";
 import { useCartCount } from "@/lib/provider/cart-provider";
+import { addItemToCart } from "@/lib/actions";
+import { removeFromWishlist, WishlistItem, WishlistProduct } from "@/lib/actions/wishlist";
 
 
 
