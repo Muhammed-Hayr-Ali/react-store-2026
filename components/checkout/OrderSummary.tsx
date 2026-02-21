@@ -1,9 +1,9 @@
-import { type Cart } from "@/types";
 import Image from "next/image";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card";
+import { UserCart } from "@/lib/actions/cart";
 
 interface OrderSummaryProps {
-  cart: Cart;
+  cart: UserCart;
 }
 
 export function OrderSummary({ cart }: OrderSummaryProps) {

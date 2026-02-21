@@ -158,8 +158,8 @@ export async function getCart(): Promise<ApiResponse<UserCart>> {
     );
   }
 
-  return { data: cart };
-}
+  return { data: cart };  };
+
 
 // ====================================================================
 // Get Items Count

@@ -68,7 +68,6 @@ export default async function Page({ params }: Props) {
       isInitiallyWishlisted = wishlistResponse.data[product.id] || false;
     } else {
       console.warn("Failed to check wishlist status:", wishlistResponse.error);
-      // في حالة الخطأ، نفترض أن المنتج غير موجود في القائمة لتجنب تعطيل الصفحة
       isInitiallyWishlisted = false;
     }
   }
