@@ -1,4 +1,11 @@
-import { IconSvgProps } from "@/lib/types";
+export interface IconSvgProps {
+  size?: number;
+  width?: number;
+  height?: number;
+  // Add any other props that are used in the IconSvgProps
+}
+
+
 
 export const Logo = ({ size = 36, width, height, ...props }: IconSvgProps) => (
   <svg
