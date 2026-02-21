@@ -1,3 +1,5 @@
+// lib\actions\wishlist.ts
+
 "use server";
 
 import { revalidatePath } from "next/cache";
