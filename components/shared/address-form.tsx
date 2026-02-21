@@ -11,8 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { addAddress, updateAddress } from "@/lib/actions/address";
-import { UserAddress } from "@/lib/types";
+import { addAddress, updateAddress, UserAddress } from "@/lib/actions/address";
 
 type AddressInputs = Omit<UserAddress, "id" | "user_id" | "created_at">;
 

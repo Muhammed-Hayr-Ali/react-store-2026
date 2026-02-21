@@ -30,8 +30,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"; // ✅ 2. استيراد Tooltip
-import { UserAddress } from "@/lib/types/account/address";
-import { deleteAddress } from "@/lib/actions";
+import { deleteAddress, UserAddress } from "@/lib/actions";
 
 interface AddressCardProps {
   address: UserAddress;
@@ -56,7 +55,7 @@ export function AddressCard({
     if (result.error) {
       toast.error(result.error);
     } else {
-      toast.success(result.message || "Address deleted successfully.");
+      toast.success("Address deleted successfully.");
     }
   };
 

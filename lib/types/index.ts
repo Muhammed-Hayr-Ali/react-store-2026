@@ -295,19 +295,6 @@ export interface Profile {
 }
 
 /** @description يمثل جدول `user_addresses` */
-export interface UserAddress {
-  id: UUID;
-  user_id: UUID;
-  created_at: Timestamp;
-  address_nickname: string | null;
-  first_name: string;
-  last_name: string;
-  address: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
-}
 
 /** @description يمثل جدول `password_reset_tokens` */
 export interface PasswordResetToken {

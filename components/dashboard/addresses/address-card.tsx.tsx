@@ -24,8 +24,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { UserAddress } from "@/lib/types/account/address";
-import { deleteAddress } from "@/lib/actions/address";
+import { deleteAddress, UserAddress } from "@/lib/actions/address";
 
 interface AddressCardProps {
   address: UserAddress;
@@ -42,7 +41,7 @@ export function AddressCard({ address, onEdit }: AddressCardProps) {
       toast.error(result.error);
       setIsDeleting(false); // أعد الزر إلى حالته الطبيعية في حالة الفشل
     } else {
-      toast.success(result.message || "Address deleted successfully.");
+      toast.success("Address deleted successfully.");
       // لا حاجة لـ setIsDeleting(false) هنا، لأن المكون سيختفي
     }
   };
