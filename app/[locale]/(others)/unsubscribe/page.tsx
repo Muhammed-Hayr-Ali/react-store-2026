@@ -1,3 +1,11 @@
+
+
+
+
+
+
+// app\[locale]\(others)\unsubscribe\page.tsx
+
 import UnsubscribePage from "@/components/others/unsubscribe-page";
 import { createMetadata } from "@/lib/metadata";
 import { notFound } from "next/navigation";
@@ -20,3 +28,6 @@ export default async function Page({
 
   return <UnsubscribePage token={token} />;
 }
+
+
+

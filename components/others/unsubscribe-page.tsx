@@ -1,8 +1,8 @@
-// app/unsubscribe/page.tsx
+// components\others\unsubscribe-page.tsx
 
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useForm, type SubmitHandler, Controller } from "react-hook-form";
 import { toast } from "sonner";
 import { CheckCircle, AlertTriangle } from "lucide-react";
@@ -36,6 +36,7 @@ type FormInputs = {
 };
 
 export default function UnsubscribePage({ token }: { token: string }) {
+
   const [formState, setFormState] = useState<"idle" | "success" | "error">(
     "idle",
   );

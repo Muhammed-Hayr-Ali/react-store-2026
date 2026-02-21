@@ -1,6 +1,14 @@
-import { createServerClient } from "@/lib/supabase/createServerClient";
+// lib\actions\unsubscribe-actions.ts
+
+
+
+
+
+
+"use server";
 import { UnsubscribeResult } from "@/lib/types/others";
 import jwt from "jsonwebtoken";
+import { createServerClient } from "../supabase/createServerClient";
 
 export async function unsubscribeFromNewsletter(
   token: string,

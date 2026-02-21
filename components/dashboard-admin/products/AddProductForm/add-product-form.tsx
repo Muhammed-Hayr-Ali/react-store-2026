@@ -36,7 +36,6 @@ import { Spinner } from "@/components/ui/spinner";
 import {
   Trash2,
   PlusCircle,
-  Image,
   Tag,
   CheckCircle,
   X,

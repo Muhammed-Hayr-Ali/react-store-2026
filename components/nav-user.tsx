@@ -33,3 +33,10 @@ export function NavUser({ user }: { user: User | undefined }) {
     </SidebarMenu>
   );
 }
+
+
+
+
+
+
+
