@@ -4,6 +4,14 @@ import Link from "next/link";
 import { createServerClient } from "@/lib/supabase/createServerClient";
 import { OrderWithDetails } from "@/lib/actions/order";
 
+
+
+export const dynamic = "force-dynamic";
+
+
+
+
+
 async function getOrderDetails(
   orderId: string,
 ): Promise<OrderWithDetails | null> {
