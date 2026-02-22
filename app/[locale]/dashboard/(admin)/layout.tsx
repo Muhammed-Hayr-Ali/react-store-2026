@@ -1,5 +1,3 @@
-
-
 // app\[locale]\dashboard\(admin)\layout.tsx
 
 import { RolesGuard } from "@/lib/guards/roles-guard";

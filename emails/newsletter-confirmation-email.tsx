@@ -1,6 +1,5 @@
 // src/emails/newsletter-confirmation-email.tsx
 
-import React from "react";
 import { Heading, Text, Button, Section, Hr } from "@react-email/components";
 import { MasterTemplate } from "./templates/master-template";
 

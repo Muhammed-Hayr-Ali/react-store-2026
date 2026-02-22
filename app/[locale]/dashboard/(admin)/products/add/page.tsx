@@ -1,6 +1,4 @@
 // app\[locale]\dashboard\(admin)\products\add\page.tsx
-
-
 import { AddProductForm } from "@/components/dashboard-admin/products/AddProductForm/add-product-form";
 import { createServerClient } from "@/lib/supabase/createServerClient";
 

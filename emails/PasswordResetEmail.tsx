@@ -1,6 +1,5 @@
 // src/emails/password-reset-email.tsx
 
-import React from "react";
 import {
   Heading,
   Text,

@@ -88,7 +88,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
         {displayVariant && <DiscountBadge variant={displayVariant} />}
 
-        <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-3/4 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
 
         <div className="absolute inset-0 flex flex-col justify-end p-5 text-white">
           <h3 className="font-bold text-2xl leading-tight tracking-tight">

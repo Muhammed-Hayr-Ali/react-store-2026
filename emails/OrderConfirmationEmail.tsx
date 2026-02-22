@@ -10,7 +10,7 @@ import {
   Link,
 } from "@react-email/components";
 import { MasterTemplate } from "./templates/master-template";
-import { OrderWithDetails } from "@/lib/types/order";
+import { OrderWithDetails } from "@/lib/actions/order";
 
 interface OrderConfirmationEmailProps {
   order: OrderWithDetails;

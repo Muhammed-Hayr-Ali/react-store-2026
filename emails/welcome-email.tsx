@@ -1,6 +1,4 @@
 // src/emails/welcome-email.tsx
-
-import React from "react";
 import { Heading, Text, Button, Section } from "@react-email/components";
 import { MasterTemplate } from "./templates/master-template";
 

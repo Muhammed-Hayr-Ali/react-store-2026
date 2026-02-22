@@ -1,9 +1,3 @@
-
-
-
-
-
-
 // app\[locale]\(others)\unsubscribe\page.tsx
 
 import UnsubscribePage from "@/components/others/unsubscribe-page";

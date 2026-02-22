@@ -1,5 +1,4 @@
 // components/account/DashboardCard.tsx
-
 import { type ElementType } from "react"; // ✅ 1. استيراد ElementType
 
 interface DashboardCardProps {
