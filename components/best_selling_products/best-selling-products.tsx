@@ -6,13 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
-import Image from "next/image";
-import {
-  Card,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { AspectRatio } from "../ui/aspect-ratio";
 import { Spinner } from "../ui/spinner";
 import { useCartCount } from "@/lib/provider/cart-provider";
@@ -34,6 +28,7 @@ const FADE_UP_ANIMATION_VARIANTS = {
 } as const;
 
 function AddToCartButton({ product }: { product: BestSellingProduct }) {
+  const router = useRouter();
   const { refreshCount } = useCartCount();
   const [isAdding, setIsAdding] = useState(false);
 
@@ -49,7 +44,11 @@ function AddToCartButton({ product }: { product: BestSellingProduct }) {
       quantity: 1,
     });
     if (error) {
-      toast.error("Failed to add to cart: " + error);
+      if (error === "AUTHENTICATION_FAILED") {
+        router.push("/auth/login");
+      } else {
+        toast.error("Failed to add to cart: " + error);
+      }
     } else {
       toast.success(`${product.name} added to cart successfully!`);
       refreshCount();
@@ -89,7 +88,7 @@ function ProductCard({
     <Card
       onClick={handleView}
       key={product.slug}
-      className=" h-full overflow-hidden  p-1  transition-all duration-300 hover:shadow-lg hover:-translate-y-1 gap-3"
+      className=" h-full overflow-hidden  p-1  transition-all duration-300 hover:shadow-lg hover:-translate-y-1 gap-3 cursor-pointer"
     >
       <AspectRatio
         key={product.slug}

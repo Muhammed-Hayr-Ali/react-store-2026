@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, User as UserIcon } from "lucide-react";
+import { User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
@@ -13,33 +13,10 @@ import { useRouter } from "next/navigation";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
 import { toast } from "sonner";
-import { SearchDialog } from "./custom-ui/search-dialog";
 import { useUser } from "@/lib/provider/user-provider";
-import { CartButton } from "./custom-ui/cart_button";
-import { useCartCount } from "@/lib/provider/cart-provider";
 import { signOut } from "@/lib/actions/user";
 
-export const NavbarMobile = () => {
-  const { count, loading } = useCartCount();
-
-  return (
-    <nav className="flex items-center lg:hidden">
-      <SearchDialog>
-        <Button
-          variant={"ghost"}
-          asChild
-          className="flex rounded-sm h-8 items-center hover:bg-[#EBEBEB] dark:hover:bg-[#1F1F1F] justify-between w-fit px-2 py-2"
-        >
-          <Search size={16} />
-        </Button>
-      </SearchDialog>
-      <CartButton count={count} isloading={loading} />
-      <MobileMenu />
-    </nav>
-  );
-};
-
-const MobileMenu = () => {
+export const MobileMenu = () => {
   const router = useRouter();
   const locale = useLocale();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -84,7 +61,7 @@ const MobileMenu = () => {
   };
 
   return (
-    <div>
+    <div className="lg:hidden">
       <MenuButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
       <div
         className={`fixed top-14 right-0 left-0 w-full border-t bg-background z-40 transform ${

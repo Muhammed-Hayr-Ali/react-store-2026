@@ -7,7 +7,6 @@ import { createServerClient } from "../supabase/createServerClient";
 import { unstable_noStore as noStore } from "next/cache";
 import { getUser } from "./get-user-action";
 
-
 // =================================================================
 // Generic API Response Type
 // =================================================================
@@ -114,7 +113,7 @@ export async function getWishlist(): Promise<ApiResponse<ProcessedProduct[]>> {
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
     console.error("Error fetching user:", userError);
-    return { error: "Authentication failed." };
+    return { error: "AUTHENTICATION_FAILED" };
   }
   // Fetch wishlist items for the authenticated user, including related product data
   const { data, error } = await supabase
@@ -198,7 +197,7 @@ export async function addToWishlist(
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
     console.error("Error fetching user:", userError);
-    return { error: "Authentication failed." };
+    return { error: "AUTHENTICATION_FAILED" };
   }
 
   // Add the product to the wishlist
@@ -241,7 +240,7 @@ export async function removeFromWishlist(
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
     console.error("Error fetching user:", userError);
-    return { error: "Authentication failed." };
+    return { error: "AUTHENTICATION_FAILED" };
   }
 
   // Remove the product from the wishlist
@@ -298,7 +297,7 @@ export async function checkWishlistStatus(
 
   if (userError || !user) {
     console.error("Auth Error:", userError);
-    return { error: "Authentication failed." };
+    return { error: "AUTHENTICATION_FAILED" };
   }
 
   //  We only query the database for valid UUIDs, ensuring we don't run into errors due to invalid input. The invalid IDs will be handled in the final mapping step.

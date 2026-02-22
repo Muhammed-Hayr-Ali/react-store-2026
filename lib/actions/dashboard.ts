@@ -26,9 +26,12 @@ export type ApiResponse<T> = {
 // 1.  Dashboard Summary Types
 // ===============================================================================
 export type DashboardSummary = {
-  addressesSummary: { totalAddresses: number; latestAddress: LatestAddress | null };
+  addressesSummary: {
+    totalAddresses: number;
+    latestAddress: LatestAddress | null;
+  };
   cartSummary: { totalItems: number; totalPrice: number };
-  ordersSummary: { totalOrders : number; latestOrder: LatestOrder | null };
+  ordersSummary: { totalOrders: number; latestOrder: LatestOrder | null };
   reviewsSummary: { totalReviews: number; latestReview: LatestReview | null };
   wishlistSummary: WishlistSummary;
 };
@@ -106,7 +109,7 @@ export async function getDashboardSummary(): Promise<
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
     console.error("Error fetching user:", userError);
-    return { error: "Authentication failed." };
+    return { error: "AUTHENTICATION_FAILED" };
   }
 
   const userId = user.id;
@@ -139,7 +142,9 @@ export async function getDashboardSummary(): Promise<
 // ====================================================================
 //  Get Orders Summary
 // ====================================================================
-async function getOrdersSummary(userId: string): Promise<{ totalOrders : number; latestOrder: LatestOrder | null }> {
+async function getOrdersSummary(
+  userId: string,
+): Promise<{ totalOrders: number; latestOrder: LatestOrder | null }> {
   const supabase = await createServerClient();
   const [countResult, latestOrderResult] = await Promise.all([
     supabase
@@ -163,7 +168,9 @@ async function getOrdersSummary(userId: string): Promise<{ totalOrders : number;
 // ====================================================================
 //  Get Cart Summary
 // ====================================================================
-async function getCartSummary(userId: string): Promise<{ totalItems: number; totalPrice: number }> {
+async function getCartSummary(
+  userId: string,
+): Promise<{ totalItems: number; totalPrice: number }> {
   const supabase = await createServerClient();
   const { data: cart, error } = await supabase
     .from("carts")
@@ -217,7 +224,9 @@ async function getWishlistSummary(userId: string): Promise<WishlistSummary> {
 // ====================================================================
 //  Get Reviews Summary
 // ====================================================================
-async function getReviewsSummary(userId: string): Promise<{ totalReviews: number; latestReview: LatestReview | null }> {
+async function getReviewsSummary(
+  userId: string,
+): Promise<{ totalReviews: number; latestReview: LatestReview | null }> {
   const supabase = await createServerClient();
   const [totalReviewsResult, latestReviewResult] = await Promise.all([
     supabase
@@ -241,7 +250,9 @@ async function getReviewsSummary(userId: string): Promise<{ totalReviews: number
 // ====================================================================
 //  Get Addresses Summary
 // ====================================================================
-async function getAddressesSummary(userId: string): Promise<{ totalAddresses: number; latestAddress: LatestAddress | null }> {
+async function getAddressesSummary(
+  userId: string,
+): Promise<{ totalAddresses: number; latestAddress: LatestAddress | null }> {
   const supabase = await createServerClient();
   const [totalAddressesResult, latestAddressResult] = await Promise.all([
     supabase

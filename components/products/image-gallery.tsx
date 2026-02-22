@@ -210,7 +210,7 @@ export function ImageGallery({
             <img
               src={activeImage}
               alt={product.name}
-              className="object-contain"
+              className="object-contain h-full w-full object-center"
             />
           </div>
 

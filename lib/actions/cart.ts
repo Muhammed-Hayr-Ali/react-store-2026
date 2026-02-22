@@ -135,7 +135,7 @@ export async function getCart(): Promise<ApiResponse<UserCart>> {
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
     console.error("Error fetching user:", userError);
-    return { error: "Authentication failed." };
+    return { error: "AUTHENTICATION_FAILED" };
   }
   // Fetch cart for the authenticated user using a single query that retrieves the cart and its related items and product details
   const { data: cart, error: cartError } = await supabase
@@ -158,8 +158,8 @@ export async function getCart(): Promise<ApiResponse<UserCart>> {
     );
   }
 
-  return { data: cart };  };
-
+  return { data: cart };
+}
 
 // ====================================================================
 // Get Items Count
@@ -172,7 +172,7 @@ export async function getTotalCartQuantity(): Promise<ApiResponse<number>> {
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
     // console.error("Error fetching user:", userError);
-    return { error: "Authentication failed." };
+    return { error: "AUTHENTICATION_FAILED" };
   }
   // Call the RPC function to get the total quantity of items in the user's cart. This function should return a single value representing the total quantity.
   const { data, error } = await supabase.rpc("get_my_total_cart_quantity");
@@ -202,7 +202,7 @@ export async function addItemToCart({
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
     console.error("Error fetching user:", userError);
-    return { error: "Authentication failed." };
+    return { error: "AUTHENTICATION_FAILED" };
   }
 
   // Critical validation: Ensure that the variant ID is provided and is in a valid UUID format,
@@ -271,7 +271,7 @@ export async function removeItem(
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
     console.error("Error fetching user:", userError);
-    return { error: "Authentication failed." };
+    return { error: "AUTHENTICATION_FAILED" };
   }
 
   // Check if the item belongs to the authenticated user
@@ -316,7 +316,7 @@ export async function updateItemQuantity(
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
     console.error("Error fetching user:", userError);
-    return { error: "Authentication failed." };
+    return { error: "AUTHENTICATION_FAILED" };
   }
 
   // Critical validation: Ensure that the quantity is a positive integer. This is important to prevent invalid data from being saved to the database, which could lead to issues with order processing and inventory management.

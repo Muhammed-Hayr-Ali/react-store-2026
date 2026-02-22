@@ -47,8 +47,6 @@ export type UserAddress = {
 // ===============================================================================
 export type AddressPayload = Omit<UserAddress, "id" | "user_id" | "created_at">;
 
-
-
 // ===============================================================================
 // Address Search Field Type
 // ===============================================================================
@@ -61,8 +59,6 @@ export type AddressSearchField =
   | "state"
   | "zip"
   | "country";
-
-
 
 //================================================================================
 // Create Address
@@ -77,7 +73,7 @@ export async function createAddress(
   // Critical error handling: If we fail to fetch the user, we cannot proceed with adding a new address
   if (userError || !user) {
     console.error("Error fetching user:", userError);
-    return { error: "Authentication failed." };
+    return { error: "AUTHENTICATION_FAILED" };
   }
   // Add a new address for the authenticated user
   const { error } = await supabase
@@ -105,7 +101,7 @@ export async function getAddresses(): Promise<ApiResponse<UserAddress[]>> {
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
     console.error("Error fetching user:", userError);
-    return { error: "Authentication failed." };
+    return { error: "AUTHENTICATION_FAILED" };
   }
   // Fetch addresses for the authenticated user
   const { data: userAddresses, error: addressesError } = await supabase
@@ -137,7 +133,7 @@ export async function updateAddress(
   // Critical error handling: If we fail to fetch the user, we cannot proceed with updating the address
   if (userError || !user) {
     console.error("Error fetching user:", userError);
-    return { error: "Authentication failed." };
+    return { error: "AUTHENTICATION_FAILED" };
   }
   // Update the address for the authenticated user
   const { error } = await supabase
@@ -159,9 +155,7 @@ export async function updateAddress(
 //================================================================================
 // Delete Address
 //================================================================================
-export async function deleteAddress(
-  id: string,
-): Promise<ApiResponse<boolean>> {
+export async function deleteAddress(id: string): Promise<ApiResponse<boolean>> {
   // Critical validation: Ensure we have a valid address ID before attempting to delete
   if (!id) {
     return { data: false, error: "Address ID is required." };
@@ -173,7 +167,7 @@ export async function deleteAddress(
   // Critical error handling: If we fail to fetch the user, we cannot proceed with deleting the address
   if (userError || !user) {
     console.error("Error fetching user:", userError);
-    return { error: "Authentication failed." };
+    return { error: "AUTHENTICATION_FAILED" };
   }
   // Delete the address for the authenticated user, ensuring we match both the address ID and user ID for security
   const { error } = await supabase
@@ -191,8 +185,6 @@ export async function deleteAddress(
   revalidatePath("/addresses");
   return { data: true };
 }
-
-
 
 //================================================================================
 // Search Address
@@ -213,7 +205,7 @@ export async function searchAddress(
   // Critical error handling: If we fail to fetch the user, we cannot proceed with adding a new address
   if (userError || !user) {
     console.error("Error fetching user:", userError);
-    return { error: "Authentication failed." };
+    return { error: "AUTHENTICATION_FAILED" };
   }
 
   // Search addresses for the authenticated user based on the provided query, using a case-insensitive search on the street_address field
@@ -231,8 +223,6 @@ export async function searchAddress(
   // Return the search results in a consistent API response format
   return { data };
 }
-
-
 
 // ================================================================================
 // End of File: address.ts

@@ -16,7 +16,8 @@ export const CartButton = ({
   return (
     <Button
       variant={"ghost"}
-      className="relative flex h-8 w-fit items-center justify-between rounded-sm px-2 py-2 hover:bg-[#EBEBEB] dark:hover:bg-[#1F1F1F]"
+      size={"icon-sm"}
+      className="relative"
       asChild
     >
       <Link href="/cart">

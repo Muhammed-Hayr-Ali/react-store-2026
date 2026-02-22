@@ -47,7 +47,7 @@ export async function updateUserProfile(
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
     console.error("Error fetching user:", userError);
-    return { error: "Authentication failed." };
+    return { error: "AUTHENTICATION_FAILED" };
   }
 
   const dataToUpdate: ProfilePayload = {};
@@ -97,7 +97,7 @@ export async function updateUserPassword(
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
     console.error("Error fetching user:", userError);
-    return { error: "Authentication failed." };
+    return { error: "AUTHENTICATION_FAILED" };
   }
 
   const email = user.email;
@@ -151,7 +151,7 @@ export async function uploadProfilePicture(
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
     console.error("Error fetching user:", userError);
-    return { error: "Authentication failed." };
+    return { error: "AUTHENTICATION_FAILED" };
   }
 
   const file = formData.get("avatar") as File;
@@ -212,7 +212,7 @@ export async function deleteProfilePicture(): Promise<ApiResponse<boolean>> {
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
     console.error("Error fetching user:", userError);
-    return { error: "Authentication failed." };
+    return { error: "AUTHENTICATION_FAILED" };
   }
   const avatarUrl = user.user_metadata.avatar_url || user.user_metadata.avatar;
   if (!avatarUrl) return { error: "No profile picture to delete." };

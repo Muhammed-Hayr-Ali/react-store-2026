@@ -6,7 +6,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ShoppingCart, Star } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
-import Image from "next/image";
 import {
   Card,
   CardAction,
@@ -37,6 +36,7 @@ const FADE_UP_ANIMATION_VARIANTS = {
 } as const;
 
 function AddToCartButton({ product }: { product: ProcessedProduct }) {
+  const router = useRouter();
   const { refreshCount } = useCartCount();
   const [isAdding, setIsAdding] = useState(false);
 
@@ -52,7 +52,11 @@ function AddToCartButton({ product }: { product: ProcessedProduct }) {
       quantity: 1,
     });
     if (error) {
-      toast.error("Failed to add to cart: " + error);
+      if (error === "AUTHENTICATION_FAILED") {
+        router.push("/auth/login");
+      } else {
+        toast.error("Failed to add to cart: " + error);
+      }
     } else {
       toast.success(`${product.name} added to cart successfully!`);
       refreshCount();
@@ -66,7 +70,6 @@ function AddToCartButton({ product }: { product: ProcessedProduct }) {
       className="cursor-pointer"
       onClick={handleAddToCart}
       disabled={isAdding}
-      
     >
       {isAdding ? <Spinner /> : <ShoppingCart />}
     </Button>
@@ -93,7 +96,7 @@ function ProductCard({
     <Card
       onClick={handleView}
       key={product.slug}
-      className=" h-full overflow-hidden  p-1  transition-all duration-300 hover:shadow-lg hover:-translate-y-1 gap-3"
+      className=" h-full overflow-hidden  p-1  transition-all duration-300 hover:shadow-lg hover:-translate-y-1 gap-3 cursor-pointer"
     >
       <AspectRatio
         key={product.id}
@@ -230,7 +233,10 @@ export function RecentProducts({
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
         >
           {products.map((product) => (
-            <motion.div key={product.slug} variants={FADE_UP_ANIMATION_VARIANTS}>
+            <motion.div
+              key={product.slug}
+              variants={FADE_UP_ANIMATION_VARIANTS}
+            >
               <ProductCard product={product} basePath={basePath} />
             </motion.div>
           ))}

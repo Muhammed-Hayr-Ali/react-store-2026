@@ -18,12 +18,9 @@ import {
   X,
   CornerDownLeft,
   BrushCleaning,
+  Trash,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-interface SearchDialogProps {
-  children: React.ReactNode;
-}
 
 //================================================================================
 // 1. الخطاف المخصص لإدارة سجل البحث (يبقى كما هو)
@@ -66,9 +63,6 @@ const useSearchHistory = (storageKey: string = "search-history") => {
   return { history, addSearchTerm, removeSearchTerm, clearHistory };
 };
 
-//================================================================================
-// 2. مكون المحتوى الديناميكي (يتم عرضه فقط عند الحاجة)
-//================================================================================
 const SearchDialogContent = ({ onClose }: { onClose: () => void }) => {
   const [query, setQuery] = React.useState("");
   const { history, addSearchTerm, removeSearchTerm, clearHistory } =
@@ -161,30 +155,40 @@ const SearchDialogContent = ({ onClose }: { onClose: () => void }) => {
       )}
 
       <DialogFooter className="p-3 border-t bg-muted/50 shrink-0">
-        <div className="flex items-center justify-center w-full text-xs text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <button onClick={onClose} className="flex gap-1 items-center">
-              <span>Escape to close</span>
-              <Kbd className="bg-background border">Esc</Kbd>
-            </button>
-            <div className="w-px h-4 bg-border mx-2" />
-            <button onClick={handleSearch} className="flex gap-1 items-center">
-              <span>Enter to submit</span>
-              <Kbd className="bg-background border">
-                <CornerDownLeft className="h-3 w-3" />
-              </Kbd>
-            </button>
+        <div className="flex items-center justify-center w-full">
+          <div className="flex items-center gap-2.5">
+            <Button
+              variant={"outline"}
+              size={"icon-xs"}
+              onClick={onClose}
+              className="shadow-none"
+            >
+              <span className=" text-[10px]">Esc</span>
+            </Button>
+            <div className="w-px h-4 bg-border" />
+
+            <Button
+              variant={"outline"}
+              size={"icon-xs"}
+              onClick={onClose}
+              className="shadow-none"
+            >
+              <CornerDownLeft className="h-3 w-3" />
+            </Button>
+
             {history.length > 0 && (
-              <button
-                onClick={handleClearHistory}
-                className="flex gap-1 items-center"
-              >
-                <div className="w-px h-4 bg-border mx-2" />
-                <span>Clear history</span>
-                <Kbd className="bg-background border">
-                  <BrushCleaning className="h-2.5 w-2.5" />
-                </Kbd>
-              </button>
+              <>
+                <div className="w-px h-4 bg-border" />
+
+                <Button
+                  variant={"outline"}
+                  size={"icon-xs"}
+                  onClick={handleClearHistory}
+                  className="shadow-none"
+                >
+                  <Trash className="h-3 w-3" />
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -196,7 +200,7 @@ const SearchDialogContent = ({ onClose }: { onClose: () => void }) => {
 //================================================================================
 // 3. المكون الرئيسي المبسط (آمن للعرض من جانب الخادم)
 //================================================================================
-export const SearchDialog = ({ children }: SearchDialogProps) => {
+export const SearchButton = () => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   React.useEffect(() => {
@@ -213,31 +217,12 @@ export const SearchDialog = ({ children }: SearchDialogProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogTrigger asChild>
+        <Button variant={"ghost"} size={"icon-sm"}>
+          <Search />
+        </Button>
+      </DialogTrigger>
       {isOpen && <SearchDialogContent onClose={() => setIsOpen(false)} />}
     </Dialog>
   );
 };
-
-//  <div>
-//     {size === "deafult" ? (
-//       <Button
-//         variant={"ghost"}
-//         className="flex rounded-sm h-12 lg:h-8 items-center bg-[#F2F2F2] hover:bg-[#EBEBEB] dark:bg-[#1A1A1A] dark:hover:bg-[#1F1F1F] justify-between min-w-3xs px-1.5 py-2"
-//       >
-//         <div className="flex items-center gap-2">
-//           <Search className="h-4 w-4 text-muted-foreground block lg:hidden" />
-//           <span className="text-xs font-mono font-normal">
-//             Search Products...
-//           </span>
-//         </div>
-//         <Kbd dir="ltr" className="bg-background hidden lg:block">
-//           ⌘K
-//         </Kbd>
-//       </Button>
-//     ) : (
-//       <Button variant={"ghost"} size={"icon"}>
-//         <Search/>
-//       </Button>
-//     )}
-//     </div>
