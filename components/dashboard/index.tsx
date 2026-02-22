@@ -149,14 +149,12 @@ export function IndexPage({ dashboardSummary, user }: DashboardProps) {
                         <TooltipTrigger asChild>
                           <Link href={`/products/${item.products.slug}`}>
                             <img
-                              width={40}
-                              height={40}
                               src={
                                 item.products.main_image_url ||
                                 "/placeholder.svg"
                               }
                               alt={item.products.name}
-                              className=" h-full w-full rounded-full border-2 border-background object-cover bg-muted hover:scale-110 transition-transform"
+                              className=" h-16 w-16 rounded-full border-2 border-background object-cover bg-muted hover:scale-110 transition-transform"
                             />
                           </Link>
                         </TooltipTrigger>

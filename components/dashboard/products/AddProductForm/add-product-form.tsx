@@ -63,7 +63,13 @@ import { createCategory } from "@/lib/actions/category";
 // ⚠️ تأكد من وجود هذين الملفين في lib/actions/
 import { createProductOption } from "@/lib/actions/product-options";
 import { createProductOptionValue } from "@/lib/actions/product-option-values";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 
 // =================================================================
 // واجهة المكون (Props)
@@ -367,78 +373,80 @@ export function AddProductForm({
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Product Name & Slug */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FieldGroup>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field>
+                <FieldLabel htmlFor="name">Product Name *</FieldLabel>
+                <Input
+                  id="name"
+                  type="text"
+                  {...register("name", {
+                    required: "product name is required.",
+                    minLength: {
+                      value: 3,
+                      message: "product name must be at least 3 characters.",
+                    },
+                  })}
+                  disabled={isSubmitting}
+                  placeholder="e.g., Smartphone V10"
+                />
+                <FieldError>{errors.name?.message}</FieldError>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="slug">Product Slug *</FieldLabel>
+                <Input
+                  id="slug"
+                  {...register("slug", {
+                    required: "product slug is required.",
+                    pattern: {
+                      value: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+                      message:
+                        "product slug must contain only lowercase letters, numbers, and hyphens.",
+                    },
+                  })}
+                  disabled={isSubmitting}
+                  placeholder="e.g., smartphone-v10"
+                />
+                <FieldError>{errors.slug?.message}</FieldError>
+              </Field>
+            </div>
+
+            {/* Short Description */}
             <Field>
-              <FieldLabel htmlFor="name">Product Name *</FieldLabel>
-              <Input
-                id="name"
-                type="text"
-                {...register("name", {
-                  required: "product name is required.",
+              <FieldLabel htmlFor="short_description">
+                Short Description
+              </FieldLabel>
+              <Textarea
+                id="short_description"
+                {...register("short_description", {
+                  required: "short description is required.",
+                })}
+                disabled={isSubmitting}
+                placeholder="a brief description that appears in product lists..."
+                rows={3}
+              />
+              <FieldError>{errors.short_description?.message}</FieldError>
+            </Field>
+
+            {/* Description */}
+            <Field>
+              <Label htmlFor="description">Full Description *</Label>
+              <Textarea
+                id="description"
+                {...register("description", {
+                  required: "full description is required.",
                   minLength: {
-                    value: 3,
-                    message: "product name must be at least 3 characters.",
+                    value: 10,
+                    message: "full description must be at least 10 characters.",
                   },
                 })}
                 disabled={isSubmitting}
-                placeholder="e.g., Smartphone V10"
+                placeholder="a detailed description of the product..."
+                rows={6}
               />
-              <FieldError>{errors.name?.message}</FieldError>
+              <FieldError>{errors.description?.message}</FieldError>
             </Field>
-            <Field>
-              <FieldLabel htmlFor="slug">Product Slug *</FieldLabel>
-              <Input
-                id="slug"
-                {...register("slug", {
-                  required: "product slug is required.",
-                  pattern: {
-                    value: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-                    message:
-                      "product slug must contain only lowercase letters, numbers, and hyphens.",
-                  },
-                })}
-                disabled={isSubmitting}
-                placeholder="e.g., smartphone-v10"
-              />
-              <FieldError>{errors.slug?.message}</FieldError>
-            </Field>
-          </div>
-
-          {/* Short Description */}
-          <Field>
-            <FieldLabel htmlFor="short_description">
-              Short Description
-            </FieldLabel>
-            <Textarea
-              id="short_description"
-              {...register("short_description", {
-                required: "short description is required.",
-              })}
-              disabled={isSubmitting}
-              placeholder="a brief description that appears in product lists..."
-              rows={3}
-            />
-            <FieldError>{errors.short_description?.message}</FieldError>
-          </Field>
-
-          {/* Description */}
-          <Field>
-            <Label htmlFor="description">Full Description *</Label>
-            <Textarea
-              id="description"
-              {...register("description", {
-                required: "full description is required.",
-                minLength: {
-                  value: 10,
-                  message: "full description must be at least 10 characters.",
-                },
-              })}
-              disabled={isSubmitting}
-              placeholder="a detailed description of the product..."
-              rows={6}
-            />
-            <FieldError>{errors.description?.message}</FieldError>
-          </Field>
+          </FieldGroup>
         </CardContent>
       </Card>
 
@@ -451,101 +459,102 @@ export function AddProductForm({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Field>
-            <FieldLabel htmlFor="main_image_url">Main Image URL</FieldLabel>
-            <Input
-              id="main_image_url"
-              {...register("main_image_url", {
-                required: "main image url is required.",
-                pattern: {
-                  value:
-                    /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp|bmp|svg))$/i,
-                  message: "main image url must be a valid image URL.",
-                },
-              })}
-              disabled={isSubmitting}
-              placeholder="https://example.com/image.jpg"
-            />
-            <FieldError>{errors.main_image_url?.message}</FieldError>
-          </Field>
-
-          <Field>
-            <div className="flex items-center justify-between">
-              <FieldLabel>Additional Image URLs</FieldLabel>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const currentUrls = watch("image_urls") || [];
-                  setValue("image_urls", [...currentUrls, ""], {
-                    shouldValidate: true,
-                  });
-                }}
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="main_image_url">Main Image URL</FieldLabel>
+              <Input
+                id="main_image_url"
+                {...register("main_image_url", {
+                  required: "main image url is required.",
+                  pattern: {
+                    value:
+                      /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp|bmp|svg))$/i,
+                    message: "main image url must be a valid image URL.",
+                  },
+                })}
                 disabled={isSubmitting}
-                className="h-7 text-xs"
-              >
-                <Plus className="mr-1 h-3 w-3" />
-                Add Image
-              </Button>
-            </div>
+                placeholder="https://example.com/image.jpg"
+              />
+              <FieldError>{errors.main_image_url?.message}</FieldError>
+            </Field>
 
-            <div className="space-y-2 mt-2">
-              {watch("image_urls")?.length === 0 ? (
-                <p className="text-sm text-muted-foreground italic">
-                  No additional images added yet. Click &quot;Add Image&quot; to
-                  start.
-                </p>
-              ) : (
-                watch("image_urls")?.map((_, index) => (
-                  <div key={index} className="flex gap-2 items-start">
-                    <div className="flex-1">
-                      <Input
-                        id={`image_urls.${index}`}
-                        value={watch("image_urls")?.[index] || ""}
-                        onChange={(e) => {
+            <Field>
+              <div className="flex items-center justify-between">
+                <FieldLabel>Additional Image URLs</FieldLabel>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => {
+                    const currentUrls = watch("image_urls") || [];
+                    setValue("image_urls", [...currentUrls, ""], {
+                      shouldValidate: true,
+                    });
+                  }}
+                  disabled={isSubmitting}
+                  className="h-7 text-xs"
+                >
+                  <Plus className="mr-1 h-3 w-3" />
+                  Add Image
+                </Button>
+              </div>
+
+              <div className="space-y-2 mt-2">
+                {watch("image_urls")?.length === 0 ? (
+                  <p className="text-sm text-muted-foreground italic">
+                    No additional images added yet. Click &quot;Add Image&quot;
+                    to start.
+                  </p>
+                ) : (
+                  watch("image_urls")?.map((_, index) => (
+                    <div key={index} className="flex gap-2 items-start">
+                      <div className="flex-1">
+                        <Input
+                          id={`image_urls.${index}`}
+                          value={watch("image_urls")?.[index] || ""}
+                          onChange={(e) => {
+                            const currentUrls = watch("image_urls") || [];
+                            const newUrls = [...currentUrls];
+                            newUrls[index] = e.target.value;
+                            setValue("image_urls", newUrls, {
+                              shouldValidate: true,
+                            });
+                          }}
+                          disabled={isSubmitting}
+                          placeholder={`https://example.com/image${index + 1}.jpg`}
+                          className="font-mono text-sm"
+                        />
+                        {/* عرض الخطأ لكل حقل على حدة إذا أردت */}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
                           const currentUrls = watch("image_urls") || [];
-                          const newUrls = [...currentUrls];
-                          newUrls[index] = e.target.value;
+                          const newUrls = currentUrls.filter(
+                            (_, i) => i !== index,
+                          );
                           setValue("image_urls", newUrls, {
                             shouldValidate: true,
                           });
                         }}
                         disabled={isSubmitting}
-                        placeholder={`https://example.com/image${index + 1}.jpg`}
-                        className="font-mono text-sm"
-                      />
-                      {/* عرض الخطأ لكل حقل على حدة إذا أردت */}
+                        className="h-9 w-9 text-destructive hover:bg-destructive/10 shrink-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        const currentUrls = watch("image_urls") || [];
-                        const newUrls = currentUrls.filter(
-                          (_, i) => i !== index,
-                        );
-                        setValue("image_urls", newUrls, {
-                          shouldValidate: true,
-                        });
-                      }}
-                      disabled={isSubmitting}
-                      className="h-9 w-9 text-destructive hover:bg-destructive/10 shrink-0"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))
-              )}
-            </div>
+                  ))
+                )}
+              </div>
 
-            <FieldError>{errors.image_urls?.message}</FieldError>
-            <p className="text-xs text-muted-foreground mt-1">
-              Add multiple image URLs. Each URL will be displayed as a separate
-              field.
-            </p>
-          </Field>
+              <FieldError>{errors.image_urls?.message}</FieldError>
+              <p className="text-xs text-muted-foreground mt-1">
+                Add multiple image URLs. Each URL will be displayed as a
+                separate field.
+              </p>
+            </Field>
+          </FieldGroup>
         </CardContent>
       </Card>
 
@@ -555,245 +564,256 @@ export function AddProductForm({
           <CardTitle>التصنيفات والعلامات</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* التصنيف */}
-          <div className="space-y-1">
-            <Label>التصنيف</Label>
-            <div className="flex gap-2">
-              <Controller
-                name="category_id"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    onValueChange={(val) =>
-                      field.onChange(val === "" ? null : val)
-                    }
-                    value={field.value ?? ""}
-                    disabled={isSubmitting}
+          <FieldGroup>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* التصنيف */}
+              <Field>
+                <FieldLabel>Category</FieldLabel>
+                <div className="flex gap-2">
+                  <Controller
+                    name="category_id"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        onValueChange={(val) =>
+                          field.onChange(val === "" ? null : val)
+                        }
+                        value={field.value ?? ""}
+                        disabled={isSubmitting}
+                      >
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="اختر تصنيفًا" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id}>
+                              {cat.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  <Dialog
+                    open={isCategoryDialogOpen}
+                    onOpenChange={setIsCategoryDialogOpen}
                   >
-                    <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="اختر تصنيفًا" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.id}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              <Dialog
-                open={isCategoryDialogOpen}
-                onOpenChange={setIsCategoryDialogOpen}
-              >
-                <DialogTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    disabled={isSubmitting}
-                    title="إضافة تصنيف جديد"
-                    className="shrink-0"
-                  >
-                    <FolderPlus className="h-4 w-4" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>إضافة تصنيف جديد</DialogTitle>
-                    <DialogDescription>
-                      أضف تصنيفًا جديدًا ليظهر في القائمة
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="new-category">اسم التصنيف</Label>
-                      <Input
-                        id="new-category"
-                        value={newCategoryName}
-                        onChange={(e) => setNewCategoryName(e.target.value)}
-                        placeholder="مثال: إلكترونيات"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            handleCreateCategory();
-                          }
-                        }}
-                        disabled={isCreatingCategory}
-                        autoFocus
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button type="button" variant="outline">
-                        إلغاء
+                    <DialogTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        disabled={isSubmitting}
+                        title="إضافة تصنيف جديد"
+                        className="shrink-0"
+                      >
+                        <FolderPlus className="h-4 w-4" />
                       </Button>
-                    </DialogClose>
-                    <Button
-                      onClick={handleCreateCategory}
-                      disabled={isCreatingCategory || !newCategoryName.trim()}
-                    >
-                      {isCreatingCategory ? (
-                        <>
-                          <Spinner className="mr-2 h-4 w-4" />
-                          جاري الإضافة...
-                        </>
-                      ) : (
-                        <>
-                          <Plus className="mr-2 h-4 w-4" />
-                          إضافة
-                        </>
-                      )}
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-
-          {/* العلامة التجارية */}
-          <div className="space-y-1">
-            <Label>العلامة التجارية</Label>
-            <div className="flex gap-2">
-              <Controller
-                name="brand_id"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    onValueChange={(val) =>
-                      field.onChange(val === "" ? null : val)
-                    }
-                    value={field.value ?? ""}
-                    disabled={isSubmitting}
-                  >
-                    <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="اختر علامة تجارية" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {brands.map((brand) => (
-                        <SelectItem key={brand.id} value={brand.id}>
-                          {brand.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              <Dialog
-                open={isBrandDialogOpen}
-                onOpenChange={setIsBrandDialogOpen}
-              >
-                <DialogTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    disabled={isSubmitting}
-                    title="إضافة علامة تجارية جديدة"
-                    className="shrink-0"
-                  >
-                    <Store className="h-4 w-4" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>إضافة علامة تجارية جديدة</DialogTitle>
-                    <DialogDescription>
-                      أضف علامة تجارية جديدة لتظهر في القائمة
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="new-brand">اسم العلامة التجارية</Label>
-                      <Input
-                        id="new-brand"
-                        value={newBrandName}
-                        onChange={(e) => setNewBrandName(e.target.value)}
-                        placeholder="مثال: سامسونج"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            handleCreateBrand();
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>إضافة تصنيف جديد</DialogTitle>
+                        <DialogDescription>
+                          أضف تصنيفًا جديدًا ليظهر في القائمة
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="new-category">اسم التصنيف</Label>
+                          <Input
+                            id="new-category"
+                            value={newCategoryName}
+                            onChange={(e) => setNewCategoryName(e.target.value)}
+                            placeholder="مثال: إلكترونيات"
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                handleCreateCategory();
+                              }
+                            }}
+                            disabled={isCreatingCategory}
+                            autoFocus
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button type="button" variant="outline">
+                            إلغاء
+                          </Button>
+                        </DialogClose>
+                        <Button
+                          onClick={handleCreateCategory}
+                          disabled={
+                            isCreatingCategory || !newCategoryName.trim()
                           }
-                        }}
-                        disabled={isCreatingBrand}
-                        autoFocus
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button type="button" variant="outline">
-                        إلغاء
-                      </Button>
-                    </DialogClose>
-                    <Button
-                      onClick={handleCreateBrand}
-                      disabled={isCreatingBrand || !newBrandName.trim()}
-                    >
-                      {isCreatingBrand ? (
-                        <>
-                          <Spinner className="mr-2 h-4 w-4" />
-                          جاري الإضافة...
-                        </>
-                      ) : (
-                        <>
-                          <Plus className="mr-2 h-4 w-4" />
-                          إضافة
-                        </>
-                      )}
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
+                        >
+                          {isCreatingCategory ? (
+                            <>
+                              <Spinner className="mr-2 h-4 w-4" />
+                              جاري الإضافة...
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="mr-2 h-4 w-4" />
+                              إضافة
+                            </>
+                          )}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </Field>
 
-          {/* الوسوم */}
-          <div className="space-y-2">
-            <Label>الوسوم (Tags)</Label>
-            <div className="flex gap-2">
-              <Input
-                value={tagsInput}
-                onChange={(e) => setTagsInput(e.target.value)}
-                onKeyDown={handleAddTag}
-                disabled={isSubmitting}
-                placeholder="اضغط Enter لإضافة وسم..."
-                className="flex-1"
-              />
-              <Button
-                type="button"
-                onClick={() => {
-                  if (tagsInput.trim()) {
-                    const newTag = tagsInput.trim();
-                    if (!currentTags.includes(newTag)) {
-                      setValue("tags", [...currentTags, newTag]);
-                    }
-                    setTagsInput("");
-                  }
-                }}
-                disabled={isSubmitting}
-              >
-                <Tag className="mr-2 h-4 w-4" />
-                إضافة
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {currentTags.map((tag) => (
-                <Badge key={tag} variant="secondary">
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveTag(tag)}
-                    className="ml-2 hover:text-red-500"
-                    aria-label={`إزالة الوسم ${tag}`}
+              {/* العلامة التجارية */}
+              <Field>
+                <FieldLabel>Brand</FieldLabel>
+                <div className="flex gap-2">
+                  <Controller
+                    name="brand_id"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        onValueChange={(val) =>
+                          field.onChange(val === "" ? null : val)
+                        }
+                        value={field.value ?? ""}
+                        disabled={isSubmitting}
+                      >
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="اختر علامة تجارية" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {brands.map((brand) => (
+                            <SelectItem key={brand.id} value={brand.id}>
+                              {brand.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  <Dialog
+                    open={isBrandDialogOpen}
+                    onOpenChange={setIsBrandDialogOpen}
                   >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
+                    <DialogTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        disabled={isSubmitting}
+                        title="إضافة علامة تجارية جديدة"
+                        className="shrink-0"
+                      >
+                        <Store className="h-4 w-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>إضافة علامة تجارية جديدة</DialogTitle>
+                        <DialogDescription>
+                          أضف علامة تجارية جديدة لتظهر في القائمة
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="new-brand">
+                            اسم العلامة التجارية
+                          </Label>
+                          <Input
+                            id="new-brand"
+                            value={newBrandName}
+                            onChange={(e) => setNewBrandName(e.target.value)}
+                            placeholder="مثال: سامسونج"
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                handleCreateBrand();
+                              }
+                            }}
+                            disabled={isCreatingBrand}
+                            autoFocus
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button type="button" variant="outline">
+                            إلغاء
+                          </Button>
+                        </DialogClose>
+                        <Button
+                          onClick={handleCreateBrand}
+                          disabled={isCreatingBrand || !newBrandName.trim()}
+                        >
+                          {isCreatingBrand ? (
+                            <>
+                              <Spinner className="mr-2 h-4 w-4" />
+                              جاري الإضافة...
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="mr-2 h-4 w-4" />
+                              إضافة
+                            </>
+                          )}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </Field>
             </div>
-          </div>
+            {/* الوسوم */}
+            <Field>
+              <FieldLabel>Tags</FieldLabel>
+              <div className="flex gap-2">
+                <Input
+                  value={tagsInput}
+                  onChange={(e) => setTagsInput(e.target.value)}
+                  onKeyDown={handleAddTag}
+                  disabled={isSubmitting}
+                  placeholder="اضغط Enter لإضافة وسم..."
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  onClick={() => {
+                    if (tagsInput.trim()) {
+                      const newTag = tagsInput.trim();
+                      if (!currentTags.includes(newTag)) {
+                        setValue("tags", [...currentTags, newTag]);
+                      }
+                      setTagsInput("");
+                    }
+                  }}
+                  disabled={isSubmitting}
+                >
+                  <Tag className="mr-2 h-4 w-4" />
+                  إضافة
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {currentTags.map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant="secondary"
+                    className="p-2 flex items-center"
+                  >
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveTag(tag)}
+                      className="ml-1 rtl:ml-auto rtl:mr-1 hover:text-red-500"
+                      aria-label={`إزالة الوسم ${tag}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            </Field>
+          </FieldGroup>
         </CardContent>
       </Card>
 
@@ -803,47 +823,53 @@ export function AddProductForm({
           <CardTitle>الإعدادات</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-            <div className="space-y-1">
-              <Label htmlFor="is_available">متاح للبيع</Label>
-              <p className="text-sm text-muted-foreground">
-                جعل هذا المنتج متاحًا في المتجر
-              </p>
-            </div>
-            <Controller
-              name="is_available"
-              control={control}
-              render={({ field }) => (
-                <Switch
-                  id="is_available"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  disabled={isSubmitting}
-                />
-              )}
-            />
-          </div>
+          <FieldGroup>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                <Field className="">
+                  <FieldLabel htmlFor="is_available">Available</FieldLabel>
+                  <FieldDescription>Available for sale</FieldDescription>
+                </Field>
+                <div>
+                  <Controller
+                    name="is_available"
+                    control={control}
+                    render={({ field }) => (
+                      <Switch
+                        id="is_available"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isSubmitting}
+                      />
+                    )}
+                  />
+                </div>
+              </div>
 
-          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-            <div className="space-y-1">
-              <Label htmlFor="is_featured">منتج مميز</Label>
-              <p className="text-sm text-muted-foreground">
-                عرض هذا المنتج في الأقسام المميزة
-              </p>
-            </div>
-            <Controller
-              name="is_featured"
-              control={control}
-              render={({ field }) => (
-                <Switch
-                  id="is_featured"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  disabled={isSubmitting}
+              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                <Field className="">
+                  <FieldLabel htmlFor="is_available">
+                    Featured product
+                  </FieldLabel>
+                  <FieldDescription>
+                    Add this product to your featured product list
+                  </FieldDescription>
+                </Field>
+                <Controller
+                  name="is_featured"
+                  control={control}
+                  render={({ field }) => (
+                    <Switch
+                      id="is_featured"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={isSubmitting}
+                    />
+                  )}
                 />
-              )}
-            />
-          </div>
+              </div>
+            </div>
+          </FieldGroup>
         </CardContent>
       </Card>
 
