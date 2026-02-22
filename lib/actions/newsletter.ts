@@ -29,12 +29,10 @@ export type ApiResponse<T> = {
 // ==============================================================================
 // Subscribe to Newsletter Action
 // ==============================================================================
-export interface SubscribeToNewsletterPayload {
-  email: string;
-  locale: "ar" | "en" | undefined;
-}
+
 export async function subscribeToNewsletter(
-  payload: SubscribeToNewsletterPayload,
+  email: string,
+  locale: string,
 ): Promise<ApiResponse<string>> {
   // Create a Supabase Server client
   const supabase = await createServerClient();
@@ -42,7 +40,7 @@ export async function subscribeToNewsletter(
   // Insert or update the subscription in the database
   const { error } = await supabase.from("newsletter_subscriptions").upsert(
     {
-      email: payload.email,
+      email: email,
       status: "subscribed",
       unsubscribe_reason: null,
       unsubscribed_at: null,
@@ -59,17 +57,19 @@ export async function subscribeToNewsletter(
     };
   }
 
-  
   try {
-    const unsubscribeUrl = createUnsubscribeLink(payload.email);
+    const unsubscribeUrl = createUnsubscribeLink(email);
 
     await sendEmail({
-      to: payload.email,
-      subject: payload.locale === "ar" ? "اشترك في النشرة البريدية" : "Newsletter Subscription",
+      to: email,
+      subject:
+        locale === "ar"
+          ? "اشترك في النشرة البريدية"
+          : "Newsletter Subscription",
       react: React.createElement(NewsletterConfirmationEmail, {
-        userName: payload.email,
+        userName: email,
         unsubscribeUrl: unsubscribeUrl,
-        locale: payload.locale,
+        locale: locale as "ar" | "en",
       }),
     });
   } catch (emailError) {
