@@ -11,6 +11,7 @@ export const metadata = createMetadata({
 });
 
 export default async function Page() {
+  // Fetch cart
   const { data } = await getCart();
 
 
