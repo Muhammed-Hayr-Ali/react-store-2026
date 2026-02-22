@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { createServerClient } from "@/lib/supabase/createServerClient";
-import { OrderWithDetails } from "@/lib/actions";
+import { OrderWithDetails } from "@/lib/actions/order";
 
 async function getOrderDetails(
   orderId: string,
