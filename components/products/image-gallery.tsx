@@ -148,12 +148,12 @@ export function ImageGallery({
               "object-contain transition-transform duration-300 hover:scale-105",
               imageLoaded ? "opacity-100" : "opacity-0",
             )}
-            onLoadingComplete={() => setImageLoaded(true)}
+            // onLoadingComplete={() => setImageLoaded(true)}
             onError={() => {
               console.error("❌ Image failed to load:", activeImage);
               setImageLoaded(true);
             }}
-            unoptimized={activeImage.startsWith("http")}
+            // unoptimized={activeImage.startsWith("http")}
           />
 
           {imageList.length > 1 && (
@@ -212,7 +212,6 @@ export function ImageGallery({
               src={activeImage}
               alt={product.name}
               className="object-contain"
-              unoptimized={activeImage.startsWith("http")}
             />
           </div>
 
