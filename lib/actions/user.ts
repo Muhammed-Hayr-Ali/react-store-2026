@@ -254,15 +254,3 @@ export async function deleteProfilePicture(): Promise<ApiResponse<boolean>> {
   revalidatePath("/profile");
   return { data: true };
 }
-
-type SignOutResponse = { success: boolean; error?: string };
-
-export async function signOut(): Promise<SignOutResponse> {
-  const supabase = await createServerClient();
-  const { error } = await supabase.auth.signOut();
-  if (error) {
-    return { success: false, error: error.message };
-  } else {
-    return { success: true };
-  }
-}

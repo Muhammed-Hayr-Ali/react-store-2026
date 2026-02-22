@@ -11,7 +11,6 @@ import {
   PaletteIcon,
   SunIcon,
   Ticket,
-  User,
   User2Icon,
   UserIcon,
 } from "lucide-react";
