@@ -9,6 +9,7 @@ import { createOrder } from "@/lib/actions/order";
 import { PlusCircle } from "lucide-react";
 import { AddressForm } from "../shared/address-form";
 import { AddressCard } from "./address-card";
+import { useCartCount } from "@/lib/provider/cart-provider";
 import { useRouter } from "next/navigation";
 import { UserAddress } from "@/lib/actions/address";
 
@@ -25,6 +26,7 @@ interface CheckoutFormProps {
 }
 
 export function CheckoutForm({ savedAddresses }: CheckoutFormProps) {
+  const { refreshCount } = useCartCount();
 
   const router = useRouter();
 
@@ -51,8 +53,9 @@ export function CheckoutForm({ savedAddresses }: CheckoutFormProps) {
         return;
       }
 
-      toast.success("Order placed successfully.");
-      router.push(`/order-confirmation?order_id=${orderId}`);
+      refreshCount();
+      // toast.success("Order placed successfully.");
+     router.push(`/order-confirmation?order_id=${orderId}`);
     });
   };
 
