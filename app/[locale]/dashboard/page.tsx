@@ -15,13 +15,12 @@ export default async function DashboardSummary() {
     redirect("/auth/login");
   }
 
-  const userId = user.id;
 
-  const data = await getDashboardSummary(userId);
+  const data = await getDashboardSummary();
 
   return (
     <>
-      <IndexPage user={user} dashboardSummary={data} />
+      <IndexPage user={user} dashboardSummary={data.data} />
     </>
   );
 }

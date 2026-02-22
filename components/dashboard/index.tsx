@@ -24,7 +24,7 @@ import { DashboardCard } from "./ui/dashboard-card";
 import { DashboardSummary } from "@/lib/actions/dashboard";
 
 interface DashboardProps {
-  dashboardSummary: DashboardSummary | null;
+  dashboardSummary: DashboardSummary | undefined;
   user: User;
 }
 
