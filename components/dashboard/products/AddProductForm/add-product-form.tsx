@@ -47,6 +47,7 @@ import {
   Folder,
   Settings2,
   BadgePercent,
+  PlusCircle,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -115,7 +116,6 @@ export function AddProductForm({
   const [isOpen, setIsOpen] = useState(false);
   const [activeDialog, setActiveDialog] = useState<DialogState>(null);
 
-
   // ✅ حالة نوافذ إضافة الخيارات
   const [isNewOptionDialogOpen, setIsNewOptionDialogOpen] = useState(false);
   const [newOptionName, setNewOptionName] = useState("");
@@ -167,10 +167,12 @@ export function AddProductForm({
   const productName = watch("name");
   const currentTags = watch("tags") || [];
 
-  const { fields, remove } = useFieldArray({
+
+  const { fields, append, remove } = useFieldArray({
     control,
     name: "variants",
   });
+
 
   // --- تحديث الـ slug تلقائيًا (مع دعم العربية) ---
   useEffect(() => {
@@ -200,7 +202,6 @@ export function AddProductForm({
     const newTags = currentTags.filter((tag) => tag !== tagToRemove);
     setValue("tags", newTags);
   };
-
 
   // --- ✅ إضافة نوع خيار جديد (مثل: Material, Style) ---
   const handleCreateProductOption = async () => {
@@ -709,7 +710,23 @@ export function AddProductForm({
               Variables and prices
             </CardTitle>
 
-            
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                append({
+                  sku: "",
+                  price: 0,
+                  stock_quantity: 0,
+                  is_default: false,
+                  variant_options: [],
+                })
+              }
+              disabled={isSubmitting}
+            >
+              <PlusCircle  className="mr-2 h-4 w-4" /> إضافة متغير
+            </Button>
           </CardHeader>
           <CardContent className="space-y-4">
             <FieldGroup>
