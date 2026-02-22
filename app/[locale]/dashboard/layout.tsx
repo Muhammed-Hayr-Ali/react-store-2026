@@ -35,11 +35,7 @@ export default async function Layout({ params, children }: Props) {
     <AuthProvider>
       <AuthGuard />
       <SidebarProvider>
-        <AppSidebar 
-        side={side}
-        user={data.user}
-        role={data.role }
-         />
+        <AppSidebar side={side} user={data.data?.user} role={data.data?.role} />
 
         {/* ✅ 1. تحويل SidebarInset إلى حاوية Flex عمودية تأخذ ارتفاع الشاشة بالكامل */}
         <SidebarInset className="flex flex-col h-screen">
@@ -54,7 +50,9 @@ export default async function Layout({ params, children }: Props) {
           </header>
 
           {/* ✅ 3. المحتوى الرئيسي (الأطفال): يأخذ المساحة المتبقية ويكون هو القابل للتمرير */}
-          <main className="flex-1 overflow-y-auto p-4 bg-muted">{children}</main>
+          <main className="flex-1 overflow-y-auto p-4 bg-muted">
+            {children}
+          </main>
         </SidebarInset>
       </SidebarProvider>
     </AuthProvider>

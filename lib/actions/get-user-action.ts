@@ -41,7 +41,7 @@ export type Profile = {
 // Get User with Role Action
 // =============================================================================
 export async function getUserWithRole(): Promise<
-  ApiResponse<{ user: User; role: string | string[] }>
+  ApiResponse<{ user: User; role: string[] }>
 > {
   // No cache for this route
   noStore();

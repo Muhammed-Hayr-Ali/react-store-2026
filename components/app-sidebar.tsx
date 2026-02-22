@@ -20,9 +20,9 @@ import { siteConfig } from "@/lib/config/site";
 
 
 
-interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+interface AppSidebarProps  {
   user?: SupabaseUser;
-  role?: "admin" | "user";
+  role?: string[];
 }
 
 
@@ -33,7 +33,7 @@ export function AppSidebar({
   ...props
 }: AppSidebarProps) {
   const navMain =
-    role === "admin" ? siteConfig.adminNavMain : siteConfig.userNavMain;
+    role?.includes("admin") ? siteConfig.adminNavMain : siteConfig.userNavMain;
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -53,7 +53,7 @@ export function AppSidebar({
       <SidebarContent>
         <TooltipProvider>
           {/* <NavMain items={data.navMain} /> */}
-          <NavMain label={role === "admin" ? "Admin" : "User"} items={navMain} />
+          <NavMain label={role?.includes("admin") ? "Admin" : "User"} items={navMain} />
         </TooltipProvider>
       </SidebarContent>
       <SidebarFooter>
