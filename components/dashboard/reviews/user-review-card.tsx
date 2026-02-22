@@ -76,7 +76,7 @@ export function UserReviewCard({ review }: { review: UserReview }) {
   return (
     <div className="border rounded-lg p-4 flex flex-col sm:flex-row items-start gap-4 transition-colors hover:bg-muted/50">
       <Link href={`/products/${review.product.slug}`}>
-        <Image
+        <img
           width={112}
           height={112}
           src={review.product.main_image_url || "/placeholder.svg"}

@@ -120,12 +120,10 @@ export function ImageGallery({
                     : "border-muted hover:border-primary/50",
                 )}
               >
-                <Image
+                <img
                   src={img}
                   alt={`${product.name} thumbnail ${index + 1}`}
-                  fill
                   className="object-cover"
-                  unoptimized={img.startsWith("http")}
                 />
               </button>
             ))}
@@ -142,10 +140,9 @@ export function ImageGallery({
               <Spinner />
             </div>
           )}
-          <Image
+          <img
             src={activeImage}
             alt={product.name}
-            fill
             sizes="(max-width: 768px) 100vw, 50vw"
             className={cn(
               "object-contain transition-transform duration-300 hover:scale-105",
@@ -211,10 +208,9 @@ export function ImageGallery({
             className="relative w-full h-full max-w-5xl max-h-[85vh]"
             onClick={(e) => e.stopPropagation()}
           >
-            <Image
+            <img
               src={activeImage}
               alt={product.name}
-              fill
               className="object-contain"
               unoptimized={activeImage.startsWith("http")}
             />

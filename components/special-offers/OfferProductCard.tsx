@@ -26,10 +26,9 @@ export function OfferProductCard({ product }: OfferProductCardProps) {
     >
       {/* الصورة */}
       <div className="relative shrink-0 w-full h-40 mb-4">
-        <Image
+        <img
           src={product.main_image_url || "/placeholder.svg"}
           alt={product.name}
-          fill
           className="object-contain drop-shadow-lg group-hover:scale-105 transition-transform duration-300"
         />
         {/* شارة الخصم */}

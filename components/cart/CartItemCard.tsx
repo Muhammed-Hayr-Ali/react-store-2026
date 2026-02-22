@@ -88,10 +88,9 @@ export function CartItemCard({ item }: CartItemCardProps) {
     >
       {/* Image */}
       <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md">
-        <Image
+        <img
           src={product.main_image_url || "/placeholder.svg"}
           alt={product.name}
-          fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="object-contain p-1"
         />

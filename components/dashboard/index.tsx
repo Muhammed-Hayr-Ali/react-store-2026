@@ -148,7 +148,7 @@ export function IndexPage({ dashboardSummary, user }: DashboardProps) {
                       <Tooltip key={item.id}>
                         <TooltipTrigger asChild>
                           <Link href={`/products/${item.products.slug}`}>
-                            <Image
+                            <img
                               width={40}
                               height={40}
                               src={

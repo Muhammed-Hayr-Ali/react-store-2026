@@ -42,10 +42,9 @@ export function OrderSummary({ cart }: OrderSummaryProps) {
             return (
               <div key={item.id} className="flex items-center gap-4">
                 <div className="relative h-16 w-16 rounded-md border bg-white">
-                  <Image
+                  <img
                     src={product.main_image_url || "/placeholder.svg"}
                     alt={product.name}
-                    fill
                     className="object-contain p-1"
                   />
                   <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">

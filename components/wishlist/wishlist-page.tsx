@@ -125,10 +125,9 @@ function ProductCard({
           </Button>
         </div>
 
-        <Image
+        <img
           src={product.main_image_url || "/placeholder.svg"}
           alt="Photo"
-          fill
           className=" object-cover object-center"
         />
       </AspectRatio>
