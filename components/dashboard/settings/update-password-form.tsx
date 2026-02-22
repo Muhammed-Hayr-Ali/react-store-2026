@@ -16,7 +16,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { MailCheck } from "lucide-react";
-import {  AlertDialog, AlertDialogDescription, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogDescription,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // ... (تعريف FormInputs و UpdatePasswordFormProps)
 type FormInputs = {
@@ -41,29 +45,21 @@ export function UpdatePasswordForm({ onFormSubmit }: UpdatePasswordFormProps) {
     reset,
   } = useForm<FormInputs>();
 
-
   const onSubmit: SubmitHandler<FormInputs> = async (formData) => {
     setIsSubmitting(true);
     setShowReauthMessage(false); // إخفاء الرسالة القديمة عند كل محاولة جديدة
-    const result = await updateUserPassword(formData);
-    setIsSubmitting(false);
+    const { error } = await updateUserPassword(formData);
 
     // ✅ === الجزء الجديد ===
-    if (result?.requiresReauthentication) {
-      // إذا طلب الخادم إعادة المصادقة
-      setShowReauthMessage(true); // عرض الرسالة الخاصة
-      reset(); // مسح النموذج
-    } else if (result?.error) {
-      // إذا كان هناك خطأ آخر
-      toast.error(result.error);
-      console.error(result.error);
-    } else if (result?.success) {
-      // في حالة النجاح المباشر
-      toast.success(result.message || "Password updated successfully.");
-      reset();
-      onFormSubmit?.();
+    if (error) {
+      toast.error(error);
+      setIsSubmitting(false);
+      return;
     }
-    // =======================
+    toast.success("Password updated successfully.");
+    reset();
+    onFormSubmit?.();
+    setIsSubmitting(false);
   };
 
   // ✅ إذا كانت رسالة إعادة المصادقة ظاهرة، اعرضها بدلاً من النموذج
@@ -82,7 +78,7 @@ export function UpdatePasswordForm({ onFormSubmit }: UpdatePasswordFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <FieldGroup >
+      <FieldGroup>
         <Field>
           <FieldLabel>Current Password</FieldLabel>
           <Input
@@ -126,7 +122,8 @@ export function UpdatePasswordForm({ onFormSubmit }: UpdatePasswordFormProps) {
             {...register("confirmPassword", {
               required: "Please confirm your new password.",
               validate: (value) =>
-                value === getValues().newPassword || "The passwords do not match.",
+                value === getValues().newPassword ||
+                "The passwords do not match.",
             })}
           />
           {errors.confirmPassword && (
