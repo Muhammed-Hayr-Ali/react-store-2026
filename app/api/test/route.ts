@@ -1,4 +1,5 @@
 import { getTotalCartQuantity } from "@/lib/actions/cart";
+import { getReviewsByProductId } from "@/lib/actions/reviews";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -7,7 +8,9 @@ export async function GET(request: NextRequest) {
 
   console.log("Received limit_count:", limit_count);
 
-  const { data: initialCartCount, error } = await getTotalCartQuantity();
+  const { data: initialCartCount, error } = await getReviewsByProductId(
+    "c124741e-d725-40fd-b08c-448b6ff3a55a",
+  );
 
   if (error) {
     return NextResponse.json(

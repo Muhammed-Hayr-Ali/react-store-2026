@@ -1,4 +1,4 @@
-import { Review } from "@/lib/types";
+import { Review } from "@/lib/actions/reviews";
 import { ReviewCard } from "../reviews/review-card";
 
 

@@ -2,11 +2,46 @@
 
 import { unstable_noStore as noStore, revalidatePath } from "next/cache";
 import { createServerClient } from "../supabase/createServerClient";
-import { ApiResponse, Review } from "../types";
 
 
 
+// ===============================================================================
+// Api Response Type
+// ===============================================================================
+export type ApiResponse<T> = {
+  data?: T;
+  error?: string;
+};
 
+
+// ===============================================================================
+// Review Type
+// ===============================================================================
+
+export type Review = {
+  id: number;
+  created_at: Date;
+  product_id: string;
+  user_id: string;
+  rating: number;
+  title: string;
+  comment: string;
+  is_verified_purchase: boolean;
+  author: Author;
+};
+
+export type Author = {
+  id: string;
+  last_name: string;
+  avatar_url: string;
+  first_name: string;
+};
+
+
+
+// =================================================================
+// GET REVIEWS BY PRODUCT ID
+// =================================================================
 
 
 
@@ -39,7 +74,7 @@ export async function getReviewsByProductId(
     return { error: "Failed to fetch reviews." };
   }
 
-  return { data: reviews as Review[] };
+  return { data: reviews };
 }
 
 // =================================================================

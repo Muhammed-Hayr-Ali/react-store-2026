@@ -5,7 +5,7 @@ import { StarRating } from "./star-rating";
 import { formatDistanceToNow } from "date-fns";
 import { CheckBadgeIcon } from "@heroicons/react/24/solid";
 import { TrashIcon } from "@heroicons/react/24/outline";
-import { deleteReview } from "@/lib/actions/reviews";
+import { deleteReview, Review } from "@/lib/actions/reviews";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useTransition } from "react";
@@ -64,7 +64,7 @@ function ReportReviewButton({ reviewId }: { reviewId: number }) {
 
 
 type ReviewCardProps = {
-  review: ReviewWithAuthor;
+  review: Review;
   currentUserId: string | undefined;
   productSlug: string;
 };
