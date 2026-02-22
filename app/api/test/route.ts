@@ -1,4 +1,3 @@
-import { getTotalCartQuantity } from "@/lib/actions/cart";
 import { getReviewsByProductId } from "@/lib/actions/reviews";
 import { NextRequest, NextResponse } from "next/server";
 

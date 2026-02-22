@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, ReactNode } from "react";
-import { FullProduct, Review, ProductVariant } from "@/lib/types";
+import { FullProduct, ProductVariant } from "@/lib/types";
 import { User } from "@supabase/supabase-js";
 import { Option } from "react-day-picker";
 import { ImageGallery } from "./image-gallery";
@@ -11,6 +11,7 @@ import { Variants } from "./variants";
 import SummaryReviews from "./summary-reviews";
 import ReviewsList from "./reviews";
 import WriteReview from "./review-form";
+import { Review } from "@/lib/actions/reviews";
 
 // ============================================================================
 // Types & Interfaces
