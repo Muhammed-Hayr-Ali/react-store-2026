@@ -82,7 +82,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         <img
           src={product.main_image_url || "/placeholder.svg"}
           alt={product.name}
-          className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
+          className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105  h-full w-full"
         />
 
         {displayVariant && <DiscountBadge variant={displayVariant} />}

@@ -93,7 +93,7 @@ function ProductCard({
     >
       <AspectRatio
         key={product.slug}
-        ratio={4/3}
+        ratio={4 / 3}
         className="relative bg-muted overflow-hidden rounded-lg"
       >
         {/* {product.discountPercentage && (
@@ -104,7 +104,7 @@ function ProductCard({
         <img
           src={product.main_image_url || "/placeholder.svg"}
           alt="Photo"
-          className=" object-cover object-center"
+          className=" object-cover object-center  h-full w-full"
         />
       </AspectRatio>
       <CardHeader className="px-2 pt-2">

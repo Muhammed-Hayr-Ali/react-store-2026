@@ -81,7 +81,7 @@ export function UserReviewCard({ review }: { review: UserReview }) {
           height={112}
           src={review.product.main_image_url || "/placeholder.svg"}
           alt={review.product.name}
-          className="h-28 w-28 rounded-md object-cover bg-muted shrink-0"
+          className=" h-full w-full rounded-md object-cover bg-muted shrink-0"
         />
       </Link>
       <div className="flex-1">
@@ -107,7 +107,10 @@ export function UserReviewCard({ review }: { review: UserReview }) {
         )}
       </div>
       <div className="w-full sm:w-auto mt-2 sm:mt-0">
-        <DeleteReviewButton reviewId={review.id} productSlug={review.product.slug} />
+        <DeleteReviewButton
+          reviewId={review.id}
+          productSlug={review.product.slug}
+        />
       </div>
     </div>
   );

@@ -29,7 +29,7 @@ export function OfferProductCard({ product }: OfferProductCardProps) {
         <img
           src={product.main_image_url || "/placeholder.svg"}
           alt={product.name}
-          className="object-contain drop-shadow-lg group-hover:scale-105 transition-transform duration-300"
+          className="object-contain drop-shadow-lg group-hover:scale-105 transition-transform duration-300  h-full w-full"
         />
         {/* شارة الخصم */}
         <div className="absolute top-0 right-0 rtl:right-auto rtl:left-0 bg-destructive text-destructive-foreground text-xs font-bold px-2 py-1 rounded-bl-md rtl:rounded-bl-none rtl:rounded-br-md flex items-center gap-1">

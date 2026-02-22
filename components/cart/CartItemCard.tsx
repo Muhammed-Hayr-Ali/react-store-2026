@@ -10,7 +10,13 @@ import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { useCartCount } from "@/lib/provider/cart-provider";
-import { CartItem, Products, ProductVariants, removeItem, updateItemQuantity } from "@/lib/actions/cart";
+import {
+  CartItem,
+  Products,
+  ProductVariants,
+  removeItem,
+  updateItemQuantity,
+} from "@/lib/actions/cart";
 
 interface CartItemCardProps {
   item: CartItem;
@@ -92,7 +98,7 @@ export function CartItemCard({ item }: CartItemCardProps) {
           src={product.main_image_url || "/placeholder.svg"}
           alt={product.name}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="object-contain p-1"
+          className="object-contain p-1  h-full w-full"
         />
       </div>
       {/* ditails */}

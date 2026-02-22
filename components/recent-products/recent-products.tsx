@@ -108,7 +108,7 @@ function ProductCard({
         <img
           src={product.main_image_url || "/placeholder.svg"}
           alt="Photo"
-          className=" object-cover object-center"
+          className=" object-cover object-center h-full w-full"
         />
       </AspectRatio>
       <CardHeader className="px-2 pt-2">

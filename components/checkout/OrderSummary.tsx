@@ -45,7 +45,7 @@ export function OrderSummary({ cart }: OrderSummaryProps) {
                   <img
                     src={product.main_image_url || "/placeholder.svg"}
                     alt={product.name}
-                    className="object-contain p-1"
+                    className="object-contain p-1  h-full w-full"
                   />
                   <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
                     {item.quantity}

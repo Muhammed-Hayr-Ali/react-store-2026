@@ -120,7 +120,12 @@ function ProductCard({
         )}
 
         <div className="absolute top-2 right-2 z-10">
-          <Button size="icon-sm" onClick={handleRemove} disabled={isRemoving} className="bg-red-500 hover:bg-red-600 text-white ">
+          <Button
+            size="icon-sm"
+            onClick={handleRemove}
+            disabled={isRemoving}
+            className="bg-red-500 hover:bg-red-600 text-white "
+          >
             {isRemoving ? <Spinner /> : <Trash />}
           </Button>
         </div>
@@ -128,7 +133,7 @@ function ProductCard({
         <img
           src={product.main_image_url || "/placeholder.svg"}
           alt="Photo"
-          className=" object-cover object-center"
+          className=" object-cover object-center  h-full w-full"
         />
       </AspectRatio>
       <CardHeader className="px-2 pt-2">

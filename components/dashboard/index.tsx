@@ -156,7 +156,7 @@ export function IndexPage({ dashboardSummary, user }: DashboardProps) {
                                 "/placeholder.svg"
                               }
                               alt={item.products.name}
-                              className="h-10 w-10 rounded-full border-2 border-background object-cover bg-muted hover:scale-110 transition-transform"
+                              className=" h-full w-full rounded-full border-2 border-background object-cover bg-muted hover:scale-110 transition-transform"
                             />
                           </Link>
                         </TooltipTrigger>

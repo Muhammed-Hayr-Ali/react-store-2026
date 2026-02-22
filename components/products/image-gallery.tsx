@@ -135,18 +135,17 @@ export function ImageGallery({
           className="relative grow w-full max-h-125 h-auto aspect-square rounded-lg border bg-card overflow-hidden cursor-zoom-in"
           onClick={openLightbox}
         >
-          {!imageLoaded && (
+          {/* {!imageLoaded && (
             <div className="absolute inset-0 flex items-center justify-center bg-muted">
               <Spinner />
             </div>
-          )}
+          )} */}
           <img
             src={activeImage}
             alt={product.name}
-            sizes="(max-width: 768px) 100vw, 50vw"
             className={cn(
-              "object-contain transition-transform duration-300 hover:scale-105",
-              imageLoaded ? "opacity-100" : "opacity-0",
+              "object-cover transition-transform duration-300 hover:scale-105  h-full w-full",
+              // imageLoaded ? "opacity-100" : "opacity-0",
             )}
             // onLoadingComplete={() => setImageLoaded(true)}
             onError={() => {
