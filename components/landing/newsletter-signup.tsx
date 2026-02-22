@@ -37,13 +37,13 @@ export const NewsletterSignup = () => {
   } = useForm<FormInputs>();
 
   const onSubmit: SubmitHandler<FormInputs> = async (formData) => {
-    const result = await subscribeToNewsletter(formData.email);
+    const { data, error } = await subscribeToNewsletter(formData.email);
 
-    if (result.error) {
-      toast.error(result.error.message);
-    } else if (result.data) {
-      toast.success(result.data.message);
-      reset(); // إعادة تعيين النموذج بعد النجاح
+    if (error || !data) {
+      toast.error(error);
+    } else {
+      toast.success(data);
+      reset();
     }
   };
 

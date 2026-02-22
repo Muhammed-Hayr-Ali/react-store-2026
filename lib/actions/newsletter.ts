@@ -7,6 +7,7 @@ import { sendEmail } from "@/lib/actions/email";
 import { createUnsubscribeLink } from "./utils"; // استيراد دالة إنشاء الرابط من ملفها الصحيح
 import { createServerClient } from "@/lib/supabase/createServerClient";
 import NewsletterConfirmationEmail from "@/emails/newsletter-confirmation-email";
+import { getLocale } from "next-intl/server";
 
 // ===============================================================================
 // File Name: newsletter.ts
@@ -32,8 +33,8 @@ export type ApiResponse<T> = {
 
 export async function subscribeToNewsletter(
   email: string,
-  locale: string,
 ): Promise<ApiResponse<string>> {
+  const locale = await getLocale();
   // Create a Supabase Server client
   const supabase = await createServerClient();
 

@@ -11,7 +11,6 @@ import { toast } from "sonner";
 import { Spinner } from "./ui/spinner";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { subscribeToNewsletter } from "@/lib/actions/newsletter";
-import { useLocale } from "next-intl";
 
 type FormInputs = {
   email: string;
@@ -89,7 +88,6 @@ const Footer = () => {
 export default Footer;
 
 const Newsletter = () => {
-  const locale = useLocale();
   const {
     register,
     handleSubmit,
@@ -99,9 +97,7 @@ const Newsletter = () => {
 
   const onSubmit: SubmitHandler<FormInputs> = async (formData) => {
     const { data, error } = await subscribeToNewsletter(
-      formData.email,
-      locale
-    );
+      formData.email,    );
 
     if (error || !data) {
       toast.error(error);
