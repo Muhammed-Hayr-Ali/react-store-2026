@@ -1,16 +1,9 @@
 import { notFound } from "next/navigation";
-import { CheckCircle2 } from "lucide-react";
-import Link from "next/link";
 import { createServerClient } from "@/lib/supabase/createServerClient";
 import { OrderWithDetails } from "@/lib/actions/order";
-
-
+import OrderConfirmation from "@/components/order-confirmation/order-confirmation";
 
 export const dynamic = "force-dynamic";
-
-
-
-
 
 async function getOrderDetails(
   orderId: string,
@@ -73,81 +66,5 @@ export default async function OrderConfirmationPage({
     notFound();
   }
 
-  const shipping = order.shipping_address;
-
-  return (
-    <div className="container mx-auto max-w-2xl py-12 px-4">
-      <div className="text-center border-b pb-8">
-        <CheckCircle2 className="mx-auto h-16 w-16 text-green-500" />
-        <h1 className="mt-4 text-3xl font-bold">Thank you for your order!</h1>
-        <p className="mt-2 text-muted-foreground">
-          Your order has been placed successfully. A confirmation email has been
-          sent.
-        </p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Order ID: <span className="font-mono">{order.id}</span>
-        </p>
-      </div>
-
-      <div className="py-8 space-y-8">
-        {/* Order Items */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">What you ordered</h2>
-          <div className="space-y-4">
-            {order.order_items.map((item) => (
-              <div key={item.id} className="flex justify-between items-center">
-                <div>
-                  <p className="font-medium">{item.product_name}</p>
-                  {item.variant_options && (
-                    <p className="text-sm text-muted-foreground">
-                      {Object.entries(item.variant_options)
-                        .map(([key, value]) => `${key}: ${value}`)
-                        .join(", ")}
-                    </p>
-                  )}
-                  <p className="text-sm text-muted-foreground">
-                    Quantity: {item.quantity}
-                  </p>
-                </div>
-                <p className="font-medium">
-                  ${(item.price_at_purchase * item.quantity).toFixed(2)}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Shipping Address */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Shipping to</h2>
-          <div className="text-muted-foreground bg-muted/50 p-4 rounded-lg">
-            <p className="font-medium text-foreground">
-              {shipping.first_name} {shipping.last_name}
-            </p>
-            <p>{shipping.address}</p>
-            <p>
-              {shipping.city}, {shipping.state} {shipping.zip}
-            </p>
-            <p>{shipping.country}</p>
-          </div>
-        </div>
-
-        {/* Total */}
-        <div className="flex justify-between items-center border-t pt-6 text-xl font-bold">
-          <p>Total Paid</p>
-          <p>${order.total_amount.toFixed(2)}</p>
-        </div>
-      </div>
-
-      <div className="text-center mt-8">
-        {/* FIXED: Corrected typo in className (foreground) */}
-        <Link
-          href="/"
-          className="bg-primary text-primary-foreground px-6 py-3 rounded-md font-semibold hover:bg-primary/90 transition"
-        >
-          Continue Shopping
-        </Link>
-      </div>
-    </div>
-  );
+  return <OrderConfirmation order={order} />;
 }

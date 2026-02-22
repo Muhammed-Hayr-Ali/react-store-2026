@@ -26,7 +26,6 @@ interface CheckoutFormProps {
 }
 
 export function CheckoutForm({ savedAddresses }: CheckoutFormProps) {
-  const { refreshCount } = useCartCount();
 
   const router = useRouter();
 
@@ -53,7 +52,6 @@ export function CheckoutForm({ savedAddresses }: CheckoutFormProps) {
         return;
       }
 
-      refreshCount();
       // toast.success("Order placed successfully.");
      router.push(`/order-confirmation?order_id=${orderId}`);
     });
