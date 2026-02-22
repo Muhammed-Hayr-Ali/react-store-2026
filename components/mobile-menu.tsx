@@ -15,8 +15,9 @@ import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { useUser } from "@/lib/provider/user-provider";
 import { signOut } from "@/lib/actions/user";
+import { cn } from "@/lib/utils";
 
-export const MobileMenu = () => {
+export const MobileMenu = ({ className }: { className?: string }) => {
   const router = useRouter();
   const locale = useLocale();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -61,7 +62,7 @@ export const MobileMenu = () => {
   };
 
   return (
-    <div className="lg:hidden">
+    <div className={cn("", className)}>
       <MenuButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
       <div
         className={`fixed top-14 right-0 left-0 w-full border-t bg-background z-40 transform ${

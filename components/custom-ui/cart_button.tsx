@@ -1,15 +1,18 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { ShoppingCart } from "lucide-react";
 import Link from "next/link";
 
 export const CartButton = ({
   count,
   isloading,
+  className,
 }: {
   count?: number;
   isloading?: boolean;
+  className?: string;
 }) => {
   const displayCount = count ?? 0;
 
@@ -17,7 +20,7 @@ export const CartButton = ({
     <Button
       variant={"ghost"}
       size={"icon-sm"}
-      className="relative"
+      className={cn("relative", className)}
       asChild
     >
       <Link href="/cart">

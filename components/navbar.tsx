@@ -10,14 +10,24 @@ export default function Navbar() {
   const { count, loading } = useCartCount();
 
   return (
-    <nav className="flex gap-4 items-center">
+    <div className="flex  gap-2 lg:gap-4 items-center">
+      {/* <DesktopMobile /> */}
       <SearchButton />
-      <button className="w-px h-5 bg-border " />
-      <WishlistButton />
-      <div className=" w-px h-5 bg-border " />
-      <CartButton count={count} isloading={loading} />
-      <MobileMenu />
-    </nav>
+      <nav className="hidden lg:flex gap-2 lg:gap-4 items-center">
+        <button className="w-px h-5 bg-border " />
+        <WishlistButton />
+        <div className=" w-px h-5 bg-border " />
+        <CartButton count={count} isloading={loading} />
+      </nav>
+
+      {/* <NavbarMobile /> */}
+      <nav className="lg:hidden flex gap-2 lg:gap-4 items-center">
+        <div className=" w-px h-5 bg-border " />
+        <CartButton count={count} isloading={loading} />
+        <div className=" w-px h-5 bg-border " />
+        <MobileMenu />
+      </nav>
+    </div>
   );
 }
 

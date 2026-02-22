@@ -21,6 +21,7 @@ import {
   Trash,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 //================================================================================
 // 1. الخطاف المخصص لإدارة سجل البحث (يبقى كما هو)
@@ -200,7 +201,7 @@ const SearchDialogContent = ({ onClose }: { onClose: () => void }) => {
 //================================================================================
 // 3. المكون الرئيسي المبسط (آمن للعرض من جانب الخادم)
 //================================================================================
-export const SearchButton = () => {
+export const SearchButton = ({ className }: { className?: string }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   React.useEffect(() => {
@@ -218,7 +219,11 @@ export const SearchButton = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant={"ghost"} size={"icon-sm"}>
+        <Button
+          variant={"ghost"}
+          size={"icon-sm"}
+          className={cn("", className)}
+        >
           <Search />
         </Button>
       </DialogTrigger>
