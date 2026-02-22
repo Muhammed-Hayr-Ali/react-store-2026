@@ -36,8 +36,8 @@ export type Brand = {
 export type CreateBrandPayload = {
   name: string;
   slug: string;
-  description?: string;
-  logo_url?: string;
+  description: string | null;
+  logo_url: string | null;
 };
 
 

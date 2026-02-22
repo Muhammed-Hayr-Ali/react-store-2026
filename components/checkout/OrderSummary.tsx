@@ -80,7 +80,6 @@ export function OrderSummary({ cart }: OrderSummaryProps) {
           </div>
         </div>
 
-        {/* الإجمالي النهائي */}
       </CardContent>
       <CardFooter>
         <div className="flex w-full items-center justify-between border-t pt-4 text-lg font-bold border-dashed">

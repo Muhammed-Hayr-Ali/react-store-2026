@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 
 import { toast } from "sonner";
-import { createOrder } from "@/lib/actions/order"; // استيراد وظيفة إنشاء الطلب
+import { createOrder } from "@/lib/actions/order";
 import { PlusCircle } from "lucide-react";
 import { AddressForm } from "../shared/address-form";
 import { AddressCard } from "./address-card";

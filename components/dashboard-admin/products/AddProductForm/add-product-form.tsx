@@ -189,20 +189,23 @@ export function AddProductForm({
 
     setIsCreatingCategory(true);
     try {
-      const result = await createCategory({
+      const { data, error } = await createCategory({
         name: newCategoryName.trim(),
         slug: slugify(newCategoryName.trim(), { lower: true, locale: "ar" }),
+        description: null,
+        image_url: null,
+        parent_id: null,
       });
 
-      if (result.success && result.categoryId) {
-        toast.success("تم إضافة التصنيف بنجاح");
-        setValue("category_id", result.categoryId);
-        setNewCategoryName("");
-        setIsCategoryDialogOpen(false);
-        router.refresh();
-      } else {
-        toast.error(result.error || "فشل إضافة التصنيف");
+      if (error || !data) {
+        toast.error(error);
+        return;
       }
+      toast.success("تم إضافة التصنيف بنجاح");
+      setValue("category_id", data);
+      setNewCategoryName("");
+      setIsCategoryDialogOpen(false);
+      router.refresh();
     } catch (error) {
       console.error("Error creating category:", error);
       toast.error("حدث خطأ أثناء إضافة التصنيف");
@@ -220,20 +223,23 @@ export function AddProductForm({
 
     setIsCreatingBrand(true);
     try {
-      const result = await createBrand({
+      const { data, error } = await createBrand({
         name: newBrandName.trim(),
         slug: slugify(newBrandName.trim(), { lower: true, locale: "ar" }),
+        description: null,
+        logo_url: null,
       });
 
-      if (result.success && result.brandId) {
-        toast.success("تم إضافة العلامة التجارية بنجاح");
-        setValue("brand_id", result.brandId);
-        setNewBrandName("");
-        setIsBrandDialogOpen(false);
-        router.refresh();
-      } else {
-        toast.error(result.error || "فشل إضافة العلامة التجارية");
+      if (error || !data) {
+        toast.error(error);
+        return;
       }
+
+      toast.success("تم إضافة العلامة التجارية بنجاح");
+      setValue("brand_id", data);
+      setNewBrandName("");
+      setIsBrandDialogOpen(false);
+      router.refresh();
     } catch (error) {
       console.error("Error creating brand:", error);
       toast.error("حدث خطأ أثناء إضافة العلامة التجارية");
