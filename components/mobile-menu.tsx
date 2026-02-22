@@ -11,10 +11,9 @@ import React from "react";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-
+import { signOut } from "@/lib/actions/auth";
 import { toast } from "sonner";
 import { useUser } from "@/lib/provider/user-provider";
-import { signOut } from "@/lib/actions/user";
 import { cn } from "@/lib/utils";
 
 export const MobileMenu = ({ className }: { className?: string }) => {
@@ -52,14 +51,15 @@ export const MobileMenu = ({ className }: { className?: string }) => {
     };
   }, [isOpen]);
 
-  const handleLogout = async () => {
+   const handleLogout = async () => {
     setIsOpen(false);
-    const { error } = await signOut();
-    if (error) {
-      toast.error(error);
-    }
-    router.refresh();
-  };
+    
+     const { error } = await signOut();
+     if (error) {
+       toast.error(error);
+     }
+     router.refresh();
+   };
 
   return (
     <div className={cn("", className)}>

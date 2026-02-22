@@ -11,6 +11,8 @@ import {
   PaletteIcon,
   SunIcon,
   Ticket,
+  User,
+  User2Icon,
   UserIcon,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -35,10 +37,29 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import { siteConfig } from "@/lib/config/site";
 import { useUserDisplay } from "@/hooks/useUserDisplay";
-import Link from "next/link";
 import { signOut } from "@/lib/actions/auth";
 import { toast } from "sonner";
 import { useUser } from "@/lib/provider/user-provider";
+import { Button } from "./ui/button";
+import Link from "next/link";
+
+export default function UserButtonClient() {
+  const { user } = useUser();
+  if (!user) {
+    return (
+      <Button variant={"ghost"} size={"icon-sm"} asChild>
+        <Link href="/auth/login">
+          <User2Icon />
+        </Link>
+      </Button>
+    );
+  }
+  return (
+    <Button variant={"ghost"} size={"icon-sm"} asChild>
+      <UserButton />
+    </Button>
+  );
+}
 
 export const UserButton = () => {
   const { user } = useUser();

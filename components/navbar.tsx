@@ -5,6 +5,7 @@ import { CartButton } from "./custom-ui/cart_button";
 import { useCartCount } from "@/lib/provider/cart-provider";
 import { MobileMenu } from "./mobile-menu";
 import { SearchButton } from "./custom-ui/search-dialog";
+import UserButtonClient from "./user-button";
 
 export default function Navbar() {
   const { count, loading } = useCartCount();
@@ -18,6 +19,8 @@ export default function Navbar() {
         <WishlistButton />
         <div className=" w-px h-5 bg-border " />
         <CartButton count={count} isloading={loading} />
+        <button className="w-px h-5 bg-border " />
+        <UserButtonClient />
       </nav>
 
       {/* <NavbarMobile /> */}
