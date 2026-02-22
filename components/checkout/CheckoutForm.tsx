@@ -11,9 +11,7 @@ import { AddressForm } from "../shared/address-form";
 import { AddressCard } from "./address-card";
 import { useCartCount } from "@/lib/provider/cart-provider";
 import { useRouter } from "next/navigation";
-import { UserAddress } from "@/lib/actions";
-// نوع بيانات النموذج، يستخدم snake_case ليتوافق مع قاعدة البيانات
-
+import { UserAddress } from "@/lib/actions/address";
 interface CheckoutFormProps {
   savedAddresses: UserAddress[];
 }
