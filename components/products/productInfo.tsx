@@ -7,7 +7,6 @@ import WishlistButton from "./wishlist-button";
 import { StarRating } from "../reviews/star-rating";
 import Link from "next/link";
 import { Badge } from "../ui/badge";
-import { FullProduct, ProductVariant } from "@/lib/types";
 import {
   getOrganizedOptions,
   ProductInfoProps,
