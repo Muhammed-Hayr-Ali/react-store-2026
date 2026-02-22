@@ -20,12 +20,14 @@ export default function WishlistButton({
   const handleWishlistToggle = () => {
     startTransition(async () => {
       const action = isWishlisted ? removeFromWishlist : addToWishlist;
-      const result = await action(productId);
-      if (result.success) {
-        toast.success(result.message);
-        setIsWishlisted(!isWishlisted);
+      const { error } = await action(productId);
+      if (error) {
+        toast.error(error);
       } else {
-        toast.error(result.error || "Failed to update wishlist");
+        toast.success(
+          isWishlisted ? "Removed from wishlist" : "Added to wishlist",
+        );
+        setIsWishlisted(!isWishlisted);
       }
     });
   };
