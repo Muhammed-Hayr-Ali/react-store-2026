@@ -33,15 +33,18 @@ export function EditContactForm({ user, onFormSubmit }: EditContactFormProps) {
 
   const onSubmit: SubmitHandler<FormInputs> = async (formData) => {
     setIsSubmitting(true);
-    const result = await updateUserProfile(formData);
-    setIsSubmitting(false);
+    const { error } = await updateUserProfile(formData);
 
-    if (result?.error) {
-      toast.error(result.error);
-    } else if (result?.success) {
-      toast.success(result.message);
-      onFormSubmit();
+    if (error) {
+      toast.error(error);
+      setIsSubmitting(false);
+      return;
     }
+
+    toast.success("Phone number updated successfully!");
+    onFormSubmit();
+
+    setIsSubmitting(false);
   };
 
   return (

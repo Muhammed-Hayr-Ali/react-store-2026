@@ -77,25 +77,30 @@ export function ProfileHeaderCard({ user, onEdit }: ProfileHeaderCardProps) {
     setIsUploading(true);
     const formData = new FormData();
     formData.append("avatar", file);
-    const result = await uploadProfilePicture(formData);
-    if (result.success) {
-      toast.success(result.message);
-      router.refresh();
-    } else {
-      toast.error(result.error);
+    const { error } = await uploadProfilePicture(formData);
+
+    if (error) {
+      toast.error(error);
+      setIsUploading(false);
+      return;
     }
+
+    router.refresh();
     setIsUploading(false);
   };
 
   const handleDelete = async () => {
     setIsDeleting(true);
-    const result = await deleteProfilePicture();
-    if (result.success) {
-      toast.success(result.message);
-      router.refresh();
-    } else {
-      toast.error(result.error);
+    const { error } = await deleteProfilePicture();
+
+    if (error) {
+      toast.error(error);
+      setIsDeleting(false);
+      return;
     }
+
+    router.refresh();
+    setIsDeleting(false);
   };
 
   return (

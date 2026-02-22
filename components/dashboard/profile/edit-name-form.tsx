@@ -36,20 +36,25 @@ export function EditNameForm({
 
   const onSubmit: SubmitHandler<FormInputs> = async (formData) => {
     setIsSubmitting(true);
-    const result = await updateUserProfile(
-      { first_name: formData.firstName, last_name: formData.lastName },
-    );
-    setIsSubmitting(false);
-    if (result?.error) toast.error(result.error);
-    else if (result?.success) {
-      toast.success(result.message);
-      onFormSubmit();
+    const { error } = await updateUserProfile({
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+    });
+    if (error) {
+      toast.error(error);
+      setIsSubmitting(false);
+      return;
     }
+
+    toast.success("Name updated successfully!");
+    onFormSubmit();
+
+    setIsSubmitting(false);
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <FieldGroup >
+      <FieldGroup>
         <div className="grid grid-cols-1 gap-4">
           <Field>
             <FieldLabel>First Name</FieldLabel>

@@ -47,15 +47,17 @@ export function EditProfileForm({ user, onFormSubmit }: EditProfileFormProps) {
 
   const onSubmit: SubmitHandler<FormInputs> = async (formData) => {
     setIsSubmitting(true);
-    const result = await updateUserProfile(formData); 
-    setIsSubmitting(false);
-
-    if (result?.error) {
-      toast.error(result.error);
-    } else if (result?.success) {
-      toast.success(result.message);
-      onFormSubmit();
+    const { error } = await updateUserProfile(formData);
+    if (error) {
+      toast.error(error);
+      setIsSubmitting(false);
+      return;
     }
+
+    toast.success("Profile updated successfully!");
+    onFormSubmit();
+
+    setIsSubmitting(false);
   };
 
   return (

@@ -46,15 +46,18 @@ export function EditBirthdateForm({
 
   const onSubmit: SubmitHandler<FormInputs> = async (formData) => {
     setIsSubmitting(true);
-    const result = await updateUserProfile(formData);
-    setIsSubmitting(false);
+    const { data: error } = await updateUserProfile(formData);
 
-    if (result?.error) {
-      toast.error(result.error);
-    } else if (result?.success) {
-      toast.success("Date of birth updated successfully!");
-      onFormSubmit();
+    if (error) {
+      toast.error(error);
+      setIsSubmitting(false);
+      return;
     }
+
+    toast.success("Date of birth updated successfully!");
+    onFormSubmit();
+
+    setIsSubmitting(false);
   };
 
   return (
