@@ -20,20 +20,15 @@ import { siteConfig } from "@/lib/config/site";
 
 
 
-interface AppSidebarProps  {
-  user?: SupabaseUser;
-  role?: string[];
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  data: { user?: SupabaseUser; role?: string[] } | undefined;
 }
 
 
-
-export function AppSidebar({
-  user,
-  role,
-  ...props
-}: AppSidebarProps) {
-  const navMain =
-    role?.includes("admin") ? siteConfig.adminNavMain : siteConfig.userNavMain;
+export function AppSidebar({ data, ...props }: AppSidebarProps) {
+  const navMain = data?.role?.includes("admin")
+    ? siteConfig.adminNavMain
+    : siteConfig.userNavMain;
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -53,11 +48,14 @@ export function AppSidebar({
       <SidebarContent>
         <TooltipProvider>
           {/* <NavMain items={data.navMain} /> */}
-          <NavMain label={role?.includes("admin") ? "Admin" : "User"} items={navMain} />
+          <NavMain
+            label={data?.role?.includes("admin") ? "Admin" : "User"}
+            items={navMain}
+          />
         </TooltipProvider>
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} />
+        <NavUser user={data?.user} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

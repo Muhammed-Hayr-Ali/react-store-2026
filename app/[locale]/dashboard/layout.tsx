@@ -26,7 +26,7 @@ export default async function Layout({ params, children }: Props) {
   const data = await getUserWithRole();  
 
   
-
+ 
 
 
 
@@ -35,7 +35,7 @@ export default async function Layout({ params, children }: Props) {
     <AuthProvider>
       <AuthGuard />
       <SidebarProvider>
-        <AppSidebar side={side} user={data.data?.user} role={data.data?.role} />
+        <AppSidebar data={data.data} side={side}  />
 
         {/* ✅ 1. تحويل SidebarInset إلى حاوية Flex عمودية تأخذ ارتفاع الشاشة بالكامل */}
         <SidebarInset className="flex flex-col h-screen">
