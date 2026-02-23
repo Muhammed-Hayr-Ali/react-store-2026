@@ -3,57 +3,57 @@
 import React, { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-
 import { toast } from "sonner";
 import { createOrder } from "@/lib/actions/order";
 import { PlusCircle } from "lucide-react";
 import { AddressForm } from "../shared/address-form";
 import { AddressCard } from "./address-card";
-import { useCartCount } from "@/lib/provider/cart-provider";
 import { useRouter } from "next/navigation";
 import { UserAddress } from "@/lib/actions/address";
-
-
-
-
-
-
-
-
 
 interface CheckoutFormProps {
   savedAddresses: UserAddress[];
 }
 
 export function CheckoutForm({ savedAddresses }: CheckoutFormProps) {
-
   const router = useRouter();
 
   const [view, setView] = useState<"list" | "form">(
     savedAddresses.length > 0 ? "list" : "form",
   );
-  const [selectedAddress, setSelectedAddress] = useState<string | null>(
-    savedAddresses[0]?.id || null,
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
+    savedAddresses.length > 0 ? savedAddresses[0].id || null : null,
   );
 
   const [isPlacingOrder, startPlaceOrderTransition] = useTransition();
 
+  // **المنطق الجديد: حساب العنوان النشط أثناء التصير**
+  // 1. تحقق مما إذا كان العنوان المختار يدويًا لا يزال صالحًا.
+  const isSelectedAddressValid = savedAddresses.some(
+    (addr) => addr.id === selectedAddressId,
+  );
+
+  // 2. حدد العنوان النشط: إما العنوان المختار الصالح، أو أول عنوان في القائمة.
+  const activeAddressId = isSelectedAddressValid
+    ? selectedAddressId
+    : savedAddresses.length > 0
+      ? savedAddresses[0].id
+      : null;
+
   const handlePlaceOrder = () => {
-    if (!selectedAddress) {
+    if (!activeAddressId) {
       toast.error("Please select a shipping address.");
       return;
     }
     startPlaceOrderTransition(async () => {
       const { data: orderId, error: orderError } =
-        await createOrder(selectedAddress);
+        await createOrder(activeAddressId);
 
       if (orderError || !orderId) {
         toast.error(orderError);
         return;
       }
-
-      // toast.success("Order placed successfully.");
-     router.push(`/order-confirmation?order_id=${orderId}`);
+      router.push(`/order-confirmation?order_id=${orderId}`);
     });
   };
 
@@ -65,8 +65,8 @@ export function CheckoutForm({ savedAddresses }: CheckoutFormProps) {
             <AddressCard
               key={address.id}
               address={address}
-              isSelected={selectedAddress === address.id}
-              onSelect={setSelectedAddress}
+              isSelected={activeAddressId === address.id}
+              onSelect={setSelectedAddressId}
             />
           ))}
           <Button
@@ -84,7 +84,7 @@ export function CheckoutForm({ savedAddresses }: CheckoutFormProps) {
         <>
           <h3 className="text-xl font-bold mb-4">Add a New Address</h3>
           <AddressForm
-            onFormSubmit={() => setView("list")} // ✅ الاسم الصحيح
+            onFormSubmit={async () => setView("list")}
             onCancel={() => savedAddresses.length > 0 && setView("list")}
           />
         </>
@@ -95,7 +95,7 @@ export function CheckoutForm({ savedAddresses }: CheckoutFormProps) {
           onClick={handlePlaceOrder}
           className="w-full"
           size="lg"
-          disabled={isPlacingOrder || view === "form" || !selectedAddress}
+          disabled={isPlacingOrder || view === "form" || !activeAddressId}
         >
           {isPlacingOrder ? <Spinner /> : "Place Order"}
         </Button>

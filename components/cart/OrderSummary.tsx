@@ -9,13 +9,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Spinner } from "../ui/spinner";
 
 interface OrderSummaryProps {
   subtotal: number;
 }
 
 export function OrderSummary({ subtotal }: OrderSummaryProps) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handlProceedCheckout = async () => {
+    setIsLoading(true);
+    router.push("/checkout");
+  };
+
   return (
     <Card className="sticky bg-muted/50">
       <CardHeader>
@@ -47,8 +57,12 @@ export function OrderSummary({ subtotal }: OrderSummaryProps) {
         </div>
       </CardContent>
       <CardFooter className="flex justify-center">
-        <Button asChild className="w-full" size="lg">
-          <Link href="/checkout">Proceed to Checkout</Link>
+        <Button
+          className="w-full"
+          size="lg"
+          onClick={handlProceedCheckout}
+        >
+          {isLoading ? <Spinner /> : "Proceed to Checkout"}
         </Button>
       </CardFooter>
     </Card>

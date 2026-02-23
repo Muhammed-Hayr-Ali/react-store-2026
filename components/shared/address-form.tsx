@@ -16,6 +16,7 @@ import {
   updateAddress,
   UserAddress,
 } from "@/lib/actions/address";
+import { useRouter } from "next/navigation";
 
 type AddressInputs = Omit<UserAddress, "id" | "user_id" | "created_at">;
 
@@ -30,8 +31,9 @@ export function AddressForm({
   mode = "add",
   addressToEdit,
   onCancel,
+  onFormSubmit,
 }: AddressFormProps) {
-  // تهيئة النموذج بالبيانات الحالية إذا كنا في وضع التعديل
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -56,6 +58,9 @@ export function AddressForm({
           ? "Address updated successfully."
           : "Address added successfully.",
       );
+      if (onFormSubmit) {
+        onFormSubmit();
+      }
     }
   };
 
