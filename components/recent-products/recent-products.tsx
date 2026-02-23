@@ -207,15 +207,15 @@ export function RecentProducts({
               id="new-products-heading"
               className="text-2xl md:text-3xl font-bold tracking-tight"
             >
-              ✨ أحدث المنتجات
+              ✨ Latest Products
             </h2>
             <p className="text-muted-foreground mt-1">
-              اكتشف تشكيلتنا الجديدة المختارة بعناية
+              Discover our carefully curated new collection
             </p>
           </div>
           {/* زر عرض الكل (اختياري) */}
           <Button variant="ghost" className="hidden sm:flex items-center gap-1">
-            عرض الكل
+            <span>View All</span>
             <span className="text-xs">→</span>
           </Button>
         </motion.div>
