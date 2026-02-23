@@ -59,12 +59,14 @@ import {
 import CategoryForm from "./category-form";
 import { useLocale } from "next-intl";
 import VariantsForm from "./variants-form";
-import { Category } from "@/lib/actions/category";
+import {  Category } from "@/lib/actions/category";
 import { Brand } from "@/lib/actions/brands";
 import { ProductOption } from "@/lib/actions/product-options";
 import { ProductOptionValue } from "@/lib/actions/product-option-values";
 import OptionsForm from "./options-form";
 import BrandForm from "./brand-form";
+import { nanoid } from "nanoid";
+import { buildCategoryTree } from "@/lib/utils";
 
 // =================================================================
 // واجهة المكون (Props)
@@ -84,6 +86,15 @@ type DialogState = "category" | "brand" | "options" | "variants" | null;
 const isRtlLocale = (locale: string) => {
   return ["ar", "fa", "he", "ur"].includes(locale);
 };
+
+// =================================================================
+// Generate SKU
+// ================================================================
+function generateSKU(productName: string) {
+  const namePart = productName.slice(0, 3).toUpperCase(); // يأخذ أول 3 أحرف من اسم المنتج
+  const uniqueId = nanoid(6).toUpperCase(); // يولد 6 أحرف عشوائية
+  return `${namePart}-${uniqueId}`;
+}
 
 // =================================================================
 // المكون الرئيسي للنموذج
@@ -153,11 +164,14 @@ export function AddProductForm({
   // --- تحديث الـ slug تلقائيًا (مع دعم العربية) ---
   useEffect(() => {
     if (productName) {
+      const sku = generateSKU(productName);
       const slug = slugify(productName, {
         lower: true,
         strict: true,
         locale: "ar",
       });
+
+      setValue("variants.0.sku", sku, { shouldValidate: true });
       setValue("slug", slug, { shouldValidate: true });
     }
   }, [productName, setValue]);
@@ -189,6 +203,9 @@ export function AddProductForm({
       });
     }
   };
+
+
+  const categoryTree = buildCategoryTree(categories);
 
   // --- دالة الإرسال ---
   const onSubmit: SubmitHandler<ProductFormData> = async (formData) => {
@@ -456,6 +473,32 @@ export function AddProductForm({
                       <SelectValue placeholder="Select a Category" />
                     </SelectTrigger>
                     <SelectContent dir={dir}>
+                      {categoryTree.map((categoryNode) => (
+                        <SelectGroup key={categoryNode.id}>
+                          {/* التصنيف الرئيسي */}
+                          <SelectItem value={categoryNode.id}>
+                            {categoryNode.name}
+                          </SelectItem>
+                          {/* التصنيفات الفرعية */}
+                          {categoryNode.children.map((child) => (
+                            <SelectItem
+                              key={child.id}
+                              value={child.id}
+                              className="pl-6"
+                            >
+                              - {child.name} {/* أضف مسافة بادئة للتمييز */}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* <Select onValueChange={(val) => setValue("category_id", val)}>
+                    <SelectTrigger dir={dir} className="w-full">
+                      <SelectValue placeholder="Select a Category" />
+                    </SelectTrigger>
+                    <SelectContent dir={dir}>
                       <SelectGroup>
                         {categories.map((cat) => (
                           <SelectItem key={cat.name} value={cat.id}>
@@ -464,7 +507,7 @@ export function AddProductForm({
                         ))}
                       </SelectGroup>
                     </SelectContent>
-                  </Select>
+                  </Select> */}
                 </Field>
                 {/* brand */}
                 <Field>
@@ -978,6 +1021,7 @@ export function AddProductForm({
         setActiveDialog={setActiveDialog}
         optionId={optionId}
         optionName={optionName}
+        categories={categories}
       />
     </>
   );
@@ -990,6 +1034,7 @@ function DialogForm({
   setIsOpen,
   optionId,
   optionName,
+  categories,
 }: {
   isOpen: boolean;
   activeDialog: DialogState;
@@ -997,6 +1042,7 @@ function DialogForm({
   setIsOpen: (value: boolean) => void;
   optionId?: string;
   optionName?: string;
+  categories?: Category[];
 }) {
   return (
     <Dialog
@@ -1014,6 +1060,7 @@ function DialogForm({
             setIsOpen(false);
             setActiveDialog(null);
           }}
+          categories={categories}
         />
       ) : activeDialog === "brand" ? (
         <BrandForm

@@ -13,17 +13,26 @@ import { Field, FieldGroup, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
-import { createCategory } from "@/lib/actions/category";
+import { Category, createCategory } from "@/lib/actions/category";
 import { useRouter } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import slugify from "slugify";
 import { useLocale } from "next-intl";
 import { useEffect } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Inputs = {
   name: string;
   slug: string;
+  parent_id?: string;
 };
 
 const isRtlLocale = (locale: string) => {
@@ -32,8 +41,10 @@ const isRtlLocale = (locale: string) => {
 
 export default function CategoryForm({
   closeDialog,
+  categories,
 }: {
   closeDialog: () => void;
+  categories?: Category[];
 }) {
   const locale = useLocale();
   const router = useRouter();
@@ -68,7 +79,7 @@ export default function CategoryForm({
       slug: data.slug,
       description: null,
       image_url: null,
-      parent_id: null,
+      parent_id: data.parent_id || null,
     });
 
     if (error) {
@@ -117,6 +128,27 @@ export default function CategoryForm({
               />
               <FieldError>{errors.slug?.message}</FieldError>
             </Field>
+            {categories && categories.length > 0 && (
+              <Field>
+                <Label htmlFor="slug">Parent</Label>
+                <Select onValueChange={(val) => setValue("parent_id", val)}>
+                  <SelectTrigger dir={dir} className="w-full">
+                    <SelectValue placeholder="Select a Category" />
+                  </SelectTrigger>
+                  <SelectContent dir={dir}>
+                    <SelectGroup>
+                      {categories
+                        .filter((cat) => !cat.parent_id)
+                        .map((cat) => (
+                          <SelectItem key={cat.name} value={cat.id}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
           </FieldGroup>
           <DialogFooter className="pt-8">
             <DialogClose asChild>
