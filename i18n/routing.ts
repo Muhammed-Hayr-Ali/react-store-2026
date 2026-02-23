@@ -1,3 +1,4 @@
+import { siteConfig } from "@/lib/config/site";
 import { defineRouting } from "next-intl/routing";
 
 export const routing = defineRouting({
@@ -5,7 +6,7 @@ export const routing = defineRouting({
   locales: ["ar", "en"],
 
   // Used when no locale matches
-  defaultLocale: "ar",
+  defaultLocale: siteConfig.defaultLocale as "en" | "ar",
 
   // Strategy for locale prefixes in URLs
   localePrefix: "as-needed",

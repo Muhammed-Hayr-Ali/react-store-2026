@@ -44,6 +44,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RequestDeleteAccountDialog } from "./RequestDeleteAccountDialog";
 import { getMfaFactors } from "@/lib/actions/mfa";
 import { Spinner } from "@/components/ui/spinner";
+import { siteConfig } from "@/lib/config/site";
 
 function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
@@ -114,17 +115,13 @@ function LanguageSwitcher() {
     }
   };
 
-  const languages = [
-    { name: "English", value: "en" },
-    { name: "العربية", value: "ar" },
-  ];
 
   return (
     <Tabs defaultValue={locale} onValueChange={handleChangeLocale}>
       <TabsList>
-        {languages.map((l) => (
-          <TabsTrigger key={l.value} value={l.value}>
-            {l.name}
+        {siteConfig.locales.map((locale) => (
+          <TabsTrigger key={locale.name} value={locale.value}>
+            {locale.name}
           </TabsTrigger>
         ))}
       </TabsList>

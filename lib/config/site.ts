@@ -29,11 +29,11 @@ export const siteConfig = {
   url: "https://markatna.com",
 
 
-  shippingCost: 5.0,
-  taxes: 0.1,
+  shippingCost: 1.0,
+  taxes: 0,
 
 
-  defaultLocale: "ar",
+  defaultLocale: "en",
 
   // dashboard menu items
    adminNavMain: [
@@ -147,12 +147,8 @@ export const siteConfig = {
 
   locales: [
     {
-      name: "العربية",
-      locale: "ar",
-    },
-    {
       name: "English",
-      locale: "en",
+      value: "en",
     },
   ],
 

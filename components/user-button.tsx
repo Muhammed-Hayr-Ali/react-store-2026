@@ -168,15 +168,15 @@ export const UserButton = () => {
                   </DropdownMenuLabel>
                   <DropdownMenuRadioGroup
                     value={
-                      siteConfig.locales.find((loc) => loc.locale === locale)
-                        ?.locale || siteConfig.defaultLocale
+                      siteConfig.locales.find((loc) => loc.value === locale)
+                        ?.value || siteConfig.defaultLocale
                     }
                     onValueChange={handleChangeLocale}
                   >
                     {siteConfig.locales.map((loc) => (
                       <DropdownMenuRadioItem
-                        key={loc.locale}
-                        value={loc.locale}
+                        key={loc.name}
+                        value={loc.value}
                       >
                         {loc.name}
                       </DropdownMenuRadioItem>
