@@ -17,7 +17,7 @@ import { getUser } from "./get-user-action";
 // ================================================================================
 // Api Response Type
 // ================================================================================
-export type ApiResponse<T = unknown> = {
+export type ApiResponse<T> = {
   data?: T;
   error?: string;
   [key: string]: unknown;

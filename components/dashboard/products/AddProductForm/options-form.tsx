@@ -13,29 +13,22 @@ import { Field, FieldGroup, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
-import { createCategory } from "@/lib/actions/category";
 import { useRouter } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import slugify from "slugify";
 import { useLocale } from "next-intl";
-import { useEffect } from "react";
-import { createBrand } from "@/lib/actions/brands";
+import { createProductOption } from "@/lib/actions/product-options";
 
 type Inputs = {
   name: string;
-  slug: string;
+  description: string;
 };
 
 const isRtlLocale = (locale: string) => {
   return ["ar", "fa", "he", "ur"].includes(locale);
 };
 
-export default function BrandForm({
-  closeDialog,
-}: {
-  closeDialog: () => void;
-}) {
+export default function OptionsForm({ closeDialog }: { closeDialog: () => void }) {
   const locale = useLocale();
   const router = useRouter();
 
@@ -44,31 +37,15 @@ export default function BrandForm({
   const {
     register,
     reset,
-    watch,
-    setValue,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<Inputs>();
 
-  const name = watch("name");
-
-  useEffect(() => {
-    if (name) {
-      const slug = slugify(name, {
-        lower: true,
-        strict: true,
-        locale: locale,
-      });
-      setValue("slug", slug, { shouldValidate: true });
-    }
-  }, [name, setValue, locale]);
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    const { error } = await createBrand({
+    const { error } = await createProductOption({
       name: data.name,
-      slug: data.slug,
-      description: null,
-      logo_url: null,
+      description: data.description,
     });
 
     if (error) {
@@ -76,7 +53,7 @@ export default function BrandForm({
       return;
     }
 
-    toast.success("Brand created successfully");
+    toast.success("Product Option created successfully");
 
     // Reset the form after successful submission
     reset();
@@ -95,10 +72,13 @@ export default function BrandForm({
       <DialogContent className="sm:max-w-sm" dir={dir}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
           <DialogHeader>
-            <DialogTitle>Add a Brand</DialogTitle>
-            <DialogDescription>Add a Brand to your store.</DialogDescription>
+            <DialogTitle>Add a Product Options</DialogTitle>
+            <DialogDescription>
+              Add a new Product Options to your store.
+            </DialogDescription>
           </DialogHeader>
           <FieldGroup>
+            {/* Name */}
             <Field>
               <Label htmlFor="name">Name</Label>
               <Input
@@ -108,14 +88,15 @@ export default function BrandForm({
               />
               <FieldError>{errors.name?.message}</FieldError>
             </Field>
+            {/* description */}
             <Field>
-              <Label htmlFor="slug">Slug</Label>
+              <Label htmlFor="slug">Description</Label>
               <Input
-                id="slug"
+                id="description"
                 type="text"
-                {...register("slug", { required: "Slug is required" })}
+                {...register("description", { required: "Description is required" })}
               />
-              <FieldError>{errors.slug?.message}</FieldError>
+              <FieldError>{errors.description?.message}</FieldError>
             </Field>
           </FieldGroup>
           <DialogFooter className="pt-8">

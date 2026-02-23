@@ -3,6 +3,7 @@
 export interface ProductOption {
   id: string;
   name: string;
+  description: string | null;
 }
 
 export interface ProductOptionValue {

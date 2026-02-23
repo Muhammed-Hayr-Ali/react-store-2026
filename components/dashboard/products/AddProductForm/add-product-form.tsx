@@ -23,16 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-  DialogClose,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
 import {
   Trash2,
@@ -40,7 +31,6 @@ import {
   CheckCircle,
   X,
   Plus,
-  Store,
   ListPlus,
   ImageIcon,
   Info,
@@ -48,6 +38,7 @@ import {
   Settings2,
   BadgePercent,
   PlusCircle,
+  ListCheck,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -56,17 +47,8 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 
 // --- استيرادات الأنواع ---
-import {
-  ProductFormData,
-  ProductOption,
-  ProductOptionValue,
-} from "@/lib/types/product";
+import { ProductFormData } from "@/lib/types/product";
 import { createProduct } from "@/lib/actions/producta-add";
-import { createBrand } from "@/lib/actions/brands";
-import { createCategory } from "@/lib/actions/category";
-// ⚠️ تأكد من وجود هذين الملفين في lib/actions/
-import { createProductOption } from "@/lib/actions/product-options";
-import { createProductOptionValue } from "@/lib/actions/product-option-values";
 import {
   Field,
   FieldDescription,
@@ -76,14 +58,20 @@ import {
 } from "@/components/ui/field";
 import CategoryForm from "./category-form";
 import { useLocale } from "next-intl";
+import VariantsForm from "./variants-form";
+import { Category } from "@/lib/actions/category";
+import { Brand } from "@/lib/actions/brands";
+import { ProductOption } from "@/lib/actions/product-options";
+import { ProductOptionValue } from "@/lib/actions/product-option-values";
+import OptionsForm from "./options-form";
 import BrandForm from "./brand-form";
 
 // =================================================================
 // واجهة المكون (Props)
 // =================================================================
 interface AddProductFormProps {
-  categories: { id: string; name: string }[];
-  brands: { id: string; name: string }[];
+  categories: Category[];
+  brands: Brand[];
   options: ProductOption[];
   optionValues: ProductOptionValue[];
 }
@@ -91,7 +79,7 @@ interface AddProductFormProps {
 // =================================================================
 // Dialog State
 // =================================================================
-type DialogState = "category" | "brand" | "otherState2" | null;
+type DialogState = "category" | "brand" | "options" | "variants" | null;
 
 const isRtlLocale = (locale: string) => {
   return ["ar", "fa", "he", "ur"].includes(locale);
@@ -115,18 +103,8 @@ export function AddProductForm({
   // Dialog State
   const [isOpen, setIsOpen] = useState(false);
   const [activeDialog, setActiveDialog] = useState<DialogState>(null);
-
-  // ✅ حالة نوافذ إضافة الخيارات
-  const [isNewOptionDialogOpen, setIsNewOptionDialogOpen] = useState(false);
-  const [newOptionName, setNewOptionName] = useState("");
-  const [isCreatingOption, setIsCreatingOption] = useState(false);
-
-  const [isNewOptionValueDialogOpen, setIsNewOptionValueDialogOpen] =
-    useState(false);
-  const [selectedOptionForValue, setSelectedOptionForValue] =
-    useState<string>("");
-  const [newOptionValueName, setNewOptionValueName] = useState("");
-  const [isCreatingOptionValue, setIsCreatingOptionValue] = useState(false);
+  const [optionId, setOptionId] = useState<string>("");
+  const [optionName, setOptionName] = useState<string>("");
 
   // --- إعداد react-hook-form ---
   const {
@@ -167,12 +145,10 @@ export function AddProductForm({
   const productName = watch("name");
   const currentTags = watch("tags") || [];
 
-
   const { fields, append, remove } = useFieldArray({
     control,
     name: "variants",
   });
-
 
   // --- تحديث الـ slug تلقائيًا (مع دعم العربية) ---
   useEffect(() => {
@@ -201,66 +177,6 @@ export function AddProductForm({
   const handleRemoveTag = (tagToRemove: string) => {
     const newTags = currentTags.filter((tag) => tag !== tagToRemove);
     setValue("tags", newTags);
-  };
-
-  // --- ✅ إضافة نوع خيار جديد (مثل: Material, Style) ---
-  const handleCreateProductOption = async () => {
-    if (!newOptionName.trim()) {
-      toast.error("يرجى إدخال اسم الخيار");
-      return;
-    }
-
-    setIsCreatingOption(true);
-    try {
-      const result = await createProductOption({
-        name: newOptionName.trim(),
-      });
-
-      if (result.success && result.optionId) {
-        toast.success("تم إضافة الخيار بنجاح");
-        setNewOptionName("");
-        setIsNewOptionDialogOpen(false);
-        router.refresh(); // تحديث قائمة الخيارات
-      } else {
-        toast.error(result.error || "فشل إضافة الخيار");
-      }
-    } catch (error) {
-      console.error("Error creating product option:", error);
-      toast.error("حدث خطأ أثناء إضافة الخيار");
-    } finally {
-      setIsCreatingOption(false);
-    }
-  };
-
-  // --- ✅ إضافة قيمة خيار جديدة (مثل: Green for Color) ---
-  const handleCreateProductOptionValue = async () => {
-    if (!selectedOptionForValue || !newOptionValueName.trim()) {
-      toast.error("يرجى اختيار الخيار وإدخال القيمة");
-      return;
-    }
-
-    setIsCreatingOptionValue(true);
-    try {
-      const result = await createProductOptionValue({
-        option_id: selectedOptionForValue,
-        value: newOptionValueName.trim(),
-      });
-
-      if (result.success && result.optionValueId) {
-        toast.success("تم إضافة القيمة بنجاح");
-        setNewOptionValueName("");
-        setSelectedOptionForValue("");
-        setIsNewOptionValueDialogOpen(false);
-        router.refresh(); // تحديث قائمة قيم الخيارات
-      } else {
-        toast.error(result.error || "فشل إضافة قيمة الخيار");
-      }
-    } catch (error) {
-      console.error("Error creating product option value:", error);
-      toast.error("حدث خطأ أثناء إضافة قيمة الخيار");
-    } finally {
-      setIsCreatingOptionValue(false);
-    }
   };
 
   // --- دالة التعامل مع المتغير الافتراضي ---
@@ -520,30 +436,13 @@ export function AddProductForm({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Category */}
                 <Field>
-                  <FieldLabel>Category</FieldLabel>
-                  <div className="flex items-center gap-2">
-                    <Select
-                      onValueChange={(val) => setValue("category_id", val)}
-                    >
-                      <SelectTrigger dir={dir} className="w-full max-w-48">
-                        <SelectValue placeholder="Select a Category" />
-                      </SelectTrigger>
-                      <SelectContent dir={dir}>
-                        <SelectGroup>
-                          {categories.map((cat) => (
-                            <SelectItem key={cat.id} value={cat.id}>
-                              {cat.name}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-
+                  <div className="flex items-center justify-between">
+                    <FieldLabel>Category</FieldLabel>
                     <Button
                       type="button"
-                      size="icon-sm"
-                      variant={"outline"}
-                      className="shrink-0 size-9"
+                      size="icon-xs"
+                      variant={"ghost"}
+                      className="shrink-0"
                       onClick={() => {
                         setIsOpen(true);
                         setActiveDialog("category");
@@ -552,31 +451,31 @@ export function AddProductForm({
                       <Plus className="h-3 w-3" />
                     </Button>
                   </div>
+
+                  <Select onValueChange={(val) => setValue("category_id", val)}>
+                    <SelectTrigger dir={dir} className="w-full max-w-48">
+                      <SelectValue placeholder="Select a Category" />
+                    </SelectTrigger>
+                    <SelectContent dir={dir}>
+                      <SelectGroup>
+                        {categories.map((cat) => (
+                          <SelectItem key={cat.name} value={cat.id}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 </Field>
                 {/* brand */}
                 <Field>
-                  <FieldLabel>Brand</FieldLabel>
-                  <div className="flex items-center gap-2">
-                    <Select onValueChange={(val) => setValue("brand_id", val)}>
-                      <SelectTrigger dir={dir} className="w-full max-w-48">
-                        <SelectValue placeholder="Select a Brand" />
-                      </SelectTrigger>
-                      <SelectContent dir={dir}>
-                        <SelectGroup>
-                          {brands.map((bnd) => (
-                            <SelectItem key={bnd.id} value={bnd.id}>
-                              {bnd.name}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-
+                  <div className="flex items-center justify-between">
+                    <FieldLabel>Brand</FieldLabel>
                     <Button
                       type="button"
-                      size="icon-sm"
-                      variant={"outline"}
-                      className="shrink-0 size-9"
+                      size="icon-xs"
+                      variant={"ghost"}
+                      className="shrink-0"
                       onClick={() => {
                         setIsOpen(true);
                         setActiveDialog("brand");
@@ -585,6 +484,21 @@ export function AddProductForm({
                       <Plus className="h-3 w-3" />
                     </Button>
                   </div>
+
+                  <Select onValueChange={(val) => setValue("brand_id", val)}>
+                    <SelectTrigger dir={dir}>
+                      <SelectValue placeholder="Select a Brand" />
+                    </SelectTrigger>
+                    <SelectContent dir={dir}>
+                      <SelectGroup>
+                        {brands.map((bnd) => (
+                          <SelectItem key={bnd.name} value={bnd.id}>
+                            {bnd.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 </Field>
               </div>
               {/* الوسوم */}
@@ -596,7 +510,7 @@ export function AddProductForm({
                     onChange={(e) => setTagsInput(e.target.value)}
                     onKeyDown={handleAddTag}
                     disabled={isSubmitting}
-                    placeholder="اضغط Enter لإضافة وسم..."
+                    placeholder="Press enter to add a tag"
                     className="flex-1"
                   />
                   <Button
@@ -613,7 +527,7 @@ export function AddProductForm({
                     disabled={isSubmitting}
                   >
                     <Tag className="mr-2 h-4 w-4" />
-                    إضافة
+                    Add
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
@@ -628,7 +542,7 @@ export function AddProductForm({
                         type="button"
                         onClick={() => handleRemoveTag(tag)}
                         className="ml-1 rtl:ml-auto rtl:mr-1 hover:text-red-500"
-                        aria-label={`إزالة الوسم ${tag}`}
+                        aria-label={`Remove ${tag}`}
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -647,9 +561,6 @@ export function AddProductForm({
               <Settings2 className="h-5 w-5" />
               Settings
             </CardTitle>
-          </CardHeader>
-          <CardHeader>
-            <CardTitle>الإعدادات</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <FieldGroup>
@@ -704,7 +615,7 @@ export function AddProductForm({
 
         {/* Variables and prices */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex justify-between items-center">
             <CardTitle className="flex gap-2 w-fit items-center">
               <BadgePercent className="h-5 w-5" />
               Variables and prices
@@ -712,8 +623,6 @@ export function AddProductForm({
 
             <Button
               type="button"
-              variant="outline"
-              size="sm"
               onClick={() =>
                 append({
                   sku: "",
@@ -725,7 +634,8 @@ export function AddProductForm({
               }
               disabled={isSubmitting}
             >
-              <PlusCircle  className="mr-2 h-4 w-4" /> إضافة متغير
+              <PlusCircle className="mr-1 rtl:mr-auto rtl:ml-1 h-4 w-4" />
+              Add Variable
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -754,7 +664,7 @@ export function AddProductForm({
                             htmlFor={`default-${index}`}
                             className="text-sm"
                           >
-                            المتغير الافتراضي
+                            Default Variant
                           </FieldLabel>
                         </div>
                       )}
@@ -866,211 +776,106 @@ export function AddProductForm({
                     </Field>
                   </div>
 
-                  {/* ✅ خيارات المتغير مع أزرار الإضافة الديناميكية */}
-                  <div className="mt-10 pt-6 border-t">
-                    <div className="flex items-center justify-between mb-2">
-                      <Label className="block">Variants</Label>
+                  {/* options */}
 
-                      {/* ✅ زر إضافة نوع خيار جديد */}
-                      <Dialog
-                        open={isNewOptionDialogOpen}
-                        onOpenChange={setIsNewOptionDialogOpen}
-                      >
-                        <DialogTrigger asChild>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 text-xs"
-                            disabled={isSubmitting}
-                            title="إضافة نوع خيار جديد"
-                          >
-                            <ListPlus className="mr-1 h-3 w-3" />
-                            خيار جديد
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>إضافة نوع خيار جديد</DialogTitle>
-                            <DialogDescription></DialogDescription>
-                          </DialogHeader>
-                          <div className="space-y-4 py-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="new-option-name">
-                                اسم الخيار
-                              </Label>
-                              <Input
-                                id="new-option-name"
-                                value={newOptionName}
-                                onChange={(e) =>
-                                  setNewOptionName(e.target.value)
-                                }
-                                placeholder="مثال: المادة"
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter") {
-                                    handleCreateProductOption();
-                                  }
-                                }}
-                                disabled={isCreatingOption}
-                                autoFocus
-                              />
-                            </div>
-                          </div>
-                          <DialogFooter>
-                            <DialogClose asChild>
-                              <Button type="button" variant="outline">
-                                إلغاء
-                              </Button>
-                            </DialogClose>
-                            <Button
-                              onClick={handleCreateProductOption}
-                              disabled={
-                                isCreatingOption || !newOptionName.trim()
-                              }
-                            >
-                              {isCreatingOption ? (
-                                <>
-                                  <Spinner className="mr-2 h-4 w-4" />
-                                  جاري الإضافة...
-                                </>
-                              ) : (
-                                <>
-                                  <Plus className="mr-2 h-4 w-4" />
-                                  إضافة
-                                </>
+                  <div className="w-full border-t my-6" />
+                  <CardHeader className=" flex justify-between items-center px-0 pb-6">
+                    <CardTitle className="flex gap-2 w-fit items-center">
+                      <ListCheck className="h-5 w-5" />
+                      Product Options
+                    </CardTitle>
+
+                    {/* Add New Option */}
+                    <Button
+                      type="button"
+                      size={"sm"}
+                      onClick={() => {
+                        setIsOpen(true);
+                        setActiveDialog("options");
+                      }}
+                      disabled={isSubmitting}
+                    >
+                      <ListPlus className="mr-1 rtl:mr-auto rtl:ml-1 h-4 w-4" />
+                      New Option
+                    </Button>
+                  </CardHeader>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {options.map((option: ProductOption) => {
+                      const availableValues = optionValues.filter(
+                        (v) => v.option_id === option.id,
+                      );
+
+                      return (
+                        <Field key={option.name}>
+                          <div className="flex items-center justify-between">
+                            <FieldLabel>
+                              {option.name}{" "}
+                              {option.description && (
+                                <span className="text-xs text-muted">
+                                  ({option.description})
+                                </span>
                               )}
+                            </FieldLabel>
+                            <Button
+                              type="button"
+                              size="icon-xs"
+                              variant={"ghost"}
+                              className="shrink-0"
+                              onClick={() => {
+                                setOptionId(option.id);
+                                setOptionName(option.name);
+                                setIsOpen(true);
+                                setActiveDialog("variants");
+                              }}
+                            >
+                              <Plus className="h-3 w-3" />
                             </Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
+                          </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {options.map((option) => {
-                        const availableValues = optionValues.filter(
-                          (v) => v.option_id === option.id,
-                        );
+                          <Controller
+                            name={`variants.${index}.variant_options`}
+                            control={control}
+                            render={({ field }) => {
+                              const currentOptions = field.value || [];
 
-                        return (
-                          <div key={option.id} className="space-y-1">
-                            <div className="flex items-center justify-between">
-                              <Label>{option.name}</Label>
+                              // Find the currently selected option for this specific product option ID
+                              const selectedOption = currentOptions.find(
+                                (opt) =>
+                                  opt.option_value?.product_options?.id ===
+                                  option.id,
+                              );
 
-                              {/* ✅ زر إضافة قيمة خيار جديدة لهذا الخيار */}
-                              <Dialog
-                                open={isNewOptionValueDialogOpen}
-                                onOpenChange={(open) => {
-                                  setIsNewOptionValueDialogOpen(open);
-                                  if (open) {
-                                    setSelectedOptionForValue(option.id);
-                                  }
-                                }}
-                              >
-                                <DialogTrigger asChild>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6"
-                                    disabled={isSubmitting}
-                                    title={`إضافة قيمة لـ ${option.name}`}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setSelectedOptionForValue(option.id);
-                                    }}
-                                  >
-                                    <Plus className="h-3 w-3" />
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                  <DialogHeader>
-                                    <DialogTitle>
-                                      اضافة قيمة ل{option.name}
-                                    </DialogTitle>
-                                    <DialogDescription></DialogDescription>
-                                  </DialogHeader>
-                                  <div className="space-y-4 py-4">
-                                    <div className="space-y-2">
-                                      <Label htmlFor="new-option-value">
-                                        القيمة الجديدة
-                                      </Label>
-                                      <Input
-                                        id="new-option-value"
-                                        value={newOptionValueName}
-                                        onChange={(e) =>
-                                          setNewOptionValueName(e.target.value)
-                                        }
-                                        placeholder={`مثال: أخضر`}
-                                        onKeyDown={(e) => {
-                                          if (e.key === "Enter") {
-                                            handleCreateProductOptionValue();
-                                          }
-                                        }}
-                                        disabled={isCreatingOptionValue}
-                                        autoFocus
-                                      />
-                                    </div>
-                                  </div>
-                                  <DialogFooter>
-                                    <DialogClose asChild>
-                                      <Button type="button" variant="outline">
-                                        إلغاء
-                                      </Button>
-                                    </DialogClose>
-                                    <Button
-                                      onClick={handleCreateProductOptionValue}
-                                      disabled={
-                                        isCreatingOptionValue ||
-                                        !newOptionValueName.trim()
-                                      }
-                                    >
-                                      {isCreatingOptionValue ? (
-                                        <>
-                                          <Spinner className="mr-2 h-4 w-4" />
-                                          جاري الإضافة...
-                                        </>
-                                      ) : (
-                                        <>
-                                          <Plus className="mr-2 h-4 w-4" />
-                                          إضافة
-                                        </>
-                                      )}
-                                    </Button>
-                                  </DialogFooter>
-                                </DialogContent>
-                              </Dialog>
-                            </div>
+                              const currentValue =
+                                selectedOption?.option_value?.value || "";
 
-                            <Controller
-                              name={`variants.${index}.variant_options`}
-                              control={control}
-                              render={({ field }) => {
-                                const currentOptions = field.value || [];
-                                const selectedOption = currentOptions.find(
-                                  (opt) =>
-                                    opt.option_value?.product_options?.id ===
-                                    option.id,
-                                );
-                                const currentValue =
-                                  selectedOption?.option_value?.value || "";
+                              return (
+                                <Select
+                                  dir={dir}
+                                  // If currentValue is empty, the placeholder will be shown
+                                  value={currentValue}
+                                  onValueChange={(value) => {
+                                    // 1. Always filter out the old selection for this option ID first
+                                    const updatedValues = currentOptions.filter(
+                                      (opt) =>
+                                        opt.option_value?.product_options
+                                          ?.id !== option.id,
+                                    );
 
-                                return (
-                                  <Select
-                                    value={currentValue}
-                                    onValueChange={(value) => {
-                                      const selectedValue =
-                                        availableValues.find(
-                                          (v) => v.value === value,
-                                        );
-                                      if (!selectedValue) return;
+                                    // 2. Check if the user selected the "Clear" option
+                                    if (value === "__clear__") {
+                                      // Update with only the filtered list (effectively removing this selection)
+                                      // This results in an empty value, showing the placeholder
+                                      field.onChange(updatedValues);
+                                      return;
+                                    }
 
-                                      const updatedValues =
-                                        currentOptions.filter(
-                                          (opt) =>
-                                            opt.option_value?.product_options
-                                              ?.id !== option.id,
-                                        );
+                                    // 3. Handle normal value selection
+                                    const selectedValue = availableValues.find(
+                                      (v) => v.value === value,
+                                    );
 
+                                    if (selectedValue) {
                                       updatedValues.push({
                                         option_value: {
                                           id: selectedValue.id,
@@ -1081,53 +886,64 @@ export function AddProductForm({
                                           },
                                         },
                                       });
+                                    }
 
-                                      field.onChange(updatedValues);
-                                    }}
-                                    disabled={isSubmitting}
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue
-                                        placeholder={`اختر ${option.name.toLowerCase()}`}
-                                      />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {availableValues.map((val) => (
-                                        <SelectItem
-                                          key={val.id}
-                                          value={val.value}
-                                        >
-                                          {val.value}
-                                        </SelectItem>
-                                      ))}
-                                      {availableValues.length === 0 && (
+                                    field.onChange(updatedValues);
+                                  }}
+                                  disabled={isSubmitting}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue
+                                      placeholder={`Select ${option.name.toLowerCase()}`}
+                                    />
+                                  </SelectTrigger>
+                                  <SelectContent dir={dir}>
+                                    <SelectGroup>
+                                      {/* Special item to clear selection (uses a non-empty string value) */}
+                                      <SelectItem value="__clear__">
+                                        No Selection
+                                      </SelectItem>
+
+                                      {availableValues.length > 0 ? (
+                                        availableValues.map((val) => (
+                                          <SelectItem
+                                            key={val.id || val.value}
+                                            value={val.value}
+                                          >
+                                            {val.value}
+                                          </SelectItem>
+                                        ))
+                                      ) : (
                                         <SelectItem value="no-values" disabled>
-                                          لا توجد قيم متاحة
+                                          No Values Available
                                         </SelectItem>
                                       )}
-                                    </SelectContent>
-                                  </Select>
-                                );
-                              }}
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {options.length === 0 && (
-                      <p className="text-sm text-muted-foreground mt-2">
-                        لا توجد خيارات متاحة.{" "}
-                        <button
-                          type="button"
-                          onClick={() => setIsNewOptionDialogOpen(true)}
-                          className="text-primary hover:underline"
-                        >
-                          أضف خيارًا جديدًا
-                        </button>
-                      </p>
-                    )}
+                                    </SelectGroup>
+                                  </SelectContent>
+                                </Select>
+                              );
+                            }}
+                          />
+                        </Field>
+                      );
+                    })}
                   </div>
+
+                  {options.length === 0 && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      No options yet.
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOpen(true);
+                          setActiveDialog("options");
+                        }}
+                        className="text-primary hover:underline"
+                      >
+                        Add Option
+                      </button>
+                    </p>
+                  )}
                 </div>
               ))}
             </FieldGroup>
@@ -1161,6 +977,8 @@ export function AddProductForm({
         setIsOpen={setIsOpen}
         activeDialog={activeDialog}
         setActiveDialog={setActiveDialog}
+        optionId={optionId}
+        optionName={optionName}
       />
     </>
   );
@@ -1171,11 +989,15 @@ function DialogForm({
   activeDialog,
   setActiveDialog,
   setIsOpen,
+  optionId,
+  optionName,
 }: {
   isOpen: boolean;
   activeDialog: DialogState;
   setActiveDialog: (value: DialogState) => void;
   setIsOpen: (value: boolean) => void;
+  optionId?: string;
+  optionName?: string;
 }) {
   return (
     <Dialog
@@ -1196,6 +1018,22 @@ function DialogForm({
         />
       ) : activeDialog === "brand" ? (
         <BrandForm
+          closeDialog={() => {
+            setIsOpen(false);
+            setActiveDialog(null);
+          }}
+        />
+      ) : activeDialog === "options" ? (
+        <OptionsForm
+          closeDialog={() => {
+            setIsOpen(false);
+            setActiveDialog(null);
+          }}
+        />
+      ) : activeDialog === "variants" ? (
+        <VariantsForm
+          optionId={optionId}
+          optionName={optionName}
           closeDialog={() => {
             setIsOpen(false);
             setActiveDialog(null);

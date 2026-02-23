@@ -72,7 +72,7 @@ export async function createCategory(
 // ================================================================================
 // Get All Categories Action
 // ================================================================================
-export async function getAllCategories(): Promise<ApiResponse<Category[]>> {
+export async function getCategories(): Promise<ApiResponse<Category[]>> {
   // Create a Supabase client instance for server-side operations
   const supabase = await createServerClient();
   // Fetch all categories from the "categories" table, ordered by creation date in descending order
