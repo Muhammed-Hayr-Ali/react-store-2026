@@ -26,7 +26,8 @@ export type ApiResponse<T> = {
 export type ProductOption = {
   id: string;
   name: string;
-  description: string | null;
+  unit: string;
+  description: string | undefined;
   created_at: Date;
 };
 
@@ -38,7 +39,7 @@ export type ProductOptionPayload = Omit<ProductOption, "id" | "created_at">;
 // ===============================================================================
 // Product Option Search Field Type
 // ===============================================================================
-export type AddressSearchField = "name" | "description";
+export type AddressSearchField = "name" | "unit" | "description";
 // ================================================================================
 // Create Product Option
 // ================================================================================
@@ -128,7 +129,6 @@ export async function deleteProductOption(
   // Return the success status
   return { data: true };
 }
-
 
 //================================================================================
 // Search Product Option

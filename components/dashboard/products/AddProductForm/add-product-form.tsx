@@ -59,7 +59,7 @@ import {
 import CategoryForm from "./category-form";
 import { useLocale } from "next-intl";
 import VariantsForm from "./variants-form";
-import {  Category } from "@/lib/actions/category";
+import { Category } from "@/lib/actions/category";
 import { Brand } from "@/lib/actions/brands";
 import { ProductOption } from "@/lib/actions/product-options";
 import { ProductOptionValue } from "@/lib/actions/product-option-values";
@@ -203,7 +203,6 @@ export function AddProductForm({
       });
     }
   };
-
 
   const categoryTree = buildCategoryTree(categories);
 
@@ -470,7 +469,13 @@ export function AddProductForm({
 
                   <Select onValueChange={(val) => setValue("category_id", val)}>
                     <SelectTrigger dir={dir} className="w-full">
-                      <SelectValue placeholder="Select a Category" />
+                      <SelectValue
+                        placeholder={
+                          categoryTree.length > 0
+                            ? "Select a Category"
+                            : "No categories"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent dir={dir}>
                       {categoryTree.map((categoryNode) => (
@@ -493,21 +498,6 @@ export function AddProductForm({
                       ))}
                     </SelectContent>
                   </Select>
-
-                  {/* <Select onValueChange={(val) => setValue("category_id", val)}>
-                    <SelectTrigger dir={dir} className="w-full">
-                      <SelectValue placeholder="Select a Category" />
-                    </SelectTrigger>
-                    <SelectContent dir={dir}>
-                      <SelectGroup>
-                        {categories.map((cat) => (
-                          <SelectItem key={cat.name} value={cat.id}>
-                            {cat.name}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select> */}
                 </Field>
                 {/* brand */}
                 <Field>
@@ -529,7 +519,11 @@ export function AddProductForm({
 
                   <Select onValueChange={(val) => setValue("brand_id", val)}>
                     <SelectTrigger dir={dir}>
-                      <SelectValue placeholder="Select a Brand" />
+                      <SelectValue
+                        placeholder={
+                          brands.length > 0 ? "Select a Brand" : "No Brands"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent dir={dir}>
                       <SelectGroup>
@@ -718,7 +712,7 @@ export function AddProductForm({
                         size="icon"
                         onClick={() => remove(index)}
                         disabled={isSubmitting}
-                        aria-label="حذف المتغير"
+                        aria-label="Remove variant"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -852,12 +846,19 @@ export function AddProductForm({
                         <Field key={option.name}>
                           <div className="flex items-center justify-between">
                             <FieldLabel>
-                              {option.name}{" "}
-                              {option.description && (
-                                <span className="text-xs text-muted">
-                                  ({option.description})
-                                </span>
-                              )}
+                              <div>
+                                {option.name}{" "}
+                                {option.unit && (
+                                  <span className="text-xs text-muted-foreground font-semibold">
+                                    ({option.unit})
+                                  </span>
+                                )}{" "}
+                                {option.description && (
+                                  <span className="text-xs text-muted-foreground font-normal">
+                                    {option.description}
+                                  </span>
+                                )}
+                              </div>
                             </FieldLabel>
                             <Button
                               type="button"
@@ -951,8 +952,16 @@ export function AddProductForm({
                                           <SelectItem
                                             key={val.id || val.value}
                                             value={val.value}
+                                            className="gap-0"
                                           >
-                                            {val.value}
+                                            <div className="flex items-center gap-x-0.5">
+                                              <span>{val.value}</span>
+                                              {option.unit && (
+                                                <p className="text-xs text-muted-foreground">
+                                                  ({option.unit})
+                                                </p>
+                                              )}
+                                            </div>
                                           </SelectItem>
                                         ))
                                       ) : (

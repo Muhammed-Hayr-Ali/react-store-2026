@@ -21,6 +21,7 @@ import { createProductOption } from "@/lib/actions/product-options";
 
 type Inputs = {
   name: string;
+  unit: string;
   description: string;
 };
 
@@ -28,7 +29,11 @@ const isRtlLocale = (locale: string) => {
   return ["ar", "fa", "he", "ur"].includes(locale);
 };
 
-export default function OptionsForm({ closeDialog }: { closeDialog: () => void }) {
+export default function OptionsForm({
+  closeDialog,
+}: {
+  closeDialog: () => void;
+}) {
   const locale = useLocale();
   const router = useRouter();
 
@@ -41,10 +46,10 @@ export default function OptionsForm({ closeDialog }: { closeDialog: () => void }
     formState: { errors, isSubmitting },
   } = useForm<Inputs>();
 
-
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     const { error } = await createProductOption({
       name: data.name,
+      unit: data.unit,
       description: data.description,
     });
 
@@ -88,13 +93,25 @@ export default function OptionsForm({ closeDialog }: { closeDialog: () => void }
               />
               <FieldError>{errors.name?.message}</FieldError>
             </Field>
+            {/* Unit */}
+            <Field>
+              <Label htmlFor="unit">Unit</Label>
+              <Input
+                id="unit"
+                type="text"
+                {...register("unit", { required: "Unit is required" })}
+              />
+              <FieldError>{errors.unit?.message}</FieldError>
+            </Field>
             {/* description */}
             <Field>
               <Label htmlFor="slug">Description</Label>
               <Input
                 id="description"
                 type="text"
-                {...register("description", { required: "Description is required" })}
+                {...register("description", {
+                  required: "Description is required",
+                })}
               />
               <FieldError>{errors.description?.message}</FieldError>
             </Field>
