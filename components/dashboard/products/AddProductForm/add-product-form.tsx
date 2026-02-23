@@ -303,7 +303,6 @@ export function AddProductForm({
                 <Textarea
                   id="description"
                   {...register("description", {
-                    required: "full description is required.",
                     minLength: {
                       value: 10,
                       message:
