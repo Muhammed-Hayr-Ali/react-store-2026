@@ -957,9 +957,9 @@ export function AddProductForm({
                                             <div className="flex items-center gap-x-0.5">
                                               <span>{val.value}</span>
                                               {option.unit && (
-                                                <p className="text-xs text-muted-foreground">
+                                                <span className="text-xs text-muted-foreground">
                                                   ({option.unit})
-                                                </p>
+                                                </span>
                                               )}
                                             </div>
                                           </SelectItem>
