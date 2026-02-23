@@ -452,7 +452,7 @@ export function AddProductForm({
                   </div>
 
                   <Select onValueChange={(val) => setValue("category_id", val)}>
-                    <SelectTrigger dir={dir} className="w-full max-w-48">
+                    <SelectTrigger dir={dir} className="w-full">
                       <SelectValue placeholder="Select a Category" />
                     </SelectTrigger>
                     <SelectContent dir={dir}>
