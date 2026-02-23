@@ -335,11 +335,11 @@ export function AddProductForm({
                   id="main_image_url"
                   {...register("main_image_url", {
                     required: "main image url is required.",
-                    pattern: {
-                      value:
-                        /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp|bmp|svg))$/i,
-                      message: "main image url must be a valid image URL.",
-                    },
+                    // pattern: {
+                    //   value:
+                    //     /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp|bmp|svg))$/i,
+                    //   message: "main image url must be a valid image URL.",
+                    // },
                   })}
                   disabled={isSubmitting}
                   placeholder="https://example.com/image.jpg"
