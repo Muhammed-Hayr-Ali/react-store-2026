@@ -186,11 +186,7 @@ export function RecentProducts({
   }
 
   if (!products?.length)
-    return (
-      <div className="p-8 text-center text-muted-foreground">
-        لا توجد منتجات
-      </div>
-    );
+    return null;
 
   return (
     <section className="py-16 sm:py-24 bg-background/50">
