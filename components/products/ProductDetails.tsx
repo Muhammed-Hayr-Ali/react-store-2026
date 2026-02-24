@@ -13,6 +13,7 @@ import ReviewsList from "./reviews";
 import { Review } from "@/lib/actions/reviews";
 import { AddReviewGuestForm } from "../reviews/add-review-guest-form";
 import { AddReviewUserForm } from "../reviews/add-review-user-form";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 // ============================================================================
 // Types & Interfaces
@@ -153,21 +154,27 @@ export default function ProductDetails({
         userId={user?.id}
         productSlug={product.slug}
       />
-      <Separator className="my-12 lg:my-16" />
 
       {/* write review for guest */}
-      <div className="flex justify-center py-6">
-        {user ? (
-          <AddReviewUserForm
-            productId={product.id}
-            productSlug={product.slug}
-          />
-        ) : (
-          <AddReviewGuestForm
-            productId={product.id}
-            productSlug={product.slug}
-          />
-        )}
+      <div className="flex justify-center mt-18 mb-6">
+        <Card className="w-full lg:max-w-3xl shadow-none rounded-none">
+          <CardHeader>
+            <CardTitle>Leave a Review</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {user ? (
+              <AddReviewUserForm
+                productId={product.id}
+                productSlug={product.slug}
+              />
+            ) : (
+              <AddReviewGuestForm
+                productId={product.id}
+                productSlug={product.slug}
+              />
+            )}
+          </CardContent>
+        </Card>
       </div>
     </>
   );

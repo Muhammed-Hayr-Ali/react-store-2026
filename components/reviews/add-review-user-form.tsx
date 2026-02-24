@@ -66,88 +66,79 @@ export function AddReviewUserForm({
   };
 
   return (
-    <Card className="w-full lg:max-w-3xl shadow-none">
-      <CardHeader>
-        <CardTitle>Leave a Review</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <FieldGroup>
-            <Controller
-              name="rating"
-              control={control}
-              rules={{ min: { value: 1, message: "Rating is required." } }}
-              render={({ field }) => (
-                <Field>
-                  <FieldLabel>Your Rating *</FieldLabel>
-                  <div className="flex items-center gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        type="button"
-                        key={star}
-                        onClick={() => field.onChange(star)}
-                      >
-                        <StarIcon
-                          key={star}
-                          className={`h-8 w-8 cursor-pointer transition-colors ${
-                            field.value >= star
-                              ? "text-amber-400 fill-amber-400"
-                              : "text-muted-foreground/30"
-                          }`}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                  {errors.rating && (
-                    <p className="text-sm text-destructive mt-1">
-                      {errors.rating.message}
-                    </p>
-                  )}
-                </Field>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <FieldGroup>
+        <Controller
+          name="rating"
+          control={control}
+          rules={{ min: { value: 1, message: "Rating is required." } }}
+          render={({ field }) => (
+            <Field>
+              <FieldLabel>Your Rating *</FieldLabel>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    type="button"
+                    key={star}
+                    onClick={() => field.onChange(star)}
+                  >
+                    <StarIcon
+                      key={star}
+                      className={`h-8 w-8 cursor-pointer transition-colors ${
+                        field.value >= star
+                          ? "text-amber-400 fill-amber-400"
+                          : "text-muted-foreground/30"
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+              {errors.rating && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.rating.message}
+                </p>
               )}
-            />
+            </Field>
+          )}
+        />
 
-            <Field>
-              <FieldLabel htmlFor="title">Title</FieldLabel>
-              <Input
-                id="title"
-                type="title"
-                placeholder="Give your review a title"
-                aria-invalid={errors.title ? "true" : "false"}
-                disabled={isSubmitting}
-                {...register("title", {
-                  required: "Title is required",
-                })}
-              />
-              <FieldError>{errors.title?.message}</FieldError>
-            </Field>
+        <Field>
+          <FieldLabel htmlFor="title">Title</FieldLabel>
+          <Input
+            id="title"
+            type="title"
+            placeholder="Give your review a title"
+            aria-invalid={errors.title ? "true" : "false"}
+            disabled={isSubmitting}
+            {...register("title", {
+              required: "Title is required",
+            })}
+          />
+          <FieldError>{errors.title?.message}</FieldError>
+        </Field>
 
-            <Field>
-              <FieldLabel htmlFor="comment">Comment</FieldLabel>
-              <Textarea
-                id="comment"
-                placeholder="Write your comment here"
-                aria-invalid={errors.comment ? "true" : "false"}
-                disabled={isSubmitting}
-                {...register("comment", {
-                  required: "Comment is required",
-                })}
-              />
-              <FieldError>{errors.comment?.message}</FieldError>
-            </Field>
-            <Field>
-              <Button type="submit">
-                {isSubmitting ? <Spinner /> : "Submit"}
-              </Button>
-              <FieldDescription className="text-center">
-                Visitor comments are only published after they have been
-                approved.
-              </FieldDescription>
-            </Field>
-          </FieldGroup>
-        </form>
-      </CardContent>
-    </Card>
+        <Field>
+          <FieldLabel htmlFor="comment">Comment</FieldLabel>
+          <Textarea
+            id="comment"
+            placeholder="Write your comment here"
+            aria-invalid={errors.comment ? "true" : "false"}
+            disabled={isSubmitting}
+            {...register("comment", {
+              required: "Comment is required",
+            })}
+          />
+          <FieldError>{errors.comment?.message}</FieldError>
+        </Field>
+        <Field>
+          <Button type="submit">{isSubmitting ? <Spinner /> : "Submit"}</Button>
+          <FieldDescription
+            className="text-xs"
+            dangerouslySetInnerHTML={{ __html: siteConfig.termsPostingComment }}
+          ></FieldDescription>
+        </Field>
+      </FieldGroup>
+    </form>
   );
 }
 

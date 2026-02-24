@@ -37,7 +37,14 @@ export const siteConfig = {
 
   postGuestComments: false,
   postUserComments: true,
-
+  termsPostingComment:`
+            By posting a comment, you agree to our community standards.
+            <br />
+            Please ensure your comment is:
+            <br />
+            Respectful and polite. Relevant to the topic. Free from spam, hate
+            speech, or personal attacks. We reserve the right to remove any
+            comments that violate these terms.`,
 
 
   // dashboard menu items

@@ -16,12 +16,6 @@ import {
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Spinner } from "../ui/spinner";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
 import { Textarea } from "../ui/textarea";
 import { siteConfig } from "@/lib/config/site";
 
@@ -36,6 +30,14 @@ interface AddReviewFormProps {
   productId: string;
   productSlug: string;
 }
+
+
+
+
+function createMarkup(text: string) {
+  return { __html: text };
+}
+
 
 export function AddReviewGuestForm({
   productId,
@@ -70,68 +72,59 @@ export function AddReviewGuestForm({
   };
 
   return (
-    <Card className="w-full lg:max-w-3xl shadow-none">
-      <CardHeader>
-        <CardTitle>Leave a Review</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="name">Name</FieldLabel>
-              <Input
-                id="name"
-                type="name"
-                placeholder="John Doe"
-                aria-invalid={errors.name ? "true" : "false"}
-                disabled={isSubmitting}
-                {...register("name", {
-                  required: "Name is required",
-                })}
-              />
-              <FieldError>{errors.name?.message}</FieldError>
-            </Field>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <FieldGroup>
+        <Field>
+          <FieldLabel htmlFor="name">Name</FieldLabel>
+          <Input
+            id="name"
+            type="name"
+            placeholder="John Doe"
+            aria-invalid={errors.name ? "true" : "false"}
+            disabled={isSubmitting}
+            {...register("name", {
+              required: "Name is required",
+            })}
+          />
+          <FieldError>{errors.name?.message}</FieldError>
+        </Field>
 
-            <Field>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@domain.com"
-                aria-invalid={errors.email ? "true" : "false"}
-                disabled={isSubmitting}
-                {...register("email", {
-                  required: "Email is required",
-                })}
-              />
-              <FieldError>{errors.email?.message}</FieldError>
-            </Field>
+        <Field>
+          <FieldLabel htmlFor="email">Email</FieldLabel>
+          <Input
+            id="email"
+            type="email"
+            placeholder="you@domain.com"
+            aria-invalid={errors.email ? "true" : "false"}
+            disabled={isSubmitting}
+            {...register("email", {
+              required: "Email is required",
+            })}
+          />
+          <FieldError>{errors.email?.message}</FieldError>
+        </Field>
 
-            <Field>
-              <FieldLabel htmlFor="comment">Comment</FieldLabel>
-              <Textarea
-                id="comment"
-                placeholder="Write your comment here"
-                aria-invalid={errors.comment ? "true" : "false"}
-                disabled={isSubmitting}
-                {...register("comment", {
-                  required: "Comment is required",
-                })}
-              />
-              <FieldError>{errors.comment?.message}</FieldError>
-            </Field>
-            <Field>
-              <Button type="submit">
-                {isSubmitting ? <Spinner /> : "Submit"}
-              </Button>
-              <FieldDescription className="text-center">
-                Visitor comments are only published after they have been
-                approved.
-              </FieldDescription>
-            </Field>
-          </FieldGroup>
-        </form>
-      </CardContent>
-    </Card>
+        <Field>
+          <FieldLabel htmlFor="comment">Comment</FieldLabel>
+          <Textarea
+            id="comment"
+            placeholder="Write your comment here"
+            aria-invalid={errors.comment ? "true" : "false"}
+            disabled={isSubmitting}
+            {...register("comment", {
+              required: "Comment is required",
+            })}
+          />
+          <FieldError>{errors.comment?.message}</FieldError>
+        </Field>
+        <Field>
+          <Button type="submit">{isSubmitting ? <Spinner /> : "Submit"}</Button>
+          <FieldDescription
+            className="text-xs"
+            dangerouslySetInnerHTML={{ __html: siteConfig.termsPostingComment }}
+          ></FieldDescription>
+        </Field>
+      </FieldGroup>
+    </form>
   );
 }
