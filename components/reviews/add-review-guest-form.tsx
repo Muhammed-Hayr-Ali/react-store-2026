@@ -118,7 +118,11 @@ export function AddReviewGuestForm({
           <FieldError>{errors.comment?.message}</FieldError>
         </Field>
         <Field>
-          <Button type="submit">{isSubmitting ? <Spinner /> : "Submit"}</Button>
+          <div className="flex justify-end">
+            <Button type="submit" className="min-w-28">
+              {isSubmitting ? <Spinner /> : "Submit"}
+            </Button>
+          </div>
           <FieldDescription
             className="text-xs"
             dangerouslySetInnerHTML={{ __html: siteConfig.termsPostingComment }}

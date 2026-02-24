@@ -67,6 +67,7 @@ import OptionsForm from "./options-form";
 import BrandForm from "./brand-form";
 import { nanoid } from "nanoid";
 import { buildCategoryTree } from "@/lib/utils";
+import { RichTextEditor } from "@/components/editor/rich-text-editor";
 
 // =================================================================
 // واجهة المكون (Props)
@@ -315,21 +316,11 @@ export function AddProductForm({
 
               {/* Description */}
               <Field>
-                <Label htmlFor="description">Full Description *</Label>
-                <Textarea
-                  id="description"
-                  {...register("description", {
-                    minLength: {
-                      value: 10,
-                      message:
-                        "full description must be at least 10 characters.",
-                    },
-                  })}
-                  disabled={isSubmitting}
-                  placeholder="a detailed description of the product..."
-                  rows={6}
+                <FieldLabel htmlFor="description">Full Description</FieldLabel>
+                <RichTextEditor
+                  content="a detailed description of the product..."
+                  onChange={(val) => setValue("description", val)}
                 />
-                <FieldError>{errors.description?.message}</FieldError>
               </Field>
             </FieldGroup>
           </CardContent>

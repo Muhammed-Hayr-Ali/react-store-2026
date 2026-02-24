@@ -22,7 +22,7 @@ export default function ReviewsList({
     <div className="mt-8">
       {errorReviews && <p className="text-destructive">{errorReviews}</p>}
       {totalReviews === 0 && !errorReviews && (
-        <div className="text-center py-12 px-4 border-2 border-dashed rounded-lg">
+        <div className="text-center py-12 px-4 border border-dashed  rounded-lg">
           <h3 className="text-xl font-semibold">No reviews yet</h3>
           <p className="text-muted-foreground mt-2">
             Be the first to share your thoughts!

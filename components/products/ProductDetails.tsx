@@ -14,6 +14,7 @@ import { Review } from "@/lib/actions/reviews";
 import { AddReviewGuestForm } from "../reviews/add-review-guest-form";
 import { AddReviewUserForm } from "../reviews/add-review-user-form";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Content } from "../editor/content";
 
 // ============================================================================
 // Types & Interfaces
@@ -130,10 +131,7 @@ export default function ProductDetails({
           <Separator className="my-12 lg:my-16" />
           <div>
             <h3 className="text-xl font-semibold mb-2">Product Description</h3>
-            <div
-              className="prose dark:prose-invert max-w-none"
-              dangerouslySetInnerHTML={{ __html: product.description }}
-            />
+            <Content html={product.description} />
           </div>
         </>
       )}
@@ -156,8 +154,7 @@ export default function ProductDetails({
       />
 
       {/* write review for guest */}
-      <div className="flex justify-center mt-18 mb-6">
-        <Card className="w-full lg:max-w-3xl shadow-none rounded-none">
+        <Card className="shadow-none rounded-none mt-16 mb-10">
           <CardHeader>
             <CardTitle>Leave a Review</CardTitle>
           </CardHeader>
@@ -175,7 +172,7 @@ export default function ProductDetails({
             )}
           </CardContent>
         </Card>
-      </div>
+      
     </>
   );
 }
