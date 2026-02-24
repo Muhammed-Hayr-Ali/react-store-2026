@@ -283,8 +283,11 @@ export const getProductBySlug = cache(
         averageRating,
       },
     };
+
+
+
     return {
-      productDetailResponse,
+     data: productDetailResponse,
     };
   },
 );

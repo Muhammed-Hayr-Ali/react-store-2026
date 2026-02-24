@@ -10,7 +10,7 @@ async function getProduct(slug: string) {
   const response = await getProductBySlug(slug);
   if (!response.data) return null;
 
-  return response.data;
+  return response;
 }
 
 export async function generateMetadata({
@@ -20,16 +20,16 @@ export async function generateMetadata({
 }) {
   const { slug } = await params;
 
-  const data = await getProduct(slug);
+  const response = await getProduct(slug);
 
-  if (!data) {
+  if (!response || !response.data || !response.data.product) {
     return createMetadata({
       title: "Product Not Found",
       description: "Product not found",
     });
   }
 
-  const product = data.product;
+  const product = response.data.product;
 
   return createMetadata({
     title: product?.name ?? "",
@@ -47,16 +47,18 @@ export default async function Page({ params }: Props) {
   // Get slug from params
   const { slug } = await params;
 
-  const data = await getProduct(slug);
+  const response = await getProduct(slug);
   const user = await getUser();
 
-  if (!data && data != null) {
+  console.log("productDetailResponse", response);
+
+  if (!response || !response.data || !response.data.product) {
     notFound();
   }
 
   return (
     <main className="container mx-auto pb-8 md:pb-12 px-4">
-      <ProductDetails user={user.data!} data={data!} />
+      <ProductDetails user={user.data!} data={response.data} />
     </main>
   );
 }
