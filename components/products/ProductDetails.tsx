@@ -123,16 +123,18 @@ export default function ProductDetails({
       </div>
 
       {/* Separator */}
-      <Separator className="my-12 lg:my-16" />
 
       {product.description && (
-        <div>
-          <h3 className="text-xl font-semibold mb-2">Product Description</h3>
-          <div
-            className="prose dark:prose-invert max-w-none"
-            dangerouslySetInnerHTML={{ __html: product.description }}
-          />
-        </div>
+        <>
+          <Separator className="my-12 lg:my-16" />
+          <div>
+            <h3 className="text-xl font-semibold mb-2">Product Description</h3>
+            <div
+              className="prose dark:prose-invert max-w-none"
+              dangerouslySetInnerHTML={{ __html: product.description }}
+            />
+          </div>
+        </>
       )}
       {/* Separator */}
       <Separator className="my-12 lg:my-16" />
@@ -151,6 +153,7 @@ export default function ProductDetails({
         userId={user?.id}
         productSlug={product.slug}
       />
+      <Separator className="my-12 lg:my-16" />
 
       {/* write review for guest */}
       <div className="flex justify-center py-6">

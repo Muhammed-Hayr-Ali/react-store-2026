@@ -23,6 +23,7 @@ import {
   CardTitle,
 } from "../ui/card";
 import { Textarea } from "../ui/textarea";
+import { siteConfig } from "@/lib/config/site";
 
 type Inputs = {
   name: string;
@@ -53,6 +54,7 @@ export function AddReviewGuestForm({
       ...formData,
       product_id: productId,
       product_slug: productSlug,
+      is_verified_purchase: siteConfig.postGuestComments,
     });
 
     if (error) {

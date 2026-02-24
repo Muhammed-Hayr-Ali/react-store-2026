@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/dialog";
 import { useState } from "react";
 import { ReportReviewForm } from "./report-review-form";
+import { User2 } from "lucide-react";
 
 
 function ReportReviewButton({ reviewId }: { reviewId: number }) {
@@ -131,6 +132,9 @@ export function ReviewCard({
   currentUserId,
   productSlug,
 }: ReviewCardProps) {
+
+
+  if(review.author){
   const authorName =
     [review.author?.first_name, review.author?.last_name]
       .filter(Boolean)
@@ -190,4 +194,41 @@ export function ReviewCard({
       </div>
     </div>
   );
+}
+
+  return (
+    <div className="border-b last:border-b-0 py-6">
+      <div className="flex items-start gap-4">
+        <Avatar>
+          <AvatarFallback>
+            <User2 />
+          </AvatarFallback>
+        </Avatar>
+
+        <div className="flex-1">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <p className="font-semibold">{review.name}</p>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                {formatDistanceToNow(new Date(review.created_at), {
+                  addSuffix: true,
+                })}
+              </span>
+              <ReportReviewButton reviewId={review.id} />
+            </div>
+          </div>
+
+          {review.title && (
+            <h4 className="font-semibold mt-3">{review.title}</h4>
+          )}
+          {review.comment && (
+            <p className="text-muted-foreground mt-1 whitespace-pre-wrap">
+              {review.comment}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
 }

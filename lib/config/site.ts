@@ -35,6 +35,11 @@ export const siteConfig = {
 
   defaultLocale: "en",
 
+  postGuestComments: false,
+  postUserComments: true,
+
+
+
   // dashboard menu items
    adminNavMain: [
       {

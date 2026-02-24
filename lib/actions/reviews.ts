@@ -48,6 +48,7 @@ export type CreateReviewPayload = {
   title: string;
   comment: string;
   product_slug: string;
+  is_verified_purchase: boolean;
 };
 
 // ===============================================================================
@@ -79,6 +80,7 @@ export async function createReview(
     rating: payload.rating,
     title: payload.title,
     comment: payload.comment,
+    is_verified_purchase: payload.is_verified_purchase
   });
 
   if (insertError) {
@@ -122,6 +124,7 @@ export async function getReviewsByProductId(
     .from("reviews")
     .select(GET_REVIEWS_BY_PRODUCT_ID_QUERY)
     .eq("product_id", productId)
+    .eq("is_verified_purchase", true)
     .order("created_at", { ascending: false });
 
   if (errorReviews) {

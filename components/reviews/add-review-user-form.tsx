@@ -19,6 +19,7 @@ import { Spinner } from "../ui/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Textarea } from "../ui/textarea";
 import { StarIcon } from "../custom-ui/icons";
+import { siteConfig } from "@/lib/config/site";
 
 type Inputs = {
   rating: number;
@@ -49,6 +50,7 @@ export function AddReviewUserForm({
       ...formData,
       product_id: productId,
       product_slug: productSlug,
+      is_verified_purchase: siteConfig.postUserComments,
     });
 
     if (error) {
@@ -80,7 +82,11 @@ export function AddReviewUserForm({
                   <FieldLabel>Your Rating *</FieldLabel>
                   <div className="flex items-center gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <button key={star} onClick={() => field.onChange(star)}>
+                      <button
+                        type="button"
+                        key={star}
+                        onClick={() => field.onChange(star)}
+                      >
                         <StarIcon
                           key={star}
                           className={`h-8 w-8 cursor-pointer transition-colors ${
@@ -106,7 +112,7 @@ export function AddReviewUserForm({
               <Input
                 id="title"
                 type="title"
-                placeholder="John Doe"
+                placeholder="Give your review a title"
                 aria-invalid={errors.title ? "true" : "false"}
                 disabled={isSubmitting}
                 {...register("title", {
