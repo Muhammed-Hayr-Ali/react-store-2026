@@ -1,7 +1,8 @@
+// components\products\ProductDetails.tsx
+
 "use client";
 
 import { useState, ReactNode } from "react";
-import { FullProduct, ProductVariant } from "@/lib/types";
 import { User } from "@supabase/supabase-js";
 import { Option } from "react-day-picker";
 import { ImageGallery } from "./image-gallery";
@@ -14,16 +15,23 @@ import { AddReviewGuestForm } from "../reviews/add-review-guest-form";
 import { AddReviewUserForm } from "../reviews/add-review-user-form";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Content } from "../editor/content";
-import { ProductDetailResponse } from "@/lib/actions/products";
+import { ProductDetailResponse, ProductVariant } from "@/lib/actions/products";
 
 // ============================================================================
 // Types & Interfaces
 // ============================================================================
 
+
+export interface OptionValue {
+  value: string;
+  unit?: string;
+}
+
 export interface Option {
   name: string;
-  values: string[];
+  values: OptionValue[]; // تغيير من string[] إلى OptionValue[]
 }
+
 
 export interface VariantsChildProps {
   options: Option[];
@@ -39,7 +47,7 @@ export interface VariantsProps {
 }
 
 export interface ProductInfoProps {
-  product: FullProduct;
+  product: ProductDetailResponse["product"];
   isInitiallyWishlisted: boolean;
   averageRating: number;
   totalReviews: number;
@@ -58,31 +66,36 @@ export interface ProductDetailsProps {
 // ============================================================================
 
 export const getOrganizedOptions = (
-  variants: FullProduct["variants"],
+  variants: ProductDetailResponse["product"]["variants"],
 ): Option[] => {
-  const optionsMap = new Map<string, Set<string>>();
+  const optionsMap = new Map<string, Map<string, string | undefined>>();
 
   variants.forEach((variant) => {
-    // ✅ المسار الصحيح للوصول إلى البيانات
     variant.variant_option_values.forEach((vo) => {
       const optionData = vo.product_option_values;
       if (optionData && optionData.product_options) {
         const optionName = optionData.product_options.name;
         const optionValue = optionData.value;
+        const optionUnit = optionData.product_options.unit;
 
         if (!optionsMap.has(optionName)) {
-          optionsMap.set(optionName, new Set());
+          optionsMap.set(optionName, new Map());
         }
-        optionsMap.get(optionName)!.add(optionValue);
+        // تخزين القيمة كمفتاح والوحدة كقيمة (لتجنب التكرار)
+        optionsMap.get(optionName)!.set(optionValue, optionUnit);
       }
     });
   });
 
-  return Array.from(optionsMap.entries()).map(([name, values]) => ({
+  return Array.from(optionsMap.entries()).map(([name, valuesMap]) => ({
     name,
-    values: Array.from(values),
+    values: Array.from(valuesMap.entries()).map(([value, unit]) => ({
+      value,
+      unit,
+    })),
   }));
 };
+
 
 // ============================================================================
 // Main Export - ProductDetails Component
@@ -90,6 +103,8 @@ export const getOrganizedOptions = (
 
 export default function ProductDetails({ user, data }: ProductDetailsProps) {
   const product = data.product;
+  const variants = product.variants;
+
   const [activeVariant, setActiveVariant] = useState<
     ProductVariant | undefined
   >(() => product.variants.find((v) => v.is_default) || product.variants[0]);
@@ -162,3 +177,4 @@ export default function ProductDetails({ user, data }: ProductDetailsProps) {
     </>
   );
 }
+

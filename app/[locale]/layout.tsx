@@ -18,6 +18,7 @@ import { CartCountProvider } from "@/lib/provider/cart-provider";
 import { UserProvider } from "@/lib/provider/user-provider";
 import { getTotalCartQuantity } from "@/lib/actions/cart";
 import { getUser } from "@/lib/actions/get-user-action";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -63,7 +64,7 @@ export default async function RootLayout({ children, params }: Props) {
           >
             <UserProvider initialUser={initialUser || null}>
               <CartCountProvider initialCount={initialCartCount || 0}>
-                {children}
+                <TooltipProvider>{children}</TooltipProvider>
               </CartCountProvider>
             </UserProvider>
           </ThemeProvider>

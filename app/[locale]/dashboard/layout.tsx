@@ -29,10 +29,10 @@ export default async function Layout({ params, children }: Props) {
     <AuthProvider>
       <AuthGuard />
       <SidebarProvider>
-        <AppSidebar data={data.data} side={side}  />
+        <AppSidebar data={data.data} side={side} />
 
         <SidebarInset className="flex flex-col h-screen">
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <header className="fixed w-full  z-10 top-0 flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-background">
             <SidebarTrigger className="-ml-1" />
             <Separator
               orientation="vertical"
@@ -41,9 +41,7 @@ export default async function Layout({ params, children }: Props) {
             <DynamicBreadcrumb />
           </header>
 
-          <main className="flex-1 overflow-y-auto p-4 bg-muted/40">
-            {children}
-          </main>
+          <main className="flex-1 p-4 bg-muted/40">{children}</main>
         </SidebarInset>
       </SidebarProvider>
     </AuthProvider>

@@ -68,6 +68,7 @@ import BrandForm from "./brand-form";
 import { nanoid } from "nanoid";
 import { buildCategoryTree } from "@/lib/utils";
 import { RichTextEditor } from "@/components/editor/rich-text-editor";
+import { Separator } from "@/components/ui/separator";
 
 // =================================================================
 // واجهة المكون (Props)
@@ -152,13 +153,11 @@ export function AddProductForm({
     mode: "onBlur",
   });
 
-const productName = useWatch({ control, name: "name" });
-const currentTags = useWatch({ control, name: "tags" }) || [];
+  const productName = useWatch({ control, name: "name" });
+  const currentTags = useWatch({ control, name: "tags" }) || [];
 
-    // const productName = useWatch({ name: "name" }) || "";
-    // const currentTags = useWatch({ name: "tags" }) || [];
-
-
+  // const productName = useWatch({ name: "name" }) || "";
+  // const currentTags = useWatch({ name: "tags" }) || [];
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -253,7 +252,7 @@ const currentTags = useWatch({ control, name: "tags" }) || [];
     <>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* General Information */}
-        <Card>
+        <Card className="rounded-none shadow-none">
           <CardHeader>
             <CardTitle className="flex gap-2 w-fit items-center">
               <Info className="h-5 w-5" />
@@ -330,7 +329,7 @@ const currentTags = useWatch({ control, name: "tags" }) || [];
         </Card>
 
         {/* Media */}
-        <Card>
+        <Card className="rounded-none shadow-none">
           <CardHeader>
             <CardTitle className="flex gap-2 w-fit items-center">
               <ImageIcon className="h-5 w-5" />
@@ -436,7 +435,7 @@ const currentTags = useWatch({ control, name: "tags" }) || [];
         </Card>
 
         {/* --- القسم 3: التصنيفات والعلامات --- */}
-        <Card>
+        <Card className="rounded-none shadow-none">
           <CardHeader>
             <CardTitle className="flex gap-2 w-fit items-center">
               <Folder className="h-5 w-5" />
@@ -566,21 +565,17 @@ const currentTags = useWatch({ control, name: "tags" }) || [];
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {currentTags.map((tag: string) => (
-                    <Badge
+                    <Button
                       key={tag}
-                      variant="secondary"
-                      className="p-2 flex items-center"
+                      type="button"
+                      size="sm"
+                      variant={"secondary"}
+                      onClick={() => handleRemoveTag(tag)}
+                      aria-label={`Remove ${tag}`}
+                      className="px-2.5 py-0 text-xs hover:bg-red-300"
                     >
                       {tag}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveTag(tag)}
-                        className="ml-1 rtl:ml-auto rtl:mr-1 hover:text-red-500"
-                        aria-label={`Remove ${tag}`}
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
+                    </Button>
                   ))}
                 </div>
               </Field>
@@ -589,7 +584,7 @@ const currentTags = useWatch({ control, name: "tags" }) || [];
         </Card>
 
         {/* --- القسم 4: الإعدادات --- */}
-        <Card>
+        <Card className="rounded-none shadow-none">
           <CardHeader>
             <CardTitle className="flex gap-2 w-fit items-center">
               <Settings2 className="h-5 w-5" />
@@ -648,7 +643,7 @@ const currentTags = useWatch({ control, name: "tags" }) || [];
         </Card>
 
         {/* Variables and prices */}
-        <Card>
+        <Card className="rounded-none shadow-none">
           <CardHeader className="flex justify-between items-center">
             <CardTitle className="flex gap-2 w-fit items-center">
               <BadgePercent className="h-5 w-5" />
@@ -672,13 +667,10 @@ const currentTags = useWatch({ control, name: "tags" }) || [];
               Add Variable
             </Button>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <FieldGroup>
+          <CardContent className="space-y-4 border-none ">
+            <FieldGroup className="gap-16">
               {fields.map((field, index) => (
-                <div
-                  key={field.id}
-                  className="p-4 border rounded-lg relative bg-muted/50"
-                >
+                <div key={field.id} className="border p-4">
                   {/* is default checkbox & remove button */}
                   <div className=" flex justify-between items-center">
                     <Controller
@@ -812,7 +804,7 @@ const currentTags = useWatch({ control, name: "tags" }) || [];
 
                   {/* options */}
 
-                  <div className="w-full border-t my-6" />
+                  <Separator className="my-10" />
                   <CardHeader className=" flex justify-between items-center px-0 pb-6">
                     <CardTitle className="flex gap-2 w-fit items-center">
                       <ListCheck className="h-5 w-5" />
@@ -995,6 +987,7 @@ const currentTags = useWatch({ control, name: "tags" }) || [];
                   )}
                 </div>
               ))}
+
             </FieldGroup>
           </CardContent>
         </Card>

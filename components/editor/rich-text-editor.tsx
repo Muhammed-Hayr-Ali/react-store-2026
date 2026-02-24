@@ -4,9 +4,20 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import Link from "@tiptap/extension-link";
-import { Button } from "@/components/ui/button"; // Your shadcn button
-import { Separator } from "@/components/ui/separator"; // Your shadcn separator
+import TextAlign from "@tiptap/extension-text-align";
+import Highlight from "@tiptap/extension-highlight";
+import TaskList from "@tiptap/extension-task-list";
+import TaskItem from "@tiptap/extension-task-item";
+import Image from "@tiptap/extension-image";
+// --- إضافات حجم النص ---
+import TextStyle from "@tiptap/extension-text-style";
+import FontSize from "@tiptap/extension-font-size";
+
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+
 import {
   Dialog,
   DialogContent,
@@ -14,9 +25,25 @@ import {
   DialogTitle,
   DialogFooter,
   DialogDescription,
-} from '@/components/ui/dialog'
+} from "@/components/ui/dialog";
 
-// Icons (you can use lucide-react which usually comes with shadcn)
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import EmojiPicker, { Theme, EmojiClickData } from "emoji-picker-react";
+import { useTheme } from "next-themes";
+
 import {
   Bold,
   Italic,
@@ -25,9 +52,23 @@ import {
   Link as LinkIcon,
   Undo,
   Redo,
+  Strikethrough,
+  Quote,
+  Eraser,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Highlighter,
+  CheckSquare,
+  Image as ImageIcon,
+  Smile,
+  Type,
+  Heading1,
+  Heading2,
+  Heading3,
 } from "lucide-react";
+
 import { useState } from "react";
-import { Input } from "../ui/input";
 
 interface RichTextEditorProps {
   content: string;
@@ -39,26 +80,23 @@ interface RichTextEditorProps {
 export function RichTextEditor({
   content,
   onChange,
-  placeholder = "Write something...",
+  placeholder = "اكتب شيئاً...",
   className,
 }: RichTextEditorProps) {
+  const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
 
-
-
-  const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false)
-  const [linkUrl, setLinkUrl] = useState("")
-
-
-
-
-
+  const { theme, systemTheme } = useTheme();
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
-      Placeholder.configure({
-        placeholder,
+      StarterKit.configure({
+        heading: { levels: [1, 2, 3] },
+        bulletList: { keepMarks: true },
+        orderedList: { keepMarks: true },
+        blockquote: {},
       }),
+      Placeholder.configure({ placeholder }),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
@@ -66,153 +104,384 @@ export function RichTextEditor({
             "text-primary underline underline-offset-4 hover:text-primary/80",
         },
       }),
+      TextAlign.configure({
+        types: ["heading", "paragraph"],
+        alignments: ["left", "center", "right", "justify"],
+        defaultAlignment: "right",
+      }),
+      Highlight.configure({ multicolor: true }),
+      TaskList,
+      TaskItem.configure({ nested: true }),
+      Image.configure({
+        allowBase64: true,
+        HTMLAttributes: {
+          class: "rounded-lg max-w-full h-auto border mx-auto block",
+        },
+      }),
+      // --- تفعيل_extensions حجم النص ---
+      TextStyle,
+      FontSize.configure({
+        types: ["textStyle"],
+        defaultFontSize: "16px",
+      }),
     ],
     content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
-
     immediatelyRender: false,
-
     editorProps: {
       attributes: {
         class: cn(
-          "prose prose-sm sm:prose dark:prose-invert max-w-none focus:outline-none min-h-[200px] p-4",
+          "prose prose-sm sm:prose dark:prose-invert max-w-none focus:outline-none min-h-[250px] p-4",
           "prose-headings:font-semibold prose-p:my-2 prose-ul:my-2 prose-ol:my-2",
+          "prose-li:my-0",
           className,
         ),
+        dir: "auto",
       },
     },
   });
 
-  if (!editor) {
-    return null;
-  }
-
-
-
-
-
-
+  if (!editor) return null;
 
   const handleOpenLinkDialog = () => {
-    // إذا كان هناك رابط محدد حالياً، نضعه كقيمة افتراضية
-    const currentLink = editor.getAttributes('link').href
-    setLinkUrl(currentLink || "")
-    setIsLinkDialogOpen(true)
-  }
-
-
-
-
+    const currentLink = editor.getAttributes("link").href;
+    setLinkUrl(currentLink || "");
+    setIsLinkDialogOpen(true);
+  };
 
   const handleSaveLink = () => {
     if (!linkUrl) {
-      // إذا كان الحقل فارغاً، نقوم بإزالة الرابط
-      editor.chain().focus().unsetLink().run()
+      editor.chain().focus().unsetLink().run();
     } else {
-      // إضافة أو تحديث الرابط
-      editor.chain().focus().setLink({ href: linkUrl }).run()
+      editor.chain().focus().setLink({ href: linkUrl }).run();
     }
-    setIsLinkDialogOpen(false)
-    setLinkUrl("")
-  }
+    setIsLinkDialogOpen(false);
+    setLinkUrl("");
+  };
 
+  const addImage = () => {
+    const url = window.prompt("أدخل رابط الصورة (URL)");
+    if (url) {
+      editor.chain().focus().setImage({ src: url }).run();
+    }
+  };
 
+  const onEmojiClick = (emojiObject: EmojiClickData) => {
+    editor.chain().focus().insertContent(emojiObject.emoji).run();
+  };
 
-  const handleUnsetLink = () => {
-    editor.chain().focus().unsetLink().run()
-  }
-
-
-
-
-
-
-
+  const currentTheme = theme === "system" ? systemTheme : theme;
+  const emojiTheme = currentTheme === "dark" ? Theme.DARK : Theme.LIGHT;
 
   return (
     <>
-      <div className="border rounded-md overflow-hidden bg-background transition-all duration-300">
+      <div className="border focus-within:border-ring overflow-hidden bg-background rounded-md transition-all duration-300 ring-offset-background focus-within:ring-[3px] focus-within:ring-ring/50 focus-within:ring-offset-0">
         {/* Toolbar */}
-        <div className="border-b bg-muted/30 p-2 flex flex-wrap gap-1 items-center">
-          <Button
-            type="button"
-            variant={editor.isActive("bold") ? "default" : "ghost"}
-            size="sm"
-            onClick={() => editor.chain().focus().toggleBold().run()}
-            disabled={!editor.can().chain().focus().toggleBold().run()}
-            className="h-8 w-8 p-0"
-          >
-            <Bold className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant={editor.isActive("italic") ? "default" : "ghost"}
-            size="sm"
-            onClick={() => editor.chain().focus().toggleItalic().run()}
-            disabled={!editor.can().chain().focus().toggleItalic().run()}
-            className="h-8 w-8 p-0"
-          >
-            <Italic className="h-4 w-4" />
-          </Button>
-
+        <div className="border-b bg-muted/30 p-2 flex flex-wrap gap-1 items-center sticky top-0 z-10 backdrop-blur-sm">
+          {/* --- مجموعة حجم الخط (جديد) --- */}
+          <div className="flex items-center gap-2 mr-1">
+            <Select
+              value={editor.getAttributes("textStyle").fontSize || ""}
+              onValueChange={(value) => {
+                if (value === "") {
+                  editor.chain().focus().unsetFontSize().run();
+                } else {
+                  editor.chain().focus().setFontSize(value).run();
+                }
+              }}
+            >
+              <SelectTrigger
+                className="h-8 w-[110px] text-xs"
+                aria-label="Font Size"
+              >
+                <SelectValue placeholder="الحجم" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">افتراضي</SelectItem>
+                <SelectItem value="12px">صغير (12px)</SelectItem>
+                <SelectItem value="14px">عادي (14px)</SelectItem>
+                <SelectItem value="16px">كبير (16px)</SelectItem>
+                <SelectItem value="20px">عنوان صغير (20px)</SelectItem>
+                <SelectItem value="24px">عنوان متوسط (24px)</SelectItem>
+                <SelectItem value="32px">عنوان كبير (32px)</SelectItem>
+                <SelectItem value="48px">عملاق (48px)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Separator orientation="vertical" className="h-6 mx-1" />
 
-          <Button
-            type="button"
-            variant={editor.isActive("bulletList") ? "default" : "ghost"}
-            size="sm"
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            className="h-8 w-8 p-0"
-          >
-            <List className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant={editor.isActive("orderedList") ? "default" : "ghost"}
-            size="sm"
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            className="h-8 w-8 p-0"
-          >
-            <ListOrdered className="h-4 w-4" />
-          </Button>
-
-          <Separator orientation="vertical" className="h-6 mx-1" />
-
-          <Button
-            type="button"
-            variant={editor.isActive("link") ? "default" : "ghost"}
-            size="sm"
-            onClick={handleOpenLinkDialog}
-            className="h-8 w-8 p-0"
-          >
-            <LinkIcon className="h-4 w-4" />
-          </Button>
-
-          {editor.isActive("link") && (
+          {/* Text Style Group */}
+          <div className="flex items-center gap-1 mr-1">
             <Button
               type="button"
-              variant="destructive" // أو ghost حسب التصميم
+              variant={editor.isActive("bold") ? "secondary" : "ghost"}
               size="sm"
-              onClick={handleUnsetLink}
-              className="h-8 w-8 p-0 ml-1"
-              title="Remove Link"
+              onClick={() => editor.chain().focus().toggleBold().run()}
+              className={cn(
+                "h-8 w-8 p-0",
+                editor.isActive("bold") && "bg-muted font-bold",
+              )}
+              title="عريض"
             >
-              <span className="sr-only">Remove</span>✕
+              <Bold className="h-4 w-4" />
             </Button>
-          )}
+            <Button
+              type="button"
+              variant={editor.isActive("italic") ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => editor.chain().focus().toggleItalic().run()}
+              className={cn(
+                "h-8 w-8 p-0",
+                editor.isActive("italic") && "bg-muted",
+              )}
+              title="مائل"
+            >
+              <Italic className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant={editor.isActive("strike") ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => editor.chain().focus().toggleStrike().run()}
+              className={cn(
+                "h-8 w-8 p-0",
+                editor.isActive("strike") && "bg-muted",
+              )}
+              title="مشطوب"
+            >
+              <Strikethrough className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant={editor.isActive("highlight") ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => editor.chain().focus().toggleHighlight().run()}
+              className={cn(
+                "h-8 w-8 p-0 text-yellow-600",
+                editor.isActive("highlight") && "bg-yellow-100",
+              )}
+              title="تظليل"
+            >
+              <Highlighter className="h-4 w-4" />
+            </Button>
+          </div>
 
-          <div className="ml-auto flex gap-1">
+          <Separator orientation="vertical" className="h-6 mx-1" />
+
+          {/* Headings Group */}
+          <div className="flex items-center gap-1 mr-1">
+            <Button
+              type="button"
+              variant={
+                editor.isActive("heading", { level: 1 }) ? "secondary" : "ghost"
+              }
+              size="sm"
+              onClick={() =>
+                editor.chain().focus().toggleHeading({ level: 1 }).run()
+              }
+              className="h-8 w-8 p-0"
+              title="عنوان 1"
+            >
+              <Heading1 className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant={
+                editor.isActive("heading", { level: 2 }) ? "secondary" : "ghost"
+              }
+              size="sm"
+              onClick={() =>
+                editor.chain().focus().toggleHeading({ level: 2 }).run()
+              }
+              className="h-8 w-8 p-0"
+              title="عنوان 2"
+            >
+              <Heading2 className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <Separator orientation="vertical" className="h-6 mx-1" />
+
+          {/* Alignment Group */}
+          <div className="flex items-center gap-1 mr-1">
+            <Button
+              type="button"
+              variant={
+                editor.isActive({ textAlign: "right" }) ? "secondary" : "ghost"
+              }
+              size="sm"
+              onClick={() => editor.chain().focus().setTextAlign("right").run()}
+              className="h-8 w-8 p-0"
+              title="يمين"
+            >
+              <AlignRight className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant={
+                editor.isActive({ textAlign: "center" }) ? "secondary" : "ghost"
+              }
+              size="sm"
+              onClick={() =>
+                editor.chain().focus().setTextAlign("center").run()
+              }
+              className="h-8 w-8 p-0"
+              title="وسط"
+            >
+              <AlignCenter className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant={
+                editor.isActive({ textAlign: "left" }) ? "secondary" : "ghost"
+              }
+              size="sm"
+              onClick={() => editor.chain().focus().setTextAlign("left").run()}
+              className="h-8 w-8 p-0"
+              title="يسار"
+            >
+              <AlignLeft className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <Separator orientation="vertical" className="h-6 mx-1" />
+
+          {/* Lists & Tasks Group */}
+          <div className="flex items-center gap-1 mr-1">
+            <Button
+              type="button"
+              variant={editor.isActive("bulletList") ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => editor.chain().focus().toggleBulletList().run()}
+              className="h-8 w-8 p-0"
+              title="قائمة نقطية"
+            >
+              <List className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant={editor.isActive("orderedList") ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => editor.chain().focus().toggleOrderedList().run()}
+              className="h-8 w-8 p-0"
+              title="قائمة رقمية"
+            >
+              <ListOrdered className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant={editor.isActive("taskList") ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => editor.chain().focus().toggleTaskList().run()}
+              className="h-8 w-8 p-0"
+              title="قائمة مهام"
+            >
+              <CheckSquare className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <Separator orientation="vertical" className="h-6 mx-1" />
+
+          {/* Media, Links & Emoji Group */}
+          <div className="flex items-center gap-1 mr-1">
+            <Button
+              type="button"
+              variant={editor.isActive("link") ? "secondary" : "ghost"}
+              size="sm"
+              onClick={handleOpenLinkDialog}
+              className="h-8 w-8 p-0"
+              title="رابط"
+            >
+              <LinkIcon className="h-4 w-4" />
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={addImage}
+              className="h-8 w-8 p-0"
+              title="صورة"
+            >
+              <ImageIcon className="h-4 w-4" />
+            </Button>
+
+            {/* Emoji Picker Button */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 hover:bg-yellow-100 hover:text-yellow-600 dark:hover:bg-yellow-900/30 dark:hover:text-yellow-400"
+                  title="إيموجي"
+                >
+                  <Smile className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-full p-0 border-0 shadow-xl"
+                align="start"
+                side="bottom"
+              >
+                <EmojiPicker
+                  theme={emojiTheme}
+                  onEmojiClick={onEmojiClick}
+                  searchPlaceHolder="بحث عن إيموجي..."
+                  width={320}
+                  height={400}
+                  lazyLoadEmojis={true}
+                  previewConfig={{ showPreview: false }}
+                  skinTonesDisabled={false}
+                />
+              </PopoverContent>
+            </Popover>
+
+            <Button
+              type="button"
+              variant={editor.isActive("blockquote") ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => editor.chain().focus().toggleBlockquote().run()}
+              className={cn(
+                "h-8 w-8 p-0",
+                editor.isActive("blockquote") && "bg-muted",
+              )}
+              title="اقتباس"
+            >
+              <Quote className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <Separator orientation="vertical" className="h-6 mx-1" />
+
+          {/* Utils Group */}
+          <div className="flex items-center gap-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                editor.chain().focus().unsetAllMarks().clearNodes().run()
+              }
+              className="h-8 w-8 p-0"
+              title="مسح التنسيق"
+            >
+              <Eraser className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Undo/Redo - Far Right */}
+          <div className="ml-auto flex gap-1 border-l pl-2">
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().undo().run()}
-              disabled={!editor.can().chain().focus().undo().run()}
+              disabled={!editor.can().undo()}
               className="h-8 w-8 p-0"
+              title="تراجع"
             >
               <Undo className="h-4 w-4" />
             </Button>
@@ -221,55 +490,49 @@ export function RichTextEditor({
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().redo().run()}
-              disabled={!editor.can().chain().focus().redo().run()}
+              disabled={!editor.can().redo()}
               className="h-8 w-8 p-0"
+              title="إعادة"
             >
               <Redo className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
-        {/* Editor Content */}
+        {/* Editor Content Area */}
         <EditorContent editor={editor} />
       </div>
 
-      {/* Dialog Component for Link Input */}
+      {/* Link Dialog */}
       <Dialog open={isLinkDialogOpen} onOpenChange={setIsLinkDialogOpen}>
-        <DialogContent className="sm:max-w-106.25">
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Add Link</DialogTitle>
+            <DialogTitle>إضافة/تعديل رابط</DialogTitle>
             <DialogDescription>
-              Enter the URL you want to link to.
+              أدخل الرابط الذي تريد الإضافة إليه. اتركه فارغاً لإزالة الرابط.
             </DialogDescription>
           </DialogHeader>
-
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Input
-                id="url"
-                value={linkUrl}
-                onChange={(e) => setLinkUrl(e.target.value)}
-                placeholder="https://example.com"
-                className="col-span-4"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleSaveLink();
-                  }
-                }}
-              />
-            </div>
+          <div className="py-4">
+            <Input
+              id="url"
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              placeholder="https://example.com"
+              className="w-full"
+              onKeyDown={(e) => e.key === "Enter" && handleSaveLink()}
+              autoFocus
+              dir="ltr"
+            />
           </div>
-
           <DialogFooter>
             <Button
-              type="button"
               variant="outline"
               onClick={() => setIsLinkDialogOpen(false)}
             >
-              Cancel
+              إلغاء
             </Button>
-            <Button type="button" onClick={handleSaveLink}>
-              {linkUrl ? "Update Link" : "Add Link"}
+            <Button onClick={handleSaveLink}>
+              {linkUrl ? "حفظ" : "إزالة الرابط"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -23,6 +23,13 @@ import {
   useEffect,
 } from "react";
 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import Image from "next/image";
+
 export default function ProductInfo({
   product,
   isInitiallyWishlisted,
@@ -140,11 +147,34 @@ export default function ProductInfo({
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        {product.category && (
-          <Badge variant="outline">{product.category.name}</Badge>
-        )}
         {product.brand && (
-          <Badge variant="secondary">{product.brand.name}</Badge>
+          <Tooltip>
+            <TooltipTrigger>
+             
+                {product.brand.logo_url ? (
+                  <Image
+                    src={product.brand.logo_url}
+                    alt={product.brand.name}
+                    width={60}
+                    height={60}
+                  />
+                ) : ( <Badge variant="secondary" className=" text-xs font-normal p-2">
+                  {product.brand.name}</Badge>
+                )
+                }
+              
+            </TooltipTrigger>
+            {product.brand.description && (
+              <TooltipContent side={"bottom"}>
+                <p>{product.brand.description}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        )}
+        {product.category && (
+          <Badge variant="secondary" className=" text-xs font-normal p-2">
+            {product.category.name}
+          </Badge>
         )}
       </div>
 

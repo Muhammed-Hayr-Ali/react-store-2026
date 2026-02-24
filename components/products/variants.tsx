@@ -1,5 +1,4 @@
-'use client';
-
+"use client";
 
 import { useMemo } from "react";
 import { Button } from "../ui/button";
@@ -10,7 +9,7 @@ export function Variants({
   options,
   selectedOptions = {},
   onOptionSelect = () => {},
-  variants,
+  variants = [],
 }: VariantsProps) {
   const organizedOptions: Option[] = useMemo(() => {
     if (options && options.length > 0) {
@@ -34,16 +33,41 @@ export function Variants({
             {option.name}
           </Label>
           <div className="flex flex-wrap gap-2">
-            {option.values.map((value) => {
-              const isSelected = selectedOptions[option.name] === value;
+            {option.values.map((item) => {
+              // التحقق من الاختيار باستخدام القيمة فقط
+              const isSelected = selectedOptions[option.name] === item.value;
               return (
                 <Button
-                  key={value}
+                  key={item.value}
                   type="button"
-                  variant={isSelected ? "default" : "outline"}
-                  onClick={() => onOptionSelect(option.name, value)}
+                  variant={isSelected ? "outline" : "secondary"} // نستخدم outline أو أي لون محايد لأننا سنضيف الحدود الحمراء يدوياً
+                  onClick={() => onOptionSelect(option.name, item.value)}
+                  size="sm"
+                  className={`
+                            rounded-none relative h-9 px-4
+                            ${isSelected ? "border-foreground border text-foreground" : "border-transparent"}
+                            transition-all duration-200
+                  `}
                 >
-                  {value}
+                  {/* عرض القيمة والوحدة */}
+                  <span className="flex items-center">
+                    {item.value}
+                    {item.unit && (
+                      <span className="ml-1 rtl:mr-1 text-xs font-normal opacity-70">
+                        {item.unit}
+                      </span>
+                    )}
+                  </span>
+
+                  {/* رسم المثلث في الزاوية عند التحديد */}
+                  {isSelected && (
+                    <div
+                      className="absolute top-0 right-0 w-0 h-0 
+                      border-t-8 border-t-foreground 
+                      border-l-8 border-l-transparent"
+                      aria-hidden="true"
+                    />
+                  )}
                 </Button>
               );
             })}
@@ -53,4 +77,3 @@ export function Variants({
     </div>
   );
 }
-
