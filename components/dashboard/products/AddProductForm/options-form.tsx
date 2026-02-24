@@ -99,7 +99,7 @@ export default function OptionsForm({
               <Input
                 id="unit"
                 type="text"
-                {...register("unit", { required: "Unit is required" })}
+                {...register("unit")}
               />
               <FieldError>{errors.unit?.message}</FieldError>
             </Field>
