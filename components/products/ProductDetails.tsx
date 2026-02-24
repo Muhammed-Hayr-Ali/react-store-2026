@@ -10,8 +10,9 @@ import ProductInfo from "./productInfo";
 import { Variants } from "./variants";
 import SummaryReviews from "./summary-reviews";
 import ReviewsList from "./reviews";
-import WriteReview from "./review-form";
 import { Review } from "@/lib/actions/reviews";
+import { AddReviewGuestForm } from "../reviews/add-review-guest-form";
+import { AddReviewUserForm } from "../reviews/add-review-user-form";
 
 // ============================================================================
 // Types & Interfaces
@@ -99,7 +100,6 @@ export default function ProductDetails({
   reviews,
   errorReviews,
 }: ProductDetailsProps) {
-  // الحالة النشطة للمتغير (النوع المحدد)
   const [activeVariant, setActiveVariant] = useState<
     ProductVariant | undefined
   >(() => product.variants.find((v) => v.is_default) || product.variants[0]);
@@ -143,13 +143,6 @@ export default function ProductDetails({
         totalReviews={totalReviews}
       />
 
-      {/* Review Form */}
-      <WriteReview
-        productId={product.id}
-        productName={product.name}
-        productSlug={product.slug}
-      />
-
       {/* Reviews List */}
       <ReviewsList
         reviews={reviews}
@@ -158,6 +151,21 @@ export default function ProductDetails({
         userId={user?.id}
         productSlug={product.slug}
       />
+
+      {/* write review for guest */}
+      <div className="flex justify-center py-6">
+        {user ? (
+          <AddReviewUserForm
+            productId={product.id}
+            productSlug={product.slug}
+          />
+        ) : (
+          <AddReviewGuestForm
+            productId={product.id}
+            productSlug={product.slug}
+          />
+        )}
+      </div>
     </>
   );
 }

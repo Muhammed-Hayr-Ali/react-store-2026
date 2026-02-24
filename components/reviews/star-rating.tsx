@@ -2,6 +2,7 @@
 
 import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { StarIcon } from "../custom-ui/icons";
 
 interface StarRatingProps {
   rating: number;
@@ -21,7 +22,7 @@ export function StarRating({
       {Array.from({ length: totalStars }, (_, index) => {
         const starValue = index + 1;
         return (
-          <Star
+          <StarIcon
             key={index}
             className={cn(
               "h-5 w-5", // الحجم الافتراضي
@@ -30,12 +31,14 @@ export function StarRating({
               // ✅ --- هذا هو التصحيح --- ✅
               // استخدام النقطتين (:) بدلاً من علامة الطرح (-)
               starValue <= rating
-                ? "fill-amber-400 text-amber-400"
+                ? "fill-orange-400 text-orange-400"
                 : "fill-muted text-muted-foreground",
               // -------------------------
             )}
           />
         );
+
+       
       })}
     </div>
   );

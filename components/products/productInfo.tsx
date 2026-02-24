@@ -214,7 +214,7 @@ export default function ProductInfo({
           </Button>
           <span className="px-2 font-semibold text-center  min-w-13 ">
             {quantity}
-          </span>{" "}
+          </span>
           <Button
             type="button"
             variant="ghost"
