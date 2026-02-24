@@ -10,11 +10,11 @@ import ProductInfo from "./productInfo";
 import { Variants } from "./variants";
 import SummaryReviews from "./summary-reviews";
 import ReviewsList from "./reviews";
-import { Review } from "@/lib/actions/reviews";
 import { AddReviewGuestForm } from "../reviews/add-review-guest-form";
 import { AddReviewUserForm } from "../reviews/add-review-user-form";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Content } from "../editor/content";
+import { ProductDetailResponse } from "@/lib/actions/products";
 
 // ============================================================================
 // Types & Interfaces
@@ -49,13 +49,8 @@ export interface ProductInfoProps {
 }
 
 export interface ProductDetailsProps {
-  user: User | null | undefined;
-  product: FullProduct;
-  isInitiallyWishlisted: boolean;
-  averageRating: number;
-  totalReviews: number;
-  reviews: Review[];
-  errorReviews: string | undefined;
+  user: User | null;
+  data: ProductDetailResponse;
 }
 
 // ============================================================================
@@ -93,15 +88,8 @@ export const getOrganizedOptions = (
 // Main Export - ProductDetails Component
 // ============================================================================
 
-export default function ProductDetails({
-  user,
-  product,
-  isInitiallyWishlisted,
-  averageRating,
-  totalReviews,
-  reviews,
-  errorReviews,
-}: ProductDetailsProps) {
+export default function ProductDetails({ user, data }: ProductDetailsProps) {
+  const product = data.product;
   const [activeVariant, setActiveVariant] = useState<
     ProductVariant | undefined
   >(() => product.variants.find((v) => v.is_default) || product.variants[0]);
@@ -114,9 +102,9 @@ export default function ProductDetails({
         {/* Product Info */}
         <ProductInfo
           product={product}
-          isInitiallyWishlisted={isInitiallyWishlisted}
-          averageRating={averageRating}
-          totalReviews={totalReviews}
+          isInitiallyWishlisted={data.initiallyWishlisted}
+          averageRating={data.summaryReviews.averageRating}
+          totalReviews={data.summaryReviews.totalReviews}
           activeVariantFromProps={activeVariant}
           onVariantChange={setActiveVariant}
         >
@@ -140,39 +128,37 @@ export default function ProductDetails({
 
       {/* Summary Section for Reviews */}
       <SummaryReviews
-        averageRating={averageRating}
-        totalReviews={totalReviews}
+        averageRating={data.summaryReviews.averageRating}
+        totalReviews={data.summaryReviews.totalReviews}
       />
 
       {/* Reviews List */}
       <ReviewsList
-        reviews={reviews}
-        errorReviews={errorReviews}
-        totalReviews={totalReviews}
+        reviews={data.reviews}
+        totalReviews={data.reviews.length}
         userId={user?.id}
         productSlug={product.slug}
       />
 
       {/* write review for guest */}
-        <Card className="shadow-none rounded-none mt-16 mb-10">
-          <CardHeader>
-            <CardTitle>Leave a Review</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {user ? (
-              <AddReviewUserForm
-                productId={product.id}
-                productSlug={product.slug}
-              />
-            ) : (
-              <AddReviewGuestForm
-                productId={product.id}
-                productSlug={product.slug}
-              />
-            )}
-          </CardContent>
-        </Card>
-      
+      <Card className="shadow-none rounded-none mt-16 mb-10">
+        <CardHeader>
+          <CardTitle>Leave a Review</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {user ? (
+            <AddReviewUserForm
+              productId={product.id}
+              productSlug={product.slug}
+            />
+          ) : (
+            <AddReviewGuestForm
+              productId={product.id}
+              productSlug={product.slug}
+            />
+          )}
+        </CardContent>
+      </Card>
     </>
   );
 }

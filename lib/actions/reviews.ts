@@ -114,7 +114,7 @@ const GET_REVIEWS_BY_PRODUCT_ID_QUERY = `
 
 export async function getReviewsByProductId(
   productId: string,
-): Promise<ApiResponse<Review[] | []>> {
+): Promise<ApiResponse<Review[]>> {
   //Don't cache this route
   noStore();
 

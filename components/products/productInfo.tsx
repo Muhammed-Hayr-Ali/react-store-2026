@@ -44,7 +44,6 @@ export default function ProductInfo({
     const options: Record<string, string> = {};
 
     if (defaultVariant) {
-      // ✅ المسار الصحيح للوصول إلى البيانات
       defaultVariant.variant_option_values.forEach((vo) => {
         const optionData = vo.product_option_values;
         if (optionData && optionData.product_options) {
@@ -62,7 +61,6 @@ export default function ProductInfo({
   const activeVariant = useMemo(() => {
     return product.variants.find((variant) =>
       Object.entries(selectedOptions).every(([optionName, optionValue]) =>
-        // ✅ المسار الصحيح للوصول إلى البيانات
         variant.variant_option_values.some(
           (vo) =>
             vo.product_option_values?.product_options?.name === optionName &&
@@ -85,7 +83,6 @@ export default function ProductInfo({
     onVariantChange(newActiveVariant);
   }, [selectedOptions, product.variants, onVariantChange]);
 
-  // ... (باقي منطق `useMemo` و `useState` لـ price, stock, quantity يبقى كما هو) ...
   const { price, originalPrice, stock, isAvailable } = useMemo(() => {
     const price = activeVariant?.discount_price ?? activeVariant?.price ?? 0;
     const originalPrice = activeVariant?.discount_price

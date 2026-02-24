@@ -3,11 +3,15 @@
 import { getProductBySlug } from "@/lib/actions/products";
 import { createMetadata } from "@/lib/metadata";
 import { notFound } from "next/navigation";
-import { checkWishlistStatus } from "@/lib/actions/wishlist";
-import { getReviewsByProductId } from "@/lib/actions/reviews";
 import { getUser } from "@/lib/actions/get-user-action";
 import ProductDetails from "@/components/products/ProductDetails";
 
+async function getProduct(slug: string) {
+  const response = await getProductBySlug(slug);
+  if (!response.data) return null;
+
+  return response.data;
+}
 
 export async function generateMetadata({
   params,
@@ -16,15 +20,16 @@ export async function generateMetadata({
 }) {
   const { slug } = await params;
 
-  const data = await getProductBySlug(slug);
-  const product = data.data;
+  const data = await getProduct(slug);
 
-  if (!product) {
+  if (!data) {
     return createMetadata({
       title: "Product Not Found",
       description: "Product not found",
     });
   }
+
+  const product = data.product;
 
   return createMetadata({
     title: product?.name ?? "",
@@ -42,58 +47,16 @@ export default async function Page({ params }: Props) {
   // Get slug from params
   const { slug } = await params;
 
-  // Get product by slug
-  const data = await getProductBySlug(slug);
-  const product = data.data;
+  const data = await getProduct(slug);
+  const user = await getUser();
 
-  if (!product) {
+  if (!data && data != null) {
     notFound();
   }
 
-  const userResponse = await getUser();
-  const user = userResponse.data;
-
-  let isInitiallyWishlisted = false;
-
-  // ✅ 2. التحقق من قائمة الأمنيات فقط إذا كان المستخدم مسجلاً
-  if (user) {
-    // استدعاء الدالة مع مصفوفة تحتوي على ID المنتج
-    const wishlistResponse = await checkWishlistStatus([product.id]);
-
-    // ✅ التصحيح الهام: الوصول إلى .data أولاً، ثم التعامل مع النتيجة
-    if (!wishlistResponse.error && wishlistResponse.data) {
-      isInitiallyWishlisted = wishlistResponse.data[product.id] || false;
-    } else {
-      console.warn("Failed to check wishlist status:", wishlistResponse.error);
-      isInitiallyWishlisted = false;
-    }
-  }
-
-
-
-  // Get reviews
-  const { data: dataReviews, error: errorReviews } =
-    await getReviewsByProductId(product.id);
-
-  // Calculate average rating
-  const totalReviews = dataReviews?.length || 0;
-  const averageRating =
-    totalReviews > 0
-      ? dataReviews!.reduce((acc, review) => acc + review.rating, 0) /
-        totalReviews
-      : 0;
-
   return (
     <main className="container mx-auto pb-8 md:pb-12 px-4">
-      <ProductDetails
-        user={user}
-        product={product}
-        isInitiallyWishlisted={isInitiallyWishlisted}
-        averageRating={averageRating}
-        totalReviews={totalReviews}
-        reviews={dataReviews || []}
-        errorReviews={errorReviews}
-      />
+      <ProductDetails user={user.data!} data={data!} />
     </main>
   );
 }
