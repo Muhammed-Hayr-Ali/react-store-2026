@@ -16,7 +16,6 @@ import {
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Spinner } from "../ui/spinner";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Textarea } from "../ui/textarea";
 import { StarIcon } from "../custom-ui/icons";
 import { siteConfig } from "@/lib/config/site";

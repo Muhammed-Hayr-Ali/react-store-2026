@@ -33,12 +33,6 @@ interface AddReviewFormProps {
 
 
 
-
-function createMarkup(text: string) {
-  return { __html: text };
-}
-
-
 export function AddReviewGuestForm({
   productId,
   productSlug,

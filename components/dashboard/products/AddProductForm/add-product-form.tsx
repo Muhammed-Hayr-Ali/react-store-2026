@@ -5,6 +5,7 @@ import {
   useFieldArray,
   SubmitHandler,
   Controller,
+  useWatch,
 } from "react-hook-form";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -40,7 +41,6 @@ import {
   PlusCircle,
   ListCheck,
 } from "lucide-react";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -123,7 +123,6 @@ export function AddProductForm({
     register,
     handleSubmit,
     control,
-    watch,
     setValue,
     getValues,
     formState: { errors, isSubmitting },
@@ -153,9 +152,13 @@ export function AddProductForm({
     mode: "onBlur",
   });
 
-  // --- مراقبة القيم الهامة ---
-  const productName = watch("name");
-  const currentTags = watch("tags") || [];
+const productName = useWatch({ control, name: "name" });
+const currentTags = useWatch({ control, name: "tags" }) || [];
+
+    // const productName = useWatch({ name: "name" }) || "";
+    // const currentTags = useWatch({ name: "tags" }) || [];
+
+
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -190,7 +193,7 @@ export function AddProductForm({
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
-    const newTags = currentTags.filter((tag) => tag !== tagToRemove);
+    const newTags = currentTags.filter((tag: string) => tag !== tagToRemove);
     setValue("tags", newTags);
   };
 
@@ -385,9 +388,12 @@ export function AddProductForm({
                         <div className="flex-1">
                           <Input
                             id={`image_urls.${index}`}
-                            value={watch("image_urls")?.[index] || ""}
+                            // value={watch("image_urls")?.[index] || ""}
+                            value={getValues("image_urls")?.[index] || ""}
                             onChange={(e) => {
-                              const currentUrls = watch("image_urls") || [];
+                              // const currentUrls = watch("image_urls") || [];
+                              const currentUrls = getValues("image_urls") || [];
+
                               const newUrls = [...currentUrls];
                               newUrls[index] = e.target.value;
                               setValue("image_urls", newUrls, {
@@ -404,7 +410,8 @@ export function AddProductForm({
                           variant="ghost"
                           size="icon"
                           onClick={() => {
-                            const currentUrls = watch("image_urls") || [];
+                            // const currentUrls = watch("image_urls") || [];
+                            const currentUrls = getValues("image_urls") || [];
                             const newUrls = currentUrls.filter(
                               (_, i) => i !== index,
                             );
@@ -558,7 +565,7 @@ export function AddProductForm({
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {currentTags.map((tag) => (
+                  {currentTags.map((tag: string) => (
                     <Badge
                       key={tag}
                       variant="secondary"

@@ -235,7 +235,7 @@ export function RichTextEditor({
 
       {/* Dialog Component for Link Input */}
       <Dialog open={isLinkDialogOpen} onOpenChange={setIsLinkDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-106.25">
           <DialogHeader>
             <DialogTitle>Add Link</DialogTitle>
             <DialogDescription>
