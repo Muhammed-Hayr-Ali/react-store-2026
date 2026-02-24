@@ -3,7 +3,6 @@
 import { createServerClient } from "@/lib/supabase/createServerClient"; // تأكد من صحة المسار
 import { unstable_noStore as noStore } from "next/cache";
 
-
 interface UserRoles {
   name: string;
 }
@@ -18,6 +17,7 @@ export async function getCurrentUserRoles(): Promise<string[]> {
   } = await supabase.auth.getUser();
 
   if (userError || !user) {
+    console.error("AUTHENTICATION_FAILED");
     return [];
   }
 
@@ -31,8 +31,8 @@ export async function getCurrentUserRoles(): Promise<string[]> {
     return [];
   }
 
-const roles: UserRoles[] = data.map((item) => item.roles).flat();
-const roleNames = roles.map((role) => role.name);
+  const roles: UserRoles[] = data.map((item) => item.roles).flat();
+  const roleNames = roles.map((role) => role.name);
 
   return roleNames;
 }

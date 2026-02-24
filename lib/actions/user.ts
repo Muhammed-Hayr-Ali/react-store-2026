@@ -46,7 +46,7 @@ export async function updateUserProfile(
   const { data: user, error: userError } = await getUser();
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
-    console.error("Error fetching user:", userError);
+    console.error("AUTHENTICATION_FAILED");
     return { error: "AUTHENTICATION_FAILED" };
   }
 
@@ -96,7 +96,7 @@ export async function updateUserPassword(
   const { data: user, error: userError } = await getUser();
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
-    console.error("Error fetching user:", userError);
+    console.error("AUTHENTICATION_FAILED");
     return { error: "AUTHENTICATION_FAILED" };
   }
 
@@ -150,7 +150,7 @@ export async function uploadProfilePicture(
   const { data: user, error: userError } = await getUser();
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
-    console.error("Error fetching user:", userError);
+    console.error("AUTHENTICATION_FAILED");
     return { error: "AUTHENTICATION_FAILED" };
   }
 
@@ -211,7 +211,7 @@ export async function deleteProfilePicture(): Promise<ApiResponse<boolean>> {
   const { data: user, error: userError } = await getUser();
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
-    console.error("Error fetching user:", userError);
+    console.error("AUTHENTICATION_FAILED");
     return { error: "AUTHENTICATION_FAILED" };
   }
   const avatarUrl = user.user_metadata.avatar_url || user.user_metadata.avatar;

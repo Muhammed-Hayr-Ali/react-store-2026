@@ -108,7 +108,7 @@ export async function getDashboardSummary(): Promise<
   const { data: user, error: userError } = await getUser();
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
-    console.error("Error fetching user:", userError);
+    console.error("AUTHENTICATION_FAILED");
     return { error: "AUTHENTICATION_FAILED" };
   }
 

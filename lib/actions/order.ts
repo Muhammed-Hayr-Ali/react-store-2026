@@ -63,8 +63,8 @@ export async function createOrder(
 
   // If there's an error fetching the user or no user is found, return an error response
   if (userError || !user) {
-    console.error("Error fetching user:", userError);
-    return { error: "You must be logged in to place an order." };
+    console.error("AUTHENTICATION_FAILED");
+    return { error: "AUTHENTICATION_FAILED" };
   }
 
   // Get Cart Items and Cart Details
@@ -202,8 +202,8 @@ export async function getOrderDetails(
   const { data: user, error: userError } = await getUser();
 
   if (userError || !user) {
-    console.error("Error fetching user:", userError);
-    return { error: "You must be logged in to place an order." };
+    console.error("AUTHENTICATION_FAILED");
+    return { error: "AUTHENTICATION_FAILED" };
   }
 
   const { data: order, error } = await supabase

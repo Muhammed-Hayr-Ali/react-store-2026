@@ -45,7 +45,7 @@ export async function generatePasswordResetLink(
     );
 
     if (userError || !user) {
-      console.error("Error fetching user:", userError);
+    console.error("AUTHENTICATION_FAILED");
       // Don't reveal whether the email exists or not for security reasons
       // Delay the response to mitigate brute-force attempts
       await new Promise((resolve) => setTimeout(resolve, 2000));

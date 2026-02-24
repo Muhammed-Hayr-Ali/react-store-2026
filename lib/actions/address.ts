@@ -72,7 +72,7 @@ export async function createAddress(
   const { data: user, error: userError } = await getUser();
   // Critical error handling: If we fail to fetch the user, we cannot proceed with adding a new address
   if (userError || !user) {
-    console.error("Error fetching user:", userError);
+    console.error("AUTHENTICATION_FAILED");
     return { error: "AUTHENTICATION_FAILED" };
   }
   // Add a new address for the authenticated user
@@ -100,7 +100,7 @@ export async function getAddresses(): Promise<ApiResponse<UserAddress[]>> {
   const { data: user, error: userError } = await getUser();
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
-    console.error("Error fetching user:", userError);
+    console.error("AUTHENTICATION_FAILED");
     return { error: "AUTHENTICATION_FAILED" };
   }
   // Fetch addresses for the authenticated user
@@ -132,7 +132,7 @@ export async function updateAddress(
   const { data: user, error: userError } = await getUser();
   // Critical error handling: If we fail to fetch the user, we cannot proceed with updating the address
   if (userError || !user) {
-    console.error("Error fetching user:", userError);
+    console.error("AUTHENTICATION_FAILED");
     return { error: "AUTHENTICATION_FAILED" };
   }
   // Update the address for the authenticated user
@@ -166,7 +166,7 @@ export async function deleteAddress(id: string): Promise<ApiResponse<boolean>> {
   const { data: user, error: userError } = await getUser();
   // Critical error handling: If we fail to fetch the user, we cannot proceed with deleting the address
   if (userError || !user) {
-    console.error("Error fetching user:", userError);
+    console.error("AUTHENTICATION_FAILED");
     return { error: "AUTHENTICATION_FAILED" };
   }
   // Delete the address for the authenticated user, ensuring we match both the address ID and user ID for security
@@ -204,7 +204,7 @@ export async function searchAddress(
   const { data: user, error: userError } = await getUser();
   // Critical error handling: If we fail to fetch the user, we cannot proceed with adding a new address
   if (userError || !user) {
-    console.error("Error fetching user:", userError);
+    console.error("AUTHENTICATION_FAILED");
     return { error: "AUTHENTICATION_FAILED" };
   }
 
