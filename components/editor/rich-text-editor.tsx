@@ -1,6 +1,6 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, Extension } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import Link from "@tiptap/extension-link";
@@ -9,9 +9,7 @@ import Highlight from "@tiptap/extension-highlight";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import Image from "@tiptap/extension-image";
-// --- إضافات حجم النص ---
-import TextStyle from "@tiptap/extension-text-style";
-import FontSize from "@tiptap/extension-font-size";
+import {TextStyle} from "@tiptap/extension-text-style";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -62,13 +60,75 @@ import {
   CheckSquare,
   Image as ImageIcon,
   Smile,
-  Type,
   Heading1,
   Heading2,
   Heading3,
 } from "lucide-react";
 
 import { useState } from "react";
+
+// ---------------------------------------------------------
+// 1. Custom Font Size Extension
+// ---------------------------------------------------------
+declare module "@tiptap/core" {
+  interface Commands<ReturnType> {
+    fontSize: {
+      setFontSize: (size: string) => ReturnType;
+      unsetFontSize: () => ReturnType;
+    };
+  }
+}
+
+const FontSize = Extension.create({
+  name: "fontSize",
+  addOptions() {
+    return {
+      types: ["textStyle"],
+    };
+  },
+  addGlobalAttributes() {
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          fontSize: {
+            default: null,
+            parseHTML: (element) => element.style.fontSize,
+            renderHTML: (attributes) => {
+              if (!attributes.fontSize) {
+                return {};
+              }
+              return {
+                style: `font-size: ${attributes.fontSize}`,
+              };
+            },
+          },
+        },
+      },
+    ];
+  },
+  addCommands() {
+    return {
+      setFontSize:
+        (fontSize: string) =>
+        ({ chain }) => {
+          return chain().setMark("textStyle", { fontSize }).run();
+        },
+      unsetFontSize:
+        () =>
+        ({ chain }) => {
+          return chain()
+            .setMark("textStyle", { fontSize: null })
+            .removeEmptyTextStyle()
+            .run();
+        },
+    };
+  },
+});
+
+// ---------------------------------------------------------
+// 2. Main Component
+// ---------------------------------------------------------
 
 interface RichTextEditorProps {
   content: string;
@@ -85,6 +145,12 @@ export function RichTextEditor({
 }: RichTextEditorProps) {
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
+
+  // حالات جديدة لإدارة Dialog الصورة
+  const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
+
+  const [currentFontSize, setCurrentFontSize] = useState<string>("default");
 
   const { theme, systemTheme } = useTheme();
 
@@ -118,16 +184,18 @@ export function RichTextEditor({
           class: "rounded-lg max-w-full h-auto border mx-auto block",
         },
       }),
-      // --- تفعيل_extensions حجم النص ---
       TextStyle,
-      FontSize.configure({
-        types: ["textStyle"],
-        defaultFontSize: "16px",
-      }),
+      FontSize,
     ],
     content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
+      const size = editor.getAttributes("textStyle").fontSize;
+      setCurrentFontSize(size || "default");
+    },
+    onSelectionUpdate: ({ editor }) => {
+      const size = editor.getAttributes("textStyle").fontSize;
+      setCurrentFontSize(size || "default");
     },
     immediatelyRender: false,
     editorProps: {
@@ -145,6 +213,8 @@ export function RichTextEditor({
 
   if (!editor) return null;
 
+  // --- Handlers ---
+
   const handleOpenLinkDialog = () => {
     const currentLink = editor.getAttributes("link").href;
     setLinkUrl(currentLink || "");
@@ -161,15 +231,32 @@ export function RichTextEditor({
     setLinkUrl("");
   };
 
-  const addImage = () => {
-    const url = window.prompt("أدخل رابط الصورة (URL)");
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
+  // فتح Dialog الصورة
+  const handleOpenImageDialog = () => {
+    setImageUrl(""); // تصفير الحقل عند الفتح
+    setIsImageDialogOpen(true);
+  };
+
+  // حفظ الصورة من الـ Dialog
+  const handleSaveImage = () => {
+    if (imageUrl) {
+      editor.chain().focus().setImage({ src: imageUrl }).run();
     }
+    setIsImageDialogOpen(false);
+    setImageUrl("");
   };
 
   const onEmojiClick = (emojiObject: EmojiClickData) => {
     editor.chain().focus().insertContent(emojiObject.emoji).run();
+  };
+
+  const handleFontSizeChange = (value: string) => {
+    if (value === "default") {
+      editor.chain().focus().unsetFontSize().run();
+    } else {
+      editor.chain().focus().setFontSize(value).run();
+    }
+    editor.commands.focus();
   };
 
   const currentTheme = theme === "system" ? systemTheme : theme;
@@ -180,17 +267,11 @@ export function RichTextEditor({
       <div className="border focus-within:border-ring overflow-hidden bg-background rounded-md transition-all duration-300 ring-offset-background focus-within:ring-[3px] focus-within:ring-ring/50 focus-within:ring-offset-0">
         {/* Toolbar */}
         <div className="border-b bg-muted/30 p-2 flex flex-wrap gap-1 items-center sticky top-0 z-10 backdrop-blur-sm">
-          {/* --- مجموعة حجم الخط (جديد) --- */}
+          {/* --- Font Size Group --- */}
           <div className="flex items-center gap-2 mr-1">
             <Select
-              value={editor.getAttributes("textStyle").fontSize || ""}
-              onValueChange={(value) => {
-                if (value === "") {
-                  editor.chain().focus().unsetFontSize().run();
-                } else {
-                  editor.chain().focus().setFontSize(value).run();
-                }
-              }}
+              value={currentFontSize}
+              onValueChange={handleFontSizeChange}
             >
               <SelectTrigger
                 className="h-8 w-[110px] text-xs"
@@ -199,7 +280,7 @@ export function RichTextEditor({
                 <SelectValue placeholder="الحجم" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">افتراضي</SelectItem>
+                <SelectItem value="default">افتراضي</SelectItem>
                 <SelectItem value="12px">صغير (12px)</SelectItem>
                 <SelectItem value="14px">عادي (14px)</SelectItem>
                 <SelectItem value="16px">كبير (16px)</SelectItem>
@@ -397,11 +478,12 @@ export function RichTextEditor({
               <LinkIcon className="h-4 w-4" />
             </Button>
 
+            {/* زر الصورة يفتح الـ Dialog */}
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              onClick={addImage}
+              onClick={handleOpenImageDialog}
               className="h-8 w-8 p-0"
               title="صورة"
             >
@@ -503,7 +585,7 @@ export function RichTextEditor({
         <EditorContent editor={editor} />
       </div>
 
-      {/* Link Dialog */}
+      {/* --- Link Dialog --- */}
       <Dialog open={isLinkDialogOpen} onOpenChange={setIsLinkDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -533,6 +615,52 @@ export function RichTextEditor({
             </Button>
             <Button onClick={handleSaveLink}>
               {linkUrl ? "حفظ" : "إزالة الرابط"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* --- Image Dialog (جديد) --- */}
+      <Dialog open={isImageDialogOpen} onOpenChange={setIsImageDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>إضافة صورة</DialogTitle>
+            <DialogDescription>
+              أدخل رابط الصورة (URL) لإضافتها إلى المحتوى.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              id="image-url"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="https://example.com/image.jpg"
+              className="w-full"
+              onKeyDown={(e) => e.key === "Enter" && handleSaveImage()}
+              autoFocus
+              dir="ltr"
+            />
+            {/* معاينة صغيرة للصورة إذا كان الرابط صالحاً (اختياري) */}
+            {imageUrl && (
+              <div className="mt-4 flex justify-center bg-muted/50 rounded-md p-2">
+                <img
+                  src={imageUrl}
+                  alt="Preview"
+                  className="max-h-32 object-contain rounded"
+                  onError={(e) => (e.currentTarget.style.display = "none")}
+                />
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsImageDialogOpen(false)}
+            >
+              إلغاء
+            </Button>
+            <Button onClick={handleSaveImage} disabled={!imageUrl}>
+              إضافة صورة
             </Button>
           </DialogFooter>
         </DialogContent>
