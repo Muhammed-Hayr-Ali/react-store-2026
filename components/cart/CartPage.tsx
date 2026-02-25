@@ -29,10 +29,10 @@ export default async function CartPage({
 
   if (items.length === 0)
     return (
-      <Empty className="h-full">
+      <Empty className="h-[60vh]">
         <EmptyHeader>
           <EmptyMedia variant="icon">
-            <ShoppingCart className="rtl:rotate-y-180"/>
+            <ShoppingCart className="rtl:rotate-y-180" />
           </EmptyMedia>
           <EmptyTitle>Your cart is empty</EmptyTitle>
           <EmptyDescription className="max-w-xs text-pretty">

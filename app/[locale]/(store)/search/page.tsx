@@ -1,4 +1,5 @@
 import SearchPage from "@/components/search/search-page";
+import { getProductsByQuery } from "@/lib/actions/search";
 import { createMetadata } from "@/lib/metadata";
 
 export function generateMetadata() {
@@ -15,6 +16,7 @@ export default async function Page({
 }) {
   const query = (await searchParams).q;
 
+  const products = await getProductsByQuery(query);
 
-  return <SearchPage searchParams={{ q: query }} />;
+  return <SearchPage query={query} products={products} />;
 }

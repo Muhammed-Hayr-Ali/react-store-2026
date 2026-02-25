@@ -1,41 +1,47 @@
 "use client";
+
 import { SearchX } from "lucide-react";
-import { getProductsByQuery, Product } from "@/lib/actions/search";
+import { Product } from "@/lib/actions/search";
 import { ProductCard } from "./product-card";
-import { useEffect, useState } from "react";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { Button } from "../ui/button";
+import Link from "next/link";
+interface SearchProps {
+  query: string;
+  products: Product[] | [];
+}
 
-function SearchResults({ query }: { query: string }) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [products, setProducts] = useState<Product[]>([]);
-  // const products = await getProductsByQuery(query);
-
-  useEffect(() => {
-    async function fetchProducts() {
-      setIsLoading(true);
-      const products = await getProductsByQuery(query);
-      setProducts(products);
-      setIsLoading(false);
-    }
-    fetchProducts();
-  }, [query]);
-
-  if (isLoading) {
+function SearchResults({ query, products }: SearchProps) {
+  if (products.length === 0 || !products) {
     return (
-      <div className="flex flex-col items-center justify-center text-center py-20">
-        <h2 className="text-2xl font-bold">Loading...</h2>
-      </div>
-    );
-  }
-
-  if (products.length === 0 && !isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center text-center py-20">
-        <SearchX className="h-16 w-16 text-muted-foreground mb-4" />
-        <h2 className="text-2xl font-bold">No Results Found</h2>
-        <p className="text-muted-foreground mt-2">
-          We couldn&apos;t find any products matching &quot;{query}&quot;.
-        </p>
-      </div>
+      <Empty className="h-[60vh]">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <SearchX className="rtl:rotate-y-180" />
+          </EmptyMedia>
+          <EmptyTitle>No Results Found</EmptyTitle>
+          <EmptyDescription className="max-w-xs text-pretty">
+            We couldn&apos;t find any products matching &quot;{query}&quot;.
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button>
+            <Link
+              href="/"
+              className="flex gap-2 items-center rtl:flex-row-reverse"
+            >
+              <p> Continue Shopping</p>
+            </Link>
+          </Button>
+        </EmptyContent>
+      </Empty>
     );
   }
 
@@ -54,20 +60,9 @@ function SearchResults({ query }: { query: string }) {
   );
 }
 
-export default function SearchPage({
-  searchParams,
-}: {
-  searchParams?: { [key: string]: string | string[] | undefined };
-}) {
-  const query = typeof searchParams?.q === "string" ? searchParams.q : "";
-
+export default function SearchPage({ query, products }: SearchProps) {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold tracking-tight mb-2">
-        Search results for:{" "}
-        <span className="text-primary">&quot;{query}&quot;</span>
-      </h1>
-      <SearchResults query={query} />
-    </div>
+      <SearchResults query={query} products={products} />
+    
   );
 }

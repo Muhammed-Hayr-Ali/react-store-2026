@@ -41,7 +41,7 @@ export default async function Layout({ params, children }: Props) {
             <DynamicBreadcrumb />
           </header>
 
-          <main className="flex-1 p-4 bg-muted/40">{children}</main>
+          <main className="flex-1 p-4 pt-22 bg-muted/40">{children}</main>
         </SidebarInset>
       </SidebarProvider>
     </AuthProvider>

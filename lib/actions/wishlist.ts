@@ -112,7 +112,7 @@ export async function getWishlist(): Promise<ApiResponse<ProcessedProduct[]>> {
   const { data: user, error: userError } = await getUser();
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
-    console.error("AUTHENTICATION_FAILED");
+    // console.error("AUTHENTICATION_FAILED");
     return { error: "AUTHENTICATION_FAILED" };
   }
   // Fetch wishlist items for the authenticated user, including related product data
@@ -296,7 +296,7 @@ export async function checkWishlistStatus(
   const { data: user, error: userError } = await getUser();
 
   if (userError || !user) {
-    console.error("AUTHENTICATION_FAILED");
+    // console.error("AUTHENTICATION_FAILED");
     return { error: "AUTHENTICATION_FAILED" };
   }
 

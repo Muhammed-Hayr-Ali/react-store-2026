@@ -25,7 +25,6 @@ import {
 } from "../ui/card";
 import { AspectRatio } from "../ui/aspect-ratio";
 import { Badge } from "../ui/badge";
-import Image from "next/image";
 import { Spinner } from "../ui/spinner";
 import { toast } from "sonner";
 import { addItemToCart } from "@/lib/actions/cart";
@@ -186,7 +185,7 @@ export function WishlistPage({ wishlistItems }: WishlistPageProps) {
   // ✅ التحسين: عرض حالة "فارغة" فقط إذا كانت القائمة فارغة حقًا
   if (items.length === 0) {
     return (
-      <Empty className="h-full">
+      <Empty className="h-[60vh]">
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <Heart className="rtl:rotate-y-180" />

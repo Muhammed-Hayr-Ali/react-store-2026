@@ -73,7 +73,7 @@ export function AddReviewUserForm({
           rules={{ min: { value: 1, message: "Rating is required." } }}
           render={({ field }) => (
             <Field>
-              <FieldLabel>Your Rating *</FieldLabel>
+              <FieldLabel>Your Rating</FieldLabel>
               <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button

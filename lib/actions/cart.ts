@@ -134,7 +134,7 @@ export async function getCart(): Promise<ApiResponse<UserCart>> {
   const { data: user, error: userError } = await getUser();
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
-    console.error("AUTHENTICATION_FAILED");
+    // console.error("AUTHENTICATION_FAILED");
     return { error: "AUTHENTICATION_FAILED" };
   }
   // Fetch cart for the authenticated user using a single query that retrieves the cart and its related items and product details
@@ -171,7 +171,7 @@ export async function getTotalCartQuantity(): Promise<ApiResponse<number>> {
   const { data: user, error: userError } = await getUser();
   // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
   if (userError || !user) {
-    console.error("AUTHENTICATION_FAILED");
+    // console.error("AUTHENTICATION_FAILED");
     return { error: "AUTHENTICATION_FAILED" };
   }
   // Call the RPC function to get the total quantity of items in the user's cart. This function should return a single value representing the total quantity.

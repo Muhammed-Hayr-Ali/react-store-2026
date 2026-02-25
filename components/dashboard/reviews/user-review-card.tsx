@@ -6,7 +6,6 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { TrashIcon } from "lucide-react";
-import Image from "next/image";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -81,7 +80,7 @@ export function UserReviewCard({ review }: { review: UserReview }) {
           height={112}
           src={review.product.main_image_url || "/placeholder.svg"}
           alt={review.product.name}
-          className=" h-full w-full rounded-md object-cover bg-muted shrink-0"
+          className="rounded-md object-cover bg-muted shrink-0"
         />
       </Link>
       <div className="flex-1">

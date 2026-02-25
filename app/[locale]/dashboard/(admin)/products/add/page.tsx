@@ -53,8 +53,8 @@ export default async function AddProductPage() {
   
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold my-10">Add New Product</h1>
+    <div className="container mx-auto">
+      <h1 className="text-3xl font-bold mb-10">Add New Product</h1>
       <AddProductForm
         categories={categories}
         brands={brands}
