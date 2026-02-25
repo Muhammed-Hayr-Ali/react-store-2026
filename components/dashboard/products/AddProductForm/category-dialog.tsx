@@ -16,6 +16,14 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import {
   Category,
@@ -23,6 +31,7 @@ import {
   updateCategory,
 } from "@/lib/actions/category";
 import { cn } from "@/lib/utils";
+import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
@@ -41,14 +50,28 @@ interface DialogProps {
   className?: string;
   onClose: () => void;
   category: Category | null;
+  categories?: Category[];
 }
+
+const isRtlLocale = (locale: string) => {
+  return ["ar", "fa", "he", "ur"].includes(locale);
+};
+
 export default function CategoryDialog({
   onClose,
   category,
+  categories,
   className,
   ...props
 }: DialogProps) {
   const router = useRouter();
+  const locale = useLocale();
+  const dir = isRtlLocale(locale) ? "rtl" : "ltr";
+
+  // remove main category from category from the list.
+  const mainCategories = categories?.filter(
+    (c) => c.id !== category?.id || null,
+  );
 
   const {
     register,
@@ -112,7 +135,11 @@ export default function CategoryDialog({
   }, [category, reset, name, setValue]);
 
   return (
-    <DialogContent className={cn("sm:max-w-sm", className)} {...props}>
+    <DialogContent
+      className={cn("sm:max-w-sm", className)}
+      {...props}
+      dir={dir}
+    >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <DialogHeader>
           <DialogTitle>
@@ -125,7 +152,7 @@ export default function CategoryDialog({
               : "Create a new Category and add it to your store."}
           </DialogDescription>
         </DialogHeader>
-        <FieldGroup>
+        <FieldGroup className="gap-4">
           {/* name */}
           <Field>
             <FieldLabel htmlFor="name">Name</FieldLabel>
@@ -166,14 +193,46 @@ export default function CategoryDialog({
 
           {/* image url */}
           <Field>
-            <FieldLabel htmlFor="logo_url">Description</FieldLabel>
+            <FieldLabel htmlFor="image_url">Image</FieldLabel>
             <Input
-              id="logo_url"
-              placeholder="https://example.com/logo.png"
+              id="image_url"
+              placeholder="https://example.com/image_url.png"
               disabled={isSubmitting}
               {...register("image_url")}
             />
           </Field>
+
+          {mainCategories && mainCategories.length > 0 && (
+            <Field>
+              <FieldLabel htmlFor="slug">Parent</FieldLabel>
+              <Select
+                onValueChange={(val) => {
+                  if (val === "no_parent") {
+                    setValue("parent_id", null);
+                    return;
+                  }
+
+                  setValue("parent_id", val);
+                }}
+              >
+                <SelectTrigger dir={dir} className="w-full">
+                  <SelectValue placeholder="Select a Category" />
+                </SelectTrigger>
+                <SelectContent dir={dir}>
+                  <SelectGroup>
+                    <SelectItem value={"no_parent"}>No Parent</SelectItem>
+                    {mainCategories
+                      .filter((cat) => !cat.parent_id)
+                      .map((cat) => (
+                        <SelectItem key={cat.name} value={cat.id}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </Field>
+          )}
         </FieldGroup>
         <DialogFooter>
           <DialogClose asChild>

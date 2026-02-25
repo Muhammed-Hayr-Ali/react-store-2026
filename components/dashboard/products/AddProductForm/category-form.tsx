@@ -46,9 +46,9 @@ export default function CategoryForm({
   closeDialog: () => void;
   categories?: Category[];
 }) {
-  const locale = useLocale();
   const router = useRouter();
 
+  const locale = useLocale();
   const dir = isRtlLocale(locale) ? "rtl" : "ltr";
 
   const {

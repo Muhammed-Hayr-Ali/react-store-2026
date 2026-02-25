@@ -162,6 +162,10 @@ export const siteConfig = {
       name: "English",
       value: "en",
     },
+    {
+      name: "عربي",
+      value: "ar",
+    },
   ],
 
   navItems: [

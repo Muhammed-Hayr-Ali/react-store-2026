@@ -9,7 +9,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Spinner } from "@/components/ui/spinner";
-import { Brand, deleteBrand } from "@/lib/actions/brands";
+import { Category, deleteCategory } from "@/lib/actions/category";
 import { Trash2Icon } from "lucide-react";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -19,16 +19,16 @@ import { toast } from "sonner";
 interface DialogProps {
   className?: string;
   onClose: () => void;
-  brand: Brand | null;
+  category: Category | null;
 }
 
 const isRtlLocale = (locale: string) => {
   return ["ar", "fa", "he", "ur"].includes(locale);
 };
 
-export default function DeleteBrandAlertDialog({
+export default function DeleteCategoryAlertDialog({
   onClose,
-  brand,
+  category,
   className,
 }: DialogProps) {
   const router = useRouter();
@@ -37,9 +37,9 @@ export default function DeleteBrandAlertDialog({
 
   const [isLoading, setIsLoading] = useState(false);
   const handleDelete = async () => {
-    if (!brand || !brand?.id) return;
+    if (!category || !category?.id) return;
     setIsLoading(true);
-    const { error } = await deleteBrand(brand?.id);
+    const { error } = await deleteCategory(category?.id);
     if (error) {
       toast.error(error);
       setIsLoading(false);
@@ -57,7 +57,7 @@ export default function DeleteBrandAlertDialog({
         </AlertDialogMedia>
         <AlertDialogTitle>Delete Brand?</AlertDialogTitle>
         <AlertDialogDescription>
-          Are you sure you want to delete {brand?.name}?
+          Are you sure you want to delete {category?.name}?
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>

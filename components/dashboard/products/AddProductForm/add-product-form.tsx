@@ -88,6 +88,7 @@ import {
 import BrandDialog from "./brand-dialog";
 import DeleteBrandAlertDialog from "./brand-delete";
 import CategoryDialog from "./category-dialog";
+import DeleteCategoryAlertDialog from "./category-delete";
 
 // =================================================================
 // واجهة المكون (Props)
@@ -106,6 +107,7 @@ type DialogState =
   | "BrandDialog"
   | "DeleteBrandDialog"
   | "CategoryDialog"
+  | "DeleteCategoryDialog"
   | "category"
   | "brand"
   | "options"
@@ -509,7 +511,7 @@ export function AddProductForm({
                           variant={"ghost"}
                           className="shrink-0"
                           onClick={() => {
-                            setActiveDialog("DeleteBrandDialog");
+                            setActiveDialog("DeleteCategoryDialog");
                           }}
                         >
                           <Trash className="h-3 w-3" />
@@ -1214,9 +1216,22 @@ export function AddProductForm({
         <CategoryDialog
           onClose={onCloseDialog}
           category={selcetedCategory}
+          categories={categories}
           className="lg:max-w-lg"
         />
       </Dialog>
+
+      {/* Category Delete Dialog */}
+      <AlertDialog
+        open={activeDialog === "DeleteCategoryDialog"}
+        onOpenChange={onCloseDialog}
+      >
+        <DeleteCategoryAlertDialog
+          onClose={onCloseDialog}
+          category={selcetedCategory}
+          className="lg:max-w-lg"
+        />
+      </AlertDialog>
     </>
   );
 }

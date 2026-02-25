@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Brand, createBrand, updateBrand } from "@/lib/actions/brands";
 import { cn } from "@/lib/utils";
+import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
@@ -37,13 +38,23 @@ interface DialogProps {
   onClose: () => void;
   brand: Brand | null;
 }
+
+
+
+const isRtlLocale = (locale: string) => {
+  return ["ar", "fa", "he", "ur"].includes(locale);
+};
 export default function BrandDialog({
   onClose,
   brand,
   className,
   ...props
 }: DialogProps) {
+
   const router = useRouter();
+  const locale = useLocale();
+  const dir = isRtlLocale(locale) ? "rtl" : "ltr";
+
 
   const {
     register,
@@ -105,7 +116,11 @@ export default function BrandDialog({
   }, [brand, reset, name, setValue]);
 
   return (
-    <DialogContent className={cn("sm:max-w-sm", className)} {...props}>
+    <DialogContent
+      className={cn("sm:max-w-sm", className)}
+      {...props}
+      dir={dir}
+    >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <DialogHeader>
           <DialogTitle>
@@ -118,7 +133,7 @@ export default function BrandDialog({
               : "Create a new Brand and add it to your store."}
           </DialogDescription>
         </DialogHeader>
-        <FieldGroup>
+        <FieldGroup className="gap-4">
           {/* name */}
           <Field>
             <FieldLabel htmlFor="name">Name</FieldLabel>
@@ -157,9 +172,9 @@ export default function BrandDialog({
             />
           </Field>
 
-          {/* description */}
+          {/* logo */}
           <Field>
-            <FieldLabel htmlFor="logo_url">Description</FieldLabel>
+            <FieldLabel htmlFor="logo_url">Logo</FieldLabel>
             <Input
               id="logo_url"
               placeholder="https://example.com/logo.png"
