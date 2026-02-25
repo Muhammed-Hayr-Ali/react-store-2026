@@ -92,7 +92,13 @@ export default function CategoryDialog({
     if (category) {
       reset(category);
     } else {
-      reset();
+      reset({
+        name: "",
+        slug: "",
+        description: "",
+        image_url: "",
+        parent_id: null,
+      });
     }
 
     if (name) {
@@ -109,7 +115,9 @@ export default function CategoryDialog({
     <DialogContent className={cn("sm:max-w-sm", className)} {...props}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <DialogHeader>
-          <DialogTitle>{category ? "Edit" : "Create"} Category</DialogTitle>
+          <DialogTitle>
+            {category ? "Edit" : "Create"} Category {category && category.name}
+          </DialogTitle>
           <DialogDescription>
             {/* Create Or Update Dialog discription */}
             {category

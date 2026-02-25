@@ -85,10 +85,13 @@ export default function BrandDialog({
   useEffect(() => {
     if (brand) {
       reset(brand);
-      console.log("brand", brand);
-    }else{
-      console.log("reset");
-      reset();
+    } else {
+      reset({
+        name: "",
+        slug: "",
+        description: "",
+        logo_url: "",
+      });
     }
 
     if (name) {
@@ -101,12 +104,13 @@ export default function BrandDialog({
     }
   }, [brand, reset, name, setValue]);
 
-
   return (
     <DialogContent className={cn("sm:max-w-sm", className)} {...props}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <DialogHeader>
-          <DialogTitle>{brand ? "Edit" : "Create"} Brand</DialogTitle>
+          <DialogTitle>
+            {brand ? "Edit" : "Create"} Brand {brand && brand.name}
+          </DialogTitle>
           <DialogDescription>
             {/* Create Or Update Dialog discription */}
             {brand
