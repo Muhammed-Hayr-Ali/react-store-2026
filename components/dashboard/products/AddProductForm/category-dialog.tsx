@@ -112,6 +112,17 @@ export default function CategoryDialog({
   const name = useWatch({ control, name: "name" });
 
   useEffect(() => {
+    if (!category && name) {
+      const slug = slugify(name, {
+        lower: true,
+        strict: true,
+        locale: "ar",
+      });
+      setValue("slug", slug, { shouldValidate: true });
+    }
+  }, [category, name, setValue]);
+
+  useEffect(() => {
     if (category) {
       reset(category);
     } else {
@@ -123,16 +134,7 @@ export default function CategoryDialog({
         parent_id: null,
       });
     }
-
-    if (name) {
-      const slug = slugify(name, {
-        lower: true,
-        strict: true,
-        locale: "ar",
-      });
-      setValue("slug", slug, { shouldValidate: true });
-    }
-  }, [category, reset, name, setValue]);
+  }, [category, reset]);
 
   return (
     <DialogContent
@@ -158,7 +160,7 @@ export default function CategoryDialog({
             <FieldLabel htmlFor="name">Name</FieldLabel>
             <Input
               id="name"
-              placeholder="Category Name"
+              placeholder="eg: Name"
               disabled={isSubmitting}
               aria-invalid={errors.name ? "true" : "false"}
               {...register("name", { required: "Name is required" })}
@@ -171,7 +173,7 @@ export default function CategoryDialog({
             <FieldLabel htmlFor="slug">Slug</FieldLabel>
             <Input
               id="slug"
-              placeholder="Slug"
+              placeholder="eg: Slug"
               disabled={isSubmitting}
               aria-invalid={errors.slug ? "true" : "false"}
               {...register("slug", { required: "Slug is required" })}
@@ -214,6 +216,7 @@ export default function CategoryDialog({
 
                   setValue("parent_id", val);
                 }}
+                value={category?.parent_id || "no_parent"}
               >
                 <SelectTrigger dir={dir} className="w-full">
                   <SelectValue placeholder="Select a Category" />

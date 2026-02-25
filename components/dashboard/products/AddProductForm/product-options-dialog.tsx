@@ -17,71 +17,64 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { Brand, createBrand, updateBrand } from "@/lib/actions/brands";
+import { createProductOption, ProductOption, updateProductOption } from "@/lib/actions/product-options";
 import { cn } from "@/lib/utils";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { SubmitHandler, useForm, useWatch } from "react-hook-form";
-import slugify from "slugify";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 type Inputs = {
   name: string;
-  slug: string;
-  description: string | null;
-  logo_url: string | null;
+  unit: string;
+  description: string | undefined;
 };
 
 interface DialogProps {
   className?: string;
   onClose: () => void;
-  brand: Brand | null;
+  productOption: ProductOption | null;
 }
-
-
 
 const isRtlLocale = (locale: string) => {
   return ["ar", "fa", "he", "ur"].includes(locale);
 };
-export default function BrandDialog({
+export default function ProductOptionsDialog({
   onClose,
-  brand,
+  productOption,
   className,
   ...props
 }: DialogProps) {
-
   const router = useRouter();
   const locale = useLocale();
   const dir = isRtlLocale(locale) ? "rtl" : "ltr";
-
 
   const {
     register,
     handleSubmit,
     reset,
-    setValue,
-    control,
     formState: { errors, isSubmitting },
   } = useForm<Inputs>({
     defaultValues: {
-      name: brand?.name || "",
-      slug: brand?.slug || "",
-      description: brand?.description || "",
-      logo_url: brand?.logo_url || "",
+      name: productOption?.name || "",
+      unit: productOption?.unit || "",
+      description: productOption?.description || "",
     },
   });
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    const { error: brandError } =
-      brand && brand?.id
-        ? await updateBrand(brand.id, data)
-        : await createBrand(data);
+    const { error: productOptionError } =
+      productOption && productOption?.id
+        ? await updateProductOption(productOption.id, data)
+        : await createProductOption(data);
 
-    if (brandError) {
-      toast.error(brandError);
+    if (productOptionError) {
+      toast.error(productOptionError);
       return;
     }
-    toast.success(`Brand ${brand ? "updated" : "created"} successfully.`);
+    toast.success(
+      `Brand ${productOption ? "updated" : "created"} successfully.`,
+    );
     router.refresh();
     resetDialog();
   };
@@ -91,35 +84,17 @@ export default function BrandDialog({
     reset();
   };
 
-  const name = useWatch({ control, name: "name" });
-
   useEffect(() => {
-       if (!brand && name) {
-         const slug = slugify(name, {
-           lower: true,
-           strict: true,
-           locale: "ar",
-         });
-         setValue("slug", slug, { shouldValidate: true });
-       }
-  }, [brand, name, setValue]);
-
-
-  
-  useEffect(() => {
-    if (brand) {
-      reset(brand);
+    if (productOption) {
+      reset(productOption);
     } else {
       reset({
         name: "",
-        slug: "",
+        unit: "",
         description: "",
-        logo_url: "",
       });
     }
-
-  }, [brand, reset]);
-
+  }, [productOption, reset]);
 
   return (
     <DialogContent
@@ -130,13 +105,14 @@ export default function BrandDialog({
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <DialogHeader>
           <DialogTitle>
-            {brand ? "Edit" : "Create"} Brand {brand && brand.name}
+            {productOption ? "Edit" : "Create"} Product Option{" "}
+            {productOption && productOption.name}
           </DialogTitle>
           <DialogDescription>
             {/* Create Or Update Dialog discription */}
-            {brand
-              ? "Update Brand Information and save changes."
-              : "Create a new Brand and add it to your store."}
+            {productOption
+              ? "Update Product Option Information and save changes."
+              : "Create a new Product Option and add it to your store."}
           </DialogDescription>
         </DialogHeader>
         <FieldGroup className="gap-4">
@@ -145,7 +121,7 @@ export default function BrandDialog({
             <FieldLabel htmlFor="name">Name</FieldLabel>
             <Input
               id="name"
-              placeholder="eg: Name"
+              placeholder="eg: name"
               disabled={isSubmitting}
               aria-invalid={errors.name ? "true" : "false"}
               {...register("name", { required: "Name is required" })}
@@ -155,15 +131,15 @@ export default function BrandDialog({
 
           {/* slug */}
           <Field>
-            <FieldLabel htmlFor="slug">Slug</FieldLabel>
+            <FieldLabel htmlFor="unit">Unit</FieldLabel>
             <Input
-              id="slug"
-              placeholder="eg: Slug"
+              id="unit"
+              placeholder="eg: kg, ml, ltr, box, pack, etc"
               disabled={isSubmitting}
-              aria-invalid={errors.slug ? "true" : "false"}
-              {...register("slug", { required: "Slug is required" })}
+              aria-invalid={errors.unit ? "true" : "false"}
+              {...register("unit")}
             />
-            <FieldError>{errors.slug?.message}</FieldError>
+            <FieldError>{errors.unit?.message}</FieldError>
           </Field>
 
           {/* description */}
@@ -177,17 +153,6 @@ export default function BrandDialog({
               {...register("description")}
             />
           </Field>
-
-          {/* logo */}
-          <Field>
-            <FieldLabel htmlFor="logo_url">Logo</FieldLabel>
-            <Input
-              id="logo_url"
-              placeholder="https://example.com/logo.png"
-              disabled={isSubmitting}
-              {...register("logo_url")}
-            />
-          </Field>
         </FieldGroup>
         <DialogFooter>
           <DialogClose asChild>
@@ -196,7 +161,7 @@ export default function BrandDialog({
             </Button>
           </DialogClose>
           <Button type="submit">
-            {isSubmitting ? <Spinner /> : brand ? "Update" : "Create"}
+            {isSubmitting ? <Spinner /> : productOption ? "Update" : "Create"}
           </Button>
         </DialogFooter>
       </form>

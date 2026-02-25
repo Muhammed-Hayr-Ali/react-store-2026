@@ -9,7 +9,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Spinner } from "@/components/ui/spinner";
-import { Category, deleteCategory } from "@/lib/actions/category";
+import { deleteProductOptionValue } from "@/lib/actions/product-option-values";
 import { Trash2Icon } from "lucide-react";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -19,16 +19,16 @@ import { toast } from "sonner";
 interface DialogProps {
   className?: string;
   onClose: () => void;
-  category: Category | null;
+  valueId: string | null;
 }
 
 const isRtlLocale = (locale: string) => {
   return ["ar", "fa", "he", "ur"].includes(locale);
 };
 
-export default function DeleteCategoryAlertDialog({
+export default function DeleteVariantDialogAlertDialog({
   onClose,
-  category,
+  valueId,
   className,
 }: DialogProps) {
   const router = useRouter();
@@ -37,9 +37,9 @@ export default function DeleteCategoryAlertDialog({
 
   const [isLoading, setIsLoading] = useState(false);
   const handleDelete = async () => {
-    if (!category || !category?.id) return;
+    if (!valueId) return;
     setIsLoading(true);
-    const { error } = await deleteCategory(category?.id);
+    const { error } = await deleteProductOptionValue(valueId);
     if (error) {
       toast.error(error);
       setIsLoading(false);
@@ -47,7 +47,7 @@ export default function DeleteCategoryAlertDialog({
     }
     router.refresh();
     onClose();
-    toast.success("Category deleted successfully!");
+    toast.success("Value deleted successfully!");
     setIsLoading(false);
   };
   return (
@@ -56,9 +56,9 @@ export default function DeleteCategoryAlertDialog({
         <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
           <Trash2Icon />
         </AlertDialogMedia>
-        <AlertDialogTitle>Delete Category?</AlertDialogTitle>
+        <AlertDialogTitle>Delete Value?</AlertDialogTitle>
         <AlertDialogDescription>
-          Are you sure you want to delete {category?.name}?
+          Are you sure you want to delete this value
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>

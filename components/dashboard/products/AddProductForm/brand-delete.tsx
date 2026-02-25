@@ -48,6 +48,7 @@ export default function DeleteBrandAlertDialog({
     router.refresh();
     onClose();
     toast.success("Brand deleted successfully!");
+    setIsLoading(false);
   };
   return (
     <AlertDialogContent size="sm" className={className} dir={dir}>

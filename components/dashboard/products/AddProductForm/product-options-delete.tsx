@@ -9,7 +9,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Spinner } from "@/components/ui/spinner";
-import { Category, deleteCategory } from "@/lib/actions/category";
+import {
+  deleteProductOption,
+  ProductOption,
+} from "@/lib/actions/product-options";
 import { Trash2Icon } from "lucide-react";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -19,16 +22,16 @@ import { toast } from "sonner";
 interface DialogProps {
   className?: string;
   onClose: () => void;
-  category: Category | null;
+  productOption: ProductOption | null;
 }
 
 const isRtlLocale = (locale: string) => {
   return ["ar", "fa", "he", "ur"].includes(locale);
 };
 
-export default function DeleteCategoryAlertDialog({
+export default function DeleteProductOptionAlertDialog({
   onClose,
-  category,
+  productOption,
   className,
 }: DialogProps) {
   const router = useRouter();
@@ -37,9 +40,9 @@ export default function DeleteCategoryAlertDialog({
 
   const [isLoading, setIsLoading] = useState(false);
   const handleDelete = async () => {
-    if (!category || !category?.id) return;
+    if (!productOption || !productOption?.id) return;
     setIsLoading(true);
-    const { error } = await deleteCategory(category?.id);
+    const { error } = await deleteProductOption(productOption?.id);
     if (error) {
       toast.error(error);
       setIsLoading(false);
@@ -47,7 +50,7 @@ export default function DeleteCategoryAlertDialog({
     }
     router.refresh();
     onClose();
-    toast.success("Category deleted successfully!");
+    toast.success("Product option deleted successfully!");
     setIsLoading(false);
   };
   return (
@@ -56,9 +59,9 @@ export default function DeleteCategoryAlertDialog({
         <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
           <Trash2Icon />
         </AlertDialogMedia>
-        <AlertDialogTitle>Delete Category?</AlertDialogTitle>
+        <AlertDialogTitle>Delete Brand?</AlertDialogTitle>
         <AlertDialogDescription>
-          Are you sure you want to delete {category?.name}?
+          Are you sure you want to delete {productOption?.name}?
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
