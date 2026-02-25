@@ -49,12 +49,12 @@ export default function DeleteProductOptionAlertDialog({
     setIsLoading(false);
   };
   return (
-    <AlertDialogContent size="sm" className={className} >
+    <AlertDialogContent size="sm" className={className}>
       <AlertDialogHeader>
         <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
           <Trash2Icon />
         </AlertDialogMedia>
-        <AlertDialogTitle>Delete Brand?</AlertDialogTitle>
+        <AlertDialogTitle>Delete Product option?</AlertDialogTitle>
         <AlertDialogDescription>
           Are you sure you want to delete {productOption?.name}?
         </AlertDialogDescription>

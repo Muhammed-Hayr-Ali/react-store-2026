@@ -43,7 +43,6 @@ import EmojiPicker, {
   Theme,
   EmojiClickData,
   EmojiStyle,
-  SuggestionMode,
 } from "emoji-picker-react";
 import { useTheme } from "next-themes";
 
@@ -67,7 +66,6 @@ import {
   Smile,
   Heading1,
   Heading2,
-  Heading3,
 } from "lucide-react";
 
 import { useState } from "react";
@@ -267,7 +265,6 @@ export function RichTextEditor({
   const currentTheme = theme === "system" ? systemTheme : theme;
   const emojiTheme = currentTheme === "dark" ? Theme.DARK : Theme.LIGHT;
   const emojiStyle = EmojiStyle.NATIVE;
-  const suggestionMode = SuggestionMode.RECENT;
 
   return (
     <>
@@ -281,7 +278,7 @@ export function RichTextEditor({
               onValueChange={handleFontSizeChange}
             >
               <SelectTrigger
-                className="h-8 w-[110px] text-xs"
+                className="h-8 w-27.5 text-xs"
                 aria-label="Font Size"
               >
                 <SelectValue placeholder="الحجم" />
@@ -597,7 +594,7 @@ export function RichTextEditor({
 
       {/* --- Link Dialog --- */}
       <Dialog open={isLinkDialogOpen} onOpenChange={setIsLinkDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-106.25">
           <DialogHeader>
             <DialogTitle>إضافة/تعديل رابط</DialogTitle>
             <DialogDescription>
@@ -632,7 +629,7 @@ export function RichTextEditor({
 
       {/* --- Image Dialog (جديد) --- */}
       <Dialog open={isImageDialogOpen} onOpenChange={setIsImageDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-106.25">
           <DialogHeader>
             <DialogTitle>إضافة صورة</DialogTitle>
             <DialogDescription>

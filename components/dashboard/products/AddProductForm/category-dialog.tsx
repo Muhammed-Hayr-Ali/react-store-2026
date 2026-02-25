@@ -32,7 +32,7 @@ import {
 } from "@/lib/actions/category";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import slugify from "slugify";
 import { toast } from "sonner";
@@ -52,8 +52,6 @@ interface DialogProps {
   categories?: Category[];
 }
 
-
-
 export default function CategoryDialog({
   onClose,
   category,
@@ -62,6 +60,9 @@ export default function CategoryDialog({
   ...props
 }: DialogProps) {
   const router = useRouter();
+  const [parentId, setParentId] = useState<string>(
+    category?.parent_id || "no_parent",
+  );
   // remove main category from category from the list.
   const mainCategories = categories?.filter(
     (c) => c.id !== category?.id || null,
@@ -131,10 +132,7 @@ export default function CategoryDialog({
   }, [category, reset]);
 
   return (
-    <DialogContent
-      className={cn("sm:max-w-sm", className)}
-      {...props}
-    >
+    <DialogContent className={cn("sm:max-w-sm", className)} {...props}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <DialogHeader>
           <DialogTitle>
@@ -201,6 +199,7 @@ export default function CategoryDialog({
             <Field>
               <FieldLabel htmlFor="slug">Parent</FieldLabel>
               <Select
+                value={parentId}
                 onValueChange={(val) => {
                   if (val === "no_parent") {
                     setValue("parent_id", null);
@@ -208,13 +207,14 @@ export default function CategoryDialog({
                   }
 
                   setValue("parent_id", val);
+                  setParentId(val);
                 }}
-                value={category?.parent_id || "no_parent"}
+                
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a Category" />
                 </SelectTrigger>
-                <SelectContent >
+                <SelectContent>
                   <SelectGroup>
                     <SelectItem value={"no_parent"}>No Parent</SelectItem>
                     {mainCategories

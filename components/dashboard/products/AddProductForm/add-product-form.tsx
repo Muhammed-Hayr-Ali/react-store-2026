@@ -58,7 +58,6 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import { useLocale } from "next-intl";
 import { Category } from "@/lib/actions/category";
 import { Brand } from "@/lib/actions/brands";
 import { ProductOption } from "@/lib/actions/product-options";
@@ -102,9 +101,6 @@ type DialogState =
   | "DeleteVariantDialog"
   | null;
 
-const isRtlLocale = (locale: string) => {
-  return ["ar", "fa", "he", "ur"].includes(locale);
-};
 
 // =================================================================
 // Generate SKU
@@ -124,9 +120,7 @@ export function AddProductForm({
   options,
   optionValues,
 }: AddProductFormProps) {
-  const locale = useLocale();
   const router = useRouter();
-  const dir = isRtlLocale(locale) ? "rtl" : "ltr";
 
   const [tagsInput, setTagsInput] = useState("");
 
@@ -534,7 +528,7 @@ export function AddProductForm({
                     }}
                     value={selcetedCategory?.id || ""} // التحكم في القيمة المعروضة
                   >
-                    <SelectTrigger dir={dir} className="w-full">
+                    <SelectTrigger className="w-full">
                       <SelectValue
                         placeholder={
                           categoryTree.length > 0
@@ -543,7 +537,7 @@ export function AddProductForm({
                         }
                       />
                     </SelectTrigger>
-                    <SelectContent dir={dir}>
+                    <SelectContent>
                       <SelectItem value="__clear__">No Selected</SelectItem>
 
                       {categoryTree.map((categoryNode) => (
@@ -557,9 +551,9 @@ export function AddProductForm({
                             <SelectItem
                               key={child.id}
                               value={child.id}
-                              className="pl-6"
-                            >
-                              - {child.name} {/* أضف مسافة بادئة للتمييز */}
+                              >
+                                <div className="flex items-center gap-2 rtl:flex-row-reverse"><p>-</p> {child.name}</div>
+                         
                             </SelectItem>
                           ))}
                         </SelectGroup>
@@ -629,14 +623,14 @@ export function AddProductForm({
                     }}
                     value={selcetedBrand?.id || ""} // التحكم في القيمة المعروضة
                   >
-                    <SelectTrigger dir={dir}>
+                    <SelectTrigger>
                       <SelectValue
                         placeholder={
                           brands.length > 0 ? "Select a Brand" : "No Brands"
                         }
                       />
                     </SelectTrigger>
-                    <SelectContent dir={dir}>
+                    <SelectContent>
                       <SelectGroup>
                         {/* ✅ الخيار الأول: قيمة فارغة لإفراغ التحديد */}
                         <SelectItem value="__clear__">No Selected</SelectItem>
@@ -1037,7 +1031,7 @@ export function AddProductForm({
 
                               return (
                                 <Select
-                                  dir={dir}
+                                 
                                   // If currentValue is empty, the placeholder will be shown
                                   value={currentValue}
                                   onValueChange={(value) => {
@@ -1085,7 +1079,7 @@ export function AddProductForm({
                                       placeholder={`Select ${option.name.toLowerCase()}`}
                                     />
                                   </SelectTrigger>
-                                  <SelectContent dir={dir}>
+                                  <SelectContent>
                                     <SelectGroup>
                                       {/* Special item to clear selection (uses a non-empty string value) */}
                                       <SelectItem value="__clear__">
