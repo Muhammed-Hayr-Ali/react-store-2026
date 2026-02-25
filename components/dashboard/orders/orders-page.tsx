@@ -90,7 +90,7 @@ function OrderCard({ order }: { order: OrderSummary }) {
             <Badge
               variant={order.status === "Processing" ? "default" : "secondary"}
             >
-              <p className="text-[10px]">{order.status}vbn</p>
+              <p className="text-[10px]">{order.status}</p>
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">
