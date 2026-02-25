@@ -22,9 +22,6 @@ interface DialogProps {
   category: Category | null;
 }
 
-const isRtlLocale = (locale: string) => {
-  return ["ar", "fa", "he", "ur"].includes(locale);
-};
 
 export default function DeleteCategoryAlertDialog({
   onClose,
@@ -32,8 +29,6 @@ export default function DeleteCategoryAlertDialog({
   className,
 }: DialogProps) {
   const router = useRouter();
-  const locale = useLocale();
-  const dir = isRtlLocale(locale) ? "rtl" : "ltr";
 
   const [isLoading, setIsLoading] = useState(false);
   const handleDelete = async () => {
@@ -51,7 +46,7 @@ export default function DeleteCategoryAlertDialog({
     setIsLoading(false);
   };
   return (
-    <AlertDialogContent size="sm" className={className} dir={dir}>
+    <AlertDialogContent size="sm" className={className}>
       <AlertDialogHeader>
         <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
           <Trash2Icon />

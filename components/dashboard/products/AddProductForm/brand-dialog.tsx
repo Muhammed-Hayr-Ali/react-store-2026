@@ -41,9 +41,6 @@ interface DialogProps {
 
 
 
-const isRtlLocale = (locale: string) => {
-  return ["ar", "fa", "he", "ur"].includes(locale);
-};
 export default function BrandDialog({
   onClose,
   brand,
@@ -52,8 +49,6 @@ export default function BrandDialog({
 }: DialogProps) {
 
   const router = useRouter();
-  const locale = useLocale();
-  const dir = isRtlLocale(locale) ? "rtl" : "ltr";
 
 
   const {
@@ -125,7 +120,6 @@ export default function BrandDialog({
     <DialogContent
       className={cn("sm:max-w-sm", className)}
       {...props}
-      dir={dir}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <DialogHeader>

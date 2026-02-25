@@ -53,9 +53,7 @@ interface DialogProps {
   categories?: Category[];
 }
 
-const isRtlLocale = (locale: string) => {
-  return ["ar", "fa", "he", "ur"].includes(locale);
-};
+
 
 export default function CategoryDialog({
   onClose,
@@ -65,9 +63,6 @@ export default function CategoryDialog({
   ...props
 }: DialogProps) {
   const router = useRouter();
-  const locale = useLocale();
-  const dir = isRtlLocale(locale) ? "rtl" : "ltr";
-
   // remove main category from category from the list.
   const mainCategories = categories?.filter(
     (c) => c.id !== category?.id || null,
@@ -140,7 +135,6 @@ export default function CategoryDialog({
     <DialogContent
       className={cn("sm:max-w-sm", className)}
       {...props}
-      dir={dir}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <DialogHeader>
@@ -218,10 +212,10 @@ export default function CategoryDialog({
                 }}
                 value={category?.parent_id || "no_parent"}
               >
-                <SelectTrigger dir={dir} className="w-full">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a Category" />
                 </SelectTrigger>
-                <SelectContent dir={dir}>
+                <SelectContent >
                   <SelectGroup>
                     <SelectItem value={"no_parent"}>No Parent</SelectItem>
                     {mainCategories

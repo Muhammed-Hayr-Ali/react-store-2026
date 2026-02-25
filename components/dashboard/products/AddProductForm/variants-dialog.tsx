@@ -35,9 +35,7 @@ interface DialogProps {
   onClose: () => void;
 }
 
-const isRtlLocale = (locale: string) => {
-  return ["ar", "fa", "he", "ur"].includes(locale);
-};
+
 export default function VariantDialog({
   onClose,
   optionName,
@@ -46,8 +44,6 @@ export default function VariantDialog({
   ...props
 }: DialogProps) {
   const router = useRouter();
-  const locale = useLocale();
-  const dir = isRtlLocale(locale) ? "rtl" : "ltr";
 
   const {
     register,
@@ -81,7 +77,6 @@ export default function VariantDialog({
     <DialogContent
       className={cn("sm:max-w-sm", className)}
       {...props}
-      dir={dir}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <DialogHeader>

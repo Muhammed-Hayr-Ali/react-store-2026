@@ -37,9 +37,7 @@ interface DialogProps {
   productOption: ProductOption | null;
 }
 
-const isRtlLocale = (locale: string) => {
-  return ["ar", "fa", "he", "ur"].includes(locale);
-};
+
 export default function ProductOptionsDialog({
   onClose,
   productOption,
@@ -47,8 +45,6 @@ export default function ProductOptionsDialog({
   ...props
 }: DialogProps) {
   const router = useRouter();
-  const locale = useLocale();
-  const dir = isRtlLocale(locale) ? "rtl" : "ltr";
 
   const {
     register,
@@ -100,7 +96,6 @@ export default function ProductOptionsDialog({
     <DialogContent
       className={cn("sm:max-w-sm", className)}
       {...props}
-      dir={dir}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <DialogHeader>

@@ -25,19 +25,14 @@ type Inputs = {
   description: string;
 };
 
-const isRtlLocale = (locale: string) => {
-  return ["ar", "fa", "he", "ur"].includes(locale);
-};
+
 
 export default function OptionsForm({
   closeDialog,
 }: {
   closeDialog: () => void;
 }) {
-  const locale = useLocale();
   const router = useRouter();
-
-  const dir = isRtlLocale(locale) ? "rtl" : "ltr";
 
   const {
     register,
@@ -74,7 +69,7 @@ export default function OptionsForm({
 
   return (
     <>
-      <DialogContent className="sm:max-w-sm" dir={dir}>
+      <DialogContent className="sm:max-w-sm" >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
           <DialogHeader>
             <DialogTitle>Add a Product Options</DialogTitle>
