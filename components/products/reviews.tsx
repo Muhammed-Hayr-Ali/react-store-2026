@@ -1,7 +1,5 @@
 import { Review } from "@/lib/actions/reviews";
-import { ReviewCard } from "../reviews/review-card";
-
-
+import { ReviewCard } from "./review-card";
 
 interface ReviewsListProps {
   reviews: Review[];

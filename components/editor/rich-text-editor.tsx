@@ -9,7 +9,7 @@ import Highlight from "@tiptap/extension-highlight";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import Image from "@tiptap/extension-image";
-import {TextStyle} from "@tiptap/extension-text-style";
+import { TextStyle } from "@tiptap/extension-text-style";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -39,7 +39,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import EmojiPicker, { Theme, EmojiClickData } from "emoji-picker-react";
+import EmojiPicker, {
+  Theme,
+  EmojiClickData,
+  EmojiStyle,
+  SuggestionMode,
+} from "emoji-picker-react";
 import { useTheme } from "next-themes";
 
 import {
@@ -261,6 +266,8 @@ export function RichTextEditor({
 
   const currentTheme = theme === "system" ? systemTheme : theme;
   const emojiTheme = currentTheme === "dark" ? Theme.DARK : Theme.LIGHT;
+  const emojiStyle = EmojiStyle.NATIVE;
+  const suggestionMode = SuggestionMode.RECENT;
 
   return (
     <>
@@ -509,6 +516,9 @@ export function RichTextEditor({
                 side="bottom"
               >
                 <EmojiPicker
+                  // export {  SuggestionMode, SkinTonePickerLocation, CategoryIcons, CategoryConfig, } from './types/exposedTypes';
+                  reactionsDefaultOpen={true}
+                  emojiStyle={emojiStyle}
                   theme={emojiTheme}
                   onEmojiClick={onEmojiClick}
                   searchPlaceHolder="بحث عن إيموجي..."

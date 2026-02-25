@@ -30,7 +30,6 @@ import {
   Trash2,
   Tag,
   CheckCircle,
-  X,
   Plus,
   ListPlus,
   ImageIcon,
@@ -40,10 +39,12 @@ import {
   BadgePercent,
   PlusCircle,
   ListCheck,
+  SquarePen,
+  Trash,
+  Pencil,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 
 // --- استيرادات الأنواع ---
@@ -61,7 +62,10 @@ import { useLocale } from "next-intl";
 import VariantsForm from "./variants-form";
 import { Category } from "@/lib/actions/category";
 import { Brand } from "@/lib/actions/brands";
-import { ProductOption } from "@/lib/actions/product-options";
+import {
+  deleteProductOption,
+  ProductOption,
+} from "@/lib/actions/product-options";
 import { ProductOptionValue } from "@/lib/actions/product-option-values";
 import OptionsForm from "./options-form";
 import BrandForm from "./brand-form";
@@ -69,6 +73,21 @@ import { nanoid } from "nanoid";
 import { buildCategoryTree } from "@/lib/utils";
 import { RichTextEditor } from "@/components/editor/rich-text-editor";
 import { Separator } from "@/components/ui/separator";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import BrandDialog from "./brand-dialog";
+import DeleteBrandAlertDialog from "./brand-delete";
+import CategoryDialog from "./category-dialog";
 
 // =================================================================
 // واجهة المكون (Props)
@@ -83,7 +102,16 @@ interface AddProductFormProps {
 // =================================================================
 // Dialog State
 // =================================================================
-type DialogState = "category" | "brand" | "options" | "variants" | null;
+type DialogState =
+  | "BrandDialog"
+  | "DeleteBrandDialog"
+  | "CategoryDialog"
+  | "category"
+  | "brand"
+  | "options"
+  | "deleteOption"
+  | "variants"
+  | null;
 
 const isRtlLocale = (locale: string) => {
   return ["ar", "fa", "he", "ur"].includes(locale);
@@ -113,13 +141,19 @@ export function AddProductForm({
 
   const [tagsInput, setTagsInput] = useState("");
 
-  // Dialog State
-  const [isOpen, setIsOpen] = useState(false);
+  //New Dialog State
   const [activeDialog, setActiveDialog] = useState<DialogState>(null);
+  const [selcetedBrand, setSelcetedBrand] = useState<Brand | null>(null);
+  const [selcetedCategory, setSelcetedCategory] = useState<Category | null>(
+    null,
+  );
+
+  const [isOpen, setIsOpen] = useState(false);
+
   const [optionId, setOptionId] = useState<string>("");
   const [optionName, setOptionName] = useState<string>("");
 
-  // --- إعداد react-hook-form ---
+  // Setting React Hook Form
   const {
     register,
     handleSubmit,
@@ -246,6 +280,10 @@ export function AddProductForm({
       console.error("Error creating product:", error);
       toast.error("حدث خطأ غير متوقع");
     }
+  };
+
+  const onCloseDialog = () => {
+    setActiveDialog(null);
   };
 
   return (
@@ -447,24 +485,68 @@ export function AddProductForm({
             <FieldGroup>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Category */}
+
                 <Field>
                   <div className="flex items-center justify-between">
                     <FieldLabel>Category</FieldLabel>
-                    <Button
-                      type="button"
-                      size="icon-xs"
-                      variant={"ghost"}
-                      className="shrink-0"
-                      onClick={() => {
-                        setIsOpen(true);
-                        setActiveDialog("category");
-                      }}
-                    >
-                      <Plus className="h-3 w-3" />
-                    </Button>
+                    {selcetedCategory ? (
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          size="icon-xs"
+                          variant={"ghost"}
+                          className="shrink-0"
+                          onClick={() => {
+                            setActiveDialog("CategoryDialog");
+                          }}
+                        >
+                          <Pencil className="h-3 w-3" />
+                        </Button>
+
+                        <Button
+                          type="button"
+                          size="icon-xs"
+                          variant={"ghost"}
+                          className="shrink-0"
+                          onClick={() => {
+                            setActiveDialog("DeleteBrandDialog");
+                          }}
+                        >
+                          <Trash className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        type="button"
+                        size="icon-xs"
+                        variant={"ghost"}
+                        className="shrink-0"
+                        onClick={() => {
+                          setActiveDialog("CategoryDialog");
+                        }}
+                      >
+                        <Plus className="h-3 w-3" />
+                      </Button>
+                    )}
                   </div>
 
-                  <Select onValueChange={(val) => setValue("category_id", val)}>
+                  {/* <Select onValueChange={(val) => setValue("category_id", val)}> */}
+                  <Select
+                    onValueChange={(val) => {
+                      // إذا كانت القيمة فارغة، نقوم بمسح الحقل
+                      if (val === "__clear__") {
+                        setValue("category_id", "", { shouldValidate: true });
+                        setSelcetedCategory(null);
+                        console.error("selcetedCategory", selcetedCategory);
+                        return;
+                      }
+                      // إذا كانت هناك قيمة، نقوم بتعيينها
+                      setValue("category_id", val);
+                      const category = categories.find((cat) => cat.id === val);
+                      setSelcetedCategory(category || null);
+                    }}
+                    value={selcetedCategory?.id || ""} // التحكم في القيمة المعروضة
+                  >
                     <SelectTrigger dir={dir} className="w-full">
                       <SelectValue
                         placeholder={
@@ -475,6 +557,8 @@ export function AddProductForm({
                       />
                     </SelectTrigger>
                     <SelectContent dir={dir}>
+                      <SelectItem value="__clear__">No Selected</SelectItem>
+
                       {categoryTree.map((categoryNode) => (
                         <SelectGroup key={categoryNode.id}>
                           {/* التصنيف الرئيسي */}
@@ -496,25 +580,68 @@ export function AddProductForm({
                     </SelectContent>
                   </Select>
                 </Field>
+
                 {/* brand */}
+
                 <Field>
                   <div className="flex items-center justify-between">
                     <FieldLabel>Brand</FieldLabel>
-                    <Button
-                      type="button"
-                      size="icon-xs"
-                      variant={"ghost"}
-                      className="shrink-0"
-                      onClick={() => {
-                        setIsOpen(true);
-                        setActiveDialog("brand");
-                      }}
-                    >
-                      <Plus className="h-3 w-3" />
-                    </Button>
+                    {selcetedBrand ? (
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          size="icon-xs"
+                          variant={"ghost"}
+                          className="shrink-0"
+                          onClick={() => {
+                            setActiveDialog("BrandDialog");
+                          }}
+                        >
+                          <Pencil className="h-3 w-3" />
+                        </Button>
+
+                        <Button
+                          type="button"
+                          size="icon-xs"
+                          variant={"ghost"}
+                          className="shrink-0"
+                          onClick={() => {
+                            setActiveDialog("DeleteBrandDialog");
+                          }}
+                        >
+                          <Trash className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        type="button"
+                        size="icon-xs"
+                        variant={"ghost"}
+                        className="shrink-0"
+                        onClick={() => {
+                          setActiveDialog("BrandDialog");
+                        }}
+                      >
+                        <Plus className="h-3 w-3" />
+                      </Button>
+                    )}
                   </div>
 
-                  <Select onValueChange={(val) => setValue("brand_id", val)}>
+                  <Select
+                    onValueChange={(val) => {
+                      // إذا كانت القيمة فارغة، نقوم بمسح الحقل
+                      if (val === "__clear__") {
+                        setValue("brand_id", "", { shouldValidate: true });
+                        setSelcetedBrand(null);
+                        return;
+                      }
+                      // إذا كانت هناك قيمة، نقوم بتعيينها
+                      setValue("brand_id", val);
+                      const brand = brands.find((bnd) => bnd.id === val);
+                      setSelcetedBrand(brand || null);
+                    }}
+                    value={selcetedBrand?.id || ""} // التحكم في القيمة المعروضة
+                  >
                     <SelectTrigger dir={dir}>
                       <SelectValue
                         placeholder={
@@ -524,8 +651,11 @@ export function AddProductForm({
                     </SelectTrigger>
                     <SelectContent dir={dir}>
                       <SelectGroup>
+                        {/* ✅ الخيار الأول: قيمة فارغة لإفراغ التحديد */}
+                        <SelectItem value="__clear__">No Selected</SelectItem>
+
                         {brands.map((bnd) => (
-                          <SelectItem key={bnd.name} value={bnd.id}>
+                          <SelectItem key={bnd.id} value={bnd.id}>
                             {bnd.name}
                           </SelectItem>
                         ))}
@@ -850,20 +980,49 @@ export function AddProductForm({
                                 )}
                               </div>
                             </FieldLabel>
-                            <Button
-                              type="button"
-                              size="icon-xs"
-                              variant={"ghost"}
-                              className="shrink-0"
-                              onClick={() => {
-                                setOptionId(option.id);
-                                setOptionName(option.name);
-                                setIsOpen(true);
-                                setActiveDialog("variants");
-                              }}
-                            >
-                              <Plus className="h-3 w-3" />
-                            </Button>
+                            <div>
+                              <Button
+                                type="button"
+                                size="icon-xs"
+                                variant={"ghost"}
+                                className="shrink-0"
+                                onClick={() => {
+                                  setOptionId(option.id);
+                                  setOptionName(option.name);
+                                  setIsOpen(true);
+                                  setActiveDialog("variants");
+                                }}
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                type="button"
+                                size="icon-xs"
+                                variant={"ghost"}
+                                className="shrink-0"
+                                onClick={() => {
+                                  setOptionId(option.id);
+                                  setOptionName(option.name);
+                                  setIsOpen(true);
+                                  setActiveDialog("variants");
+                                }}
+                              >
+                                <SquarePen className="h-3 w-3" />
+                              </Button>
+                              <DeleteProductOptionDialog
+                                id={option.id}
+                                name={option.name}
+                              >
+                                <Button
+                                  type="button"
+                                  size="icon-xs"
+                                  variant={"ghost"}
+                                  className="shrink-0"
+                                >
+                                  <Trash className="h-3 w-3" />
+                                </Button>
+                              </DeleteProductOptionDialog>
+                            </div>
                           </div>
 
                           <Controller
@@ -934,7 +1093,7 @@ export function AddProductForm({
                                     <SelectGroup>
                                       {/* Special item to clear selection (uses a non-empty string value) */}
                                       <SelectItem value="__clear__">
-                                        No Selection
+                                        No Selected
                                       </SelectItem>
 
                                       {availableValues.length > 0 ? (
@@ -987,7 +1146,6 @@ export function AddProductForm({
                   )}
                 </div>
               ))}
-
             </FieldGroup>
           </CardContent>
         </Card>
@@ -1023,6 +1181,42 @@ export function AddProductForm({
         optionName={optionName}
         categories={categories}
       />
+
+      {/* Brand Dialog */}
+      <Dialog
+        open={activeDialog === "BrandDialog"}
+        onOpenChange={onCloseDialog}
+      >
+        <BrandDialog
+          onClose={onCloseDialog}
+          brand={selcetedBrand}
+          className="lg:max-w-lg"
+        />
+      </Dialog>
+
+      {/* Brand Delete Dialog */}
+      <AlertDialog
+        open={activeDialog === "DeleteBrandDialog"}
+        onOpenChange={onCloseDialog}
+      >
+        <DeleteBrandAlertDialog
+          onClose={onCloseDialog}
+          brand={selcetedBrand}
+          className="lg:max-w-lg"
+        />
+      </AlertDialog>
+
+      {/* Category Dialog */}
+      <Dialog
+        open={activeDialog === "CategoryDialog"}
+        onOpenChange={onCloseDialog}
+      >
+        <CategoryDialog
+          onClose={onCloseDialog}
+          category={selcetedCategory}
+          className="lg:max-w-lg"
+        />
+      </Dialog>
     </>
   );
 }
@@ -1087,5 +1281,56 @@ function DialogForm({
         />
       ) : null}
     </Dialog>
+  );
+}
+
+// Delete Product Option
+
+function DeleteProductOptionDialog({
+  children,
+  id,
+  name,
+}: {
+  children: React.ReactNode;
+  id: string;
+  name: string;
+}) {
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  const handleDelete = async () => {
+    setIsLoading(true);
+    const { error } = await deleteProductOption(id);
+
+    if (error) {
+      toast.error(error);
+      setIsLoading(false);
+      return;
+    }
+
+    toast.success("Option deleted successfully.");
+    setIsLoading(false);
+    router.refresh();
+  };
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete the
+            option <b>{name}</b> and remove it from all products.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction variant={"destructive"} onClick={handleDelete}>
+            {isLoading ? <Spinner /> : "Delete Option"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

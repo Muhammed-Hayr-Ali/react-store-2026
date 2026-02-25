@@ -1,7 +1,7 @@
 // components/reviews/ReviewCard.tsx
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { StarRating } from "./star-rating";
+import { StarRating } from "../reviews/star-rating";
 import { formatDistanceToNow } from "date-fns";
 import { CheckBadgeIcon } from "@heroicons/react/24/solid";
 import { TrashIcon } from "@heroicons/react/24/outline";
@@ -32,9 +32,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useState } from "react";
-import { ReportReviewForm } from "./report-review-form";
+import { ReportReviewForm } from "../reviews/report-review-form";
 import { User2 } from "lucide-react";
-
 
 function ReportReviewButton({ reviewId }: { reviewId: number }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -62,7 +61,6 @@ function ReportReviewButton({ reviewId }: { reviewId: number }) {
     </Dialog>
   );
 }
-
 
 type ReviewCardProps = {
   review: Review;
@@ -132,69 +130,67 @@ export function ReviewCard({
   currentUserId,
   productSlug,
 }: ReviewCardProps) {
+  if (review.author) {
+    const authorName =
+      [review.author?.first_name, review.author?.last_name]
+        .filter(Boolean)
+        .join(" ") || "Anonymous";
 
+    const avatarUrl = review.author?.avatar_url;
+    const avatarFallback = authorName.charAt(0).toUpperCase();
+    const isOwner = currentUserId === review.user_id;
 
-  if(review.author){
-  const authorName =
-    [review.author?.first_name, review.author?.last_name]
-      .filter(Boolean)
-      .join(" ") || "Anonymous";
+    return (
+      <div className="border-b last:border-b-0 py-6">
+        <div className="flex items-start gap-4">
+          <Avatar>
+            <AvatarImage src={avatarUrl || undefined} alt={authorName} />
+            <AvatarFallback>{avatarFallback}</AvatarFallback>
+          </Avatar>
 
-  const avatarUrl = review.author?.avatar_url;
-  const avatarFallback = authorName.charAt(0).toUpperCase();
-  const isOwner = currentUserId === review.user_id;
+          <div className="flex-1">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <p className="font-semibold">{authorName}</p>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  {formatDistanceToNow(new Date(review.created_at), {
+                    addSuffix: true,
+                  })}
+                </span>
+                {isOwner ? (
+                  <DeleteReviewButton
+                    reviewId={review.id}
+                    productSlug={productSlug}
+                  />
+                ) : (
+                  <ReportReviewButton reviewId={review.id} />
+                )}
+              </div>
+            </div>
 
-  return (
-    <div className="border-b last:border-b-0 py-6">
-      <div className="flex items-start gap-4">
-        <Avatar>
-          <AvatarImage src={avatarUrl || undefined} alt={authorName} />
-          <AvatarFallback>{avatarFallback}</AvatarFallback>
-        </Avatar>
-
-        <div className="flex-1">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <p className="font-semibold">{authorName}</p>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">
-                {formatDistanceToNow(new Date(review.created_at), {
-                  addSuffix: true,
-                })}
-              </span>
-              {isOwner ? (
-                <DeleteReviewButton
-                  reviewId={review.id}
-                  productSlug={productSlug}
-                />
-              ) : (
-                <ReportReviewButton reviewId={review.id} />
+            <div className="flex items-center flex-wrap gap-x-4 gap-y-1 my-2">
+              <StarRating rating={review.rating} />
+              {review.is_verified_purchase && (
+                <div className="flex items-center gap-1.5 text-sm font-medium text-emerald-600">
+                  <CheckBadgeIcon className="h-5 w-5" />
+                  <span>Verified Purchase</span>
+                </div>
               )}
             </div>
-          </div>
 
-          <div className="flex items-center flex-wrap gap-x-4 gap-y-1 my-2">
-            <StarRating rating={review.rating} />
-            {review.is_verified_purchase && (
-              <div className="flex items-center gap-1.5 text-sm font-medium text-emerald-600">
-                <CheckBadgeIcon className="h-5 w-5" />
-                <span>Verified Purchase</span>
-              </div>
+            {review.title && (
+              <h4 className="font-semibold mt-3">{review.title}</h4>
+            )}
+            {review.comment && (
+              <p className="text-muted-foreground mt-1 whitespace-pre-wrap">
+                {review.comment}
+              </p>
             )}
           </div>
-
-          {review.title && (
-            <h4 className="font-semibold mt-3">{review.title}</h4>
-          )}
-          {review.comment && (
-            <p className="text-muted-foreground mt-1 whitespace-pre-wrap">
-              {review.comment}
-            </p>
-          )}
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   return (
     <div className="border-b last:border-b-0 py-6">
@@ -230,5 +226,4 @@ export function ReviewCard({
       </div>
     </div>
   );
-
 }

@@ -16,11 +16,24 @@ import { AddReviewUserForm } from "../reviews/add-review-user-form";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Content } from "../editor/content";
 import { ProductDetailResponse, ProductVariant } from "@/lib/actions/products";
-
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { Button } from "../ui/button";
+import { Input } from "@base-ui/react";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { useUserDisplay } from "@/hooks/useUserDisplay";
+import { Send, SendHorizonal } from "lucide-react";
 // ============================================================================
 // Types & Interfaces
 // ============================================================================
-
 
 export interface OptionValue {
   value: string;
@@ -31,7 +44,6 @@ export interface Option {
   name: string;
   values: OptionValue[]; // تغيير من string[] إلى OptionValue[]
 }
-
 
 export interface VariantsChildProps {
   options: Option[];
@@ -96,14 +108,12 @@ export const getOrganizedOptions = (
   }));
 };
 
-
 // ============================================================================
 // Main Export - ProductDetails Component
 // ============================================================================
 
 export default function ProductDetails({ user, data }: ProductDetailsProps) {
   const product = data.product;
-  const variants = product.variants;
 
   const [activeVariant, setActiveVariant] = useState<
     ProductVariant | undefined
@@ -174,7 +184,8 @@ export default function ProductDetails({ user, data }: ProductDetailsProps) {
           )}
         </CardContent>
       </Card>
+
+      {/* <WriteReview user={user} /> */}
     </>
   );
 }
-
