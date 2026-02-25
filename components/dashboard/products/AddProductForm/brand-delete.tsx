@@ -11,7 +11,6 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { Brand, deleteBrand } from "@/lib/actions/brands";
 import { Trash2Icon } from "lucide-react";
-import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";

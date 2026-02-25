@@ -19,7 +19,6 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { createProductOptionValue } from "@/lib/actions/product-option-values";
 import { cn } from "@/lib/utils";
-import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";

@@ -19,7 +19,6 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { createProductOption, ProductOption, updateProductOption } from "@/lib/actions/product-options";
 import { cn } from "@/lib/utils";
-import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";

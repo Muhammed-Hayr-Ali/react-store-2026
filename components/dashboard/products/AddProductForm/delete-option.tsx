@@ -16,7 +16,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useLocale } from "next-intl";
 import { createProductOption } from "@/lib/actions/product-options";
 
 type Inputs = {

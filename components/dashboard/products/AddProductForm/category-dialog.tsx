@@ -31,7 +31,6 @@ import {
   updateCategory,
 } from "@/lib/actions/category";
 import { cn } from "@/lib/utils";
-import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";

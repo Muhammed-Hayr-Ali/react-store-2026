@@ -19,7 +19,6 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Brand, createBrand, updateBrand } from "@/lib/actions/brands";
 import { cn } from "@/lib/utils";
-import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
