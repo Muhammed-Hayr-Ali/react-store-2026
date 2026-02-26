@@ -213,9 +213,9 @@ const parentCategory = category ? category?.parent_id || "" : "";
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem key={"no_parent"} value={"no_parent"}>
+                {category?.parent_id &&  <SelectItem key={"no_parent"} value={"no_parent"}>
                     No Parent
-                  </SelectItem>
+                  </SelectItem>}
                   {categories &&
                     categories
                       .filter(
