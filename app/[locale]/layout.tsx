@@ -19,6 +19,11 @@ import { UserProvider } from "@/lib/provider/user-provider";
 import { getTotalCartQuantity } from "@/lib/actions/cart";
 import { getUser } from "@/lib/actions/get-user-action";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ReactNode, Suspense } from "react";
+import ClientSideScrollRestorer from "@/lib/scroll-restorer/client-side-scroll-restorer";
+
+
+
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -71,6 +76,9 @@ export default async function RootLayout({ children, params }: Props) {
         </NextIntlClientProvider>
         <Toaster position="bottom-right" />
       </body>
+      <Suspense>
+        <ClientSideScrollRestorer />
+      </Suspense>
     </html>
   );
 }

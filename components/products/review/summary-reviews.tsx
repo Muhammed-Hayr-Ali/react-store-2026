@@ -36,15 +36,15 @@ export default function SummaryReviewsComponent({ reviews }: Props) {
   ] as const;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col">
       <h1 className="text-2xl font-bold">Product Reviews</h1>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-xs text-muted-foreground">
         Reviews are from registered users. Note: Purchasing this product is not
         required to leave a review.
       </p>
-      <div className="w-full grid grid-cols-3 gap-4">
+      <div className="w-full pt-6 grid grid-cols-3 gap-4">
         <div className="col-span-1">
-          <div className="flex flex-col items-center justify-center gap-2">
+          <div className="flex flex-col h-full items-center justify-center gap-2">
             <p className="text-5xl lg:text-7xl">
               {reviews.averageRating.toFixed(1)}
             </p>

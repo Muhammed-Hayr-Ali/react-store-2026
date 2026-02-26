@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState, ReactNode } from "react";
+import { useState, ReactNode, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import { Option } from "react-day-picker";
 import { ImageGallery } from "./image-gallery";
@@ -104,6 +104,8 @@ export default function ProductDetails({ user, data }: ProductDetailsProps) {
   const [activeVariant, setActiveVariant] = useState<
     ProductVariant | undefined
   >(() => product.variants.find((v) => v.is_default) || product.variants[0]);
+
+
 
   return (
     <>
