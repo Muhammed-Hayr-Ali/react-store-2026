@@ -1,31 +1,23 @@
 "use client";
-
+import React from "react"
 import { User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { siteConfig } from "@/lib/config/site";
-import MenuButton from "./custom-ui/menu_button";
 import { useUserDisplay } from "@/hooks/useUserDisplay";
-import React from "react";
-import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { useUser } from "@/lib/provider/user-provider";
 import { signOut } from "@/lib/actions/auth";
 import { toast } from "sonner";
-import { useUser } from "@/lib/provider/user-provider";
-import { cn } from "@/lib/utils";
 
-export const MobileMenu = ({ className }: { className?: string }) => {
+export const MobileMenu = ({ isOpen, setIsOpen }: { isOpen?: boolean ; setIsOpen: (isOpen: boolean) => void }) => {
   const router = useRouter();
-  const locale = useLocale();
-  const [isOpen, setIsOpen] = React.useState(false);
   const { user } = useUser();
   const { fullName, avatarUrl, email } = useUserDisplay(user);
   const menuItems = user ? siteConfig.userMenuItems : siteConfig.guestMenuItems;
 
-  // **الإصلاح رقم 1: إعادة تفعيل منع السكرول للخلفية**
-  // هذا الكود يمنع تمرير الصفحة في الخلفية عندما تكون القائمة مفتوحة.
   React.useEffect(() => {
     if (isOpen) {
       const originalStyle = window.getComputedStyle(document.body).overflow;
@@ -38,25 +30,7 @@ export const MobileMenu = ({ className }: { className?: string }) => {
     }
   }, [isOpen]);
 
-  // التعامل مع إغلاق القائمة عند الضغط على زر "Escape"
-  React.useEffect(() => {
-    const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsOpen(false);
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener("keydown", handleEsc);
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleEsc);
-    };
-  }, [isOpen]);
-
   const handleLogout = async () => {
-    setIsOpen(false); // إغلاق القائمة قبل تسجيل الخروج
     const { error } = await signOut();
     if (error) {
       toast.error(error);
@@ -65,19 +39,19 @@ export const MobileMenu = ({ className }: { className?: string }) => {
   };
 
   return (
-    <div className={cn("", className)}>
-      <MenuButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
+    <div
+      className={`fixed inset-0 top-14  z-50 md:hidden transition-opacity duration-300 ${
+        isOpen
+          ? "opacity-100 pointer-events-auto"
+          : "opacity-0 pointer-events-none"
+      }`}
+    >
       <div
-        className={`fixed top-14 right-0 left-0 w-full border-t bg-background z-40 transform ${
-          isOpen
-            ? "translate-x-0"
-            : locale === "ar"
-              ? "-translate-x-full"
-              : "translate-x-full"
-        } transition-transform duration-300 ease-in-out lg:hidden`}
-        style={{ height: "calc(100dvh - 56px)" }}
+        className={`absolute border-t right-0 h-screen w-full bg-background shadow-2xl transform transition-transform duration-300 ease-in-out border-l ${
+          isOpen ? "translate-x-0" : "translate-x-full"
+        }`}
       >
-        <div className="flex flex-col h-full">
+        <nav className="flex flex-col justify-between h-[calc(100vh-7rem)]">
           {/* Header */}
           <div className="h-20 shrink-0 p-4 border-b">
             <div className="flex items-center gap-3">
@@ -154,7 +128,7 @@ export const MobileMenu = ({ className }: { className?: string }) => {
               </div>
             )}
           </div>
-        </div>
+        </nav>
       </div>
     </div>
   );

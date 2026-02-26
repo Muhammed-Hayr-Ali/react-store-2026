@@ -9,7 +9,7 @@ export default function ScrollToTop() {
   useEffect(() => {
     // تأكد من أن الكود يعمل فقط في المتصفح
     if (typeof window !== "undefined") {
-      window.scrollTo(0, 0);
+      window.scrollTo({ top: 0 });
     }
   }, [pathname]);
 

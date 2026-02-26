@@ -153,11 +153,11 @@
   animation: float 6s ease-in-out infinite;
 }
   */ 
-
+/* 
 body {
   overflow-x: hidden;
-  /* touch-action: pan-y; */
-}
+  touch-action: pan-y;
+} */
 
 
 

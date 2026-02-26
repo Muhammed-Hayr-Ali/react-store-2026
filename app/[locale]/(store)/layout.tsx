@@ -20,8 +20,7 @@ export default function Layout({ children }: Props) {
         <Navbar />
       </Header>
       <DynamicBreadcrumb />
-      <div className="min-h-[60vh] flex items-center justify-center ">
-        {" "}
+      <div className="min-h-[80vh] flex items-center justify-center ">
         {children}
       </div>
       <Footer />
