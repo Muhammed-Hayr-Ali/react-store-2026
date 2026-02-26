@@ -165,7 +165,7 @@ export function RecentProducts({
   if (error)
     return (
       <div className="p-8 text-center text-destructive">
-        Failed to load products{" "}
+        {/* Failed to load products */}
       </div>
     );
 

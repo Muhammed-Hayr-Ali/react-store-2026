@@ -60,9 +60,7 @@ export default function CategoryDialog({
   ...props
 }: DialogProps) {
   const router = useRouter();
-  const [parentId, setParentId] = useState<string>(
-    category?.parent_id || "no_parent",
-  );
+  const [parentCategory, setParentCategory] = useState<string>(category?.parent_id || "no_parent");
   // remove main category from category from the list.
   const mainCategories = categories?.filter(
     (c) => c.id !== category?.id || null,
@@ -119,7 +117,12 @@ export default function CategoryDialog({
 
   useEffect(() => {
     if (category) {
-      reset(category);
+      reset({
+        name: category.name || "",
+        slug: category.slug || "",
+        description: category.description || "",
+        image_url: category.image_url || "",
+      });
     } else {
       reset({
         name: "",
@@ -195,40 +198,37 @@ export default function CategoryDialog({
             />
           </Field>
 
-          {mainCategories && mainCategories.length > 0 && (
-            <Field>
-              <FieldLabel htmlFor="slug">Parent</FieldLabel>
-              <Select
-                value={parentId}
-                onValueChange={(val) => {
-                  if (val === "no_parent") {
-                    setValue("parent_id", null);
-                    return;
-                  }
-
-                  setValue("parent_id", val);
-                  setParentId(val);
-                }}
-                
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value={"no_parent"}>No Parent</SelectItem>
-                    {mainCategories
-                      .filter((cat) => !cat.parent_id)
-                      .map((cat) => (
-                        <SelectItem key={cat.name} value={cat.id}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </Field>
-          )}
+          <Field>
+            <FieldLabel htmlFor="slug">Parent</FieldLabel>
+            <Select
+              value={parentCategory}
+              onValueChange={(val) => {
+                setParentCategory(val);
+                if (val === "no_parent") {
+                  setValue("parent_id", null);
+                  return;
+                }
+                setValue("parent_id", val);
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem key={"no_parent"} value={"no_parent"}>
+                    No Parent
+                  </SelectItem>
+                  {mainCategories &&
+                    mainCategories.map((cat) => (
+                      <SelectItem key={cat.name} value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </Field>
         </FieldGroup>
         <DialogFooter>
           <DialogClose asChild>

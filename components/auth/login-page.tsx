@@ -88,6 +88,7 @@ export function LoginPage({}: React.ComponentProps<"div">) {
             id="email"
             type="email"
             placeholder="you@domain.com"
+            disabled={isSubmitting}
             aria-invalid={errors.email ? "true" : "false"}
             {...register("email", {
               required: "Email is required",
@@ -112,6 +113,7 @@ export function LoginPage({}: React.ComponentProps<"div">) {
           <Input
             id="password"
             type="password"
+            disabled={isSubmitting}
             aria-invalid={errors.password ? "true" : "false"}
             {...register("password", {
               required: "Password is required",

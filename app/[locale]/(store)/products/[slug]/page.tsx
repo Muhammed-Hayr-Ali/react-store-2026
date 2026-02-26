@@ -50,7 +50,6 @@ export default async function Page({ params }: Props) {
   const response = await getProduct(slug);
   const user = await getUser();
 
-  console.log("productDetailResponse", response);
 
   if (!response || !response.data || !response.data.product) {
     notFound();

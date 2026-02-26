@@ -157,7 +157,7 @@ export function BestSellingProducts({
   if (error)
     return (
       <div className="p-8 text-center text-destructive">
-        Failed to load products{" "}
+        {/* Failed to load products */}
       </div>
     );
 
@@ -212,7 +212,7 @@ export function BestSellingProducts({
         >
           {products.map((product) => (
             <motion.div
-              key={product.slug}
+              key={product.name}
               variants={FADE_UP_ANIMATION_VARIANTS}
             >
               <ProductCard product={product} basePath={basePath} />
