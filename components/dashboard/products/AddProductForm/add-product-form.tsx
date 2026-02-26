@@ -264,7 +264,14 @@ export function AddProductForm({
   };
 
   const onCloseDialog = () => {
+    //New Dialog State
+
     setActiveDialog(null);
+    setSelcetedBrand(null);
+    setSelcetedCategory(null);
+    setSelcetedProductOption(null);
+    setSelcetedOptionId(null);
+    setSelcetedValueId(null);
   };
 
   return (
