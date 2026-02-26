@@ -1,6 +1,5 @@
 // components/reviews/StarRating.tsx (أو star-rating.tsx)
 
-import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StarIcon } from "../custom-ui/icons";
 

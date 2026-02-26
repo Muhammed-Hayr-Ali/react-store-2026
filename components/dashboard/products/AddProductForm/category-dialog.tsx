@@ -32,7 +32,7 @@ import {
 } from "@/lib/actions/category";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import slugify from "slugify";
 import { toast } from "sonner";

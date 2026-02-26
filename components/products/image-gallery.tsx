@@ -2,9 +2,7 @@
 
 import { FullProduct, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
-import { Spinner } from "../ui/spinner";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 export function ImageGallery({
@@ -23,7 +21,7 @@ export function ImageGallery({
   const [activeImage, setActiveImage] = useState(
     imageList[0] || "/placeholder.svg",
   );
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [setImageLoaded] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   // ✅ تعيين الصورة النشطة عند تحميل القائمة
@@ -145,14 +143,7 @@ export function ImageGallery({
             alt={product.name}
             className={cn(
               "object-cover transition-transform duration-300 hover:scale-105  h-full w-full",
-              // imageLoaded ? "opacity-100" : "opacity-0",
             )}
-            // onLoadingComplete={() => setImageLoaded(true)}
-            onError={() => {
-              console.error("❌ Image failed to load:", activeImage);
-              setImageLoaded(true);
-            }}
-            // unoptimized={activeImage.startsWith("http")}
           />
 
           {imageList.length > 1 && (

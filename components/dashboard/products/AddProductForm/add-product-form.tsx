@@ -460,7 +460,6 @@ export function AddProductForm({
           </CardContent>
         </Card>
 
-        {/* --- القسم 3: التصنيفات والعلامات --- */}
         <Card className="rounded-none shadow-none">
           <CardHeader>
             <CardTitle className="flex gap-2 w-fit items-center">

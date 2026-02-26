@@ -16,21 +16,7 @@ import { AddReviewUserForm } from "../reviews/add-review-user-form";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Content } from "../editor/content";
 import { ProductDetailResponse, ProductVariant } from "@/lib/actions/products";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import { Button } from "../ui/button";
-import { Input } from "@base-ui/react";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { useUserDisplay } from "@/hooks/useUserDisplay";
-import { Send, SendHorizonal } from "lucide-react";
+
 // ============================================================================
 // Types & Interfaces
 // ============================================================================

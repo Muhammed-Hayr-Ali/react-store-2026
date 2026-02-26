@@ -3,7 +3,6 @@
 import * as React from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Kbd } from "@/components/ui/kbd";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +16,6 @@ import {
   History,
   X,
   CornerDownLeft,
-  BrushCleaning,
   Trash,
 } from "lucide-react";
 import { useRouter } from "next/navigation";

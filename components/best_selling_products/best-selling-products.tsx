@@ -218,7 +218,7 @@ export function BestSellingProducts({
               <ProductCard product={product} basePath={basePath} />
             </motion.div>
           ))}
-        </motion.div>{" "}
+        </motion.div>
       </div>
     </section>
   );

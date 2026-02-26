@@ -33,7 +33,6 @@ export function AddressForm({
   onCancel,
   onFormSubmit,
 }: AddressFormProps) {
-  const router = useRouter();
   const {
     register,
     handleSubmit,
