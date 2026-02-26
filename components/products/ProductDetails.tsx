@@ -9,13 +9,13 @@ import { ImageGallery } from "./image-gallery";
 import { Separator } from "../ui/separator";
 import ProductInfo from "./productInfo";
 import { Variants } from "./variants";
-import SummaryReviews from "./summary-reviews";
-import ReviewsList from "./reviews";
+import ReviewsList from "./review/reviews-list";
 import { AddReviewGuestForm } from "../reviews/add-review-guest-form";
 import { AddReviewUserForm } from "../reviews/add-review-user-form";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Content } from "../editor/content";
 import { ProductDetailResponse, ProductVariant } from "@/lib/actions/products";
+import SummaryReviewsComponent from "./review/summary-reviews";
 
 // ============================================================================
 // Types & Interfaces
@@ -138,10 +138,7 @@ export default function ProductDetails({ user, data }: ProductDetailsProps) {
       <Separator className="my-12 lg:my-16" />
 
       {/* Summary Section for Reviews */}
-      <SummaryReviews
-        averageRating={data.summaryReviews.averageRating}
-        totalReviews={data.summaryReviews.totalReviews}
-      />
+      <SummaryReviewsComponent reviews={data.summaryReviews} />
 
       {/* Reviews List */}
       <ReviewsList

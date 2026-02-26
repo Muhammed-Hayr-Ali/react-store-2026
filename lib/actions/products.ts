@@ -123,6 +123,15 @@ export type Author = {
 export type SummaryReviews = {
   totalReviews: number;
   averageRating: number;
+  starCounts: StarCounts;
+};
+
+export type StarCounts = {
+  oneStar: number;
+  twoStar: number;
+  threeStar: number;
+  fourStar: number;
+  fiveStar: number;
 };
 
 export type Product = {
@@ -229,9 +238,10 @@ export const getProductBySlug = cache(
   ): Promise<ApiResponse<ProductDetailResponse | undefined>> => {
     let reviews: Review[] = [];
     let initiallyWishlisted: boolean = false;
-
+    // Initialize Supabase client
     const supabase = await createServerClient();
 
+    // Fetch the product by slug
     const { data: productResponse, error: productErrorResponse } =
       await supabase
         .from("products")
@@ -244,6 +254,17 @@ export const getProductBySlug = cache(
       return { error: "Failed to fetch product by slug." };
     }
 
+    // Check wishlist status
+    const wishlistResponse = await checkWishlistStatus([productResponse.id]);
+
+    if (!wishlistResponse.error && wishlistResponse.data) {
+      initiallyWishlisted = wishlistResponse.data[productResponse.id] || false;
+    } else {
+      console.warn("Failed to check wishlist status:", wishlistResponse.error);
+      initiallyWishlisted = false;
+    }
+
+    // Fetch reviews
     const { data: reviewsResponse, error: reviewsErrorResponse } =
       await getReviewsByProductId(productResponse.id);
 
@@ -257,37 +278,63 @@ export const getProductBySlug = cache(
 
     reviews = reviewsResponse || [];
 
+    const sortedReviews = [...reviews].sort((a, b) => {
+      // إعطاء وزن رقمي: 0 للمسجل (أولوية)، 1 للزائر
+      const priorityA = a.user_id ? 0 : 1;
+      const priorityB = b.user_id ? 0 : 1;
+
+      // الفرز حسب الأولوية (الأصغر أولاً)
+      return priorityA - priorityB;
+    });
+
+    
+
     /// Summary Reviews
-    const totalReviews = reviews?.length || 0;
+    const validReviews = reviews?.filter((r) => r.rating > 0) || [];
+
+
+    const totalReviews = validReviews.length;
     const averageRating =
       totalReviews > 0
-        ? reviews!.reduce((acc, review) => acc + review.rating, 0) /
+        ? validReviews!.reduce((acc, review) => acc + review.rating, 0) /
           totalReviews
         : 0;
 
-    const wishlistResponse = await checkWishlistStatus([productResponse.id]);
-
-    if (!wishlistResponse.error && wishlistResponse.data) {
-      initiallyWishlisted = wishlistResponse.data[productResponse.id] || false;
-    } else {
-      console.warn("Failed to check wishlist status:", wishlistResponse.error);
-      initiallyWishlisted = false;
-    }
+    const starCounts = validReviews.reduce(
+      (acc, review) => {
+        const key =
+          `${["one", "two", "three", "four", "five"][review.rating - 1]}Star` as
+            | "oneStar"
+            | "twoStar"
+            | "threeStar"
+            | "fourStar"
+            | "fiveStar";
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      },
+      {
+        oneStar: 0,
+        twoStar: 0,
+        threeStar: 0,
+        fourStar: 0,
+        fiveStar: 0,
+      },
+    );
 
     const productDetailResponse: ProductDetailResponse = {
       product: productResponse,
-      reviews,
+      reviews: sortedReviews,
       initiallyWishlisted,
+
       summaryReviews: {
         totalReviews,
         averageRating,
+        starCounts,
       },
     };
 
-
-
     return {
-     data: productDetailResponse,
+      data: productDetailResponse,
     };
   },
 );

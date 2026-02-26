@@ -24,11 +24,10 @@ export function StarRating({
           <StarIcon
             key={index}
             className={cn(
-              "h-5 w-5", // الحجم الافتراضي
-              starClassName, // أي حجم مخصص يتم تمريره
+              "h-5 w-5", 
+              starClassName,
 
-              // ✅ --- هذا هو التصحيح --- ✅
-              // استخدام النقطتين (:) بدلاً من علامة الطرح (-)
+            
               starValue <= rating
                 ? "fill-orange-400 text-orange-400"
                 : "fill-muted text-muted-foreground",

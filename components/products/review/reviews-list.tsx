@@ -1,3 +1,5 @@
+"use client";
+
 import { Review } from "@/lib/actions/reviews";
 import { ReviewCard } from "./review-card";
 
@@ -14,6 +16,10 @@ export default function ReviewsList({
   userId,
   productSlug,
 }: ReviewsListProps) {
+
+
+
+
   return (
     <div className="mt-8">
       {totalReviews === 0 && (
@@ -24,7 +30,7 @@ export default function ReviewsList({
           </p>
         </div>
       )}
-      <div className="space-y-8">
+      <div className="space-y-10">
         {reviews?.map((review) => (
           <ReviewCard
             key={review.id}

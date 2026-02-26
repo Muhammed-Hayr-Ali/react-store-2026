@@ -1,7 +1,7 @@
 // components/reviews/ReviewCard.tsx
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { StarRating } from "../reviews/star-rating";
+import { StarRating } from "../../reviews/star-rating";
 import { formatDistanceToNow } from "date-fns";
 import { CheckBadgeIcon } from "@heroicons/react/24/solid";
 import { TrashIcon } from "@heroicons/react/24/outline";
@@ -32,8 +32,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useState } from "react";
-import { ReportReviewForm } from "../reviews/report-review-form";
-import { User2 } from "lucide-react";
+import { ReportReviewForm } from "../../reviews/report-review-form";
+
+type ReviewCardProps = {
+  review: Review;
+  currentUserId: string | undefined;
+  productSlug: string;
+};
 
 function ReportReviewButton({ reviewId }: { reviewId: number }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -62,13 +67,6 @@ function ReportReviewButton({ reviewId }: { reviewId: number }) {
   );
 }
 
-type ReviewCardProps = {
-  review: Review;
-  currentUserId: string | undefined;
-  productSlug: string;
-};
-
-// ✅ 2. تحديث مكون زر الحذف ليستخدم AlertDialog
 function DeleteReviewButton({
   reviewId,
   productSlug,
@@ -125,12 +123,18 @@ function DeleteReviewButton({
   );
 }
 
+type DialogState =
+  | "RemoveReviewDialog"
+  | "EditReviewDialog"
+  | "ReportReviewDialog"
+  | null;
+
 export function ReviewCard({
   review,
   currentUserId,
   productSlug,
 }: ReviewCardProps) {
-  if (review.author) {
+  if (review.user_id) {
     const authorName =
       [review.author?.first_name, review.author?.last_name]
         .filter(Boolean)
@@ -141,77 +145,70 @@ export function ReviewCard({
     const isOwner = currentUserId === review.user_id;
 
     return (
-      <div className="border-b last:border-b-0 py-6">
-        <div className="flex items-start gap-4">
-          <Avatar>
+      <div className="border-t flex flex-col pt-6 gap-2">
+        <div className="flex items-center gap-4 ">
+          <Avatar size={"lg"}>
             <AvatarImage src={avatarUrl || undefined} alt={authorName} />
             <AvatarFallback>{avatarFallback}</AvatarFallback>
           </Avatar>
-
-          <div className="flex-1">
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <p className="font-semibold">{authorName}</p>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">
-                  {formatDistanceToNow(new Date(review.created_at), {
-                    addSuffix: true,
-                  })}
-                </span>
-                {isOwner ? (
-                  <DeleteReviewButton
-                    reviewId={review.id}
-                    productSlug={productSlug}
-                  />
-                ) : (
-                  <ReportReviewButton reviewId={review.id} />
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center flex-wrap gap-x-4 gap-y-1 my-2">
-              <StarRating rating={review.rating} />
-              {review.is_verified_purchase && (
-                <div className="flex items-center gap-1.5 text-sm font-medium text-emerald-600">
-                  <CheckBadgeIcon className="h-5 w-5" />
-                  <span>Verified Purchase</span>
-                </div>
-              )}
-            </div>
-
-            {review.title && (
-              <h4 className="font-semibold mt-3">{review.title}</h4>
-            )}
-            {review.comment && (
-              <p className="text-muted-foreground mt-1 whitespace-pre-wrap">
-                {review.comment}
-              </p>
-            )}
-          </div>
+          <p className="font-semibold">{authorName}</p>
         </div>
-      </div>
-    );
-  }
 
-  return (
-    <div className="border-b last:border-b-0 py-6">
-      <div className="flex items-start gap-4">
-        <Avatar>
-          <AvatarFallback>
-            <User2 />
-          </AvatarFallback>
-        </Avatar>
+        <div className="flex items-center gap-4">
+          {/* {Verified Purchase  */}
+          {/* {review.is_verified_purchase && (
+            <div className="flex items-center gap-1.5 text-sm font-medium text-emerald-600">
+              <CheckBadgeIcon className="h-5 w-5" />
+              <span>Verified Purchase</span>
+            </div>
+          )} */}
 
-        <div className="flex-1">
+          <StarRating rating={review.rating} starClassName="size-4" />
+
+          <span className="text-sm text-muted-foreground">
+            {formatDistanceToNow(new Date(review.created_at), {
+              addSuffix: true,
+            })}
+          </span>
+        </div>
+
+        {review.title && <h4 className="font-semibold mt-3">{review.title}</h4>}
+        {review.comment && (
+          <p className="text-muted-foreground mt-1 whitespace-pre-wrap">
+            {review.comment}
+          </p>
+        )}
+
+
+
+
+        {/* <div className="flex-1">
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <p className="font-semibold">{review.name}</p>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">
                 {formatDistanceToNow(new Date(review.created_at), {
                   addSuffix: true,
                 })}
               </span>
-              <ReportReviewButton reviewId={review.id} />
+              {isOwner ? (
+                <DeleteReviewButton
+                  reviewId={review.id}
+                  productSlug={productSlug}
+                />
+              ) : (
+                <ReportReviewButton reviewId={review.id} />
+              )}
             </div>
+          </div>
+
+          <div className="flex items-center flex-wrap gap-x-4 gap-y-1 my-2">
+            <StarRating rating={review.rating} />
+            {review.is_verified_purchase && (
+              <div className="flex items-center gap-1.5 text-sm font-medium text-emerald-600">
+                <CheckBadgeIcon className="h-5 w-5" />
+                <span>Verified Purchase</span>
+              </div>
+            )}
           </div>
 
           {review.title && (
@@ -222,8 +219,10 @@ export function ReviewCard({
               {review.comment}
             </p>
           )}
-        </div>
+        </div> */}
       </div>
-    </div>
-  );
+    );
+  }
+
+  return <span>{review.comment}</span>;
 }
