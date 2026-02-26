@@ -31,7 +31,6 @@ import {
   Tag,
   CheckCircle,
   Plus,
-  ListPlus,
   ImageIcon,
   Info,
   Folder,
@@ -548,12 +547,10 @@ export function AddProductForm({
                           </SelectItem>
                           {/* التصنيفات الفرعية */}
                           {categoryNode.children.map((child) => (
-                            <SelectItem
-                              key={child.id}
-                              value={child.id}
-                              >
-                                <div className="flex items-center gap-2 rtl:flex-row-reverse"><p>-</p> {child.name}</div>
-                         
+                            <SelectItem key={child.id} value={child.id}>
+                              <div className="flex items-center gap-2 rtl:flex-row-reverse">
+                                <p>-</p> {child.name}
+                              </div>
                             </SelectItem>
                           ))}
                         </SelectGroup>
@@ -931,7 +928,7 @@ export function AddProductForm({
                       }}
                       disabled={isSubmitting}
                     >
-                      <ListPlus className="mr-1 rtl:mr-auto rtl:ml-1 h-4 w-4" />
+                      <Plus className="mr-1 rtl:mr-auto rtl:ml-1 h-4 w-4" />
                       New Option
                     </Button>
                   </CardHeader>
@@ -1031,7 +1028,6 @@ export function AddProductForm({
 
                               return (
                                 <Select
-                                 
                                   // If currentValue is empty, the placeholder will be shown
                                   value={currentValue}
                                   onValueChange={(value) => {
@@ -1050,7 +1046,7 @@ export function AddProductForm({
                                       setSelcetedValueId(null);
                                       return;
                                     }
-                                      setSelcetedValueId(value);
+                                    setSelcetedValueId(value);
 
                                     // 3. Handle normal value selection
                                     const selectedValue = availableValues.find(

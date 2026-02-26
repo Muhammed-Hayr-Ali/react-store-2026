@@ -60,11 +60,9 @@ export default function CategoryDialog({
   ...props
 }: DialogProps) {
   const router = useRouter();
-  const [parentCategory, setParentCategory] = useState<string>(category?.parent_id || "no_parent");
-  // remove main category from category from the list.
-  const mainCategories = categories?.filter(
-    (c) => c.id !== category?.id || null,
-  );
+
+const parentCategory = category ? category?.parent_id || "" : "";
+
 
   const {
     register,
@@ -118,10 +116,10 @@ export default function CategoryDialog({
   useEffect(() => {
     if (category) {
       reset({
-        name: category.name || "",
-        slug: category.slug || "",
-        description: category.description || "",
-        image_url: category.image_url || "",
+        name: category.name,
+        slug: category.slug,
+        description: category.description,
+        image_url: category.image_url,
       });
     } else {
       reset({
@@ -201,9 +199,8 @@ export default function CategoryDialog({
           <Field>
             <FieldLabel htmlFor="slug">Parent</FieldLabel>
             <Select
-              value={parentCategory}
+              defaultValue={parentCategory}
               onValueChange={(val) => {
-                setParentCategory(val);
                 if (val === "no_parent") {
                   setValue("parent_id", null);
                   return;
@@ -212,19 +209,24 @@ export default function CategoryDialog({
               }}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a Category" />
+                <SelectValue placeholder="Select a parent" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
                   <SelectItem key={"no_parent"} value={"no_parent"}>
                     No Parent
                   </SelectItem>
-                  {mainCategories &&
-                    mainCategories.map((cat) => (
-                      <SelectItem key={cat.name} value={cat.id}>
-                        {cat.name}
-                      </SelectItem>
-                    ))}
+                  {categories &&
+                    categories
+                      .filter(
+                        (cat) =>
+                          cat.id !== category?.id && cat.parent_id === null,
+                      )
+                      .map((cat) => (
+                        <SelectItem key={cat.name} value={cat.id}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
                 </SelectGroup>
               </SelectContent>
             </Select>
