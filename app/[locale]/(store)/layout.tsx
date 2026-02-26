@@ -5,7 +5,6 @@ import Header from "@/components/header";
 import Navbar from "@/components/navbar";
 import Link from "next/link";
 import { AppLogo } from "@/components/custom-ui/app-logo";
-
 type Props = {
   children: React.ReactNode;
 };

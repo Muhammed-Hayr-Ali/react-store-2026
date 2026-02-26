@@ -19,8 +19,7 @@ import { UserProvider } from "@/lib/provider/user-provider";
 import { getTotalCartQuantity } from "@/lib/actions/cart";
 import { getUser } from "@/lib/actions/get-user-action";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ReactNode, Suspense } from "react";
-import ClientSideScrollRestorer from "@/lib/scroll-restorer/client-side-scroll-restorer";
+import ScrollToTop from "@/components/ScrollToTop";
 
 
 
@@ -67,6 +66,7 @@ export default async function RootLayout({ children, params }: Props) {
             enableSystem
             disableTransitionOnChange
           >
+            <ScrollToTop />
             <UserProvider initialUser={initialUser || null}>
               <CartCountProvider initialCount={initialCartCount || 0}>
                 <TooltipProvider>{children}</TooltipProvider>
@@ -76,9 +76,6 @@ export default async function RootLayout({ children, params }: Props) {
         </NextIntlClientProvider>
         <Toaster position="bottom-right" />
       </body>
-      <Suspense>
-        <ClientSideScrollRestorer />
-      </Suspense>
     </html>
   );
 }

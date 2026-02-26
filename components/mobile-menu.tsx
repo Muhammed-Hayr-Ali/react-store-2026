@@ -24,17 +24,21 @@ export const MobileMenu = ({ className }: { className?: string }) => {
   const { fullName, avatarUrl, email } = useUserDisplay(user);
   const menuItems = user ? siteConfig.userMenuItems : siteConfig.guestMenuItems;
 
+  // **الإصلاح رقم 1: إعادة تفعيل منع السكرول للخلفية**
+  // هذا الكود يمنع تمرير الصفحة في الخلفية عندما تكون القائمة مفتوحة.
   React.useEffect(() => {
     if (isOpen) {
       const originalStyle = window.getComputedStyle(document.body).overflow;
       document.body.style.overflow = "hidden";
 
+      // دالة التنظيف: تعيد النمط الأصلي عند إغلاق القائمة أو مغادرة الصفحة
       return () => {
         document.body.style.overflow = originalStyle;
       };
     }
   }, [isOpen]);
 
+  // التعامل مع إغلاق القائمة عند الضغط على زر "Escape"
   React.useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -51,15 +55,14 @@ export const MobileMenu = ({ className }: { className?: string }) => {
     };
   }, [isOpen]);
 
-   const handleLogout = async () => {
-    setIsOpen(false);
-    
-     const { error } = await signOut();
-     if (error) {
-       toast.error(error);
-     }
-     router.refresh();
-   };
+  const handleLogout = async () => {
+    setIsOpen(false); // إغلاق القائمة قبل تسجيل الخروج
+    const { error } = await signOut();
+    if (error) {
+      toast.error(error);
+    }
+    router.refresh();
+  };
 
   return (
     <div className={cn("", className)}>
@@ -68,7 +71,7 @@ export const MobileMenu = ({ className }: { className?: string }) => {
         className={`fixed top-14 right-0 left-0 w-full border-t bg-background z-40 transform ${
           isOpen
             ? "translate-x-0"
-            : locale == "ar"
+            : locale === "ar"
               ? "-translate-x-full"
               : "translate-x-full"
         } transition-transform duration-300 ease-in-out lg:hidden`}
@@ -95,13 +98,14 @@ export const MobileMenu = ({ className }: { className?: string }) => {
 
           {/* Body */}
           <div className="grow overflow-y-auto p-2">
-            <nav className="grid gap-2  ">
+            <nav className="grid gap-2">
               {menuItems.map((item) => (
                 <Button
                   key={`/${item.label}`}
                   variant="ghost"
                   className="w-full justify-start text-base gap-3 h-10"
                   asChild
+                  // **الإصلاح رقم 2: إغلاق القائمة عند الضغط على الرابط**
                   onClick={() => setIsOpen(false)}
                 >
                   <Link href={item.href}>
@@ -110,10 +114,7 @@ export const MobileMenu = ({ className }: { className?: string }) => {
                   </Link>
                 </Button>
               ))}
-
               <DropdownMenuSeparator className="my-3" />
-
-              {/* <SearchButton /> */}
             </nav>
           </div>
 
@@ -128,13 +129,24 @@ export const MobileMenu = ({ className }: { className?: string }) => {
                 Sign Out
               </Button>
             ) : (
-              <div className="flex gap-2 ">
-                <Button className="w-full" asChild>
+              <div className="flex gap-2">
+                <Button
+                  className="w-full"
+                  asChild
+                  // **الإصلاح رقم 2 (مكرر): إغلاق القائمة**
+                  onClick={() => setIsOpen(false)}
+                >
                   <Link href={`/auth/login`} className="flex-1">
                     Sign In
                   </Link>
                 </Button>
-                <Button variant="outline" className="w-full" asChild>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  asChild
+                  // **الإصلاح رقم 2 (مكرر): إغلاق القائمة**
+                  onClick={() => setIsOpen(false)}
+                >
                   <Link href={`/auth/signup`} className="flex-1">
                     Create Account
                   </Link>
