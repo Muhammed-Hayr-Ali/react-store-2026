@@ -101,12 +101,12 @@ function DeleteReviewButton({
           size="icon"
           className="h-8 w-8 text-muted-foreground hover:text-destructive"
           aria-label="Delete review"
-          disabled={isPending} // تعطيل الزر أثناء الحذف
+          disabled={isPending}
         >
           <TrashIcon className="h-5 w-5" />
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent size="sm">
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
@@ -117,7 +117,7 @@ function DeleteReviewButton({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction onClick={handleDelete} disabled={isPending}>
-            {isPending ? "Deleting..." : "Continue"}
+            {isPending ? "Deleting..." : "Yes, delete it."}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

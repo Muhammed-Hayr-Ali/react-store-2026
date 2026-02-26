@@ -43,6 +43,7 @@ import EmojiPicker, {
   Theme,
   EmojiClickData,
   EmojiStyle,
+  Categories,
 } from "emoji-picker-react";
 import { useTheme } from "next-themes";
 
@@ -69,6 +70,7 @@ import {
 } from "lucide-react";
 
 import { useState } from "react";
+import { useLocale } from "next-intl";
 
 // ---------------------------------------------------------
 // 1. Custom Font Size Extension
@@ -140,12 +142,19 @@ interface RichTextEditorProps {
   className?: string;
 }
 
+const isRtlLocale = (locale: string) => {
+  return ["ar", "fa", "he", "ur"].includes(locale);
+};
+
 export function RichTextEditor({
   content,
   onChange,
   placeholder = "اكتب شيئاً...",
   className,
 }: RichTextEditorProps) {
+  const locale = useLocale();
+  const dir = isRtlLocale(locale) ? "rtl" : "ltr";
+
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
 
@@ -264,7 +273,7 @@ export function RichTextEditor({
 
   const currentTheme = theme === "system" ? systemTheme : theme;
   const emojiTheme = currentTheme === "dark" ? Theme.DARK : Theme.LIGHT;
-  const emojiStyle = EmojiStyle.NATIVE;
+  const emojiStyle = EmojiStyle.GOOGLE;
 
   return (
     <>
@@ -507,23 +516,65 @@ export function RichTextEditor({
                   <Smile className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
+
               <PopoverContent
-                className="w-full p-0 border-0 shadow-xl"
+                dir={dir}
+                className="w-[320px] p-0 border-0 shadow-none ring-0 focus:ring-0 "
                 align="start"
                 side="bottom"
+                sideOffset={8}
               >
                 <EmojiPicker
-                  // export {  SuggestionMode, SkinTonePickerLocation, CategoryIcons, CategoryConfig, } from './types/exposedTypes';
-                  reactionsDefaultOpen={true}
+                  className="font-almarai"
+                  categories={[
+                    {
+                      category: Categories.SUGGESTED,
+                      name: "المستخدمة حديثًا", // بدلاً من "Frequently Used"
+                      
+                    },
+                    {
+                      category: Categories.SMILEYS_PEOPLE,
+                      name: "ابتسامات وأشخاص", // بدلاً من "Smileys & People"
+                    },
+                    {
+                      category: Categories.ANIMALS_NATURE,
+                      name: "حيوانات وطبيعة",
+                    },
+                    {
+                      category: Categories.FOOD_DRINK,
+                      name: "طعام وشراب",
+                    },
+                    {
+                      category: Categories.ACTIVITIES,
+                      name: "أنشطة",
+                    },
+                    {
+                      category: Categories.TRAVEL_PLACES,
+                      name: "سفر وأماكن",
+                    },
+                    {
+                      category: Categories.OBJECTS,
+                      name: "أشياء",
+                    },
+                    {
+                      category: Categories.SYMBOLS,
+                      name: "رموز",
+                    },
+                    {
+                      category: Categories.FLAGS,
+                      name: "أعلام",
+                    },
+                  ]}
                   emojiStyle={emojiStyle}
                   theme={emojiTheme}
                   onEmojiClick={onEmojiClick}
-                  searchPlaceHolder="بحث عن إيموجي..."
+                  searchPlaceholder="بحث عن إيموجي..." // ✅ تصحيح الإملاء
                   width={320}
                   height={400}
                   lazyLoadEmojis={true}
                   previewConfig={{ showPreview: false }}
                   skinTonesDisabled={false}
+                  reactionsDefaultOpen={true}
                 />
               </PopoverContent>
             </Popover>
