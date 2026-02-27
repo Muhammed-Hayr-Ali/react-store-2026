@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState, ReactNode, useEffect } from "react";
+import { useState, ReactNode } from "react";
 import { User } from "@supabase/supabase-js";
 import { Option } from "react-day-picker";
 import { ImageGallery } from "./image-gallery";

@@ -3,6 +3,7 @@
 import { unstable_noStore as noStore, revalidatePath } from "next/cache";
 import { createServerClient } from "../supabase/createServerClient";
 import { getUser } from "./get-user-action";
+import { siteConfig } from "../config/site";
 
 // ===============================================================================
 // Api Response Type
@@ -18,14 +19,15 @@ export type ApiResponse<T> = {
 
 export type Review = {
   id: number;
-  name: string;
-  email: string;
+  name?: string;
+  email?: string;
   product_id: string;
   user_id?: string;
   rating: number;
-  title: string;
+  title?: string;
   comment: string;
   is_verified_purchase: boolean;
+  is_published?: boolean;
   author?: Author;
   created_at: Date;
 };
@@ -40,60 +42,15 @@ export type Author = {
 // ===============================================================================
 // createReview Payload Type
 // ===============================================================================
-export type CreateReviewPayload = {
-  name?: string;
-  email?: string;
-  product_id: string;
-  rating?: number;
-  title: string;
-  comment: string;
-  product_slug: string;
-  is_verified_purchase: boolean;
-};
-
-// ===============================================================================
-// Create Review
-// ===============================================================================
-export async function createReview(
-  payload: CreateReviewPayload,
-): Promise<ApiResponse<boolean>> {
-
-  const product_slug = payload.product_slug;
-  let userId: string | null = null;
-
-  // Initialize Supabase client for server-side operations
-  const supabase = await createServerClient();
-  // Fetch the currently authenticated user to ensure we have a valid session and user ID
-  const { data: user, error: userError } = await getUser();
-  // Critical error handling: If we fail to fetch the user, we cannot proceed with adding a new address
-  if (user && !userError) {
-    userId = user.id;
-  }
-
-
-  // 4. إدراج البيانات في قاعدة البيانات
-  const { error: insertError } = await supabase.from("reviews").insert({
-    product_id: payload.product_id,
-    user_id: userId,
-    name: payload.name,
-    email: payload.email,
-    rating: payload.rating,
-    title: payload.title,
-    comment: payload.comment,
-    is_verified_purchase: payload.is_verified_purchase
-  });
-
-  if (insertError) {
-    console.error("Error inserting review:", insertError.message);
-    return { error: "Failed to add review." };
-  }
-
-  revalidatePath(`/products/${product_slug}`);
-
-  return { data: true };
-
-
-}
+export type CreateReviewPayload = Omit<
+  Review,
+  | "id"
+  | "user_id"
+  | "is_verified_purchase"
+  | "is_published"
+  | "author"
+  | "created_at"
+>;
 
 // =================================================================
 // GET REVIEWS BY PRODUCT ID Query
@@ -107,6 +64,56 @@ const GET_REVIEWS_BY_PRODUCT_ID_QUERY = `
         avatar_url
       )
     `;
+// ===============================================================================
+// Create Review
+// ===============================================================================
+export async function createReview({
+  productSlug,
+  payload,
+}: {
+  productSlug: string;
+  payload: CreateReviewPayload;
+}): Promise<ApiResponse<boolean>> {
+  let userId: string | null = null;
+  let isPublished: boolean = false;
+  let isVerifiedPurchase: boolean = false;
+
+  // Initialize Supabase client for server-side operations
+  const supabase = await createServerClient();
+  // Fetch the currently authenticated user to ensure we have a valid session and user ID
+  const { data: user, error: userError } = await getUser();
+  // Critical error handling: If we fail to fetch the user, we cannot proceed with adding a new address
+  if (user && !userError) {
+    userId = user.id;
+    isVerifiedPurchase = await checkUserPurchase(user.id, payload.product_id);
+    isPublished = siteConfig.postUserComments;
+  } else {
+    isPublished = siteConfig.postGuestComments;
+    isVerifiedPurchase = false;
+  }
+
+  // 4. إدراج البيانات في قاعدة البيانات
+  const { error: insertError } = await supabase.from("reviews").insert({
+    product_id: payload.product_id,
+    user_id: userId,
+    name: payload.name,
+    email: payload.email,
+    rating: payload.rating,
+    title: payload.title,
+    comment: payload.comment,
+    is_published: isPublished,
+    is_verified_purchase: isVerifiedPurchase,
+  });
+
+  if (insertError) {
+    console.error("Error inserting review:", insertError.message);
+    return { error: "Failed to add review." };
+  }
+
+  revalidatePath(`/products/${productSlug}`);
+
+  return { data: true };
+}
 
 // =================================================================
 // GET REVIEWS BY PRODUCT ID
@@ -124,7 +131,7 @@ export async function getReviewsByProductId(
     .from("reviews")
     .select(GET_REVIEWS_BY_PRODUCT_ID_QUERY)
     .eq("product_id", productId)
-    .eq("is_verified_purchase", true)
+    .eq("is_published", true)
     .order("created_at", { ascending: false });
 
   if (errorReviews) {
@@ -136,131 +143,22 @@ export async function getReviewsByProductId(
 }
 
 // =================================================================
-// HELPER FUNCTION FOR PURCHASE VERIFICATION
-// =================================================================
-export async function checkUserPurchase(
-  userId: string,
-  productId: string, // هذا هو ID المنتج الرئيسي
-): Promise<boolean> {
-  const supabase = await createServerClient();
-
-  // الاستعلام الجديد والمُصحح
-  const { data, error } = await supabase
-    .from("order_items")
-    .select(
-      `
-      id,
-      order:orders!inner ( user_id ),
-      variant:product_variants!inner ( product_id )
-    `,
-    )
-    .eq("order.user_id", userId) // هل الطلب يخص هذا المستخدم؟
-    .eq("variant.product_id", productId) // هل هذا المتغير يخص المنتج الذي نراجعه؟
-    .limit(1)
-    .single();
-
-  if (error) {
-    if (error.code !== "PGRST116") {
-      console.error("Error checking user purchase (Corrected Query):", error);
-    }
-    return false;
-  }
-
-  return data !== null;
-}
-
-// =================================================================
-// REVIEW SUBMISSION ACTION (WITH VERIFIED PURCHASE LOGIC)
-// =================================================================
-
-// دالة إضافة التقييم الجديدة مع التحقق اليدوي
-export async function addReview(
-  formData: FormData,
-  productId: string,
-  productSlug: string,
-): Promise<ApiResponse<boolean>> {
-  // Initialize Supabase client for server-side operations
-  const supabase = await createServerClient();
-  // Fetch the currently authenticated user to ensure we have a valid session and user ID
-  const { data: user } = await getUser();
-  // Critical error handling: If we fail to fetch the user, we cannot proceed with adding a new address
-
-  let userId: string | null = null;
-  const name = formData.get("name") as string;
-  const email = formData.get("email") as string;
-  let isVerified = false;
-  const ratingNum = parseInt(formData.get("rating") as string);
-  const title = formData.get("title") as string;
-  const comment = formData.get("comment") as string;
-
-  if (user) {
-    userId = user.id;
-    isVerified = await checkUserPurchase(user.id, productId);
-  }
-
-  // 4. إدراج البيانات في قاعدة البيانات
-  const { error: insertError } = await supabase.from("reviews").insert({
-    product_id: productId,
-    user_id: userId,
-    name: name,
-    email: email,
-    rating: ratingNum,
-    title: title,
-    comment: comment,
-    is_verified_purchase: isVerified,
-  });
-
-  if (insertError) {
-    console.error("Error adding review:", insertError);
-    return {
-      error: "Failed to submit your review. Please try again.",
-    };
-  }
-
-  // 5. إعادة التحقق من المسار لتحديث الواجهة
-  revalidatePath(`/products/${productSlug}`);
-
-  return {
-    data: true,
-  };
-}
-
-// getAllUserReviews;
-
-// =================================================================
 // REVIEW DELETION ACTION
 // =================================================================
 
 export async function deleteReview(
-  formData: FormData,
-): Promise<{ success: boolean; message: string }> {
+  reviewId: number,
+  productSlug: string,
+): Promise<ApiResponse<boolean>> {
   const supabase = await createServerClient();
-
-  // 1. التحقق من وجود مستخدم مسجل
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return {
-      success: false,
-      message: "You must be logged in to perform this action.",
-    };
+  // Fetch the currently authenticated user to ensure we have a valid session and user ID
+  const { data: user, error: userError } = await getUser();
+  // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
+  if (userError || !user) {
+    // console.error("AUTHENTICATION_FAILED");
+    return { error: "AUTHENTICATION_FAILED" };
   }
 
-  // 2. استخراج البيانات من النموذج
-  const reviewId = formData.get("reviewId");
-  const productSlug = formData.get("productSlug");
-
-  if (!reviewId || typeof reviewId !== "string") {
-    return { success: false, message: "Invalid review ID." };
-  }
-  if (!productSlug || typeof productSlug !== "string") {
-    return { success: false, message: "Product slug is missing." };
-  }
-
-  // 3. تنفيذ الحذف مع شرط أمان حاسم
-  //    نحن نحذف فقط إذا كان `id` يطابق و `user_id` يطابق المستخدم الحالي.
-  //    هذا يمنع أي مستخدم من حذف تقييمات الآخرين.
   const { error } = await supabase
     .from("reviews")
     .delete()
@@ -272,8 +170,7 @@ export async function deleteReview(
   if (error) {
     console.error("Error deleting review:", error);
     return {
-      success: false,
-      message: "Failed to delete your review. Please try again.",
+      error: "Failed to delete your review. Please try again.",
     };
   }
 
@@ -281,7 +178,7 @@ export async function deleteReview(
   revalidatePath(`/products/${productSlug}`);
   revalidatePath(`/[locale]/products/${productSlug}`);
 
-  return { success: true, message: "Your review has been deleted." };
+  return { data: true };
 }
 
 // =================================================================
@@ -337,19 +234,53 @@ export async function getAllUserReviews(): Promise<UserReview[]> {
   return data || [];
 }
 
-// =================================================================
-// GET USER REVIEWS SUMMARY
-// =================================================================
+// // =================================================================
+// // GET USER REVIEWS SUMMARY
+// // =================================================================
 
-export type ReviewsSummary = {
-  totalReviews: number;
-  latestReview: {
-    id: number;
-    rating: number;
-    title: string | null;
-    product: {
-      name: string;
-      slug: string;
-    };
-  } | null;
-};
+// export type ReviewsSummary = {
+//   totalReviews: number;
+//   latestReview: {
+//     id: number;
+//     rating: number;
+//     title: string | null;
+//     product: {
+//       name: string;
+//       slug: string;
+//     };
+//   } | null;
+// };
+
+// =================================================================
+// HELPER FUNCTION FOR PURCHASE VERIFICATION
+// =================================================================
+export async function checkUserPurchase(
+  userId: string,
+  productId: string, // هذا هو ID المنتج الرئيسي
+): Promise<boolean> {
+  const supabase = await createServerClient();
+
+  // الاستعلام الجديد والمُصحح
+  const { data, error } = await supabase
+    .from("order_items")
+    .select(
+      `
+      id,
+      order:orders!inner ( user_id ),
+      variant:product_variants!inner ( product_id )
+    `,
+    )
+    .eq("order.user_id", userId) // هل الطلب يخص هذا المستخدم؟
+    .eq("variant.product_id", productId) // هل هذا المتغير يخص المنتج الذي نراجعه؟
+    .limit(1)
+    .single();
+
+  if (error || !data) {
+    if (error.code !== "PGRST116") {
+      console.error("Error checking user purchase (Corrected Query):", error);
+    }
+    return false;
+  }
+
+  return true;
+}

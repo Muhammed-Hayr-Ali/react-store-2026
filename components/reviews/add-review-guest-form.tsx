@@ -47,10 +47,14 @@ export function AddReviewGuestForm({
 
   const onSubmit: SubmitHandler<Inputs> = async (formData: Inputs) => {
     const { data, error } = await createReview({
-      ...formData,
-      product_id: productId,
-      product_slug: productSlug,
-      is_verified_purchase: siteConfig.postGuestComments,
+      productSlug: productSlug,
+      payload: {
+        product_id: productId,
+        name: formData.name,
+        email: formData.email,
+        rating: 0,
+        comment: formData.comment,
+      },
     });
 
     if (error) {

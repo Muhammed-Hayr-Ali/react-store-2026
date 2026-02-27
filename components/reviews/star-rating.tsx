@@ -24,19 +24,15 @@ export function StarRating({
           <StarIcon
             key={index}
             className={cn(
-              "h-5 w-5", 
+              "h-5 w-5",
               starClassName,
-
-            
               starValue <= rating
-                ? "fill-orange-400 text-orange-400"
+                ? "fill-orange-500 text-orange-500"
                 : "fill-muted text-muted-foreground",
               // -------------------------
             )}
           />
         );
-
-       
       })}
     </div>
   );
