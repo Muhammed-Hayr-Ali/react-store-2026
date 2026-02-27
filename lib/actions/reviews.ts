@@ -4,6 +4,7 @@ import { unstable_noStore as noStore, revalidatePath } from "next/cache";
 import { createServerClient } from "../supabase/createServerClient";
 import { getUser } from "./get-user-action";
 import { siteConfig } from "../config/site";
+import { createBrowserClient } from "../supabase/createBrowserClient";
 
 // ===============================================================================
 // Api Response Type
@@ -85,7 +86,7 @@ export async function createReview({
   // Critical error handling: If we fail to fetch the user, we cannot proceed with adding a new address
   if (user && !userError) {
     userId = user.id;
-    isVerifiedPurchase = await checkUserPurchase(user.id, payload.product_id);
+    isVerifiedPurchase = await checkUserPurchase(payload.product_id);
     isPublished = siteConfig.postUserComments;
   } else {
     isPublished = siteConfig.postGuestComments;
@@ -322,33 +323,22 @@ export async function getAllUserReviews(): Promise<UserReview[]> {
 // =================================================================
 // HELPER FUNCTION FOR PURCHASE VERIFICATION
 // =================================================================
-export async function checkUserPurchase(
-  userId: string,
-  productId: string, // هذا هو ID المنتج الرئيسي
-): Promise<boolean> {
-  const supabase = await createServerClient();
+export async function checkUserPurchase(productId: string): Promise<boolean> {
+  const supabase = createBrowserClient();
 
-  // الاستعلام الجديد والمُصحح
-  const { data, error } = await supabase
-    .from("order_items")
-    .select(
-      `
-      id,
-      order:orders!inner ( user_id ),
-      variant:product_variants!inner ( product_id )
-    `,
-    )
-    .eq("order.user_id", userId) // هل الطلب يخص هذا المستخدم؟
-    .eq("variant.product_id", productId) // هل هذا المتغير يخص المنتج الذي نراجعه؟
-    .limit(1)
-    .single();
+  const { data, error } = await supabase.rpc("did_user_purchase_product", {
+    p_product_id: productId, // p_product_id هو اسم الوسيط في دالة SQL
+  });
 
-  if (error || !data) {
-    if (error.code !== "PGRST116") {
-      console.error("Error checking user purchase (Corrected Query):", error);
-    }
+  if (error) {
+    console.error(
+      "Error calling DB function 'did_user_purchase_product':",
+      error,
+    );
     return false;
   }
 
-  return true;
+  // 3. إرجاع النتيجة
+  // 'data' هنا ستحتوي على true أو false مباشرة
+  return data;
 }
