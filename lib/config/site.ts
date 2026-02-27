@@ -30,6 +30,11 @@ export const siteConfig = {
 
   defaultLocale: "en",
 
+
+
+RecentProductsLimit: 10,
+
+
   postGuestComments: false,
   postUserComments: true,
 

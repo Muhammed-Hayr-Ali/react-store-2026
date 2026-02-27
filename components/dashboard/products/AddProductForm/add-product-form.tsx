@@ -49,7 +49,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 // --- استيرادات الأنواع ---
 import { ProductFormData } from "@/lib/types/product";
-import { createProduct } from "@/lib/actions/producta-add";
+import { createProduct, deleteProduct } from "@/lib/actions/producta-add";
 import {
   Field,
   FieldDescription,
@@ -118,7 +118,11 @@ export function AddProductForm({
   options,
   optionValues,
 }: AddProductFormProps) {
+
+
   const router = useRouter();
+
+  const [productId, setProductId] = useState<string | null>(null);
 
   const [tagsInput, setTagsInput] = useState("");
 
@@ -182,15 +186,17 @@ export function AddProductForm({
   // --- تحديث الـ slug تلقائيًا (مع دعم العربية) ---
   useEffect(() => {
     if (productName) {
-      const sku = generateSKU(productName);
       const slug = slugify(productName, {
         lower: true,
         strict: true,
         locale: "ar",
       });
+      const sku = generateSKU(slug);
 
       setValue("variants.0.sku", sku, { shouldValidate: true });
       setValue("slug", slug, { shouldValidate: true });
+
+
     }
   }, [productName, setValue]);
 
@@ -249,9 +255,18 @@ export function AddProductForm({
         ),
       }));
 
+      if(productId) {
+        const { error } = await deleteProduct(productId);
+        if (error) {
+          console.error("Error deleting product:", error);
+          toast.error("Unknown error occurred while Updating product.");
+        }
+      }
+
       const result = await createProduct(formData);
 
       if (result.success && result.productId) {
+        setProductId(result.productId);
         toast.success("تم إنشاء المنتج بنجاح!");
         router.refresh();
       } else {
@@ -846,10 +861,10 @@ export function AddProductForm({
                       <Input
                         type="number"
                         {...register(`variants.${index}.stock_quantity`, {
-                          valueAsNumber: true,
                           required: "Quantity is required.",
+                          valueAsNumber: true,
                           min: {
-                            value: 0,
+                            value: 1,
                             message: "Quantity must be a positive number.",
                           },
                         })}
@@ -1150,12 +1165,14 @@ export function AddProductForm({
             {isSubmitting ? (
               <>
                 <Spinner className="mr-2" />
-                Creating...{" "}
+                {isSubmitting && productId ? "Updateing..." : "Creating..."}
               </>
             ) : (
               <>
                 <CheckCircle className="mr-2 h-5 w-5" />
-                Create Product
+                {!isSubmitting && productId
+                  ? "Update Product"
+                  : "Create Product"}
               </>
             )}
           </Button>

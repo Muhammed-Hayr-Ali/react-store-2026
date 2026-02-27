@@ -5,6 +5,23 @@ import { ProductFormData } from "../types/product";
 import { createServerClient } from "../supabase/createServerClient";
 import { isAdmin } from "./get-user-action";
 
+
+
+
+
+
+// ================================================================================
+// Api Response Type
+// ================================================================================
+export type ApiResponse<T> = {
+  data?: T;
+  error?: string;
+  [key: string]: unknown;
+};
+
+
+
+
 export async function createProduct(
   formData: ProductFormData
 ): Promise<{ success: boolean; productId?: string; error?: string }> {
@@ -117,4 +134,23 @@ export async function createProduct(
       error: error instanceof Error ? error.message : "Unknown error occurred",
     };
   }
+}
+
+
+
+export async function deleteProduct(id: string): Promise<ApiResponse<boolean>> {
+  // Initialize Supabase client for server-side operations
+  const supabase = await createServerClient();
+  // Delete the ProductOption for the provided ID
+  const { error } = await supabase
+    .from("products")
+    .delete()
+    .eq("id", id);
+  // Critical error handling: If we fail to delete the ProductOption, we log the error and return a user-friendly message
+  if (error) {
+    console.error("Error deleting ProductOption:", error);
+    return { error: "Failed to delete ProductOption." }
+  }
+  // Return the success status
+  return { data: true }
 }
