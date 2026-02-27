@@ -4,7 +4,7 @@ import { Minus, Plus } from "lucide-react";
 import { Button } from "../ui/button";
 import AddToCartButton from "./add-to-cart-button";
 import WishlistButton from "./wishlist-button";
-import { StarRating } from "../reviews/star-rating";
+import { StarRating } from "../ui/star-rating";
 import Link from "next/link";
 import { Badge } from "../ui/badge";
 import {
@@ -150,19 +150,18 @@ export default function ProductInfo({
         {product.brand && (
           <Tooltip>
             <TooltipTrigger>
-             
-                {product.brand.logo_url ? (
-                  <Image
-                    src={product.brand.logo_url}
-                    alt={product.brand.name}
-                    width={60}
-                    height={60}
-                  />
-                ) : ( <Badge variant="secondary" className=" text-xs font-normal p-2">
-                  {product.brand.name}</Badge>
-                )
-                }
-              
+              {product.brand.logo_url ? (
+                <Image
+                  src={product.brand.logo_url}
+                  alt={product.brand.name}
+                  width={60}
+                  height={60}
+                />
+              ) : (
+                <Badge variant="secondary" className=" text-xs font-normal p-2">
+                  {product.brand.name}
+                </Badge>
+              )}
             </TooltipTrigger>
             {product.brand.description && (
               <TooltipContent side={"bottom"}>

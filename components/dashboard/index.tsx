@@ -16,7 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { StarRating } from "@/components/reviews/star-rating";
+import { StarRating } from "@/components/ui/star-rating";
 import { User } from "@supabase/supabase-js";
 import React from "react";
 import { ProfileCard } from "./ui/profile-card";

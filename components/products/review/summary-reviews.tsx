@@ -1,6 +1,6 @@
 "use client";
 import { SummaryReviews } from "@/lib/actions/products";
-import { StarRating } from "../../reviews/star-rating";
+import { StarRating } from "../../ui/star-rating";
 import { Progress } from "@/components/ui/progress";
 
 interface Props {

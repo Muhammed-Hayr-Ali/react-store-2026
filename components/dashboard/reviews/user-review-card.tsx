@@ -1,6 +1,6 @@
 "use client";
 
-import { StarRating } from "@/components/reviews/star-rating";
+import { StarRating } from "@/components/ui/star-rating";
 import { deleteReview, UserReview } from "@/lib/actions/reviews";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -8,10 +8,17 @@ import { Button } from "@/components/ui/button";
 import { TrashIcon } from "lucide-react";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-
-
-
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 function DeleteReviewButton({
   reviewId,
@@ -37,7 +44,6 @@ function DeleteReviewButton({
       }
 
       toast.success("Review deleted successfully!");
-
     });
   };
 
@@ -72,8 +78,6 @@ function DeleteReviewButton({
     </AlertDialog>
   );
 }
-
-
 
 export function UserReviewCard({ review }: { review: UserReview }) {
   return (
@@ -118,6 +122,3 @@ export function UserReviewCard({ review }: { review: UserReview }) {
     </div>
   );
 }
-
-
-

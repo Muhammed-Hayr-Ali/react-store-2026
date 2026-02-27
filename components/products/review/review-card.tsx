@@ -19,7 +19,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { Edit, Flag, ShieldCheck, TrashIcon, User } from "lucide-react";
 import { Review as ReviewData } from "@/lib/actions/reviews";
-import { StarRating } from "@/components/reviews/star-rating";
+import { StarRating } from "@/components/ui/star-rating";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { AlertDialog } from "@/components/ui/alert-dialog";
