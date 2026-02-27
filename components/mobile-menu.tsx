@@ -40,12 +40,14 @@ export const MobileMenu = ({ isOpen, setIsOpen }: { isOpen?: boolean ; setIsOpen
 
   return (
     <div
-      className={`fixed inset-0 top-14  z-50 md:hidden transition-opacity duration-300 ${
+      className={`fixed inset-0 top-14 z-50 md:hidden transition-opacity duration-300 ${
         isOpen
           ? "opacity-100 pointer-events-auto"
           : "opacity-0 pointer-events-none"
       }`}
     >
+    
+
       <div
         className={`absolute border-t right-0 h-screen w-full bg-background shadow-2xl transform transition-transform duration-300 ease-in-out border-l ${
           isOpen ? "translate-x-0" : "translate-x-full"
