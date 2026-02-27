@@ -6,7 +6,7 @@ import { createServerClient } from "../supabase/createServerClient";
 // Types Definition
 //================================================================================
 export type ApiResponse<T> = {
-  data: T | null;
+  data?: T;
   error: string | null;
 };
 
@@ -96,7 +96,7 @@ export async function getRecentProducts(
 
   if (error || !data) {
     console.error("Supabase error:", error?.message);
-    return { data: null, error: "Error fetching products" }; // ✅ استخدام 'data'
+    return { error: "Error fetching products" }; // ✅ استخدام 'data'
   }
 
   const processedProducts: ProcessedProduct[] = data.map(

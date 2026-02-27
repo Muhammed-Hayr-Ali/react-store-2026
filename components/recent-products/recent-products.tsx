@@ -185,8 +185,7 @@ export function RecentProducts({
     );
   }
 
-  if (!products?.length)
-    return null;
+  if (!products?.length) return null;
 
   return (
     <section className="py-16 sm:py-24 bg-background/50">

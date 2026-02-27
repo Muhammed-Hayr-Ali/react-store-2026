@@ -3,7 +3,9 @@ import { RecentProducts } from "./recent-products";
 
 export async function RecentProductsServer() {
   const { data: products, error } = await getRecentProducts(4);
-
+if(error){
+  return <span>{error}</span>
+}
   return (
     <RecentProducts
       products={products || []}

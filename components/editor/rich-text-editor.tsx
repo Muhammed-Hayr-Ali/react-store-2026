@@ -65,8 +65,6 @@ import {
   CheckSquare,
   Image as ImageIcon,
   Smile,
-  Heading1,
-  Heading2,
 } from "lucide-react";
 
 import { useState } from "react";
@@ -158,18 +156,18 @@ export function RichTextEditor({
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
 
-  // حالات جديدة لإدارة Dialog الصورة
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
 
   const [currentFontSize, setCurrentFontSize] = useState<string>("default");
+  const [selectionState, setSelectionState] = useState(0);
 
   const { theme, systemTheme } = useTheme();
 
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: { levels: [1, 2, 3] },
+        heading: false, // ✅ تعطيل العناوين تماماً
         bulletList: { keepMarks: true },
         orderedList: { keepMarks: true },
         blockquote: {},
@@ -183,7 +181,7 @@ export function RichTextEditor({
         },
       }),
       TextAlign.configure({
-        types: ["heading", "paragraph"],
+        types: ["paragraph"],
         alignments: ["left", "center", "right", "justify"],
         defaultAlignment: "right",
       }),
@@ -204,21 +202,41 @@ export function RichTextEditor({
       onChange(editor.getHTML());
       const size = editor.getAttributes("textStyle").fontSize;
       setCurrentFontSize(size || "default");
+      setSelectionState((prev) => prev + 1);
     },
     onSelectionUpdate: ({ editor }) => {
       const size = editor.getAttributes("textStyle").fontSize;
       setCurrentFontSize(size || "default");
+      // ✅ إزالة منطق تحديد العناوين
+      setSelectionState((prev) => prev + 1);
     },
     immediatelyRender: false,
     editorProps: {
       attributes: {
         class: cn(
           "prose prose-sm sm:prose dark:prose-invert max-w-none focus:outline-none min-h-[250px] p-4",
-          "prose-headings:font-semibold prose-p:my-2 prose-ul:my-2 prose-ol:my-2",
+          "prose-p:my-2 prose-ul:my-2 prose-ol:my-2",
           "prose-li:my-0",
+          "prose-blockquote:border-l-4 prose-blockquote:border-primary/50",
+          "prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-muted-foreground",
+          "prose-blockquote:my-4 prose-blockquote:py-2 prose-blockquote:bg-muted/20",
+          "prose-blockquote:rounded-r-lg prose-blockquote:transition-all",
+          // ✅ إزالة تنسيقات العناوين
           className,
         ),
         dir: "auto",
+      },
+      handleKeyDown: (view, event) => {
+        if (
+          (event.ctrlKey || event.metaKey) &&
+          event.shiftKey &&
+          event.key.toLowerCase() === "b"
+        ) {
+          event.preventDefault();
+          editor?.chain().focus().toggleBlockquote().run();
+          return true;
+        }
+        return false;
       },
     },
   });
@@ -243,13 +261,11 @@ export function RichTextEditor({
     setLinkUrl("");
   };
 
-  // فتح Dialog الصورة
   const handleOpenImageDialog = () => {
-    setImageUrl(""); // تصفير الحقل عند الفتح
+    setImageUrl("");
     setIsImageDialogOpen(true);
   };
 
-  // حفظ الصورة من الـ Dialog
   const handleSaveImage = () => {
     if (imageUrl) {
       editor.chain().focus().setImage({ src: imageUrl }).run();
@@ -271,6 +287,14 @@ export function RichTextEditor({
     editor.commands.focus();
   };
 
+  const isTextAligned = (alignment: string) => {
+    if (editor.isActive({ textAlign: alignment })) return true;
+    if (!editor.getAttributes("paragraph").textAlign && alignment === "right") {
+      return true;
+    }
+    return false;
+  };
+
   const currentTheme = theme === "system" ? systemTheme : theme;
   const emojiTheme = currentTheme === "dark" ? Theme.DARK : Theme.LIGHT;
   const emojiStyle = EmojiStyle.GOOGLE;
@@ -280,14 +304,15 @@ export function RichTextEditor({
       <div className="border focus-within:border-ring overflow-hidden bg-background rounded-md transition-all duration-300 ring-offset-background focus-within:ring-[3px] focus-within:ring-ring/50 focus-within:ring-offset-0">
         {/* Toolbar */}
         <div className="border-b bg-muted/30 p-2 flex flex-wrap gap-1 items-center sticky top-0 z-10 backdrop-blur-sm">
-          {/* --- Font Size Group --- */}
+          {/* ✅ 1. Font Size Group - أصبح أول عنصر بعد حذف العناوين */}
           <div className="flex items-center gap-2 mr-1">
             <Select
               value={currentFontSize}
               onValueChange={handleFontSizeChange}
+              key={`font-select-${selectionState}`}
             >
               <SelectTrigger
-                className="h-8 w-27.5 text-xs"
+                className="h-8 w-24 text-xs"
                 aria-label="Font Size"
               >
                 <SelectValue placeholder="الحجم" />
@@ -304,9 +329,10 @@ export function RichTextEditor({
               </SelectContent>
             </Select>
           </div>
+
           <Separator orientation="vertical" className="h-6 mx-1" />
 
-          {/* Text Style Group */}
+          {/* 2. Text Style Group */}
           <div className="flex items-center gap-1 mr-1">
             <Button
               type="button"
@@ -318,6 +344,7 @@ export function RichTextEditor({
                 editor.isActive("bold") && "bg-muted font-bold",
               )}
               title="عريض"
+              key={`bold-${selectionState}`}
             >
               <Bold className="h-4 w-4" />
             </Button>
@@ -331,6 +358,7 @@ export function RichTextEditor({
                 editor.isActive("italic") && "bg-muted",
               )}
               title="مائل"
+              key={`italic-${selectionState}`}
             >
               <Italic className="h-4 w-4" />
             </Button>
@@ -344,6 +372,7 @@ export function RichTextEditor({
                 editor.isActive("strike") && "bg-muted",
               )}
               title="مشطوب"
+              key={`strike-${selectionState}`}
             >
               <Strikethrough className="h-4 w-4" />
             </Button>
@@ -357,6 +386,7 @@ export function RichTextEditor({
                 editor.isActive("highlight") && "bg-yellow-100",
               )}
               title="تظليل"
+              key={`highlight-${selectionState}`}
             >
               <Highlighter className="h-4 w-4" />
             </Button>
@@ -364,51 +394,19 @@ export function RichTextEditor({
 
           <Separator orientation="vertical" className="h-6 mx-1" />
 
-          {/* Headings Group */}
+          {/* 3. Alignment Group */}
           <div className="flex items-center gap-1 mr-1">
             <Button
               type="button"
-              variant={
-                editor.isActive("heading", { level: 1 }) ? "secondary" : "ghost"
-              }
-              size="sm"
-              onClick={() =>
-                editor.chain().focus().toggleHeading({ level: 1 }).run()
-              }
-              className="h-8 w-8 p-0"
-              title="عنوان 1"
-            >
-              <Heading1 className="h-4 w-4" />
-            </Button>
-            <Button
-              type="button"
-              variant={
-                editor.isActive("heading", { level: 2 }) ? "secondary" : "ghost"
-              }
-              size="sm"
-              onClick={() =>
-                editor.chain().focus().toggleHeading({ level: 2 }).run()
-              }
-              className="h-8 w-8 p-0"
-              title="عنوان 2"
-            >
-              <Heading2 className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <Separator orientation="vertical" className="h-6 mx-1" />
-
-          {/* Alignment Group */}
-          <div className="flex items-center gap-1 mr-1">
-            <Button
-              type="button"
-              variant={
-                editor.isActive({ textAlign: "right" }) ? "secondary" : "ghost"
-              }
+              variant={isTextAligned("right") ? "secondary" : "ghost"}
               size="sm"
               onClick={() => editor.chain().focus().setTextAlign("right").run()}
-              className="h-8 w-8 p-0"
+              className={cn(
+                "h-8 w-8 p-0",
+                isTextAligned("right") && "bg-muted",
+              )}
               title="يمين"
+              key={`align-right-${selectionState}`}
             >
               <AlignRight className="h-4 w-4" />
             </Button>
@@ -421,8 +419,12 @@ export function RichTextEditor({
               onClick={() =>
                 editor.chain().focus().setTextAlign("center").run()
               }
-              className="h-8 w-8 p-0"
+              className={cn(
+                "h-8 w-8 p-0",
+                editor.isActive({ textAlign: "center" }) && "bg-muted",
+              )}
               title="وسط"
+              key={`align-center-${selectionState}`}
             >
               <AlignCenter className="h-4 w-4" />
             </Button>
@@ -433,8 +435,12 @@ export function RichTextEditor({
               }
               size="sm"
               onClick={() => editor.chain().focus().setTextAlign("left").run()}
-              className="h-8 w-8 p-0"
+              className={cn(
+                "h-8 w-8 p-0",
+                editor.isActive({ textAlign: "left" }) && "bg-muted",
+              )}
               title="يسار"
+              key={`align-left-${selectionState}`}
             >
               <AlignLeft className="h-4 w-4" />
             </Button>
@@ -442,7 +448,7 @@ export function RichTextEditor({
 
           <Separator orientation="vertical" className="h-6 mx-1" />
 
-          {/* Lists & Tasks Group */}
+          {/* 4. Lists & Tasks Group */}
           <div className="flex items-center gap-1 mr-1">
             <Button
               type="button"
@@ -451,6 +457,7 @@ export function RichTextEditor({
               onClick={() => editor.chain().focus().toggleBulletList().run()}
               className="h-8 w-8 p-0"
               title="قائمة نقطية"
+              key={`bullet-${selectionState}`}
             >
               <List className="h-4 w-4" />
             </Button>
@@ -461,6 +468,7 @@ export function RichTextEditor({
               onClick={() => editor.chain().focus().toggleOrderedList().run()}
               className="h-8 w-8 p-0"
               title="قائمة رقمية"
+              key={`ordered-${selectionState}`}
             >
               <ListOrdered className="h-4 w-4" />
             </Button>
@@ -471,6 +479,7 @@ export function RichTextEditor({
               onClick={() => editor.chain().focus().toggleTaskList().run()}
               className="h-8 w-8 p-0"
               title="قائمة مهام"
+              key={`task-${selectionState}`}
             >
               <CheckSquare className="h-4 w-4" />
             </Button>
@@ -478,7 +487,7 @@ export function RichTextEditor({
 
           <Separator orientation="vertical" className="h-6 mx-1" />
 
-          {/* Media, Links & Emoji Group */}
+          {/* 5. Media, Links & Emoji Group */}
           <div className="flex items-center gap-1 mr-1">
             <Button
               type="button"
@@ -487,11 +496,11 @@ export function RichTextEditor({
               onClick={handleOpenLinkDialog}
               className="h-8 w-8 p-0"
               title="رابط"
+              key={`link-${selectionState}`}
             >
               <LinkIcon className="h-4 w-4" />
             </Button>
 
-            {/* زر الصورة يفتح الـ Dialog */}
             <Button
               type="button"
               variant="ghost"
@@ -503,7 +512,7 @@ export function RichTextEditor({
               <ImageIcon className="h-4 w-4" />
             </Button>
 
-            {/* Emoji Picker Button */}
+            {/* Emoji Picker */}
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -516,10 +525,9 @@ export function RichTextEditor({
                   <Smile className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
-
               <PopoverContent
                 dir={dir}
-                className="w-[320px] p-0 border-0 shadow-none ring-0 focus:ring-0 "
+                className="w-[320px] bg-transparent p-0 border-0 shadow-none ring-0 focus:ring-0"
                 align="start"
                 side="bottom"
                 sideOffset={8}
@@ -529,46 +537,27 @@ export function RichTextEditor({
                   categories={[
                     {
                       category: Categories.SUGGESTED,
-                      name: "المستخدمة حديثًا", // بدلاً من "Frequently Used"
-                      
+                      name: "المستخدمة حديثًا",
                     },
                     {
                       category: Categories.SMILEYS_PEOPLE,
-                      name: "ابتسامات وأشخاص", // بدلاً من "Smileys & People"
+                      name: "ابتسامات وأشخاص",
                     },
                     {
                       category: Categories.ANIMALS_NATURE,
                       name: "حيوانات وطبيعة",
                     },
-                    {
-                      category: Categories.FOOD_DRINK,
-                      name: "طعام وشراب",
-                    },
-                    {
-                      category: Categories.ACTIVITIES,
-                      name: "أنشطة",
-                    },
-                    {
-                      category: Categories.TRAVEL_PLACES,
-                      name: "سفر وأماكن",
-                    },
-                    {
-                      category: Categories.OBJECTS,
-                      name: "أشياء",
-                    },
-                    {
-                      category: Categories.SYMBOLS,
-                      name: "رموز",
-                    },
-                    {
-                      category: Categories.FLAGS,
-                      name: "أعلام",
-                    },
+                    { category: Categories.FOOD_DRINK, name: "طعام وشراب" },
+                    { category: Categories.ACTIVITIES, name: "أنشطة" },
+                    { category: Categories.TRAVEL_PLACES, name: "سفر وأماكن" },
+                    { category: Categories.OBJECTS, name: "أشياء" },
+                    { category: Categories.SYMBOLS, name: "رموز" },
+                    { category: Categories.FLAGS, name: "أعلام" },
                   ]}
                   emojiStyle={emojiStyle}
                   theme={emojiTheme}
                   onEmojiClick={onEmojiClick}
-                  searchPlaceholder="بحث عن إيموجي..." // ✅ تصحيح الإملاء
+                  searchPlaceholder="بحث عن إيموجي..."
                   width={320}
                   height={400}
                   lazyLoadEmojis={true}
@@ -585,18 +574,25 @@ export function RichTextEditor({
               size="sm"
               onClick={() => editor.chain().focus().toggleBlockquote().run()}
               className={cn(
-                "h-8 w-8 p-0",
-                editor.isActive("blockquote") && "bg-muted",
+                "h-8 w-8 p-0 transition-colors",
+                editor.isActive("blockquote") &&
+                  "bg-muted border border-border",
               )}
-              title="اقتباس"
+              title="اقتباس (Ctrl+Shift+B)"
+              key={`quote-${selectionState}`}
             >
-              <Quote className="h-4 w-4" />
+              <Quote
+                className={cn(
+                  "h-4 w-4",
+                  editor.isActive("blockquote") && "text-primary",
+                )}
+              />
             </Button>
           </div>
 
           <Separator orientation="vertical" className="h-6 mx-1" />
 
-          {/* Utils Group */}
+          {/* 6. Utils Group */}
           <div className="flex items-center gap-1">
             <Button
               type="button"
@@ -612,7 +608,7 @@ export function RichTextEditor({
             </Button>
           </div>
 
-          {/* Undo/Redo - Far Right */}
+          {/* 7. Undo/Redo - Far Right */}
           <div className="ml-auto flex gap-1 border-l pl-2">
             <Button
               type="button"
@@ -657,7 +653,7 @@ export function RichTextEditor({
               id="url"
               value={linkUrl}
               onChange={(e) => setLinkUrl(e.target.value)}
-              placeholder="https://example.com"
+              placeholder="https://example.com  "
               className="w-full"
               onKeyDown={(e) => e.key === "Enter" && handleSaveLink()}
               autoFocus
@@ -678,7 +674,7 @@ export function RichTextEditor({
         </DialogContent>
       </Dialog>
 
-      {/* --- Image Dialog (جديد) --- */}
+      {/* --- Image Dialog --- */}
       <Dialog open={isImageDialogOpen} onOpenChange={setIsImageDialogOpen}>
         <DialogContent className="sm:max-w-106.25">
           <DialogHeader>
@@ -692,13 +688,12 @@ export function RichTextEditor({
               id="image-url"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="https://example.com/image.jpg"
+              placeholder="https://example.com/image.jpg  "
               className="w-full"
               onKeyDown={(e) => e.key === "Enter" && handleSaveImage()}
               autoFocus
               dir="ltr"
             />
-            {/* معاينة صغيرة للصورة إذا كان الرابط صالحاً (اختياري) */}
             {imageUrl && (
               <div className="mt-4 flex justify-center bg-muted/50 rounded-md p-2">
                 <img
