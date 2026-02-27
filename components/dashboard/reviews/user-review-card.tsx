@@ -28,12 +28,16 @@ function DeleteReviewButton({
       formData.append("reviewId", String(reviewId));
       formData.append("productSlug", productSlug);
 
-      const result = await deleteReview(formData);
-      if (result.success) {
-        toast.success(result.message);
-      } else {
-        toast.error(result.message);
+      const { error } = await deleteReview(reviewId, productSlug);
+
+      if (error) {
+        console.error("Error deleting review:", error);
+        toast.error("Failed to delete your review. Please try again.");
+        return;
       }
+
+      toast.success("Review deleted successfully!");
+
     });
   };
 
