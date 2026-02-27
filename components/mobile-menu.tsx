@@ -1,5 +1,5 @@
 "use client";
-import React from "react"
+import React from "react";
 import { User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,7 +12,13 @@ import { useUser } from "@/lib/provider/user-provider";
 import { signOut } from "@/lib/actions/auth";
 import { toast } from "sonner";
 
-export const MobileMenu = ({ isOpen, setIsOpen }: { isOpen?: boolean ; setIsOpen: (isOpen: boolean) => void }) => {
+export const MobileMenu = ({
+  isOpen,
+  setIsOpen,
+}: {
+  isOpen?: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+}) => {
   const router = useRouter();
   const { user } = useUser();
   const { fullName, avatarUrl, email } = useUserDisplay(user);
@@ -46,14 +52,12 @@ export const MobileMenu = ({ isOpen, setIsOpen }: { isOpen?: boolean ; setIsOpen
           : "opacity-0 pointer-events-none"
       }`}
     >
-    
-
       <div
-        className={`absolute border-t right-0 h-screen w-full bg-background shadow-2xl transform transition-transform duration-300 ease-in-out border-l ${
-          isOpen ? "translate-x-0" : "translate-x-full"
+        className={`absolute border-t right-0 rtl:right-auto rtl:left-0 h-screen w-full bg-background shadow-2xl transform transition-transform duration-300 ease-in-out border-l ${
+          isOpen ? "translate-x-0" : "ltr:translate-x-full rtl:-translate-x-full"
         }`}
       >
-        <nav className="flex flex-col justify-between h-[calc(100vh-7rem)]">
+        <nav className="flex flex-col h-[calc(100vh-7rem)]">
           {/* Header */}
           <div className="h-20 shrink-0 p-4 border-b">
             <div className="flex items-center gap-3">
@@ -81,7 +85,6 @@ export const MobileMenu = ({ isOpen, setIsOpen }: { isOpen?: boolean ; setIsOpen
                   variant="ghost"
                   className="w-full justify-start text-base gap-3 h-10"
                   asChild
-                  // **الإصلاح رقم 2: إغلاق القائمة عند الضغط على الرابط**
                   onClick={() => setIsOpen(false)}
                 >
                   <Link href={item.href}>
@@ -109,7 +112,6 @@ export const MobileMenu = ({ isOpen, setIsOpen }: { isOpen?: boolean ; setIsOpen
                 <Button
                   className="w-full"
                   asChild
-                  // **الإصلاح رقم 2 (مكرر): إغلاق القائمة**
                   onClick={() => setIsOpen(false)}
                 >
                   <Link href={`/auth/login`} className="flex-1">
@@ -120,7 +122,6 @@ export const MobileMenu = ({ isOpen, setIsOpen }: { isOpen?: boolean ; setIsOpen
                   variant="outline"
                   className="w-full"
                   asChild
-                  // **الإصلاح رقم 2 (مكرر): إغلاق القائمة**
                   onClick={() => setIsOpen(false)}
                 >
                   <Link href={`/auth/signup`} className="flex-1">
