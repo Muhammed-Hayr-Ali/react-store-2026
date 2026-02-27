@@ -42,7 +42,7 @@ export type Author = {
 // ===============================================================================
 // createReview Payload Type
 // ===============================================================================
-export type CreateReviewPayload = Omit<
+export type ReviewPayload = Omit<
   Review,
   | "id"
   | "user_id"
@@ -72,7 +72,7 @@ export async function createReview({
   payload,
 }: {
   productSlug: string;
-  payload: CreateReviewPayload;
+  payload: ReviewPayload;
 }): Promise<ApiResponse<boolean>> {
   let userId: string | null = null;
   let isPublished: boolean = false;
@@ -114,6 +114,73 @@ export async function createReview({
 
   return { data: true };
 }
+
+
+
+//================================================================================
+// Get User Reviews
+//================================================================================
+export async function getReviews(): Promise<ApiResponse<Review[]>> {
+  // Initialize Supabase client for server-side operations
+  const supabase = await createServerClient();
+  // Fetch the currently authenticated user to ensure we have a valid session and user ID
+  const { data: user, error: userError } = await getUser();
+  // Critical error handling: If we fail to fetch the user, we cannot proceed with fetching addresses
+  if (userError || !user) {
+    console.error("AUTHENTICATION_FAILED");
+    return { error: "AUTHENTICATION_FAILED" };
+  }
+  // Fetch reviews for the authenticated user
+  const { data: userReviews, error: reviewsError } = await supabase
+    .from("reviews")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  // Critical error handling: If we fail to fetch reviews, we log the error and return a user-friendly message
+  if (reviewsError) {
+    console.error("Error fetching user reviews:", reviewsError);
+    return { error: "Failed to fetch user reviews." };
+  }
+  // Return the fetched reviews in a consistent API response format
+  return { data: userReviews };
+}
+
+
+
+
+
+//================================================================================
+// Update Review
+//================================================================================
+export async function updateReview(
+  id: number,
+  formData: ReviewPayload,
+): Promise<ApiResponse<boolean>> {
+  // Initialize Supabase client for server-side operations
+  const supabase = await createServerClient();
+  // Fetch the currently authenticated user to ensure we have a valid session and user ID
+  const { data: user, error: userError } = await getUser();
+  // Critical error handling: If we fail to fetch the user, we cannot proceed with updating the reviews
+  if (userError || !user) {
+    console.error("AUTHENTICATION_FAILED");
+    return { error: "AUTHENTICATION_FAILED" };
+  }
+  // Update the address for the authenticated user
+  const { error } = await supabase
+    .from("reviews")
+    .update(formData)
+    .eq("id", id)
+    .eq("user_id", user.id);
+  // Critical error handling: If we fail to update the review, we log the error and return a user-friendly message
+  if (error) {
+    console.error("Error updating review:", error.message);
+    return { error: "Failed to update review." };
+  }
+
+  return { data: true };
+}
+
 
 // =================================================================
 // GET REVIEWS BY PRODUCT ID
@@ -158,7 +225,7 @@ export async function deleteReview(
     // console.error("AUTHENTICATION_FAILED");
     return { error: "AUTHENTICATION_FAILED" };
   }
-
+  //
   const { error } = await supabase
     .from("reviews")
     .delete()
@@ -167,6 +234,7 @@ export async function deleteReview(
       user_id: user.id, // 🛑 The most important security check!
     });
 
+  // Critical error handling: If we fail to delete the address, we log the error and return a user-friendly message
   if (error) {
     console.error("Error deleting review:", error);
     return {

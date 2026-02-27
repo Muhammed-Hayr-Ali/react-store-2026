@@ -17,13 +17,21 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { formatDistanceToNow } from "date-fns";
-import { Flag, ShieldCheck, TrashIcon, User } from "lucide-react";
+import {
+  Edit,
+  Flag,
+  ShieldCheck,
+  TrashIcon,
+  User,
+} from "lucide-react";
 import { Review as ReviewData } from "@/lib/actions/reviews";
 import { StarRating } from "@/components/reviews/star-rating";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 import DeleteReviewAlertDialog from "./review-delete";
+import { Dialog } from "@/components/ui/dialog";
+import UserReviewDialog from "./review-dialog";
 
 type ReviewCardProps = {
   review: ReviewData;
@@ -31,7 +39,10 @@ type ReviewCardProps = {
   productSlug: string;
 };
 
-type DialogState = "ReviewDialog" | "DeleteReviewDialog" | null;
+type DialogState =
+  | "UserReviewDialog"
+  | "DeleteReviewDialog"
+  | null;
 
 export function ReviewCard({
   review,
@@ -39,7 +50,9 @@ export function ReviewCard({
   productSlug,
 }: ReviewCardProps) {
   const [activeDialog, setActiveDialog] = useState<DialogState>(null);
-  const [selcetedReview, setSelcetedReview] = useState<ReviewData>(review);
+  const [selcetedReview, setSelcetedReview] = useState<ReviewData | null>(
+    review,
+  );
 
   const isOwner = currentUserId === review.user_id;
   const isUserReview = !!review.user_id && !!review.author;
@@ -51,6 +64,13 @@ export function ReviewCard({
 
   const avatarUrl = isUserReview ? review.author?.avatar_url : undefined;
   const avatarFallback = authorName.charAt(0).toUpperCase();
+
+  const onCloseDialog = () => {
+    //New Dialog State
+
+    setActiveDialog(null);
+    setSelcetedReview(null);
+  };
 
   return (
     <>
@@ -114,13 +134,29 @@ export function ReviewCard({
           {
             // تحديد اذا كان المستخدم هو صاحب التعليق
             isOwner ? (
-              <Button
-                size={"icon-xs"}
-                variant="destructive"
-                onClick={() => setActiveDialog("DeleteReviewDialog")}
-              >
-                <TrashIcon />
-              </Button>
+              <div className="space-x-3">
+                <Button
+                  size={"icon-xs"}
+                  variant="secondary"
+                  onClick={() => {
+                    setActiveDialog("UserReviewDialog");
+                    setSelcetedReview(review);
+                  }}
+                >
+                  <Edit />
+                </Button>
+
+                <Button
+                  size={"icon-xs"}
+                  variant="destructive"
+                  onClick={() => {
+                    setActiveDialog("DeleteReviewDialog");
+                    setSelcetedReview(review);
+                  }}
+                >
+                  <TrashIcon />
+                </Button>
+              </div>
             ) : (
               <Button size={"icon-xs"} variant="secondary">
                 <Flag />
@@ -130,16 +166,30 @@ export function ReviewCard({
         </CardFooter>
       </Card>
 
-      {/* Category Delete Dialog */}
-      <AlertDialog
-        open={activeDialog === "DeleteReviewDialog"}
-        onOpenChange={() => setActiveDialog(null)}
+
+      {/* Review Create or Update Dialog */}
+      <Dialog
+        open={activeDialog === "UserReviewDialog"}
+        onOpenChange={onCloseDialog}
       >
-        <DeleteReviewAlertDialog
-          onClose={() => setActiveDialog(null)}
+        <UserReviewDialog
+          onClose={onCloseDialog}
+          className="lg:max-w-lg"
           review={selcetedReview}
           productSlug={productSlug}
-          className="max-w-lg"
+          productId={review.product_id}
+        />
+      </Dialog>
+
+      {/* Review Delete Dialog */}
+      <AlertDialog
+        open={activeDialog === "DeleteReviewDialog"}
+        onOpenChange={onCloseDialog}
+      >
+        <DeleteReviewAlertDialog
+          onClose={onCloseDialog}
+          review={selcetedReview}
+          productSlug={productSlug}
         />
       </AlertDialog>
     </>

@@ -53,7 +53,7 @@ export default function DeleteReviewAlertDialog({
         </AlertDialogMedia>
         <AlertDialogTitle>Delete Review?</AlertDialogTitle>
         <AlertDialogDescription>
-          Are you sure you want to delete {review?.comment}?
+          Are you sure you want to delete this review? This action cannot be undone?
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>

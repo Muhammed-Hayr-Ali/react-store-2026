@@ -147,10 +147,11 @@ export default function ProductDetails({ user, data }: ProductDetailsProps) {
         reviews={data.reviews}
         totalReviews={data.reviews.length}
         userId={user?.id}
+        productId={product.id}
         productSlug={product.slug}
       />
 
-      {/* write review for guest */}
+      {/* write review for guest
       <Card className="shadow-none rounded-none mt-16 mb-10">
         <CardHeader>
           <CardTitle>Leave a Review</CardTitle>
@@ -168,7 +169,7 @@ export default function ProductDetails({ user, data }: ProductDetailsProps) {
             />
           )}
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* <WriteReview user={user} /> */}
     </>
