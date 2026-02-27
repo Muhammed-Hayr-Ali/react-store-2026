@@ -4,7 +4,6 @@ import { unstable_noStore as noStore, revalidatePath } from "next/cache";
 import { createServerClient } from "../supabase/createServerClient";
 import { getUser } from "./get-user-action";
 import { siteConfig } from "../config/site";
-import { createBrowserClient } from "../supabase/createBrowserClient";
 
 // ===============================================================================
 // Api Response Type
@@ -77,7 +76,7 @@ export async function createReview({
 }): Promise<ApiResponse<boolean>> {
   let userId: string | null = null;
   let isPublished: boolean = false;
-  let isVerifiedPurchase: boolean = false;
+  const isVerifiedPurchase = await checkUserPurchase(payload.product_id);
 
   // Initialize Supabase client for server-side operations
   const supabase = await createServerClient();
@@ -86,11 +85,9 @@ export async function createReview({
   // Critical error handling: If we fail to fetch the user, we cannot proceed with adding a new address
   if (user && !userError) {
     userId = user.id;
-    isVerifiedPurchase = await checkUserPurchase(payload.product_id);
     isPublished = siteConfig.postUserComments;
   } else {
     isPublished = siteConfig.postGuestComments;
-    isVerifiedPurchase = false;
   }
 
   // 4. إدراج البيانات في قاعدة البيانات
@@ -115,8 +112,6 @@ export async function createReview({
 
   return { data: true };
 }
-
-
 
 //================================================================================
 // Get User Reviews
@@ -146,10 +141,6 @@ export async function getReviews(): Promise<ApiResponse<Review[]>> {
   // Return the fetched reviews in a consistent API response format
   return { data: userReviews };
 }
-
-
-
-
 
 //================================================================================
 // Update Review
@@ -181,7 +172,6 @@ export async function updateReview(
 
   return { data: true };
 }
-
 
 // =================================================================
 // GET REVIEWS BY PRODUCT ID
@@ -323,13 +313,16 @@ export async function getAllUserReviews(): Promise<UserReview[]> {
 // =================================================================
 // HELPER FUNCTION FOR PURCHASE VERIFICATION
 // =================================================================
-export async function checkUserPurchase(productId: string): Promise<boolean> {
-  const supabase = createBrowserClient();
+export async function checkUserPurchase(
+  productId: string,
+): Promise<boolean> {
+  const supabase = await createServerClient();
 
   const { data, error } = await supabase.rpc("did_user_purchase_product", {
-    p_product_id: productId, // p_product_id هو اسم الوسيط في دالة SQL
+    p_product_id: productId,
   });
 
+  console.log(data);
   if (error) {
     console.error(
       "Error calling DB function 'did_user_purchase_product':",
@@ -337,8 +330,5 @@ export async function checkUserPurchase(productId: string): Promise<boolean> {
     );
     return false;
   }
-
-  // 3. إرجاع النتيجة
-  // 'data' هنا ستحتوي على true أو false مباشرة
   return data;
 }
