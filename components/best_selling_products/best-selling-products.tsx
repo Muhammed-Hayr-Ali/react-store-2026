@@ -95,11 +95,6 @@ function ProductCard({
         ratio={4 / 3}
         className="relative bg-muted overflow-hidden rounded-lg"
       >
-        {/* {product.discountPercentage && (
-          <Badge variant="default" className="absolute top-2 left-2 z-10">
-            Discount {`${product.discountPercentage}%`}
-          </Badge>
-        )} */}
         <img
           src={product.main_image_url || "/placeholder.svg"}
           alt="Photo"
@@ -108,22 +103,8 @@ function ProductCard({
       </AspectRatio>
       <CardHeader className="px-2 pt-2">
         <CardTitle className="text-lg font-bold">{product.name}</CardTitle>
-        {/* {product.total_reviews > 0 && (
-          <CardAction>
-            <Badge variant="secondary">
-              <div className="flex items-center gap-1 text-sm text-yellow-500">
-                <Star className="w-4 h-4 fill-current" />
-                <span className="text-muted-foreground">
-                  {product.average_rating}
-                </span>
-              </div>
-            </Badge>
-          </CardAction>
-        )} */}
       </CardHeader>
-      {/* <CardDescription className="px-2 grow">
-        {product.short_description}
-      </CardDescription> */}
+    
       <CardFooter className="flex justify-between items-center px-2 pb-2 ">
         <div className="space-x-2">
           {product.discount_price ? (

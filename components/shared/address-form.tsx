@@ -16,7 +16,6 @@ import {
   updateAddress,
   UserAddress,
 } from "@/lib/actions/address";
-import { useRouter } from "next/navigation";
 
 type AddressInputs = Omit<UserAddress, "id" | "user_id" | "created_at">;
 

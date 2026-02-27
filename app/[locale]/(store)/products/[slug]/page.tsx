@@ -3,7 +3,6 @@
 import { getProductBySlug } from "@/lib/actions/products";
 import { createMetadata } from "@/lib/metadata";
 import { notFound } from "next/navigation";
-import { getUser } from "@/lib/actions/get-user-action";
 import ProductDetails from "@/components/products/ProductDetails";
 
 async function getProduct(slug: string) {
