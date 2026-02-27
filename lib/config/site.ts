@@ -17,9 +17,6 @@ import {
   Settings,
 } from "lucide-react";
 
-
-
-
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
@@ -28,16 +25,25 @@ export const siteConfig = {
   defaultRobots: "index, follow",
   url: "https://markatna.com",
 
-
   shippingCost: 1.0,
   taxes: 0,
-
 
   defaultLocale: "en",
 
   postGuestComments: false,
   postUserComments: true,
-  termsPostingComment:`
+
+  reportReasons: [
+    "Spam or advertisements",
+    "Hate speech or harassment",
+    "Sexual or inappropriate content",
+    "Misinformation or fake news",
+    "Violence or dangerous content",
+    "Off-topic",
+    "Other reasons",
+  ],
+
+  termsPostingComment: `
             By posting a comment, you agree to our community standards.
             <br />
             Please ensure your comment is:
@@ -46,99 +52,98 @@ export const siteConfig = {
             speech, or personal attacks. We reserve the right to remove any
             comments that violate these terms.`,
 
-
   // dashboard menu items
-   adminNavMain: [
-      {
-        title: "Dashboard",
-        url: "/dashboard",
-        icon: LayoutDashboard,
-        isActive: true,
-      },
-      {
-        title: "Add New Product",
-        url: "/dashboard/products/add",
-        icon: Package,
-      },
-      {
-        title: "My Orders",
-        url: "/dashboard/orders",
-        icon: Package,
-      },
-      {
-        title: "My Cart",
-        url: "/cart",
-        icon: ShoppingCart,
-      },
-      {
-        title: "Wishlist",
-        url: "/wishlist",
-        icon: Heart,
-      },
-      {
-        title: "My Reviews",
-        url: "/dashboard/reviews",
-        icon: MessageSquareQuote,
-      },
-      {
-        title: "Addresses",
-        url: "/dashboard/addresses",
-        icon: MapPin,
-      },
-      {
-        title: "Profile",
-        url: "/dashboard/profile",
-        icon: User,
-      },
-      {
-        title: "Settings",
-        url: "/dashboard/settings",
-        icon: Settings,
-      },
-    ],
-    userNavMain: [
-      {
-        title: "Dashboard",
-        url: "/dashboard",
-        icon: LayoutDashboard,
-        isActive: true,
-      },
-      {
-        title: "My Orders",
-        url: "/dashboard/orders",
-        icon: Package,
-      },
-      {
-        title: "My Cart",
-        url: "/cart",
-        icon: ShoppingCart,
-      },
-      {
-        title: "Wishlist",
-        url: "/wishlist",
-        icon: Heart,
-      },
-      {
-        title: "My Reviews",
-        url: "/dashboard/reviews",
-        icon: MessageSquareQuote,
-      },
-      {
-        title: "Addresses",
-        url: "/dashboard/addresses",
-        icon: MapPin,
-      },
-      {
-        title: "Profile",
-        url: "/dashboard/profile",
-        icon: User,
-      },
-      {
-        title: "Settings",
-        url: "/dashboard/settings",
-        icon: Settings,
-      },
-    ],
+  adminNavMain: [
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: LayoutDashboard,
+      isActive: true,
+    },
+    {
+      title: "Add New Product",
+      url: "/dashboard/products/add",
+      icon: Package,
+    },
+    {
+      title: "My Orders",
+      url: "/dashboard/orders",
+      icon: Package,
+    },
+    {
+      title: "My Cart",
+      url: "/cart",
+      icon: ShoppingCart,
+    },
+    {
+      title: "Wishlist",
+      url: "/wishlist",
+      icon: Heart,
+    },
+    {
+      title: "My Reviews",
+      url: "/dashboard/reviews",
+      icon: MessageSquareQuote,
+    },
+    {
+      title: "Addresses",
+      url: "/dashboard/addresses",
+      icon: MapPin,
+    },
+    {
+      title: "Profile",
+      url: "/dashboard/profile",
+      icon: User,
+    },
+    {
+      title: "Settings",
+      url: "/dashboard/settings",
+      icon: Settings,
+    },
+  ],
+  userNavMain: [
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: LayoutDashboard,
+      isActive: true,
+    },
+    {
+      title: "My Orders",
+      url: "/dashboard/orders",
+      icon: Package,
+    },
+    {
+      title: "My Cart",
+      url: "/cart",
+      icon: ShoppingCart,
+    },
+    {
+      title: "Wishlist",
+      url: "/wishlist",
+      icon: Heart,
+    },
+    {
+      title: "My Reviews",
+      url: "/dashboard/reviews",
+      icon: MessageSquareQuote,
+    },
+    {
+      title: "Addresses",
+      url: "/dashboard/addresses",
+      icon: MapPin,
+    },
+    {
+      title: "Profile",
+      url: "/dashboard/profile",
+      icon: User,
+    },
+    {
+      title: "Settings",
+      url: "/dashboard/settings",
+      icon: Settings,
+    },
+  ],
 
   userMenuItems: [
     { icon: Home, label: "Home", href: "" },

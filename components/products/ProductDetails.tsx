@@ -3,7 +3,6 @@
 "use client";
 
 import { useState, ReactNode } from "react";
-import { User } from "@supabase/supabase-js";
 import { Option } from "react-day-picker";
 import { ImageGallery } from "./image-gallery";
 import { Separator } from "../ui/separator";
@@ -13,6 +12,7 @@ import ReviewsList from "./review/reviews-list";
 import { Content } from "../editor/content";
 import { ProductDetailResponse, ProductVariant } from "@/lib/actions/products";
 import SummaryReviewsComponent from "./review/summary-reviews";
+import { useUser } from "@/lib/provider/user-provider";
 
 // ============================================================================
 // Types & Interfaces
@@ -52,7 +52,6 @@ export interface ProductInfoProps {
 }
 
 export interface ProductDetailsProps {
-  user: User | null;
   data: ProductDetailResponse;
 }
 
@@ -95,7 +94,8 @@ export const getOrganizedOptions = (
 // Main Export - ProductDetails Component
 // ============================================================================
 
-export default function ProductDetails({ user, data }: ProductDetailsProps) {
+export default function ProductDetails({ data }: ProductDetailsProps) {
+  const { user } = useUser();
   const product = data.product;
 
   const [activeVariant, setActiveVariant] = useState<
@@ -143,7 +143,7 @@ export default function ProductDetails({ user, data }: ProductDetailsProps) {
       <ReviewsList
         reviews={data.reviews}
         totalReviews={data.reviews.length}
-        userId={user?.id}
+        userId={user?.id ?? ""}
         productId={product.id}
         productSlug={product.slug}
       />

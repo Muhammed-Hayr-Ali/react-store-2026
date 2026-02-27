@@ -48,7 +48,6 @@ export default async function Page({ params }: Props) {
   const { slug } = await params;
 
   const response = await getProduct(slug);
-  const user = await getUser();
 
 
   if (!response || !response.data || !response.data.product) {
@@ -57,7 +56,7 @@ export default async function Page({ params }: Props) {
 
   return (
     <main className="container mx-auto pb-8 md:pb-12 px-4">
-      <ProductDetails user={user.data!} data={response.data} />
+      <ProductDetails data={response.data} />
     </main>
   );
 }

@@ -17,13 +17,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { formatDistanceToNow } from "date-fns";
-import {
-  Edit,
-  Flag,
-  ShieldCheck,
-  TrashIcon,
-  User,
-} from "lucide-react";
+import { Edit, Flag, ShieldCheck, TrashIcon, User } from "lucide-react";
 import { Review as ReviewData } from "@/lib/actions/reviews";
 import { StarRating } from "@/components/reviews/star-rating";
 import { Button } from "@/components/ui/button";
@@ -32,6 +26,7 @@ import { AlertDialog } from "@/components/ui/alert-dialog";
 import DeleteReviewAlertDialog from "./review-delete";
 import { Dialog } from "@/components/ui/dialog";
 import UserReviewDialog from "./review-dialog";
+import ReportReviewDialog from "./report-review-dialog";
 
 type ReviewCardProps = {
   review: ReviewData;
@@ -40,6 +35,7 @@ type ReviewCardProps = {
 };
 
 type DialogState =
+  | "ReportReviewDialog"
   | "UserReviewDialog"
   | "DeleteReviewDialog"
   | null;
@@ -50,9 +46,6 @@ export function ReviewCard({
   productSlug,
 }: ReviewCardProps) {
   const [activeDialog, setActiveDialog] = useState<DialogState>(null);
-  const [selcetedReview, setSelcetedReview] = useState<ReviewData | null>(
-    review,
-  );
 
   const isOwner = currentUserId === review.user_id;
   const isUserReview = !!review.user_id && !!review.author;
@@ -67,9 +60,7 @@ export function ReviewCard({
 
   const onCloseDialog = () => {
     //New Dialog State
-
     setActiveDialog(null);
-    setSelcetedReview(null);
   };
 
   return (
@@ -140,7 +131,6 @@ export function ReviewCard({
                   variant="secondary"
                   onClick={() => {
                     setActiveDialog("UserReviewDialog");
-                    setSelcetedReview(review);
                   }}
                 >
                   <Edit />
@@ -151,14 +141,19 @@ export function ReviewCard({
                   variant="destructive"
                   onClick={() => {
                     setActiveDialog("DeleteReviewDialog");
-                    setSelcetedReview(review);
                   }}
                 >
                   <TrashIcon />
                 </Button>
               </div>
             ) : (
-              <Button size={"icon-xs"} variant="secondary">
+              <Button
+                size={"icon-xs"}
+                variant="secondary"
+                onClick={() => {
+                  setActiveDialog("ReportReviewDialog");
+                }}
+              >
                 <Flag />
               </Button>
             )
@@ -166,6 +161,17 @@ export function ReviewCard({
         </CardFooter>
       </Card>
 
+      {/* Review Create or Update Dialog */}
+      <Dialog
+        open={activeDialog === "ReportReviewDialog"}
+        onOpenChange={onCloseDialog}
+      >
+        <ReportReviewDialog
+          onClose={onCloseDialog}
+          className="lg:max-w-lg"
+          reviewId={review.id}
+        />
+      </Dialog>
 
       {/* Review Create or Update Dialog */}
       <Dialog
@@ -175,7 +181,7 @@ export function ReviewCard({
         <UserReviewDialog
           onClose={onCloseDialog}
           className="lg:max-w-lg"
-          review={selcetedReview}
+          review={review}
           productSlug={productSlug}
           productId={review.product_id}
         />
@@ -188,7 +194,7 @@ export function ReviewCard({
       >
         <DeleteReviewAlertDialog
           onClose={onCloseDialog}
-          review={selcetedReview}
+          review={review}
           productSlug={productSlug}
         />
       </AlertDialog>
