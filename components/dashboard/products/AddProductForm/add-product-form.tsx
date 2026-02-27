@@ -100,7 +100,6 @@ type DialogState =
   | "DeleteVariantDialog"
   | null;
 
-
 // =================================================================
 // Generate SKU
 // ================================================================
@@ -141,6 +140,7 @@ export function AddProductForm({
     control,
     setValue,
     getValues,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<ProductFormData>({
     defaultValues: {
@@ -1143,19 +1143,19 @@ export function AddProductForm({
 
         {/* --- زر الإرسال النهائي --- */}
         <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={() => router.back()}>
-            إلغاء
+          <Button type="button" variant="destructive" onClick={() => reset()}>
+            Reset
           </Button>
           <Button type="submit" size="lg" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
                 <Spinner className="mr-2" />
-                جاري الإنشاء...
+                Creating...{" "}
               </>
             ) : (
               <>
                 <CheckCircle className="mr-2 h-5 w-5" />
-                إنشاء المنتج
+                Create Product
               </>
             )}
           </Button>
