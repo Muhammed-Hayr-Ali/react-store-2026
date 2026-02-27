@@ -33,9 +33,13 @@ type ReviewCardProps = {
 
 type DialogState = "ReviewDialog" | "DeleteReviewDialog" | null;
 
-export function ReviewCard({ review, currentUserId, productSlug }: ReviewCardProps) {
+export function ReviewCard({
+  review,
+  currentUserId,
+  productSlug,
+}: ReviewCardProps) {
   const [activeDialog, setActiveDialog] = useState<DialogState>(null);
-  const [selcetedReview, setSelcetedReview] = useState<ReviewData | null>(null);
+  const [selcetedReview, setSelcetedReview] = useState<ReviewData>(review);
 
   const isOwner = currentUserId === review.user_id;
   const isUserReview = !!review.user_id && !!review.author;
@@ -47,16 +51,6 @@ export function ReviewCard({ review, currentUserId, productSlug }: ReviewCardPro
 
   const avatarUrl = isUserReview ? review.author?.avatar_url : undefined;
   const avatarFallback = authorName.charAt(0).toUpperCase();
-
-
-
-  const onCloseDialog = () => {
-    //New Dialog State
-
-    setActiveDialog(null);
-    setSelcetedReview(null);
-  };
-
 
   return (
     <>
@@ -120,7 +114,11 @@ export function ReviewCard({ review, currentUserId, productSlug }: ReviewCardPro
           {
             // تحديد اذا كان المستخدم هو صاحب التعليق
             isOwner ? (
-              <Button size={"icon-xs"} variant="destructive">
+              <Button
+                size={"icon-xs"}
+                variant="destructive"
+                onClick={() => setActiveDialog("DeleteReviewDialog")}
+              >
                 <TrashIcon />
               </Button>
             ) : (
@@ -135,10 +133,10 @@ export function ReviewCard({ review, currentUserId, productSlug }: ReviewCardPro
       {/* Category Delete Dialog */}
       <AlertDialog
         open={activeDialog === "DeleteReviewDialog"}
-        onOpenChange={onCloseDialog}
+        onOpenChange={() => setActiveDialog(null)}
       >
         <DeleteReviewAlertDialog
-          onClose={onCloseDialog}
+          onClose={() => setActiveDialog(null)}
           review={selcetedReview}
           productSlug={productSlug}
           className="max-w-lg"
