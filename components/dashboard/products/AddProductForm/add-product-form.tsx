@@ -254,14 +254,6 @@ export function AddProductForm({
         ),
       }));
 
-      if (productId) {
-        const { error } = await deleteProduct(productId);
-        if (error) {
-          console.error("Error deleting product:", error);
-          toast.error("Unknown error occurred while Updating product.");
-        }
-      }
-
       const result = await createProduct(formData);
 
       if (result.success && result.productId) {
@@ -346,9 +338,7 @@ export function AddProductForm({
                 </FieldLabel>
                 <Textarea
                   id="short_description"
-                  {...register("short_description", {
-                    required: "short description is required.",
-                  })}
+                  {...register("short_description")}
                   disabled={isSubmitting}
                   placeholder="a brief description that appears in product lists..."
                   rows={3}
@@ -382,14 +372,7 @@ export function AddProductForm({
                 <FieldLabel htmlFor="main_image_url">Main Image URL</FieldLabel>
                 <Input
                   id="main_image_url"
-                  {...register("main_image_url", {
-                    required: "main image url is required.",
-                    // pattern: {
-                    //   value:
-                    //     /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp|bmp|svg))$/i,
-                    //   message: "main image url must be a valid image URL.",
-                    // },
-                  })}
+                  {...register("main_image_url")}
                   disabled={isSubmitting}
                   placeholder="https://example.com/image.jpg"
                   className="font-mono text-sm"

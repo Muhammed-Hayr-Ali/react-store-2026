@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ShoppingCart, Star } from "lucide-react";
+import { Edit, ShoppingCart, Star } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import {
@@ -67,7 +67,8 @@ function AddToCartButton({ product }: { product: ProcessedProduct }) {
   return (
     <Button
       size="icon-sm"
-      className="cursor-pointer"
+      variant={"outline"}
+      className="cursor-pointer rounded-full"
       onClick={handleAddToCart}
       disabled={isAdding}
     >
@@ -79,6 +80,80 @@ function AddToCartButton({ product }: { product: ProcessedProduct }) {
 // ================================================================================
 // Product Card
 // ================================================================================
+// function ProductCard({
+//   product,
+//   basePath = "/products",
+// }: {
+//   product: ProcessedProduct;
+//   basePath?: string;
+// }) {
+//   const router = useRouter(); // ✅ استخدام الروتر داخلياً
+
+//   const handleView = () => {
+//     router.push(`${basePath}/${product.slug}`);
+//   };
+
+//   return (
+//     <Card
+//       onClick={handleView}
+//       key={product.slug}
+//       className=" h-full overflow-hidden  p-1  transition-all duration-300 hover:shadow-lg hover:-translate-y-1 gap-3 cursor-pointer"
+//     >
+//       <AspectRatio
+//         key={product.id}
+//         ratio={1 / 1}
+//         className="relative bg-muted overflow-hidden rounded-lg"
+//       >
+//         {product.discountPercentage && (
+//           <Badge variant="default" className="absolute top-2 left-2 z-10">
+//             Discount {`${product.discountPercentage}%`}
+//           </Badge>
+//         )}
+//         <img
+//           src={product.main_image_url || "/placeholder.svg"}
+//           alt="Photo"
+//           className=" object-cover object-center h-full w-full"
+//         />
+//       </AspectRatio>
+//       <CardHeader className="px-2 pt-2">
+//         <CardTitle className="text-lg font-bold">{product.name}</CardTitle>
+//         {product.total_reviews > 0 && (
+//           <CardAction>
+//             <Badge variant="secondary">
+//               <div className="flex items-center gap-1 text-sm text-yellow-500">
+//                 <Star className="w-4 h-4 fill-current" />
+//                 <span className="text-muted-foreground">
+//                   {product.average_rating}
+//                 </span>
+//               </div>
+//             </Badge>
+//           </CardAction>
+//         )}
+//       </CardHeader>
+//       <CardDescription className="px-2 grow">
+//         {product.short_description}
+//       </CardDescription>
+//       <CardFooter className="flex justify-between items-center px-2 pb-2 ">
+//         <div className="space-x-2">
+//           {product.discount_price ? (
+//             <div className="flex items-center gap-2">
+//               <span className="text-base font-bold text-primary">
+//                 ${product.discount_price}
+//               </span>
+//               <span className="text-sm text-muted-foreground line-through">
+//                 ${product.price}
+//               </span>
+//             </div>
+//           ) : (
+//             <span className="font-bold">${product.price}</span>
+//           )}
+//         </div>
+//         <AddToCartButton product={product} />
+//       </CardFooter>
+//     </Card>
+//   );
+// }
+
 function ProductCard({
   product,
   basePath = "/products",
@@ -96,25 +171,50 @@ function ProductCard({
     <Card
       onClick={handleView}
       key={product.slug}
-      className=" h-full overflow-hidden  p-1  transition-all duration-300 hover:shadow-lg hover:-translate-y-1 gap-3 cursor-pointer"
+      className=" h-full overflow-hidden  p-1  transition-all duration-300 hover:shadow-lg hover:-translate-y-1 gap-2 cursor-pointer rounded-3xl"
     >
       <AspectRatio
         key={product.id}
-        ratio={1 / 1}
-        className="relative bg-muted overflow-hidden rounded-lg"
+        ratio={4 / 3}
+        className="relative bg-muted overflow-hidden rounded-2xl"
       >
         {product.discountPercentage && (
-          <Badge variant="default" className="absolute top-2 left-2 z-10">
+          <Badge className="absolute top-2 left-2 z-10">
             Discount {`${product.discountPercentage}%`}
           </Badge>
         )}
+
+        <div className="h-2/5 w-full p-3 absolute bottom-0 left-0 bg-linear-to-t from-black/90  to-black/0 flex items-end">
+          <div className="w-full flex justify-between items-center gap-2">
+            <div className=" flex flex-col text-white">
+              <h1 className="text-lg font-semibold">{product.name}</h1>
+              <p className="text-xs">{product.short_description}</p>
+              <span className="text-sm pt-2">
+                {product.discount_price ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-base font-bold">
+                      ${product.discount_price}
+                    </span>
+                    <span className="text-sm text-muted-foreground line-through">
+                      ${product.price}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="font-bold">${product.price}</span>
+                )}
+              </span>
+            </div>
+            <AddToCartButton product={product} />
+          </div>
+        </div>
+
         <img
           src={product.main_image_url || "/placeholder.svg"}
           alt="Photo"
           className=" object-cover object-center h-full w-full"
         />
       </AspectRatio>
-      <CardHeader className="px-2 pt-2">
+      {/* <CardHeader className="px-2">
         <CardTitle className="text-lg font-bold">{product.name}</CardTitle>
         {product.total_reviews > 0 && (
           <CardAction>
@@ -148,7 +248,7 @@ function ProductCard({
           )}
         </div>
         <AddToCartButton product={product} />
-      </CardFooter>
+      </CardFooter> */}
     </Card>
   );
 }
@@ -171,7 +271,7 @@ export function RecentProducts({
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[...Array(4)].map((_, i) => (
           <Card key={i} className="overflow-hidden">
             <Skeleton className="aspect-square" />
@@ -225,7 +325,7 @@ export function RecentProducts({
               },
             },
           }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
         >
           {products.map((product) => (
             <motion.div
