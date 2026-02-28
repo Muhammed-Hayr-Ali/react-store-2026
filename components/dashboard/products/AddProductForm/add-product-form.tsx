@@ -42,6 +42,7 @@ import {
   Trash,
   Pencil,
   Minus,
+  Calculator,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -75,6 +76,7 @@ import DeleteProductOptionAlertDialog from "./product-options-delete";
 import VariantDialog from "./variants-dialog";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 import DeleteProductOptionValueAlertDialog from "./variants-delete";
+import CalculatorDialog from "./calculator-dialog";
 
 // =================================================================
 // واجهة المكون (Props)
@@ -98,6 +100,7 @@ type DialogState =
   | "DeleteProductOptionsDialog"
   | "VariantDialog"
   | "DeleteVariantDialog"
+  | "calculator"
   | null;
 
 // =================================================================
@@ -118,8 +121,6 @@ export function AddProductForm({
   options,
   optionValues,
 }: AddProductFormProps) {
-
-
   const router = useRouter();
 
   const [productId, setProductId] = useState<string | null>(null);
@@ -195,8 +196,6 @@ export function AddProductForm({
 
       setValue("variants.0.sku", sku, { shouldValidate: true });
       setValue("slug", slug, { shouldValidate: true });
-
-
     }
   }, [productName, setValue]);
 
@@ -255,7 +254,7 @@ export function AddProductForm({
         ),
       }));
 
-      if(productId) {
+      if (productId) {
         const { error } = await deleteProduct(productId);
         if (error) {
           console.error("Error deleting product:", error);
@@ -779,22 +778,32 @@ export function AddProductForm({
               Variables and prices
             </CardTitle>
 
-            <Button
-              type="button"
-              onClick={() =>
-                append({
-                  sku: "",
-                  price: 0,
-                  stock_quantity: 0,
-                  is_default: false,
-                  variant_options: [],
-                })
-              }
-              disabled={isSubmitting}
-            >
-              <PlusCircle className="mr-1 rtl:mr-auto rtl:ml-1 h-4 w-4" />
-              Add Variable
-            </Button>
+            <div className="space-x-2">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setActiveDialog("calculator")}
+              >
+                <Calculator className="mr-1 rtl:mr-auto rtl:ml-1 h-4 w-4" />
+              </Button>
+
+              <Button
+                type="button"
+                onClick={() =>
+                  append({
+                    sku: "",
+                    price: 0,
+                    stock_quantity: 0,
+                    is_default: false,
+                    variant_options: [],
+                  })
+                }
+                disabled={isSubmitting}
+              >
+                <PlusCircle className="mr-1 rtl:mr-auto rtl:ml-1 h-4 w-4" />
+                Add Variable
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4 border-none ">
             <FieldGroup className="gap-16">
@@ -1271,6 +1280,10 @@ export function AddProductForm({
           valueId={selcetedValueId}
         />
       </AlertDialog>
+
+      <Dialog open={activeDialog === "calculator"} onOpenChange={onCloseDialog}>
+        <CalculatorDialog onClose={onCloseDialog} />
+      </Dialog>
     </>
   );
 }
