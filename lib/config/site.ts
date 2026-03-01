@@ -67,11 +67,7 @@ export const siteConfig = {
       url: "/dashboard/products/",
       icon: Package,
     },
-    {
-      title: "Add New Product",
-      url: "/dashboard/products/add",
-      icon: Package,
-    },
+   
     {
       title: "My Orders",
       url: "/dashboard/orders",

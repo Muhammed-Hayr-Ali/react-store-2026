@@ -83,8 +83,8 @@ export type MiniProduct = {
   slug: string;
   name: string;
   short_description: string;
-  brand: string; // ✅ String بسيط
-  category: string; // ✅ String بسيط
+  brand: string; 
+  category: string; 
   main_image_url: string;
   is_available: boolean;
   is_featured: boolean;

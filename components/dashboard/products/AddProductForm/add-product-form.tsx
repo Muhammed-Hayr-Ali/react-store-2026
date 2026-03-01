@@ -1238,12 +1238,12 @@ export function AddProductForm({
             {isSubmitting ? (
               <>
                 <Spinner className="mr-2" />
-                Creating...
+                {product?.brand_id ? "Updating..." : "Creating..."}
               </>
             ) : (
               <>
                 <CheckCircle className="mr-2 h-5 w-5" />
-                Create Product
+                {product?.brand_id ? "Update Product" : "Create Product"}
               </>
             )}
           </Button>
