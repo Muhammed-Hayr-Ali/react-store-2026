@@ -30,10 +30,7 @@ export const siteConfig = {
 
   defaultLocale: "en",
 
-
-
-RecentProductsLimit: 10,
-
+  RecentProductsLimit: 10,
 
   postGuestComments: false,
   postUserComments: true,
@@ -64,6 +61,11 @@ RecentProductsLimit: 10,
       url: "/dashboard",
       icon: LayoutDashboard,
       isActive: true,
+    },
+    {
+      title: "Products",
+      url: "/dashboard/products/",
+      icon: Package,
     },
     {
       title: "Add New Product",

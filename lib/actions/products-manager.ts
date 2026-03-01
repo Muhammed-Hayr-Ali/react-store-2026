@@ -15,7 +15,6 @@ import { isAdmin } from "./get-user-action";
 // Copyright (c) 2026 Mohammed Kher Ali
 // ===============================================================================
 
-
 // ================================================================================
 // Api Response Type
 // ================================================================================
@@ -25,28 +24,27 @@ export type ApiResponse<T> = {
   [key: string]: unknown;
 };
 
-
- interface ProductOption {
+// ================================================================================
+// Product Types
+// ================================================================================
+interface ProductOption {
   id: string;
   name: string;
   description?: string | null;
   unit?: string | null;
 }
 
-// يمثل قيمة الخيار مثل "أحمر" أو "XL"
- interface ProductOptionValue {
+interface ProductOptionValue {
   id: string;
   value: string;
   product_options: ProductOption; // علاقة
 }
 
-// يمثل سجل الربط في جدول variant_option_values
- interface VariantOptionValueLink {
+interface VariantOptionValueLink {
   option_value: ProductOptionValue;
 }
 
-// يمثل متغير المنتج (Variant) كما يأتي من Supabase
- interface ProductVariantFromSupabase {
+interface ProductVariantFromSupabase {
   id: string;
   sku: string;
   price: number;
@@ -60,8 +58,7 @@ export type ApiResponse<T> = {
   variant_option_values: VariantOptionValueLink[];
 }
 
-// يمثل المنتج الكامل كما يأتي من Supabase
- interface ProductFromSupabase {
+interface ProductFromSupabase {
   id: string;
   name: string;
   slug: string;
@@ -78,14 +75,36 @@ export type ApiResponse<T> = {
   product_variants: ProductVariantFromSupabase[];
 }
 
+// ===============================================================================
+//  Mini Product Type
+// ===============================================================================
+export type MiniProduct = {
+  id: string;
+  slug: string;
+  name: string;
+  short_description: string;
+  brand: string; // ✅ String بسيط
+  category: string; // ✅ String بسيط
+  main_image_url: string;
+  is_available: boolean;
+  is_featured: boolean;
+  created_at: string;
+  updated_at: string;
+};
 
+// ===============================================================================
+//  Paginated Products Type
+// ===============================================================================
 
+export interface PaginatedProductsResponse {
+  products: MiniProduct[];
+  totalCount: number;
+}
 
-
-
-
-
-
+// ===============================================================================
+//  Full Product Query
+// ===============================================================================
+const MINI_PRODUCT_QUERY = "*, brand:brands(name), category:categories(name)";
 
 // ===============================================================================
 // Create Product (Transaction-based)
@@ -95,7 +114,9 @@ export async function createProduct(
 ): Promise<{ success: boolean; productId?: string; error?: string }> {
   try {
     const supabase = await createServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) return { success: false, error: "User not authenticated" };
     if (!(await isAdmin())) return { success: false, error: "Unauthorized" };
@@ -103,7 +124,7 @@ export async function createProduct(
     // استدعاء دالة PostgreSQL كمعاملة
     const { data: newProductId, error } = await supabase.rpc(
       "create_full_product",
-      { product_data: formData } // مرر البيانات ككائن JSON
+      { product_data: formData }, // مرر البيانات ككائن JSON
     );
 
     if (error) {
@@ -114,8 +135,59 @@ export async function createProduct(
 
     return { success: true, productId: newProductId };
   } catch (error: unknown) {
-    return { success: false, error: ( error as Error)?.message  || "Failed to create product" };
+    return {
+      success: false,
+      error: (error as Error)?.message || "Failed to create product",
+    };
   }
+}
+
+// ===============================================================================
+// Get Mini Product
+// ===============================================================================
+export async function getProducts(
+  page: number = 1, // رقم الصفحة الافتراضي هو 1
+  pageSize: number = 10, // حجم الصفحة الافتراضي هو 10
+): Promise<ApiResponse<PaginatedProductsResponse>> {
+  const supabase = await createServerClient();
+
+  // 1. حساب المدى (range)
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  // 2. جلب المنتجات للصفحة الحالية والعدد الإجمالي في نفس الوقت
+  const { data, error, count } = await supabase
+    .from("products")
+    .select(MINI_PRODUCT_QUERY, { count: "exact" }) // <-- اطلب العدد الإجمالي هنا
+    .order("created_at", { ascending: false })
+    .range(from, to); // <-- استخدم .range() بدلاً من .limit()
+
+  if (error) {
+    console.error("Error fetching products:", error);
+    return { error: error.message };
+  }
+
+  const formattedProducts: MiniProduct[] = data.map((product) => ({
+    id: product.id,
+    slug: product.slug,
+    name: product.name,
+    short_description: product.short_description,
+    brand: product.brand?.name ?? "",
+    category: product.category?.name ?? "",
+    main_image_url: product.main_image_url,
+    is_available: product.is_available,
+    is_featured: product.is_featured,
+    created_at: product.created_at,
+    updated_at: product.updated_at,
+  }));
+
+  // 3. إرجاع البيانات مع العدد الإجمالي
+  return {
+    data: {
+      products: formattedProducts,
+      totalCount: count ?? 0, 
+    },
+  };
 }
 
 // ===============================================================================
@@ -127,14 +199,16 @@ export async function updateProduct(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = await createServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) return { success: false, error: "User not authenticated" };
     if (!(await isAdmin())) return { success: false, error: "Unauthorized" };
 
     // استدعاء دالة PostgreSQL كمعاملة
     const { error } = await supabase.rpc("update_full_product", {
-      p_id: productId,       // المعامل الأول
+      p_id: productId, // المعامل الأول
       product_data: formData, // المعامل الثاني
     });
 
@@ -146,16 +220,12 @@ export async function updateProduct(
 
     return { success: true };
   } catch (error: unknown) {
-    return { success: false, error: ( error as Error)?.message || "Failed to update product" };
+    return {
+      success: false,
+      error: (error as Error)?.message || "Failed to update product",
+    };
   }
 }
-
-
-
-
-
-
-
 
 // ===============================================================================
 // Get Product By ID
@@ -243,23 +313,10 @@ export async function getProductById(
 
     return { data: formattedProduct };
   } catch {
-    console.error("Unexpected error in getProductById:",);
+    console.error("Unexpected error in getProductById:");
     return { error: "An unexpected error occurred." };
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 export async function deleteProduct(id: string): Promise<ApiResponse<boolean>> {
   // Initialize Supabase client for server-side operations
