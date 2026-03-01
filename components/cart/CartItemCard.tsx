@@ -156,7 +156,7 @@ export function CartItemCard({ item }: CartItemCardProps) {
       >
         <span className="hidden lg:block">Remove</span>
         {isRemovePending ? <Spinner /> : <X />}
-      </Button>{" "}
+      </Button>
     </div>
   );
 }

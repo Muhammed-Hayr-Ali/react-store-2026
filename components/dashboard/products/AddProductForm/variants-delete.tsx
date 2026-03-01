@@ -31,6 +31,7 @@ export default function DeleteVariantDialogAlertDialog({
 
   const [isLoading, setIsLoading] = useState(false);
   const handleDelete = async () => {
+
     if (!valueId) return;
     setIsLoading(true);
     const { error } = await deleteProductOptionValue(valueId);

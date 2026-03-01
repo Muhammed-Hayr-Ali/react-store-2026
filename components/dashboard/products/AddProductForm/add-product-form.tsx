@@ -9,7 +9,7 @@ import {
 } from "react-hook-form";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import slugify from "slugify";
 
 // --- استيرادات الواجهة والأيقونات ---
@@ -50,7 +50,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 // --- استيرادات الأنواع ---
 import { ProductFormData } from "@/lib/types/product";
-import { createProduct, deleteProduct } from "@/lib/actions/producta-add";
+import { createProduct, updateProduct } from "@/lib/actions/products-manager";
 import {
   Field,
   FieldDescription,
@@ -82,26 +82,34 @@ import CalculatorDialog from "./calculator-dialog";
 // واجهة المكون (Props)
 // =================================================================
 interface AddProductFormProps {
+  product?: ProductFormData; // بيانات المنتج للتحرير
   categories: Category[];
   brands: Brand[];
   options: ProductOption[];
   optionValues: ProductOptionValue[];
 }
 
-// =================================================================
-// Dialog State
-// =================================================================
-type DialogState =
-  | "BrandDialog"
-  | "DeleteBrandDialog"
-  | "CategoryDialog"
-  | "DeleteCategoryDialog"
-  | "ProductOptionsDialog"
-  | "DeleteProductOptionsDialog"
-  | "VariantDialog"
-  | "DeleteVariantDialog"
-  | "calculator"
-  | null;
+interface DialogState {
+  isOpen: boolean;
+  type:
+    | "BrandDialog"
+    | "DeleteBrandDialog"
+    | "CategoryDialog"
+    | "DeleteCategoryDialog"
+    | "ProductOptionsDialog"
+    | "DeleteProductOptionsDialog"
+    | "VariantDialog"
+    | "DeleteVariantDialog"
+    | "calculator"
+    | null;
+  data?: {
+    brandId?: string; // لـ BrandDialog و DeleteBrandDialog
+    categoryId?: string; // لـ CategoryDialog و DeleteCategoryDialog
+    productOption?: ProductOption; // لـ ProductOptionsDialog و DeleteProductOptionsDialog
+    optionId?: string; // لـ VariantDialog
+    valueId?: string; // لـ DeleteVariantDialog
+  };
+}
 
 // =================================================================
 // Generate SKU
@@ -116,6 +124,7 @@ function generateSKU(productName: string) {
 // المكون الرئيسي للنموذج
 // =================================================================
 export function AddProductForm({
+  product,
   categories,
   brands,
   options,
@@ -123,22 +132,12 @@ export function AddProductForm({
 }: AddProductFormProps) {
   const router = useRouter();
 
-  const [productId, setProductId] = useState<string | null>(null);
-
   const [tagsInput, setTagsInput] = useState("");
+  const [activeDialog, setActiveDialog] = useState<DialogState>({
+    type: null,
+    isOpen: false,
+  });
 
-  //New Dialog State
-  const [activeDialog, setActiveDialog] = useState<DialogState>(null);
-  const [selcetedBrand, setSelcetedBrand] = useState<Brand | null>(null);
-  const [selcetedCategory, setSelcetedCategory] = useState<Category | null>(
-    null,
-  );
-  const [selcetedProductOption, setSelcetedProductOption] =
-    useState<ProductOption | null>(null);
-  const [selcetedOptionId, setSelcetedOptionId] = useState<string | null>(null);
-  const [selcetedValueId, setSelcetedValueId] = useState<string | null>(null);
-
-  // Setting React Hook Form
   const {
     register,
     handleSubmit,
@@ -148,7 +147,7 @@ export function AddProductForm({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ProductFormData>({
-    defaultValues: {
+    defaultValues: product || {
       name: "",
       slug: "",
       description: "",
@@ -174,17 +173,13 @@ export function AddProductForm({
   });
 
   const productName = useWatch({ control, name: "name" });
-  const currentTags = useWatch({ control, name: "tags" }) || [];
-
-  // const productName = useWatch({ name: "name" }) || "";
-  // const currentTags = useWatch({ name: "tags" }) || [];
+  const currentTags = useWatch({ control, name: "tags" }) ?? [];
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: "variants",
   });
 
-  // --- تحديث الـ slug تلقائيًا (مع دعم العربية) ---
   useEffect(() => {
     if (productName) {
       const slug = slugify(productName, {
@@ -227,7 +222,10 @@ export function AddProductForm({
     }
   };
 
-  const categoryTree = buildCategoryTree(categories);
+  const categoryTree = useMemo(
+    () => buildCategoryTree(categories),
+    [categories],
+  );
 
   // --- دالة الإرسال ---
   const onSubmit: SubmitHandler<ProductFormData> = async (formData) => {
@@ -243,41 +241,50 @@ export function AddProductForm({
       const hasDefaultVariant = formData.variants.some(
         (v) => v.is_default === true,
       );
+
       if (!hasDefaultVariant && formData.variants.length > 0) {
         formData.variants[0].is_default = true;
       }
 
-      formData.variants = formData.variants.map((variant) => ({
-        ...variant,
-        variant_options: variant.variant_options?.filter(
-          (opt) => opt.option_value?.id,
-        ),
-      }));
+      const cleanedData = {
+        ...formData,
+        variants: formData.variants.map((v) => ({
+          ...v,
+          variant_options: v.variant_options.filter(
+            (opt) => opt.option_value?.id,
+          ),
+        })),
+      };
 
-      const result = await createProduct(formData);
-
-      if (result.success && result.productId) {
-        setProductId(result.productId);
-        toast.success("تم إنشاء المنتج بنجاح!");
-        router.refresh();
+      let result;
+      if (product?.id) {
+        // وضع التحرير
+        result = await updateProduct(product.id, formData);
+        if (result.success) {
+          toast.success("Product updated successfully!");
+        } else {
+          toast.error(result.error ?? "Failed to update product.");
+        }
       } else {
-        toast.error(result.error || "فشل إنشاء المنتج");
+        // وضع الإنشاء
+        result = await createProduct(formData);
+        if (result.success) {
+          toast.success("Product created successfully!");
+        } else {
+          toast.error(result.error ?? "Failed to create product.");
+        }
       }
+
+      router.refresh();
     } catch (error) {
       console.error("Error creating product:", error);
-      toast.error("حدث خطأ غير متوقع");
+      toast.error("Failed to create product.");
     }
   };
 
+  // Dialog State
   const onCloseDialog = () => {
-    //New Dialog State
-
-    setActiveDialog(null);
-    setSelcetedBrand(null);
-    setSelcetedCategory(null);
-    setSelcetedProductOption(null);
-    setSelcetedOptionId(null);
-    setSelcetedValueId(null);
+    setActiveDialog({ type: null, isOpen: false });
   };
 
   return (
@@ -338,7 +345,9 @@ export function AddProductForm({
                 </FieldLabel>
                 <Textarea
                   id="short_description"
-                  {...register("short_description")}
+                  {...register("short_description", {
+                    required: "short description is required.",
+                  })}
                   disabled={isSubmitting}
                   placeholder="a brief description that appears in product lists..."
                   rows={3}
@@ -350,7 +359,7 @@ export function AddProductForm({
               <Field>
                 <FieldLabel htmlFor="description">Full Description</FieldLabel>
                 <RichTextEditor
-                  content="a detailed description of the product..."
+                  content={""}
                   onChange={(val) => setValue("description", val)}
                 />
               </Field>
@@ -386,7 +395,7 @@ export function AddProductForm({
                     type="button"
                     size="sm"
                     onClick={() => {
-                      const currentUrls = getValues("image_urls") || [];
+                      const currentUrls = getValues("image_urls") ?? [];
                       setValue("image_urls", [...currentUrls, ""], {
                         shouldValidate: true,
                       });
@@ -410,11 +419,9 @@ export function AddProductForm({
                         <div className="flex-1">
                           <Input
                             id={`image_urls.${index}`}
-                            // value={watch("image_urls")?.[index] || ""}
-                            value={getValues("image_urls")?.[index] || ""}
+                            value={getValues("image_urls")?.[index] ?? ""}
                             onChange={(e) => {
-                              // const currentUrls = watch("image_urls") || [];
-                              const currentUrls = getValues("image_urls") || [];
+                              const currentUrls = getValues("image_urls") ?? [];
 
                               const newUrls = [...currentUrls];
                               newUrls[index] = e.target.value;
@@ -432,8 +439,7 @@ export function AddProductForm({
                           variant="ghost"
                           size="icon"
                           onClick={() => {
-                            // const currentUrls = watch("image_urls") || [];
-                            const currentUrls = getValues("image_urls") || [];
+                            const currentUrls = getValues("image_urls") ?? [];
                             const newUrls = currentUrls.filter(
                               (_, i) => i !== index,
                             );
@@ -445,6 +451,7 @@ export function AddProductForm({
                           className="h-9 w-9 text-destructive hover:bg-destructive/10 shrink-0"
                         >
                           <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete Image</span>
                         </Button>
                       </div>
                     ))
@@ -457,6 +464,7 @@ export function AddProductForm({
           </CardContent>
         </Card>
 
+        {/* Categories & Brands & Tags */}
         <Card className="rounded-none shadow-none">
           <CardHeader>
             <CardTitle className="flex gap-2 w-fit items-center">
@@ -468,182 +476,215 @@ export function AddProductForm({
             {/* Categories */}
             <FieldGroup>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Category */}
+                {/* Category Tree */}
+                <Controller
+                  name="category_id"
+                  control={control}
+                  rules={{ required: "Category is required" }}
+                  render={({ field, fieldState: { error } }) => (
+                    <Field>
+                      <FieldLabel className="flex items-center justify-between">
+                        <span>Category</span>
+                        {field.value ? (
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              size="icon-xs"
+                              variant={"ghost"}
+                              className="shrink-0"
+                              onClick={() => {
+                                // setActiveDialog("CategoryDialog");
+                                setActiveDialog({
+                                  isOpen: true,
+                                  type: "CategoryDialog",
+                                  data: { categoryId: field.value as string },
+                                }); // للتعديل
+                              }}
+                            >
+                              <Pencil className="h-3 w-3" />
+                              <span className="sr-only">Edit Category</span>
+                            </Button>
 
-                <Field>
-                  <div className="flex items-center justify-between">
-                    <FieldLabel>Category</FieldLabel>
-                    {selcetedCategory ? (
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          size="icon-xs"
-                          variant={"ghost"}
-                          className="shrink-0"
-                          onClick={() => {
-                            setActiveDialog("CategoryDialog");
-                          }}
-                        >
-                          <Pencil className="h-3 w-3" />
-                        </Button>
-
-                        <Button
-                          type="button"
-                          size="icon-xs"
-                          variant={"ghost"}
-                          className="shrink-0"
-                          onClick={() => {
-                            setActiveDialog("DeleteCategoryDialog");
-                          }}
-                        >
-                          <Trash className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button
-                        type="button"
-                        size="icon-xs"
-                        variant={"ghost"}
-                        className="shrink-0"
-                        onClick={() => {
-                          setActiveDialog("CategoryDialog");
+                            <Button
+                              type="button"
+                              size="icon-xs"
+                              variant={"ghost"}
+                              className="shrink-0"
+                              onClick={() => {
+                                // setActiveDialog("DeleteCategoryDialog");
+                                setActiveDialog({
+                                  isOpen: true,
+                                  type: "DeleteCategoryDialog",
+                                  data: { categoryId: field.value as string },
+                                });
+                              }}
+                            >
+                              <Trash className="h-3 w-3" />
+                              <span className="sr-only">Delete Category</span>
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button
+                            type="button"
+                            size="icon-xs"
+                            variant={"ghost"}
+                            className="shrink-0"
+                            onClick={() => {
+                              // setActiveDialog("CategoryDialog");
+                              setActiveDialog({
+                                isOpen: true,
+                                type: "CategoryDialog",
+                              });
+                            }}
+                          >
+                            <Plus className="h-3 w-3" />
+                            <span className="sr-only">Add Category</span>
+                          </Button>
+                        )}
+                      </FieldLabel>
+                      <Select
+                        value={field.value ?? ""}
+                        onValueChange={(val) => {
+                          if (val === "__clear__") {
+                            field.onChange("");
+                            return;
+                          }
+                          field.onChange(val);
                         }}
+                        disabled={isSubmitting}
+                        aria-invalid={error ? "true" : "false"}
                       >
-                        <Plus className="h-3 w-3" />
-                      </Button>
-                    )}
-                  </div>
+                        <SelectTrigger className="w-full">
+                          <SelectValue
+                            placeholder={
+                              categoryTree.length > 0
+                                ? "Select a Category"
+                                : "No categories"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__clear__">No Selected</SelectItem>
 
-                  {/* <Select onValueChange={(val) => setValue("category_id", val)}> */}
-                  <Select
-                    onValueChange={(val) => {
-                      // إذا كانت القيمة فارغة، نقوم بمسح الحقل
-                      if (val === "__clear__") {
-                        setValue("category_id", "", { shouldValidate: true });
-                        setSelcetedCategory(null);
-                        return;
-                      }
-                      // إذا كانت هناك قيمة، نقوم بتعيينها
-                      setValue("category_id", val);
-                      const category = categories.find((cat) => cat.id === val);
-                      setSelcetedCategory(category || null);
-                    }}
-                    value={selcetedCategory?.id || ""} // التحكم في القيمة المعروضة
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue
-                        placeholder={
-                          categoryTree.length > 0
-                            ? "Select a Category"
-                            : "No categories"
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__clear__">No Selected</SelectItem>
+                          {categoryTree.map((categoryNode) => (
+                            <SelectGroup key={categoryNode.id}>
+                              <SelectItem value={categoryNode.id}>
+                                {categoryNode.name}
+                              </SelectItem>
+                              {categoryNode.children.map((child) => (
+                                <SelectItem key={child.id} value={child.id}>
+                                  <div className="flex items-center gap-2 rtl:flex-row-reverse">
+                                    <p>-</p> {child.name}
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FieldError>{error?.message}</FieldError>
+                    </Field>
+                  )}
+                />
 
-                      {categoryTree.map((categoryNode) => (
-                        <SelectGroup key={categoryNode.id}>
-                          {/* التصنيف الرئيسي */}
-                          <SelectItem value={categoryNode.id}>
-                            {categoryNode.name}
-                          </SelectItem>
-                          {/* التصنيفات الفرعية */}
-                          {categoryNode.children.map((child) => (
-                            <SelectItem key={child.id} value={child.id}>
-                              <div className="flex items-center gap-2 rtl:flex-row-reverse">
-                                <p>-</p> {child.name}
-                              </div>
+                {/* Brand */}
+                <Controller
+                  name="brand_id"
+                  control={control}
+                  rules={{ required: "Brand is required" }}
+                  render={({ field, fieldState: { error } }) => (
+                    <Field>
+                      <FieldLabel className="flex items-center justify-between">
+                        <span>Brand</span>
+                        {field.value ? (
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              size="icon-xs"
+                              variant={"ghost"}
+                              className="shrink-0"
+                              onClick={() => {
+                                // setActiveDialog("BrandDialog");
+                                setActiveDialog({
+                                  isOpen: true,
+                                  type: "BrandDialog",
+                                  data: { brandId: field.value as string },
+                                });
+                              }}
+                            >
+                              <Pencil className="h-3 w-3" />
+                              <span className="sr-only">Edit Brand</span>
+                            </Button>
+
+                            <Button
+                              type="button"
+                              size="icon-xs"
+                              variant={"ghost"}
+                              className="shrink-0"
+                              onClick={() => {
+                                // setActiveDialog("DeleteBrandDialog");
+                                setActiveDialog({
+                                  isOpen: true,
+                                  type: "DeleteBrandDialog",
+                                  data: { brandId: field.value as string },
+                                });
+                              }}
+                            >
+                              <Trash className="h-3 w-3" />
+                              <span className="sr-only">Delete Brand</span>
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button
+                            type="button"
+                            size="icon-xs"
+                            variant={"ghost"}
+                            className="shrink-0"
+                            onClick={() => {
+                              // setActiveDialog("BrandDialog");
+                              setActiveDialog({
+                                isOpen: true,
+                                type: "BrandDialog",
+                              });
+                            }}
+                          >
+                            <Plus className="h-3 w-3" />
+                            <span className="sr-only">Add Brand</span>
+                          </Button>
+                        )}
+                      </FieldLabel>
+                      <Select
+                        value={field.value ?? ""}
+                        onValueChange={(val) => {
+                          if (val === "__clear__") {
+                            field.onChange("");
+                            return;
+                          }
+                          field.onChange(val);
+                        }}
+                        disabled={isSubmitting}
+                        aria-invalid={error ? "true" : "false"}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue
+                            placeholder={
+                              brands.length > 0 ? "Select a Brand" : "No brands"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__clear__">No Selected</SelectItem>
+                          {brands.map((brand) => (
+                            <SelectItem key={brand.id} value={brand.id}>
+                              {brand.name}
                             </SelectItem>
                           ))}
-                        </SelectGroup>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
-
-                {/* brand */}
-
-                <Field>
-                  <div className="flex items-center justify-between">
-                    <FieldLabel>Brand</FieldLabel>
-                    {selcetedBrand ? (
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          size="icon-xs"
-                          variant={"ghost"}
-                          className="shrink-0"
-                          onClick={() => {
-                            setActiveDialog("BrandDialog");
-                          }}
-                        >
-                          <Pencil className="h-3 w-3" />
-                        </Button>
-
-                        <Button
-                          type="button"
-                          size="icon-xs"
-                          variant={"ghost"}
-                          className="shrink-0"
-                          onClick={() => {
-                            setActiveDialog("DeleteBrandDialog");
-                          }}
-                        >
-                          <Trash className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button
-                        type="button"
-                        size="icon-xs"
-                        variant={"ghost"}
-                        className="shrink-0"
-                        onClick={() => {
-                          setActiveDialog("BrandDialog");
-                        }}
-                      >
-                        <Plus className="h-3 w-3" />
-                      </Button>
-                    )}
-                  </div>
-
-                  <Select
-                    onValueChange={(val) => {
-                      // إذا كانت القيمة فارغة، نقوم بمسح الحقل
-                      if (val === "__clear__") {
-                        setValue("brand_id", "", { shouldValidate: true });
-                        setSelcetedBrand(null);
-                        return;
-                      }
-                      // إذا كانت هناك قيمة، نقوم بتعيينها
-                      setValue("brand_id", val);
-                      const brand = brands.find((bnd) => bnd.id === val);
-                      setSelcetedBrand(brand || null);
-                    }}
-                    value={selcetedBrand?.id || ""} // التحكم في القيمة المعروضة
-                  >
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          brands.length > 0 ? "Select a Brand" : "No Brands"
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {/* ✅ الخيار الأول: قيمة فارغة لإفراغ التحديد */}
-                        <SelectItem value="__clear__">No Selected</SelectItem>
-
-                        {brands.map((bnd) => (
-                          <SelectItem key={bnd.id} value={bnd.id}>
-                            {bnd.name}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </Field>
+                        </SelectContent>
+                      </Select>
+                      <FieldError>{error?.message}</FieldError>
+                    </Field>
+                  )}
+                />
               </div>
               {/* الوسوم */}
               <Field>
@@ -671,7 +712,7 @@ export function AddProductForm({
                     disabled={isSubmitting}
                   >
                     <Tag className="mr-2 h-4 w-4" />
-                    Add
+                    Add Tag
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
@@ -686,6 +727,7 @@ export function AddProductForm({
                       className="px-2.5 py-0 text-xs hover:bg-red-300"
                     >
                       {tag}
+                      <span className="sr-only">Remove {tag}</span>
                     </Button>
                   ))}
                 </div>
@@ -765,9 +807,15 @@ export function AddProductForm({
               <Button
                 type="button"
                 variant="secondary"
-                onClick={() => setActiveDialog("calculator")}
+                onClick={() =>
+                  setActiveDialog({
+                    isOpen: true,
+                    type: "calculator",
+                  })
+                }
               >
                 <Calculator className="mr-1 rtl:mr-auto rtl:ml-1 h-4 w-4" />
+                <span className="sr-only">Calculator</span>
               </Button>
 
               <Button
@@ -826,6 +874,7 @@ export function AddProductForm({
                         aria-label="Remove variant"
                       >
                         <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Remove variant</span>
                       </Button>
                     )}
                   </div>
@@ -937,7 +986,11 @@ export function AddProductForm({
                       type="button"
                       size={"sm"}
                       onClick={() => {
-                        setActiveDialog("ProductOptionsDialog");
+                        // setActiveDialog("ProductOptionsDialog");
+                        setActiveDialog({
+                          isOpen: true,
+                          type: "ProductOptionsDialog",
+                        });
                       }}
                       disabled={isSubmitting}
                     >
@@ -962,7 +1015,7 @@ export function AddProductForm({
                                   <span className="text-xs text-muted-foreground font-semibold">
                                     ({option.unit})
                                   </span>
-                                )}{" "}
+                                )}
                                 {option.description && (
                                   <span className="text-xs text-muted-foreground font-normal">
                                     {option.description}
@@ -977,11 +1030,19 @@ export function AddProductForm({
                                 variant={"ghost"}
                                 className="shrink-0"
                                 onClick={() => {
-                                  if (!selcetedValueId) return;
-                                  setActiveDialog("DeleteVariantDialog");
+                                  setActiveDialog({
+                                    isOpen: true,
+                                    type: "DeleteVariantDialog",
+                                    data: {
+                                      valueId: activeDialog.data?.valueId,
+                                    },
+                                  });
                                 }}
                               >
                                 <Minus className="h-3 w-3" />
+                                <span className="sr-only">
+                                  Remove option value
+                                </span>
                               </Button>
                               <Button
                                 type="button"
@@ -989,11 +1050,17 @@ export function AddProductForm({
                                 variant={"ghost"}
                                 className="shrink-0"
                                 onClick={() => {
-                                  setSelcetedOptionId(option.id);
-                                  setActiveDialog("VariantDialog");
+                                  setActiveDialog({
+                                    isOpen: true,
+                                    type: "VariantDialog",
+                                    data: { optionId: option.id },
+                                  });
                                 }}
                               >
                                 <Plus className="h-3 w-3" />
+                                <span className="sr-only">
+                                  Add option value
+                                </span>
                               </Button>
                               <Button
                                 type="button"
@@ -1001,11 +1068,15 @@ export function AddProductForm({
                                 variant={"ghost"}
                                 className="shrink-0"
                                 onClick={() => {
-                                  setSelcetedProductOption(option);
-                                  setActiveDialog("ProductOptionsDialog");
+                                  setActiveDialog({
+                                    isOpen: true,
+                                    type: "ProductOptionsDialog",
+                                    data: { productOption: option },
+                                  });
                                 }}
                               >
                                 <SquarePen className="h-3 w-3" />
+                                <span className="sr-only">Edit option</span>
                               </Button>
 
                               <Button
@@ -1014,11 +1085,15 @@ export function AddProductForm({
                                 variant={"ghost"}
                                 className="shrink-0"
                                 onClick={() => {
-                                  setSelcetedProductOption(option);
-                                  setActiveDialog("DeleteProductOptionsDialog");
+                                  setActiveDialog({
+                                    isOpen: true,
+                                    type: "DeleteProductOptionsDialog",
+                                    data: { productOption: option },
+                                  });
                                 }}
                               >
                                 <Trash className="h-3 w-3" />
+                                <span className="sr-only">Remove option</span>
                               </Button>
                             </div>
                           </div>
@@ -1027,7 +1102,7 @@ export function AddProductForm({
                             name={`variants.${index}.variant_options`}
                             control={control}
                             render={({ field }) => {
-                              const currentOptions = field.value || [];
+                              const currentOptions = field.value ?? [];
 
                               // Find the currently selected option for this specific product option ID
                               const selectedOption = currentOptions.find(
@@ -1037,7 +1112,7 @@ export function AddProductForm({
                               );
 
                               const currentValue =
-                                selectedOption?.option_value?.id || "";
+                                selectedOption?.option_value?.id ?? "";
 
                               return (
                                 <Select
@@ -1056,10 +1131,13 @@ export function AddProductForm({
                                       // Update with only the filtered list (effectively removing this selection)
                                       // This results in an empty value, showing the placeholder
                                       field.onChange(updatedValues);
-                                      setSelcetedValueId(null);
                                       return;
                                     }
-                                    setSelcetedValueId(value);
+                                    setActiveDialog({
+                                      isOpen: false,
+                                      type: "DeleteVariantDialog",
+                                      data: { valueId: value },
+                                    });
 
                                     // 3. Handle normal value selection
                                     const selectedValue = availableValues.find(
@@ -1134,7 +1212,10 @@ export function AddProductForm({
                       <button
                         type="button"
                         onClick={() => {
-                          setActiveDialog("ProductOptionsDialog");
+                          setActiveDialog({
+                            isOpen: true,
+                            type: "ProductOptionsDialog",
+                          });
                         }}
                         className="text-primary hover:underline"
                       >
@@ -1157,48 +1238,58 @@ export function AddProductForm({
             {isSubmitting ? (
               <>
                 <Spinner className="mr-2" />
-                {isSubmitting && productId ? "Updateing..." : "Creating..."}
+                Creating...
               </>
             ) : (
               <>
                 <CheckCircle className="mr-2 h-5 w-5" />
-                {!isSubmitting && productId
-                  ? "Update Product"
-                  : "Create Product"}
+                Create Product
               </>
             )}
           </Button>
         </div>
       </form>
 
+      {/* Dialogs Manager */}
+
       {/* Brand Dialog */}
       <Dialog
-        open={activeDialog === "BrandDialog"}
+        open={activeDialog.type === "BrandDialog"}
         onOpenChange={onCloseDialog}
       >
         <BrandDialog
           onClose={onCloseDialog}
-          brand={selcetedBrand}
+          brand={
+            brands.find((b) => b.id === activeDialog.data?.brandId) ?? null
+          }
           className="lg:max-w-lg"
         />
       </Dialog>
 
       {/* Brand Delete Dialog */}
       <AlertDialog
-        open={activeDialog === "DeleteBrandDialog"}
+        open={activeDialog.type === "DeleteBrandDialog"}
         onOpenChange={onCloseDialog}
       >
-        <DeleteBrandAlertDialog onClose={onCloseDialog} brand={selcetedBrand} />
+        <DeleteBrandAlertDialog
+          onClose={onCloseDialog}
+          brand={
+            brands.find((b) => b.id === activeDialog.data?.brandId) ?? null
+          }
+        />
       </AlertDialog>
 
       {/* Category Dialog */}
       <Dialog
-        open={activeDialog === "CategoryDialog"}
+        open={activeDialog.type === "CategoryDialog"}
         onOpenChange={onCloseDialog}
       >
         <CategoryDialog
           onClose={onCloseDialog}
-          category={selcetedCategory}
+          category={
+            categories.find((c) => c.id === activeDialog.data?.categoryId) ??
+            null
+          }
           categories={categories}
           className="lg:max-w-lg"
         />
@@ -1206,65 +1297,75 @@ export function AddProductForm({
 
       {/* Category Delete Dialog */}
       <AlertDialog
-        open={activeDialog === "DeleteCategoryDialog"}
+        open={activeDialog.type === "DeleteCategoryDialog"}
         onOpenChange={onCloseDialog}
       >
         <DeleteCategoryAlertDialog
           onClose={onCloseDialog}
-          category={selcetedCategory}
+          category={
+            categories.find((c) => c.id === activeDialog.data?.categoryId) ??
+            null
+          }
         />
       </AlertDialog>
 
       {/* ProductOption Dialog */}
       <Dialog
-        open={activeDialog === "ProductOptionsDialog"}
+        open={activeDialog.type === "ProductOptionsDialog"}
         onOpenChange={onCloseDialog}
       >
         <ProductOptionsDialog
           onClose={onCloseDialog}
-          productOption={selcetedProductOption}
+          productOption={activeDialog.data?.productOption ?? null}
+          // productOption={selectedProductOption}
           className="lg:max-w-lg"
         />
       </Dialog>
 
       {/* ProductOption Delete Dialog */}
       <AlertDialog
-        open={activeDialog === "DeleteProductOptionsDialog"}
+        open={activeDialog.type === "DeleteProductOptionsDialog"}
         onOpenChange={onCloseDialog}
       >
         <DeleteProductOptionAlertDialog
           onClose={onCloseDialog}
-          productOption={selcetedProductOption}
+          productOption={activeDialog.data?.productOption ?? null}
         />
       </AlertDialog>
 
       {/* ProductOption Dialog */}
       <Dialog
-        open={activeDialog === "VariantDialog"}
+        open={activeDialog.type === "VariantDialog"}
         onOpenChange={onCloseDialog}
       >
         <VariantDialog
           onClose={onCloseDialog}
           optionName={
-            options.find((o) => o.id === selcetedOptionId)?.name ?? ""
+            options.find((o) => o.id === activeDialog.data?.optionId)?.name ??
+            ""
           }
-          optionId={selcetedOptionId}
+          optionId={activeDialog.data?.optionId ?? null}
           className="lg:max-w-lg"
         />
       </Dialog>
 
       {/* ProductOption Delete Dialog */}
       <AlertDialog
-        open={activeDialog === "DeleteVariantDialog"}
+        open={
+          activeDialog.type === "DeleteVariantDialog" && activeDialog.isOpen
+        }
         onOpenChange={onCloseDialog}
       >
         <DeleteProductOptionValueAlertDialog
           onClose={onCloseDialog}
-          valueId={selcetedValueId}
+          valueId={activeDialog.data?.valueId ?? null}
         />
       </AlertDialog>
 
-      <Dialog open={activeDialog === "calculator"} onOpenChange={onCloseDialog}>
+      <Dialog
+        open={activeDialog.type === "calculator"}
+        onOpenChange={onCloseDialog}
+      >
         <CalculatorDialog onClose={onCloseDialog} />
       </Dialog>
     </>

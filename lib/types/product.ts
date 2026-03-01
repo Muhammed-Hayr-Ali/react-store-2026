@@ -1,20 +1,22 @@
 // lib/types/product.ts
 
 export interface ProductOption {
-  id: string;
+  id?: string;
   name: string;
   description: string | null;
 }
 
 export interface ProductOptionValue {
-  id: string;
+  id?: string;
   option_id: string;
   value: string;
 }
 
 export interface VariantOptionValue {
+  id?: string;
+
   option_value: {
-    id: string;
+    id?: string;
     value: string;
     product_options: {
       id: string;
@@ -24,6 +26,7 @@ export interface VariantOptionValue {
 }
 
 export interface ProductVariantFormData {
+  id?: string;
   sku: string;
   price: number;
   discount_price?: number;
@@ -35,6 +38,7 @@ export interface ProductVariantFormData {
 }
 
 export interface ProductFormData {
+  id?: string;
   name: string;
   slug: string;
   description: string;
