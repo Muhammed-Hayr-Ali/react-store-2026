@@ -27,9 +27,6 @@ const formatSegment = (segment: string): string => {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
-// =================================================================
-// تعريف الأنواع والواجهات
-// =================================================================
 export interface BreadcrumbSegment {
   title: string;
   href?: string;
@@ -39,9 +36,7 @@ interface DynamicBreadcrumbProps {
   extraSegments?: BreadcrumbSegment[];
 }
 
-// =================================================================
-// ✅ الخطوة 2: المكون الآن يمكنه العثور على الدالة واستخدامها
-// =================================================================
+
 export function DynamicBreadcrumb({
   extraSegments = [],
 }: DynamicBreadcrumbProps) {
