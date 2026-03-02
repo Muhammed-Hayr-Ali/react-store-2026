@@ -85,7 +85,7 @@ export async function getBrands(): Promise<ApiResponse<Brand[]>> {
   // Initialize Supabase client for server-side operations
   const supabase = await createServerClient();
   // Fetch all brands from the "brands" table, selecting only the id, name, and slug fields
-  const { data: brands, error } = await supabase.from("brands").select("*");
+  const { data: brands, error } = await supabase.from("brands").select("*").order("name", { ascending: true });
   // Critical error handling: If we fail to fetch brands, we log the error and return a user-friendly message
   if (error) {
     console.error("Error fetching brands:", error);

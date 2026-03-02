@@ -153,6 +153,8 @@ export type Product = {
   brand: Brand;
   category: Category;
   variants: ProductVariant[];
+  average_rating: number;
+  reviews_count: number;
 };
 export type ProductDetailResponse = {
   product: Product;
@@ -288,18 +290,11 @@ export const getProductBySlug = cache(
       return priorityA - priorityB;
     });
 
-    
-
     /// Summary Reviews
     const validReviews = reviews?.filter((r) => r.rating > 0) || [];
 
-
-    const totalReviews = validReviews.length;
-    const averageRating =
-      totalReviews > 0
-        ? validReviews!.reduce((acc, review) => acc + review.rating, 0) /
-          totalReviews
-        : 0;
+    const totalReviews = productResponse.reviews_count || 0;
+    const averageRating = productResponse.average_rating || 0;
 
     const starCounts = validReviews.reduce(
       (acc, review) => {
@@ -326,7 +321,6 @@ export const getProductBySlug = cache(
       product: productResponse,
       reviews: sortedReviews,
       initiallyWishlisted,
-
       summaryReviews: {
         totalReviews,
         averageRating,

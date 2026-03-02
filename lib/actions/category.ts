@@ -79,7 +79,7 @@ export async function getCategories(): Promise<ApiResponse<Category[]>> {
   const { data: categories, error } = await supabase
     .from("categories")
     .select("*")
-    .order("created_at", { ascending: true });
+    .order("name", { ascending: true });
   // Critical error handling: If there's an error fetching categories, we log it and return a user-friendly error message
   if (error) {
     console.error("Error fetching categories:", error);
