@@ -8,6 +8,7 @@ import { NewsletterSignup } from "@/components/landing/newsletter-signup";
 import { SpecialOffers } from "@/components/special-offers/SpecialOffers";
 import { RecentProductsServer } from "@/components/recent-products/recent-products-server";
 import { BestSellingProductsServer } from "@/components/best_selling_products/best_selling_products-server";
+import FeaturedProductsServer from "@/components/featured-products/featured-products-server";
 
 export function generateMetadata() {
   return createMetadata({
@@ -20,6 +21,7 @@ export default function Page() {
   return (
     <main className="container mx-auto px-4">
       <Hero />
+      <FeaturedProductsServer />
       <RecentProductsServer />
       <FeaturedCategories />
       <BestSellingProductsServer />

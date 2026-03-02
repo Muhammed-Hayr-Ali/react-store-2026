@@ -44,6 +44,7 @@ next-env.d.ts
 # ملف Api Test 
 /app/api
 /uploads
+/components/dashboard/products
 
 # ملفات السجلات المحلية
 /logs
