@@ -30,7 +30,7 @@ export type ApiResponse<T> = {
 const FULL_PRODUCT_QUERY = `
                             *,
                             brand:brands(*),
-                            category:categories(*),
+                            category:categories(*,parent:parent_id(*) ),
                               variants:product_variants (
                               *,
                                 variant_option_values (
@@ -79,6 +79,7 @@ export type Category = {
   parent_id: string | null;
   created_at: string;
   description: string | null;
+  parent: Category | null;
 };
 
 export type ProductOption = {

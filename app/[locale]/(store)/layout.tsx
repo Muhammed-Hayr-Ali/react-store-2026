@@ -19,7 +19,6 @@ export default function Layout({ children }: Props) {
         </Link>
         <Navbar />
       </Header>
-      <DynamicBreadcrumb />
       <div className="min-h-[81vh] flex items-center justify-center ">
         {children}
       </div>

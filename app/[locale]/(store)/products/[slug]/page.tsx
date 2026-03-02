@@ -2,8 +2,8 @@
 
 import { getProductBySlug } from "@/lib/actions/products";
 import { createMetadata } from "@/lib/metadata";
-import { notFound } from "next/navigation";
 import ProductDetails from "@/components/products/ProductDetails";
+import { BreadcrumbSegment, DynamicBreadcrumb } from "@/components/custom-ui/dynamic-breadcrumb";
 
 async function getProduct(slug: string) {
   const response = await getProductBySlug(slug);
@@ -46,16 +46,58 @@ export default async function Page({ params }: Props) {
   // Get slug from params
   const { slug } = await params;
 
-  const response = await getProduct(slug);
+  const productData = await getProduct(slug);
 
-
-  if (!response || !response.data || !response.data.product) {
-    notFound();
+  if (!productData || !productData.data || !productData.data.product) {
+    return (
+      <main className="container mx-auto pb-8 md:pb-12 px-4">
+        Product not found
+      </main>
+    );
   }
+
+
+
+    const category  = productData.data.product.category;
+
+    // 2. بناء مصفوفة الأجزاء المخصصة
+    const breadcrumbSegments: BreadcrumbSegment[] = [];
+
+    // أضف الأب إذا كان موجودًا
+    if (category && category.parent) {
+      breadcrumbSegments.push({
+        title: category.parent.name,
+        href: `/categories/${category.parent.slug}`, // رابط صفحة التصنيف الأب
+      });
+    }
+
+    // أضف الابن (التصنيف الحالي للمنتج)
+    if (category) {
+      breadcrumbSegments.push({
+        title: category.name,
+        href: `/categories/${category.slug}`, // رابط صفحة التصنيف الابن
+      });
+    }
+
+    // أضف اسم المنتج نفسه كجزء أخير (بدون رابط)
+    breadcrumbSegments.push({
+      title: productData.data.product.name,
+    });
+
+
+
+
+
+
+
+
+
 
   return (
     <main className="container mx-auto pb-8 md:pb-12 px-4">
-      <ProductDetails data={response.data} />
+      <DynamicBreadcrumb extraSegments={breadcrumbSegments} />
+
+      <ProductDetails data={productData.data} />
     </main>
   );
 }
