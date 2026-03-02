@@ -1,6 +1,5 @@
 import { MfaGuard } from "@/lib/guards/mfa-guard";
 import Footer from "@/components/footer";
-import { DynamicBreadcrumb } from "@/components/custom-ui/dynamic-breadcrumb";
 import Header from "@/components/header";
 import Navbar from "@/components/navbar";
 import Link from "next/link";
