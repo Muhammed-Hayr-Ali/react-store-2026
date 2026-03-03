@@ -67,7 +67,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "cdn.mafrservices.com",
+        hostname: "i.suar.me",
         port: "",
         pathname: "/**",
       },
@@ -79,7 +79,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  
 };
 
 const withNextIntl = createNextIntlPlugin();

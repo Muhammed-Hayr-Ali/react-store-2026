@@ -1,15 +1,37 @@
-// ===============================================================================
-// Api Response Type
-
 import { createServerClient } from "../supabase/createServerClient";
 
+
+
+
+// ===============================================================================
+// Api Response Type
 // ===============================================================================
 export type ApiResponse<T> = {
   data?: T;
   error?: string;
 };
 
-export async function getFeaturedProducts(limit: number = 3) {
+
+// ===============================================================================
+// Products type
+// ===============================================================================
+
+export type Product = {
+  name: string;
+  slug: string;
+  short_description: string;
+  main_image_url: string;
+  image_urls: string[];
+  category_id: string;
+  brand_id: string;
+
+};
+
+// ===============================================================================
+// Get Featured Products Function
+// ===============================================================================
+
+export async function getFeaturedProducts(limit: number = 3): Promise<ApiResponse<Product[]>> {
   // Initialize Supabase client for server-side operations
   const supabase = await createServerClient();
 
@@ -26,5 +48,5 @@ export async function getFeaturedProducts(limit: number = 3) {
 
 
 
-  return products;
+  return { data: products };
 }
