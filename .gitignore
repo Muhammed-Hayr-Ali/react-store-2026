@@ -42,7 +42,7 @@ next-env.d.ts
 
 
 # ملف Api Test 
-/app/api
+/app/api/test/
 /uploads
 
 
