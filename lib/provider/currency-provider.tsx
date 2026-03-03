@@ -3,6 +3,7 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
 import { setCookie } from "cookies-next";
+import { useRouter } from "next/navigation";
 
 // 1. تعريف أنواع البيانات التي سنتعامل معها
 export interface Currency {
@@ -46,6 +47,8 @@ export function CurrencyProvider({
   initialRates,
   initialCurrencyCode,
 }: CurrencyProviderProps) {
+  const router = useRouter();
+
   // استخدام useState لإدارة العملة الحالية على العميل
   const [currentCurrency, setCurrentCurrency] = useState<Currency>(() => {
     return (
@@ -63,7 +66,9 @@ export function CurrencyProvider({
         maxAge: 30 * 24 * 60 * 60,
         path: "/",
       });
-      window.location.reload(); // إعادة تحميل الصفحة لتطبيق التغييرات على مستوى الخادم
+      // refresh the page using router navigation redirect
+      router.refresh();
+      // window.location.reload(); // إعادة تحميل الصفحة لتطبيق التغييرات على مستوى الخادم
     }
   };
 

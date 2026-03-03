@@ -18,12 +18,16 @@ export function CurrencySelector() {
 
   return (
     <Select value={currency.code} onValueChange={setCurrency}>
-      <SelectTrigger className="w-auto border-none bg-transparent">
+      <SelectTrigger className="text-xs shadow-none border-0">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
         {supportedCurrencies.map((c) => (
-          <SelectItem key={c.code} value={c.code}>
+          <SelectItem
+            key={c.code}
+            value={c.code}
+            className="text-xs"
+          >
             {c.code}
           </SelectItem>
         ))}
