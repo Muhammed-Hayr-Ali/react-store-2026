@@ -29,6 +29,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import Image from "next/image";
+import { useFormatPrice } from "@/hooks/use-format-price";
+import { useLocale } from "next-intl";
 
 export default function ProductInfo({
   product,
@@ -38,6 +40,8 @@ export default function ProductInfo({
   children,
   onVariantChange,
 }: ProductInfoProps) {
+
+  const locale = useLocale();
   const organizedOptions = useMemo(
     () => getOrganizedOptions(product.variants),
     [product.variants],
@@ -129,7 +133,9 @@ export default function ProductInfo({
     });
   };
 
-  // handle +/- using keyboard
+    const displayPrice = useFormatPrice(price, locale);
+    const displayoriginalPrice = useFormatPrice(originalPrice ?? price, locale);
+
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -199,10 +205,10 @@ export default function ProductInfo({
       )}
 
       <div className="flex items-baseline gap-3">
-        <p className="text-3xl font-semibold">${price.toFixed(2)}</p>
+        <p className="text-3xl font-semibold">{displayPrice}</p>
         {originalPrice && (
           <p className="text-xl text-muted-foreground line-through">
-            ${originalPrice.toFixed(2)}
+            {displayoriginalPrice}
           </p>
         )}
       </div>

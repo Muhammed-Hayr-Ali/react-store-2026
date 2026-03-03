@@ -20,6 +20,9 @@ import { getTotalCartQuantity } from "@/lib/actions/cart";
 import { getUser } from "@/lib/actions/get-user-action";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ScrollToTop from "@/components/ScrollToTop";
+import { CurrencyProvider } from "@/lib/provider/currency-provider";
+import { cookies } from "next/headers";
+import { getRates } from "@/lib/actions/currency";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -48,6 +51,11 @@ export default async function RootLayout({ children, params }: Props) {
   const { data: initialCartCount } = await getTotalCartQuantity();
   const { data: initialUser } = await getUser();
 
+  const rates = await getRates();
+  const cookieStore = await cookies();
+  const initialCurrencyCode =
+    cookieStore.get("selected_currency")?.value || "USD";
+
   return (
     <html
       lang={locale}
@@ -65,9 +73,14 @@ export default async function RootLayout({ children, params }: Props) {
           >
             <ScrollToTop />
             <UserProvider initialUser={initialUser || null}>
-              <CartCountProvider initialCount={initialCartCount || 0}>
-                <TooltipProvider>{children}</TooltipProvider>
-              </CartCountProvider>
+              <CurrencyProvider
+                initialRates={rates}
+                initialCurrencyCode={initialCurrencyCode}
+              >
+                <CartCountProvider initialCount={initialCartCount || 0}>
+                  <TooltipProvider>{children}</TooltipProvider>
+                </CartCountProvider>
+              </CurrencyProvider>
             </UserProvider>
           </ThemeProvider>
         </NextIntlClientProvider>

@@ -8,7 +8,7 @@ import UserButtonClient from "./user-button";
 import MenuButton from "./custom-ui/menu_button";
 import React from "react";
 import { MobileMenu } from "./mobile-menu";
-
+import { CurrencySelector } from "./currency-selector";
 
 export default function Navbar() {
   const { count, loading } = useCartCount();
@@ -22,6 +22,8 @@ export default function Navbar() {
         {/* <DesktopMobile /> */}
         <SearchButton />
         <nav className="hidden lg:flex gap-2 lg:gap-4 items-center">
+          <div className="w-px h-5 bg-border " />
+          <CurrencySelector />
           <div className="w-px h-5 bg-border " />
           <WishlistButton />
           <div className=" w-px h-5 bg-border " />
