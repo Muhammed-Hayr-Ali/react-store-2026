@@ -147,28 +147,6 @@ export default function ProductDetails({ data }: ProductDetailsProps) {
         productId={product.id}
         productSlug={product.slug}
       />
-
-      {/* write review for guest
-      <Card className="shadow-none rounded-none mt-16 mb-10">
-        <CardHeader>
-          <CardTitle>Leave a Review</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {user ? (
-            <AddReviewUserForm
-              productId={product.id}
-              productSlug={product.slug}
-            />
-          ) : (
-            <AddReviewGuestForm
-              productId={product.id}
-              productSlug={product.slug}
-            />
-          )}
-        </CardContent>
-      </Card> */}
-
-      {/* <WriteReview user={user} /> */}
     </>
   );
 }

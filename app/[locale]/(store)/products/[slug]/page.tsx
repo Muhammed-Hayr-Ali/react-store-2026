@@ -56,41 +56,29 @@ export default async function Page({ params }: Props) {
     );
   }
 
+  const category = productData.data.product.category;
 
+  // 2. بناء مصفوفة الأجزاء المخصصة
+  const breadcrumbSegments: BreadcrumbSegment[] = [];
 
-    const category  = productData.data.product.category;
-
-    // 2. بناء مصفوفة الأجزاء المخصصة
-    const breadcrumbSegments: BreadcrumbSegment[] = [];
-
-    // أضف الأب إذا كان موجودًا
-    if (category && category.parent) {
-      breadcrumbSegments.push({
-        title: category.parent.name,
-        href: `/categories/${category.parent.slug}`, // رابط صفحة التصنيف الأب
-      });
-    }
-
-    // أضف الابن (التصنيف الحالي للمنتج)
-    if (category) {
-      breadcrumbSegments.push({
-        title: category.name,
-        href: `/categories/${category.slug}`, // رابط صفحة التصنيف الابن
-      });
-    }
-
-    // أضف اسم المنتج نفسه كجزء أخير (بدون رابط)
+  // أضف الأب إذا كان موجودًا
+  if (category && category.parent) {
     breadcrumbSegments.push({
-      title: productData.data.product.name,
+      title: category.parent.name,
+      href: `/categories/${category.parent.slug}`, // رابط صفحة التصنيف الأب
     });
+  }
 
+  if (category) {
+    breadcrumbSegments.push({
+      title: category.name,
+      href: `/categories/${category.slug}`, // رابط صفحة التصنيف الابن
+    });
+  }
 
-
-
-
-
-
-
+  breadcrumbSegments.push({
+    title: productData.data.product.name,
+  });
 
 
   return (

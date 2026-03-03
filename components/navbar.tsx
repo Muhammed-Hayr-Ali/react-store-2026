@@ -9,6 +9,7 @@ import MenuButton from "./custom-ui/menu_button";
 import React from "react";
 import { MobileMenu } from "./mobile-menu";
 
+
 export default function Navbar() {
   const { count, loading } = useCartCount();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -21,11 +22,11 @@ export default function Navbar() {
         {/* <DesktopMobile /> */}
         <SearchButton />
         <nav className="hidden lg:flex gap-2 lg:gap-4 items-center">
-          <button className="w-px h-5 bg-border " />
+          <div className="w-px h-5 bg-border " />
           <WishlistButton />
           <div className=" w-px h-5 bg-border " />
           <CartButton count={count} isloading={loading} />
-          <button className="w-px h-5 bg-border " />
+          <div className="w-px h-5 bg-border " />
           <UserButtonClient />
         </nav>
 

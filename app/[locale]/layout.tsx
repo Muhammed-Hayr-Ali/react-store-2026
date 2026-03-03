@@ -21,9 +21,6 @@ import { getUser } from "@/lib/actions/get-user-action";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ScrollToTop from "@/components/ScrollToTop";
 
-
-
-
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
