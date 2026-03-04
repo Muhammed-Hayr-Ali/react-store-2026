@@ -79,10 +79,14 @@ const PRODUCTS_QUERY = `
       )
     `;
 
-//================================================================================
+
+
+
+
+    //================================================================================
 // Server Action
 //================================================================================
-export async function getAllMiniProducts(limit: number = 4): Promise<
+export async function getAllMiniProducts(limit: number = 100): Promise<
   ApiResponse<{
     featuredProducts: MiniProduct[];
     recentProducts: MiniProduct[];
@@ -149,3 +153,8 @@ export async function getAllMiniProducts(limit: number = 4): Promise<
     error: null,
   };
 }
+
+
+
+
+

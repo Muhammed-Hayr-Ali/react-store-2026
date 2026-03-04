@@ -21,19 +21,25 @@ export function generateMetadata() {
 export default async function Page() {
   const { data: miniProducts, error } = await getAllMiniProducts();
 
+  if (error) {
+    console.error("Error fetching mini products:", error);
+    return <span>Error: {error}</span>;
+  }
+
   const featuredProducts = miniProducts?.featuredProducts || [];
   const recentProducts = miniProducts?.recentProducts || [];
 
+  console.log("Featured Products:", featuredProducts);
   return (
     <main className="container mx-auto px-4">
       <Hero />
       <FeaturedProductsServer products={featuredProducts} />
-      <RecentProductsServer />
+      {/* <RecentProductsServer />
       <FeaturedCategories />
       <BestSellingProductsServer />
       <SpecialOffers />
       <WhyChooseUs />
-      <NewsletterSignup />
+      <NewsletterSignup /> */}
     </main>
   );
 }
