@@ -128,7 +128,7 @@ export default function ProductDetails({ data }: ProductDetailsProps) {
         <>
           <Separator className="my-12 lg:my-16" />
           <div>
-            <h3 className="text-xl font-semibold mb-2">Product Description</h3>
+            <h1 className="text-2xl font-bold">Product Description</h1>
             <Content html={product.description} />
           </div>
         </>
