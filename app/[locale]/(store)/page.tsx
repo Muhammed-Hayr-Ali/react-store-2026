@@ -20,14 +20,14 @@ export function generateMetadata() {
 export default function Page() {
   return (
     <main className="container mx-auto px-4">
-      <Hero />
+      {/* <Hero /> */}
       <FeaturedProductsServer />
-      <RecentProductsServer />
+      {/* <RecentProductsServer />
       <FeaturedCategories />
       <BestSellingProductsServer />
       <SpecialOffers />
       <WhyChooseUs />
-      <NewsletterSignup />
+      <NewsletterSignup /> */}
     </main>
   );
 }

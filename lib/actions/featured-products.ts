@@ -35,10 +35,11 @@ export async function getFeaturedProducts(limit: number = 3): Promise<ApiRespons
   // Initialize Supabase client for server-side operations
   const supabase = await createServerClient();
 
-  const { data: products , error } = await supabase
+  const { data: products, error } = await supabase
     .from("products")
     .select("*")
     .eq("is_featured", true)
+    .order("updated_at", { ascending: false })
     .limit(limit);
 
   if (error) {
