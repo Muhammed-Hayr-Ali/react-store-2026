@@ -157,7 +157,7 @@ export default function ProductInfo({
           <Tooltip>
             <TooltipTrigger>
               {product.brand.logo_url ? (
-                <Image
+                <img
                   src={product.brand.logo_url}
                   alt={product.brand.name}
                   width={60}
