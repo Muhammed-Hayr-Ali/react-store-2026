@@ -17,10 +17,17 @@ export interface UseCalculatorReturn {
   handleDecimal: () => void;
   handlePercentage: () => void;
   handleToggleSign: () => void;
+  setValue: (value: string) => void; // ✅ دالة جديدة للتحكم بالقيمة
 }
 
-export function useCalculator(): UseCalculatorReturn {
-  const [display, setDisplay] = useState("0");
+interface UseCalculatorProps {
+  initialValue?: string;
+}
+
+export function useCalculator({
+  initialValue = "0",
+}: UseCalculatorProps = {}): UseCalculatorReturn {
+  const [display, setDisplay] = useState(initialValue);
   const [previousValue, setPreviousValue] = useState<string | null>(null);
   const [operation, setOperation] = useState<CalculatorOperation>(null);
   const [isNewNumber, setIsNewNumber] = useState(true);
@@ -35,7 +42,7 @@ export function useCalculator(): UseCalculatorReturn {
         case "×":
           return a * b;
         case "÷":
-          return b !== 0 ? a / b : 0;
+          return b !== 0 ? a / b : 0; // يمكن إرجاع Error بدلاً من 0
         default:
           return b;
       }
@@ -115,13 +122,25 @@ export function useCalculator(): UseCalculatorReturn {
   }, [display]);
 
   const handlePercentage = useCallback(() => {
-    setDisplay(String(parseFloat(display) / 100));
-    setIsNewNumber(true);
+    const value = parseFloat(display);
+    if (!isNaN(value)) {
+      setDisplay(String(value / 100));
+      setIsNewNumber(true);
+    }
   }, [display]);
 
   const handleToggleSign = useCallback(() => {
-    setDisplay(String(-parseFloat(display)));
+    const value = parseFloat(display);
+    if (!isNaN(value)) {
+      setDisplay(String(-value));
+    }
   }, [display]);
+
+  // ✅ دالة جديدة لضبط القيمة يدوياً (مفيدة لـ initialValue والـ Callbacks)
+  const setValue = useCallback((value: string) => {
+    setDisplay(value);
+    setIsNewNumber(true);
+  }, []);
 
   return {
     display,
@@ -135,5 +154,6 @@ export function useCalculator(): UseCalculatorReturn {
     handleDecimal,
     handlePercentage,
     handleToggleSign,
+    setValue, // ✅ إرجاع الدالة الجديدة
   };
 }
