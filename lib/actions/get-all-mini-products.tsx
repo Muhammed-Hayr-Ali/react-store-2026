@@ -53,7 +53,7 @@ export type MiniProduct = {
   discount_price: number | null;
   discountPercentage: number | null;
   stock_quantity: number;
-
+  variant_id: string;
   average_rating: number;
   total_reviews: number;
 };
@@ -79,11 +79,7 @@ const PRODUCTS_QUERY = `
       )
     `;
 
-
-
-
-
-    //================================================================================
+//================================================================================
 // Server Action
 //================================================================================
 export async function getAllMiniProducts(limit: number = 100): Promise<
@@ -132,6 +128,7 @@ export async function getAllMiniProducts(limit: number = 100): Promise<
             )
           : null,
 
+      variant_id: defaultVariant?.id || "",
       // بيانات التقييم
       average_rating: product.average_rating,
       total_reviews: product.reviews_count,
@@ -153,8 +150,3 @@ export async function getAllMiniProducts(limit: number = 100): Promise<
     error: null,
   };
 }
-
-
-
-
-

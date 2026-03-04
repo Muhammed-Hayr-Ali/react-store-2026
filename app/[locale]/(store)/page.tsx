@@ -26,16 +26,17 @@ export default async function Page() {
     return <span>Error: {error}</span>;
   }
 
+  const basePath = "/products";
+
   const featuredProducts = miniProducts?.featuredProducts || [];
   const recentProducts = miniProducts?.recentProducts || [];
 
-  console.log("Featured Products:", featuredProducts);
   return (
-    <main className="container mx-auto px-4">
-      <Hero />
-      <FeaturedProductsServer products={featuredProducts} />
-      {/* <RecentProductsServer />
-      <FeaturedCategories />
+    <main className="container mx-auto px-4 pt-8">
+      {/* <Hero /> */}
+      <FeaturedProductsServer basePath={basePath} products={featuredProducts} />
+      <RecentProductsServer basePath={basePath} products={recentProducts} />
+      {/*  <FeaturedCategories />
       <BestSellingProductsServer />
       <SpecialOffers />
       <WhyChooseUs />

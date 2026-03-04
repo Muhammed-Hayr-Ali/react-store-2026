@@ -1,5 +1,6 @@
 // app/api/cron/update-rates/route.ts
 
+import { siteConfig } from "@/lib/config/site";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
@@ -40,8 +41,7 @@ export async function GET() {
     }
 
     // 3. تحديد العملات التي نهتم بها
-    const targetCurrencies = ["SYP", "SAR", "EGP", "TRY", "EUR", "AED"];
-    const ratesToUpsert = targetCurrencies
+    const ratesToUpsert = siteConfig.targetCurrencies
       .filter((code) => data.conversion_rates[code])
       .map((code) => ({
         currency_code: code,

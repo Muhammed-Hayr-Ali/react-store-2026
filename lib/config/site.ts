@@ -25,6 +25,12 @@ export const siteConfig = {
   defaultRobots: "index, follow",
   url: "https://markatna.com",
 
+
+  // "SYP",  ايقاف التحديث التلقائي لليرة السورية
+  targetCurrencies: ["SAR", "EGP", "TRY", "EUR", "AED"],
+
+
+
   shippingCost: 1.0,
   taxes: 0,
 

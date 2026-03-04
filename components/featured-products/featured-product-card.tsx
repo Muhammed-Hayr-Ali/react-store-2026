@@ -1,8 +1,4 @@
 // src/components/products/FeaturedProductCard.tsx (مسار مقترح)
-"use client";
-
-import { useRouter } from "next/navigation";
-import { Card } from "../ui/card";
 import { AspectRatio } from "../ui/aspect-ratio";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,11 +9,12 @@ import { MiniProduct } from "@/lib/actions/get-all-mini-products";
 
 interface ProductCardProps {
   product: MiniProduct;
+  basePath: string;
+
   className?: string; // للسماح بتمرير فئات CSS إضافية
 }
 
-export function FeaturedProductCard({ product, className }: ProductCardProps) {
-  const basePath = "/products";
+export function FeaturedProductCard({ product,basePath, className }: ProductCardProps) {
 
   return (
     <Link href={`${basePath}/${product.slug}`}>
