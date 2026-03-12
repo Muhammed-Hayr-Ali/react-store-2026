@@ -4,7 +4,7 @@
 
 import React from "react";
 import { sendEmail } from "@/lib/actions/email";
-import { createUnsubscribeLink } from "./utils"; // استيراد دالة إنشاء الرابط من ملفها الصحيح
+import { createUnsubscribeLink } from "./jwt"; // استيراد دالة إنشاء الرابط من ملفها الصحيح
 import { createServerClient } from "@/lib/supabase/createServerClient";
 import NewsletterConfirmationEmail from "@/emails/newsletter-confirmation-email";
 import { getLocale } from "next-intl/server";

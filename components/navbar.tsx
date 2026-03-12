@@ -8,8 +8,8 @@ import UserButtonClient from "./user-button";
 import MenuButton from "./custom-ui/menu_button";
 import React from "react";
 import { MobileMenu } from "./mobile-menu";
+import { Separator } from "@/components/ui/separator";
 import { CurrencySelector } from "./currency-selector";
-
 export default function Navbar() {
   const { count, loading } = useCartCount();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -21,22 +21,22 @@ export default function Navbar() {
       <div className="flex  gap-2 lg:gap-4 items-center">
         {/* <DesktopMobile /> */}
         <SearchButton />
-        <nav className="hidden lg:flex gap-2 lg:gap-4 items-center">
-          <div className="w-px h-5 bg-border " />
+        <nav className="hidden lg:flex h-5 gap-2 lg:gap-4 items-center">
+          <Separator orientation="vertical" />
           <CurrencySelector />
-          <div className="w-px h-5 bg-border " />
+          <Separator orientation="vertical" />
           <WishlistButton />
-          <div className=" w-px h-5 bg-border " />
+          <Separator orientation="vertical" />
           <CartButton count={count} isloading={loading} />
-          <div className="w-px h-5 bg-border " />
+          <Separator orientation="vertical" />
           <UserButtonClient />
         </nav>
 
         {/* <NavbarMobile /> */}
-        <nav className="lg:hidden flex gap-2 lg:gap-4 items-center">
-          <div className=" w-px h-5 bg-border " />
+        <nav className="lg:hidden h-5 flex gap-2 lg:gap-4 items-center">
+          <Separator orientation="vertical" />
           <CartButton count={count} isloading={loading} />
-          <div className=" w-px h-5 bg-border " />
+          <Separator orientation="vertical" />
           <MenuButton isOpen={isOpen} onClick={toggleMenu} />
         </nav>
       </div>

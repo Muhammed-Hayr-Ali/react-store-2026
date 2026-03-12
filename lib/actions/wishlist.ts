@@ -1,11 +1,9 @@
-// lib\actions\wishlist.ts
-
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { createServerClient } from "../supabase/createServerClient";
-import { unstable_noStore as noStore } from "next/cache";
 import { getUser } from "./get-user-action";
+import { createServerClient } from "../supabase/createServerClient";
+import { revalidatePath } from "next/cache";
+import { unstable_noStore as noStore } from "next/cache";
 
 // =================================================================
 // Generic API Response Type
@@ -116,7 +114,7 @@ export async function getWishlist(): Promise<ApiResponse<ProcessedProduct[]>> {
     return { error: "AUTHENTICATION_FAILED" };
   }
   // Fetch wishlist items for the authenticated user, including related product data
-  const { data, error } = await supabase
+  const { data: products, error } = await supabase
     .from("wishlist_items")
     .select(WISHLIST_QUERY)
     .eq("user_id", user.id);
@@ -127,7 +125,7 @@ export async function getWishlist(): Promise<ApiResponse<ProcessedProduct[]>> {
   }
 
   // convert wishlist items List to Product List
-  const products = data.map((item) => item.product);
+  // const products = data.map((item) => item.product);
 
   // convert Product List to ProcessedProduct List
   const processedProducts: ProcessedProduct[] = products.map(

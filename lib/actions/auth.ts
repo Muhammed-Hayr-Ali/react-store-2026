@@ -1,22 +1,30 @@
 "use client";
 
+import { createBrowserClient } from "../supabase/createBrowserClient";
 import { AuthResponse, User } from "@supabase/supabase-js";
-import { generateRandomCode } from "./generate-discount-code";
 import { createDiscountCode } from "./discounts";
 import { sendEmail } from "./email";
 import WelcomeEmail from "@/emails/welcome-email";
-import { createBrowserClient } from "../supabase/createBrowserClient";
-import { ApiResponse } from "../types";
+import { generateRandomCode } from "./utils";
 
 // ===============================================================================
 // File Name: auth.ts
 // Description: Authantication Management Actions
 // status: Active ✅
 // Author: Mohammed Kher Ali
-// Date: 2026-02-010
+// Date: 2026-03-11
 // Version: 1.0
 // Copyright (c) 2023 Mohammed Kher Ali
 // ===============================================================================
+
+// ================================================================================
+// Api Response Type
+// ================================================================================
+export type ApiResponse<T> = {
+  data?: T;
+  error?: string;
+  [key: string]: unknown;
+};
 
 // ===============================================================================
 // Sign Up Payload
@@ -28,6 +36,7 @@ export interface SignUpPayload {
   password: string;
   locale: string;
 }
+
 
 // ===============================================================================
 // Sign Up With Password & Generate Welcome Discount Code & Send Welcome Email
@@ -66,7 +75,6 @@ export async function signUpWithPassword({
   const welcomeDiscountCode = `WELCOME-${generateRandomCode(6)}`;
 
   // Create a new discount code
-
   const discountPayload = {
     code: welcomeDiscountCode,
     discount_type: "percentage" as const,
@@ -115,14 +123,14 @@ export async function signInWithPassword(
   password: string,
 ): Promise<ApiResponse<AuthResponse["data"] | null | null>> {
   const supabase = createBrowserClient();
-  const { data, error: signInError } = await supabase.auth.signInWithPassword({
+  const { data, error} = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
-  if (signInError || !data) {
+  if (error || !data) {
     return {
-      error: signInError?.message || "Sign in failed.",
+      error: error?.message || "Sign in failed.",
       mfaData: null,
     };
   }

@@ -1,7 +1,7 @@
 "use server";
 
 import { createAdminClient } from "../supabase/admin";
-import { generateRandomCode } from "./generate-discount-code";
+import { generateRandomCode } from "./utils";
 
 // ===============================================================================
 // File Name: discounts.ts

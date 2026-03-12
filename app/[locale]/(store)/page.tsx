@@ -32,8 +32,8 @@ export default async function Page() {
   const recentProducts = miniProducts?.recentProducts || [];
 
   return (
-    <main className="container mx-auto px-4 pt-8">
-      {/* <Hero /> */}
+    <main className="container mx-auto px-4 ">
+      <Hero />
       <FeaturedProductsServer basePath={basePath} products={featuredProducts} />
       <RecentProductsServer basePath={basePath} products={recentProducts} />
       {/*  <FeaturedCategories />
