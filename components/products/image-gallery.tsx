@@ -21,7 +21,6 @@ export function ImageGallery({
   const [activeImage, setActiveImage] = useState(
     imageList[0] || "/placeholder.svg",
   );
-  const [setImageLoaded] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   // ✅ تعيين الصورة النشطة عند تحميل القائمة

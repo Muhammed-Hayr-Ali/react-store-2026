@@ -32,6 +32,8 @@ export type BestSellingProduct = {
   discount_price: number | null;
   total_sold: number;
   brand_name: string;
+  average_rating: number;
+  reviews_count: number;
 };
 
 // ================================================================================
@@ -39,7 +41,7 @@ export type BestSellingProduct = {
 // ================================================================================
 export async function getBestSellingProducts(
   limit: number = 8,
-): Promise<ApiResponse<BestSellingProduct[]>> {
+){
   // Initialize Supabase client for server-side operations
   const supabase = await createServerClient();
 

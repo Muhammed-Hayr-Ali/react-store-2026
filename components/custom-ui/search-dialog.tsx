@@ -99,7 +99,7 @@ const SearchDialogContent = ({ onClose }: { onClose: () => void }) => {
       showCloseButton={false}
       className="p-0 gap-0 overflow-hidden max-h-[80svh] flex flex-col"
     >
-      <DialogHeader className="p-3 border-b shrink-0">
+      <DialogHeader className="p-3  shrink-0">
         <DialogTitle>
           <form
             onSubmit={handleSearch}
@@ -153,7 +153,7 @@ const SearchDialogContent = ({ onClose }: { onClose: () => void }) => {
         </div>
       )}
 
-      <DialogFooter className="p-3 border-t bg-muted/50 shrink-0">
+      <DialogFooter className="p-3 border border-t bg-muted/50 shrink-0">
         <div className="flex items-center justify-center w-full">
           <div className="flex items-center gap-2.5">
             <Button

@@ -13,9 +13,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-// =================================================================
-// ✅ الخطوة 1: تعريف الدالة المفقودة هنا
-// =================================================================
 const formatSegment = (segment: string): string => {
   // تجاهل UUIDs (معرفات فريدة)
   if (segment.match(/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i)) {
@@ -55,7 +52,7 @@ export function DynamicBreadcrumb({
     extraSegments.length > 0 ? pathSegments.slice(0, -1) : pathSegments;
 
   return (
-    <div className="container mx-auto my-6 px-4">
+    <div className="container mx-auto my-6 lg:my-10 px-4">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
