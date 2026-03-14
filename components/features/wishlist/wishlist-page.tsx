@@ -64,7 +64,7 @@ export function WishlistPage({ wishlistItems, error }: WishlistPageProps) {
   }
 
   return (
-    <main className="container mx-auto min-h-[50vh] px-4 mb-8">
+    <main className="container mx-auto min-h-[50vh] px-4 my-8">
       <h1 className="text-3xl font-bold">Wishlist ({wishlistItems.length})</h1>
       {/* ✅ التحسين: استخدام AnimatePresence لتغليف الشبكة للسماح بتأثير الخروج */}
       <AnimatePresence>

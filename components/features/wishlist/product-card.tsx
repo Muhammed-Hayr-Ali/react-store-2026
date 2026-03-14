@@ -10,15 +10,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import Image from "next/image";
 import { useFormatPrice } from "@/hooks/use-format-price";
 import { addItemToCart } from "@/lib/actions/cart";
-import { MiniProduct } from "@/lib/actions/wishlist";
+import { MiniProduct, removeFromWishlist } from "@/lib/actions/wishlist";
 import { useCartCount } from "@/lib/provider/cart-provider";
 import { useLocale } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
-import {  ShoppingCart } from "lucide-react";
+import { CircleX, ShoppingCart } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
+import { StarIcon } from "@/components/shared/icons";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface ProductCardProps {
   product: MiniProduct;
@@ -59,42 +64,111 @@ function AddToCartButton({ product }: { product: MiniProduct }) {
       size="icon"
       className="rounded-full shrink-0"
     >
-      { isLoading ? <Spinner /> : <ShoppingCart className="size-4" />}
+      {isLoading ? <Spinner /> : <ShoppingCart className="size-4" />}
+    </Button>
+  );
+}
+
+function RemoveFromWishlistButton({
+  productId,
+  className,
+}: {
+  productId: string;
+  className?: string;
+}) {
+  const routre = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleRemoveFromWishlist = async () => {
+    setIsLoading(true);
+    const { error } = await removeFromWishlist(productId);
+    if (error) {
+      toast.error(error);
+    } else {
+      routre.refresh();
+    }
+    setIsLoading(false);
+  };
+
+  return (
+    <Button
+      size="icon"
+      variant="destructive"
+      className={cn("absolute z-50 top-2 right-2", className)}
+      onClick={handleRemoveFromWishlist}
+    >
+      {isLoading ? <Spinner /> : <CircleX className="size-4" />}
     </Button>
   );
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, className }) => {
+  const routre = useRouter();
   const locale = useLocale();
   const price = useFormatPrice(product.price, locale);
   const discountPrice = useFormatPrice(product.discount_price, locale);
 
   const hasDiscount =
     product.discountPercentage && product.discountPercentage > 0;
-  const isOutOfStock = product.stock_quantity <= 0;
-  const rating = product.average_rating || 0;
-  const isFeatured = product.is_featured;
+
+  if (!product) {
+    return null;
+  }
+
+  const handleViewProduct = () => {
+    routre.push(`/products/${product.slug}`);
+  };
 
   return (
-    <Card className="relative mx-auto w-full max-w-sm pt-0 gap-1.5">
-      <div className="absolute inset-0 z-30 aspect-video bg-black/35" />
-      <img
-        src="https://avatar.vercel.sh/shadcn1"
-        alt="Event cover"
-        className="relative z-20 aspect-video w-full object-cover brightness-60 grayscale dark:brightness-40"
+    <Card
+      className={cn(
+        "relative mx-auto w-full max-w-sm flex flex-col pt-0 pb-3 gap-1.5",
+        className,
+      )}
+      onClick={handleViewProduct}
+    >
+      <Image
+        src={product.main_image_url || "/placeholder.svg"}
+        alt={product.name}
+        width={400}
+        height={225}
+        className="relative z-20 aspect-4/3  w-full object-cover"
       />
-      <CardHeader className="p-4">
+
+      <RemoveFromWishlistButton productId={product.id} />
+
+      <CardHeader className="px-4 py-2">
         <CardAction>
-          <Badge variant="secondary">Featured</Badge>
+          {hasDiscount && (
+            <Badge variant="secondary">OFF {product.discountPercentage}%</Badge>
+          )}
         </CardAction>
-        <CardTitle>Design systems meetup</CardTitle>
-        <CardDescription>
-          A practical talk on component APIs, accessibility, and shipping
-          faster.
+        <CardTitle>{product.name}</CardTitle>
+        <CardTitle className="flex items-center gap-1 text-xs font-normal text-muted-foreground">
+          {product.average_rating}
+          <StarIcon className="size-3" />
+          <Separator orientation="vertical" />
+          {product.category}
+          <Separator orientation="vertical" />
+          {product.brand}
+        </CardTitle>
+
+        <CardDescription className="line-clamp-2 mt-2">
+          {product.short_description}
         </CardDescription>
       </CardHeader>
-      <CardFooter>
-        <Button className="w-full">View Event</Button>
+      <CardFooter className="mt-auto px-4">
+        <div className=" w-full flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-base font-medium">{price}</span>
+            {hasDiscount && (
+              <span className="text-sm font-medium line-through text-muted-foreground">
+                {discountPrice}
+              </span>
+            )}
+          </div>
+          <AddToCartButton product={product} />
+        </div>
       </CardFooter>
     </Card>
   );

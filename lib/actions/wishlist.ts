@@ -60,6 +60,7 @@ type ProductRaw = {
 // MiniProduct type
 // ===============================================================
 export type MiniProduct = {
+  id: string;
   name: string;
   slug: string;
   short_description: string | null;
@@ -73,7 +74,7 @@ export type MiniProduct = {
   discountPercentage: number | null;
   stock_quantity: number;
   variant_id: string;
-  average_rating: number;
+  average_rating: string;
   total_reviews: number;
 };
 
@@ -137,6 +138,7 @@ export async function getWishlist(): Promise<ApiResponse<MiniProduct[]>> {
     const discountPrice = defaultVariant?.discount_price ?? null;
 
     return {
+      id: product.id,
       name: product.name,
       slug: product.slug,
       short_description: product.short_description,
@@ -152,7 +154,7 @@ export async function getWishlist(): Promise<ApiResponse<MiniProduct[]>> {
       ),
       stock_quantity: defaultVariant?.stock_quantity || 0,
       variant_id: defaultVariant?.id || "",
-      average_rating: product.average_rating,
+      average_rating: product.average_rating.toFixed(1),
       total_reviews: product.reviews_count,
     };
   });
