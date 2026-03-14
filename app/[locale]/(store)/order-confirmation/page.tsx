@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { createServerClient } from "@/lib/supabase/createServerClient";
 import { OrderWithDetails } from "@/lib/actions/order";
-import OrderConfirmation from "@/components/order-confirmation/order-confirmation";
+import OrderConfirmation from "@/components/features/order-confirmation/order-confirmation";
 
 export const dynamic = "force-dynamic";
 

@@ -1,7 +1,8 @@
 // components/reviews/StarRating.tsx (أو star-rating.tsx)
 
 import { cn } from "@/lib/utils";
-import { StarIcon } from "../custom-ui/icons";
+import { StarIcon } from "../shared/icons";
+
 
 interface StarRatingProps {
   rating: number;

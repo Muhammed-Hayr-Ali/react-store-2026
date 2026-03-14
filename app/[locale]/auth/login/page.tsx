@@ -1,6 +1,7 @@
 "use client";
 
-import { LoginPage } from "@/components/auth/login-page";
+import { LoginPage } from "@/components/features/auth/login-page";
+
 
 // المكون الرئيسي للصفحة
 export default function Page() {

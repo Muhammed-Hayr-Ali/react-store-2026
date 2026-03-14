@@ -1,22 +1,26 @@
 // app/[locale]/(account)/profile/page.tsx
 
-import { getUserWithRole } from "@/lib/actions/get-user-action";
+import { IndexPage } from "@/components/features/dashboard";
+import { getDashboardSummary } from "@/lib/actions/dashboard";
+import { createServerClient } from "@/lib/supabase/createServerClient";
 import { redirect } from "next/navigation";
 
-export default async function page() {
-  // Check if the user is logged in
-  const { data: user, error } = await getUserWithRole();
+export default async function DashboardSummary() {
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  //if the user is not logged in, redirect to the login page
-  if (error || !user) {
+  if (!user) {
     redirect("/auth/login");
   }
 
-  //   Check if the user is an admin
-  if (!user.role.includes("admin")) {
-  return <>Dashboard Page: {user.role}</>;
-  }
 
-//   Return the dashboard page
-  return <>Dashboard Page: {user.role}</>;
+  const data = await getDashboardSummary();
+
+  return (
+    <>
+      <IndexPage user={user} dashboardSummary={data.data} />
+    </>
+  );
 }

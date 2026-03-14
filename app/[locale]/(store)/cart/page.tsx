@@ -1,6 +1,6 @@
 // app/(store)/cart/page.tsx
 
-import CartPage from "@/components/cart/CartPage";
+import CartPage from "@/components/features/cart/CartPage";
 import { getCart } from "@/lib/actions/cart";
 import { createMetadata } from "@/lib/metadata";
 

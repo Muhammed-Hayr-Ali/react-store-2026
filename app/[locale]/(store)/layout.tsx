@@ -1,8 +1,8 @@
+import Footer from "@/components/layout/footer";
+import Header from "@/components/layout/header";
+import Navbar from "@/components/layout/navbar";
+import { AppLogo } from "@/components/shared/app-logo";
 import { MfaGuard } from "@/lib/guards/mfa-guard";
-import Footer from "@/components/footer";
-import Header from "@/components/header";
-import Navbar from "@/components/navbar";
-import { AppLogo } from "@/components/custom-ui/app-logo";
 import Link from "next/link";
 type Props = {
   children: React.ReactNode;

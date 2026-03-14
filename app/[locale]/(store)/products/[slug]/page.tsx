@@ -1,9 +1,9 @@
 // app\[locale]\(store)\products\[slug]\page.tsx
 
+import ProductDetails from "@/components/features/products/ProductDetails";
+import { BreadcrumbSegment, DynamicBreadcrumb } from "@/components/shared/dynamic-breadcrumb";
 import { getProductBySlug } from "@/lib/actions/products";
 import { createMetadata } from "@/lib/metadata";
-import ProductDetails from "@/components/products/ProductDetails";
-import { BreadcrumbSegment, DynamicBreadcrumb } from "@/components/custom-ui/dynamic-breadcrumb";
 
 async function getProduct(slug: string) {
   const response = await getProductBySlug(slug);

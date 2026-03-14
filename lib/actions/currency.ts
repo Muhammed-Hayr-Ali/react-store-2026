@@ -1,5 +1,4 @@
-// lib/actions/currency.ts
-"use server"; // مهم جدًا: هذه دالة خادم
+"use server";
 
 import { cache } from "react";
 import { createServerClient } from "../supabase/createServerClient";

@@ -1,6 +1,6 @@
-"use server"; // هذا التوجيه ضروري إذا كنت ستستدعي هذه الدالة من مكونات العميل.
+"use server"; 
 
-import { createServerClient } from "@/lib/supabase/createServerClient"; // تأكد من صحة المسار
+import { createServerClient } from "@/lib/supabase/createServerClient"; 
 import { unstable_noStore as noStore } from "next/cache";
 
 interface UserRoles {

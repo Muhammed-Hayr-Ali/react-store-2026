@@ -4,32 +4,45 @@ import { getUser } from "./get-user-action";
 import { createServerClient } from "../supabase/createServerClient";
 import { revalidatePath } from "next/cache";
 import { unstable_noStore as noStore } from "next/cache";
+import { calculateDiscountPercentage } from "./convert-functions";
 
-// =================================================================
-// Generic API Response Type
-// =================================================================
+// ===============================================================================
+// File Name: wishlist.ts
+// Description: Wishlist Management Actions.
+// Status: Active ✅
+// Author: Mohammed Kher Ali
+// Date: 2026-03-14
+// Version: 1.0
+// Copyright (c) 2026 Mohammed Kher Ali
+// ===============================================================================
+
+// ================================================================================
+// Api Response Type
+// ================================================================================
 export type ApiResponse<T> = {
   data?: T;
   error?: string;
-};
-// =================================================================
-// Wishlist types
-// =================================================================
-export type WishlistItem = {
-  id: string;
-  user_id: string;
-  product_id: string;
-  created_at: Date;
-  product: ProductRaw;
+  [key: string]: unknown;
 };
 
+// ================================================================
+// ProductRaw type
+// ================================================================
 type ProductRaw = {
   id: string;
   name: string;
   slug: string;
+  is_featured: boolean;
   short_description: string | null;
   main_image_url: string | null;
-  created_at: string;
+  category: {
+    id: string;
+    name: string;
+  };
+  brand: {
+    id: string;
+    name: string;
+  };
   variants: {
     id: string;
     price: number;
@@ -38,28 +51,28 @@ type ProductRaw = {
     stock_quantity?: number;
     image_url?: string;
   }[];
-  reviews: { rating: number }[];
+  average_rating: number;
+  reviews_count: number;
+  created_at: string;
 };
 
-// ✅ نوع للمنتج بعد المعالجة (الذي سيستخدمه الـ UI)
-export type ProcessedProduct = {
-  id?: string;
+// ===============================================================
+// MiniProduct type
+// ===============================================================
+export type MiniProduct = {
   name: string;
   slug: string;
   short_description: string | null;
   main_image_url: string | null;
-  created_at: string;
-
-  variant_id: string;
-
+  category: string;
+  brand: string;
+  is_featured: boolean;
   // ✅ بيانات محسوبة من المتغير الافتراضي
   price: number;
   discount_price: number | null;
   discountPercentage: number | null;
   stock_quantity: number;
-  variant_image: string | null;
-
-  // ✅ بيانات التقييمات
+  variant_id: string;
   average_rating: number;
   total_reviews: number;
 };
@@ -67,27 +80,20 @@ export type ProcessedProduct = {
 // =================================================================
 // Wishlist Queries
 // =================================================================
-
-const WISHLIST_QUERY = `*, 
+const PRODUCTS_QUERY = `*, 
       product:products(
-      id,
-      name,
-      slug,
-      short_description,
-      main_image_url,
-      created_at,
-      variants:product_variants (
-        id,
-        price,
-        discount_price,
-        is_default,
-        stock_quantity,
-        image_url
-      ),
-      reviews:reviews (
-        rating
-      )
-    )`;
+      *,
+        category:categories (id, name),
+        brand:brands (id, name),
+        variants:product_variants (
+          id,
+          price,
+          discount_price,
+          is_default,
+          stock_quantity,
+          image_url
+          )
+        )`;
 
 // =================================================================
 // Check if UUID is valid Helper functions
@@ -101,7 +107,7 @@ const isValidUUID = (uuid: string): boolean => {
 // =================================================================
 // Get wishlist items for the authenticated user
 // =================================================================
-export async function getWishlist(): Promise<ApiResponse<ProcessedProduct[]>> {
+export async function getWishlist(): Promise<ApiResponse<MiniProduct[]>> {
   noStore(); // Ensure this action is not cached and always runs on the server for real-time data
 
   // Initialize Supabase client for server-side operations
@@ -114,9 +120,9 @@ export async function getWishlist(): Promise<ApiResponse<ProcessedProduct[]>> {
     return { error: "AUTHENTICATION_FAILED" };
   }
   // Fetch wishlist items for the authenticated user, including related product data
-  const { data: products, error } = await supabase
+  const { data, error } = await supabase
     .from("wishlist_items")
-    .select(WISHLIST_QUERY)
+    .select(PRODUCTS_QUERY)
     .eq("user_id", user.id);
 
   if (error) {
@@ -124,57 +130,36 @@ export async function getWishlist(): Promise<ApiResponse<ProcessedProduct[]>> {
     return { error: "Failed to fetch wishlist items." };
   }
 
-  // convert wishlist items List to Product List
-  // const products = data.map((item) => item.product);
+  // Convert wishlist items to MiniProduct format
+  const wishlistItems: MiniProduct[] = data.map((item) => {
+    const product = item.product as ProductRaw;
+    const defaultVariant = product.variants.find((v) => v.is_default === true);
+    const discountPrice = defaultVariant?.discount_price ?? null;
 
-  // convert Product List to ProcessedProduct List
-  const processedProducts: ProcessedProduct[] = products.map(
-    (product: ProductRaw) => {
-      const defaultVariant = product.variants?.find(
-        (v) => v.is_default === true,
-      );
+    return {
+      name: product.name,
+      slug: product.slug,
+      short_description: product.short_description,
+      main_image_url: product.main_image_url,
+      category: product.category.name,
+      brand: product.brand.name,
+      is_featured: product.is_featured,
+      price: defaultVariant?.price || 0,
+      discount_price: discountPrice,
+      discountPercentage: calculateDiscountPercentage(
+        defaultVariant?.discount_price,
+        defaultVariant?.price,
+      ),
+      stock_quantity: defaultVariant?.stock_quantity || 0,
+      variant_id: defaultVariant?.id || "",
+      average_rating: product.average_rating,
+      total_reviews: product.reviews_count,
+    };
+  });
 
-      const variantId = defaultVariant?.id || "";
-
-      const reviews = product.reviews || [];
-      const averageRating =
-        reviews.length > 0
-          ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
-            reviews.length
-          : 0;
-
-      return {
-        id: product.id,
-        name: product.name,
-        slug: product.slug,
-        short_description: product.short_description,
-        main_image_url: product.main_image_url,
-        created_at: product.created_at,
-
-        variant_id: variantId,
-        price: defaultVariant?.price || 0,
-        discount_price: defaultVariant?.discount_price ?? null,
-        stock_quantity: defaultVariant?.stock_quantity || 0,
-        variant_image: defaultVariant?.image_url || null,
-
-        discountPercentage:
-          defaultVariant?.discount_price && defaultVariant?.price
-            ? Math.floor(
-                ((defaultVariant.price - defaultVariant.discount_price) /
-                  defaultVariant.price) *
-                  100,
-              )
-            : null,
-
-        // بيانات التقييم
-        average_rating: parseFloat(averageRating.toFixed(1)),
-        total_reviews: reviews.length,
-      };
-    },
-  );
-
-  // Return the wishlist items
-  return { data: processedProducts };
+  return {
+    data: wishlistItems,
+  };
 }
 
 // =================================================================
@@ -327,3 +312,5 @@ export async function checkWishlistStatus(
   // This approach ensures that we handle all input gracefully, providing a complete status map for the original list of product IDs while avoiding any database errors caused by invalid UUIDs.
   return { data: statusMap };
 }
+
+// =================================================================

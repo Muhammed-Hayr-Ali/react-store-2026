@@ -10,7 +10,7 @@ import { useMemo } from "react";
  * @param locale رمز اللغة الحالي (e.g., "en", "ar", "tr")
  * @returns السعر المنسق كنص (e.g., "٧٥٫٠٠ ر.س.‏")
  */
-export function useFormatPrice(priceInCents: number, locale: string): string {
+export function useFormatPrice(priceInCents: number | null, locale: string): string {
   // 1. الوصول إلى العملة الحالية وأسعار الصرف من السياق
   const { currency, rates } = useCurrencyContext();
 

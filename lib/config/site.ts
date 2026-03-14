@@ -25,11 +25,8 @@ export const siteConfig = {
   defaultRobots: "index, follow",
   url: "https://markatna.com",
 
-
   // "SYP",  ايقاف التحديث التلقائي لليرة السورية
   targetCurrencies: ["SAR", "EGP", "TRY", "EUR", "AED"],
-
-
 
   shippingCost: 1.0,
   taxes: 0,
@@ -60,6 +57,13 @@ export const siteConfig = {
             speech, or personal attacks. We reserve the right to remove any
             comments that violate these terms.`,
 
+  UNSUBSCRIBE_REASONS: [
+    "I receive too many emails.",
+    "The content is not relevant to me.",
+    "I no longer wish to receive these emails.",
+    "I signed up by accident.",
+  ],
+
   // dashboard menu items
   adminNavMain: [
     {
@@ -73,7 +77,7 @@ export const siteConfig = {
       url: "/dashboard/products/",
       icon: Package,
     },
-   
+
     {
       title: "My Orders",
       url: "/dashboard/orders",

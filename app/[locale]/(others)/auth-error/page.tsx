@@ -1,5 +1,5 @@
 import { createMetadata } from "@/lib/metadata";
-import ErrorPage from "@/components/others/error-page";
+import ErrorPage from "@/components/features/others/error-page";
 
 export function generateMetadata() {
   return createMetadata({

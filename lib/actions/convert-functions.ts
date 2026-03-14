@@ -11,7 +11,7 @@ export function getExpiryMessage(
   const expiryDate = new Date(discount_expires_at);
   const now = new Date();
 
-//   Check if the offer has already expired
+  //   Check if the offer has already expired
   if (expiryDate <= now) return null; // Don't show if already expired
 
   const diffTime = Math.abs(expiryDate.getTime() - now.getTime());
@@ -23,15 +23,20 @@ export function getExpiryMessage(
   return `Expires on ${expiryDate.toLocaleDateString()}`;
 }
 
-
 // ===============================================================================
 // Calculate Discount Percentage
 // ===============================================================================
 export function calculateDiscountPercentage(
-  discount_price: number | undefined,
-  price: number | undefined,
+  discount_price: number | null | undefined,
+  price: number | null | undefined,
 ): number | null {
-    // Check if discount_price and price are defined
-  if (price === undefined || discount_price === undefined) return null;
+  if (
+    discount_price === null ||
+    discount_price === undefined ||
+    price === null ||
+    price === undefined
+  )
+    return null;
+
   return Math.floor(((price - discount_price) / price) * 100);
 }

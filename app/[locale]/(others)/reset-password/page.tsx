@@ -1,7 +1,7 @@
-import ResetPasswordForm from "@/components/others/reset-password-page";
 import { checkResetToken } from "@/lib/actions/update-password";
 import { createMetadata } from "@/lib/metadata";
 import { notFound } from "next/navigation";
+import ResetPasswordForm from "@/components/features/others/reset-password-page";
 
 export function generateMetadata() {
   return createMetadata({

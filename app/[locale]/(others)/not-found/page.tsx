@@ -1,5 +1,5 @@
-import NotFoundPage from "@/components/others/not-found-page";
 import { createMetadata } from "@/lib/metadata";
+import NotFoundPage from "@/components/features/others/not-found-page";
 
 export function generateMetadata() {
   return createMetadata({

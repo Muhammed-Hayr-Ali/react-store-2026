@@ -12,17 +12,17 @@ import {
   comfortaa,
   urbanist,
 } from "@/lib/config/fonts";
-import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { CartCountProvider } from "@/lib/provider/cart-provider";
 import { UserProvider } from "@/lib/provider/user-provider";
 import { getTotalCartQuantity } from "@/lib/actions/cart";
 import { getUser } from "@/lib/actions/get-user-action";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import ScrollToTop from "@/components/ScrollToTop";
 import { CurrencyProvider } from "@/lib/provider/currency-provider";
 import { cookies } from "next/headers";
 import { getRates } from "@/lib/actions/currency";
+import ScrollToTop from "@/components/shared/ScrollToTop";
+import { ThemeProvider } from "@/components/shared/theme-provider";
 
 export const viewport: Viewport = {
   width: "device-width",

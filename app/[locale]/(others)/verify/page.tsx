@@ -1,4 +1,4 @@
-import VerifyMfaPage from "@/components/others/verify-mfa-Page";
+import VerifyMfaPage from "@/components/features/others/verify-mfa-Page";
 import { VerifyMfaGuard } from "@/lib/guards/verify-mfa";
 import { createMetadata } from "@/lib/metadata";
 

@@ -8,29 +8,30 @@ import { createUnsubscribeLink } from "./jwt"; // استيراد دالة إنش
 import { createServerClient } from "@/lib/supabase/createServerClient";
 import NewsletterConfirmationEmail from "@/emails/newsletter-confirmation-email";
 import { getLocale } from "next-intl/server";
+import jwt from "jsonwebtoken";
 
 // ===============================================================================
 // File Name: newsletter.ts
-// Description: Newsletter Management Actions
-// status: Active ✅
+// Description: Newsletter Management Actions.
+// Status: Active ✅
 // Author: Mohammed Kher Ali
-// Date: 2026-02-010
+// Date: 2026-03-14
 // Version: 1.0
-// Copyright (c) 2023 Mohammed Kher Ali
+// Copyright (c) 2026 Mohammed Kher Ali
 // ===============================================================================
 
-// ===============================================================================
+// ================================================================================
 // Api Response Type
-// ===============================================================================
+// ================================================================================
 export type ApiResponse<T> = {
   data?: T;
   error?: string;
+  [key: string]: unknown;
 };
 
 // ==============================================================================
 // Subscribe to Newsletter Action
 // ==============================================================================
-
 export async function subscribeToNewsletter(
   email: string,
 ): Promise<ApiResponse<string>> {
@@ -81,3 +82,52 @@ export async function subscribeToNewsletter(
     data: "Successfully subscribed to newsletter",
   };
 }
+
+
+
+// ================================================================================
+// Unsubscribe From Newsletter
+// ================================================================================
+export async function unsubscribeFromNewsletter(
+  token: string,
+  reason: string,
+): Promise<ApiResponse<boolean>> {
+  // Initialize Supabase client
+  const supabase = await createServerClient();
+
+  // Initialize JWT secret
+  const secret = process.env.NEWSLETTER_JWT_SECRET;
+
+  if (!secret) {
+    console.error("JWT secret for newsletter is not set.");
+    return { error: "Could not process your request." };
+  }
+
+  // 1. التحقق من صحة التوكن واستخراج البريد الإلكتروني
+  const payload = jwt.verify(token, secret) as { email: string };
+  const email = payload.email;
+
+  // 2. تحديث سجل المستخدم في قاعدة البيانات
+  const { error } = await supabase
+    .from("newsletter_subscriptions")
+    .update({
+      status: "unsubscribed",
+      unsubscribe_reason: reason,
+      unsubscribed_at: new Date().toISOString(),
+    })
+    .eq("email", email);
+
+  if (error) {
+    console.error("Unsubscribe DB Error:", error);
+    return { error: "Could not process your request." };
+  }
+
+  return {
+    data: true,
+  };
+}
+
+
+
+
+

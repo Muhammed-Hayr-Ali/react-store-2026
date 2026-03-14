@@ -1,4 +1,4 @@
-import { ForgotPasswordPage } from "@/components/auth/forgot-password-page";
+import { ForgotPasswordPage } from "@/components/features/auth/forgot-password-page";
 import { createMetadata } from "@/lib/metadata";
 
 export function generateMetadata() {

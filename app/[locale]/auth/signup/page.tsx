@@ -1,4 +1,4 @@
-import { SignupPage } from "@/components/auth/signup-page";
+import { SignupPage } from "@/components/features/auth/signup-page";
 import { createMetadata } from "@/lib/metadata";
 
 export function generateMetadata() {
