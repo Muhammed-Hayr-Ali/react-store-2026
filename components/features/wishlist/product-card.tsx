@@ -5,22 +5,20 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardAction,
-  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useFormatPrice } from "@/hooks/use-format-price";
 import { addItemToCart } from "@/lib/actions/cart";
 import { MiniProduct } from "@/lib/actions/wishlist";
 import { useCartCount } from "@/lib/provider/cart-provider";
-import { cn } from "@/lib/utils";
 import { useLocale } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Star, ShoppingCart } from "lucide-react";
+import {  ShoppingCart } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
 interface ProductCardProps {
   product: MiniProduct;
@@ -58,10 +56,10 @@ function AddToCartButton({ product }: { product: MiniProduct }) {
     <Button
       disabled={isLoading || product.stock_quantity <= 0}
       onClick={handleAddToCart}
-      className="w-full gap-2"
+      size="icon"
+      className="rounded-full shrink-0"
     >
-      <ShoppingCart className={cn("size-4", isLoading && "animate-spin")} />
-      {isLoading ? "جاري الإضافة..." : "أضف للسلة"}
+      { isLoading ? <Spinner /> : <ShoppingCart className="size-4" />}
     </Button>
   );
 }
@@ -78,110 +76,25 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className }) => {
   const isFeatured = product.is_featured;
 
   return (
-    <Card className={cn("relative w-full overflow-hidden p-0", className)}>
-      {/* Image Section */}
-      <div className="relative">
-        {/* Dark Overlay */}
-        <div
-          className={cn(
-            "absolute inset-0 z-10 bg-black/30 transition-all duration-300",
-            isOutOfStock && "bg-black/60",
-          )}
-        />
-
-        <AspectRatio ratio={16 / 9}>
-          <img
-            src={product.main_image_url || "/placeholder.svg"}
-            alt={product.name}
-            className={cn(
-              "relative z-20 size-full object-cover",
-              "transition-all duration-500",
-              "brightness-70 grayscale-[30%]",
-              "group-hover/card:brightness-100 group-hover/card:grayscale-0",
-              isOutOfStock && "grayscale brightness-50",
-            )}
-            loading="lazy"
-          />
-        </AspectRatio>
-
-        {/* Featured Badge - CardAction */}
-        {isFeatured && (
-          <div className="absolute top-3 right-3 z-30">
-            <Badge variant="secondary" className="shadow-md">
-              <Star className="mr-1 size-3 fill-amber-500 text-amber-500" />
-              مميز
-            </Badge>
-          </div>
-        )}
-
-        {/* Discount Badge */}
-        {hasDiscount && (
-          <div className="absolute top-3 left-3 z-30">
-            <Badge variant="destructive" className="font-bold shadow-md">
-              خصم {product.discountPercentage}%
-            </Badge>
-          </div>
-        )}
-
-        {/* Out of Stock Overlay */}
-        {isOutOfStock && (
-          <div className="absolute inset-0 z-40 flex items-center justify-center">
-            <Badge
-              variant="secondary"
-              className="px-4 py-2 text-sm font-bold shadow-lg"
-            >
-              نفذ من المخزون
-            </Badge>
-          </div>
-        )}
-      </div>
-
-      {/* Content Section */}
-      <CardHeader className="pb-3">
+    <Card className="relative mx-auto w-full max-w-sm pt-0 gap-1.5">
+      <div className="absolute inset-0 z-30 aspect-video bg-black/35" />
+      <img
+        src="https://avatar.vercel.sh/shadcn1"
+        alt="Event cover"
+        className="relative z-20 aspect-video w-full object-cover brightness-60 grayscale dark:brightness-40"
+      />
+      <CardHeader className="p-4">
         <CardAction>
-          {/* Rating */}
-          {rating > 0 && (
-            <div className="flex items-center gap-1">
-              <Star className="size-4 fill-yellow-400 text-yellow-400" />
-              <span className="text-sm font-medium">{rating}</span>
-              {product.total_reviews !== undefined && (
-                <span className="text-xs text-muted-foreground">
-                  ({product.total_reviews})
-                </span>
-              )}
-            </div>
-          )}
+          <Badge variant="secondary">Featured</Badge>
         </CardAction>
-
-        <CardTitle className="line-clamp-2">{product.name}</CardTitle>
-
-        {product.short_description && (
-          <CardDescription className="line-clamp-2">
-            {product.short_description}
-          </CardDescription>
-        )}
+        <CardTitle>Design systems meetup</CardTitle>
+        <CardDescription>
+          A practical talk on component APIs, accessibility, and shipping
+          faster.
+        </CardDescription>
       </CardHeader>
-
-      <CardContent className="pb-3">
-        {/* Price */}
-        <div className="flex items-center gap-2">
-          {hasDiscount ? (
-            <>
-              <span className="text-xl font-bold text-primary">
-                {discountPrice}
-              </span>
-              <span className="text-sm text-muted-foreground line-through">
-                {price}
-              </span>
-            </>
-          ) : (
-            <span className="text-xl font-bold text-primary">{price}</span>
-          )}
-        </div>
-      </CardContent>
-
       <CardFooter>
-        <AddToCartButton product={product} />
+        <Button className="w-full">View Event</Button>
       </CardFooter>
     </Card>
   );
