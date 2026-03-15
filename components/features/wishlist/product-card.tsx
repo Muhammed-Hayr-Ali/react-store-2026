@@ -18,13 +18,14 @@ import { useCartCount } from "@/lib/provider/cart-provider";
 import { useLocale } from "next-intl";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { ShoppingCart, Trash } from "lucide-react";
+import { ShoppingCart, Trash, CheckCircle2, Store } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { StarIcon } from "@/components/shared/icons";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { memo } from "react";
+import Link from "next/link";
 import {
   Tooltip,
   TooltipContent,
@@ -197,6 +198,37 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className }) => {
             )}
             {isOutOfStock && <Badge variant="destructive">Out of Stock</Badge>}
           </CardAction>
+
+          {/* Vendor Info */}
+          {product.vendor_store_name && (
+            <Link
+              href={`/vendors/${product.vendor_id}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+              className="flex items-center gap-2 mb-2 hover:opacity-80 transition-opacity"
+            >
+              {product.vendor_logo_url ? (
+                <Image
+                  src={product.vendor_logo_url}
+                  alt={product.vendor_store_name}
+                  width={24}
+                  height={24}
+                  className="rounded-full object-cover"
+                />
+              ) : (
+                <Store className="size-4 text-muted-foreground" />
+              )}
+              <span className="text-xs font-medium text-muted-foreground hover:underline">
+                {product.vendor_store_name}
+              </span>
+              {product.is_vendor_verified && (
+                <CheckCircle2 className="size-3 text-blue-500" />
+              )}
+            </Link>
+          )}
+
           <CardTitle className="line-clamp-2">{product.name}</CardTitle>
           <div className="flex items-center gap-1 text-xs font-normal text-muted-foreground">
             {product.average_rating}

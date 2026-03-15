@@ -1,5 +1,34 @@
 {
     "HomePage": {
         "title": "Hello world!"
+    },
+    "ComingSoon": {
+        "title": "We're Building Something Amazing",
+        "description": "Our website is currently under construction. We're working hard to bring you the best shopping experience possible. Stay tuned!",
+        "descriptionAr": "موقعنا قيد الإنشاء حالياً. نحن نعمل بجد لنقدم لكم أفضل تجربة تسوق. ترقبوا إطلاقنا القريب!",
+        "features": {
+            "marketplace": {
+                "title": "Multi-Vendor Marketplace",
+                "description": "Discover products from verified sellers"
+            },
+            "shipping": {
+                "title": "Fast Shipping",
+                "description": "Quick delivery to your doorstep"
+            },
+            "payments": {
+                "title": "Secure Payments",
+                "description": "Safe and encrypted transactions"
+            }
+        },
+        "notify": {
+            "title": "Get Notified When We Launch",
+            "description": "Be the first to know about our exclusive offers",
+            "placeholder": "Enter your email",
+            "button": "Notify Me",
+            "submitting": "Submitting..."
+        },
+        "follow": "Follow our journey",
+        "contact": "Contact Us",
+        "footer": "© {year} MarketNa. All rights reserved."
     }
 }

@@ -43,6 +43,12 @@ type ProductRaw = {
     id: string;
     name: string;
   };
+  vendor: {
+    id: string;
+    store_name: string;
+    logo_url: string | null;
+    is_verified: boolean;
+  } | null;
   variants: {
     id: string;
     price: number;
@@ -74,18 +80,24 @@ export type MiniProduct = {
   discountPercentage: number | null;
   stock_quantity: number;
   variant_id: string;
-  average_rating: string;
-  total_reviews: number;
+  average_rating: number;
+  // ✅ بيانات البائع (للدعم متعدد الباعة)
+  vendor_id?: string;
+  vendor_name?: string;
+  vendor_store_name?: string;
+  vendor_logo_url?: string;
+  is_vendor_verified?: boolean;
 };
 
 // =================================================================
 // Wishlist Queries
 // =================================================================
-const PRODUCTS_QUERY = `*, 
+const PRODUCTS_QUERY = `*,
       product:products(
       *,
         category:categories (id, name),
         brand:brands (id, name),
+        vendor:vendors (id, store_name, logo_url, is_verified),
         variants:product_variants (
           id,
           price,
@@ -154,8 +166,12 @@ export async function getWishlist(): Promise<ApiResponse<MiniProduct[]>> {
       ),
       stock_quantity: defaultVariant?.stock_quantity || 0,
       variant_id: defaultVariant?.id || "",
-      average_rating: product.average_rating.toFixed(1),
-      total_reviews: product.reviews_count,
+      average_rating: product.average_rating,
+      // ✅ بيانات البائع
+      vendor_id: product.vendor?.id,
+      vendor_store_name: product.vendor?.store_name,
+      vendor_logo_url: product.vendor?.logo_url || undefined,
+      is_vendor_verified: product.vendor?.is_verified,
     };
   });
 
@@ -315,4 +331,6 @@ export async function checkWishlistStatus(
   return { data: statusMap };
 }
 
+// =================================================================
+// End
 // =================================================================
