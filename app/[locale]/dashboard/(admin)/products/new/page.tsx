@@ -1,5 +1,5 @@
 // app\[locale]\dashboard\(admin)\products\add\page.tsx
-import { AddProductForm } from "@/components/dashboard/products/AddProductForm/add-product-form";
+import { AddProductForm } from "@/components/features/dashboard/products/AddProductForm/add-product-form";
 import { getBrands } from "@/lib/actions/brands";
 import { getCategories } from "@/lib/actions/category";
 import { getProductOptionValues } from "@/lib/actions/product-option-values";

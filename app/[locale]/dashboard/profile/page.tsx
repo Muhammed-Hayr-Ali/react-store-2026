@@ -1,4 +1,4 @@
-import ProfilePage from "@/components/dashboard/profile/ProfilePage";
+import ProfilePage from "@/components/features/dashboard/profile/ProfilePage";
 import { createMetadata } from "@/lib/metadata";
 import { createServerClient } from "@/lib/supabase/createServerClient";
 import { redirect } from "next/navigation";

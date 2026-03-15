@@ -1,5 +1,5 @@
 // app/dashboard/products/page.tsx
-import ProductsManagePage from "@/components/dashboard/products/products-manage/products-manage-page";
+import ProductsManagePage from "@/components/features/dashboard/products/products-manage/products-manage-page";
 import { getProducts } from "@/lib/actions/products-manager";
 
 // ✅ منع التخزين المؤقت للصفحة

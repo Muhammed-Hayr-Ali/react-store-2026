@@ -1,4 +1,4 @@
-import MyReviewsPage from "@/components/dashboard/reviews/my-reviews";
+import MyReviewsPage from "@/components/features/dashboard/reviews/my-reviews";
 import { getAllUserReviews } from "@/lib/actions/reviews";
 import { createMetadata } from "@/lib/metadata";
 
