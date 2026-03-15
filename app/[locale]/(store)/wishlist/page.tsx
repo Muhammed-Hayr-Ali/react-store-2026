@@ -1,22 +1,19 @@
 // File: app/[locale]/(store)/(account)/wishlist/page.tsx
 
-import { createMetadata } from "@/lib/metadata";
-import { getWishlist } from "@/lib/actions/wishlist";
 import { WishlistPage } from "@/components/features/wishlist/wishlist-page";
+import { getWishlist } from "@/lib/actions/wishlist";
+import { createMetadata } from "@/lib/metadata";
 
 export const metadata = createMetadata({
   title: "Your Wishlist",
   description: "A collection of products you love and want to save for later.",
 });
 
-
+// هذه الصفحة هي Server Component
 export default async function Page() {
-
-  const { data, error } = await getWishlist();
+  // 1. جلب البيانات من الخادم
+const { data: wishlistItems } = await getWishlist();
   
-
-
-
-
-  return <WishlistPage wishlistItems={data} error={error} />;
+  // 2. تمرير البيانات إلى مكون العميل
+  return <WishlistPage wishlistItems={wishlistItems || []} />;
 }

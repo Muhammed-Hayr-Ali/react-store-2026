@@ -1,8 +1,8 @@
 // app\[locale]\(others)\unsubscribe\page.tsx
 
+import UnsubscribePage from "@/components/others/unsubscribe-page";
 import { createMetadata } from "@/lib/metadata";
 import { notFound } from "next/navigation";
-import UnsubscribePage from "@/components/features/others/unsubscribe-page";
 
 export function generateMetadata() {
   return createMetadata({

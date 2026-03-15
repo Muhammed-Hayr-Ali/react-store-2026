@@ -21,8 +21,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { CurrencyProvider } from "@/lib/provider/currency-provider";
 import { cookies } from "next/headers";
 import { getRates } from "@/lib/actions/currency";
-import ScrollToTop from "@/components/shared/ScrollToTop";
 import { ThemeProvider } from "@/components/shared/theme-provider";
+import ScrollToTop from "@/components/shared/ScrollToTop";
 
 export const viewport: Viewport = {
   width: "device-width",

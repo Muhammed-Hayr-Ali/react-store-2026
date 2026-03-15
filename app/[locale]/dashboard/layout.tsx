@@ -1,5 +1,5 @@
-import { AppSidebar } from "@/components/layout/app-sidebar";
-import { DynamicBreadcrumb } from "@/components/shared/dynamic-breadcrumb";
+import { AppSidebar } from "@/components/app-sidebar";
+import { DynamicBreadcrumb } from "@/components/custom-ui/dynamic-breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
@@ -29,7 +29,7 @@ export default async function Layout({ params, children }: Props) {
     <AuthProvider>
       <AuthGuard />
       <SidebarProvider>
-        <AppSidebar  data={data.data} side={side} />
+        <AppSidebar data={data.data} side={side} />
 
         <SidebarInset className="flex flex-col h-screen">
           <header className="fixed w-full  z-10 top-0 flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-background">

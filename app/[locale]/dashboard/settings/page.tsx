@@ -1,4 +1,4 @@
-import SettingsPage from "@/components/features/dashboard/settings/settings-page";
+import SettingsPage from "@/components/dashboard/settings/settings-page";
 import { getUser } from "@/lib/actions/get-user-action";
 import { createMetadata } from "@/lib/metadata";
 

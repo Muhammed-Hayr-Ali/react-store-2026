@@ -1,8 +1,8 @@
 import { getCart } from "@/lib/actions/cart";
+import { OrderSummary } from "@/components/checkout/OrderSummary";
+import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 import { redirect } from "next/navigation";
 import { getAddresses, UserAddress } from "@/lib/actions/address";
-import { CheckoutForm } from "@/components/features/checkout/CheckoutForm";
-import { OrderSummary } from "@/components/features/checkout/OrderSummary";
 
 export default async function CheckoutPage() {
   const [

@@ -1,4 +1,4 @@
-import AddressesPage from "@/components/features/dashboard/addresses/addresses-page";
+import AddressesPage from "@/components/dashboard/addresses/addresses-page";
 import { getAddresses } from "@/lib/actions/address";
 import { createMetadata } from "@/lib/metadata";
 

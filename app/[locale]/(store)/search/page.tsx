@@ -1,6 +1,6 @@
+import SearchPage from "@/components/search/search-page";
 import { getProductsByQuery } from "@/lib/actions/search";
 import { createMetadata } from "@/lib/metadata";
-import SearchPage from "@/components/features/search/search-page";
 
 export function generateMetadata() {
   return createMetadata({

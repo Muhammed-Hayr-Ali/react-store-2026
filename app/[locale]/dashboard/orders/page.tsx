@@ -1,4 +1,4 @@
-import OrdersPage from "@/components/features/dashboard/orders/orders-page";
+import OrdersPage from "@/components/dashboard/orders/orders-page";
 import { createMetadata } from "@/lib/metadata";
 
 // إضافة بيانات وصفية (Metadata) للصفحة

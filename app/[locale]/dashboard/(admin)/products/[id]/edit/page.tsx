@@ -3,7 +3,7 @@ import { getBrands } from "@/lib/actions/brands"; // دالة لجلب كل ال
 import { getProductById } from "@/lib/actions/products-manager";
 import { getProductOptions } from "@/lib/actions/product-options";
 import { getProductOptionValues } from "@/lib/actions/product-option-values";
-import { AddProductForm } from "@/components/features/dashboard/products/AddProductForm/add-product-form";
+import { AddProductForm } from "@/components/dashboard/products/AddProductForm/add-product-form";
 
 export default async function EditProductPage({
   params,

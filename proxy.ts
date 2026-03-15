@@ -1,13 +1,12 @@
 // middleware.ts
 import createMiddleware from "next-intl/middleware";
-import { siteConfig } from "./lib/config/site";
 
 export default createMiddleware({
   // قائمة بجميع اللغات المدعومة في تطبيقك
-  locales: ["en", "ar", siteConfig.defaultLocale],
+  locales: ["en", "ar"],
 
   // اللغة الافتراضية التي سيتم استخدامها إذا لم يتم تحديد لغة في المسار
-  defaultLocale: siteConfig.defaultLocale,
+  defaultLocale: "en",
 
   // هل يجب أن يكون defaultLocale دائمًا في المسار؟
   // إذا كان false، فإن /en/about ستصبح /about

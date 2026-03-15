@@ -1,4 +1,4 @@
-import OrderDetailsPage from "@/components/features/dashboard/orders/order-details";
+import OrderDetailsPage from "@/components/dashboard/orders/order-details";
 import { createMetadata } from "@/lib/metadata";
 
 
