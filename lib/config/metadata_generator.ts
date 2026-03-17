@@ -75,11 +75,6 @@ interface SeoConfig {
      */
     type?: "website" | "article";
 
-    /**
-     * Theme color for the PWA and mobile status bar.
-     * @default "#000000"
-     */
-    themeColor?: string;
 }
 
 /**
@@ -98,7 +93,6 @@ export function createMetadata({
     noindex = false,
     image,
     type = "website",
-    themeColor = "#000000",
 }: SeoConfig): Metadata {
     const fullTitle = `${title} | ${siteName}`;
     const robots = noindex ? "noindex, follow" : siteConfig.robots;
@@ -150,7 +144,6 @@ export function createMetadata({
         },
 
         icons: siteConfig.icons,
-        themeColor,
         manifest: "/manifest.json",
         appleWebApp: {
             capable: true,

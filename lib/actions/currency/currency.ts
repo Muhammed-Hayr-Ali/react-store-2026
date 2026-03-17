@@ -1,0 +1,23 @@
+"use server";
+
+import { createServerClient } from "@/lib/supabase/createServerClient";
+import { cache } from "react";
+
+type RatesMap = Record<string, number>;
+
+export const getRates = cache(async (): Promise<RatesMap> => {
+  const supabase = await createServerClient();
+  const { data, error } = await supabase
+    .from("exchange_rates")
+    .select("currency_code, rate_from_usd");
+
+  if (error) {
+    console.error("Error fetching exchange rates:", error);
+    return {};
+  }
+
+  return data.reduce((acc, rate) => {
+    acc[rate.currency_code] = rate.rate_from_usd;
+    return acc;
+  }, {} as RatesMap);
+});
