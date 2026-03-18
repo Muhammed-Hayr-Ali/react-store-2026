@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js"
+import { createAdminClient } from "@/lib/supabase/createAdminClient "
 import { NextResponse } from "next/server"
 
 // Force dynamic rendering - Required for API routes
@@ -61,10 +61,7 @@ export async function GET(request: Request) {
     }
 
     // 3. الاتصال بـ Supabase باستخدام Service Role
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    const supabase = createAdminClient()
 
     // 4. استدعاء دالة التنظيف
     console.log("🧹 Starting cleanup of expired tokens...")
