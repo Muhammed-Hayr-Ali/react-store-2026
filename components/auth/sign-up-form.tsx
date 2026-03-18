@@ -89,8 +89,9 @@ export default function SignUpForm({
     setShowSuccessDialog(false)
     router.push(appRouter.twoFactorSetup)
   }
-              //    بيلريريرير
-  return (
+
+  
+   return (
     <form
       className={cn("flex flex-col gap-8", className)}
       {...props}
