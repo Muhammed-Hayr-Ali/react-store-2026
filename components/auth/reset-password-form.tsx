@@ -19,7 +19,16 @@ function ResetPasswordFormContent() {
   const t = useTranslations("ResetPassword")
   const router = useRouter()
   const searchParams = useSearchParams()
-  const token = searchParams.get("token")
+
+  // ✅ تصحيح قراءة التوكن - استخدام useMemo لتجنب إعادة الحساب
+  const [token, setToken] = useState<string | null>(null)
+
+  useEffect(() => {
+    const t = searchParams.get("token")
+    if (t) {
+      setToken(t)
+    }
+  }, [searchParams])
 
   const [isPending, startTransition] = useTransition()
   const [isValidating, setIsValidating] = useState(true)
@@ -45,13 +54,16 @@ function ResetPasswordFormContent() {
 
     const verifyToken = async () => {
       try {
+        console.log("🔍 Verifying token:", token.substring(0, 20) + "...")
         const result = await verifyResetToken(token)
+        console.log("✅ Token verification result:", result)
         setIsTokenValid(result.isValid)
 
         if (!result.isValid) {
           toast.error(t("invalidToken"))
         }
-      } catch {
+      } catch (error) {
+        console.error("❌ Token verification error:", error)
         toast.error(t("verificationError"))
       } finally {
         setIsValidating(false)
@@ -71,7 +83,12 @@ function ResetPasswordFormContent() {
     }
 
     startTransition(async () => {
+      console.log(
+        "🔄 Resetting password with token:",
+        token.substring(0, 20) + "..."
+      )
       const result = await resetPassword(token, data.password)
+      console.log("✅ Password reset result:", result)
 
       if (result.success) {
         setIsSuccess(true)
@@ -82,6 +99,7 @@ function ResetPasswordFormContent() {
           router.push("/sign-in")
         }, 3000)
       } else {
+        console.error("❌ Password reset failed:", result.error)
         toast.error(result.error || t("invalidToken"))
       }
     })
