@@ -13,8 +13,12 @@ export async function GET(request: NextRequest) {
   // 1. التعامل مع أخطاء المصادقة القادمة من الرابط مباشرة
   if (urlError) {
     console.error("Auth Callback Error from URL:", urlError)
-    // توجيه المستخدم إلى صفحة تسجيل الدخول مع رسالة خطأ
-    return NextResponse.redirect(`${origin}/sign-in?error=${urlError}`)
+
+    // تنظيف رسالة الخطأ من الأحرف الخاصة
+    const cleanError = encodeURIComponent(urlError.split("#")[0])
+
+    // توجيه المستخدم إلى صفحة تسجيل الدخول مع رسالة خطأ نظيفة
+    return NextResponse.redirect(`${origin}/sign-in?error=${cleanError}`)
   }
 
   // 2. إذا كان هناك كود، نقوم بتبادله للحصول على الجلسة
@@ -29,16 +33,21 @@ export async function GET(request: NextRequest) {
 
       if (exchangeError) {
         console.error("Token Exchange Error:", exchangeError.message)
-        return NextResponse.redirect(
-          `${origin}/sign-in?error=token_exchange_failed`
+        // تنظيف رسالة الخطأ
+        const cleanError = encodeURIComponent(
+          exchangeError.message.split("#")[0]
         )
+        return NextResponse.redirect(`${origin}/sign-in?error=${cleanError}`)
       }
 
       // ✅ ملاحظة: لا نحتاج هنا لاستدعاء getUser() إلا إذا أردنا استخدام بيانات المستخدم الآن
       // الجلسة تم إنشاؤها والكوكيز تم تعيينها بنجاح.
     } catch (err) {
       console.error("Unexpected Error in Callback:", err)
-      return NextResponse.redirect(`${origin}/sign-in?error=unexpected_error`)
+      const cleanError = encodeURIComponent(
+        err instanceof Error ? err.message.split("#")[0] : "unknown_error"
+      )
+      return NextResponse.redirect(`${origin}/sign-in?error=${cleanError}`)
     }
   }
 
