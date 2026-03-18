@@ -29,21 +29,6 @@
   animation: spin-slow 20s linear infinite;
 }
 
-/* Rotating gradient animation - rotates the gradient colors, not the element */
-.animate-gradient-rotate {
-  animation: gradient-rotate 20s linear infinite;
-}
-
-@keyframes gradient-rotate {
-  0% {
-    background: conic-gradient(from 0deg at 50% 50%, #FEE3D0, #D5E6FF, #FEE3D0);
-  }
-
-  100% {
-    background: conic-gradient(from 360deg at 50% 50%, #FEE3D0, #D5E6FF, #FEE3D0);
-  }
-}
-
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
