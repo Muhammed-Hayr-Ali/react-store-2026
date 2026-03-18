@@ -1,8 +1,12 @@
 // app/api/cron/update-rates/route.ts
 
 import { siteConfig } from "@/lib/config/site_config"
-import { createAdminClient } from "@/lib/supabase/createAdminClient "
+import { createAdminClient } from "@/lib/supabase/createAdminClient"
 import { NextResponse } from "next/server"
+
+// Force dynamic rendering - Required for API routes
+export const dynamic = "force-dynamic"
+export const runtime = "nodejs"
 
 // تعريف نوع البيانات للاستجابة من API
 interface ExchangeRateResponse {
@@ -13,33 +17,76 @@ interface ExchangeRateResponse {
   }
 }
 
-// نستخدم 'force-dynamic' لضمان أن يتم تنفيذ هذا الكود ديناميكيًا عند كل طلب
-export const dynamic = "force-dynamic"
-
-export async function GET() {
+/**
+ * Cron Job Handler for Updating Exchange Rates
+ *
+ * Called automatically by Vercel Cron based on vercel.json schedule
+ * Fetches latest USD exchange rates and updates the database
+ *
+ * @example
+ * curl -H "Authorization: Bearer YOUR_CRON_SECRET" \
+ *   http://localhost:3000/api/cron/update-rates
+ */
+export async function GET(request: Request) {
   try {
-    // 1. جلب مفتاح API من متغيرات البيئة
-    const apiKey = process.env.EXCHANGERATE_API_KEY
-    if (!apiKey) {
-      throw new Error(
-        "EXCHANGERATE_API_KEY is not set in environment variables."
+    // 1. التحقق من أن الطلب قادم من المصدر الموثوق
+    const authHeader = request.headers.get("authorization")
+    const expectedAuth = `Bearer ${process.env.CRON_SECRET}`
+
+    // التحقق من وجود CRON_SECRET
+    if (!process.env.CRON_SECRET) {
+      console.error("❌ CRON_SECRET is not configured")
+      return new NextResponse(
+        JSON.stringify({
+          success: false,
+          error: "CRON_SECRET not configured",
+        }),
+        { status: 500 }
       )
     }
 
-    // 2. الاتصال بـ API أسعار الصرف
+    // التحقق من صحة الـ header
+    if (authHeader !== expectedAuth) {
+      console.warn("⚠️ Unauthorized cron attempt")
+      return new NextResponse(
+        JSON.stringify({
+          success: false,
+          error: "Unauthorized - Invalid CRON_SECRET",
+        }),
+        { status: 401 }
+      )
+    }
+
+    // 2. التحقق من وجود متغيرات البيئة
+    if (!process.env.EXCHANGERATE_API_KEY) {
+      console.error("❌ EXCHANGERATE_API_KEY is not configured")
+      return new NextResponse(
+        JSON.stringify({
+          success: false,
+          error: "EXCHANGERATE_API_KEY not configured",
+        }),
+        { status: 500 }
+      )
+    }
+
+    // 3. الاتصال بـ API أسعار الصرف
+    console.log("💱 Fetching latest exchange rates...")
+    const apiKey = process.env.EXCHANGERATE_API_KEY
     const response = await fetch(
       `https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`
     )
+
     if (!response.ok) {
       throw new Error(`Failed to fetch exchange rates: ${response.statusText}`)
     }
+
     const data: ExchangeRateResponse = await response.json()
 
     if (data.result !== "success") {
       throw new Error("Exchange rate API did not return success.")
     }
 
-    // 3. تحديد العملات التي نهتم بها
+    // 4. تحديد العملات التي نهتم بها
     const ratesToUpsert = siteConfig.targetCurrencies
       .filter((code) => data.conversion_rates[code])
       .map((code) => ({
@@ -52,39 +99,49 @@ export async function GET() {
       throw new Error("No target currencies found in API response.")
     }
 
-    // 4. إنشاء عميل Supabase (آمن للاستخدام على الخادم)
-    // نستخدم متغيرات البيئة التي لا تبدأ بـ NEXT_PUBLIC_ لأن هذا الكود يعمل على الخادم فقط
+    // 5. الاتصال بـ Supabase وتحديث قاعدة البيانات
     const supabaseAdmin = createAdminClient()
-    // 5. تحديث قاعدة البيانات باستخدام upsert
+
+    console.log(`📊 Updating ${ratesToUpsert.length} exchange rates...`)
     const { error: upsertError } = await supabaseAdmin
       .from("exchange_rates")
       .upsert(ratesToUpsert, { onConflict: "currency_code" })
 
     if (upsertError) {
+      console.error("❌ Database upsert failed:", upsertError)
       throw upsertError
     }
 
-    console.log(`Successfully updated ${ratesToUpsert.length} exchange rates.`)
+    console.log(
+      `✅ Successfully updated ${ratesToUpsert.length} exchange rates.`
+    )
 
     // 6. إرجاع استجابة نجاح
     return NextResponse.json({
-      message: `Updated ${ratesToUpsert.length} rates.`,
+      success: true,
+      message: `Successfully updated ${ratesToUpsert.length} rates.`,
+      currencies: ratesToUpsert.map((r) => r.currency_code),
+      timestamp: new Date().toISOString(),
     })
   } catch (error: unknown) {
-    console.error(error)
-    if (isError(error)) {
-      console.error(error)
+    console.error("❌ Cron job error:", error)
+
+    if (error instanceof Error) {
       return NextResponse.json(
-        { error: error.message || "Unknown error." },
+        {
+          success: false,
+          error: error.message,
+        },
         { status: 500 }
       )
     }
-  }
-}
 
-function isError(error: unknown): error is Error {
-  return (
-    typeof (error as Error).message === "string" &&
-    typeof (error as Error).stack === "string"
-  )
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Unknown error occurred",
+      },
+      { status: 500 }
+    )
+  }
 }
