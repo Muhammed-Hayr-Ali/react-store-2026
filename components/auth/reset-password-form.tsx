@@ -39,10 +39,7 @@ function ResetPasswordFormContent() {
 
   // التحقق من الرمز عند تحميل الصفحة
   useEffect(() => {
-    console.log(
-      "🔍 [ResetPasswordForm] Token from URL:",
-      token ? token.substring(0, 20) + "..." : "null"
-    )
+
 
     if (!token) {
       console.log("❌ [ResetPasswordForm] No token found")
