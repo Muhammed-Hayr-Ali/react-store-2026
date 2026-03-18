@@ -7,7 +7,8 @@ import { NextIntlClientProvider } from "next-intl"
 import { getMessages } from "next-intl/server"
 import { routing } from "@/i18n/routing"
 import { Toaster } from "sonner"
-import { Viewport } from "next"
+import { Viewport, Metadata } from "next"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
@@ -22,8 +23,6 @@ const fontMono = Geist_Mono({
   variable: "--font-mono",
 })
 
-
-
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -31,9 +30,11 @@ export const viewport: Viewport = {
   userScalable: false,
 }
 
+export const metadata: Metadata = {
+  manifest: "/manifest.json",
+}
+
 // kjl
-
-
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }))
@@ -62,12 +63,14 @@ export default async function RootLayout({
       )}
     >
       <body>
-        <NextIntlClientProvider messages={messages}>
-          <ThemeProvider>
-            <AuthProvider>{children}</AuthProvider>
-            <Toaster position="top-center" richColors />
-          </ThemeProvider>
-        </NextIntlClientProvider>
+        <TooltipProvider>
+          <NextIntlClientProvider messages={messages}>
+            <ThemeProvider>
+              <AuthProvider>{children}</AuthProvider>
+              <Toaster position="top-center" richColors />
+            </ThemeProvider>
+          </NextIntlClientProvider>
+        </TooltipProvider>
       </body>
     </html>
   )

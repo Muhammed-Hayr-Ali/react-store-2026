@@ -5,7 +5,7 @@
 -- 1. ENUMS (استخدام DO $$ لتجنب أخطاء التكرار)
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'gender') THEN
-    CREATE TYPE gender AS ENUM ('male', 'female', 'other', 'prefer_not_to_say');
+    CREATE TYPE gender AS ENUM ('male', 'female', 'prefer_not_to_say');
   END IF;
 END $$;
 
@@ -29,11 +29,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   phone_verified BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
-  last_login_at TIMESTAMPTZ DEFAULT NOW(),
-
-  CONSTRAINT profiles_email_check CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'),
-  CONSTRAINT profiles_phone_check CHECK (phone IS NULL OR phone ~ '^\+?[0-9]{10,15}$')
-);
+  last_sign_in_at TIMESTAMPTZ DEFAULT NOW());
 
 -- 3. FUNCTIONS & TRIGGERS
 
@@ -90,6 +86,12 @@ CREATE POLICY "profiles_user_update_own"
   TO authenticated
   USING (auth.uid() = id)
   WITH CHECK (auth.uid() = id);
+
+
+
+
+
+  
 
 -- لا حاجة لسياسة INSERT لأن الـ Trigger يعمل بصلاحيات النظام
 

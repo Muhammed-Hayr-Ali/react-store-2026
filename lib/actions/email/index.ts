@@ -1,0 +1,6 @@
+export { sendEmail } from "./actions/sendEmail"
+export type { SendEmailOptions, EmailResult } from "./types"
+export { EmailTemplate } from "./templates/EmailTemplate"
+export { WelcomeEmail } from "./templates/WelcomeEmail"
+export { VerificationEmail } from "./templates/VerificationEmail"
+export { PasswordResetEmail } from "./templates/PasswordResetEmail"

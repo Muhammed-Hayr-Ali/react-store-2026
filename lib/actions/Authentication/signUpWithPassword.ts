@@ -26,6 +26,14 @@ export async function signUpWithPassword({
 
   if (error) {
     console.error("Error signing up:", error)
+
+    if (error.message === "User already registered") {
+      return {
+        success: false,
+        error: "USER_ALREADY_EXISTS",
+      }
+    }
+
     return {
       success: false,
       error: "USER_SIGNUP_ERROR",

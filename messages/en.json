@@ -1,7 +1,7 @@
 {
   "HomePage": {
     "titlePart1": "Coming Soon",
-    "titlePart2": "",
+    "titlePart2": "Something Extraordinary",
     "subtitle": "We're building a unique shopping experience. Stay tuned.",
     "launchingSoon": "Coming Soon",
     "footer": "Marketna"
@@ -52,7 +52,51 @@
     "passwordTooShort": "Password is too short",
     "confirmPasswordRequired": "Please confirm your password",
     "passwordsDoNotMatch": "Passwords do not match",
-    "loginWithGoogle": "Login with Google"
+    "loginWithGoogle": "Login with Google",
+    "accountCreatedSuccess": "🎉 Account Created Successfully!",
+    "twoFactorSetupDesc": "Would you like to enable two-factor authentication for enhanced security?",
+    "continueToHome": "Continue to Home",
+    "enableTwoFactor": "Enable 2FA"
+  },
+  "ForgotPassword": {
+    "title": "Forgot Password?",
+    "description": "Enter your email and we'll send you a link to reset your password",
+    "email": "Email Address",
+    "emailPlaceholder": "mail@example.com",
+    "emailRequired": "Email is required",
+    "invalidEmail": "Please enter a valid email address",
+    "sendResetLink": "Send Reset Link",
+    "sending": "Sending...",
+    "checkYourEmail": "Check Your Email",
+    "resetInstructions": "We've sent you a password reset link. Please check your email.",
+    "backToSignIn": "Back to Sign In",
+    "emailSent": "Email sent"
+  },
+  "ResetPassword": {
+    "title": "Reset Password",
+    "description": "Enter your new password below",
+    "newPassword": "New Password",
+    "newPasswordPlaceholder": "••••••••",
+    "passwordRequired": "Password is required",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordMaxLength": "Password is too long",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "••••••••",
+    "confirmPasswordRequired": "Please confirm your password",
+    "passwordsMatch": "Passwords do not match",
+    "resetPassword": "Reset Password",
+    "resetting": "Resetting...",
+    "backToSignIn": "Back to Sign In",
+    "validatingToken": "Validating token...",
+    "missingToken": "Reset link is missing",
+    "invalidToken": "Token is invalid or expired",
+    "invalidTokenTitle": "Invalid Token",
+    "invalidTokenDescription": "This link is invalid or has expired. Please request a new one.",
+    "requestNewLink": "Request New Link",
+    "successTitle": "Reset Successful",
+    "successDescription": "Your password has been reset successfully. Redirecting...",
+    "goToSignIn": "Go to Sign In",
+    "verificationError": "Error validating token"
   },
   "Legal": {
     "termsTitle": "Terms of Service",
@@ -76,5 +120,35 @@
   },
   "Theme": {
     "toggle": "Toggle theme"
+  },
+  "TwoFactor": {
+    "title": "Two-Factor Authentication",
+    "description": "Add an extra layer of security to your account",
+    "setupTitle": "Setup 2FA",
+    "setupDescription": "Scan the QR code with your authenticator app",
+    "startSetup": "Start Setup",
+    "verifyTitle": "Enter Verification Code",
+    "verifyDescription": "Enter the 6-digit code from your authenticator app",
+    "verifyAndContinue": "Verify & Continue",
+    "skip": "Skip for Now",
+    "scanQrCodeSuccess": "QR code generated! Scan it with your authenticator app",
+    "enrollFailed": "Failed to setup 2FA. Please try again",
+    "verifyFailed": "Invalid code. Please try again",
+    "verifySuccess": "2FA enabled successfully!",
+    "enterCodeError": "Please enter the verification code",
+    "secretKey": "Secret Key",
+    "copy": "Copy",
+    "copiedToClipboard": "Copied!",
+    "secretKeyDescription": "If you can't scan the QR code, enter this key manually"
+  },
+  "Verify": {
+    "title": "Two-Factor Authentication",
+    "description": "Enter verification code to continue",
+    "enterCodeTitle": "Enter Verification Code",
+    "enterCodeDescription": "Enter the 6-digit code from your authenticator app",
+    "verifyAndContinue": "Verify & Continue",
+    "verifyFailed": "Invalid code. Please try again",
+    "verifySuccess": "Verified successfully!",
+    "enterCodeError": "Please enter the verification code"
   }
 }

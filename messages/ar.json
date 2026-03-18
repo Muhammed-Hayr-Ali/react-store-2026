@@ -3,7 +3,6 @@
     "titlePart1": "قريباً",
     "titlePart2": "شيء استثنائي",
     "subtitle": "نحن نعمل على بناء تجربة تسوق فريدة. انتظرونا قريباً.",
-    "launchingSoon": "قريباً",
     "footer": "ماركتنا"
   },
   "Auth": {
@@ -52,7 +51,51 @@
     "passwordTooShort": "كلمة المرور قصيرة جداً",
     "confirmPasswordRequired": "يرجى تأكيد كلمة المرور",
     "passwordsDoNotMatch": "كلمات المرور غير متطابقة",
-    "loginWithGoogle": "الدخول باستخدام جوجل"
+    "loginWithGoogle": "الدخول باستخدام جوجل",
+    "accountCreatedSuccess": "🎉 تم إنشاء الحساب بنجاح!",
+    "twoFactorSetupDesc": "هل ترغب بتفعيل المصادقة الثنائية لزيادة الأمان؟",
+    "continueToHome": "المتابعة للرئيسية",
+    "enableTwoFactor": "تفعيل المصادقة الثنائية"
+  },
+  "ForgotPassword": {
+    "title": "نسيت كلمة المرور؟",
+    "description": "أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور",
+    "email": "البريد الإلكتروني",
+    "emailPlaceholder": "mail@example.com",
+    "emailRequired": "البريد الإلكتروني مطلوب",
+    "invalidEmail": "يرجى إدخال بريد إلكتروني صالح",
+    "sendResetLink": "إرسال رابط إعادة التعيين",
+    "sending": "جاري الإرسال...",
+    "checkYourEmail": "تحقق من بريدك الإلكتروني",
+    "resetInstructions": "أرسلنا لك رابطاً لإعادة تعيين كلمة المرور. تحقق من بريدك الإلكتروني.",
+    "backToSignIn": "العودة لتسجيل الدخول",
+    "emailSent": "تم إرسال البريد الإلكتروني"
+  },
+  "ResetPassword": {
+    "title": "إعادة تعيين كلمة المرور",
+    "description": "أدخل كلمة المرور الجديدة أدناه",
+    "newPassword": "كلمة المرور الجديدة",
+    "newPasswordPlaceholder": "••••••••",
+    "passwordRequired": "كلمة المرور مطلوبة",
+    "passwordMinLength": "كلمة المرور يجب أن تكون 8 أحرف على الأقل",
+    "passwordMaxLength": "كلمة المرور طويلة جداً",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "confirmPasswordPlaceholder": "••••••••",
+    "confirmPasswordRequired": "يرجى تأكيد كلمة المرور",
+    "passwordsMatch": "كلمات المرور غير متطابقة",
+    "resetPassword": "إعادة تعيين كلمة المرور",
+    "resetting": "جاري إعادة التعيين...",
+    "backToSignIn": "العودة لتسجيل الدخول",
+    "validatingToken": "جاري التحقق من الرمز...",
+    "missingToken": "رابط إعادة التعيين مفقود",
+    "invalidToken": "الرمز غير صحيح أو منتهي الصلاحية",
+    "invalidTokenTitle": "الرمز غير صالح",
+    "invalidTokenDescription": "هذا الرابط غير صالح أو منتهي الصلاحية. يرجى طلب رابط جديد.",
+    "requestNewLink": "طلب رابط جديد",
+    "successTitle": "تم إعادة التعيين بنجاح",
+    "successDescription": "تم إعادة تعيين كلمة المرور بنجاح. جاري إعادة التوجيه...",
+    "goToSignIn": "الذهاب لتسجيل الدخول",
+    "verificationError": "خطأ في التحقق من الرمز"
   },
   "Legal": {
     "termsTitle": "شروط الخدمة",
@@ -76,5 +119,35 @@
   },
   "Theme": {
     "toggle": "تبديل الوضع"
+  },
+  "TwoFactor": {
+    "title": "المصادقة الثنائية",
+    "description": "أضف طبقة أمان إضافية لحسابك",
+    "setupTitle": "إعداد المصادقة الثنائية",
+    "setupDescription": "امسح رمز الاستجابة السريعة باستخدام تطبيق المصادقة",
+    "startSetup": "بدء الإعداد",
+    "verifyTitle": "أدخل رمز التحقق",
+    "verifyDescription": "أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة",
+    "verifyAndContinue": "تحقق ومتابعة",
+    "skip": "تخطي الآن",
+    "scanQrCodeSuccess": "تم إنشاء رمز QR! امسحه باستخدام تطبيق المصادقة",
+    "enrollFailed": "فشل إعداد المصادقة الثنائية. يرجى المحاولة مرة أخرى",
+    "verifyFailed": "رمز غير صالح. يرجى المحاولة مرة أخرى",
+    "verifySuccess": "تم تفعيل المصادقة الثنائية بنجاح!",
+    "enterCodeError": "يرجى إدخال رمز التحقق",
+    "secretKey": "مفتاح سري",
+    "copy": "نسخ",
+    "copiedToClipboard": "تم النسخ!",
+    "secretKeyDescription": "إذا لم تتمكن من مسح رمز QR، يمكنك إدخال هذا المفتاح يدوياً"
+  },
+  "Verify": {
+    "title": "المصادقة الثنائية",
+    "description": "أدخل رمز التحقق للمتابعة",
+    "enterCodeTitle": "أدخل رمز التحقق",
+    "enterCodeDescription": "أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة",
+    "verifyAndContinue": "تحقق ومتابعة",
+    "verifyFailed": "رمز غير صالح. يرجى المحاولة مرة أخرى",
+    "verifySuccess": "تم التحقق بنجاح!",
+    "enterCodeError": "يرجى إدخال رمز التحقق"
   }
 }

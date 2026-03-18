@@ -1,7 +1,6 @@
-"use server";
+"use server"
 
-import { createServerClient } from "@/lib/supabase/createServerClient";
-import { getMfaFactors, verifyMfa } from "@/lib/actions/Mfa/mfa";
+import { getMfaFactors, verifyMfa } from "@/lib/actions/mfa/mfa"
 
 // ===============================================================================
 // File Name: verify-mfa-actions.ts
@@ -17,62 +16,44 @@ import { getMfaFactors, verifyMfa } from "@/lib/actions/Mfa/mfa";
 // Api Response Type
 // ================================================================================
 export type ApiResponse<T> = {
-  data?: T;
-  error?: string;
-  [key: string]: unknown;
-};
-
+  data?: T
+  error?: string
+  [key: string]: unknown
+}
 
 // ===============================================================================
 // Verify MFA For Login
 // ===============================================================================
-export async function verifyMfaForLogin(code: string): Promise<ApiResponse<boolean>> {
-
+export async function verifyMfaForLogin(
+  code: string
+): Promise<ApiResponse<boolean>> {
   // Create a new server client
-  const supabase = await createServerClient();
 
   // Get the MFA factors
-  const { data: factor , error } = await getMfaFactors();
+  const { data: factor, error } = await getMfaFactors()
 
   // Check for errors
-  if( error || !factor || !factor.id){
-    console.error(
-      "MFA Verify Step 2 Error (getMfaFactors):",
-      "No factor found",
-    );
-    return {error: "MFA_VERIFY_FAILED" };
+  if (error || !factor || !factor.id) {
+    console.error("MFA Verify Step 2 Error (getMfaFactors):", "No factor found")
+    return { error: "MFA_VERIFY_FAILED" }
   }
 
-
-
-
   // Get the TOTP factor ID
-  const totpFactorId = factor.id;
+  const totpFactorId = factor.id
 
   // Verify the MFA code
   const { data: verifyData, error: verifyError } = await verifyMfa(
     totpFactorId,
-    code,
-  );
+    code
+  )
 
   // Check for errors
   if (verifyError || !verifyData) {
-    console.error("MFA Verify Step 2 Error (verifyMfa):", verifyError);
-    return { error: "MFA_VERIFY_FAILED" };
+    console.error("MFA Verify Step 2 Error (verifyMfa):", verifyError)
+    return { error: "MFA_VERIFY_FAILED" }
   }
 
 
-  const { data: session, error: sessionError } = await supabase.auth.setSession(
-    {
-      access_token: verifyData.access_token,
-      refresh_token: verifyData.refresh_token,
-    },
-  );
 
-  if (sessionError) {
-    console.error("MFA Verify Step 4 Error (setSession):", sessionError);
-    return { error: "MFA_VERIFY_FAILED" };
-  }
-
-  return { data: true };
+  return { data: true }
 }

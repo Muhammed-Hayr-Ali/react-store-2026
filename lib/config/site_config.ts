@@ -25,7 +25,7 @@ export const siteConfig = {
   defaultLocale: "en",
   locales: ["en", "ar"],
 
-  targetCurrencies: ["SAR", "EGP", "TRY", "EUR", "AED"],
+  targetCurrencies: ["SYP", "SAR", "EGP", "TRY", "EUR", "AED"],
 
   supportedCurrencies: [
     { code: "USD", symbol: "$", name: "US Dollar" },
@@ -33,5 +33,5 @@ export const siteConfig = {
     { code: "SAR", symbol: "ر.س", name: "Saudi Riyal" },
     { code: "EGP", symbol: "ج.م", name: "Egyptian Pound" },
     { code: "AED", symbol: "د.إ", name: "UAE Dirham" },
-  ]
+  ],
 }

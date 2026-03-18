@@ -1,5 +1,4 @@
 import { GuestGuard } from "@/lib/middleware/guest-guard"
-import { MfaGuard } from "@/lib/middleware/mfa-guard"
 
 export default async function AuthLayout({
   children,
@@ -8,11 +7,10 @@ export default async function AuthLayout({
 }>) {
   return (
     <main>
-        <GuestGuard />
-        <MfaGuard />
-        <div className="bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
-          <div className="w-full max-w-lg">{children}</div>
-        </div>
+      <GuestGuard />
+      <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
+        <div className="w-full max-w-lg">{children}</div>
+      </div>
     </main>
   )
 }

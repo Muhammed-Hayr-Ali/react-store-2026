@@ -6,8 +6,8 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useRouter } from "next/navigation"
 
-import { signInWithPassword } from "@/lib/actions/Authentication/signInWithPassword"
-import { signInWithGoogle } from "@/lib/actions/Authentication/signIn-with-google"
+import { signInWithPassword } from "@/lib/actions/authentication/signInWithPassword"
+import { signInWithGoogle } from "@/lib/actions/authentication/signIn-with-google"
 import { SignInInput } from "@/lib/types/auth"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -137,8 +137,14 @@ export default function SignInForm({
           {errors.password ? (
             <FieldDescription>{errors.password.message}</FieldDescription>
           ) : (
-            <FieldDescription className="text-xs">
-              {t("passwordRequirement")}
+            <FieldDescription className="flex items-center justify-between text-xs">
+              <span>{t("passwordRequirement")}</span>
+              <Link
+                href={appRouter.forgotPassword}
+                className="text-primary hover:underline"
+              >
+                {t("forgotPassword")}
+              </Link>
             </FieldDescription>
           )}
         </Field>
