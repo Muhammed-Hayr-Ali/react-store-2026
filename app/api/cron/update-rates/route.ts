@@ -1,7 +1,7 @@
 // app/api/cron/update-rates/route.ts
 
 import { siteConfig } from "@/lib/config/site_config"
-import { createAdminClient } from "@/lib/supabase/createAdminClient"
+import { createAdminClient } from "@/lib/supabase/createAdminClient "
 import { NextResponse } from "next/server"
 
 // Force dynamic rendering - Required for API routes
