@@ -26,7 +26,7 @@ export default createMiddleware({
   locales: siteConfig.locales,
   defaultLocale: siteConfig.defaultLocale,
   localePrefix: "never",
-  localeDetection: true,
+  localeDetection: false,
 })
 
 // Next.js Configuration for Middleware
