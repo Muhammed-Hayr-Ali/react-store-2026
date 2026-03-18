@@ -1,7 +1,7 @@
 "use client"
-
 import * as React from "react"
 import { useLocale } from "next-intl"
+import { redirect, usePathname } from "next/navigation"
 import { Languages } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -11,7 +11,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useRouter } from "@/i18n/routing"
 
 const languages = {
   ar: "العربية",
@@ -20,13 +19,11 @@ const languages = {
 
 export function LocaleSwitcher() {
   const locale = useLocale()
-  const router = useRouter()
+  const pathname = usePathname()
 
   function onSelectChange(nextLocale: string) {
-    // Set cookie for locale detection
-    document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000`
-    // Refresh to load new locale
-    router.refresh()
+    // ✅ redirect من next-intl تدعم locale بشكل صحيح مع TypeScript
+    redirect(`/${nextLocale}${pathname}`)
   }
 
   return (
