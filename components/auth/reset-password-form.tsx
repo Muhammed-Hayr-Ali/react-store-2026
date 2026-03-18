@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition, useEffect, Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import {
@@ -13,7 +14,8 @@ import { FieldLabel, FieldDescription } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { Lock, CheckCircle } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
+import { appRouter } from "@/lib/config/app_router"
 
 function ResetPasswordFormContent() {
   const t = useTranslations("ResetPassword")
@@ -74,12 +76,7 @@ function ResetPasswordFormContent() {
     }
 
     startTransition(async () => {
-      console.log(
-        "🔄 Resetting password with token:",
-        token.substring(0, 20) + "..."
-      )
       const result = await resetPassword(token, data.password)
-      console.log("✅ Password reset result:", result)
 
       if (result.success) {
         setIsSuccess(true)
@@ -87,10 +84,9 @@ function ResetPasswordFormContent() {
 
         // إعادة التوجيه لتسجيل الدخول بعد 3 ثواني
         setTimeout(() => {
-          router.push("/sign-in")
+          router.push(appRouter.signIn)
         }, 3000)
       } else {
-        console.error("❌ Password reset failed:", result.error)
         toast.error(result.error || t("invalidToken"))
       }
     })
@@ -121,7 +117,7 @@ function ResetPasswordFormContent() {
         <Button
           variant="outline"
           className="w-full"
-          onClick={() => router.push("/forgot-password")}
+          onClick={() => router.push(appRouter.forgotPassword)}
         >
           {t("requestNewLink")}
         </Button>
@@ -144,7 +140,7 @@ function ResetPasswordFormContent() {
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => router.push("/sign-in")}
+            onClick={() => router.push(appRouter.signIn)}
           >
             {t("goToSignIn")}
           </Button>
@@ -228,7 +224,7 @@ function ResetPasswordFormContent() {
         <Button
           variant="link"
           className="text-muted-foreground"
-          onClick={() => router.push("/sign-in")}
+          onClick={() => router.push(appRouter.signIn)}
         >
           {t("backToSignIn")}
         </Button>
@@ -241,8 +237,10 @@ export default function ResetPasswordForm() {
   return (
     <Suspense
       fallback={
-        <div className="flex flex-col items-center justify-center space-y-4 py-12">
-          <Spinner className="h-8 w-8" />
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold">Loading...</h1>
+          </div>
         </div>
       }
     >
