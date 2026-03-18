@@ -24,39 +24,10 @@ interface ExchangeRateResponse {
  * Fetches latest USD exchange rates and updates the database
  *
  * @example
- * curl -H "Authorization: Bearer YOUR_CRON_SECRET" \
- *   http://localhost:3000/api/cron/update-rates
+ * curl http://localhost:3000/api/cron/update-rates
  */
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    // 1. التحقق من أن الطلب قادم من المصدر الموثوق
-    const authHeader = request.headers.get("authorization")
-    const expectedAuth = `Bearer ${process.env.CRON_SECRET}`
-
-    // التحقق من وجود CRON_SECRET
-    if (!process.env.CRON_SECRET) {
-      console.error("❌ CRON_SECRET is not configured")
-      return new NextResponse(
-        JSON.stringify({
-          success: false,
-          error: "CRON_SECRET not configured",
-        }),
-        { status: 500 }
-      )
-    }
-
-    // التحقق من صحة الـ header
-    if (authHeader !== expectedAuth) {
-      console.warn("⚠️ Unauthorized cron attempt")
-      return new NextResponse(
-        JSON.stringify({
-          success: false,
-          error: "Unauthorized - Invalid CRON_SECRET",
-        }),
-        { status: 401 }
-      )
-    }
-
     // 2. التحقق من وجود متغيرات البيئة
     if (!process.env.EXCHANGERATE_API_KEY) {
       console.error("❌ EXCHANGERATE_API_KEY is not configured")

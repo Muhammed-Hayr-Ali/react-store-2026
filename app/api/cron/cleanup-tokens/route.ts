@@ -12,40 +12,11 @@ export const runtime = "nodejs"
  * Can also be called manually for testing
  *
  * @example
- * curl -H "Authorization: Bearer YOUR_CRON_SECRET" \
- *   http://localhost:3000/api/cron/cleanup-tokens
+ * curl http://localhost:3000/api/cron/cleanup-tokens
  */
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    // 1. التحقق من أن الطلب قادم من المصدر الموثوق
-    const authHeader = request.headers.get("authorization")
-    const expectedAuth = `Bearer ${process.env.CRON_SECRET}`
-
-    // التحقق من وجود CRON_SECRET
-    if (!process.env.CRON_SECRET) {
-      console.error("❌ CRON_SECRET is not configured")
-      return new NextResponse(
-        JSON.stringify({
-          success: false,
-          error: "CRON_SECRET not configured",
-        }),
-        { status: 500 }
-      )
-    }
-
-    // التحقق من صحة الـ header
-    if (authHeader !== expectedAuth) {
-      console.warn("⚠️ Unauthorized cron attempt")
-      return new NextResponse(
-        JSON.stringify({
-          success: false,
-          error: "Unauthorized - Invalid CRON_SECRET",
-        }),
-        { status: 401 }
-      )
-    }
-
-    // 2. التحقق من وجود متغيرات البيئة
+    // 1. التحقق من وجود متغيرات البيئة
     if (
       !process.env.NEXT_PUBLIC_SUPABASE_URL ||
       !process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -60,10 +31,10 @@ export async function GET(request: Request) {
       )
     }
 
-    // 3. الاتصال بـ Supabase باستخدام Service Role
+    // 2. الاتصال بـ Supabase باستخدام Service Role
     const supabase = createAdminClient()
 
-    // 4. استدعاء دالة التنظيف
+    // 3. استدعاء دالة التنظيف
     console.log("🧹 Starting cleanup of expired tokens...")
     const { data, error } = await supabase.rpc("cleanup_expired_reset_tokens")
 
