@@ -17,8 +17,8 @@ export async function GET(request: NextRequest) {
     // تنظيف رسالة الخطأ من الأحرف الخاصة
     const cleanError = encodeURIComponent(urlError.split("#")[0])
 
-    // توجيه المستخدم إلى صفحة تسجيل الدخول مع رسالة خطأ نظيفة
-    return NextResponse.redirect(`${origin}/sign-in?error=${cleanError}`)
+    // توجيه المستخدم إلى صفحة خطأ المصادقة
+    return NextResponse.redirect(`${origin}/auth-error?error=${cleanError}`)
   }
 
   // 2. إذا كان هناك كود، نقوم بتبادله للحصول على الجلسة
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
         const cleanError = encodeURIComponent(
           exchangeError.message.split("#")[0]
         )
-        return NextResponse.redirect(`${origin}/sign-in?error=${cleanError}`)
+        return NextResponse.redirect(`${origin}/auth-error?error=${cleanError}`)
       }
 
       // ✅ ملاحظة: لا نحتاج هنا لاستدعاء getUser() إلا إذا أردنا استخدام بيانات المستخدم الآن
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       const cleanError = encodeURIComponent(
         err instanceof Error ? err.message.split("#")[0] : "unknown_error"
       )
-      return NextResponse.redirect(`${origin}/sign-in?error=${cleanError}`)
+      return NextResponse.redirect(`${origin}/auth-error?error=${cleanError}`)
     }
   }
 

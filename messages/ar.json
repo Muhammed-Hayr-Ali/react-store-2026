@@ -55,7 +55,15 @@
     "accountCreatedSuccess": "🎉 تم إنشاء الحساب بنجاح!",
     "twoFactorSetupDesc": "هل ترغب بتفعيل المصادقة الثنائية لزيادة الأمان؟",
     "continueToHome": "المتابعة للرئيسية",
-    "enableTwoFactor": "تفعيل المصادقة الثنائية"
+    "enableTwoFactor": "تفعيل المصادقة الثنائية",
+    "backToSignIn": "العودة إلى تسجيل الدخول",
+    "goToHome": "العودة إلى الصفحة الرئيسية",
+    "authErrorTitle": "خطأ في المصادقة",
+    "authError": "حدث خطأ في المصادقة",
+    "accessDenied": "تم رفض الوصول",
+    "tokenExchangeFailed": "فشل تبادل الرمز",
+    "unexpectedError": "حدث خطأ غير متوقع",
+    "noCode": "لم يتم استلام رمز المصادقة"
   },
   "ForgotPassword": {
     "title": "نسيت كلمة المرور؟",
