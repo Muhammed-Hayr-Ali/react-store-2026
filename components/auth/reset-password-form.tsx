@@ -39,10 +39,7 @@ function ResetPasswordFormContent() {
 
   // التحقق من الرمز عند تحميل الصفحة
   useEffect(() => {
-
-
     if (!token) {
-      console.log("❌ [ResetPasswordForm] No token found")
       setIsValidating(false)
       setIsTokenValid(false)
       toast.error(t("missingToken"))
@@ -51,23 +48,13 @@ function ResetPasswordFormContent() {
 
     const verifyToken = async () => {
       try {
-        console.log("🔍 [ResetPasswordForm] Starting verification...")
         const result = await verifyResetToken(token)
-        console.log("✅ [ResetPasswordForm] Verification result:", result)
-
         setIsTokenValid(result.isValid)
 
         if (!result.isValid) {
-          console.log("❌ [ResetPasswordForm] Token is invalid")
           toast.error(t("invalidToken"))
-        } else {
-          console.log(
-            "✅ [ResetPasswordForm] Token is valid for:",
-            result.email
-          )
         }
-      } catch (error) {
-        console.error("❌ [ResetPasswordForm] Verification error:", error)
+      } catch {
         toast.error(t("verificationError"))
       } finally {
         setIsValidating(false)

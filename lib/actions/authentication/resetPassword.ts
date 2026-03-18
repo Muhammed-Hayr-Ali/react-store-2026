@@ -23,13 +23,6 @@ export async function resetPassword(
   password: string
 ): Promise<ResetPasswordResult> {
   try {
-    console.log("🔍 [resetPassword] Starting password reset...")
-    console.log("🔑 [resetPassword] Token length:", token?.length)
-    console.log(
-      "🔑 [resetPassword] Token (first 20 chars):",
-      token?.substring(0, 20)
-    )
-
     const supabase = createAdminClient()
 
     // 1. التحقق الذري من الرمز واستهلاكه (Atomic Claim)
@@ -39,13 +32,7 @@ export async function resetPassword(
       { p_token: token?.trim() } // ✅ Trim any whitespace
     )
 
-    console.log("📊 [resetPassword] Claim Response:", {
-      claimData,
-      claimError,
-    })
-
     if (claimError || !claimData?.[0]?.is_valid) {
-      console.error("❌ [resetPassword] Token claim failed:", claimError)
       return {
         success: false,
         error: claimData?.[0]?.message || "رمز غير صالح أو منتهي الصلاحية",
@@ -53,7 +40,6 @@ export async function resetPassword(
     }
 
     const { user_id, email } = claimData[0]
-    console.log("✅ [resetPassword] Token claimed for user:", email)
 
     // 2. تحديث كلمة المرور في Supabase Auth
     const { error: updateError } = await supabase.auth.admin.updateUserById(
@@ -62,7 +48,6 @@ export async function resetPassword(
     )
 
     if (updateError) {
-      console.error("❌ [resetPassword] Error updating password:", updateError)
       return {
         success: false,
         error: "فشل تحديث كلمة المرور",
@@ -72,13 +57,10 @@ export async function resetPassword(
     // ✅ الرمز تم استهلاكه تلقائياً عبر claim_password_reset_token
     // لا حاجة لاستدعاء دالة منفصلة
 
-    console.log("✅ [resetPassword] Password reset successful for user:", email)
-
     return {
       success: true,
     }
   } catch (error) {
-    console.error("❌ [resetPassword] Password reset error:", error)
     return {
       success: false,
       error: "حدث خطأ غير متوقع",
@@ -99,33 +81,15 @@ export async function verifyResetToken(
   token: string
 ): Promise<{ isValid: boolean; email?: string; expiresAt?: string }> {
   try {
-    console.log("🔍 [verifyResetToken] Starting verification...")
-    console.log("🔑 [verifyResetToken] Token length:", token?.length)
-    console.log(
-      "🔑 [verifyResetToken] Token (first 20 chars):",
-      token?.substring(0, 20)
-    )
-
     const supabase = createAdminClient()
 
     const { data, error } = await supabase.rpc("verify_password_reset_token", {
       p_token: token?.trim(), // ✅ Trim any whitespace
     })
 
-    console.log("📊 [verifyResetToken] RPC Response:", {
-      data,
-      error,
-    })
-
     if (error || !data?.[0]?.is_valid) {
-      console.error("❌ [verifyResetToken] Token verification failed:", error)
       return { isValid: false }
     }
-
-    console.log(
-      "✅ [verifyResetToken] Token is valid for email:",
-      data[0].email
-    )
 
     return {
       isValid: true,
@@ -133,7 +97,6 @@ export async function verifyResetToken(
       expiresAt: data[0].expires_at,
     }
   } catch (error) {
-    console.error("❌ [verifyResetToken] Token verification error:", error)
     return { isValid: false }
   }
 }
