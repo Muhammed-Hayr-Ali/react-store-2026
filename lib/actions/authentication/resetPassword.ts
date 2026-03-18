@@ -39,7 +39,7 @@ export async function resetPassword(
       }
     }
 
-    const { user_id, email } = claimData[0]
+    const { user_id } = claimData[0]
 
     // 2. تحديث كلمة المرور في Supabase Auth
     const { error: updateError } = await supabase.auth.admin.updateUserById(

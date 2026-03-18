@@ -9,4 +9,5 @@ export const appRouter = {
   terms: "/terms",
   privacy: "/privacy",
   twoFactorSetup: "/two-factor/setup",
+  callback: "/callback",
 }

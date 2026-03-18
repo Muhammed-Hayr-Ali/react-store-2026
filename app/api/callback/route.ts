@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
         const cleanError = encodeURIComponent(
           exchangeError.message.split("#")[0]
         )
-        return NextResponse.redirect(`${origin}/auth-error?error=${cleanError}`)
+        return NextResponse.redirect(`${origin}/callback=${cleanError}`)
       }
 
       // ✅ ملاحظة: لا نحتاج هنا لاستدعاء getUser() إلا إذا أردنا استخدام بيانات المستخدم الآن
