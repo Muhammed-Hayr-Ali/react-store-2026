@@ -15,7 +15,7 @@ export default function ComingSoonPage() {
       {/* Animated Gradient Background */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div
-          className="animate-spin-slow absolute inset-[-50%]"
+          className="animate-spin-slow absolute inset-[-100%]"
           style={{
             background:
               "conic-gradient(from 0deg at 50% 50%, #FEE3D0, #D5E6FF, #FEE3D0)",
