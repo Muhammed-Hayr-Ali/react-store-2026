@@ -54,7 +54,7 @@ CREATE POLICY "password_reset_tokens_service_full_access"
 -- 5. HELPER FUNCTIONS (دوال مساعدة آمنة)
 
 -- دالة 1: إنشاء رمز إعادة تعيين كلمة مرور
--- تقوم تلقائياً بإلغاء أي رموز سابقة لنفس المستخدم لمنع التراكم
+-- تقوم تلقائياً بحذف أي رموز سابقة لنفس المستخدم لمنع التراكم
 CREATE OR REPLACE FUNCTION public.create_password_reset_token(
   p_user_id UUID,
   p_email TEXT,
@@ -68,27 +68,25 @@ DECLARE
 BEGIN
   -- 1. توليد رمز عشوائي آمن (64 حرف)
   v_token := encode(gen_random_bytes(32), 'hex');
-  
+
   -- 2. حساب وقت الانتهاء
   v_expires_at := NOW() + (p_expires_in_minutes || ' minutes')::INTERVAL;
-  
-  -- 3. (تحسين أمني) إبطال أي رموز نشطة سابقة لنفس المستخدم
+
+  -- 3. (تحسين أمني) حذف أي رموز نشطة سابقة لنفس المستخدم
   -- هذا يمنع وجود أكثر من رمز فعال في نفس الوقت ويقلل من هجمات التخمين
-  UPDATE public.password_reset_tokens
-  SET expires_at = NOW() - INTERVAL '1 second'
-  WHERE user_id = p_user_id 
-    AND used_at IS NULL 
-    AND expires_at > NOW();
-  
+  DELETE FROM public.password_reset_tokens
+  WHERE user_id = p_user_id
+    AND (used_at IS NULL AND expires_at > NOW());
+
   -- 4. إدخال الرمز الجديد
   INSERT INTO public.password_reset_tokens (user_id, email, token, expires_at, ip_address)
   VALUES (p_user_id, p_email, v_token, v_expires_at, p_ip_address);
-  
+
   RETURN v_token;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-COMMENT ON FUNCTION public.create_password_reset_token IS 'إنشاء رمز إعادة تعيين كلمة مرور جديد وإبطال الرموز القديمة';
+COMMENT ON FUNCTION public.create_password_reset_token IS 'إنشاء رمز إعادة تعيين كلمة مرور جديد وحذف الرموز القديمة';
 
 -- دالة 2: التحقق والاستخدام في خطوة واحدة (Atomic Claim)
 -- ✅ هذه الدالة هي الأكثر أماناً: تتحقق من الصلاحية وتعلم الرمز كمستخدم في نفس اللحظة
