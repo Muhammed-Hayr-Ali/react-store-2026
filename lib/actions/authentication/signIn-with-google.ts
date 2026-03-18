@@ -1,7 +1,7 @@
 import { createBrowserClient } from "@/lib/supabase/createBrowserClient";
 import { ApiResult } from "@/lib/types/common";
 
-export async function signInWithGoogle(locale: string): Promise<ApiResult> {
+export async function signInWithGoogle(): Promise<ApiResult> {
   
   const supabase = createBrowserClient();
 

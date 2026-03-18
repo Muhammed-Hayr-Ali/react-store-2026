@@ -1,6 +1,6 @@
 "use client"
 
-import { useLocale, useTranslations } from "next-intl"
+import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
@@ -40,7 +40,6 @@ export default function SignUpForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
-  const locale = useLocale()
   const t = useTranslations("Auth")
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
@@ -70,7 +69,7 @@ export default function SignUpForm({
   const handleGoogleSignIn = async () => {
     setIsLoading(true)
     try {
-      const result = await signInWithGoogle(locale)
+      const result = await signInWithGoogle()
       if (!result.success) {
         toast.error(result.error)
       }
@@ -90,8 +89,7 @@ export default function SignUpForm({
     router.push(appRouter.twoFactorSetup)
   }
 
-  
-   return (
+  return (
     <form
       className={cn("flex flex-col gap-8", className)}
       {...props}
