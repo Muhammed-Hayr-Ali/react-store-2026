@@ -101,23 +101,28 @@ RETURNS TABLE (
 DECLARE
   v_record RECORD;
 BEGIN
-  -- UPDATE ... RETURNING تضمن أن العملية ذرية (Atomic)
-  -- إذا نجح التحديث، فهذا يعني أن الرمز كان صالحاً وغير مستخدم، وتم استهلاكه الآن
-  UPDATE public.password_reset_tokens
+  -- ✅ استخدام UPDATE ... RETURNING مع اسم الجدول بشكل صريح
+  UPDATE public.password_reset_tokens prt
   SET used_at = NOW()
-  WHERE token = p_token
-    AND expires_at > NOW()
-    AND used_at IS NULL
+  WHERE prt.token = p_token
+    AND prt.expires_at > NOW()
+    AND prt.used_at IS NULL
   RETURNING * INTO v_record;
-  
+
   IF v_record IS NULL THEN
-    -- الرمز غير موجود، أو منتهي، أو تم استخدامه مسبقاً
-    RETURN QUERY SELECT false, NULL::UUID, NULL::TEXT, 'رمز غير صحيح أو منتهي أو مُستخدم مسبقاً';
+    RETURN QUERY SELECT 
+      false::BOOLEAN, 
+      NULL::UUID, 
+      NULL::TEXT, 
+      'رمز غير صحيح أو منتهي أو مُستخدم مسبقاً'::TEXT;
     RETURN;
   END IF;
-  
-  -- النجاح: تم استهلاك الرمز
-  RETURN QUERY SELECT true, v_record.user_id, v_record.email, 'تم قبول الرمز بنجاح';
+
+  RETURN QUERY SELECT 
+    true::BOOLEAN, 
+    v_record.user_id, 
+    v_record.email, 
+    'تم قبول الرمز بنجاح'::TEXT;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -136,18 +141,31 @@ RETURNS TABLE (
 DECLARE
   v_record RECORD;
 BEGIN
-  SELECT * INTO v_record
-  FROM public.password_reset_tokens
-  WHERE token = p_token
-    AND expires_at > NOW()
-    AND used_at IS NULL;
-  
+  -- ✅ استخدام اسم الجدول بشكل صريح لتجنب التضارب
+  SELECT prt.* INTO v_record
+  FROM public.password_reset_tokens prt
+  WHERE prt.token = p_token
+    AND prt.expires_at > NOW()
+    AND prt.used_at IS NULL;
+
   IF v_record IS NULL THEN
-    RETURN QUERY SELECT false, NULL::UUID, NULL::TEXT, NULL::TIMESTAMPTZ, 'رمز غير صحيح أو منتهي الصلاحية';
+    -- ✅ تحديد القيم بشكل صريح
+    RETURN QUERY SELECT 
+      false::BOOLEAN, 
+      NULL::UUID, 
+      NULL::TEXT, 
+      NULL::TIMESTAMPTZ, 
+      'رمز غير صحيح أو منتهي الصلاحية'::TEXT;
     RETURN;
   END IF;
-  
-  RETURN QUERY SELECT true, v_record.user_id, v_record.email, v_record.expires_at, 'رمز صالح';
+
+  -- ✅ استخدام أسماء الأعمدة من الجدول بشكل صريح
+  RETURN QUERY SELECT 
+    true::BOOLEAN, 
+    v_record.user_id, 
+    v_record.email, 
+    v_record.expires_at, 
+    'رمز صالح'::TEXT;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
