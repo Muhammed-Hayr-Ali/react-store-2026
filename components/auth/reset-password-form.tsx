@@ -54,16 +54,13 @@ function ResetPasswordFormContent() {
 
     const verifyToken = async () => {
       try {
-        console.log("🔍 Verifying token:", token.substring(0, 20) + "...")
         const result = await verifyResetToken(token)
-        console.log("✅ Token verification result:", result)
         setIsTokenValid(result.isValid)
 
         if (!result.isValid) {
           toast.error(t("invalidToken"))
         }
-      } catch (error) {
-        console.error("❌ Token verification error:", error)
+      } catch {
         toast.error(t("verificationError"))
       } finally {
         setIsValidating(false)
