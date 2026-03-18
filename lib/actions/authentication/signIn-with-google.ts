@@ -9,7 +9,7 @@ export async function signInWithGoogle(): Promise<ApiResult> {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${appUrl}/a`,
+      redirectTo: `${appUrl}/callback`,
       queryParams: {
         access_type: "offline",
         prompt: "consent",
