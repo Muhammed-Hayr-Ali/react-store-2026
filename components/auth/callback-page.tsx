@@ -1,12 +1,11 @@
 "use client"
 
-import { useSearchParams, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
-import { AppLogo } from "@/components/shared/app-logo"
 import { appRouter } from "@/lib/config/app_router"
-import { AlertCircle, CheckCircle } from "lucide-react"
-import { Suspense } from "react"
+import { useEffect, useState } from "react"
+import { Lock } from "lucide-react"
 
 import {
   AlertDialog,
@@ -19,170 +18,169 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { createBrowserClient } from "@/lib/supabase/createBrowserClient"
 
-function CallbackContent() {
-  const searchParams = useSearchParams()
+export default function CallbackPage() {
+  const t = useTranslations("callback")
   const router = useRouter()
-  const t = useTranslations("Auth")
+  const [isLoading, setIsLoading] = useState(true)
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
 
-  // قراءة الخطأ أو النجاح من URL مباشرة دون useEffect
-  const urlError = searchParams.get("error")
-  const errorCode = searchParams.get("code")
-  const success = searchParams.get("success")
+  useEffect(() => {
+    const supabase = createBrowserClient()
+    let isMounted = true
 
-  const isSuccess = success === "true"
-  const error = urlError ? urlError.split("#")[0] : ""
+    const handleCallback = async () => {
+      try {
+        // أولاً: نحاول الحصول على الجلسة (مهم لـ OAuth callback)
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession()
 
-  // ترجمة رسائل الخطأ الشائعة
-  const getErrorMessage = () => {
-    switch (error) {
-      case "access_denied":
-        return t("accessDenied") || "تم رفض الوصول"
-      case "token_exchange_failed":
-        return t("tokenExchangeFailed") || "فشل تبادل الرمز"
-      case "unexpected_error":
-        return t("unexpectedError") || "حدث خطأ غير متوقع"
-      case "no_code":
-        return t("noCode") || "لم يتم استلام رمز المصادقة"
-      default:
-        return t("authError") || "حدث خطأ في المصادقة"
+        if (sessionError) {
+          console.error("Session error:", sessionError.message)
+          if (isMounted) {
+            setIsLoading(false)
+            setIsSuccess(false)
+          }
+          return
+        }
+
+        // إذا وجدت جلسة، نحصل على المستخدم
+        if (session) {
+          const {
+            data: { user },
+            error: userError,
+          } = await supabase.auth.getUser()
+
+          if (userError || !user) {
+            console.error("User error:", userError?.message)
+            if (isMounted) {
+              setIsLoading(false)
+              setIsSuccess(false)
+            }
+            return
+          }
+
+          if (isMounted) {
+            setIsLoading(false)
+            setIsSuccess(true)
+            // تأخير قبل إظهار نافذة النجاح
+            setTimeout(() => {
+              if (isMounted) {
+                setShowSuccessDialog(true)
+              }
+            }, 1000)
+          }
+        } else {
+          // لا توجد جلسة
+          if (isMounted) {
+            setIsLoading(false)
+            setIsSuccess(false)
+          }
+        }
+      } catch (error) {
+        console.error("Callback error:", error)
+        if (isMounted) {
+          setIsLoading(false)
+          setIsSuccess(false)
+        }
+      }
     }
-  }
+
+    handleCallback()
+
+    // cleanup function لمنع تحديث الحالة بعد unmount
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   const handleClose = () => {
+    setShowSuccessDialog(false)
     router.push(appRouter.home)
   }
 
   const handleTwoFactorSetup = () => {
+    setShowSuccessDialog(false)
     router.push(appRouter.twoFactorSetup)
   }
 
-  // حالة النجاح - عرض الدايلوج
-  if (isSuccess) {
+  if (isLoading) {
     return (
-      <>
-        <div className="flex min-h-screen w-full flex-col items-center justify-center gap-8 bg-background px-4 py-8 text-center">
-          <AppLogo size="lg" />
-
-          <div className="mx-auto max-w-md space-y-6">
-            <div className="space-y-2">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
-                <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
-              </div>
-
-              <h1 className="pt-4 text-2xl font-bold tracking-tight">
-                {t("accountCreatedSuccess") || "تم إنشاء الحساب بنجاح"}
-              </h1>
-
-              <p className="text-muted-foreground">
-                {t("twoFactorSetupDesc") ||
-                  "هل تريد تفعيل المصادقة الثنائية الآن؟"}
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-3">
-              <Button onClick={handleTwoFactorSetup}>
-                {t("enableTwoFactor") || "تفعيل المصادقة الثنائية"}
-              </Button>
-
-              <Button variant="outline" onClick={handleClose}>
-                {t("continueToHome") || "المتابعة إلى الرئيسية"}
-              </Button>
-            </div>
-          </div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <h1 className="text-2xl font-bold">{t("loading")}</h1>
+          <p className="mt-2 text-muted-foreground">{t("processingSignIn")}</p>
         </div>
-
-        {/* Success Dialog */}
-        <AlertDialog open>
-          <AlertDialogContent size="sm" className="min-w-96 space-y-4">
-            <AlertDialogHeader>
-              <AlertDialogMedia className="size-16 rounded-full">
-                <svg
-                  className="size-10 text-green-600 dark:text-green-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </AlertDialogMedia>
-              <AlertDialogTitle>{t("accountCreatedSuccess")}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {t("twoFactorSetupDesc")}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={handleClose}>
-                {t("continueToHome")}
-              </AlertDialogCancel>
-              <AlertDialogAction onClick={handleTwoFactorSetup}>
-                {t("enableTwoFactor")}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </>
+      </div>
     )
   }
 
-  // حالة الخطأ
-  return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-center gap-8 bg-background px-4 py-8 text-center">
-      <AppLogo size="lg" />
-
-      <div className="mx-auto max-w-md space-y-6">
+  if (!isSuccess) {
+    return (
+      <div className="space-y-6 text-center">
         <div className="space-y-2">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
-            <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+            <Lock className="h-8 w-8 text-red-600 dark:text-red-400" />
           </div>
-
-          <h1 className="pt-4 text-2xl font-bold tracking-tight">
-            {t("authErrorTitle") || "خطأ في المصادقة"}
-          </h1>
-
-          <p className="text-muted-foreground">{getErrorMessage()}</p>
+          <h2 className="text-2xl font-semibold">{t("signInFailedTitle")}</h2>
+          <p className="text-muted-foreground">
+            {t("signInFailedDescription")}
+          </p>
         </div>
 
-        <div className="flex flex-col gap-3">
-          <Button onClick={() => (window.location.href = appRouter.signIn)}>
-            {t("backToSignIn") || "العودة إلى تسجيل الدخول"}
-          </Button>
-
-          <Button
-            variant="outline"
-            onClick={() => (window.location.href = appRouter.home)}
-          >
-            {t("goToHome") || "العودة إلى الصفحة الرئيسية"}
-          </Button>
-        </div>
-
-        {error && (
-          <div className="mt-4 rounded-md bg-muted p-3 text-xs text-muted-foreground">
-            <code>{error}</code>
-          </div>
-        )}
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() => router.push(appRouter.signIn)}
+        >
+          {t("tryAgain")}
+        </Button>
       </div>
-    </div>
-  )
-}
+    )
+  }
 
-export default function CallbackPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold">Loading...</h1>
-          </div>
-        </div>
-      }
-    >
-      <CallbackContent />
-    </Suspense>
+    <>
+      {/* Success Dialog */}
+
+      <AlertDialog open={showSuccessDialog}>
+        <AlertDialogContent size="sm" className="min-w-96 space-y-4">
+          <AlertDialogHeader>
+            <AlertDialogMedia className="size-16 rounded-full">
+              <svg
+                className="size-10 text-green-600 dark:text-green-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </AlertDialogMedia>
+            <AlertDialogTitle>{t("accountCreatedSuccess")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("twoFactorSetupDesc")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleClose}>
+              {t("continueToHome")}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleTwoFactorSetup}>
+              {t("enableTwoFactor")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

@@ -157,5 +157,16 @@
     "verifyFailed": "رمز غير صالح. يرجى المحاولة مرة أخرى",
     "verifySuccess": "تم التحقق بنجاح!",
     "enterCodeError": "يرجى إدخال رمز التحقق"
+  },
+  "callback": {
+    "loading": "جاري التحميل...",
+    "processingSignIn": "جاري معالجة تسجيل الدخول",
+    "signInFailedTitle": "فشل تسجيل الدخول",
+    "signInFailedDescription": "تعذر تسجيل الدخول باستخدام جوجل. يرجى المحاولة مرة أخرى.",
+    "tryAgain": "إعادة المحاولة",
+    "accountCreatedSuccess": "🎉 تم إنشاء الحساب بنجاح!",
+    "twoFactorSetupDesc": "هل ترغب بتفعيل المصادقة الثنائية لزيادة الأمان؟",
+    "continueToHome": "المتابعة للرئيسية",
+    "enableTwoFactor": "تفعيل المصادقة الثنائية"
   }
 }
