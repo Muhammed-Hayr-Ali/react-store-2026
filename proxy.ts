@@ -38,7 +38,7 @@ export default createMiddleware({
   localeDetection: false,
 })
 
-// Next.js Configuration
+// Next.js Configuration for Middleware
 export const config = {
   /**
    * Matcher for middleware execution
