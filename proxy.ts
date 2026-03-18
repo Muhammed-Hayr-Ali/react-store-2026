@@ -23,18 +23,10 @@ import { siteConfig } from "./lib/config/site_config"
  * - Content is served in Arabic
  */
 export default createMiddleware({
-  // All supported locales
   locales: siteConfig.locales,
-
-  // Default locale when no locale is detected
   defaultLocale: siteConfig.defaultLocale,
-
-  // IMPORTANT: "never" hides locale from URL
-  // Options: "as-needed" | "always" | "never"
   localePrefix: "never",
-
-  // Enable locale detection from cookie and Accept-Language header
-  localeDetection: false,
+  localeDetection: true,
 })
 
 // Next.js Configuration for Middleware

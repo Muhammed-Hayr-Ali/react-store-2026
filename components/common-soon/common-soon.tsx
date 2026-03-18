@@ -15,7 +15,7 @@ export default function ComingSoonPage() {
       {/* Animated Gradient Background */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div
-          className="animate-spin-slow absolute inset-[-100%]"
+          className="animate-spin-slow absolute -inset-full"
           style={{
             background:
               "conic-gradient(from 0deg at 50% 50%, #FEE3D0, #D5E6FF, #FEE3D0)",
@@ -23,12 +23,12 @@ export default function ComingSoonPage() {
         />
       </div>
 
-      <div className="absolute top-4 right-4 space-x-2">
+      {/* <div className="absolute top-4 right-4 space-x-2">
         <LocaleSwitcher />
         <ThemeToggle />
-      </div>
+      </div> */}
       <div className="flex flex-col items-center gap-6">
-        <Badge variant="secondary" className="px-3">
+        <Badge variant="secondary" className="px-3 bg-background/50">
           {t("titlePart1")}
         </Badge>
 
