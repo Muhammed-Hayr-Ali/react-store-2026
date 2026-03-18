@@ -13,13 +13,7 @@ export default function ComingSoonPage() {
   return (
     <div className="relative flex h-screen w-full flex-col items-center justify-center gap-8 overflow-hidden px-4 py-8 text-center">
       {/* Animated Gradient Background */}
-      <div
-        className="animate-spin-slow absolute inset-0 -z-10"
-        style={{
-          background:
-            "conic-gradient(from 0deg at 50% 50%, #FEE3D0, #D5E6FF, #FEE3D0)",
-        }}
-      />
+      <div className="animate-gradient-rotate absolute inset-0 -z-10" />
 
       <div className="absolute top-4 right-4 space-x-2">
         <LocaleSwitcher />
