@@ -20,15 +20,8 @@ function ResetPasswordFormContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  // ✅ تصحيح قراءة التوكن - استخدام useMemo لتجنب إعادة الحساب
-  const [token, setToken] = useState<string | null>(null)
-
-  useEffect(() => {
-    const t = searchParams.get("token")
-    if (t) {
-      setToken(t)
-    }
-  }, [searchParams])
+  // قراءة التوكن مباشرة من searchParams
+  const token = searchParams.get("token")
 
   const [isPending, startTransition] = useTransition()
   const [isValidating, setIsValidating] = useState(true)
@@ -46,21 +39,38 @@ function ResetPasswordFormContent() {
 
   // التحقق من الرمز عند تحميل الصفحة
   useEffect(() => {
+    console.log(
+      "🔍 [ResetPasswordForm] Token from URL:",
+      token ? token.substring(0, 20) + "..." : "null"
+    )
+
     if (!token) {
+      console.log("❌ [ResetPasswordForm] No token found")
       setIsValidating(false)
+      setIsTokenValid(false)
       toast.error(t("missingToken"))
       return
     }
 
     const verifyToken = async () => {
       try {
+        console.log("🔍 [ResetPasswordForm] Starting verification...")
         const result = await verifyResetToken(token)
+        console.log("✅ [ResetPasswordForm] Verification result:", result)
+
         setIsTokenValid(result.isValid)
 
         if (!result.isValid) {
+          console.log("❌ [ResetPasswordForm] Token is invalid")
           toast.error(t("invalidToken"))
+        } else {
+          console.log(
+            "✅ [ResetPasswordForm] Token is valid for:",
+            result.email
+          )
         }
-      } catch {
+      } catch (error) {
+        console.error("❌ [ResetPasswordForm] Verification error:", error)
         toast.error(t("verificationError"))
       } finally {
         setIsValidating(false)
