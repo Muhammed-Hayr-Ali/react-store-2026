@@ -1,6 +1,6 @@
 "use server"
 
-import { createAdminClient } from "@/lib/supabase/createAdminClient"
+import { createAdminClient } from "@/lib/supabase/createAdminClient "
 import { ApiResult } from "@/lib/types/common"
 
 // ===============================================================================
