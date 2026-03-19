@@ -1,7 +1,5 @@
 import ComingSoonPage from "@/components/common-soon/common-soon"
 import Header from "@/components/layout/header"
-import Navbar from "@/components/layout/navbar"
-import { AppLogo } from "@/components/shared/app-logo"
 import { createMetadata } from "@/lib/config/metadata_generator"
 
 export const metadata = createMetadata({
@@ -14,10 +12,7 @@ export const metadata = createMetadata({
 export default function Page() {
   return (
     <>
-      <Header>
-        <AppLogo />
-        <Navbar />
-      </Header>
+      <Header/>
       <ComingSoonPage />
     </>
   )

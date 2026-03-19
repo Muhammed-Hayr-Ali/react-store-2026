@@ -1,5 +1,5 @@
 "use client"
-import * as React from "react"
+
 import { useLocale } from "next-intl"
 import { redirect, usePathname } from "next/navigation"
 import { Languages } from "lucide-react"
