@@ -1,3 +1,5 @@
+import { Book, Heart, Home, LayoutDashboard, LifeBuoy, Package, ShoppingCart, Ticket } from "lucide-react";
+
 export const siteConfig = {
   name: "Marketna",
   description: `Marketna: Your smart destination for everyday essentials where quality, variety, and speed come together.`,
@@ -25,6 +27,17 @@ export const siteConfig = {
   defaultLocale: "en",
   locales: ["en", "ar"],
 
+  lsnguages: [
+    {
+      name: "English",
+      value: "en",
+    },
+    {
+      name: "عربي",
+      value: "ar",
+    },
+  ],
+
   targetCurrencies: ["SYP", "SAR", "EGP", "TRY", "EUR", "AED"],
 
   supportedCurrencies: [
@@ -33,5 +46,48 @@ export const siteConfig = {
     { code: "SAR", symbol: "ر.س", name: "Saudi Riyal" },
     { code: "EGP", symbol: "ج.م", name: "Egyptian Pound" },
     { code: "AED", symbol: "د.إ", name: "UAE Dirham" },
+  ],
+
+  userMenuItems: [
+    { icon: Home, label: "Home", href: "" },
+    { icon: ShoppingCart, label: "Cart", href: "/cart" },
+    { icon: Heart, label: "Wishlist", href: "/wishlist" },
+    { icon: Package, label: "Orders", href: "/dashboard/orders" },
+    { icon: Ticket, label: "My Coupons", href: "coupons" },
+    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+    { icon: LifeBuoy, label: "Help & Support", href: "/support" },
+    { icon: Book, label: "Documentation", href: "docs" },
+  ],
+
+  guestMenuItems: [
+    { icon: Home, label: "Home", href: "/" },
+    { icon: LifeBuoy, label: "Help & Support", href: "/support" },
+    { icon: Book, label: "Documentation", href: "/docs" },
+  ],
+
+  quickLinks: [
+    { label: "home", href: "/" },
+    { label: "products", href: "store" },
+    { label: "about", href: "about" },
+    { label: "contact", href: "contact" },
+  ],
+
+  supportLinks: [
+    {
+      label: "shipping",
+      href: "/shipping",
+    },
+    {
+      label: "returns",
+      href: "/returns",
+    },
+    {
+      label: "faq",
+      href: "/faq",
+    },
+    {
+      label: "privacy",
+      href: "/privacy",
+    },
   ],
 }

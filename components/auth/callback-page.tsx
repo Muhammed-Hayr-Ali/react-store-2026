@@ -102,7 +102,7 @@ export default function CallbackPage() {
     return () => {
       isMounted = false
     }
-  }, [])
+  })
 
   const handleClose = () => {
     setShowSuccessDialog(false)
