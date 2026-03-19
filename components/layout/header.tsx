@@ -3,7 +3,7 @@
 import * as React from "react"
 import { AppLogo } from "@/components/shared/app-logo"
 import { UserIcon } from "@/components/shared/icons"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "../ui/button"
 import MenuButton from "../shared/menu_button"
 import {
@@ -16,6 +16,7 @@ import {
 import { useAuth } from "@/hooks/useAuth"
 import { siteConfig } from "@/lib/config/site_config"
 import Link from "next/link"
+import { appRouter } from "@/lib/config/app_router"
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
@@ -40,11 +41,28 @@ export default function Header() {
             Search
           </Button>
           <nav className="flex grow-3 items-center justify-end">
-            <Avatar size="default" className="hidden lg:block">
-              <AvatarFallback>
-                <UserIcon className="size-5" />
-              </AvatarFallback>
-            </Avatar>
+            <div className="hidden lg:block">
+              {user ? (
+                <Avatar>
+                  <AvatarImage
+                    src={profile?.avatar_url || ""}
+                    alt={profile?.full_name || ""}
+                    className="grayscale"
+                  />
+                  <AvatarFallback>
+                    <UserIcon className="size-5" />
+                  </AvatarFallback>
+                </Avatar>
+              ) : (
+                <Link href={appRouter.signIn}>
+                  <Avatar size="default">
+                    <AvatarFallback>
+                      <UserIcon className="size-5" />
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
+              )}
+            </div>
             <MenuButton
               isOpen={isMenuOpen}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -95,10 +113,10 @@ export default function Header() {
           ) : (
             <div className="flex gap-2">
               <Button className="flex-1" asChild>
-                <Link href="/auth/login">Sign In</Link>
+                <Link href={appRouter.signIn}>Sign In</Link>
               </Button>
               <Button variant="outline" className="flex-1" asChild>
-                <Link href="/auth/signup">Create Account</Link>
+                <Link href={appRouter.signUp}>Create Account</Link>
               </Button>
             </div>
           )}

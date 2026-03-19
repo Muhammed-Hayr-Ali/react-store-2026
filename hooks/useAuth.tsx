@@ -75,26 +75,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        console.log("[useAuth] Initializing auth...")
+
         // 1. التحقق من صحة المستخدم مباشرة مع Supabase Auth Server
         const {
           data: { user: authenticatedUser },
           error: userError,
         } = await supabase.auth.getUser()
 
+        console.log("[useAuth] getUser result:", {
+          authenticatedUser: authenticatedUser?.id,
+          error: userError,
+        })
+
         if (userError || !authenticatedUser) {
           // لا يوجد مستخدم مصادق عليه
+          console.log("[useAuth] No authenticated user")
           setStatus("unauthenticated")
           return
         }
 
         setUser(authenticatedUser)
+        console.log("[useAuth] User set:", authenticatedUser.id)
 
         if (!isProfileFetchingRef.current) {
           isProfileFetchingRef.current = true
           try {
+            console.log("[useAuth] Fetching profile for:", authenticatedUser.id)
             const profileData = await fetchProfileWithRetry(
               authenticatedUser.id
             )
+            console.log("[useAuth] Profile fetched:", profileData)
             setProfile(profileData)
           } finally {
             isProfileFetchingRef.current = false
@@ -102,8 +113,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         setStatus("authenticated")
+        console.log("[useAuth] Auth initialized successfully")
       } catch (error) {
-        console.error("Error initializing auth:", error)
+        console.error("[useAuth] Error initializing auth:", error)
         setStatus("unauthenticated")
       } finally {
         setStatus((prev) => (prev === "loading" ? "unauthenticated" : prev))
