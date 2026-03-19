@@ -74,11 +74,24 @@ export default function Header() {
 
       <MobileMenu isOpen={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <MobileMenuHeader className="flex items-center gap-3">
-          <Avatar className="h-12 w-12">
-            <AvatarFallback>
-              <UserIcon className="size-5" />
-            </AvatarFallback>
-          </Avatar>
+          {user ? (
+            <Avatar>
+              <AvatarImage
+                src={profile?.avatar_url || ""}
+                alt={profile?.full_name || ""}
+                className="grayscale"
+              />
+              <AvatarFallback>
+                <UserIcon className="size-5" />
+              </AvatarFallback>
+            </Avatar>
+          ) : (
+            <Avatar size="default">
+              <AvatarFallback>
+                <UserIcon className="size-5" />
+              </AvatarFallback>
+            </Avatar>
+          )}
           <div className="flex flex-col">
             <span className="text-base leading-none font-semibold">
               {profile?.full_name || "Guest"}
