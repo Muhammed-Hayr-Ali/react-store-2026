@@ -1,6 +1,6 @@
 "use client"
 
-import { redirect, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { appRouter } from "@/lib/config/app_router"
@@ -33,12 +33,14 @@ export default function CallbackPage() {
 
     const handleCallback = async () => {
       try {
-        // أولاً: نحاول الحصول على الجلسة (مهم لـ OAuth callback)
-        const { data: user, error: sessionError } =
-          await supabase.auth.getUser()
+        // أولاً: نحصل على بيانات المستخدم مباشرة (مهم لـ OAuth callback)
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser()
 
-        if (sessionError) {
-          console.error("Session error:", sessionError.message)
+        if (userError || !user) {
+          console.error("User error:", userError?.message)
           if (isMounted) {
             setIsLoading(false)
             setIsSuccess(false)
@@ -46,57 +48,42 @@ export default function CallbackPage() {
           return
         }
 
-        // إذا وجدت جلسة، نحصل على المستخدم
-        if (user) {
-          const {
-            data: { user },
-            error: userError,
-          } = await supabase.auth.getUser()
+        // المستخدم موجود - نجاح
+        if (isMounted) {
+          setIsLoading(false)
+          setIsSuccess(true)
 
-          if (userError || !user) {
-            console.error("User error:", userError?.message)
-            if (isMounted) {
-              setIsLoading(false)
-              setIsSuccess(false)
-            }
-            return
-          }
+          // التحقق من مستوى MFA
+          const { data: aalData, error: aalError } =
+            await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
 
-          if (isMounted) {
-            setIsLoading(false)
-            setIsSuccess(true)
-
-            // Get the MFA assurance level
-            const { data: aalData, error: aalError } =
-              await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
-
-            // Check for errors
-            if (aalError) {
-              console.error("AalGuard Error:", aalError)
-              return null
-            }
-
-            // Check if MFA is needed
-            const needsMfaVerification =
-              aalData.currentLevel === "aal1" && aalData.nextLevel === "aal2"
-
-            // Redirect to MFA verification page
-            if (needsMfaVerification) {
-              return redirect(appRouter.verify)
-            }
-
+          if (aalError) {
+            console.error("AAL Error:", aalError)
+            // في حالة الخطأ، نظهر الحوار مباشرة
             setTimeout(() => {
               if (isMounted) {
                 setShowSuccessDialog(true)
               }
             }, 1000)
+            return
           }
-        } else {
-          // لا توجد جلسة
-          if (isMounted) {
-            setIsLoading(false)
-            setIsSuccess(false)
+
+          // التحقق مما إذا كان يحتاج MFA
+          const needsMfaVerification =
+            aalData.currentLevel === "aal1" && aalData.nextLevel === "aal2"
+
+          // إذا كان يحتاج MFA، نوجه لصفحة التحقق
+          if (needsMfaVerification) {
+            router.push(appRouter.verify)
+            return
           }
+
+          // إذا لا يحتاج MFA، نظهر الحوار
+          setTimeout(() => {
+            if (isMounted) {
+              setShowSuccessDialog(true)
+            }
+          }, 1000)
         }
       } catch (error) {
         console.error("Callback error:", error)
@@ -113,7 +100,7 @@ export default function CallbackPage() {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [ ])
 
   const handleClose = () => {
     setShowSuccessDialog(false)
