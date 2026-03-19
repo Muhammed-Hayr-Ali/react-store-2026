@@ -66,7 +66,7 @@ export default function Header() {
           <nav className="flex grow-3 items-center justify-end gap-2">
             <div className="hidden items-center lg:flex">
               <Avatar className="size-10">
-                {user && profile?.avatar_url ? (
+                {user !== null && profile?.avatar_url ? (
                   <>
                     <AvatarImage
                       src={profile.avatar_url}
@@ -95,7 +95,7 @@ export default function Header() {
       <MobileMenu isOpen={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <MobileMenuHeader className="flex items-center gap-3">
           <Avatar className="size-10">
-            {user && profile?.avatar_url ? (
+            {user !== null && profile?.avatar_url ? (
               <>
                 <AvatarImage
                   src={profile.avatar_url}
