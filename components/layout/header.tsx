@@ -17,14 +17,17 @@ import { useAuth } from "@/hooks/useAuth"
 import { siteConfig } from "@/lib/config/site_config"
 import Link from "next/link"
 import { appRouter } from "@/lib/config/app_router"
+import { Profile } from "@/lib/types/profile"
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
-  const { profile, user, signOut } = useAuth()
+  const { profile: initialProfile, user, signOut } = useAuth()
+  const [profile, setProfile] = React.useState<Profile | null>(initialProfile)
   const menuItems = user ? siteConfig.userMenuItems : siteConfig.guestMenuItems
 
   const handleLogout = async () => {
     await signOut()
+    setProfile(null)
   }
 
   return (
@@ -62,25 +65,23 @@ export default function Header() {
           {/* User Avatar / Menu - Right */}
           <nav className="flex grow-3 items-center justify-end gap-2">
             <div className="hidden items-center lg:flex">
-              {user ? (
-                <Avatar className="size-8">
-                  <AvatarImage
-                    src={profile?.avatar_url || ""}
-                    alt={profile?.full_name || ""}
-                  />
-                  <AvatarFallback className="p-1.5">
-                    <UserBoldIcon className="size-max text-foreground" />
-                  </AvatarFallback>
-                </Avatar>
-              ) : (
-                <Link href={appRouter.signIn}>
-                  <Avatar className="size-8">
+              <Avatar className="size-10">
+                {user ? (
+                  <>
+                    <AvatarImage
+                      src={profile?.avatar_url || ""}
+                      alt={profile?.full_name || ""}
+                    />
                     <AvatarFallback className="p-1.5">
                       <UserBoldIcon className="size-max text-foreground" />
                     </AvatarFallback>
-                  </Avatar>
-                </Link>
-              )}
+                  </>
+                ) : (
+                  <AvatarFallback className="p-1.5">
+                    <UserBoldIcon className="size-max text-foreground" />
+                  </AvatarFallback>
+                )}
+              </Avatar>
             </div>
             <MenuButton
               isOpen={isMenuOpen}
@@ -93,23 +94,24 @@ export default function Header() {
 
       <MobileMenu isOpen={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <MobileMenuHeader className="flex items-center gap-3">
-          {user ? (
-            <Avatar className="size-10">
-              <AvatarImage
-                src={profile?.avatar_url || ""}
-                alt={profile?.full_name || ""}
-              />
+          <Avatar className="size-10">
+            {user ? (
+              <>
+                <AvatarImage
+                  src={profile?.avatar_url || ""}
+                  alt={profile?.full_name || ""}
+                />
+                <AvatarFallback className="p-1.5">
+                  <UserBoldIcon className="size-max text-foreground" />
+                </AvatarFallback>
+              </>
+            ) : (
               <AvatarFallback className="p-1.5">
                 <UserBoldIcon className="size-max text-foreground" />
               </AvatarFallback>
-            </Avatar>
-          ) : (
-            <Avatar className="size-10">
-              <AvatarFallback className="p-1.5">
-                <UserBoldIcon className="size-max text-foreground" />
-              </AvatarFallback>
-            </Avatar>
-          )}
+            )}
+          </Avatar>
+
           <div className="flex flex-col">
             <span className="text-base leading-none font-semibold">
               {profile?.full_name || "Guest"}

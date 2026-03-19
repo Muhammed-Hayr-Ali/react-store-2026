@@ -164,7 +164,7 @@
     "signInFailedTitle": "فشل تسجيل الدخول",
     "signInFailedDescription": "تعذر تسجيل الدخول باستخدام جوجل. يرجى المحاولة مرة أخرى.",
     "tryAgain": "إعادة المحاولة",
-    "signInSuccess": "✅ تم تسجيل الدخول بنجاح!",
+    "signInSuccess": "تم تسجيل الدخول بنجاح!",
     "signInSuccessDesc": "هل ترغب بتفعيل المصادقة الثنائية لزيادة الأمان؟",
     "continueToHome": "المتابعة للرئيسية",
     "enableTwoFactor": "تفعيل المصادقة الثنائية"
