@@ -4,15 +4,15 @@ import * as React from "react"
 import { AppLogo } from "@/components/shared/app-logo"
 import { UserIcon } from "@/components/shared/icons"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "../ui/button"
-import MenuButton from "../shared/menu_button"
+import { Button } from "@/components/ui/button"
+import MenuButton from "@/components/shared/menu_button"
 import {
   MobileMenu,
   MobileMenuHeader,
   MobileMenuBody,
   MobileMenuFooter,
   MobileMenuItem,
-} from "../ui/mobile-menu"
+} from "@/components/ui/mobile-menu"
 import { useAuth } from "@/hooks/useAuth"
 import { siteConfig } from "@/lib/config/site_config"
 import Link from "next/link"
@@ -29,35 +29,54 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg">
-        <div className="container mx-auto flex h-14 items-center justify-between px-4 lg:px-0">
-          <div className="grow-3">
-            <AppLogo size="sm" />
+      <header className="fixed top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+        <div className="container mx-auto flex h-12 items-center gap-4 px-4">
+          {/* Logo - Left */}
+          <div className="flex grow-3 items-center justify-start">
+            <AppLogo />
           </div>
-          <Button
-            variant={"secondary"}
-            className="grow-7 text-sm text-muted-foreground"
-          >
-            Search
-          </Button>
-          <nav className="flex grow-3 items-center justify-end">
-            <div className="hidden lg:block">
+
+          {/* Search - Center (macOS Spotlight style) */}
+          <div className="flex grow-7 items-center justify-center">
+            <Button
+              variant="secondary"
+              className="h-8 w-full max-w-md gap-2 rounded-full bg-background px-3 text-sm text-muted-foreground shadow-none hover:bg-background/80"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-4"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+              <span>Search</span>
+            </Button>
+          </div>
+
+          {/* User Avatar / Menu - Right */}
+          <nav className="flex grow-3 items-center justify-end gap-2">
+            <div className="hidden items-center lg:flex">
               {user ? (
-                <Avatar>
+                <Avatar className="size-8">
                   <AvatarImage
                     src={profile?.avatar_url || ""}
                     alt={profile?.full_name || ""}
-                    className="grayscale"
                   />
                   <AvatarFallback>
-                    <UserIcon className="size-5" />
+                    <UserIcon className="size-4" />
                   </AvatarFallback>
                 </Avatar>
               ) : (
                 <Link href={appRouter.signIn}>
-                  <Avatar size="default">
+                  <Avatar className="size-8">
                     <AvatarFallback>
-                      <UserIcon className="size-5" />
+                      <UserIcon className="size-4" />
                     </AvatarFallback>
                   </Avatar>
                 </Link>
@@ -79,7 +98,6 @@ export default function Header() {
               <AvatarImage
                 src={profile?.avatar_url || ""}
                 alt={profile?.full_name || ""}
-                className="grayscale"
               />
               <AvatarFallback>
                 <UserIcon className="size-5" />

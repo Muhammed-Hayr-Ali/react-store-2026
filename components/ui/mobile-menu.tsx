@@ -26,7 +26,7 @@ const MobileMenu = ({ isOpen, onOpenChange, children }: MobileMenuProps) => {
   return (
     <div
       className={cn(
-        "fixed inset-0 top-14 z-50 transition-opacity duration-300 md:hidden",
+        "fixed inset-0 top-12 z-50 transition-opacity duration-300 md:hidden",
         isOpen
           ? "pointer-events-auto opacity-100"
           : "pointer-events-none opacity-0"

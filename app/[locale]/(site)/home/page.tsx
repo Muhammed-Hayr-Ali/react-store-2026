@@ -13,7 +13,9 @@ export default function Page() {
   return (
     <>
       <Header />
-      <ComingSoonPage />
+      <div className="pt-12">
+        <ComingSoonPage />
+      </div>
     </>
   )
 }

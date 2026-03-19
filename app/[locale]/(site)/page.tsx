@@ -1,6 +1,5 @@
 import ComingSoonPage from "@/components/common-soon/common-soon"
 import Header from "@/components/layout/header"
-import { AuthDebug } from "@/components/debug/auth-debug"
 import { createMetadata } from "@/lib/config/metadata_generator"
 
 export const metadata = createMetadata({
@@ -15,7 +14,6 @@ export default function Page() {
     <>
       <Header />
       <ComingSoonPage />
-      <AuthDebug />
     </>
   )
 }

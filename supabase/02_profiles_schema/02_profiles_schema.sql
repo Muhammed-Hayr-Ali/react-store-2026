@@ -1,10 +1,45 @@
 -- =====================================================
--- Marketna E-Commerce - Profiles Schema
+-- Marketna E-Commerce - Complete Profiles Schema
 -- File: 02_profiles_schema.sql
--- Dependencies: 01_roles_permissions_system.sql
+-- Version: 3.0 - All-in-One Schema
+-- Date: 2026-03-19
+-- Description: ملف شامل لإنشاء وتحديث جدول البروفايل بالكامل
+-- =====================================================
+-- تعليمات:
+-- 1. افتح Supabase Dashboard
+-- 2. اذهب إلى SQL Editor
+-- 3. انسخ هذا الملف بالكامل
+-- 4. الصق وشغّل (Run)
 -- =====================================================
 
--- 1. أنواع البيانات (ENUMS)
+-- =====================================================
+-- PART 1: MIGRATION - Add Provider Column
+-- =====================================================
+
+-- إضافة عمود provider إذا لم يكن موجوداً
+ALTER TABLE public.profiles
+ADD COLUMN IF NOT EXISTS provider TEXT DEFAULT 'email';
+
+-- إضافة تعليق على العمود
+COMMENT ON COLUMN public.profiles.provider IS 'مزود المصادقة: email, google, facebook, github, apple, etc.';
+
+-- إنشاء فهرس على عمود provider
+CREATE INDEX IF NOT EXISTS idx_profiles_provider ON public.profiles(provider);
+
+-- تحديث السجلات الموجودة لاستخراج provider من auth.users
+UPDATE public.profiles p
+SET provider = COALESCE(
+  (SELECT au.raw_app_meta_data->>'provider'
+   FROM auth.users au
+   WHERE au.id = p.id),
+  'email'
+)
+WHERE p.provider = 'email';
+
+-- =====================================================
+-- PART 2: TYPES (ENUMS)
+-- =====================================================
+
 DO $$ BEGIN
   -- النوع الاجتماعي
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'gender') THEN
@@ -12,7 +47,10 @@ DO $$ BEGIN
   END IF;
 END $$;
 
--- 2. جدول الملفات الشخصية
+-- =====================================================
+-- PART 3: PROFILES TABLE
+-- =====================================================
+
 CREATE TABLE IF NOT EXISTS public.profiles (
   -- === الهوية والربط ===
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -29,7 +67,6 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   ) STORED,
 
   -- === الأدوار والصلاحيات ===
-  -- ملاحظة: نستخدم TEXT للتوافق مع جدول roles
   role TEXT DEFAULT 'customer',
   is_verified BOOLEAN DEFAULT FALSE,
 
@@ -52,57 +89,27 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   last_sign_in_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 3. الفهرسة (Indexing)
+-- =====================================================
+-- PART 4: INDEXES
+-- =====================================================
+
 CREATE INDEX IF NOT EXISTS idx_profiles_email ON public.profiles(email);
+CREATE INDEX IF NOT EXISTS idx_profiles_provider ON public.profiles(provider);
 CREATE INDEX IF NOT EXISTS idx_profiles_role ON public.profiles(role);
 CREATE INDEX IF NOT EXISTS idx_profiles_role_verified ON public.profiles(role, is_verified);
 CREATE INDEX IF NOT EXISTS idx_profiles_created_at ON public.profiles(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_profiles_last_sign_in ON public.profiles(last_sign_in_at DESC);
 
 -- =====================================================
--- 4. دوال ومشغلات النظام (Functions & Triggers)
+-- PART 5: FUNCTIONS AND TRIGGERS
 -- =====================================================
 
--- دالة إنشاء الملف الشخصي عند التسجيل
+-- ---------------------------------------------------------------------
+-- دالة إنشاء الملف الشخصي عند التسجيل (Fixed for Google OAuth)
+-- ---------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
-DECLARE
-  v_provider TEXT;
-  v_first_name TEXT;
-  v_last_name TEXT;
-  v_full_name TEXT;
-  v_avatar_url TEXT;
 BEGIN
-  -- استخراج مزود المصادقة من raw_app_meta_data
-  v_provider := COALESCE(
-    NEW.raw_app_meta_data->>'provider',
-    'email'
-  );
-
-  -- استخراج الاسم الكامل من Google OAuth
-  v_full_name := COALESCE(
-    NEW.raw_user_meta_data->>'full_name',
-    NEW.raw_user_meta_data->>'name',
-    ''
-  );
-
-  -- تقسيم الاسم الكامل إلى first_name و last_name
-  IF v_full_name <> '' THEN
-    v_first_name := SPLIT_PART(v_full_name, ' ', 1);
-    v_last_name := TRIM(SUBSTRING(v_full_name FROM LENGTH(v_first_name) + 2));
-  ELSE
-    -- محاولة استخراج من first_name و last_name المباشر
-    v_first_name := COALESCE(NEW.raw_user_meta_data->>'first_name', '');
-    v_last_name := COALESCE(NEW.raw_user_meta_data->>'last_name', '');
-  END IF;
-
-  -- استخراج صورة البروفايل
-  v_avatar_url := COALESCE(
-    NEW.raw_user_meta_data->>'avatar_url',
-    NEW.raw_user_meta_data->>'picture',
-    ''
-  );
-
   -- إنشاء السجل في جدول profiles
   INSERT INTO public.profiles (
     id,
@@ -114,16 +121,35 @@ BEGIN
     role,
     last_sign_in_at
   )
-  VALUES (
+  SELECT
     NEW.id,
     NEW.email,
-    v_provider,
-    v_first_name,
-    v_last_name,
-    v_avatar_url,
-    'customer', -- دور افتراضي
-    NEW.last_sign_in_at
-  );
+    COALESCE(NEW.raw_app_meta_data->>'provider', 'email'),
+    -- استخراج first_name
+    CASE 
+      WHEN NEW.raw_user_meta_data->>'first_name' IS NOT NULL AND NEW.raw_user_meta_data->>'first_name' <> '' 
+        THEN NEW.raw_user_meta_data->>'first_name'
+      WHEN COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name') <> '' 
+        THEN SPLIT_PART(COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name'), ' ', 1)
+      ELSE ''
+    END,
+    -- استخراج last_name
+    CASE 
+      WHEN NEW.raw_user_meta_data->>'last_name' IS NOT NULL AND NEW.raw_user_meta_data->>'last_name' <> '' 
+        THEN NEW.raw_user_meta_data->>'last_name'
+      WHEN POSITION(' ' IN COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', '')) > 0
+        THEN TRIM(SUBSTRING(COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', '') 
+                     FROM POSITION(' ' IN COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', '')) + 1))
+      ELSE ''
+    END,
+    -- استخراج avatar_url
+    COALESCE(
+      NULLIF(NEW.raw_user_meta_data->>'avatar_url', ''),
+      NULLIF(NEW.raw_user_meta_data->>'picture', ''),
+      ''
+    ),
+    'customer',
+    NEW.last_sign_in_at;
 
   -- ✅ منح دور customer تلقائياً في جدول user_roles
   INSERT INTO public.user_roles (user_id, role_id, granted_by)
@@ -139,12 +165,15 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- إنشاء الـ Trigger
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
+-- ---------------------------------------------------------------------
 -- دالة تحديث التوقيت (updated_at)
+-- ---------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -158,11 +187,16 @@ CREATE TRIGGER update_profiles_updated_at
   BEFORE UPDATE ON public.profiles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+-- ---------------------------------------------------------------------
 -- دالة تحديث آخر دخول
+-- ---------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.handle_user_login()
 RETURNS TRIGGER AS $$
 BEGIN
-  UPDATE public.profiles SET last_sign_in_at = NEW.last_sign_in_at, updated_at = NOW() WHERE id = NEW.id;
+  UPDATE public.profiles 
+  SET last_sign_in_at = NEW.last_sign_in_at, 
+      updated_at = NOW() 
+  WHERE id = NEW.id;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -173,7 +207,7 @@ CREATE TRIGGER on_auth_user_login
   FOR EACH ROW EXECUTE FUNCTION public.handle_user_login();
 
 -- =====================================================
--- 5. دوال مساعدة للقراءة العامة (Public Read Functions)
+-- PART 6: PUBLIC READ FUNCTIONS
 -- =====================================================
 
 -- دالة للحصول على المعلومات العامة لمستخدم معين
@@ -189,7 +223,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
   RETURN QUERY
-  SELECT 
+  SELECT
     p.id,
     p.full_name,
     p.avatar_url,
@@ -214,7 +248,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
   RETURN QUERY
-  SELECT 
+  SELECT
     p.id,
     p.full_name,
     p.avatar_url,
@@ -230,8 +264,9 @@ COMMENT ON FUNCTION public.get_public_profile IS 'الحصول على المعل
 COMMENT ON FUNCTION public.get_public_vendors IS 'الحصول على قائمة البائعين الموثوقين';
 
 -- =====================================================
--- 6. سياسات الأمان (Row Level Security)
+-- PART 7: ROW LEVEL SECURITY (RLS) POLICIES
 -- =====================================================
+
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- === سياسات القراءة (SELECT) ===
@@ -239,25 +274,25 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 -- 1. المستخدم يقرأ ملفه الشخصي بالكامل
 DROP POLICY IF EXISTS "users_read_own" ON public.profiles;
 CREATE POLICY "users_read_own" ON public.profiles FOR SELECT
-  TO authenticated 
+  TO authenticated
   USING (auth.uid() = id);
 
 -- 2. المدير يقرأ جميع الملفات بالكامل
 DROP POLICY IF EXISTS "admins_read_all" ON public.profiles;
 CREATE POLICY "admins_read_all" ON public.profiles FOR SELECT
-  TO authenticated 
+  TO authenticated
   USING (public.has_role('admin'));
 
 -- 3. المستخدمون المصادقون يقرأون المعلومات الأساسية للآخرين
 DROP POLICY IF EXISTS "users_read_public_info" ON public.profiles;
 CREATE POLICY "users_read_public_info" ON public.profiles FOR SELECT
-  TO authenticated 
+  TO authenticated
   USING (TRUE);
 
 -- 4. دعم فني يقرأ جميع الملفات
 DROP POLICY IF EXISTS "support_read_all" ON public.profiles;
 CREATE POLICY "support_read_all" ON public.profiles FOR SELECT
-  TO authenticated 
+  TO authenticated
   USING (public.has_role('support'));
 
 -- === سياسات التعديل (UPDATE) ===
@@ -265,52 +300,52 @@ CREATE POLICY "support_read_all" ON public.profiles FOR SELECT
 -- 1. المستخدم يعدل ملفه الشخصي فقط
 DROP POLICY IF EXISTS "users_update_own" ON public.profiles;
 CREATE POLICY "users_update_own" ON public.profiles FOR UPDATE
-  TO authenticated 
-  USING (auth.uid() = id) 
+  TO authenticated
+  USING (auth.uid() = id)
   WITH CHECK (auth.uid() = id);
 
 -- 2. المدير يعدل جميع الملفات
 DROP POLICY IF EXISTS "admins_update_all" ON public.profiles;
 CREATE POLICY "admins_update_all" ON public.profiles FOR UPDATE
-  TO authenticated 
+  TO authenticated
   USING (public.has_role('admin'));
 
 -- 3. دعم فني يعدل جميع الملفات
 DROP POLICY IF EXISTS "support_update_all" ON public.profiles;
 CREATE POLICY "support_update_all" ON public.profiles FOR UPDATE
-  TO authenticated 
+  TO authenticated
   USING (public.has_role('support'));
 
 -- === سياسات الإدراج (INSERT) ===
 
 DROP POLICY IF EXISTS "users_insert_own" ON public.profiles;
 CREATE POLICY "users_insert_own" ON public.profiles FOR INSERT
-  TO authenticated 
+  TO authenticated
   WITH CHECK (auth.uid() = id);
 
 DROP POLICY IF EXISTS "admins_insert_any" ON public.profiles;
 CREATE POLICY "admins_insert_any" ON public.profiles FOR INSERT
-  TO authenticated 
+  TO authenticated
   WITH CHECK (public.has_role('admin'));
 
 -- === سياسات الحذف (DELETE) ===
 
 DROP POLICY IF EXISTS "users_delete_own" ON public.profiles;
 CREATE POLICY "users_delete_own" ON public.profiles FOR DELETE
-  TO authenticated 
+  TO authenticated
   USING (auth.uid() = id);
 
 DROP POLICY IF EXISTS "admins_delete_all" ON public.profiles;
 CREATE POLICY "admins_delete_all" ON public.profiles FOR DELETE
-  TO authenticated 
+  TO authenticated
   USING (public.has_role('admin'));
 
 -- =====================================================
--- 7. عرض آمن للمعلومات العامة (Security View)
+-- PART 8: SECURITY VIEW
 -- =====================================================
 
 CREATE OR REPLACE VIEW public.public_profiles AS
-SELECT 
+SELECT
   id,
   full_name,
   avatar_url,
@@ -321,3 +356,44 @@ SELECT
 FROM public.profiles;
 
 COMMENT ON VIEW public.public_profiles IS 'عرض آمن للمعلومات العامة فقط (بدون بيانات حساسة)';
+
+-- =====================================================
+-- PART 9: EXISTING DATA FIX
+-- =====================================================
+
+-- تحديث first_name و last_name و avatar_url للمستخدمين الحاليين
+UPDATE public.profiles p
+SET
+  first_name = COALESCE(
+    p.first_name,
+    CASE 
+      WHEN au.raw_user_meta_data->>'first_name' IS NOT NULL AND au.raw_user_meta_data->>'first_name' <> '' 
+        THEN au.raw_user_meta_data->>'first_name'
+      WHEN COALESCE(au.raw_user_meta_data->>'full_name', au.raw_user_meta_data->>'name') <> '' 
+        THEN SPLIT_PART(COALESCE(au.raw_user_meta_data->>'full_name', au.raw_user_meta_data->>'name'), ' ', 1)
+      ELSE NULL
+    END
+  ),
+  last_name = COALESCE(
+    p.last_name,
+    CASE 
+      WHEN au.raw_user_meta_data->>'last_name' IS NOT NULL AND au.raw_user_meta_data->>'last_name' <> '' 
+        THEN au.raw_user_meta_data->>'last_name'
+      WHEN POSITION(' ' IN COALESCE(au.raw_user_meta_data->>'full_name', au.raw_user_meta_data->>'name', '')) > 0
+        THEN TRIM(SUBSTRING(COALESCE(au.raw_user_meta_data->>'full_name', au.raw_user_meta_data->>'name', '') 
+                     FROM POSITION(' ' IN COALESCE(au.raw_user_meta_data->>'full_name', au.raw_user_meta_data->>'name', '')) + 1))
+      ELSE NULL
+    END
+  ),
+  avatar_url = COALESCE(
+    p.avatar_url,
+    NULLIF(au.raw_user_meta_data->>'avatar_url', ''),
+    NULLIF(au.raw_user_meta_data->>'picture', '')
+  )
+FROM auth.users au
+WHERE au.id = p.id
+  AND (p.first_name = '' OR p.first_name IS NULL OR p.last_name = '' OR p.last_name IS NULL);
+
+-- =====================================================
+-- END OF SCHEMA FILE
+-- =====================================================
