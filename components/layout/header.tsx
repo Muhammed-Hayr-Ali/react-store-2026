@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { AppLogo } from "@/components/shared/app-logo"
-import { UserBoldIcon, UserIcon } from "@/components/shared/icons"
+import { UserBoldIcon } from "@/components/shared/icons"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import MenuButton from "@/components/shared/menu_button"
@@ -94,7 +94,7 @@ export default function Header() {
       <MobileMenu isOpen={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <MobileMenuHeader className="flex items-center gap-3">
           {user ? (
-            <Avatar className="size-8">
+            <Avatar className="size-10">
               <AvatarImage
                 src={profile?.avatar_url || ""}
                 alt={profile?.full_name || ""}
@@ -104,7 +104,7 @@ export default function Header() {
               </AvatarFallback>
             </Avatar>
           ) : (
-            <Avatar className="size-8">
+            <Avatar className="size-10">
               <AvatarFallback className="p-1.5">
                 <UserBoldIcon className="size-max text-foreground" />
               </AvatarFallback>
