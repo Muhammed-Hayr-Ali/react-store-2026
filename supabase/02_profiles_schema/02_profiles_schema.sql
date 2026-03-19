@@ -17,29 +17,32 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   -- === الهوية والربط ===
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT UNIQUE NOT NULL,
-  
+
+  -- === مزود المصادقة ===
+  provider TEXT DEFAULT 'email',
+
   -- === المعلومات الأساسية ===
   first_name TEXT,
   last_name TEXT,
   full_name TEXT GENERATED ALWAYS AS (
     NULLIF(TRIM(COALESCE(first_name, '') || ' ' || COALESCE(last_name, '')), '')
   ) STORED,
-  
+
   -- === الأدوار والصلاحيات ===
   -- ملاحظة: نستخدم TEXT للتوافق مع جدول roles
   role TEXT DEFAULT 'customer',
   is_verified BOOLEAN DEFAULT FALSE,
-  
+
   -- === بيانات التواصل ===
   phone TEXT,
   phone_verified BOOLEAN DEFAULT FALSE,
   avatar_url TEXT,
   bio TEXT,
-  
+
   -- === التفضيلات ===
   language TEXT DEFAULT 'ar',
   timezone TEXT DEFAULT 'Asia/Damascus',
-  
+
   -- === الحالة والتواريخ ===
   email_verified BOOLEAN DEFAULT FALSE,
   date_of_birth DATE,
@@ -63,30 +66,75 @@ CREATE INDEX IF NOT EXISTS idx_profiles_last_sign_in ON public.profiles(last_sig
 -- دالة إنشاء الملف الشخصي عند التسجيل
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+  v_provider TEXT;
+  v_first_name TEXT;
+  v_last_name TEXT;
+  v_full_name TEXT;
+  v_avatar_url TEXT;
 BEGIN
+  -- استخراج مزود المصادقة من raw_app_meta_data
+  v_provider := COALESCE(
+    NEW.raw_app_meta_data->>'provider',
+    'email'
+  );
+
+  -- استخراج الاسم الكامل من Google OAuth
+  v_full_name := COALESCE(
+    NEW.raw_user_meta_data->>'full_name',
+    NEW.raw_user_meta_data->>'name',
+    ''
+  );
+
+  -- تقسيم الاسم الكامل إلى first_name و last_name
+  IF v_full_name <> '' THEN
+    v_first_name := SPLIT_PART(v_full_name, ' ', 1);
+    v_last_name := TRIM(SUBSTRING(v_full_name FROM LENGTH(v_first_name) + 2));
+  ELSE
+    -- محاولة استخراج من first_name و last_name المباشر
+    v_first_name := COALESCE(NEW.raw_user_meta_data->>'first_name', '');
+    v_last_name := COALESCE(NEW.raw_user_meta_data->>'last_name', '');
+  END IF;
+
+  -- استخراج صورة البروفايل
+  v_avatar_url := COALESCE(
+    NEW.raw_user_meta_data->>'avatar_url',
+    NEW.raw_user_meta_data->>'picture',
+    ''
+  );
+
+  -- إنشاء السجل في جدول profiles
   INSERT INTO public.profiles (
-    id, email, first_name, last_name, avatar_url, role, last_sign_in_at
+    id,
+    email,
+    provider,
+    first_name,
+    last_name,
+    avatar_url,
+    role,
+    last_sign_in_at
   )
   VALUES (
     NEW.id,
     NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'first_name', ''),
-    COALESCE(NEW.raw_user_meta_data->>'last_name', ''),
-    COALESCE(NEW.raw_user_meta_data->>'avatar_url', ''),
+    v_provider,
+    v_first_name,
+    v_last_name,
+    v_avatar_url,
     'customer', -- دور افتراضي
     NEW.last_sign_in_at
   );
-  
+
   -- ✅ منح دور customer تلقائياً في جدول user_roles
   INSERT INTO public.user_roles (user_id, role_id, granted_by)
-  SELECT 
-    NEW.id, 
-    r.id, 
+  SELECT
+    NEW.id,
+    r.id,
     NEW.id
-  FROM public.roles r 
+  FROM public.roles r
   WHERE r.name = 'customer'
   ON CONFLICT (user_id, role_id) DO NOTHING;
-  
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

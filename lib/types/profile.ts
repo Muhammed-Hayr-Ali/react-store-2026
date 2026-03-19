@@ -21,6 +21,9 @@ export type Profile = {
   id: string
   email: string
 
+  // مزود المصادقة
+  provider: "email" | "google" | "facebook" | "github" | "apple" | string
+
   // معلومات الاتصال
   phone: string | null
 
