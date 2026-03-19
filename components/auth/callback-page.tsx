@@ -60,9 +60,11 @@ export default function CallbackPage() {
           if (aalError) {
             console.error("AAL Error:", aalError)
             // في حالة الخطأ، نظهر الحوار مباشرة
+            setShowSuccessDialog(true)
+
             setTimeout(() => {
               if (isMounted) {
-                setShowSuccessDialog(true)
+                router.push(appRouter.home)
               }
             }, 1000)
             return
@@ -100,7 +102,7 @@ export default function CallbackPage() {
     return () => {
       isMounted = false
     }
-  }, [ ])
+  }, [])
 
   const handleClose = () => {
     setShowSuccessDialog(false)
@@ -170,9 +172,9 @@ export default function CallbackPage() {
                 />
               </svg>
             </AlertDialogMedia>
-            <AlertDialogTitle>{t("accountCreatedSuccess")}</AlertDialogTitle>
+            <AlertDialogTitle>{t("signInSuccess")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t("twoFactorSetupDesc")}
+              {t("signInSuccessDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
