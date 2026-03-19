@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { AppLogo } from "@/components/shared/app-logo"
-import { UserIcon } from "@/components/shared/icons"
+import { UserBoldIcon, UserIcon } from "@/components/shared/icons"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import MenuButton from "@/components/shared/menu_button"
@@ -68,15 +68,15 @@ export default function Header() {
                     src={profile?.avatar_url || ""}
                     alt={profile?.full_name || ""}
                   />
-                  <AvatarFallback>
-                    <UserIcon className="size-4" />
+                  <AvatarFallback className="p-1.5">
+                    <UserBoldIcon className="size-max text-foreground" />
                   </AvatarFallback>
                 </Avatar>
               ) : (
                 <Link href={appRouter.signIn}>
                   <Avatar className="size-8">
-                    <AvatarFallback>
-                      <UserIcon className="size-4" />
+                    <AvatarFallback className="p-1.5">
+                      <UserBoldIcon className="size-max text-foreground" />
                     </AvatarFallback>
                   </Avatar>
                 </Link>
@@ -94,19 +94,19 @@ export default function Header() {
       <MobileMenu isOpen={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <MobileMenuHeader className="flex items-center gap-3">
           {user ? (
-            <Avatar>
+            <Avatar className="size-8">
               <AvatarImage
                 src={profile?.avatar_url || ""}
                 alt={profile?.full_name || ""}
               />
-              <AvatarFallback>
-                <UserIcon className="size-5" />
+              <AvatarFallback className="p-1.5">
+                <UserBoldIcon className="size-max text-foreground" />
               </AvatarFallback>
             </Avatar>
           ) : (
-            <Avatar size="default">
-              <AvatarFallback>
-                <UserIcon className="size-5" />
+            <Avatar className="size-8">
+              <AvatarFallback className="p-1.5">
+                <UserBoldIcon className="size-max text-foreground" />
               </AvatarFallback>
             </Avatar>
           )}
