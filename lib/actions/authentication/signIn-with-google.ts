@@ -4,12 +4,12 @@ import { appRouter } from "@/lib/config/app_router"
 
 export async function signInWithGoogle(): Promise<ApiResult> {
   const supabase = createBrowserClient()
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL
 
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${appUrl}/api/callback`,
+      redirectTo: `${appUrl}/callback`,
       queryParams: {
         access_type: "offline",
         prompt: "consent",
