@@ -66,11 +66,11 @@ export default function Header() {
           <nav className="flex grow-3 items-center justify-end gap-2">
             <div className="hidden items-center lg:flex">
               <Avatar className="size-10">
-                {user ? (
+                {user && profile?.avatar_url ? (
                   <>
                     <AvatarImage
-                      src={profile?.avatar_url || ""}
-                      alt={profile?.full_name || ""}
+                      src={profile.avatar_url}
+                      alt={profile.full_name || ""}
                     />
                     <AvatarFallback className="p-1.5">
                       <UserBoldIcon className="size-max text-foreground" />
@@ -95,11 +95,11 @@ export default function Header() {
       <MobileMenu isOpen={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <MobileMenuHeader className="flex items-center gap-3">
           <Avatar className="size-10">
-            {user ? (
+            {user && profile?.avatar_url ? (
               <>
                 <AvatarImage
-                  src={profile?.avatar_url || ""}
-                  alt={profile?.full_name || ""}
+                  src={profile.avatar_url}
+                  alt={profile.full_name || ""}
                 />
                 <AvatarFallback className="p-1.5">
                   <UserBoldIcon className="size-max text-foreground" />
