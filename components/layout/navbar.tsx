@@ -1,17 +1,10 @@
 "use client"
 
 import React from "react"
-import { MobileMenu } from "@/components/layout/mobile-menu"
+import { MobileMenu } from "@/components/ui/mobile-menu"
 import { Separator } from "@/components/ui/separator"
 import MenuButton from "@/components/shared/menu_button"
-import { Heart } from "lucide-react"
-import UserButtonClient from "@/components/shared/user-button"
-import {
-  HeartIcon,
-  MagniferIcon,
-  ShoppingCartIcon,
-  UserIcon,
-} from "@/components/shared/icons"
+import { ShoppingCartIcon, UserIcon } from "@/components/shared/icons"
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = React.useState(false)
@@ -28,35 +21,12 @@ export default function Navbar() {
         <UserIcon />
       </nav>
 
-
       {/* <NavbarMobile /> */}
       <nav className="flex-1 items-center gap-3 lg:hidden lg:gap-4">
         <MenuButton isOpen={isOpen} onClick={toggleMenu} />
       </nav>
 
-      <MobileMenu isOpen={isOpen} setIsOpen={setIsOpen} />
+      <MobileMenu isOpen={isOpen} onOpenChange={setIsOpen} />
     </div>
   )
-}
-
-// const NavbarMobile = () => {
-//   const { count, loading } = useCartCount();
-
-//   return (
-//     <nav className="flex items-center  gap-2 lg:hidden">
-//       <CartButton count={count} isloading={loading} />
-//       <MobileMenu />
-//     </nav>
-//   );
-// };
-{
-  /* <Button variant={"ghost"} size={"icon"} asChild>
-        {user ? (
-          <UserButton />
-        ) : (
-          <Link href="/auth/login">
-            <LogIn />
-          </Link>
-        )}
-      </Button> */
 }

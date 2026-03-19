@@ -1,43 +1,40 @@
-"use client";
-import React from "react";
-import { User as UserIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
-import { useAuth } from "@/hooks/useAuth";
-import { siteConfig } from "@/lib/config/site_config";
+"use client"
+import React from "react"
+import { User as UserIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
+import { useAuth } from "@/hooks/useAuth"
+import { siteConfig } from "@/lib/config/site_config"
 
 export const MobileMenu = ({
   isOpen,
   setIsOpen,
 }: {
-  isOpen?: boolean;
-  setIsOpen: (isOpen: boolean) => void;
+  isOpen?: boolean
+  setIsOpen: (isOpen: boolean) => void
 }) => {
-  const router = useRouter();
+  const router = useRouter()
   const { profile, user, signOut } = useAuth()
-  const menuItems = user ? siteConfig.userMenuItems : siteConfig.guestMenuItems;
+  const menuItems = user ? siteConfig.userMenuItems : siteConfig.guestMenuItems
 
   React.useEffect(() => {
     if (isOpen) {
-      const originalStyle = window.getComputedStyle(document.body).overflow;
-      document.body.style.overflow = "hidden";
+      const originalStyle = window.getComputedStyle(document.body).overflow
+      document.body.style.overflow = "hidden"
 
-      // دالة التنظيف: تعيد النمط الأصلي عند إغلاق القائمة أو مغادرة الصفحة
       return () => {
-        document.body.style.overflow = originalStyle;
-      };
+        document.body.style.overflow = originalStyle
+      }
     }
-  }, [isOpen]);
+  }, [isOpen])
 
   const handleLogout = async () => {
-    const response = await signOut();
-
-    router.refresh();
-  };
+    await signOut()
+    router.refresh()
+  }
 
   return (
     <div
@@ -137,4 +134,4 @@ export const MobileMenu = ({
       </div>
     </div>
   )
-};
+}

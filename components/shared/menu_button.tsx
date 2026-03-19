@@ -1,16 +1,23 @@
+import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
 
+
+interface MenuButtonProps {
+  className?: string;
+  isOpen: boolean;
+  onClick: () => void;
+
+}
+
 export default function MenuButton({
+  className,
   onClick,
   isOpen,
-}: {
-  onClick: () => void;
-  isOpen: boolean;
-}) {
+}: MenuButtonProps) {
   return (
     <button
       onClick={onClick}
-      className="relative flex p-2 flex-col items-center justify-center w-10 h-10 focus:outline-none"
+      className={cn("relative flex p-2 flex-col items-center justify-center w-10 h-10 focus:outline-none", className)}
       aria-label={`${isOpen ? "clse menu" : "open menu"}`}
     >
       {/* الخط العلوي */}

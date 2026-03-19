@@ -12,7 +12,7 @@ export const metadata = createMetadata({
 export default function Page() {
   return (
     <>
-      <Header/>
+      <Header />
       <ComingSoonPage />
     </>
   )

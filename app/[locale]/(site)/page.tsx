@@ -1,12 +1,19 @@
-import ComingSoonPage from "@/components/common-soon/common-soon";
-import { createMetadata } from "@/lib/config/metadata_generator";
+import ComingSoonPage from "@/components/common-soon/common-soon"
+import Header from "@/components/layout/header"
+import { createMetadata } from "@/lib/config/metadata_generator"
 
 export const metadata = createMetadata({
   title: "Coming Soon",
-  description: "Marketna is crafting a digital masterpiece. Something extraordinary is launching soon.",
+  description:
+    "Marketna is crafting a digital masterpiece. Something extraordinary is launching soon.",
   path: "/",
-});
+})
 
 export default function Page() {
-  return <ComingSoonPage />;
+  return (
+    <>
+      <Header />
+      <ComingSoonPage />
+    </>
+  )
 }

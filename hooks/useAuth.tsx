@@ -8,7 +8,7 @@ import {
   useCallback,
   useRef,
 } from "react"
-import { createBrowserClient } from "@/lib/supabase/createBrowserClient"
+import { createClient } from "@/lib/supabase/createClient"
 import type { User } from "@supabase/supabase-js"
 import type { Profile } from "@/lib/types/profile"
 
@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [status, setStatus] = useState<AuthStatus>("loading")
-  const supabase = createBrowserClient()
+  const supabase = createClient()
   const isProfileFetchingRef = useRef(false)
 
   const delay = (ms: number) =>
@@ -87,7 +87,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return
         }
 
-       
         setUser(authenticatedUser)
 
         if (!isProfileFetchingRef.current) {
@@ -112,8 +111,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     void initializeAuth()
-
-
   }, [supabase, fetchProfileWithRetry])
   const signOut = async () => {
     await supabase.auth.signOut()

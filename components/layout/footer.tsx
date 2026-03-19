@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 
-import { toast } from "sonner"
-import { useForm, type SubmitHandler } from "react-hook-form"
+import { useForm} from "react-hook-form"
 
 import { Spinner } from "@/components/ui/spinner"
 import { AppLogo } from "@/components/shared/app-logo"
@@ -28,7 +27,7 @@ const Footer = () => {
         <div className="flex flex-col justify-center gap-10 py-6 lg:flex-row">
           <div className="h-full w-full lg:basis-1/4">
             <div className="flex flex-col gap-4 text-foreground">
-              <AppLogo size="md" withoutText={false} />
+              <AppLogo size="md" />
               <p className="text-accents-5 text-xs">{siteConfig.description}</p>
               <div className="flex gap-4 text-accent-foreground/50">
                 <FaceBookIcon />
