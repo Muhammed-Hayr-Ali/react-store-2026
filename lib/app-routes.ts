@@ -11,6 +11,7 @@ export const appRouter = {
   resetPassword: "/auth/reset-password",
   verifyOtp: "/auth/verify-otp",
   twoFactorSetup: "/auth/two-factor-setup",
+  callback: "/auth/callback",
 
   // لوحة التحكم
   dashboard: "/dashboard",
