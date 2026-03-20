@@ -5,11 +5,11 @@ export const appRouter = {
   terms: "/terms",
   privacy: "/privacy",
   // المصادقة
-  callback: "/auth/callback",
-  forgotPassword: "/auth/forgot-password",
-  resetPassword: "/auth/reset-password",
-  signIn: "/auth/sign-in",
-  signUp: "/auth/sign-up",
+  callback: "/callback",
+  forgotPassword: "/forgot-password",
+  resetPassword: "/reset-password",
+  signIn: "/sign-in",
+  signUp: "/sign-up",
 
   // mfa
   verifyOtp: "/verify",

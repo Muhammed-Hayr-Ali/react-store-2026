@@ -103,7 +103,7 @@ export default function Header() {
                   asChild
                 >
                   <Link href={appRouter.signIn}>
-                    <span>{t("Get Started")}</span>
+                    <span>{t("getStarted")}</span>
                   </Link>
                 </Button>
               )}
@@ -201,7 +201,7 @@ export default function Header() {
 
           <Accordion type="single" collapsible defaultValue="item-3">
             <AccordionItem value="item-1">
-              <AccordionTrigger className="p-0">
+              <AccordionTrigger className="p-0" suppressHydrationWarning>
                 <MobileMenuItem key="theme" className="w-auto">
                   {theme === "light" && <SunIcon className="mr-2 h-4 w-4" />}
                   {theme === "dark" && <MoonIcon className="mr-2 h-4 w-4" />}
