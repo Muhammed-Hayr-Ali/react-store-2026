@@ -296,7 +296,7 @@ export default function UpgradePlanPage() {
           <div className="rounded-lg bg-white p-6 shadow">
             <h3 className="mb-2 font-bold">كيف يمكنني ترقية اشتراكي؟</h3>
             <p className="text-gray-600">
-              اختر الخطة التي تريدها واضغط على "طلب الترقية". سيقوم فريقنا
+              اختر الخطة التي تريدها واضغط على طلب الترقية. سيقوم فريقنا
               بالتواصل معك خلال 24 ساعة لترتيب عملية الدفع والتفعيل.
             </p>
           </div>
