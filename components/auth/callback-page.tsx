@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { createBrowserClient } from "@/lib/supabase/createBrowserClient"
+import { Spinner } from "@/components/ui/spinner"
 
 export default function CallbackPage() {
   const t = useTranslations("callback")
@@ -118,7 +119,7 @@ export default function CallbackPage() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <Spinner />
           <h1 className="text-2xl font-bold">{t("loading")}</h1>
           <p className="mt-2 text-muted-foreground">{t("processingSignIn")}</p>
         </div>

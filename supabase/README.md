@@ -11,15 +11,22 @@
 ```
 supabase/
 ├── 01-exchange_rates/              # أسعار الصرف (عملات)
+│   ├── exchange_rates.sql
+│   └── README.md
 ├── 02_password_reset_tokens/       # رموز إعادة تعيين كلمة المرور
+│   └── password_reset.sql
 ├── 03_profiles_schema/             # ملفات المستخدمين الشخصية
+│   └── profiles_schema.sql
 ├── 04_roles_permissions_system/    # نظام الأدوار والصلاحيات (RBAC)
+│   ├── 01_roles_permissions_system.sql
+│   └── README.md
 ├── 04_seller_subscriptions/        # اشتراكات الباعة
-│   ├── 01_seller_subscription_plans.sql   # خطط الاشتراكات (فقط الخطط)
+│   ├── 01_seller_subscription_plans.sql   # خطط الاشتراكات
 │   ├── 02_seller_subscriptions.sql        # جدول اشتراكات الباعة
 │   └── README.md
 ├── 05_delivery_subscriptions/      # اشتراكات التوصيل
-│   ├── 01_delivery_subscription_plans.sql
+│   ├── 01_delivery_subscription_plans.sql # خطط الاشتراكات
+│   ├── 02_delivery_partner_subscriptions.sql # جدول اشتراكات التوصيل
 │   └── README.md
 ├── 06_sellers/                     # الباعة والمتاجر
 │   ├── 01_sellers_schema.sql
@@ -62,11 +69,14 @@ psql -f supabase/05_delivery_subscriptions/01_delivery_subscription_plans.sql
 # جدول الباعة
 psql -f supabase/06_sellers/01_sellers_schema.sql
 
-# اشتراكات الباعة (بعد إنشاء جدول الباعة!)
-psql -f supabase/04_seller_subscriptions/02_seller_subscriptions.sql
-
 # جدول موظفي التوصيل (مستقبلاً)
 # psql -f supabase/07_delivery_partners/01_delivery_partners_schema.sql
+
+# ============================================
+# المرحلة 5: جداول الاشتراكات
+# ============================================
+# اشتراكات الباعة (بعد إنشاء جدول الباعة!)
+psql -f supabase/04_seller_subscriptions/02_seller_subscriptions.sql
 
 # اشتراكات التوصيل (بعد إنشاء جدول التوصيل!)
 # psql -f supabase/05_delivery_subscriptions/02_delivery_partner_subscriptions.sql
@@ -74,33 +84,51 @@ psql -f supabase/04_seller_subscriptions/02_seller_subscriptions.sql
 
 ---
 
-## 📊 ملخص النظام
+## 📊 ملخص الجداول
 
-### خطط اشتراكات الباعة (04_seller_subscriptions):
+### المرحلة 1: الإعدادات الأساسية
 
-| الملف                              | الوصف                               | الترتيب                      |
-| ---------------------------------- | ----------------------------------- | ---------------------------- |
-| `01_seller_subscription_plans.sql` | خطط الاشتراكات (Free, Silver, Gold) | **أولاً**                    |
-| `02_seller_subscriptions.sql`      | جدول اشتراكات الباعة الفعليّة       | **ثانياً** (بعد جدول الباعة) |
+| المجلد                     | الجدول                  | الوصف                        |
+| -------------------------- | ----------------------- | ---------------------------- |
+| `01-exchange_rates`        | `exchange_rates`        | أسعار صرف العملات            |
+| `02_password_reset_tokens` | `password_reset_tokens` | رموز إعادة تعيين كلمة المرور |
+| `03_profiles_schema`       | `profiles`              | ملفات المستخدمين الشخصية     |
 
-| الخطة      | السعر (USD) | عدد المنتجات |
-| ---------- | ----------- | ------------ |
-| **Free**   | $0          | **50 منتج**  |
-| **Silver** | $29/شهر     | 200 منتج     |
-| **Gold**   | $99/شهر     | 1000 منتج    |
+### المرحلة 2: نظام الأدوار والصلاحيات
 
-### خطط اشتراكات التوصيل (05_delivery_subscriptions):
+| المجلد                        | الجداول                                                  | الوصف          |
+| ----------------------------- | -------------------------------------------------------- | -------------- |
+| `04_roles_permissions_system` | `roles`, `permissions`, `user_roles`, `role_permissions` | نظام RBAC كامل |
 
-| الملف                                   | الوصف                 | الترتيب                       |
-| --------------------------------------- | --------------------- | ----------------------------- |
-| `01_delivery_subscription_plans.sql`    | خطط الاشتراكات        | **أولاً**                     |
-| `02_delivery_partner_subscriptions.sql` | جدول اشتراكات التوصيل | **ثانياً** (بعد جدول التوصيل) |
+### المرحلة 3-5: الاشتراكات والباعة
 
-| الخطة      | السعر (USD) | الطلبات/يوم | العمولة |
-| ---------- | ----------- | ----------- | ------- |
-| **Free**   | $0          | **3 طلبات** | **15%** |
-| **Silver** | $19/شهر     | 10 طلبات    | 10%     |
-| **Gold**   | $49/شهر     | غير محدود   | 5%      |
+| المجلد                      | الجداول                          | الوصف                    | الترتيب                   |
+| --------------------------- | -------------------------------- | ------------------------ | ------------------------- |
+| `04_seller_subscriptions`   | `seller_subscription_plans`      | خطط اشتراكات الباعة      | 1                         |
+| `04_seller_subscriptions`   | `seller_subscriptions`           | اشتراكات الباعة الفعلية  | 3 (بعد sellers)           |
+| `05_delivery_subscriptions` | `delivery_subscription_plans`    | خطط اشتراكات التوصيل     | 1                         |
+| `05_delivery_subscriptions` | `delivery_partner_subscriptions` | اشتراكات التوصيل الفعلية | 3 (بعد delivery_partners) |
+| `06_sellers`                | `sellers`                        | جدول الباعة              | 2                         |
+
+---
+
+## 📋 خطط الاشتراكات
+
+### 🏪 اشتراكات الباعة (04_seller_subscriptions)
+
+| الخطة      | السعر (USD) | عدد المنتجات  | الميزات                               |
+| ---------- | ----------- | ------------- | ------------------------------------- |
+| **Free**   | $0          | **50 منتج**   | لوحة تحكم أساسية، دعم عبر البريد      |
+| **Silver** | $29/شهر     | **200 منتج**  | إحصائيات متقدمة، دعم أولوي، نطاق مخصص |
+| **Gold**   | $99/شهر     | **1000 منتج** | إحصائيات كاملة، دعم 24/7، وصول API    |
+
+### 🚴 اشتراكات التوصيل (05_delivery_subscriptions)
+
+| الخطة      | السعر (USD) | الطلبات/يوم   | العمولة | الميزات                      |
+| ---------- | ----------- | ------------- | ------- | ---------------------------- |
+| **Free**   | $0          | **3 طلبات**   | **15%** | دعم أساسي، منطقة واحدة       |
+| **Silver** | $19/شهر     | **10 طلبات**  | **10%** | دعم أولوي، منطقتي تغطية      |
+| **Gold**   | $49/شهر     | **غير محدود** | **5%**  | دعم 24/7، كل المناطق، أولوية |
 
 ---
 
@@ -108,7 +136,7 @@ psql -f supabase/04_seller_subscriptions/02_seller_subscriptions.sql
 
 ```
 ┌─────────────────┐
-│   auth.users    │ (Supabase Auth)
+│   auth.users    │ (Supabase Auth - Managed by Supabase)
 └────────┬────────┘
          │
          ├──────────────────┐
@@ -142,6 +170,38 @@ psql -f supabase/04_seller_subscriptions/02_seller_subscriptions.sql
                      │ price_usd       │
                      │ max_products    │
                      └─────────────────┘
+
+
+┌─────────────────────┐ (مستقبلاً)
+│  delivery_partners  │
+├─────────────────────┤
+│ id (PK)             │
+│ user_id (FK)        │
+│ vehicle_types       │
+│ account_status      │
+└──────────┬──────────┘
+           │
+           │ 1:1
+           ▼
+┌─────────────────────────┐
+│delivery_partner_subscript.│ (05_delivery_subscriptions/02)
+├─────────────────────────┤
+│ plan_id (FK)            │
+│ max_orders_per_day      │
+│ commission_rate         │
+└────────┬────────────────┘
+         │
+         │ N:1
+         ▼
+┌─────────────────────────┐
+│delivery_subscription_   │ (05_delivery_subscriptions/01)
+│ plans                   │
+├─────────────────────────┤
+│ plan_type               │
+│ price_usd               │
+│ max_orders_per_day      │
+│ commission_rate         │
+└─────────────────────────┘
 ```
 
 ---
@@ -159,6 +219,9 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 # Stripe (للاشتراكات)
 STRIPE_SECRET_KEY=sk_test_xxx
 STRIPE_WEBHOOK_SECRET=whsec_xxx
+STRIPE_PRICE_ID_FREE=price_xxx
+STRIPE_PRICE_ID_SILVER=price_xxx
+STRIPE_PRICE_ID_GOLD=price_xxx
 ```
 
 ### الإضافات المطلوبة
@@ -215,6 +278,7 @@ supabase db push
 | `delivery_subscription_plans`    | قراءة الخطط النشطة، إدارة للأدمن   |
 | `delivery_partner_subscriptions` | قراءة/كتابة للسائق، إدارة للأدمن   |
 | `sellers`                        | قراءة/كتابة للبائع، إدارة للأدمن   |
+| `profiles`                       | قراءة عامة، كتابة للمالك           |
 
 ### دوال التحقق
 
@@ -280,6 +344,17 @@ WHERE schemaname = 'public';
 
 -- تعطيل RLS مؤقتاً (للتطوير فقط!)
 ALTER TABLE public.sellers DISABLE ROW LEVEL SECURITY;
+```
+
+### مشكلة: دالة غير موجودة
+
+```sql
+-- التحقق من الدوال
+SELECT routine_name, routine_type
+FROM information_schema.routines
+WHERE routine_schema = 'public'
+  AND routine_type = 'FUNCTION'
+ORDER BY routine_name;
 ```
 
 ---
