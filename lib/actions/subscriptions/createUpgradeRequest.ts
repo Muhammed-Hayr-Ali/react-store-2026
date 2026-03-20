@@ -11,7 +11,7 @@ export interface CreateUpgradeRequestInput {
 }
 
 // ===============================================================================
-// Create Seller Upgrade Request
+// Create Seller Upgrade Request (with plan selection)
 // ===============================================================================
 export async function createUpgradeRequest({
   sellerId,
@@ -41,7 +41,7 @@ export async function createUpgradeRequest({
     }
   }
 
-  // Create upgrade request
+  // Create upgrade request with plan
   const { error } = await supabase.rpc("create_upgrade_request", {
     p_seller_id: sellerId,
     p_target_plan_id: planId,
@@ -64,7 +64,7 @@ export async function createUpgradeRequest({
 }
 
 // ===============================================================================
-// Create Delivery Partner Upgrade Request
+// Create Delivery Partner Upgrade Request (with plan selection)
 // ===============================================================================
 export async function createDeliveryUpgradeRequest({
   partnerId,
@@ -94,7 +94,7 @@ export async function createDeliveryUpgradeRequest({
     }
   }
 
-  // Create upgrade request
+  // Create upgrade request with plan
   const { error } = await supabase.rpc("create_delivery_upgrade_request", {
     p_partner_id: partnerId,
     p_target_plan_id: planId,
