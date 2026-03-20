@@ -1954,17 +1954,23 @@ export const LoaderCircleIcon = ({ size, className, ...props }: IconProps) => (
     className={cn(svgVariants({ size }), "animate-spin", className)}
     {...props}
   >
-    <circle cx="12" cy="12" r="10" />
-    <path d="M12 6V2" />
-    <path d="M12 22v-4" />
-    <path d="m4.93 4.93 2.83 2.83" />
-    <path d="m16.24 16.24 2.83 2.83" />
+    <path d="M12 2v4" />
+    <path d="m16.2 7.8 2.9-2.9" />
+    <path d="M18 12h4" />
+    <path d="m16.2 16.2 2.9 2.9" />
+    <path d="M12 18v4" />
+    <path d="m4.9 19.1 2.9-2.9" />
     <path d="M2 12h4" />
-    <path d="M22 12h-4" />
-    <path d="m4.93 19.07 2.83-2.83" />
-    <path d="m16.24 7.76 2.83-2.83" />
+    <path d="m4.9 4.9 2.9 2.9" />
   </svg>
 )
+
+
+
+
+
+
+
 
 export const RefreshIcon = ({ size, className, ...props }: IconProps) => (
   <svg

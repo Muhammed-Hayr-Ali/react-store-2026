@@ -15,7 +15,8 @@ supabase/
 ├── 03_profiles_schema/             # ملفات المستخدمين الشخصية
 ├── 04_roles_permissions_system/    # نظام الأدوار والصلاحيات (RBAC)
 ├── 04_seller_subscriptions/        # اشتراكات الباعة
-│   ├── 01_seller_subscription_plans.sql
+│   ├── 01_seller_subscription_plans.sql   # خطط الاشتراكات (فقط الخطط)
+│   ├── 02_seller_subscriptions.sql        # جدول اشتراكات الباعة
 │   └── README.md
 ├── 05_delivery_subscriptions/      # اشتراكات التوصيل
 │   ├── 01_delivery_subscription_plans.sql
@@ -31,55 +32,56 @@ supabase/
 
 ## 🚀 دليل التثبيت
 
-### الخطوة 1: الإعدادات الأساسية
+### **الترتيب الصحيح للتشغيل:**
 
 ```bash
-# 1. ملفات الإعدادات الأساسية
+# ============================================
+# المرحلة 1: الإعدادات الأساسية
+# ============================================
 psql -f supabase/01-exchange_rates/exchange_rates.sql
 psql -f supabase/02_password_reset_tokens/password_reset.sql
 psql -f supabase/03_profiles_schema/profiles_schema.sql
-```
 
----
-
-### الخطوة 2: نظام الأدوار والصلاحيات
-
-```bash
-# 2. نظام الأدوار والصلاحيات (مهم جداً!)
+# ============================================
+# المرحلة 2: نظام الأدوار والصلاحيات
+# ============================================
 psql -f supabase/04_roles_permissions_system/01_roles_permissions_system.sql
-```
 
-**المحتويات:**
-
-- جدول الأدوار (`roles`)
-- جدول الصلاحيات (`permissions`)
-- جدول أدوار المستخدمين (`user_roles`)
-- جدول صلاحيات الأدوار (`role_permissions`)
-- دوال التحقق من الصلاحيات
-- سياسات الأمان الأساسية
-
-[📖 قراءة التوثيق](./04_roles_permissions_system/README.md)
-
----
-
-### الخطوة 3: نظام الاشتراكات
-
-```bash
-# 3أ. اشتراكات الباعة
+# ============================================
+# المرحلة 3: خطط الاشتراكات (فقط الخطط)
+# ============================================
+# خطط اشتراكات الباعة
 psql -f supabase/04_seller_subscriptions/01_seller_subscription_plans.sql
 
-# 3ب. اشتراكات التوصيل
+# خطط اشتراكات التوصيل
 psql -f supabase/05_delivery_subscriptions/01_delivery_subscription_plans.sql
+
+# ============================================
+# المرحلة 4: الجداول الرئيسية
+# ============================================
+# جدول الباعة
+psql -f supabase/06_sellers/01_sellers_schema.sql
+
+# اشتراكات الباعة (بعد إنشاء جدول الباعة!)
+psql -f supabase/04_seller_subscriptions/02_seller_subscriptions.sql
+
+# جدول موظفي التوصيل (مستقبلاً)
+# psql -f supabase/07_delivery_partners/01_delivery_partners_schema.sql
+
+# اشتراكات التوصيل (بعد إنشاء جدول التوصيل!)
+# psql -f supabase/05_delivery_subscriptions/02_delivery_partner_subscriptions.sql
 ```
 
-**المحتويات:**
+---
 
-| الملف                       | الوصف                      |
-| --------------------------- | -------------------------- |
-| `04_seller_subscriptions`   | اشتراكات الباعة (المنتجات) |
-| `05_delivery_subscriptions` | اشتراكات التوصيل (الطلبات) |
+## 📊 ملخص النظام
 
-**خطط الباعة:**
+### خطط اشتراكات الباعة (04_seller_subscriptions):
+
+| الملف                              | الوصف                               | الترتيب                      |
+| ---------------------------------- | ----------------------------------- | ---------------------------- |
+| `01_seller_subscription_plans.sql` | خطط الاشتراكات (Free, Silver, Gold) | **أولاً**                    |
+| `02_seller_subscriptions.sql`      | جدول اشتراكات الباعة الفعليّة       | **ثانياً** (بعد جدول الباعة) |
 
 | الخطة      | السعر (USD) | عدد المنتجات |
 | ---------- | ----------- | ------------ |
@@ -87,33 +89,18 @@ psql -f supabase/05_delivery_subscriptions/01_delivery_subscription_plans.sql
 | **Silver** | $29/شهر     | 200 منتج     |
 | **Gold**   | $99/شهر     | 1000 منتج    |
 
-**خطط التوصيل:**
+### خطط اشتراكات التوصيل (05_delivery_subscriptions):
+
+| الملف                                   | الوصف                 | الترتيب                       |
+| --------------------------------------- | --------------------- | ----------------------------- |
+| `01_delivery_subscription_plans.sql`    | خطط الاشتراكات        | **أولاً**                     |
+| `02_delivery_partner_subscriptions.sql` | جدول اشتراكات التوصيل | **ثانياً** (بعد جدول التوصيل) |
 
 | الخطة      | السعر (USD) | الطلبات/يوم | العمولة |
 | ---------- | ----------- | ----------- | ------- |
 | **Free**   | $0          | **3 طلبات** | **15%** |
 | **Silver** | $19/شهر     | 10 طلبات    | 10%     |
 | **Gold**   | $49/شهر     | غير محدود   | 5%      |
-
-[📖 قراءة التوثيق](./04_seller_subscriptions/README.md) | [📖 قراءة التوثيق](./05_delivery_subscriptions/README.md)
-
----
-
-### الخطوة 4: جدول الباعة
-
-```bash
-# 4. جدول الباعة
-psql -f supabase/06_sellers/01_sellers_schema.sql
-```
-
-**المحتويات:**
-
-- جدول الباعة (`sellers`)
-- دوال إدارة الباعة
-- سياسات الأمان للباعة
-- إشعارات تغيير الحالة
-
-[📖 قراءة التوثيق](./06_sellers/README.md)
 
 ---
 
@@ -128,43 +115,33 @@ psql -f supabase/06_sellers/01_sellers_schema.sql
          │                  │
          ▼                  ▼
 ┌─────────────────┐  ┌─────────────────┐
-│     profiles    │  │     sellers     │
+│     profiles    │  │     sellers     │ (06_sellers)
 ├─────────────────┤  ├─────────────────┤
 │ id (PK)         │  │ id (PK)         │
 │ user_id (FK)    │  │ user_id (FK)    │
 │ ...             │  │ store_name      │
-└─────────────────┘  │ store_slug      │
-                     │ account_status  │
+└─────────────────┘  │ account_status  │
                      └────────┬────────┘
                               │
                               │ 1:1
                               ▼
                      ┌─────────────────┐
-                     │seller_subscript.│
+                     │seller_subscript.│ (04_seller_subscriptions/02)
                      ├─────────────────┤
                      │ plan_id (FK)    │
                      │ status          │
                      │ max_products    │
+                     └────────┬────────┘
+                              │
+                              │ N:1
+                              ▼
+                     ┌─────────────────┐
+                     │seller_subscript.│ (04_seller_subscriptions/01)
+                     ├─────────────────┤
+                     │ plan_type       │
+                     │ price_usd       │
+                     │ max_products    │
                      └─────────────────┘
-
-
-┌─────────────────┐
-│ delivery_partners│
-├─────────────────┤
-│ id (PK)         │
-│ user_id (FK)    │
-│ ...             │
-└────────┬────────┘
-         │
-         │ 1:1
-         ▼
-┌─────────────────────────┐
-│delivery_partner_subscript.│
-├─────────────────────────┤
-│ plan_id (FK)            │
-│ max_orders_per_day      │
-│ commission_rate         │
-└─────────────────────────┘
 ```
 
 ---
@@ -279,7 +256,8 @@ SELECT public.can_accept_order();
 -- التحقق من الجداول الموجودة
 SELECT table_name
 FROM information_schema.tables
-WHERE table_schema = 'public';
+WHERE table_schema = 'public'
+ORDER BY table_name;
 ```
 
 ### مشكلة: صلاحيات غير كافية
