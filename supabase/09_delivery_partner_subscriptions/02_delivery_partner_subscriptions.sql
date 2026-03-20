@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS public.delivery_partner_subscriptions (
   plan_id UUID NOT NULL REFERENCES public.delivery_subscription_plans(id),
 
   -- حالة الاشتراك
-  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'expired', 'cancelled', 'pending', 'trial')),
+  status TEXT DEFAULT 'active' CHECK (status = ANY (ARRAY['active', 'expired', 'cancelled', 'pending', 'trial'])),
 
   -- التواريخ
   start_date TIMESTAMPTZ DEFAULT NOW(),
