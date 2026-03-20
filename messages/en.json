@@ -170,6 +170,7 @@
     "createAccount": "Create Account",
     "menuItems": {
       "home": "Home",
+      "products": "Products",
       "cart": "Cart",
       "wishlist": "Wishlist",
       "orders": "Orders",

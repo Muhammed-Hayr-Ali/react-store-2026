@@ -18,13 +18,14 @@ import { siteConfig } from "@/lib/config/site_config"
 import Link from "next/link"
 import { appRouter } from "@/lib/config/app_router"
 import { useTranslations } from "next-intl"
+import { Book, Home, LifeBuoy, PackageOpen } from "lucide-react"
 
 export default function Header() {
   const t = useTranslations("Header")
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
   const { profile, user, signOut } = useAuth()
   const avatar = profile?.avatar_url
-  const menuItems = user ? siteConfig.userMenuItems : siteConfig.guestMenuItems
+  const menuItems = user ? siteConfig.userMenuItems : []
 
   const handleLogout = async () => {
     await signOut()
@@ -108,6 +109,18 @@ export default function Header() {
         </MobileMenuHeader>
 
         <MobileMenuBody>
+          <MobileMenuItem key="home" href={appRouter.home} icon={Home}>
+            {t("menuItems.home")}
+          </MobileMenuItem>
+
+          <MobileMenuItem
+            key="products"
+            href={appRouter.home}
+            icon={PackageOpen}
+          >
+            {t("menuItems.products")}
+          </MobileMenuItem>
+
           {menuItems.map((item) => (
             <MobileMenuItem
               key={`/${item.key}`}
@@ -117,6 +130,14 @@ export default function Header() {
               {t("menuItems." + item.key)}
             </MobileMenuItem>
           ))}
+
+          <MobileMenuItem key="support" href={appRouter.home} icon={LifeBuoy}>
+            {t("menuItems.support")}
+          </MobileMenuItem>
+
+          <MobileMenuItem key="documentation" href={appRouter.home} icon={Book}>
+            {t("menuItems.documentation")}
+          </MobileMenuItem>
         </MobileMenuBody>
 
         <MobileMenuFooter>

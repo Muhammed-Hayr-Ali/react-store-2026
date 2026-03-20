@@ -58,7 +58,6 @@ export const siteConfig = {
   ],
 
   userMenuItems: [
-    { icon: Home, label: "Home", key: "home", href: "" },
     { icon: ShoppingCart, label: "Cart", key: "cart", href: "/cart" },
     { icon: Heart, label: "Wishlist", key: "wishlist", href: "/wishlist" },
     {
@@ -83,16 +82,6 @@ export const siteConfig = {
     { icon: Book, label: "Documentation", key: "documentation", href: "docs" },
   ],
 
-  guestMenuItems: [
-    { icon: Home, label: "Home", key: "home", href: "/" },
-    {
-      icon: LifeBuoy,
-      label: "Help & Support",
-      key: "support",
-      href: "/support",
-    },
-    { icon: Book, label: "Documentation", key: "documentation", href: "/docs" },
-  ],
 
   quickLinks: [
     { label: "home", href: "/" },
