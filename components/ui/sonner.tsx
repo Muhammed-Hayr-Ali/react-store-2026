@@ -8,7 +8,7 @@ import {
   AlertTriangleIcon,
   XOctagonIcon,
   LoaderCircleIcon,
-} from "@/components/shared/new-icons"
+} from "@/components/shared/icons"
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme()

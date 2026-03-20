@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { appRouter } from "@/lib/config/app_router"
 import { useEffect, useState } from "react"
-import { LockIcon } from "@/components/shared/new-icons"
+import { LockIcon } from "@/components/shared/icons"
 
 import {
   AlertDialog,

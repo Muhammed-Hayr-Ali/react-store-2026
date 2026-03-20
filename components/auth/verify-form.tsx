@@ -21,7 +21,7 @@ import {
 import { toast } from "sonner"
 import { appRouter } from "@/lib/config/app_router"
 import { Spinner } from "@/components/ui/spinner"
-import { ShieldCheckIcon } from "@/components/shared/new-icons"
+import { ShieldCheckIcon } from "@/components/shared/icons"
 
 export default function VerifyForm() {
   const t = useTranslations("Verify")

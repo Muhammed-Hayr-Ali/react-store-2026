@@ -28,10 +28,10 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 ```
 
-| الإضافة | الوصف |
-|---------|-------|
-| `pg_trgm` | دعم البحث النصي المتقدم (Trigram) |
-| `uuid-ossp` | توليد معرفات فريدة من نوع UUID |
+| الإضافة     | الوصف                             |
+| ----------- | --------------------------------- |
+| `pg_trgm`   | دعم البحث النصي المتقدم (Trigram) |
+| `uuid-ossp` | توليد معرفات فريدة من نوع UUID    |
 
 ---
 
@@ -41,20 +41,22 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 يخزن جميع الأدوار المتاحة في النظام.
 
-| العمود | النوع | الوصف |
-|--------|-------|-------|
-| `id` | UUID | المعرف الفريد للدور (تلقائي) |
-| `name` | TEXT | اسم الدور (فريد) |
-| `description` | TEXT | وصف الدور |
-| `is_system` | BOOLEAN | هل هو دور نظام؟ (لا يمكن حذفه) |
-| `created_at` | TIMESTAMPTZ | تاريخ الإنشاء |
-| `updated_at` | TIMESTAMPTZ | تاريخ آخر تحديث |
+| العمود        | النوع       | الوصف                          |
+| ------------- | ----------- | ------------------------------ |
+| `id`          | UUID        | المعرف الفريد للدور (تلقائي)   |
+| `name`        | TEXT        | اسم الدور (فريد)               |
+| `description` | TEXT        | وصف الدور                      |
+| `is_system`   | BOOLEAN     | هل هو دور نظام؟ (لا يمكن حذفه) |
+| `created_at`  | TIMESTAMPTZ | تاريخ الإنشاء                  |
+| `updated_at`  | TIMESTAMPTZ | تاريخ آخر تحديث                |
 
 **الأدوار الافتراضية:**
+
 - `admin` - مدير النظام (صلاحيات كاملة)
 - `vendor` - بائع (إدارة المنتجات والطلبات)
 - `customer` - عميل (تصفح وشراء فقط)
 - `support` - دعم فني (قراءة وتعديل محدود)
+- `delivery_partner` - موظف توصيل (توصيل الطلبات)
 
 ---
 
@@ -62,34 +64,38 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 يخزن جميع الصلاحيات المتاحة في النظام.
 
-| العمود | النوع | الوصف |
-|--------|-------|-------|
-| `id` | UUID | المعرف الفريد للصلاحية (تلقائي) |
-| `name` | TEXT | اسم الصلاحية (فريد) |
-| `description` | TEXT | وصف الصلاحية |
-| `resource` | TEXT | المورد (مثلاً: products, orders) |
-| `action` | TEXT | الإجراء (مثلاً: create, read, update, delete) |
-| `created_at` | TIMESTAMPTZ | تاريخ الإنشاء |
+| العمود        | النوع       | الوصف                                         |
+| ------------- | ----------- | --------------------------------------------- |
+| `id`          | UUID        | المعرف الفريد للصلاحية (تلقائي)               |
+| `name`        | TEXT        | اسم الصلاحية (فريد)                           |
+| `description` | TEXT        | وصف الصلاحية                                  |
+| `resource`    | TEXT        | المورد (مثلاً: products, orders)              |
+| `action`      | TEXT        | الإجراء (مثلاً: create, read, update, delete) |
+| `created_at`  | TIMESTAMPTZ | تاريخ الإنشاء                                 |
 
 **الصلاحيات الافتراضية:**
 
-| الصلاحية | المورد | الإجراء | الوصف |
-|----------|--------|---------|-------|
-| `profile:read` | profile | read | قراءة الملف الشخصي |
-| `profile:update` | profile | update | تعديل الملف الشخصي |
-| `profile:delete` | profile | delete | حذف الملف الشخصي |
-| `products:read` | products | read | قراءة المنتجات |
-| `products:create` | products | create | إنشاء منتج |
-| `products:update` | products | update | تعديل منتج |
-| `products:delete` | products | delete | حذف منتج |
-| `orders:read` | orders | read | قراءة الطلبات |
-| `orders:create` | orders | create | إنشاء طلب |
-| `orders:update` | orders | update | تعديل طلب |
-| `orders:cancel` | orders | cancel | إلغاء طلب |
-| `users:read` | users | read | قراءة بيانات المستخدمين |
-| `users:update` | users | update | تعديل بيانات المستخدمين |
-| `users:delete` | users | delete | حذف المستخدمين |
-| `users:manage_roles` | users | manage_roles | إدارة أدوار المستخدمين |
+| الصلاحية              | المورد     | الإجراء      | الوصف                   |
+| --------------------- | ---------- | ------------ | ----------------------- |
+| `profile:read`        | profile    | read         | قراءة الملف الشخصي      |
+| `profile:update`      | profile    | update       | تعديل الملف الشخصي      |
+| `profile:delete`      | profile    | delete       | حذف الملف الشخصي        |
+| `products:read`       | products   | read         | قراءة المنتجات          |
+| `products:create`     | products   | create       | إنشاء منتج              |
+| `products:update`     | products   | update       | تعديل منتج              |
+| `products:delete`     | products   | delete       | حذف منتج                |
+| `orders:read`         | orders     | read         | قراءة الطلبات           |
+| `orders:create`       | orders     | create       | إنشاء طلب               |
+| `orders:update`       | orders     | update       | تعديل طلب               |
+| `orders:cancel`       | orders     | cancel       | إلغاء طلب               |
+| `users:read`          | users      | read         | قراءة بيانات المستخدمين |
+| `users:update`        | users      | update       | تعديل بيانات المستخدمين |
+| `users:delete`        | users      | delete       | حذف المستخدمين          |
+| `users:manage_roles`  | users      | manage_roles | إدارة أدوار المستخدمين  |
+| `deliveries:read`     | deliveries | read         | قراءة التوصيلات         |
+| `deliveries:accept`   | deliveries | accept       | قبول توصيلة             |
+| `deliveries:update`   | deliveries | update       | تحديث حالة التوصيلة     |
+| `deliveries:complete` | deliveries | complete     | إكمال التوصيلة          |
 
 ---
 
@@ -97,16 +103,17 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 يربط المستخدمين بالأدوار الممنوحة لهم.
 
-| العمود | النوع | الوصف |
-|--------|-------|-------|
-| `id` | UUID | المعرف الفريد (تلقائي) |
-| `user_id` | UUID | معرف المستخدم (من auth.users) |
-| `role_id` | UUID | معرف الدور |
-| `granted_by` | UUID | من منح الدور (معرف المستخدم) |
-| `granted_at` | TIMESTAMPTZ | تاريخ المنح |
+| العمود       | النوع       | الوصف                                      |
+| ------------ | ----------- | ------------------------------------------ |
+| `id`         | UUID        | المعرف الفريد (تلقائي)                     |
+| `user_id`    | UUID        | معرف المستخدم (من auth.users)              |
+| `role_id`    | UUID        | معرف الدور                                 |
+| `granted_by` | UUID        | من منح الدور (معرف المستخدم)               |
+| `granted_at` | TIMESTAMPTZ | تاريخ المنح                                |
 | `expires_at` | TIMESTAMPTZ | تاريخ الانتهاء (اختياري - للأدوار المؤقتة) |
 
 **قيود:**
+
 - كل مستخدم يمكن أن يملك دورًا واحدًا فقط من كل نوع (UNIQUE constraint)
 - عند حذف المستخدم، تحذف جميع أدواره (ON DELETE CASCADE)
 - عند حذف الدور، تحذف جميع assignments (ON DELETE CASCADE)
@@ -117,14 +124,15 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 يربط الأدوار بالصلاحيات الممنوحة لها.
 
-| العمود | النوع | الوصف |
-|--------|-------|-------|
-| `id` | UUID | المعرف الفريد (تلقائي) |
-| `role_id` | UUID | معرف الدور |
-| `permission_id` | UUID | معرف الصلاحية |
-| `granted_at` | TIMESTAMPTZ | تاريخ المنح |
+| العمود          | النوع       | الوصف                  |
+| --------------- | ----------- | ---------------------- |
+| `id`            | UUID        | المعرف الفريد (تلقائي) |
+| `role_id`       | UUID        | معرف الدور             |
+| `permission_id` | UUID        | معرف الصلاحية          |
+| `granted_at`    | TIMESTAMPTZ | تاريخ المنح            |
 
 **قيود:**
+
 - كل دور يمكن أن يملك صلاحية واحدة فقط من كل نوع (UNIQUE constraint)
 - عند حذف الدور أو الصلاحية، تحذف العلاقة (ON DELETE CASCADE)
 
@@ -150,12 +158,63 @@ CREATE INDEX idx_role_permissions_permission_id ON public.role_permissions(permi
 
 ### 4.1 توزيع الصلاحيات على الأدوار
 
-| الدور | الصلاحيات الممنوحة |
-|-------|-------------------|
-| **admin** | جميع الصلاحيات (كاملة) |
-| **vendor** | profile (read, update, delete), products (read, create, update, delete), orders (read, create, update, delete) |
-| **customer** | profile (read, update), products (read), orders (read, create) |
-| **support** | profile (read, update), users (read, update), orders (read, update) |
+| الدور                | الصلاحيات الممنوحة                                                                                             |
+| -------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **admin**            | جميع الصلاحيات (كاملة)                                                                                         |
+| **vendor**           | profile (read, update, delete), products (read, create, update, delete), orders (read, create, update, delete) |
+| **customer**         | profile (read, update), products (read), orders (read, create)                                                 |
+| **support**          | profile (read, update), users (read, update), orders (read, update)                                            |
+| **delivery_partner** | profile (read, update), deliveries (read, accept, update, complete), orders (read, update)                     |
+
+---
+
+## 4.2 سير عمل الطلبات والتوصيل (Order & Delivery Workflow)
+
+```
+┌─────────────┐
+│  Customer   │──── orders:create ──▶ creates order
+└─────────────┘                       status: 'pending'
+
+┌─────────────┐
+│   Vendor    │◄─── orders:read ───── sees new order
+│             │──── orders:update ──▶ status: 'preparing'
+│             │──── orders:update ──▶ status: 'ready_for_delivery'
+└─────────────┘
+
+┌─────────────────┐
+│ Delivery Partner│◄── deliveries:read ─── sees available deliveries
+│                 │◄── orders:read (ready) ─ sees ready orders
+│                 │──── deliveries:accept ─▶ accepts delivery
+│                 │──── deliveries:update ─▶ status: 'picked_up'
+│                 │──── deliveries:update ─▶ status: 'in_transit'
+│                 │──── deliveries:complete ─▶ status: 'delivered'
+└─────────────────┘
+```
+
+### حالات الطلب (Order Statuses)
+
+| الحالة               | الوصف                | من يغيرها        |
+| -------------------- | -------------------- | ---------------- |
+| `pending`            | بانتظار تأكيد البائع | Customer         |
+| `confirmed`          | البائع أكد الطلب     | Vendor           |
+| `preparing`          | البائع يجهز الطلب    | Vendor           |
+| `ready_for_delivery` | جاهز للتوصيل         | Vendor           |
+| `in_transit`         | في الطريق            | Delivery Partner |
+| `delivered`          | تم التسليم           | Delivery Partner |
+| `cancelled`          | ملغى                 | Customer/Vendor  |
+| `refunded`           | تم الاسترجاع         | Admin/Support    |
+
+### حالات التوصيلة (Delivery Statuses)
+
+| الحالة       | الوصف          | من يغيرها        |
+| ------------ | -------------- | ---------------- |
+| `pending`    | بانتظار السائق | System           |
+| `assigned`   | تم تعيين سائق  | Vendor/Admin     |
+| `accepted`   | السائق قبل     | Delivery Partner |
+| `picked_up`  | استلم الطلب    | Delivery Partner |
+| `in_transit` | في الطريق      | Delivery Partner |
+| `delivered`  | تم التسليم     | Delivery Partner |
+| `failed`     | فشل التوصيل    | Delivery Partner |
 
 ---
 
@@ -173,6 +232,7 @@ CREATE INDEX idx_role_permissions_permission_id ON public.role_permissions(permi
 **الإرجاع:** `BOOLEAN` (TRUE إذا كان يملك الدور)
 
 **مثال:**
+
 ```sql
 SELECT public.has_role('admin');
 -- TRUE إذا كان المستخدم مديرًا
@@ -192,6 +252,7 @@ SELECT public.has_role('admin');
 **الإرجاع:** `BOOLEAN`
 
 **مثال:**
+
 ```sql
 SELECT public.has_permission('products:delete');
 -- TRUE إذا كان يملك صلاحية حذف المنتجات
@@ -212,6 +273,7 @@ SELECT public.has_permission('products:delete');
 **الإرجاع:** `BOOLEAN`
 
 **مثال:**
+
 ```sql
 SELECT public.has_permission_on_resource('products', 'create');
 -- TRUE إذا كان يملك صلاحية إنشاء المنتجات
@@ -226,6 +288,7 @@ SELECT public.has_permission_on_resource('products', 'create');
 **الإرجاع:** TABLE(role_name TEXT, granted_at TIMESTAMPTZ)
 
 **مثال:**
+
 ```sql
 SELECT * FROM public.get_user_roles();
 -- يعرض جميع أدوار المستخدم الحالي
@@ -240,6 +303,7 @@ SELECT * FROM public.get_user_roles();
 **الإرجاع:** TABLE(permission_name TEXT, resource TEXT, action TEXT)
 
 **مثال:**
+
 ```sql
 SELECT * FROM public.get_user_permissions();
 -- يعرض جميع صلاحيات المستخدم الحالي
@@ -254,6 +318,7 @@ SELECT * FROM public.get_user_permissions();
 **الإرجاع:** `BOOLEAN`
 
 **مثال:**
+
 ```sql
 SELECT public.is_admin();
 -- TRUE إذا كان المستخدم مديرًا
@@ -276,6 +341,7 @@ SELECT public.is_admin();
 **الإرجاع:** `BOOLEAN`
 
 **مثال:**
+
 ```sql
 SELECT public.owns_record('products', '123e4567-e89b-12d3-a456-426614174000');
 -- TRUE إذا كان المستخدم يملك هذا المنتج
@@ -297,6 +363,7 @@ SELECT public.owns_record('products', '123e4567-e89b-12d3-a456-426614174000');
 **الإرجاع:** `BOOLEAN`
 
 **مثال:**
+
 ```sql
 SELECT public.owns_product('123e4567-e89b-12d3-a456-426614174000');
 ```
@@ -315,6 +382,7 @@ SELECT public.owns_product('123e4567-e89b-12d3-a456-426614174000');
 **الإرجاع:** `BOOLEAN`
 
 **مثال:**
+
 ```sql
 SELECT public.owns_order('123e4567-e89b-12d3-a456-426614174000');
 -- TRUE إذا كان المستخدم هو من قدم هذا الطلب
@@ -336,11 +404,13 @@ SELECT public.owns_order('123e4567-e89b-12d3-a456-426614174000');
 **الإرجاع:** `BOOLEAN`
 
 **منطق التحقق:**
+
 ```
 RETURN is_admin OR (has_perm AND is_owner);
 ```
 
 **مثال:**
+
 ```sql
 SELECT public.can_manage_record('products', '123e4567-e89b-12d3-a456-426614174000', 'delete');
 -- TRUE إذا كان:
@@ -363,6 +433,7 @@ SELECT public.can_manage_record('products', '123e4567-e89b-12d3-a456-42661417400
 **الإرجاع:** `BOOLEAN`
 
 **مثال:**
+
 ```sql
 SELECT public.can_manage_product('123e4567-e89b-12d3-a456-426614174000', 'update');
 ```
@@ -384,10 +455,12 @@ SELECT public.can_manage_product('123e4567-e89b-12d3-a456-426614174000', 'update
 **الإرجاع:** `BOOLEAN`
 
 **الشروط:**
+
 - يجب أن يكون المستخدم الحالي مديرًا
 - يجب أن يكون الدور موجودًا
 
 **مثال:**
+
 ```sql
 SELECT public.grant_role_to_user('user-uuid-here', 'vendor');
 -- منح دور البائع لمستخدم
@@ -408,10 +481,12 @@ SELECT public.grant_role_to_user('user-uuid-here', 'vendor');
 **الإرجاع:** `BOOLEAN`
 
 **الشروط:**
+
 - يجب أن يكون المستخدم الحالي مديرًا
 - لا يمكن للمستخدم إزالة دور المدير عن نفسه
 
 **مثال:**
+
 ```sql
 SELECT public.revoke_role_from_user('user-uuid-here', 'vendor');
 -- سحب دور البائع من مستخدم
@@ -432,6 +507,7 @@ SELECT public.revoke_role_from_user('user-uuid-here', 'vendor');
 **الإرجاع:** `BOOLEAN`
 
 **مثال:**
+
 ```sql
 SELECT public.grant_permission_to_role('vendor', 'users:read');
 -- منح صلاحية قراءة المستخدمين لدور البائع
@@ -452,9 +528,11 @@ SELECT public.grant_permission_to_role('vendor', 'users:read');
 **الإرجاع:** `BOOLEAN`
 
 **الشروط:**
+
 - لا يمكن سحب الصلاحيات من أدوار النظام (is_system = TRUE)
 
 **مثال:**
+
 ```sql
 SELECT public.revoke_permission_from_role('support', 'users:update');
 -- سحب صلاحية تعديل المستخدمين من دور الدعم
@@ -466,38 +544,38 @@ SELECT public.revoke_permission_from_role('support', 'users:update');
 
 ### 8.1 جدول الأدوار `public.roles`
 
-| السياسة | النوع | الشرط |
-|---------|-------|-------|
-| `roles_public_read` | SELECT | الجميع يمكنهم القراءة |
-| `roles_admin_manage` | ALL | المدراء فقط يمكنهم الإدارة |
+| السياسة              | النوع  | الشرط                      |
+| -------------------- | ------ | -------------------------- |
+| `roles_public_read`  | SELECT | الجميع يمكنهم القراءة      |
+| `roles_admin_manage` | ALL    | المدراء فقط يمكنهم الإدارة |
 
 ---
 
 ### 8.2 جدول الصلاحيات `public.permissions`
 
-| السياسة | النوع | الشرط |
-|---------|-------|-------|
-| `permissions_public_read` | SELECT | الجميع يمكنهم القراءة |
-| `permissions_admin_manage` | ALL | المدراء فقط يمكنهم الإدارة |
+| السياسة                    | النوع  | الشرط                      |
+| -------------------------- | ------ | -------------------------- |
+| `permissions_public_read`  | SELECT | الجميع يمكنهم القراءة      |
+| `permissions_admin_manage` | ALL    | المدراء فقط يمكنهم الإدارة |
 
 ---
 
 ### 8.3 جدول أدوار المستخدمين `public.user_roles`
 
-| السياسة | النوع | الشرط |
-|---------|-------|-------|
-| `user_roles_read_own` | SELECT | المستخدم يقرأ أدواره فقط |
+| السياسة                     | النوع  | الشرط                       |
+| --------------------------- | ------ | --------------------------- |
+| `user_roles_read_own`       | SELECT | المستخدم يقرأ أدواره فقط    |
 | `user_roles_admin_read_all` | SELECT | المدراء يقرأون جميع الأدوار |
-| `user_roles_admin_manage` | ALL | المدراء فقط يديرون الأدوار |
+| `user_roles_admin_manage`   | ALL    | المدراء فقط يديرون الأدوار  |
 
 ---
 
 ### 8.4 جدول صلاحيات الأدوار `public.role_permissions`
 
-| السياسة | النوع | الشرط |
-|---------|-------|-------|
-| `role_permissions_public_read` | SELECT | الجميع يمكنهم القراءة |
-| `role_permissions_admin_manage` | ALL | المدراء فقط يمكنهم الإدارة |
+| السياسة                         | النوع  | الشرط                      |
+| ------------------------------- | ------ | -------------------------- |
+| `role_permissions_public_read`  | SELECT | الجميع يمكنهم القراءة      |
+| `role_permissions_admin_manage` | ALL    | المدراء فقط يمكنهم الإدارة |
 
 ---
 
@@ -565,17 +643,17 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 export async function createProduct(req: Request) {
   const supabase = createClient(...)
-  
+
   // التحقق من الصلاحية
   const { data: hasPermission } = await supabase.rpc(
     'has_permission',
     { permission_name: 'products:create' }
   )
-  
+
   if (!hasPermission) {
     return new Response('Unauthorized', { status: 403 })
   }
-  
+
   // إنشاء المنتج...
 }
 ```
@@ -590,27 +668,27 @@ import { useSupabase } from '@/hooks/useSupabase'
 
 export function ProductForm() {
   const supabase = useSupabase()
-  
+
   const checkPermission = async () => {
     const { data } = await supabase
-      .rpc('has_permission', { 
-        permission_name: 'products:create' 
+      .rpc('has_permission', {
+        permission_name: 'products:create'
       })
       .single()
-    
+
     return data
   }
-  
+
   const handleSubmit = async (data) => {
     const canCreate = await checkPermission()
     if (!canCreate) {
       alert('ليس لديك صلاحية إنشاء منتجات')
       return
     }
-    
+
     // إنشاء المنتج...
   }
-  
+
   return (...)
 }
 ```
@@ -641,7 +719,9 @@ SELECT public.revoke_role_from_user(
 ## 🔐 أفضل الممارسات الأمنية
 
 ### 1. استخدام الدوال المُحسّنة
+
 استخدم الدوال المخصصة لكل جدول بدلاً من الدوال العامة للأداء الأفضل:
+
 ```sql
 -- ✅ أفضل
 SELECT public.owns_product(product_id);
@@ -653,7 +733,9 @@ SELECT public.can_manage_record('products', product_id, 'delete');
 ```
 
 ### 2. التحقق المزدوج (الصلاحية + الملكية)
+
 دائمًا استخدم `can_manage_*` للعمليات الحساسة:
+
 ```sql
 -- ✅ صحيح
 DELETE FROM products
@@ -665,13 +747,16 @@ WHERE id = $1 AND public.has_permission('products:delete');
 ```
 
 ### 3. حماية أدوار النظام
+
 أدوار النظام (is_system = TRUE) لا يمكن تعديل صلاحياتها:
+
 ```sql
 -- سيرفع خطأ
 SELECT public.revoke_permission_from_role('admin', 'products:delete');
 ```
 
 ### 4. منع إزالة دور المدير عن النفس
+
 ```sql
 -- سيرفع خطأ
 SELECT public.revoke_role_from_user(auth.uid(), 'admin');
@@ -706,25 +791,75 @@ SELECT public.revoke_role_from_user(auth.uid(), 'admin');
 │ granted_at              │         └─────────────────────────┘
 │ expires_at              │
 └─────────────────────────┘
+
+┌─────────────────┐         ┌─────────────────────┐
+│    orders       │         │   deliveries        │
+├─────────────────┤         ├─────────────────────┤
+│ id (PK)         │         │ id (PK)             │
+│ customer_id     │         │ order_id (FK)       │
+│ vendor_id       │         │ delivery_partner_id │
+│ status          │         │ picked_at           │
+│ items (JSONB)   │         │ delivered_at        │
+│ total_amount    │         │ status              │
+│ shipping_address│         │ rating              │
+│ created_at      │         │ review              │
+│ updated_at      │         │ created_at          │
+└─────────────────┘         └─────────────────────┘
 ```
+
+**ملاحظة:** جدول `orders` وجدول `deliveries` منفصلان لتحقيق:
+
+1. فصل المسؤوليات (البائع يدير الطلب، السائق يدير التوصيلة)
+2. طلب واحد قد يكون له عدة توصيلات
+3. السائق لا يرى كل تفاصيل الطلب المالية
+4. تتبع أفضل لعمليات التوصيل والتقييم
 
 ---
 
 ## 🚀 الترقية والصيانة
 
 ### إضافة دور جديد
+
 ```sql
 INSERT INTO public.roles (name, description, is_system)
 VALUES ('moderator', 'مراقب - صلاحيات متوسطة', FALSE);
 ```
 
+### إضافة دور موظف التوصيل
+
+```sql
+-- 1. إضافة الدور
+INSERT INTO public.roles (name, description, is_system)
+VALUES ('delivery_partner', 'موظف توصيل - توصيل الطلبات', TRUE);
+
+-- 2. إضافة الصلاحيات
+INSERT INTO public.permissions (name, description, resource, action) VALUES
+  ('deliveries:read', 'قراءة التوصيلات', 'deliveries', 'read'),
+  ('deliveries:accept', 'قبول توصيلة', 'deliveries', 'accept'),
+  ('deliveries:update', 'تحديث حالة التوصيلة', 'deliveries', 'update'),
+  ('deliveries:complete', 'إكمال التوصيلة', 'deliveries', 'complete');
+
+-- 3. ربط الصلاحيات بالدور
+INSERT INTO public.role_permissions (role_id, permission_id)
+SELECT r.id, p.id FROM public.roles r, public.permissions p
+WHERE r.name = 'delivery_partner'
+  AND p.name IN (
+    'profile:read', 'profile:update',
+    'deliveries:read', 'deliveries:accept',
+    'deliveries:update', 'deliveries:complete',
+    'orders:read', 'orders:update'
+  );
+```
+
 ### إضافة صلاحية جديدة
+
 ```sql
 INSERT INTO public.permissions (name, description, resource, action)
 VALUES ('products:publish', 'نشر منتج', 'products', 'publish');
 ```
 
 ### منح الصلاحية لدور
+
 ```sql
 SELECT public.grant_permission_to_role('vendor', 'products:publish');
 ```

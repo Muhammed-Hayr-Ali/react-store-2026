@@ -72,7 +72,8 @@ INSERT INTO public.roles (name, description, is_system) VALUES
   ('admin', 'مدير النظام - صلاحيات كاملة', TRUE),
   ('vendor', 'بائع - إدارة المنتجات والطلبات', TRUE),
   ('customer', 'عميل - تصفح وشراء فقط', TRUE),
-  ('support', 'دعم فني - قراءة وتعديل محدود', TRUE)
+  ('support', 'دعم فني - قراءة وتعديل محدود', TRUE),
+  ('delivery_partner', 'موظف توصيل - توصيل الطلبات', TRUE)
 ON CONFLICT (name) DO NOTHING;
 
 -- إدخال الصلاحيات الأساسية
@@ -98,7 +99,17 @@ INSERT INTO public.permissions (name, description, resource, action) VALUES
   ('users:read', 'قراءة بيانات المستخدمين', 'users', 'read'),
   ('users:update', 'تعديل بيانات المستخدمين', 'users', 'update'),
   ('users:delete', 'حذف المستخدمين', 'users', 'delete'),
-  ('users:manage_roles', 'إدارة أدوار المستخدمين', 'users', 'manage_roles')
+  ('users:manage_roles', 'إدارة أدوار المستخدمين', 'users', 'manage_roles'),
+
+  -- صلاحيات التوصيل
+  ('deliveries:read', 'قراءة التوصيلات', 'deliveries', 'read'),
+  ('deliveries:accept', 'قبول توصيلة', 'deliveries', 'accept'),
+  ('deliveries:update', 'تحديث حالة التوصيلة', 'deliveries', 'update'),
+  ('deliveries:complete', 'إكمال التوصيلة', 'deliveries', 'complete'),
+
+  -- صلاحيات الطلبات (لموظفي التوصيل)
+  ('orders:read', 'قراءة الطلبات', 'orders', 'read'),
+  ('orders:update', 'تحديث حالة الطلب', 'orders', 'update')
 ON CONFLICT (name) DO NOTHING;
 
 -- ربط الأدوار بالصلاحيات (Admin - صلاحيات كاملة)
@@ -125,9 +136,20 @@ ON CONFLICT (role_id, permission_id) DO NOTHING;
 -- ربط الأدوار بالصلاحيات (Support - قراءة وتعديل محدود)
 INSERT INTO public.role_permissions (role_id, permission_id)
 SELECT r.id, p.id FROM public.roles r, public.permissions p
-WHERE r.name = 'support' 
+WHERE r.name = 'support'
   AND p.resource IN ('profile', 'users', 'orders')
   AND p.action IN ('read', 'update')
+ON CONFLICT (role_id, permission_id) DO NOTHING;
+
+-- ربط الأدوار بالصلاحيات (Delivery Partner - صلاحيات التوصيل والطلبات)
+INSERT INTO public.role_permissions (role_id, permission_id)
+SELECT r.id, p.id FROM public.roles r, public.permissions p
+WHERE r.name = 'delivery_partner'
+  AND p.name IN (
+    'profile:read', 'profile:update',
+    'deliveries:read', 'deliveries:accept', 'deliveries:update', 'deliveries:complete',
+    'orders:read', 'orders:update'
+  )
 ON CONFLICT (role_id, permission_id) DO NOTHING;
 
 -- =====================================================

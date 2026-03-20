@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl"
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { CopyIcon } from "@/components/shared/new-icons"
+import { CopyIcon } from "@/components/shared/icons"
 
 import { enrollMfa, verifyMfa } from "@/lib/actions/mfa/mfa"
 import { Button } from "@/components/ui/button"

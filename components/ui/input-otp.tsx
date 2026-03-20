@@ -4,7 +4,7 @@ import * as React from "react"
 import { OTPInput, OTPInputContext } from "input-otp"
 
 import { cn } from "@/lib/utils"
-import { MinusIcon } from "@/components/shared/new-icons"
+import { MinusIcon } from "@/components/shared/icons"
 
 function InputOTP({
   className,

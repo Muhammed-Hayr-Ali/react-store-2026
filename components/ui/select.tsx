@@ -8,7 +8,7 @@ import {
   ChevronDownIcon,
   CheckIcon,
   ChevronUpIcon,
-} from "@/components/shared/new-icons"
+} from "@/components/shared/icons"
 
 function Select({
   ...props

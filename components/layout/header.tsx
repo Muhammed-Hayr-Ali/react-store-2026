@@ -38,7 +38,7 @@ import {
   CheckIcon,
   LifeBuoyIcon,
   BookIcon,
-} from "@/components/shared/new-icons"
+} from "@/components/shared/icons"
 
 export default function Header() {
   const pathname = usePathname()
@@ -100,10 +100,10 @@ export default function Header() {
                   variant="default"
                   size="sm"
                   className="rounded-full px-4 shadow-none"
-                asChild
+                  asChild
                 >
                   <Link href={appRouter.signIn}>
-                  <span>{t("Get Started")}</span>
+                    <span>{t("Get Started")}</span>
                   </Link>
                 </Button>
               )}

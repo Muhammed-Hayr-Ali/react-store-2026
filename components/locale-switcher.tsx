@@ -2,7 +2,7 @@
 
 import { useLocale } from "next-intl"
 import { redirect, usePathname } from "next/navigation"
-import { LanguagesIcon } from "@/components/shared/new-icons"
+import { LanguagesIcon } from "@/components/shared/icons"
 
 import { Button } from "@/components/ui/button"
 import {

@@ -11,7 +11,7 @@ import {
   PaletteIcon,
   SunIcon,
   Ticket,
-} from "@/components/shared/new-icons"
+} from "@/components/shared/icons"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -37,7 +37,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { siteConfig } from "@/lib/config/site_config"
 import { useAuth } from "@/hooks/useAuth"
-import { UserIcon } from "@/components/shared/new-icons"
+import { UserIcon } from "@/components/shared/icons"
 
 export default function UserButtonClient() {
   const { user } = useAuth()

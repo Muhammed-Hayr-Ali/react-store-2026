@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { FieldLabel, FieldDescription } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
-import { MailIcon, ArrowLeftIcon } from "@/components/shared/new-icons"
+import { MailIcon, ArrowLeftIcon } from "@/components/shared/icons"
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 
