@@ -183,26 +183,27 @@ DECLARE
   v_subscription_active BOOLEAN;
 BEGIN
   -- الحصول على حد المنتجات من الاشتراك الحالي
-  SELECT sp.max_products, 
+  SELECT sp.max_products,
          EXISTS(SELECT 1 FROM public.seller_subscriptions WHERE seller_id = p_seller_id AND status = 'active')
   INTO v_max_products, v_subscription_active
   FROM public.seller_subscriptions ss
-  JOIN public.subscription_plans sp ON sp.id = ss.plan_id
+  JOIN public.seller_subscription_plans sp ON sp.id = ss.plan_id
   WHERE ss.seller_id = COALESCE(p_seller_id, (SELECT id FROM public.sellers WHERE user_id = auth.uid()))
     AND ss.status = 'active'
+    AND sp.plan_type = 'seller'
   ORDER BY ss.start_date DESC
   LIMIT 1;
-  
+
   -- إذا لم يكن هناك اشتراك فعال
   IF NOT v_subscription_active THEN
     RETURN FALSE;
   END IF;
-  
+
   -- عد المنتجات الحالية
   SELECT COUNT(*) INTO v_current_products
   FROM public.products
   WHERE vendor_id = (SELECT user_id FROM public.sellers WHERE id = p_seller_id);
-  
+
   RETURN v_current_products < v_max_products;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -225,12 +226,12 @@ DECLARE
   v_end_date TIMESTAMPTZ;
 BEGIN
   -- الحصول على معلومات الخطة
-  SELECT * INTO v_plan FROM public.subscription_plans WHERE id = p_plan_id;
-  
+  SELECT * INTO v_plan FROM public.seller_subscription_plans WHERE id = p_plan_id;
+
   IF NOT FOUND THEN
     RAISE EXCEPTION 'Subscription plan not found';
   END IF;
-  
+
   -- حساب تاريخ الانتهاء
   IF v_plan.billing_period = 'yearly' THEN
     v_end_date := NOW() + INTERVAL '1 year';
@@ -239,14 +240,14 @@ BEGIN
   ELSE
     v_end_date := NOW() + INTERVAL '1 month';
   END IF;
-  
+
   -- إلغاء الاشتراكات السابقة النشطة
   UPDATE public.seller_subscriptions
   SET status = 'cancelled',
       updated_at = NOW()
   WHERE seller_id = p_seller_id
     AND status = 'active';
-  
+
   -- إنشاء الاشتراك الجديد
   INSERT INTO public.seller_subscriptions (
     seller_id,
@@ -269,14 +270,14 @@ BEGIN
     p_amount_paid,
     v_end_date
   ) RETURNING id INTO v_subscription_id;
-  
+
   -- إذا كانت هناك فترة تجربة، حدد تاريخ انتهائها
   IF p_trial_days > 0 THEN
     UPDATE public.seller_subscriptions
     SET trial_end_date = NOW() + (p_trial_days || ' days')::INTERVAL
     WHERE id = v_subscription_id;
   END IF;
-  
+
   RETURN v_subscription_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -362,15 +363,15 @@ COMMENT ON FUNCTION public.renew_seller_subscription IS 'تجديد اشتراك
 -- 6. سياسات الأمان (Row Level Security)
 -- =====================================================
 
--- جدول خطط الاشتراك
-ALTER TABLE public.subscription_plans ENABLE ROW LEVEL SECURITY;
+-- جدول خطط اشتراكات الباعة
+ALTER TABLE public.seller_subscription_plans ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "subscription_plans_public_read" ON public.subscription_plans;
-CREATE POLICY "subscription_plans_public_read" ON public.subscription_plans FOR SELECT
-  TO authenticated USING (is_active = TRUE);
+DROP POLICY IF EXISTS "seller_subscription_plans_public_read" ON public.seller_subscription_plans;
+CREATE POLICY "seller_subscription_plans_public_read" ON public.seller_subscription_plans FOR SELECT
+  TO authenticated USING (is_active = TRUE AND plan_type = 'seller');
 
-DROP POLICY IF EXISTS "subscription_plans_admin_manage" ON public.subscription_plans;
-CREATE POLICY "subscription_plans_admin_manage" ON public.subscription_plans FOR ALL
+DROP POLICY IF EXISTS "seller_subscription_plans_admin_manage" ON public.seller_subscription_plans;
+CREATE POLICY "seller_subscription_plans_admin_manage" ON public.seller_subscription_plans FOR ALL
   TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
 
 -- جدول اشتراكات الباعة
@@ -398,9 +399,9 @@ CREATE POLICY "seller_subscriptions_admin_manage" ON public.seller_subscriptions
 -- 7. مشغلات التحديث التلقائي (Auto Update Triggers)
 -- =====================================================
 
-DROP TRIGGER IF EXISTS update_subscription_plans_updated_at ON public.subscription_plans;
-CREATE TRIGGER update_subscription_plans_updated_at
-  BEFORE UPDATE ON public.subscription_plans
+DROP TRIGGER IF EXISTS update_seller_subscription_plans_updated_at ON public.seller_subscription_plans;
+CREATE TRIGGER update_seller_subscription_plans_updated_at
+  BEFORE UPDATE ON public.seller_subscription_plans
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 DROP TRIGGER IF EXISTS update_seller_subscriptions_updated_at ON public.seller_subscriptions;
@@ -445,4 +446,5 @@ CREATE TRIGGER subscription_expiring_trigger
 -- 3. الخطة المجانية: 50 منتج
 -- 4. الخطة الفضية: $29/شهر - 200 منتج
 -- 5. الخطة الذهبية: $99/شهر - 1000 منتج
--- 6. جدول الباعة مطلوب لاستخدام دوال الاشتراكات (05_sellers)
+-- 6. جدول الباعة مطلوب لاستخدام دوال الاشتراكات (06_sellers)
+-- 7. اشتراكات التوصيل في ملف منفصل (05_delivery_subscriptions)
