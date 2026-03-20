@@ -11,7 +11,7 @@ import {
   PaletteIcon,
   SunIcon,
   Ticket,
-} from "lucide-react"
+} from "@/components/shared/new-icons"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -37,7 +37,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { siteConfig } from "@/lib/config/site_config"
 import { useAuth } from "@/hooks/useAuth"
-import { UserIcon } from "@/components/shared/icons"
+import { UserIcon } from "@/components/shared/new-icons"
 
 export default function UserButtonClient() {
   const { user } = useAuth()
@@ -93,7 +93,9 @@ export const UserButton = () => {
         <DropdownMenuGroup>
           <DropdownMenuLabel>
             <div className="flex flex-col">
-              <span className="text-sm text-foreground">{profile?.full_name}</span>
+              <span className="text-sm text-foreground">
+                {profile?.full_name}
+              </span>
               <span>{profile?.email}</span>
             </div>
           </DropdownMenuLabel>

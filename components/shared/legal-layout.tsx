@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
-import { ArrowLeft, ArrowRight } from "lucide-react"
+import { ArrowLeftIcon, ArrowRightIcon } from "@/components/shared/new-icons"
 import { useLocale } from "next-intl"
 import { Button } from "@/components/ui/button"
 
@@ -18,7 +18,7 @@ export function LegalLayout({ title, children }: LegalLayoutProps) {
   const isRtl = locale === "ar"
 
   return (
-    <main className="font-urbanist relative min-h-screen w-full overflow-x-hidden bg-background text-foreground selection:bg-emerald-500/30 py-12 px-4 md:py-20">
+    <main className="font-urbanist relative min-h-screen w-full overflow-x-hidden bg-background px-4 py-12 text-foreground selection:bg-emerald-500/30 md:py-20">
       {/* Background with Vibrant Blobs */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <motion.div
@@ -38,7 +38,12 @@ export function LegalLayout({ title, children }: LegalLayoutProps) {
             x: [0, -40, 0],
             y: [0, -20, 0],
           }}
-          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          transition={{
+            duration: 18,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1,
+          }}
           className="absolute right-[-10%] bottom-[-10%] h-[60%] w-[60%] rounded-full bg-orange-500/15 blur-[140px]"
         />
         <div className="blend-overlay absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
@@ -51,9 +56,17 @@ export function LegalLayout({ title, children }: LegalLayoutProps) {
           transition={{ duration: 0.8 }}
           className="mb-8"
         >
-          <Button variant="ghost" asChild className="gap-2 text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            asChild
+            className="gap-2 text-muted-foreground hover:text-foreground"
+          >
             <Link href="/">
-              {isRtl ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
+              {isRtl ? (
+                <ArrowRightIcon className="h-4 w-4" />
+              ) : (
+                <ArrowLeftIcon className="h-4 w-4" />
+              )}
               {t("backToHome")}
             </Link>
           </Button>
@@ -66,7 +79,7 @@ export function LegalLayout({ title, children }: LegalLayoutProps) {
           className="rounded-[2.5rem] border border-border bg-background/40 p-8 backdrop-blur-3xl md:p-12"
         >
           <header className="mb-12 border-b border-border pb-8">
-            <h1 className="mb-4 text-4xl font-black tracking-tight md:text-6xl text-foreground">
+            <h1 className="mb-4 text-4xl font-black tracking-tight text-foreground md:text-6xl">
               {title}
             </h1>
             <p className="text-sm font-medium tracking-widest text-muted-foreground uppercase">

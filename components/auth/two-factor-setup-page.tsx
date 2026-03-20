@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl"
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { Copy } from "lucide-react"
+import { CopyIcon } from "@/components/shared/new-icons"
 
 import { enrollMfa, verifyMfa } from "@/lib/actions/mfa/mfa"
 import { Button } from "@/components/ui/button"
@@ -160,7 +160,7 @@ export default function TwoFactorSetupPage() {
                         toast.success(t("copiedToClipboard") || "Copied!")
                       }}
                     >
-                      <Copy className="h-4 w-4" />
+                      <CopyIcon className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>

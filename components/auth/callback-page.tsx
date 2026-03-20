@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { appRouter } from "@/lib/config/app_router"
 import { useEffect, useState } from "react"
-import { Lock } from "lucide-react"
+import { LockIcon } from "@/components/shared/new-icons"
 
 import {
   AlertDialog,
@@ -131,7 +131,7 @@ export default function CallbackPage() {
       <div className="space-y-6 text-center">
         <div className="space-y-2">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
-            <Lock className="h-8 w-8 text-red-600 dark:text-red-400" />
+            <LockIcon className="h-8 w-8 text-red-600 dark:text-red-400" />
           </div>
           <h2 className="text-2xl font-semibold">{t("signInFailedTitle")}</h2>
           <p className="text-muted-foreground">

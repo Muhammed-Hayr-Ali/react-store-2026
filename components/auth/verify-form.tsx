@@ -21,7 +21,7 @@ import {
 import { toast } from "sonner"
 import { appRouter } from "@/lib/config/app_router"
 import { Spinner } from "@/components/ui/spinner"
-import { ShieldCheck } from "lucide-react"
+import { ShieldCheckIcon } from "@/components/shared/new-icons"
 
 export default function VerifyForm() {
   const t = useTranslations("Verify")
@@ -53,7 +53,7 @@ export default function VerifyForm() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary">
-            <ShieldCheck className="h-6 w-6 text-primary-foreground" />
+            <ShieldCheckIcon className="h-6 w-6 text-primary-foreground" />
           </div>
           <CardTitle className="text-2xl">{t("title")}</CardTitle>
           <CardDescription>{t("description")}</CardDescription>

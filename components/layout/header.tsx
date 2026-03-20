@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { AppLogo } from "@/components/shared/app-logo"
-import { ModeToggleIcon, UserBoldIcon } from "@/components/shared/icons"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import MenuButton from "@/components/shared/menu_button"
@@ -18,7 +17,7 @@ import { siteConfig } from "@/lib/config/site_config"
 import Link from "next/link"
 import { appRouter } from "@/lib/config/app_router"
 import { useLocale, useTranslations } from "next-intl"
-import { Book, Check, Globe, Home, LifeBuoy, PackageOpen } from "lucide-react"
+import {} from "lucide-react"
 import {
   Accordion,
   AccordionContent,
@@ -27,6 +26,19 @@ import {
 } from "@/components/ui/accordion"
 import { redirect, usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
+import {
+  MonitorIcon,
+  MoonIcon,
+  SunIcon,
+  UserIcon,
+  SearchIcon,
+  HomeIcon,
+  PackageIcon,
+  GlobeIcon,
+  CheckIcon,
+  LifeBuoyIcon,
+  BookIcon,
+} from "@/components/shared/new-icons"
 
 export default function Header() {
   const pathname = usePathname()
@@ -43,7 +55,6 @@ export default function Header() {
   }
 
   function onSelectChange(nextLocale: string) {
-    // ✅ redirect من next-intl تدعم locale بشكل صحيح مع TypeScript
     redirect(`/${nextLocale}${pathname}`)
   }
 
@@ -66,19 +77,7 @@ export default function Header() {
               variant="secondary"
               className="h-8 w-full max-w-md gap-2 rounded-full bg-background px-3 text-sm text-muted-foreground shadow-none hover:bg-background/80"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="size-4"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.3-4.3" />
-              </svg>
+              <SearchIcon className="size-4" />
               <span>{t("search")}</span>
             </Button>
           </div>
@@ -86,15 +85,28 @@ export default function Header() {
           {/* User Avatar / Menu - Right */}
           <nav className="flex grow-3 items-center justify-end gap-2">
             <div className="hidden items-center lg:flex">
-              <Avatar className="size-8">
-                <AvatarImage
-                  src={avatar || undefined}
-                  alt={profile?.full_name || ""}
-                />
-                <AvatarFallback className="p-1.5">
-                  <UserBoldIcon className="size-max text-foreground" />
-                </AvatarFallback>
-              </Avatar>
+              {user ? (
+                <Avatar className="size-8">
+                  <AvatarImage
+                    src={avatar || undefined}
+                    alt={profile?.full_name || ""}
+                  />
+                  <AvatarFallback className="p-1.5">
+                    <UserIcon className="size-max text-foreground" />
+                  </AvatarFallback>
+                </Avatar>
+              ) : (
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="rounded-full px-4 shadow-none"
+                asChild
+                >
+                  <Link href={appRouter.signIn}>
+                  <span>{t("Get Started")}</span>
+                  </Link>
+                </Button>
+              )}
             </div>
             {/* Mobile Menu Button */}
             <MenuButton
@@ -115,7 +127,7 @@ export default function Header() {
               alt={profile?.full_name || ""}
             />
             <AvatarFallback className="p-1.5">
-              <UserBoldIcon className="size-max text-foreground" />
+              <UserIcon className="size-max text-foreground" />
             </AvatarFallback>
           </Avatar>
 
@@ -130,14 +142,14 @@ export default function Header() {
         </MobileMenuHeader>
 
         <MobileMenuBody>
-          <MobileMenuItem key="home" href={appRouter.home} icon={Home}>
+          <MobileMenuItem key="home" href={appRouter.home} icon={HomeIcon}>
             {t("menuItems.home")}
           </MobileMenuItem>
 
           <MobileMenuItem
             key="products"
             href={appRouter.home}
-            icon={PackageOpen}
+            icon={PackageIcon}
           >
             {t("menuItems.products")}
           </MobileMenuItem>
@@ -157,8 +169,8 @@ export default function Header() {
           <Accordion type="single" collapsible defaultValue="item-2">
             <AccordionItem value="item-1">
               <AccordionTrigger className="p-0">
-                <MobileMenuItem key="language" className="w-auto p-0">
-                  <Globe className="mr-2 h-4 w-4" />
+                <MobileMenuItem key="language" className="w-auto">
+                  <GlobeIcon className="mr-2 h-4 w-4" />
                   {t("menuItems.language")}
                 </MobileMenuItem>
               </AccordionTrigger>
@@ -169,7 +181,7 @@ export default function Header() {
                   onClick={() => onSelectChange("ar")}
                 >
                   {locale === "ar" && (
-                    <Check className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
+                    <CheckIcon className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
                   )}
                   {t("menuItems.arabic")}
                 </MobileMenuItem>
@@ -179,7 +191,7 @@ export default function Header() {
                   onClick={() => onSelectChange("en")}
                 >
                   {locale === "en" && (
-                    <Check className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
+                    <CheckIcon className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
                   )}
                   {t("menuItems.english")}
                 </MobileMenuItem>
@@ -190,8 +202,13 @@ export default function Header() {
           <Accordion type="single" collapsible defaultValue="item-3">
             <AccordionItem value="item-1">
               <AccordionTrigger className="p-0">
-                <MobileMenuItem key="theme" className="w-auto p-0">
-                  <ModeToggleIcon className="mr-2 h-4 w-4" />
+                <MobileMenuItem key="theme" className="w-auto">
+                  {theme === "light" && <SunIcon className="mr-2 h-4 w-4" />}
+                  {theme === "dark" && <MoonIcon className="mr-2 h-4 w-4" />}
+                  {theme === "system" && (
+                    <MonitorIcon className="mr-2 h-4 w-4" />
+                  )}
+
                   {t("menuItems.theme")}
                 </MobileMenuItem>
               </AccordionTrigger>
@@ -202,7 +219,7 @@ export default function Header() {
                   onClick={() => handleThemeChange("system")}
                 >
                   {theme === "system" && (
-                    <Check className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
+                    <CheckIcon className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
                   )}
                   {t("menuItems.system")}
                 </MobileMenuItem>
@@ -213,7 +230,7 @@ export default function Header() {
                   onClick={() => handleThemeChange("dark")}
                 >
                   {theme === "dark" && (
-                    <Check className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
+                    <CheckIcon className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
                   )}
                   {t("menuItems.dark")}
                 </MobileMenuItem>
@@ -224,7 +241,7 @@ export default function Header() {
                   onClick={() => handleThemeChange("light")}
                 >
                   {theme === "light" && (
-                    <Check className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
+                    <CheckIcon className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
                   )}
                   {t("menuItems.light")}
                 </MobileMenuItem>
@@ -232,11 +249,19 @@ export default function Header() {
             </AccordionItem>
           </Accordion>
 
-          <MobileMenuItem key="support" href={appRouter.home} icon={LifeBuoy}>
+          <MobileMenuItem
+            key="support"
+            href={appRouter.home}
+            icon={LifeBuoyIcon}
+          >
             {t("menuItems.support")}
           </MobileMenuItem>
 
-          <MobileMenuItem key="documentation" href={appRouter.home} icon={Book}>
+          <MobileMenuItem
+            key="documentation"
+            href={appRouter.home}
+            icon={BookIcon}
+          >
             {t("menuItems.documentation")}
           </MobileMenuItem>
         </MobileMenuBody>

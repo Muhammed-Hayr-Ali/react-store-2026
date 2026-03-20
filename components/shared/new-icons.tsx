@@ -1,5 +1,4 @@
 import { cva, type VariantProps } from "class-variance-authority"
-
 import { cn } from "@/lib/utils"
 
 const svgVariants = cva("", {
@@ -18,11 +17,6 @@ const svgVariants = cva("", {
   },
 })
 
-export interface SvgProps
-  extends
-    React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof svgVariants> {}
-
 export interface IconProps
   extends React.SVGProps<SVGSVGElement>, VariantProps<typeof svgVariants> {}
 
@@ -32,6 +26,7 @@ export interface IconProps
 
 export const SearchIcon = ({ size, className, ...props }: IconProps) => (
   <svg
+    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -408,6 +403,42 @@ export const InfoIcon = ({ size, className, ...props }: IconProps) => (
   </svg>
 )
 
+export const AlertTriangleIcon = ({ size, className, ...props }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={cn(svgVariants({ size }), className)}
+    {...props}
+  >
+    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+    <path d="M12 9v4" />
+    <path d="M12 17h.01" />
+  </svg>
+)
+
+export const XOctagonIcon = ({ size, className, ...props }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={cn(svgVariants({ size }), className)}
+    {...props}
+  >
+    <path d="M10.293 2.293a2 2 0 0 1 1.414 0l5.586 2.293a2 2 0 0 0 1.414 0l2.293-2.293a2 2 0 0 1 2.293 0l2.293 2.293a2 2 0 0 1 0 2.293l-2.293 5.586a2 2 0 0 0 0 1.414l2.293 5.586a2 2 0 0 1 0 1.414l-2.293 2.293a2 2 0 0 1-2.293 0l-5.586-2.293a2 2 0 0 0-1.414 0l-5.586 2.293a2 2 0 0 1-1.414 0l-2.293-2.293a2 2 0 0 1 0-2.293l2.293-5.586a2 2 0 0 0 0-1.414L2.293 10.293a2 2 0 0 1 0-1.414l2.293-2.293a2 2 0 0 1 2.293 0l5.586 2.293a2 2 0 0 0 1.414 0l5.586-2.293a2 2 0 0 0 0-1.414l-2.293-2.293a2 2 0 0 0-2.293 0l-5.586 2.293a2 2 0 0 1-1.414 0L10.293 2.293Z" />
+    <path d="m15 9-6 6" />
+    <path d="m9 9 6 6" />
+  </svg>
+)
+
 // ─────────────────────────────────────────────────────────────────────────────
 // UI Icons
 // ─────────────────────────────────────────────────────────────────────────────
@@ -608,6 +639,122 @@ export const MoreVerticalIcon = ({ size, className, ...props }: IconProps) => (
     <circle cx="12" cy="12" r="1" />
     <circle cx="12" cy="5" r="1" />
     <circle cx="12" cy="19" r="1" />
+  </svg>
+)
+
+export const HelpCircleIcon = ({ size, className, ...props }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={cn(svgVariants({ size }), className)}
+    {...props}
+  >
+    <circle cx="12" cy="12" r="10" />
+    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+    <path d="M12 17h.01" />
+  </svg>
+)
+
+export const LanguagesIcon = ({ size, className, ...props }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={cn(svgVariants({ size }), className)}
+    {...props}
+  >
+    <path d="m5 8 6 6" />
+    <path d="m4 14 6-6 2-3" />
+    <path d="M2 5h12" />
+    <path d="M7 2h1" />
+    <path d="m22 22-5-10-5 10" />
+    <path d="M14 18h6" />
+  </svg>
+)
+
+export const LayoutDashboard = ({ size, className, ...props }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={cn(svgVariants({ size }), className)}
+    {...props}
+  >
+    <rect width="7" height="9" x="3" y="3" rx="1" />
+    <rect width="7" height="5" x="14" y="3" rx="1" />
+    <rect width="7" height="9" x="14" y="12" rx="1" />
+    <rect width="7" height="5" x="3" y="16" rx="1" />
+  </svg>
+)
+
+export const Package = ({ size, className, ...props }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={cn(svgVariants({ size }), className)}
+    {...props}
+  >
+    <path d="m7.5 4.27 9 5.15" />
+    <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+    <path d="m3.3 7 8.7 5 8.7-5" />
+    <path d="M12 22V12" />
+  </svg>
+)
+
+export const PaletteIcon = ({ size, className, ...props }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={cn(svgVariants({ size }), className)}
+    {...props}
+  >
+    <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
+    <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
+    <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
+    <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
+    <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
+  </svg>
+)
+
+export const Ticket = ({ size, className, ...props }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={cn(svgVariants({ size }), className)}
+    {...props}
+  >
+    <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
+    <path d="M13 5v2" />
+    <path d="M13 17v2" />
+    <path d="M13 11v2" />
   </svg>
 )
 
@@ -1038,6 +1185,44 @@ export const BookmarkIcon = ({ size, className, ...props }: IconProps) => (
     {...props}
   >
     <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
+  </svg>
+)
+
+export const BookIcon = ({ size, className, ...props }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={cn(svgVariants({ size }), className)}
+    {...props}
+  >
+    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+  </svg>
+)
+
+export const LifeBuoyIcon = ({ size, className, ...props }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={cn(svgVariants({ size }), className)}
+    {...props}
+  >
+    <circle cx="12" cy="12" r="10" />
+    <circle cx="12" cy="12" r="4" />
+    <line x1="4.93" x2="9.17" y1="4.93" y2="9.17" />
+    <line x1="14.83" x2="19.07" y1="14.83" y2="19.07" />
+    <line x1="14.83" x2="19.07" y1="9.17" y2="4.93" />
+    <line x1="14.83" x2="19.07" y1="14.83" y2="19.07" />
+    <line x1="4.93" x2="9.17" y1="19.07" y2="14.83" />
   </svg>
 )
 

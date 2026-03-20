@@ -2,7 +2,7 @@
 
 import { useLocale } from "next-intl"
 import { redirect, usePathname } from "next/navigation"
-import { Languages } from "lucide-react"
+import { LanguagesIcon } from "@/components/shared/new-icons"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -30,11 +30,11 @@ export function LocaleSwitcher() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="icon">
-          <Languages className="h-5 w-5" />
+          <LanguagesIcon className="h-5 w-5" />
           <span className="sr-only">Change language</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="center">
         {Object.entries(languages).map(([localeCode, name]) => (
           <DropdownMenuItem
             key={localeCode}

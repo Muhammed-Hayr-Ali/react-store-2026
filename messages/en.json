@@ -163,6 +163,7 @@
     "enableTwoFactor": "Enable 2FA"
   },
   "Header": {
+    "Get Started": "Get Started",
     "search": "Search",
     "guest": "Guest",
     "signOut": "Sign Out",

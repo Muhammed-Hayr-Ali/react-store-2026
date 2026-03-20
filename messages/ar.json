@@ -170,6 +170,7 @@
     "enableTwoFactor": "تفعيل المصادقة الثنائية"
   },
   "Header": {
+    "Get Started": "ابدأ",
     "search": "بحث",
     "guest": "ضيف",
     "signOut": "تسجيل الخروج",
@@ -188,8 +189,8 @@
       "english": "الانجليزية",
       "theme": "الثيم",
       "system": "النظام",
-      "dark": "الداكن",
-      "light": "الفاتح",
+      "dark": "داكن",
+      "light": "فاتح",
       "support": "المساعدة والدعم",
       "documentation": "التوثيق"
     }
