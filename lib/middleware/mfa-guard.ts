@@ -22,7 +22,7 @@ export async function MfaGuard() {
 
   // Redirect to MFA verification page
   if (needsMfaVerification) {
-    return redirect(appRouter.verify)
+    return redirect(appRouter.verifyOtp)
   }
 
   return null
