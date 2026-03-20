@@ -14,11 +14,14 @@ supabase/
 ├── 02_password_reset_tokens/       # رموز إعادة تعيين كلمة المرور
 ├── 03_profiles_schema/             # ملفات المستخدمين الشخصية
 ├── 04_roles_permissions_system/    # نظام الأدوار والصلاحيات (RBAC)
-├── 04_subscriptions/               # نظام الاشتراكات والخطط
-│   ├── 01_subscription_plans.sql   # جدول خطط الاشتراكات
+├── 04_seller_subscriptions/        # اشتراكات الباعة
+│   ├── 01_seller_subscription_plans.sql
 │   └── README.md
-├── 05_sellers/                     # الباعة والمتاجر
-│   ├── 01_sellers_schema.sql       # جدول الباعة
+├── 05_delivery_subscriptions/      # اشتراكات التوصيل
+│   ├── 01_delivery_subscription_plans.sql
+│   └── README.md
+├── 06_sellers/                     # الباعة والمتاجر
+│   ├── 01_sellers_schema.sql
 │   └── README.md
 ├── sql/                            # ملفات SQL عامة
 └── README.md                       # هذا الملف
@@ -62,18 +65,21 @@ psql -f supabase/04_roles_permissions_system/01_roles_permissions_system.sql
 ### الخطوة 3: نظام الاشتراكات
 
 ```bash
-# 3. نظام الاشتراكات (قبل الباعة)
-psql -f supabase/04_subscriptions/01_subscription_plans.sql
+# 3أ. اشتراكات الباعة
+psql -f supabase/04_seller_subscriptions/01_seller_subscription_plans.sql
+
+# 3ب. اشتراكات التوصيل
+psql -f supabase/05_delivery_subscriptions/01_delivery_subscription_plans.sql
 ```
 
 **المحتويات:**
 
-- جدول خطط الاشتراكات (`subscription_plans`)
-- جدول اشتراكات الباعة (`seller_subscriptions`)
-- دوال إدارة الاشتراكات
-- سياسات الأمان
+| الملف                       | الوصف                      |
+| --------------------------- | -------------------------- |
+| `04_seller_subscriptions`   | اشتراكات الباعة (المنتجات) |
+| `05_delivery_subscriptions` | اشتراكات التوصيل (الطلبات) |
 
-**الخطط المتاحة:**
+**خطط الباعة:**
 
 | الخطة      | السعر (USD) | عدد المنتجات |
 | ---------- | ----------- | ------------ |
@@ -81,7 +87,15 @@ psql -f supabase/04_subscriptions/01_subscription_plans.sql
 | **Silver** | $29/شهر     | 200 منتج     |
 | **Gold**   | $99/شهر     | 1000 منتج    |
 
-[📖 قراءة التوثيق](./04_subscriptions/README.md)
+**خطط التوصيل:**
+
+| الخطة      | السعر (USD) | الطلبات/يوم | العمولة |
+| ---------- | ----------- | ----------- | ------- |
+| **Free**   | $0          | **3 طلبات** | **15%** |
+| **Silver** | $19/شهر     | 10 طلبات    | 10%     |
+| **Gold**   | $49/شهر     | غير محدود   | 5%      |
+
+[📖 قراءة التوثيق](./04_seller_subscriptions/README.md) | [📖 قراءة التوثيق](./05_delivery_subscriptions/README.md)
 
 ---
 
@@ -89,7 +103,7 @@ psql -f supabase/04_subscriptions/01_subscription_plans.sql
 
 ```bash
 # 4. جدول الباعة
-psql -f supabase/05_sellers/01_sellers_schema.sql
+psql -f supabase/06_sellers/01_sellers_schema.sql
 ```
 
 **المحتويات:**
@@ -99,7 +113,7 @@ psql -f supabase/05_sellers/01_sellers_schema.sql
 - سياسات الأمان للباعة
 - إشعارات تغيير الحالة
 
-[📖 قراءة التوثيق](./05_sellers/README.md)
+[📖 قراءة التوثيق](./06_sellers/README.md)
 
 ---
 
@@ -130,18 +144,27 @@ psql -f supabase/05_sellers/01_sellers_schema.sql
                      ├─────────────────┤
                      │ plan_id (FK)    │
                      │ status          │
-                     │ end_date        │
-                     └────────┬────────┘
-                              │
-                              │ N:1
-                              ▼
-                     ┌─────────────────┐
-                     │subscription_plan│
-                     ├─────────────────┤
-                     │ name (free/..)  │
-                     │ price_usd       │
                      │ max_products    │
                      └─────────────────┘
+
+
+┌─────────────────┐
+│ delivery_partners│
+├─────────────────┤
+│ id (PK)         │
+│ user_id (FK)    │
+│ ...             │
+└────────┬────────┘
+         │
+         │ 1:1
+         ▼
+┌─────────────────────────┐
+│delivery_partner_subscript.│
+├─────────────────────────┤
+│ plan_id (FK)            │
+│ max_orders_per_day      │
+│ commission_rate         │
+└─────────────────────────┘
 ```
 
 ---
@@ -193,7 +216,7 @@ supabase db push
 supabase db diff
 
 # 2. إنشاء migration
-supabase migration new add_sellers_table
+supabase migration new add_seller_subscriptions
 
 # 3. تطبيق على الإنتاج
 supabase db push
@@ -205,14 +228,16 @@ supabase db push
 
 ### سياسات RLS المفعلة
 
-| الجدول                 | السياسات                           |
-| ---------------------- | ---------------------------------- |
-| `roles`                | قراءة عامة، إدارة للأدمن           |
-| `permissions`          | قراءة عامة، إدارة للأدمن           |
-| `user_roles`           | قراءة للأدوار الخاصة، إدارة للأدمن |
-| `subscription_plans`   | قراءة الخطط النشطة، إدارة للأدمن   |
-| `seller_subscriptions` | قراءة/كتابة للبائع، إدارة للأدمن   |
-| `sellers`              | قراءة/كتابة للبائع، إدارة للأدمن   |
+| الجدول                           | السياسات                           |
+| -------------------------------- | ---------------------------------- |
+| `roles`                          | قراءة عامة، إدارة للأدمن           |
+| `permissions`                    | قراءة عامة، إدارة للأدمن           |
+| `user_roles`                     | قراءة للأدوار الخاصة، إدارة للأدمن |
+| `seller_subscription_plans`      | قراءة الخطط النشطة، إدارة للأدمن   |
+| `seller_subscriptions`           | قراءة/كتابة للبائع، إدارة للأدمن   |
+| `delivery_subscription_plans`    | قراءة الخطط النشطة، إدارة للأدمن   |
+| `delivery_partner_subscriptions` | قراءة/كتابة للسائق، إدارة للأدمن   |
+| `sellers`                        | قراءة/كتابة للبائع، إدارة للأدمن   |
 
 ### دوال التحقق
 
@@ -226,8 +251,11 @@ SELECT public.has_permission('products:create');
 -- التحقق الشامل
 SELECT public.can_manage_record('products', product_id, 'delete');
 
--- التحقق من حد المنتجات
+-- التحقق من حد المنتجات (الباعة)
 SELECT public.can_add_product();
+
+-- التحقق من حد الطلبات (التوصيل)
+SELECT public.can_accept_order();
 ```
 
 ---
@@ -237,8 +265,9 @@ SELECT public.can_add_product();
 | الملف                                                                  | الوصف                   |
 | ---------------------------------------------------------------------- | ----------------------- |
 | [04_roles_permissions_system](./04_roles_permissions_system/README.md) | نظام الأدوار والصلاحيات |
-| [04_subscriptions](./04_subscriptions/README.md)                       | نظام الاشتراكات والخطط  |
-| [05_sellers](./05_sellers/README.md)                                   | الباعة والمتاجر         |
+| [04_seller_subscriptions](./04_seller_subscriptions/README.md)         | اشتراكات الباعة         |
+| [05_delivery_subscriptions](./05_delivery_subscriptions/README.md)     | اشتراكات التوصيل        |
+| [06_sellers](./06_sellers/README.md)                                   | الباعة والمتاجر         |
 
 ---
 

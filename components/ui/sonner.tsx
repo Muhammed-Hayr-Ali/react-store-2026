@@ -3,7 +3,7 @@
 import { useTheme } from "next-themes"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 import {
-  CircleCheckIcon,
+  CheckCircleIcon,
   InfoIcon,
   AlertTriangleIcon,
   XOctagonIcon,
@@ -18,7 +18,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
       icons={{
-        success: <CircleCheckIcon className="size-4" />,
+        success: <CheckCircleIcon className="size-4" />,
         info: <InfoIcon className="size-4" />,
         warning: <AlertTriangleIcon className="size-4" />,
         error: <XOctagonIcon className="size-4" />,
