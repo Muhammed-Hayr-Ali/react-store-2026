@@ -47,7 +47,6 @@ export default function Header() {
     redirect(`/${nextLocale}${pathname}`)
   }
 
-
   function handleThemeChange(theme: string) {
     setTheme(theme)
   }
@@ -97,7 +96,7 @@ export default function Header() {
                 </AvatarFallback>
               </Avatar>
             </div>
-
+            {/* Mobile Menu Button */}
             <MenuButton
               isOpen={isMenuOpen}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -107,6 +106,7 @@ export default function Header() {
         </div>
       </header>
 
+      {/* Monile Mwnu */}
       <MobileMenu isOpen={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <MobileMenuHeader className="flex items-center gap-3">
           <Avatar className="size-10">
