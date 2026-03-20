@@ -51,7 +51,7 @@ function SellerPlansContent() {
     }
 
     loadPlans()
-  }, [])
+  })
 
   const handleSelectPlan = async (plan: Plan) => {
     setLoading(plan.id)
@@ -135,7 +135,7 @@ function SellerPlansContent() {
               <ul className="space-y-3">
                 {plan.features_ar.map((feature, index) => (
                   <li key={index} className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-green-500" />
+                    <CheckCircle2 className="h-5 w-5 shrink-0 text-green-500" />
                     <span>{feature}</span>
                   </li>
                 ))}
