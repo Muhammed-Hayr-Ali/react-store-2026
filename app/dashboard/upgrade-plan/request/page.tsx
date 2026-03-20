@@ -94,8 +94,9 @@ function UpgradeRequestForm() {
 
       // الانتقال لصفحة النجاح
       router.push("/dashboard/upgrade-plan/success")
-    } catch (error: any) {
-      console.error("Error submitting upgrade request:", error)
+    } catch (error: unknown) {
+      const err = error as { message?: string }
+      console.error("Error submitting upgrade request:", err)
       alert("حدث خطأ. يرجى المحاولة مرة أخرى.")
     } finally {
       setLoading(false)

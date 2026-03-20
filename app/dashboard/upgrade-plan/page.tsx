@@ -129,8 +129,9 @@ export default function UpgradePlanPage() {
 
       // الانتقال لصفحة إكمال الطلب
       router.push(`/dashboard/upgrade-plan/request?plan=${plan.id}`)
-    } catch (error: any) {
-      console.error("Error creating upgrade request:", error)
+    } catch (error: unknown) {
+      const err = error as { message?: string }
+      console.error("Error creating upgrade request:", err)
       alert("حدث خطأ. يرجى المحاولة مرة أخرى.")
     } finally {
       setLoading(null)
