@@ -12,7 +12,7 @@
 
 CREATE TABLE IF NOT EXISTS public.delivery_subscription_plans (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  plan_type TEXT DEFAULT 'delivery_partner' CHECK (plan_type IN ('seller', 'delivery_partner')),
+  plan_type TEXT DEFAULT 'delivery_partner' CHECK (plan_type = ANY (ARRAY['seller', 'delivery_partner'])),
   name TEXT NOT NULL,
   name_ar TEXT,
   description TEXT,
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS public.delivery_subscription_plans (
   sort_order INTEGER DEFAULT 0,
 
   -- الفترة
-  billing_period TEXT DEFAULT 'monthly' CHECK (billing_period IN ('monthly', 'yearly', 'lifetime')),
+  billing_period TEXT DEFAULT 'monthly' CHECK (billing_period = ANY (ARRAY['monthly', 'yearly', 'lifetime'])),
   trial_days INTEGER DEFAULT 0,
 
   -- طوابع زمنية

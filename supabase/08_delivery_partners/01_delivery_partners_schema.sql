@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS public.delivery_partners (
   address JSONB,
 
   -- حالة الحساب
-  account_status TEXT DEFAULT 'pending' CHECK (account_status IN ('pending', 'active', 'suspended', 'rejected')),
+  account_status TEXT DEFAULT 'pending' CHECK (account_status = ANY (ARRAY['pending', 'active', 'suspended', 'rejected'])),
   rejection_reason TEXT,
 
   -- موافقة الأدمن

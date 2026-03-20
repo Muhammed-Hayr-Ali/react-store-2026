@@ -8,18 +8,18 @@
 
 ## 📋 المجلدات حسب الترتيب
 
-| #   | المجلد                              | الجداول                                                  | الاعتماديات                                        | التوثيق                                                    |
-| --- | ----------------------------------- | -------------------------------------------------------- | -------------------------------------------------- | ---------------------------------------------------------- |
-| 1   | `01-exchange_rates`                 | `exchange_rates`                                         | -                                                  | -                                                          |
-| 2   | `02_password_reset_tokens`          | `password_reset_tokens`                                  | -                                                  | -                                                          |
-| 3   | `03_profiles_schema`                | `profiles`                                               | `auth.users`                                       | -                                                          |
-| 4   | `04_roles_permissions_system`       | `roles`, `permissions`, `user_roles`, `role_permissions` | -                                                  | [README.md](./04_roles_permissions_system/README.md)       |
-| 5   | `05_seller_subscription_plans`      | `seller_subscription_plans`                              | `04_roles_permissions_system`                      | [README.md](./05_seller_subscription_plans/README.md)      |
-| 6   | `06_delivery_subscription_plans`    | `delivery_subscription_plans`                            | `04_roles_permissions_system`                      | [README.md](./06_delivery_subscription_plans/README.md)    |
-| 7   | `07_sellers_table`                  | `sellers`                                                | `auth.users`, `profiles`                           | [README.md](./07_sellers_table/README.md)                  |
-| 8   | `08_delivery_partners`              | `delivery_partners`                                      | `auth.users`, `profiles`                           | [README.md](./08_delivery_partners/README.md)              |
-| 9   | `09_delivery_partner_subscriptions` | `delivery_partner_subscriptions`                         | `delivery_partners`, `delivery_subscription_plans` | [README.md](./09_delivery_partner_subscriptions/README.md) |
-| 10  | `10_seller_subscriptions`           | `seller_subscriptions`                                   | `sellers`, `seller_subscription_plans`             | [README.md](./10_seller_subscriptions/README.md)           |
+| #   | المجلد                              | الجداول                                                       | الاعتماديات                                        | التوثيق                                                    |
+| --- | ----------------------------------- | ------------------------------------------------------------- | -------------------------------------------------- | ---------------------------------------------------------- |
+| 1   | `01-exchange_rates`                 | `exchange_rates`                                              | -                                                  | -                                                          |
+| 2   | `02_password_reset_tokens`          | `password_reset_tokens`                                       | -                                                  | -                                                          |
+| 3   | `03_profiles_schema`                | `profiles`                                                    | `auth.users`                                       | -                                                          |
+| 4   | `04_roles_permissions_system`       | `roles`, `permissions`, `user_roles`, `role_permissions`      | -                                                  | [README.md](./04_roles_permissions_system/README.md)       |
+| 5   | `05_seller_subscription_plans`      | `seller_subscription_plans`                                   | `04_roles_permissions_system`                      | [README.md](./05_seller_subscription_plans/README.md)      |
+| 6   | `06_delivery_subscription_plans`    | `delivery_subscription_plans`                                 | `04_roles_permissions_system`                      | [README.md](./06_delivery_subscription_plans/README.md)    |
+| 7   | `07_sellers_table`                  | `sellers`                                                     | `auth.users`, `profiles`                           | [README.md](./07_sellers_table/README.md)                  |
+| 8   | `08_delivery_partners`              | `delivery_partners`                                           | `auth.users`, `profiles`                           | [README.md](./08_delivery_partners/README.md)              |
+| 9   | `09_delivery_partner_subscriptions` | `delivery_partner_subscriptions`, `delivery_upgrade_requests` | `delivery_partners`, `delivery_subscription_plans` | [README.md](./09_delivery_partner_subscriptions/README.md) |
+| 10  | `10_seller_subscriptions`           | `seller_subscriptions`, `seller_upgrade_requests`             | `sellers`, `seller_subscription_plans`             | [README.md](./10_seller_subscriptions/README.md)           |
 
 ---
 
@@ -42,9 +42,11 @@ psql -f supabase/06_delivery_subscription_plans/01_delivery_subscription_plans.s
 psql -f supabase/07_sellers_table/01_sellers_schema.sql
 psql -f supabase/08_delivery_partners/01_delivery_partners_schema.sql
 
-# 5. جداول الاشتراكات
+# 5. جداول الاشتراكات والترقية
 psql -f supabase/09_delivery_partner_subscriptions/02_delivery_partner_subscriptions.sql
+psql -f supabase/09_delivery_partner_subscriptions/03_delivery_upgrade_requests.sql
 psql -f supabase/10_seller_subscriptions/02_seller_subscriptions.sql
+psql -f supabase/10_seller_subscriptions/03_upgrade_requests.sql
 ```
 
 ---
@@ -67,10 +69,12 @@ auth.users (Supabase Managed)
     ├─→ delivery_subscription_plans (06_delivery_subscription_plans)
     │
     ├─→ sellers (07_sellers_table)
-    │       └─→ seller_subscriptions (10_seller_subscriptions)
+    │       ├─→ seller_subscriptions (10_seller_subscriptions)
+    │       └─→ seller_upgrade_requests (10_seller_subscriptions)
     │
     └─→ delivery_partners (08_delivery_partners)
-            └─→ delivery_partner_subscriptions (09_delivery_partner_subscriptions)
+            ├─→ delivery_partner_subscriptions (09_delivery_partner_subscriptions)
+            └─→ delivery_upgrade_requests (09_delivery_partner_subscriptions)
 ```
 
 ---
@@ -91,7 +95,23 @@ auth.users (Supabase Managed)
 | 10  | `sellers`                        | 07_sellers_table                  | الباعة والمتاجر              |
 | 11  | `delivery_partners`              | 08_delivery_partners              | موظفي التوصيل                |
 | 12  | `delivery_partner_subscriptions` | 09_delivery_partner_subscriptions | اشتراكات التوصيل الفعلية     |
-| 13  | `seller_subscriptions`           | 10_seller_subscriptions           | اشتراكات الباعة الفعلية      |
+| 13  | `delivery_upgrade_requests`      | 09_delivery_partner_subscriptions | طلبات ترقية التوصيل          |
+| 14  | `seller_subscriptions`           | 10_seller_subscriptions           | اشتراكات الباعة الفعلية      |
+| 15  | `seller_upgrade_requests`        | 10_seller_subscriptions           | طلبات ترقية الباعة           |
+
+---
+
+## 🔗 روابط التوثيق
+
+| المجلد                              | التوثيق                                                    |
+| ----------------------------------- | ---------------------------------------------------------- |
+| `04_roles_permissions_system`       | [README.md](./04_roles_permissions_system/README.md)       |
+| `05_seller_subscription_plans`      | [README.md](./05_seller_subscription_plans/README.md)      |
+| `06_delivery_subscription_plans`    | [README.md](./06_delivery_subscription_plans/README.md)    |
+| `07_sellers_table`                  | [README.md](./07_sellers_table/README.md)                  |
+| `08_delivery_partners`              | [README.md](./08_delivery_partners/README.md)              |
+| `09_delivery_partner_subscriptions` | [README.md](./09_delivery_partner_subscriptions/README.md) |
+| `10_seller_subscriptions`           | [README.md](./10_seller_subscriptions/README.md)           |
 
 ---
 

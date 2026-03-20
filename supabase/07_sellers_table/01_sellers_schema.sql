@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS public.sellers (
   commercial_registration TEXT,
 
   -- حالة الحساب
-  account_status TEXT DEFAULT 'pending' CHECK (account_status IN ('pending', 'active', 'suspended', 'rejected')),
+  account_status TEXT DEFAULT 'pending' CHECK (account_status = ANY (ARRAY['pending', 'active', 'suspended', 'rejected'])),
   rejection_reason TEXT, -- سبب الرفض
 
   -- موافقة الأدمن
