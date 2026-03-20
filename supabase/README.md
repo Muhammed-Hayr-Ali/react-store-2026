@@ -1,176 +1,292 @@
-# Marketna - Supabase Database
+# Marketna E-Commerce - Supabase Database
 
-قاعدة بيانات متجر Marketna الإلكتروني على Supabase.
+## 📋 نظرة عامة
 
-## 📁 هيكل الملفات
+هذا المجلد يحتوي على جميع ملفات SQL اللازمة لإعداد قاعدة بيانات Supabase لمنصة Marketna للتجارة الإلكترونية.
+
+---
+
+## 📁 هيكل المجلدات
 
 ```
 supabase/
-└── sql/
-    ├── profiles.sql    - جدول الملفات الشخصية (شامل)
-    └── README.md       - هذا الملف
+├── 01-exchange_rates/              # أسعار الصرف (عملات)
+├── 02_password_reset_tokens/       # رموز إعادة تعيين كلمة المرور
+├── 03_profiles_schema/             # ملفات المستخدمين الشخصية
+├── 04_roles_permissions_system/    # نظام الأدوار والصلاحيات (RBAC)
+├── 04_subscriptions/               # نظام الاشتراكات والخطط
+│   ├── 01_subscription_plans.sql   # جدول خطط الاشتراكات
+│   └── README.md
+├── 05_sellers/                     # الباعة والمتاجر
+│   ├── 01_sellers_schema.sql       # جدول الباعة
+│   └── README.md
+├── sql/                            # ملفات SQL عامة
+└── README.md                       # هذا الملف
 ```
 
-## 🚀 كيفية التثبيت
+---
 
-### الطريقة 1: Supabase Dashboard (موصى به)
+## 🚀 دليل التثبيت
 
-1. اذهب إلى [Supabase Dashboard](https://supabase.com/dashboard)
-2. اختر مشروعك
-3. اذهب إلى **SQL Editor**
-4. انسخ محتوى `sql/profiles.sql` بالكامل
-5. الصق واضغط **Run**
+### الخطوة 1: الإعدادات الأساسية
 
-**ملاحظة:** إذا ظهر خطأ "already exists"، قم بتشغيل الأمر التالي أولاً:
+```bash
+# 1. ملفات الإعدادات الأساسية
+psql -f supabase/01-exchange_rates/exchange_rates.sql
+psql -f supabase/02_password_reset_tokens/password_reset.sql
+psql -f supabase/03_profiles_schema/profiles_schema.sql
+```
+
+---
+
+### الخطوة 2: نظام الأدوار والصلاحيات
+
+```bash
+# 2. نظام الأدوار والصلاحيات (مهم جداً!)
+psql -f supabase/04_roles_permissions_system/01_roles_permissions_system.sql
+```
+
+**المحتويات:**
+
+- جدول الأدوار (`roles`)
+- جدول الصلاحيات (`permissions`)
+- جدول أدوار المستخدمين (`user_roles`)
+- جدول صلاحيات الأدوار (`role_permissions`)
+- دوال التحقق من الصلاحيات
+- سياسات الأمان الأساسية
+
+[📖 قراءة التوثيق](./04_roles_permissions_system/README.md)
+
+---
+
+### الخطوة 3: نظام الاشتراكات
+
+```bash
+# 3. نظام الاشتراكات (قبل الباعة)
+psql -f supabase/04_subscriptions/01_subscription_plans.sql
+```
+
+**المحتويات:**
+
+- جدول خطط الاشتراكات (`subscription_plans`)
+- جدول اشتراكات الباعة (`seller_subscriptions`)
+- دوال إدارة الاشتراكات
+- سياسات الأمان
+
+**الخطط المتاحة:**
+
+| الخطة      | السعر (USD) | عدد المنتجات |
+| ---------- | ----------- | ------------ |
+| **Free**   | $0          | **50 منتج**  |
+| **Silver** | $29/شهر     | 200 منتج     |
+| **Gold**   | $99/شهر     | 1000 منتج    |
+
+[📖 قراءة التوثيق](./04_subscriptions/README.md)
+
+---
+
+### الخطوة 4: جدول الباعة
+
+```bash
+# 4. جدول الباعة
+psql -f supabase/05_sellers/01_sellers_schema.sql
+```
+
+**المحتويات:**
+
+- جدول الباعة (`sellers`)
+- دوال إدارة الباعة
+- سياسات الأمان للباعة
+- إشعارات تغيير الحالة
+
+[📖 قراءة التوثيق](./05_sellers/README.md)
+
+---
+
+## 📊 مخطط قاعدة البيانات (ERD)
+
+```
+┌─────────────────┐
+│   auth.users    │ (Supabase Auth)
+└────────┬────────┘
+         │
+         ├──────────────────┐
+         │                  │
+         ▼                  ▼
+┌─────────────────┐  ┌─────────────────┐
+│     profiles    │  │     sellers     │
+├─────────────────┤  ├─────────────────┤
+│ id (PK)         │  │ id (PK)         │
+│ user_id (FK)    │  │ user_id (FK)    │
+│ ...             │  │ store_name      │
+└─────────────────┘  │ store_slug      │
+                     │ account_status  │
+                     └────────┬────────┘
+                              │
+                              │ 1:1
+                              ▼
+                     ┌─────────────────┐
+                     │seller_subscript.│
+                     ├─────────────────┤
+                     │ plan_id (FK)    │
+                     │ status          │
+                     │ end_date        │
+                     └────────┬────────┘
+                              │
+                              │ N:1
+                              ▼
+                     ┌─────────────────┐
+                     │subscription_plan│
+                     ├─────────────────┤
+                     │ name (free/..)  │
+                     │ price_usd       │
+                     │ max_products    │
+                     └─────────────────┘
+```
+
+---
+
+## 🔧 الإعدادات المطلوبة
+
+### متغيرات البيئة
+
+```env
+# .env.local
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# Stripe (للاشتراكات)
+STRIPE_SECRET_KEY=sk_test_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+```
+
+### الإضافات المطلوبة
 
 ```sql
-DROP TABLE IF EXISTS profiles CASCADE;
-DROP TYPE IF EXISTS gender CASCADE;
+-- يتم تثبيتها تلقائياً
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 ```
 
-### الطريقة 2: سطر الأوامر
+---
+
+## 📝 سير العمل الموصى به
+
+### 1. التطوير المحلي
 
 ```bash
-psql -h db.xxx.supabase.co -U postgres -d postgres -f sql/profiles.sql
-```
+# 1. تثبيت Supabase CLI
+npm install -g supabase
 
-### الطريقة 3: Supabase CLI
+# 2. ربط المشروع
+supabase link --project-ref your-project-ref
 
-```bash
+# 3. تطبيق التغييرات
 supabase db push
 ```
 
-## 📊 هيكل قاعدة البيانات
+### 2. الإنتاج
 
-### الجداول
+```bash
+# 1. مراجعة التغييرات
+supabase db diff
 
-| الجدول     | الوصف                      |
-| ---------- | -------------------------- |
-| `profiles` | الملفات الشخصية للمستخدمين |
+# 2. إنشاء migration
+supabase migration new add_sellers_table
 
-### الأنواع (Enums)
+# 3. تطبيق على الإنتاج
+supabase db push
+```
 
-| النوع    | الوصف                                              |
-| -------- | -------------------------------------------------- |
-| `gender` | نوع الجنس (male, female, other, prefer_not_to_say) |
+---
 
-### الدوال (Functions)
+## 🔐 الأمان
 
-| الدالة                          | الوصف                                |
-| ------------------------------- | ------------------------------------ |
-| `create_profile_for_new_user()` | إنشاء ملف شخصي عند تسجيل مستخدم جديد |
-| `update_last_login(user_id)`    | تحديث تاريخ آخر دخول                 |
+### سياسات RLS المفعلة
 
-### المشغلات (Triggers)
+| الجدول                 | السياسات                           |
+| ---------------------- | ---------------------------------- |
+| `roles`                | قراءة عامة، إدارة للأدمن           |
+| `permissions`          | قراءة عامة، إدارة للأدمن           |
+| `user_roles`           | قراءة للأدوار الخاصة، إدارة للأدمن |
+| `subscription_plans`   | قراءة الخطط النشطة، إدارة للأدمن   |
+| `seller_subscriptions` | قراءة/كتابة للبائع، إدارة للأدمن   |
+| `sellers`              | قراءة/كتابة للبائع، إدارة للأدمن   |
 
-| المشغل                 | الوصف                               |
-| ---------------------- | ----------------------------------- |
-| `on_auth_user_created` | إنشاء ملف شخصي تلقائياً عند التسجيل |
-
-### سياسات الأمان (RLS)
-
-| السياسة                    | الجدول   | الوصف                        |
-| -------------------------- | -------- | ---------------------------- |
-| `profiles_public_read`     | profiles | السماح للجميع بعرض الملفات   |
-| `profiles_user_update_own` | profiles | المستخدم يملك تحديث ملفه فقط |
-| `profiles_user_insert_own` | profiles | المستخدم يملك إنشاء ملفه فقط |
-
-## 🔧 إعداد Storage (للصور الشخصية)
-
-### إنشاء Bucket للأفاتار
-
-1. اذهب إلى **Storage** في Supabase Dashboard
-2. اضغط **New Bucket**
-3. الاسم: `avatars`
-4. Public: ✅ نعم
-5. اضغط **Create bucket**
-
-### سياسات Storage للأفاتار
+### دوال التحقق
 
 ```sql
--- السماح للجميع بالعرض
-CREATE POLICY "Anyone can view avatars"
-ON storage.objects FOR SELECT
-TO authenticated
-USING (bucket_id = 'avatars');
+-- التحقق من الدور
+SELECT public.has_role('admin');
 
--- السماح للمستخدمين برفع صورهم
-CREATE POLICY "Users can upload own avatar"
-ON storage.objects FOR INSERT
-TO authenticated
-WITH CHECK (
-  bucket_id = 'avatars' AND
-  auth.uid()::text = (storage.foldername(name))[1]
-);
+-- التحقق من الصلاحية
+SELECT public.has_permission('products:create');
+
+-- التحقق الشامل
+SELECT public.can_manage_record('products', product_id, 'delete');
+
+-- التحقق من حد المنتجات
+SELECT public.can_add_product();
 ```
 
-## 🔐 متغيرات البيئة
+---
 
-أنشئ ملف `.env.local` في الجذر:
+## 📚 التوثيق
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=xxx
-SUPABASE_SERVICE_ROLE_KEY=xxx
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
+| الملف                                                                  | الوصف                   |
+| ---------------------------------------------------------------------- | ----------------------- |
+| [04_roles_permissions_system](./04_roles_permissions_system/README.md) | نظام الأدوار والصلاحيات |
+| [04_subscriptions](./04_subscriptions/README.md)                       | نظام الاشتراكات والخطط  |
+| [05_sellers](./05_sellers/README.md)                                   | الباعة والمتاجر         |
 
-## 📝 ملاحظات هامة
+---
 
-1. **البريد الإلكتروني**: لا يمكن تحديثه من جدول `profiles` (مثبت من `auth.users`)
-2. **last_login_at**: يُحدث تلقائياً عند تسجيل الدخول عبر دالة `update_last_login()`
-3. **RLS**: مفعل على جدول `profiles` للحماية
-4. **الصور الشخصية**: تُخزن في Supabase Storage bucket `avatars`
+## 🐛 استكشاف الأخطاء
 
-## 📋 هيكل جدول profiles
-
-| العمود           | النوع       | الوصف                         |
-| ---------------- | ----------- | ----------------------------- |
-| `id`             | UUID        | المعرف الفريد (من auth.users) |
-| `email`          | TEXT        | البريد الإلكتروني             |
-| `phone`          | TEXT        | رقم الهاتف                    |
-| `first_name`     | TEXT        | الاسم الأول                   |
-| `last_name`      | TEXT        | اسم العائلة                   |
-| `full_name`      | TEXT        | الاسم الكامل (محسوب)          |
-| `gender`         | gender      | نوع الجنس                     |
-| `date_of_birth`  | DATE        | تاريخ الميلاد                 |
-| `bio`            | TEXT        | نبذة تعريفية                  |
-| `avatar_url`     | TEXT        | رابط الصورة                   |
-| `language`       | TEXT        | اللغة (en/ar)                 |
-| `timezone`       | TEXT        | المنطقة الزمنية               |
-| `email_verified` | BOOLEAN     | التحقق من البريد              |
-| `phone_verified` | BOOLEAN     | التحقق من الهاتف              |
-| `created_at`     | TIMESTAMPTZ | تاريخ الإنشاء                 |
-| `updated_at`     | TIMESTAMPTZ | آخر تحديث                     |
-| `last_login_at`  | TIMESTAMPTZ | آخر دخول                      |
-
-## 🆘 استكشاف الأخطاء
-
-### خطأ: "relation already exists"
+### مشكلة: جدول غير موجود
 
 ```sql
--- حذف الجدول وإعادة الإنشاء
-DROP TABLE IF EXISTS profiles CASCADE;
-DROP TYPE IF EXISTS gender CASCADE;
+-- التحقق من الجداول الموجودة
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public';
 ```
 
-### خطأ: "permission denied"
+### مشكلة: صلاحيات غير كافية
 
 ```sql
--- إعادة تفعيل RLS
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+-- التحقق من أدوار المستخدم الحالي
+SELECT * FROM public.get_user_roles();
+
+-- التحقق من صلاحيات المستخدم
+SELECT * FROM public.get_user_permissions();
 ```
 
-### خطأ: "function does not exist"
+### مشكلة: RLS تمنع الوصول
 
 ```sql
--- إعادة تشغيل ملف profiles.sql
-psql -f sql/profiles.sql
+-- التحقق من حالة RLS
+SELECT tablename, rowsecurity
+FROM pg_tables
+WHERE schemaname = 'public';
+
+-- تعطيل RLS مؤقتاً (للتطوير فقط!)
+ALTER TABLE public.sellers DISABLE ROW LEVEL SECURITY;
 ```
 
-## 📚 روابط مفيدة
+---
 
-- [Supabase Docs](https://supabase.com/docs)
-- [PostgreSQL Enums](https://www.postgresql.org/docs/current/datatype-enum.html)
-- [Row Level Security](https://supabase.com/docs/guides/auth/row-level-security)
-- [Supabase Storage](https://supabase.com/docs/guides/storage)
+## 📞 الدعم
+
+لأي استفسارات أو مشاكل تقنية:
+
+- 📧 البريد: support@marketna.com
+- 📚 التوثيق: https://docs.marketna.com
+- 💬 Discord: https://discord.gg/marketna
+
+---
+
+**الإصدار:** 1.0  
+**آخر تحديث:** 2026  
+**المشروع:** Marketna E-Commerce Platform
