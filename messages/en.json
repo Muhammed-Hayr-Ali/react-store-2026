@@ -1,4 +1,19 @@
 {
+  "siteName": "Marketna",
+  "Header": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "admin": "Admin",
+    "profile": "Profile",
+    "settings": "Settings",
+    "signOut": "Sign Out",
+    "signIn": "Sign In",
+    "menu": "Menu",
+    "closeMenu": "Close Menu",
+    "theme": "Theme",
+    "language": "Language",
+    "upgrade": "Upgrade Account"
+  },
   "HomePage": {
     "titlePart1": "Coming Soon",
     "titlePart2": "Something Extraordinary",
@@ -319,20 +334,18 @@
         "title": "Upgrade Requests | Marketna",
         "description": "Manage and review subscription upgrade requests"
       }
+    },
+    "home": {
+      "title": "Coming Soon | Marketna",
+      "description": "Marketna is crafting a digital masterpiece. Something extraordinary is launching soon."
+    },
+    "terms": {
+      "title": "Terms of Service | Marketna",
+      "description": "Marketna Terms of Service and Conditions"
+    },
+    "privacy": {
+      "title": "Privacy Policy | Marketna",
+      "description": "Marketna Privacy Policy - Learn about how we protect your data"
     }
-  },
-  "home": {
-    "title": "Coming Soon | Marketna",
-    "description": "Marketna is crafting a digital masterpiece. Something extraordinary is launching soon."
-  },
-  "terms": {
-    "title": "Terms of Service | Marketna",
-    "description": "Marketna Terms of Service and Conditions"
-  },
-  "privacy": {
-    "title": "Privacy Policy | Marketna",
-    "description": "Marketna Privacy Policy - Learn about how we protect your data"
   }
-},
-"siteName": "Marketna"
 }

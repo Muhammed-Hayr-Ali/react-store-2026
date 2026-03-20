@@ -2,7 +2,8 @@ import { createBrowserClient } from "@/lib/supabase/createBrowserClient"
 import { ApiResult } from "@/lib/types/common"
 
 export interface CreateUpgradeRequestInput {
-  sellerId: string
+  sellerId?: string
+  partnerId?: string
   planId: string
   contactMethod?: string
   contactValue?: string
@@ -22,12 +23,21 @@ export async function createUpgradeRequest({
   const supabase = createBrowserClient()
 
   // Get current user
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   if (!user) {
     return {
       success: false,
       error: "USER_NOT_AUTHENTICATED",
+    }
+  }
+
+  if (!sellerId) {
+    return {
+      success: false,
+      error: "SELLER_ID_REQUIRED",
     }
   }
 
@@ -66,12 +76,21 @@ export async function createDeliveryUpgradeRequest({
   const supabase = createBrowserClient()
 
   // Get current user
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   if (!user) {
     return {
       success: false,
       error: "USER_NOT_AUTHENTICATED",
+    }
+  }
+
+  if (!partnerId) {
+    return {
+      success: false,
+      error: "PARTNER_ID_REQUIRED",
     }
   }
 
