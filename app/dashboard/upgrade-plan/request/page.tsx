@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { createBrowserClient } from "@/lib/supabase/createBrowserClient"
 import { Button } from "@/components/ui/button"
@@ -26,7 +26,7 @@ import {
 import { ArrowLeft, CheckCircle } from "lucide-react"
 import Link from "next/link"
 
-export default function UpgradeRequestPage() {
+function UpgradeRequestForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createBrowserClient()
@@ -248,17 +248,17 @@ export default function UpgradeRequestPage() {
               <div className="text-sm text-blue-800">
                 <p className="mb-1 font-bold">ماذا سيحدث بعد الإرسال؟</p>
                 <ol className="list-inside list-decimal space-y-1">
-                  <p>ستراجع الإدارة طلبك خلال 24 ساعة</p>
-                  <p>
+                  <li>ستراجع الإدارة طلبك خلال 24 ساعة</li>
+                  <li>
                     سنتواصل معك عبر{" "}
                     {formData.contactMethod === "email"
                       ? "البريد"
                       : formData.contactMethod === "phone"
                         ? "الهاتف"
                         : "WhatsApp"}
-                  </p>
-                  <p>سنرسل لك رابط الدفع</p>
-                  <p>بعد الدفع، سيتم تفعيل اشتراكك فوراً</p>
+                  </li>
+                  <li>سنرسل لك رابط الدفع</li>
+                  <li>بعد الدفع، سيتم تفعيل اشتراكك فوراً</li>
                 </ol>
               </div>
             </div>
@@ -277,5 +277,19 @@ export default function UpgradeRequestPage() {
         </form>
       </Card>
     </div>
+  )
+}
+
+export default function UpgradeRequestPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 py-8 text-center">
+          <p className="text-gray-500">جاري التحميل...</p>
+        </div>
+      }
+    >
+      <UpgradeRequestForm />
+    </Suspense>
   )
 }
