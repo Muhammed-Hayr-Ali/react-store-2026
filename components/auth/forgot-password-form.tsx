@@ -11,6 +11,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { MailIcon, ArrowLeftIcon } from "@/components/shared/icons"
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
+import { appRouter } from "@/lib/app-routes"
 
 export default function ForgotPasswordForm() {
   const t = useTranslations("ForgotPassword")
@@ -52,7 +53,7 @@ export default function ForgotPasswordForm() {
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => router.push("/sign-in")}
+            onClick={() => router.push(appRouter.signIn)}
           >
             <ArrowLeftIcon className="ml-2 h-4 w-4" />
             {t("backToSignIn")}
@@ -110,7 +111,7 @@ export default function ForgotPasswordForm() {
         <Button
           variant="link"
           className="text-muted-foreground"
-          onClick={() => router.push("/sign-in")}
+          onClick={() => router.push(appRouter.signIn)}
         >
           <ArrowLeftIcon className="ml-2 h-4 w-4" />
           {t("backToSignIn")}

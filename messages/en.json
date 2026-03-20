@@ -48,144 +48,291 @@
     "emailTooLong": "Email is too long",
     "emailTooShort": "Email is too short",
     "passwordRequired": "Password is required",
-    "passwordTooLong": "Password is too long",
-    "passwordTooShort": "Password is too short",
-    "confirmPasswordRequired": "Please confirm your password",
-    "passwordsDoNotMatch": "Passwords do not match",
-    "loginWithGoogle": "Login with Google",
-    "accountCreatedSuccess": "🎉 Account Created Successfully!",
-    "twoFactorSetupDesc": "Would you like to enable two-factor authentication for enhanced security?",
-    "continueToHome": "Continue to Home",
-    "enableTwoFactor": "Enable 2FA"
-  },
-  "ForgotPassword": {
-    "title": "Forgot Password?",
-    "description": "Enter your email and we'll send you a link to reset your password",
-    "email": "Email Address",
-    "emailPlaceholder": "mail@example.com",
-    "emailRequired": "Email is required",
-    "invalidEmail": "Please enter a valid email address",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "passwordMismatch": "Passwords do not match",
+    "passwordReset": "Password Reset",
+    "emailSent": "Email Sent",
+    "checkInbox": "Check your inbox",
+    "clickLinkReset": "Click the link in your email to reset your password",
+    "backToSignIn": "Back to Sign In",
     "sendResetLink": "Send Reset Link",
-    "sending": "Sending...",
-    "checkYourEmail": "Check Your Email",
-    "resetInstructions": "We've sent you a password reset link. Please check your email.",
-    "backToSignIn": "Back to Sign In",
-    "emailSent": "Email sent"
-  },
-  "ResetPassword": {
-    "title": "Reset Password",
-    "description": "Enter your new password below",
-    "newPassword": "New Password",
-    "newPasswordPlaceholder": "••••••••",
-    "passwordRequired": "Password is required",
-    "passwordMinLength": "Password must be at least 8 characters",
-    "passwordMaxLength": "Password is too long",
-    "confirmPassword": "Confirm Password",
-    "confirmPasswordPlaceholder": "••••••••",
-    "confirmPasswordRequired": "Please confirm your password",
-    "passwordsMatch": "Passwords do not match",
     "resetPassword": "Reset Password",
-    "resetting": "Resetting...",
-    "backToSignIn": "Back to Sign In",
-    "validatingToken": "Validating token...",
-    "missingToken": "Reset link is missing",
-    "invalidToken": "Token is invalid or expired",
-    "invalidTokenTitle": "Invalid Token",
-    "invalidTokenDescription": "This link is invalid or has expired. Please request a new one.",
-    "requestNewLink": "Request New Link",
-    "successTitle": "Reset Successful",
-    "successDescription": "Your password has been reset successfully. Redirecting...",
-    "goToSignIn": "Go to Sign In",
-    "verificationError": "Error validating token"
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "passwordResetSuccess": "Password reset successfully",
+    "passwordResetError": "Failed to reset password",
+    "otpVerification": "OTP Verification",
+    "enterOtp": "Enter the verification code",
+    "verify": "Verify",
+    "resendOtp": "Resend OTP",
+    "otpSent": "OTP sent to your email",
+    "otpVerified": "OTP verified successfully",
+    "otpVerificationFailed": "OTP verification failed",
+    "mfaSetup": "Two-Factor Authentication Setup",
+    "mfaEnable": "Enable 2FA",
+    "mfaDisable": "Disable 2FA",
+    "mfaDescription": "Add an extra layer of security to your account",
+    "mfaScanQR": "Scan the QR code with your authenticator app",
+    "mfaEnterCode": "Enter the 6-digit code from your app",
+    "mfaEnabled": "2FA enabled successfully",
+    "mfaDisabled": "2FA disabled successfully",
+    "mfaRequired": "2FA code required",
+    "mfaInvalid": "Invalid 2FA code"
   },
-  "Legal": {
-    "termsTitle": "Terms of Service",
-    "privacyTitle": "Privacy Policy",
-    "lastUpdated": "Last updated: March 17, 2026",
-    "introduction": "Introduction",
-    "termsIntro": "Welcome to Marketna. By using our website and services, you agree to comply with and be bound by the following terms and conditions.",
-    "privacyIntro": "At Marketna, we are committed to protecting your privacy and ensuring the security of your personal information.",
-    "useOfService": "Use of Service",
-    "useOfServiceContent": "Our services are provided for your personal and non-commercial use. You agree not to misuse the services or help anyone else do so.",
-    "dataCollection": "Data Collection",
-    "dataCollectionContent": "We collect information you provide directly to us, such as when you create an account, make a purchase, or contact us for support.",
-    "infoUsage": "Information Usage",
-    "infoUsageContent": "We use your information to provide and improve our services, process transactions, and communicate important updates regarding your account or our marketplace.",
-    "cookies": "Cookies & Tracking",
-    "cookiesContent": "We use essential cookies to maintain your session and preferences. By using Marketna, you consent to our use of these technologies for a better shopping experience.",
-    "community": "Community Guidelines",
-    "communityContent": "We expect all users to respect the platform and other participants. Any form of harassment or unauthorized data extraction is strictly prohibited.",
-    "agreementPre": "Agreement to these terms is prerequisite for using Marketna services.",
-    "backToHome": "Back to Home"
-  },
-  "Theme": {
-    "toggle": "Toggle theme"
-  },
-  "TwoFactor": {
-    "title": "Two-Factor Authentication",
-    "description": "Add an extra layer of security to your account",
-    "setupTitle": "Setup 2FA",
-    "setupDescription": "Scan the QR code with your authenticator app",
-    "startSetup": "Start Setup",
-    "verifyTitle": "Enter Verification Code",
-    "verifyDescription": "Enter the 6-digit code from your authenticator app",
-    "verifyAndContinue": "Verify & Continue",
-    "skip": "Skip for Now",
-    "scanQrCodeSuccess": "QR code generated! Scan it with your authenticator app",
-    "enrollFailed": "Failed to setup 2FA. Please try again",
-    "verifyFailed": "Invalid code. Please try again",
-    "verifySuccess": "2FA enabled successfully!",
-    "enterCodeError": "Please enter the verification code",
-    "secretKey": "Secret Key",
-    "copy": "Copy",
-    "copiedToClipboard": "Copied!",
-    "secretKeyDescription": "If you can't scan the QR code, enter this key manually"
-  },
-  "Verify": {
-    "title": "Two-Factor Authentication",
-    "description": "Enter verification code to continue",
-    "enterCodeTitle": "Enter Verification Code",
-    "enterCodeDescription": "Enter the 6-digit code from your authenticator app",
-    "verifyAndContinue": "Verify & Continue",
-    "verifyFailed": "Invalid code. Please try again",
-    "verifySuccess": "Verified successfully!",
-    "enterCodeError": "Please enter the verification code"
-  },
-  "callback": {
-    "loading": "Loading...",
-    "processingSignIn": "Processing sign in",
-    "signInFailedTitle": "Sign In Failed",
-    "signInFailedDescription": "Unable to sign in with Google. Please try again.",
-    "tryAgain": "Try Again",
-    "signInSuccess": "Signed In Successfully!",
-    "signInSuccessDesc": "Would you like to enable two-factor authentication for enhanced security?",
-    "continueToHome": "Continue to Home",
-    "enableTwoFactor": "Enable 2FA"
-  },
-  "Header": {
-    "Get Started": "Get Started",
-    "search": "Search",
-    "guest": "Guest",
-    "signOut": "Sign Out",
-    "signIn": "Sign In",
-    "createAccount": "Create Account",
-    "menuItems": {
-      "home": "Home",
-      "products": "Products",
-      "cart": "Cart",
-      "wishlist": "Wishlist",
-      "orders": "Orders",
-      "coupons": "My Coupons",
-      "dashboard": "Dashboard",
-      "language": "Language",
-      "arabic": "Arabic",
-      "english": "English",
-      "theme": "Theme",
-      "system": "System",
-      "dark": "Dark",
-      "light": "Light",
-      "support": "Help & Support",
-      "documentation": "Documentation"
+  "Dashboard": {
+    "upgrade": {
+      "title": "Upgrade Your Account",
+      "description": "Choose the type of account you want to upgrade to",
+      "seller": "Seller",
+      "sellerDescription": "Sell your products on our platform",
+      "sellerFeature1": "Product management",
+      "sellerFeature2": "Order tracking",
+      "sellerFeature3": "Sales analytics",
+      "sellerFeature4": "Dedicated support",
+      "selectSeller": "Select Seller",
+      "delivery": "Delivery Partner",
+      "deliveryDescription": "Join our delivery team",
+      "deliveryFeature1": "Accept delivery orders",
+      "deliveryFeature2": "Set coverage areas",
+      "deliveryFeature3": "Track earnings",
+      "deliveryFeature4": "Flexible schedule",
+      "selectDelivery": "Select Delivery Partner"
+    },
+    "sellerForm": {
+      "title": "Store Information",
+      "description": "Enter your store information for admin review",
+      "storeName": "Store Name",
+      "storeNamePlaceholder": "Example: My Store",
+      "storeDescription": "Store Description",
+      "storeDescriptionPlaceholder": "Brief description of your store...",
+      "phone": "Phone Number",
+      "phonePlaceholder": "0501234567",
+      "email": "Email",
+      "emailPlaceholder": "email@example.com",
+      "taxNumber": "Tax Number",
+      "taxNumberPlaceholder": "123456789",
+      "commercialRegistration": "Commercial Registration",
+      "commercialRegistrationPlaceholder": "1010101010",
+      "city": "City",
+      "cityPlaceholder": "Riyadh",
+      "street": "Street",
+      "streetPlaceholder": "King Fahd Road",
+      "note": "Note: After saving, your request will be sent to admin for review. After approval, you can choose a subscription plan and start selling.",
+      "saveAndContinue": "Save & Continue to Plan Selection",
+      "saving": "Saving...",
+      "back": "Back"
+    },
+    "sellerPlans": {
+      "title": "Choose a Subscription Plan",
+      "description": "After admin approval, your subscription will start with this plan",
+      "mostPopular": "Most Popular",
+      "perMonth": "/month",
+      "selectPlan": "Select This Plan",
+      "selecting": "Submitting...",
+      "whatHappens": "What happens after selection?",
+      "step1": "Admin reviews your request",
+      "step2": "Contact you for payment",
+      "step3": "Activate account & subscription",
+      "back": "Back"
+    },
+    "deliveryForm": {
+      "title": "Delivery Partner Information",
+      "description": "Enter your information to join the delivery team",
+      "companyName": "Company/Individual Name",
+      "companyNamePlaceholder": "Your name or company name",
+      "phone": "Phone Number",
+      "phonePlaceholder": "0501234567",
+      "email": "Email",
+      "emailPlaceholder": "email@example.com",
+      "licenseNumber": "License Number",
+      "insuranceNumber": "Insurance Number",
+      "vehicleType": "Vehicle Type",
+      "vehicleTypeMotorcycle": "Motorcycle",
+      "vehicleTypeCar": "Car",
+      "vehicleTypeVan": "Van",
+      "coverageCity": "Coverage City",
+      "coverageCityPlaceholder": "Riyadh",
+      "maxDeliveryRadius": "Max Delivery Radius (km)",
+      "note": "Note: After admin approval, you will choose a subscription plan and start working.",
+      "saveAndContinue": "Save & Continue",
+      "saving": "Saving...",
+      "back": "Back"
+    },
+    "deliveryPlans": {
+      "title": "Choose a Subscription Plan",
+      "description": "After admin approval, your subscription will start with this plan",
+      "mostPopular": "Most Popular",
+      "perMonth": "/month",
+      "selectPlan": "Select This Plan",
+      "selecting": "Submitting...",
+      "unlimitedOrders": "Unlimited Orders",
+      "ordersPerDay": "orders/day",
+      "commissionRate": "{rate}% commission",
+      "back": "Back"
+    },
+    "success": {
+      "title": "Request Submitted Successfully!",
+      "descriptionSeller": "Your store information and subscription plan have been received",
+      "descriptionDelivery": "Your information and subscription plan have been received",
+      "nextSteps": "Next Steps",
+      "step1": "Admin will review your request within 24-48 hours",
+      "step2": "We will contact you via email for approval or additional information",
+      "step3": "After approval, we will send you a payment link",
+      "step4": "After payment, your account and subscription will be activated immediately",
+      "trackStatus": "Track your request status from:",
+      "backToDashboard": "Back to Dashboard",
+      "trackStatusButton": "Track Status"
+    },
+    "status": {
+      "title": "Upgrade Requests Status",
+      "loading": "Loading...",
+      "noRequests": "You don't have any upgrade requests yet",
+      "browsePlans": "Browse Plans",
+      "requestNumber": "Upgrade Request #{number}",
+      "targetPlan": "Target Plan",
+      "price": "Price",
+      "adminNotes": "Admin Notes",
+      "statusPending": "Pending",
+      "statusApproved": "Approved",
+      "statusRejected": "Rejected",
+      "statusCompleted": "Completed"
     }
+  },
+  "Admin": {
+    "upgradeRequests": {
+      "title": "Upgrade Requests",
+      "description": "Manage and review subscription upgrade requests",
+      "filterByStatus": "Filter by status",
+      "filterAll": "All",
+      "statusPending": "Pending",
+      "statusApproved": "Approved",
+      "statusRejected": "Rejected",
+      "statusCompleted": "Completed",
+      "statTotal": "Total",
+      "statPending": "Pending",
+      "statApproved": "Approved",
+      "statCompleted": "Completed",
+      "requestsList": "Requests List",
+      "loading": "Loading...",
+      "noRequests": "No requests",
+      "tableRequestId": "Request ID",
+      "tableSeller": "Seller",
+      "tableStore": "Store",
+      "tableUpgrade": "Upgrade",
+      "tablePrice": "Price",
+      "tableContact": "Contact",
+      "tableStatus": "Status",
+      "tableDate": "Date",
+      "tableActions": "Actions",
+      "na": "N/A",
+      "free": "Free",
+      "view": "View",
+      "dialogTitle": "Upgrade Request Details",
+      "seller": "Seller",
+      "store": "Store",
+      "upgradeFrom": "Upgrade From",
+      "upgradeTo": "Upgrade To",
+      "monthlyPrice": "Monthly Price",
+      "contactMethod": "Contact Method",
+      "sellerNotes": "Seller Notes",
+      "status": "Status",
+      "createdAt": "Created At",
+      "previousAdminNotes": "Previous Admin Notes",
+      "adminNotes": "Admin Notes",
+      "adminNotesPlaceholder": "Add your notes here...",
+      "reject": "Reject",
+      "approve": "Approve",
+      "confirmPayment": "Confirm Payment",
+      "confirmPaymentQuestion": "Have you received payment from the seller?",
+      "confirmPaymentButton": "Confirm Payment & Activate Subscription",
+      "subscriptionActivated": "Subscription Activated",
+      "paymentReceivedAt": "Payment received at",
+      "activatedAt": "Activated at",
+      "errorApproving": "Error approving request. Please try again.",
+      "errorRejecting": "Error rejecting request. Please try again.",
+      "errorCompleting": "Error completing request. Please try again."
+    }
+  },
+  "seo": {
+    "auth": {
+      "signIn": {
+        "title": "Sign In | Marketna",
+        "description": "Sign in to your Marketna account to access premium features"
+      },
+      "signUp": {
+        "title": "Sign Up | Marketna",
+        "description": "Create a Marketna account to experience premium shopping"
+      },
+      "forgotPassword": {
+        "title": "Forgot Password | Marketna",
+        "description": "Reset your Marketna account password"
+      },
+      "resetPassword": {
+        "title": "Reset Password | Marketna",
+        "description": "Set a new password for your Marketna account"
+      },
+      "callback": {
+        "title": "Authentication | Marketna",
+        "description": "Processing authentication"
+      },
+      "verifyOtp": {
+        "title": "Verify OTP | Marketna",
+        "description": "Verify your authentication code"
+      },
+      "twoFactorSetup": {
+        "title": "Two-Factor Setup | Marketna",
+        "description": "Set up two-factor authentication"
+      }
+    },
+    "dashboard": {
+      "upgrade": {
+        "title": "Upgrade Account | Marketna",
+        "description": "Upgrade your account to seller or delivery partner"
+      },
+      "sellerForm": {
+        "title": "Seller Information | Marketna",
+        "description": "Enter your store information to become a seller"
+      },
+      "sellerPlans": {
+        "title": "Seller Plans | Marketna",
+        "description": "Choose a subscription plan for your store"
+      },
+      "deliveryForm": {
+        "title": "Delivery Partner Information | Marketna",
+        "description": "Enter your information to become a delivery partner"
+      },
+      "deliveryPlans": {
+        "title": "Delivery Partner Plans | Marketna",
+        "description": "Choose a subscription plan for delivery services"
+      },
+      "success": {
+        "title": "Upgrade Success | Marketna",
+        "description": "Your upgrade request has been submitted successfully"
+      },
+      "status": {
+        "title": "Upgrade Status | Marketna",
+        "description": "Track your upgrade request status"
+      }
+    },
+    "admin": {
+      "upgradeRequests": {
+        "title": "Upgrade Requests | Marketna",
+        "description": "Manage and review subscription upgrade requests"
+      }
+    }
+  },
+  "home": {
+    "title": "Coming Soon | Marketna",
+    "description": "Marketna is crafting a digital masterpiece. Something extraordinary is launching soon."
+  },
+  "terms": {
+    "title": "Terms of Service | Marketna",
+    "description": "Marketna Terms of Service and Conditions"
+  },
+  "privacy": {
+    "title": "Privacy Policy | Marketna",
+    "description": "Marketna Privacy Policy - Learn about how we protect your data"
   }
+},
+"siteName": "Marketna"
 }

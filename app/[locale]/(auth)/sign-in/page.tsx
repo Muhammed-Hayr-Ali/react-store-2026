@@ -1,15 +1,17 @@
 import { createMetadata } from "@/lib/config/metadata_generator"
 import SignInForm from "@/components/auth/sign-in-form"
+import { getTranslations } from "next-intl/server"
 
+export async function generateMetadata() {
+  const t = await getTranslations()
 
-export const metadata = createMetadata({
-    title: "Sign In",
-    description: "Sign in to your Marketna account to access premium features and personalized services.",
-    path: "/sign-in",
-})
+  return createMetadata({
+    siteName: t("siteName"),
+    title: t("seo.auth.signIn.title"),
+    description: t("seo.auth.signIn.description"),
+  })
+}
 
 export default function Page() {
-    return (
-        <SignInForm />
-    )
+  return <SignInForm />
 }

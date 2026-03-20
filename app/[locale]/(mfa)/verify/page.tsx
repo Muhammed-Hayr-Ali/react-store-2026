@@ -1,12 +1,16 @@
 import { createMetadata } from "@/lib/config/metadata_generator"
 import VerifyForm from "@/components/auth/verify-form"
+import { getTranslations } from "next-intl/server"
 
-export const metadata = createMetadata({
-  title: "Verify",
-  description:
-    "Verify your identity to continue accessing your Marketna account.",
-  path: "/verify",
-})
+export async function generateMetadata() {
+  const t = await getTranslations()
+
+  return createMetadata({
+    siteName: t("siteName"),
+    title: t("seo.auth.verifyOtp.title"),
+    description: t("seo.auth.verifyOtp.description"),
+  })
+}
 
 export default function Page() {
   return <VerifyForm />

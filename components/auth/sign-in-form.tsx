@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useRouter } from "next/navigation"
+import { appRouter } from "@/lib/app-routes"
 
 import { signInWithPassword } from "@/lib/actions/authentication/signInWithPassword"
 import { signInWithGoogle } from "@/lib/actions/authentication/signIn-with-google"
@@ -19,7 +20,6 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { appRouter } from "@/lib/config/app_router"
 import { Spinner } from "../ui/spinner"
 import { AppLogo } from "../shared/app-logo"
 import { toast } from "sonner"
@@ -43,7 +43,7 @@ export default function SignInForm({
       const result = await signInWithPassword(data)
 
       if (result.success) {
-        router.push("/")
+        router.push(appRouter.dashboard)
         router.refresh()
       } else {
         toast.error(result.error)

@@ -1,13 +1,17 @@
 import ComingSoonPage from "@/components/common-soon/common-soon"
 import Header from "@/components/layout/header"
 import { createMetadata } from "@/lib/config/metadata_generator"
+import { getTranslations } from "next-intl/server"
 
-export const metadata = createMetadata({
-  title: "Coming Soon",
-  description:
-    "Marketna is crafting a digital masterpiece. Something extraordinary is launching soon.",
-  path: "/",
-})
+export async function generateMetadata() {
+  const t = await getTranslations()
+
+  return createMetadata({
+    siteName: t("siteName"),
+    title: t("seo.home.title"),
+    description: t("seo.home.description"),
+  })
+}
 
 export default function Page() {
   return (

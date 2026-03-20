@@ -18,7 +18,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { appRouter } from "@/lib/config/app_router"
+import { appRouter } from "@/lib/app-routes"
 import { Spinner } from "../ui/spinner"
 import { AppLogo } from "../shared/app-logo"
 import { signInWithGoogle } from "@/lib/actions/authentication/signIn-with-google"

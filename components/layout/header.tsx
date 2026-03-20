@@ -15,7 +15,7 @@ import {
 import { useAuth } from "@/hooks/useAuth"
 import { siteConfig } from "@/lib/config/site_config"
 import Link from "next/link"
-import { appRouter } from "@/lib/config/app_router"
+import { appRouter } from "@/lib/app-routes"
 import { useLocale, useTranslations } from "next-intl"
 import {} from "lucide-react"
 import {

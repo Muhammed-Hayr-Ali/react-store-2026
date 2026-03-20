@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
-import { appRouter } from "@/lib/config/app_router"
+import { appRouter } from "@/lib/app-routes"
 import { useEffect, useState } from "react"
 import { LockIcon } from "@/components/shared/icons"
 
@@ -76,7 +76,7 @@ export default function CallbackPage() {
 
           // إذا كان يحتاج MFA، نوجه لصفحة التحقق
           if (needsMfaVerification) {
-            router.push(appRouter.verify)
+            router.push(appRouter.verifyOtp)
             return
           }
 
@@ -118,7 +118,7 @@ export default function CallbackPage() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"/>
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
           <h1 className="text-2xl font-bold">{t("loading")}</h1>
           <p className="mt-2 text-muted-foreground">{t("processingSignIn")}</p>
         </div>

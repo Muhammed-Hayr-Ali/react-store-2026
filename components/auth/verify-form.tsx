@@ -19,7 +19,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { toast } from "sonner"
-import { appRouter } from "@/lib/config/app_router"
+import { appRouter } from "@/lib/app-routes"
 import { Spinner } from "@/components/ui/spinner"
 import { ShieldCheckIcon } from "@/components/shared/icons"
 

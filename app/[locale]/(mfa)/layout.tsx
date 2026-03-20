@@ -1,4 +1,4 @@
-import { appRouter } from "@/lib/config/app_router"
+import { appRouter } from "@/lib/app-routes"
 import { AuthGuard } from "@/lib/middleware/auth-guard"
 
 export default async function MainLayout({

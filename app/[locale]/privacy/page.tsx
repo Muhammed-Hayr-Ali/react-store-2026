@@ -1,12 +1,17 @@
-import { createMetadata } from "@/lib/config/metadata_generator";
-import { PrivacyPageContent } from "@/components/legal/privacy-content";
+import { createMetadata } from "@/lib/config/metadata_generator"
+import { PrivacyPageContent } from "@/components/legal/privacy-content"
+import { getTranslations } from "next-intl/server"
 
-export const metadata = createMetadata({
-  title: "Privacy Policy",
-  description: "Marketna Privacy Policy - Your data security and privacy are our top priorities.",
-  path: "/privacy",
-});
+export async function generateMetadata() {
+  const t = await getTranslations()
+
+  return createMetadata({
+    siteName: t("siteName"),
+    title: t("seo.privacy.title"),
+    description: t("seo.privacy.description"),
+  })
+}
 
 export default function Page() {
-  return <PrivacyPageContent />;
+  return <PrivacyPageContent />
 }

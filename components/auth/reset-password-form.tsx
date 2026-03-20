@@ -15,7 +15,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { LockIcon, CheckCircleIcon } from "@/components/shared/icons"
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
-import { appRouter } from "@/lib/config/app_router"
+import { appRouter } from "@/lib/app-routes"
 
 function ResetPasswordFormContent() {
   const t = useTranslations("ResetPassword")
