@@ -9,12 +9,12 @@ import { useForm} from "react-hook-form"
 import { Spinner } from "@/components/ui/spinner"
 import { AppLogo } from "@/components/shared/app-logo"
 import { ModeToggle } from "@/components/shared/mode-toggle"
-import {
-  FaceBookIcon,
-  PinterestIcon,
-  TelegramIcon,
-} from "@/components/shared/icons"
 import { siteConfig } from "@/lib/config/site_config"
+import {
+  FacebookIcon,
+  InstagramIcon,
+  TwitterIcon,
+} from "@/components/shared/icons"
 
 type FormInputs = {
   email: string
@@ -30,9 +30,9 @@ const Footer = () => {
               <AppLogo size="md" />
               <p className="text-accents-5 text-xs">{siteConfig.description}</p>
               <div className="flex gap-4 text-accent-foreground/50">
-                <FaceBookIcon />
-                <PinterestIcon />
-                <TelegramIcon />
+                <FacebookIcon />
+                <TwitterIcon />
+                <InstagramIcon />
               </div>
               {/* description */}
             </div>
