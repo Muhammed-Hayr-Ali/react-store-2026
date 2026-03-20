@@ -183,6 +183,13 @@
       "orders": "الطلبات",
       "coupons": "قسائمي",
       "dashboard": "لوحة التحكم",
+      "language": "اللغة",
+      "arabic": "العربية",
+      "english": "الانجليزية",
+      "theme": "الثيم",
+      "system": "النظام",
+      "dark": "الداكن",
+      "light": "الفاتح",
       "support": "المساعدة والدعم",
       "documentation": "التوثيق"
     }

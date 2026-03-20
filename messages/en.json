@@ -176,6 +176,13 @@
       "orders": "Orders",
       "coupons": "My Coupons",
       "dashboard": "Dashboard",
+      "language": "Language",
+      "arabic": "Arabic",
+      "english": "English",
+      "theme": "Theme",
+      "system": "System",
+      "dark": "Dark",
+      "light": "Light",
       "support": "Help & Support",
       "documentation": "Documentation"
     }

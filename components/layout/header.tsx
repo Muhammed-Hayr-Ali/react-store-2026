@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { AppLogo } from "@/components/shared/app-logo"
-import { UserBoldIcon } from "@/components/shared/icons"
+import { ModeToggleIcon, UserBoldIcon } from "@/components/shared/icons"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import MenuButton from "@/components/shared/menu_button"
@@ -17,10 +17,21 @@ import { useAuth } from "@/hooks/useAuth"
 import { siteConfig } from "@/lib/config/site_config"
 import Link from "next/link"
 import { appRouter } from "@/lib/config/app_router"
-import { useTranslations } from "next-intl"
-import { Book, Home, LifeBuoy, PackageOpen } from "lucide-react"
+import { useLocale, useTranslations } from "next-intl"
+import { Book, Check, Globe, Home, LifeBuoy, PackageOpen } from "lucide-react"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import { redirect, usePathname } from "next/navigation"
+import { useTheme } from "next-themes"
 
 export default function Header() {
+  const pathname = usePathname()
+  const { theme, setTheme } = useTheme()
+  const locale = useLocale()
   const t = useTranslations("Header")
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
   const { profile, user, signOut } = useAuth()
@@ -29,6 +40,16 @@ export default function Header() {
 
   const handleLogout = async () => {
     await signOut()
+  }
+
+  function onSelectChange(nextLocale: string) {
+    // ✅ redirect من next-intl تدعم locale بشكل صحيح مع TypeScript
+    redirect(`/${nextLocale}${pathname}`)
+  }
+
+
+  function handleThemeChange(theme: string) {
+    setTheme(theme)
   }
 
   return (
@@ -130,6 +151,86 @@ export default function Header() {
               {t("menuItems." + item.key)}
             </MobileMenuItem>
           ))}
+
+          {/* language */}
+
+          <Accordion type="single" collapsible defaultValue="item-2">
+            <AccordionItem value="item-1">
+              <AccordionTrigger className="p-0">
+                <MobileMenuItem key="language" className="w-auto p-0">
+                  <Globe className="mr-2 h-4 w-4" />
+                  {t("menuItems.language")}
+                </MobileMenuItem>
+              </AccordionTrigger>
+              <AccordionContent>
+                <MobileMenuItem
+                  key="arabic"
+                  className={locale === "ar" ? "" : "ml-9 rtl:mr-9 rtl:ml-0"}
+                  onClick={() => onSelectChange("ar")}
+                >
+                  {locale === "ar" && (
+                    <Check className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
+                  )}
+                  {t("menuItems.arabic")}
+                </MobileMenuItem>
+                <MobileMenuItem
+                  key="english"
+                  className={locale === "en" ? "" : "ml-9 rtl:mr-9 rtl:ml-0"}
+                  onClick={() => onSelectChange("en")}
+                >
+                  {locale === "en" && (
+                    <Check className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
+                  )}
+                  {t("menuItems.english")}
+                </MobileMenuItem>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+
+          <Accordion type="single" collapsible defaultValue="item-3">
+            <AccordionItem value="item-1">
+              <AccordionTrigger className="p-0">
+                <MobileMenuItem key="theme" className="w-auto p-0">
+                  <ModeToggleIcon className="mr-2 h-4 w-4" />
+                  {t("menuItems.theme")}
+                </MobileMenuItem>
+              </AccordionTrigger>
+              <AccordionContent>
+                <MobileMenuItem
+                  key="system"
+                  className={theme === "system" ? "" : "ml-9 rtl:mr-9 rtl:ml-0"}
+                  onClick={() => handleThemeChange("system")}
+                >
+                  {theme === "system" && (
+                    <Check className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
+                  )}
+                  {t("menuItems.system")}
+                </MobileMenuItem>
+
+                <MobileMenuItem
+                  key="dark"
+                  className={theme === "dark" ? "" : "ml-9 rtl:mr-9 rtl:ml-0"}
+                  onClick={() => handleThemeChange("dark")}
+                >
+                  {theme === "dark" && (
+                    <Check className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
+                  )}
+                  {t("menuItems.dark")}
+                </MobileMenuItem>
+
+                <MobileMenuItem
+                  key="light"
+                  className={theme === "light" ? "" : "ml-9 rtl:mr-9 rtl:ml-0"}
+                  onClick={() => handleThemeChange("light")}
+                >
+                  {theme === "light" && (
+                    <Check className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
+                  )}
+                  {t("menuItems.light")}
+                </MobileMenuItem>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
 
           <MobileMenuItem key="support" href={appRouter.home} icon={LifeBuoy}>
             {t("menuItems.support")}

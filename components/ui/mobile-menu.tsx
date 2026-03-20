@@ -93,7 +93,7 @@ MobileMenuFooter.displayName = "MobileMenuFooter"
 const MobileMenuItem = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement> & {
-    href: string
+    href?: string
     icon?: React.ElementType
   }
 >(({ className, href, icon: Icon, children, ...props }, ref) => (
@@ -104,10 +104,17 @@ const MobileMenuItem = React.forwardRef<
     asChild
     {...props}
   >
-    <Link href={href}>
+ { href ?  <Link href={href}>
       {Icon && <Icon className="h-5 w-5" />}
       {children}
     </Link>
+  :  
+  <div>
+      {Icon && <Icon className="h-5 w-5" />}
+      {children}
+    </div>
+  
+  }
   </Button>
 ))
 MobileMenuItem.displayName = "MobileMenuItem"

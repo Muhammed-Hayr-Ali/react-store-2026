@@ -72,15 +72,7 @@ export const siteConfig = {
       label: "Dashboard",
       key: "dashboard",
       href: "/dashboard",
-    },
-    {
-      icon: LifeBuoy,
-      label: "Help & Support",
-      key: "support",
-      href: "/support",
-    },
-    { icon: Book, label: "Documentation", key: "documentation", href: "docs" },
-  ],
+    }],
 
 
   quickLinks: [
