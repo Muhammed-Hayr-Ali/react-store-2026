@@ -161,5 +161,22 @@
     "signInSuccessDesc": "Would you like to enable two-factor authentication for enhanced security?",
     "continueToHome": "Continue to Home",
     "enableTwoFactor": "Enable 2FA"
+  },
+  "Header": {
+    "search": "Search",
+    "guest": "Guest",
+    "signOut": "Sign Out",
+    "signIn": "Sign In",
+    "createAccount": "Create Account",
+    "menuItems": {
+      "home": "Home",
+      "cart": "Cart",
+      "wishlist": "Wishlist",
+      "orders": "Orders",
+      "coupons": "My Coupons",
+      "dashboard": "Dashboard",
+      "support": "Help & Support",
+      "documentation": "Documentation"
+    }
   }
 }

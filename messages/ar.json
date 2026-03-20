@@ -168,5 +168,22 @@
     "signInSuccessDesc": "هل ترغب بتفعيل المصادقة الثنائية لزيادة الأمان؟",
     "continueToHome": "المتابعة للرئيسية",
     "enableTwoFactor": "تفعيل المصادقة الثنائية"
+  },
+  "Header": {
+    "search": "بحث",
+    "guest": "ضيف",
+    "signOut": "تسجيل الخروج",
+    "signIn": "تسجيل الدخول",
+    "createAccount": "إنشاء حساب",
+    "menuItems": {
+      "home": "الرئيسية",
+      "cart": "السلة",
+      "wishlist": "المفضلة",
+      "orders": "الطلبات",
+      "coupons": "قسائمي",
+      "dashboard": "لوحة التحكم",
+      "support": "المساعدة والدعم",
+      "documentation": "التوثيق"
+    }
   }
 }

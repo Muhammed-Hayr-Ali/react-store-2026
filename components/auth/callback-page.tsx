@@ -85,7 +85,7 @@ export default function CallbackPage() {
             if (isMounted) {
               setShowSuccessDialog(true)
             }
-          }, 1000)
+          }, 500)
         }
       } catch (error) {
         console.error("Callback error:", error)

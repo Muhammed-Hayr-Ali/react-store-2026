@@ -1,4 +1,13 @@
-import { Book, Heart, Home, LayoutDashboard, LifeBuoy, Package, ShoppingCart, Ticket } from "lucide-react";
+import {
+  Book,
+  Heart,
+  Home,
+  LayoutDashboard,
+  LifeBuoy,
+  Package,
+  ShoppingCart,
+  Ticket,
+} from "lucide-react"
 
 export const siteConfig = {
   name: "Marketna",
@@ -49,20 +58,40 @@ export const siteConfig = {
   ],
 
   userMenuItems: [
-    { icon: Home, label: "Home", href: "" },
-    { icon: ShoppingCart, label: "Cart", href: "/cart" },
-    { icon: Heart, label: "Wishlist", href: "/wishlist" },
-    { icon: Package, label: "Orders", href: "/dashboard/orders" },
-    { icon: Ticket, label: "My Coupons", href: "coupons" },
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-    { icon: LifeBuoy, label: "Help & Support", href: "/support" },
-    { icon: Book, label: "Documentation", href: "docs" },
+    { icon: Home, label: "Home", key: "home", href: "" },
+    { icon: ShoppingCart, label: "Cart", key: "cart", href: "/cart" },
+    { icon: Heart, label: "Wishlist", key: "wishlist", href: "/wishlist" },
+    {
+      icon: Package,
+      label: "Orders",
+      key: "orders",
+      href: "/dashboard/orders",
+    },
+    { icon: Ticket, label: "My Coupons", key: "coupons", href: "coupons" },
+    {
+      icon: LayoutDashboard,
+      label: "Dashboard",
+      key: "dashboard",
+      href: "/dashboard",
+    },
+    {
+      icon: LifeBuoy,
+      label: "Help & Support",
+      key: "support",
+      href: "/support",
+    },
+    { icon: Book, label: "Documentation", key: "documentation", href: "docs" },
   ],
 
   guestMenuItems: [
-    { icon: Home, label: "Home", href: "/" },
-    { icon: LifeBuoy, label: "Help & Support", href: "/support" },
-    { icon: Book, label: "Documentation", href: "/docs" },
+    { icon: Home, label: "Home", key: "home", href: "/" },
+    {
+      icon: LifeBuoy,
+      label: "Help & Support",
+      key: "support",
+      href: "/support",
+    },
+    { icon: Book, label: "Documentation", key: "documentation", href: "/docs" },
   ],
 
   quickLinks: [

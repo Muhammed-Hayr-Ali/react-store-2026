@@ -17,22 +17,17 @@ import { useAuth } from "@/hooks/useAuth"
 import { siteConfig } from "@/lib/config/site_config"
 import Link from "next/link"
 import { appRouter } from "@/lib/config/app_router"
-import { Profile } from "@/lib/types/profile"
-import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 
 export default function Header() {
-  const router = useRouter()
+  const t = useTranslations("Header")
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
   const { profile, user, signOut } = useAuth()
-  const [avatar, setAvatar] = React.useState<string | undefined>(
-    profile?.avatar_url || undefined
-  )
+  const avatar = profile?.avatar_url
   const menuItems = user ? siteConfig.userMenuItems : siteConfig.guestMenuItems
 
   const handleLogout = async () => {
     await signOut()
-    setAvatar(undefined)
-    router.refresh()
   }
 
   return (
@@ -63,7 +58,7 @@ export default function Header() {
                 <circle cx="11" cy="11" r="8" />
                 <path d="m21 21-4.3-4.3" />
               </svg>
-              <span>Search</span>
+              <span>{t("search")}</span>
             </Button>
           </div>
 
@@ -115,11 +110,11 @@ export default function Header() {
         <MobileMenuBody>
           {menuItems.map((item) => (
             <MobileMenuItem
-              key={`/${item.label}`}
+              key={`/${item.key}`}
               href={item.href}
               icon={item.icon}
             >
-              {item.label}
+              {t("menuItems." + item.key)}
             </MobileMenuItem>
           ))}
         </MobileMenuBody>
@@ -131,15 +126,15 @@ export default function Header() {
               className="w-full"
               onClick={handleLogout}
             >
-              Sign Out
+              {t("signOut")}
             </Button>
           ) : (
             <div className="flex gap-2">
               <Button className="flex-1" asChild>
-                <Link href={appRouter.signIn}>Sign In</Link>
+                <Link href={appRouter.signIn}>{t("signIn")}</Link>
               </Button>
               <Button variant="outline" className="flex-1" asChild>
-                <Link href={appRouter.signUp}>Create Account</Link>
+                <Link href={appRouter.signUp}>{t("createAccount")}</Link>
               </Button>
             </div>
           )}
