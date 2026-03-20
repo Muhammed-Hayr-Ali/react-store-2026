@@ -1,20 +1,20 @@
-'use client';
+"use client"
 
-import { useState, useEffect } from 'react';
-import { useSupabase } from '@/hooks/useSupabase';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { useState, useEffect } from "react"
+import { createBrowserClient } from "@/lib/supabase/createBrowserClient"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -22,7 +22,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table"
 import {
   Dialog,
   DialogContent,
@@ -30,176 +30,184 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Clock, CheckCircle, XCircle, DollarSign, MessageSquare } from 'lucide-react';
+} from "@/components/ui/dialog"
+import {
+  Clock,
+  CheckCircle,
+  XCircle,
+  DollarSign,
+  MessageSquare,
+} from "lucide-react"
 
 interface UpgradeRequest {
-  request_id: string;
-  seller_name: string;
-  store_name: string;
-  seller_email: string;
-  current_plan_name: string;
-  target_plan_name: string;
-  target_plan_price: number;
-  status: 'pending' | 'approved' | 'rejected' | 'completed';
-  contact_method: string;
-  contact_value: string;
-  seller_notes: string;
-  admin_notes: string;
-  contacted_at: string;
-  payment_received_at: string;
-  completed_at: string;
-  created_at: string;
+  request_id: string
+  seller_name: string
+  store_name: string
+  seller_email: string
+  current_plan_name: string
+  target_plan_name: string
+  target_plan_price: number
+  status: "pending" | "approved" | "rejected" | "completed"
+  contact_method: string
+  contact_value: string
+  seller_notes: string
+  admin_notes: string
+  contacted_at: string
+  payment_received_at: string
+  completed_at: string
+  created_at: string
 }
 
 export default function AdminUpgradeRequestsPage() {
-  const supabase = useSupabase();
-  const [requests, setRequests] = useState<UpgradeRequest[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedRequest, setSelectedRequest] = useState<UpgradeRequest | null>(null);
-  const [adminNotes, setAdminNotes] = useState('');
-  const [actionLoading, setActionLoading] = useState(false);
+  const supabase = createBrowserClient()
+  const [requests, setRequests] = useState<UpgradeRequest[]>([])
+  const [loading, setLoading] = useState(true)
+  const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [selectedRequest, setSelectedRequest] = useState<UpgradeRequest | null>(
+    null
+  )
+  const [adminNotes, setAdminNotes] = useState("")
+  const [actionLoading, setActionLoading] = useState(false)
 
   useEffect(() => {
-    loadRequests();
-  }, [statusFilter]);
+    loadRequests()
+  }, [statusFilter])
 
   async function loadRequests() {
-    setLoading(true);
-    const status = statusFilter === 'all' ? null : statusFilter;
-    const { data, error } = await supabase.rpc('get_all_upgrade_requests', {
-      p_status: status
-    });
+    setLoading(true)
+    const status = statusFilter === "all" ? null : statusFilter
+    const { data, error } = await supabase.rpc("get_all_upgrade_requests", {
+      p_status: status,
+    })
 
     if (!error && data) {
-      setRequests(data);
+      setRequests(data)
     }
-    setLoading(false);
+    setLoading(false)
   }
 
   const handleApprove = async () => {
-    if (!selectedRequest) return;
+    if (!selectedRequest) return
 
-    setActionLoading(true);
+    setActionLoading(true)
     try {
-      const { error } = await supabase.rpc('approve_upgrade_request', {
+      const { error } = await supabase.rpc("approve_upgrade_request", {
         p_request_id: selectedRequest.request_id,
-        p_admin_notes: adminNotes
-      });
+        p_admin_notes: adminNotes,
+      })
 
-      if (error) throw error;
+      if (error) throw error
 
-      await loadRequests();
-      setSelectedRequest(null);
-      setAdminNotes('');
+      await loadRequests()
+      setSelectedRequest(null)
+      setAdminNotes("")
     } catch (error) {
-      console.error('Error approving request:', error);
-      alert('حدث خطأ. يرجى المحاولة مرة أخرى.');
+      console.error("Error approving request:", error)
+      alert("حدث خطأ. يرجى المحاولة مرة أخرى.")
     } finally {
-      setActionLoading(false);
+      setActionLoading(false)
     }
-  };
+  }
 
   const handleReject = async () => {
-    if (!selectedRequest) return;
+    if (!selectedRequest) return
 
-    setActionLoading(true);
+    setActionLoading(true)
     try {
-      const { error } = await supabase.rpc('reject_upgrade_request', {
+      const { error } = await supabase.rpc("reject_upgrade_request", {
         p_request_id: selectedRequest.request_id,
-        p_admin_notes: adminNotes
-      });
+        p_admin_notes: adminNotes,
+      })
 
-      if (error) throw error;
+      if (error) throw error
 
-      await loadRequests();
-      setSelectedRequest(null);
-      setAdminNotes('');
+      await loadRequests()
+      setSelectedRequest(null)
+      setAdminNotes("")
     } catch (error) {
-      console.error('Error rejecting request:', error);
-      alert('حدث خطأ. يرجى المحاولة مرة أخرى.');
+      console.error("Error rejecting request:", error)
+      alert("حدث خطأ. يرجى المحاولة مرة أخرى.")
     } finally {
-      setActionLoading(false);
+      setActionLoading(false)
     }
-  };
+  }
 
   const handleComplete = async () => {
-    if (!selectedRequest) return;
+    if (!selectedRequest) return
 
-    setActionLoading(true);
+    setActionLoading(true)
     try {
-      const { error } = await supabase.rpc('complete_upgrade_request', {
-        p_request_id: selectedRequest.request_id
-      });
+      const { error } = await supabase.rpc("complete_upgrade_request", {
+        p_request_id: selectedRequest.request_id,
+      })
 
-      if (error) throw error;
+      if (error) throw error
 
-      await loadRequests();
-      setSelectedRequest(null);
-      setAdminNotes('');
+      await loadRequests()
+      setSelectedRequest(null)
+      setAdminNotes("")
     } catch (error) {
-      console.error('Error completing request:', error);
-      alert('حدث خطأ. يرجى المحاولة مرة أخرى.');
+      console.error("Error completing request:", error)
+      alert("حدث خطأ. يرجى المحاولة مرة أخرى.")
     } finally {
-      setActionLoading(false);
+      setActionLoading(false)
     }
-  };
+  }
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'pending':
+      case "pending":
         return (
           <Badge variant="secondary" className="gap-1">
-            <Clock className="w-3 h-3" />
+            <Clock className="h-3 w-3" />
             قيد المراجعة
           </Badge>
-        );
-      case 'approved':
+        )
+      case "approved":
         return (
           <Badge variant="default" className="gap-1 bg-blue-500">
-            <CheckCircle className="w-3 h-3" />
+            <CheckCircle className="h-3 w-3" />
             تمت الموافقة
           </Badge>
-        );
-      case 'rejected':
+        )
+      case "rejected":
         return (
           <Badge variant="destructive" className="gap-1">
-            <XCircle className="w-3 h-3" />
+            <XCircle className="h-3 w-3" />
             مرفوض
           </Badge>
-        );
-      case 'completed':
+        )
+      case "completed":
         return (
           <Badge variant="default" className="gap-1 bg-green-500">
-            <DollarSign className="w-3 h-3" />
+            <DollarSign className="h-3 w-3" />
             مكتمل
           </Badge>
-        );
+        )
       default:
-        return <Badge>{status}</Badge>;
+        return <Badge>{status}</Badge>
     }
-  };
+  }
 
   const getContactIcon = (method: string) => {
     switch (method) {
-      case 'email':
-        return '📧';
-      case 'phone':
-        return '📱';
-      case 'whatsapp':
-        return '💬';
+      case "email":
+        return "📧"
+      case "phone":
+        return "📱"
+      case "whatsapp":
+        return "💬"
       default:
-        return '📞';
+        return "📞"
     }
-  };
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold mb-2">طلبات ترقية الاشتراك</h1>
+          <h1 className="mb-2 text-3xl font-bold">طلبات ترقية الاشتراك</h1>
           <p className="text-gray-600">إدارة ومراجعة طلبات الترقية</p>
         </div>
         <div className="flex gap-4">
@@ -219,10 +227,12 @@ export default function AdminUpgradeRequestsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-500">المجموع</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-500">
+              المجموع
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{requests.length}</div>
@@ -230,31 +240,37 @@ export default function AdminUpgradeRequestsPage() {
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-yellow-500">قيد المراجعة</CardTitle>
+            <CardTitle className="text-sm font-medium text-yellow-500">
+              قيد المراجعة
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">
-              {requests.filter(r => r.status === 'pending').length}
+              {requests.filter((r) => r.status === "pending").length}
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-blue-500">تمت الموافقة</CardTitle>
+            <CardTitle className="text-sm font-medium text-blue-500">
+              تمت الموافقة
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">
-              {requests.filter(r => r.status === 'approved').length}
+              {requests.filter((r) => r.status === "approved").length}
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-green-500">مكتمل</CardTitle>
+            <CardTitle className="text-sm font-medium text-green-500">
+              مكتمل
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">
-              {requests.filter(r => r.status === 'completed').length}
+              {requests.filter((r) => r.status === "completed").length}
             </div>
           </CardContent>
         </Card>
@@ -267,9 +283,9 @@ export default function AdminUpgradeRequestsPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <p className="text-center text-gray-500 py-8">جاري التحميل...</p>
+            <p className="py-8 text-center text-gray-500">جاري التحميل...</p>
           ) : requests.length === 0 ? (
-            <p className="text-center text-gray-500 py-8">لا توجد طلبات</p>
+            <p className="py-8 text-center text-gray-500">لا توجد طلبات</p>
           ) : (
             <div className="overflow-x-auto">
               <Table>
@@ -294,16 +310,22 @@ export default function AdminUpgradeRequestsPage() {
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-bold">{request.seller_name || 'غير متوفر'}</div>
-                          <div className="text-sm text-gray-500">{request.seller_email}</div>
+                          <div className="font-bold">
+                            {request.seller_name || "غير متوفر"}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {request.seller_email}
+                          </div>
                         </div>
                       </TableCell>
-                      <TableCell>{request.store_name || '-'}</TableCell>
+                      <TableCell>{request.store_name || "-"}</TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          <div>{request.current_plan_name || 'مجانية'}</div>
+                          <div>{request.current_plan_name || "مجانية"}</div>
                           <div className="text-gray-500">↓</div>
-                          <div className="font-bold">{request.target_plan_name}</div>
+                          <div className="font-bold">
+                            {request.target_plan_name}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell className="font-bold text-green-600">
@@ -312,12 +334,16 @@ export default function AdminUpgradeRequestsPage() {
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <span>{getContactIcon(request.contact_method)}</span>
-                          <span className="text-sm">{request.contact_value || '-'}</span>
+                          <span className="text-sm">
+                            {request.contact_value || "-"}
+                          </span>
                         </div>
                       </TableCell>
                       <TableCell>{getStatusBadge(request.status)}</TableCell>
                       <TableCell className="text-sm">
-                        {new Date(request.created_at).toLocaleDateString('ar-SA')}
+                        {new Date(request.created_at).toLocaleDateString(
+                          "ar-SA"
+                        )}
                       </TableCell>
                       <TableCell>
                         <Button
@@ -339,7 +365,10 @@ export default function AdminUpgradeRequestsPage() {
 
       {/* Details Dialog */}
       {selectedRequest && (
-        <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
+        <Dialog
+          open={!!selectedRequest}
+          onOpenChange={() => setSelectedRequest(null)}
+        >
           <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle>تفاصيل طلب الترقية</DialogTitle>
@@ -352,15 +381,19 @@ export default function AdminUpgradeRequestsPage() {
               <div>
                 <Label>البائع</Label>
                 <p className="font-bold">{selectedRequest.seller_name}</p>
-                <p className="text-sm text-gray-500">{selectedRequest.seller_email}</p>
+                <p className="text-sm text-gray-500">
+                  {selectedRequest.seller_email}
+                </p>
               </div>
               <div>
                 <Label>المتجر</Label>
-                <p className="font-bold">{selectedRequest.store_name || '-'}</p>
+                <p className="font-bold">{selectedRequest.store_name || "-"}</p>
               </div>
               <div>
                 <Label>الترقية من</Label>
-                <p className="font-bold">{selectedRequest.current_plan_name || 'مجانية'}</p>
+                <p className="font-bold">
+                  {selectedRequest.current_plan_name || "مجانية"}
+                </p>
               </div>
               <div>
                 <Label>الترقية إلى</Label>
@@ -368,18 +401,22 @@ export default function AdminUpgradeRequestsPage() {
               </div>
               <div>
                 <Label>السعر الشهري</Label>
-                <p className="font-bold text-green-600">${selectedRequest.target_plan_price}</p>
+                <p className="font-bold text-green-600">
+                  ${selectedRequest.target_plan_price}
+                </p>
               </div>
               <div>
                 <Label>طريقة التواصل</Label>
                 <p className="flex items-center gap-1">
                   <span>{getContactIcon(selectedRequest.contact_method)}</span>
-                  <span>{selectedRequest.contact_value || '-'}</span>
+                  <span>{selectedRequest.contact_value || "-"}</span>
                 </p>
               </div>
               <div className="col-span-2">
                 <Label>ملاحظات البائع</Label>
-                <p className="text-gray-700">{selectedRequest.seller_notes || '-'}</p>
+                <p className="text-gray-700">
+                  {selectedRequest.seller_notes || "-"}
+                </p>
               </div>
               <div>
                 <Label>الحالة</Label>
@@ -387,28 +424,32 @@ export default function AdminUpgradeRequestsPage() {
               </div>
               <div>
                 <Label>تاريخ الإنشاء</Label>
-                <p>{new Date(selectedRequest.created_at).toLocaleString('ar-SA')}</p>
+                <p>
+                  {new Date(selectedRequest.created_at).toLocaleString("ar-SA")}
+                </p>
               </div>
             </div>
 
             {/* Admin Notes */}
             {selectedRequest.admin_notes && (
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <MessageSquare className="w-4 h-4 text-gray-500" />
+              <div className="rounded-lg bg-gray-50 p-4">
+                <div className="mb-2 flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-gray-500" />
                   <Label>ملاحظات الإدارة السابقة</Label>
                 </div>
                 <p className="text-gray-700">{selectedRequest.admin_notes}</p>
                 {selectedRequest.contacted_at && (
-                  <p className="text-sm text-gray-500 mt-2">
-                    {new Date(selectedRequest.contacted_at).toLocaleString('ar-SA')}
+                  <p className="mt-2 text-sm text-gray-500">
+                    {new Date(selectedRequest.contacted_at).toLocaleString(
+                      "ar-SA"
+                    )}
                   </p>
                 )}
               </div>
             )}
 
             {/* Action Form */}
-            {selectedRequest.status === 'pending' && (
+            {selectedRequest.status === "pending" && (
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="adminNotes">ملاحظات الإدارة</Label>
@@ -427,7 +468,7 @@ export default function AdminUpgradeRequestsPage() {
                     disabled={actionLoading}
                     className="gap-1"
                   >
-                    <XCircle className="w-4 h-4" />
+                    <XCircle className="h-4 w-4" />
                     رفض الطلب
                   </Button>
                   <Button
@@ -435,7 +476,7 @@ export default function AdminUpgradeRequestsPage() {
                     disabled={actionLoading}
                     className="gap-1 bg-blue-500"
                   >
-                    <CheckCircle className="w-4 h-4" />
+                    <CheckCircle className="h-4 w-4" />
                     الموافقة على الطلب
                   </Button>
                 </DialogFooter>
@@ -443,38 +484,45 @@ export default function AdminUpgradeRequestsPage() {
             )}
 
             {/* Complete Action */}
-            {selectedRequest.status === 'approved' && !selectedRequest.payment_received_at && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <DollarSign className="w-4 h-4 text-yellow-500" />
-                  <Label>تأكيد استلام الدفع</Label>
+            {selectedRequest.status === "approved" &&
+              !selectedRequest.payment_received_at && (
+                <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+                  <div className="mb-2 flex items-center gap-2">
+                    <DollarSign className="h-4 w-4 text-yellow-500" />
+                    <Label>تأكيد استلام الدفع</Label>
+                  </div>
+                  <p className="mb-4 text-sm text-gray-700">
+                    هل تم استلام الدفع من البائع؟
+                  </p>
+                  <Button
+                    onClick={handleComplete}
+                    disabled={actionLoading}
+                    className="w-full gap-1 bg-green-500"
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    تأكيد استلام الدفع وتفعيل الاشتراك
+                  </Button>
                 </div>
-                <p className="text-sm text-gray-700 mb-4">
-                  هل تم استلام الدفع من البائع؟
-                </p>
-                <Button
-                  onClick={handleComplete}
-                  disabled={actionLoading}
-                  className="w-full gap-1 bg-green-500"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                  تأكيد استلام الدفع وتفعيل الاشتراك
-                </Button>
-              </div>
-            )}
+              )}
 
             {/* Completed */}
-            {selectedRequest.status === 'completed' && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <CheckCircle className="w-4 h-4 text-green-500" />
+            {selectedRequest.status === "completed" && (
+              <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                <div className="mb-2 flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
                   <Label>تم تفعيل الاشتراك</Label>
                 </div>
                 <p className="text-sm text-gray-700">
-                  تم استلام الدفع في: {new Date(selectedRequest.payment_received_at!).toLocaleString('ar-SA')}
+                  تم استلام الدفع في:{" "}
+                  {new Date(
+                    selectedRequest.payment_received_at!
+                  ).toLocaleString("ar-SA")}
                 </p>
                 <p className="text-sm text-gray-700">
-                  تم التفعيل في: {new Date(selectedRequest.completed_at!).toLocaleString('ar-SA')}
+                  تم التفعيل في:{" "}
+                  {new Date(selectedRequest.completed_at!).toLocaleString(
+                    "ar-SA"
+                  )}
                 </p>
               </div>
             )}
@@ -482,5 +530,5 @@ export default function AdminUpgradeRequestsPage() {
         </Dialog>
       )}
     </div>
-  );
+  )
 }
