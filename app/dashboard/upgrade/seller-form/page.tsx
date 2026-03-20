@@ -1,49 +1,66 @@
-'use client';
+"use client"
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
-import { createBrowserClient } from '@/lib/supabase/createBrowserClient';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { createBrowserClient } from "@/lib/supabase/createBrowserClient"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { ArrowLeft } from "lucide-react"
+import Link from "next/link"
 
 export default function SellerFormPage() {
-  const router = useRouter();
-  const { user } = useAuth();
-  const supabase = createBrowserClient();
+  const router = useRouter()
+  const supabase = createBrowserClient()
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
-    store_name: '',
-    store_description: '',
-    phone: '',
-    email: '',
-    tax_number: '',
-    commercial_registration: '',
-    street: '',
-    city: '',
-    country: 'السعودية'
-  });
+    store_name: "",
+    store_description: "",
+    phone: "",
+    email: "",
+    tax_number: "",
+    commercial_registration: "",
+    street: "",
+    city: "",
+    country: "السعودية",
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
+    e.preventDefault()
 
-    setLoading(true);
+    setLoading(true)
 
     try {
+      // الحصول على المستخدم
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) {
+        alert("يجب تسجيل الدخول أولاً")
+        router.push("/auth/signin")
+        return
+      }
+
       // 1. إنشاء سجل البائع
       const { data: seller, error: sellerError } = await supabase
-        .from('sellers')
+        .from("sellers")
         .insert({
           user_id: user.id,
           store_name: formData.store_name,
-          store_slug: formData.store_name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          store_slug: formData.store_name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-"),
           store_description: formData.store_description,
           phone: formData.phone,
           email: formData.email,
@@ -52,32 +69,32 @@ export default function SellerFormPage() {
           address: {
             street: formData.street,
             city: formData.city,
-            country: formData.country
+            country: formData.country,
           },
-          account_status: 'pending'  // بانتظار موافقة الإدارة
+          account_status: "pending", // بانتظار موافقة الإدارة
         })
         .select()
-        .single();
+        .single()
 
-      if (sellerError) throw sellerError;
+      if (sellerError) throw sellerError
 
       // 2. الانتقال لصفحة اختيار الخطة
-      router.push(`/dashboard/upgrade/seller-plans?seller_id=${seller.id}`);
+      router.push(`/dashboard/upgrade/seller-plans?seller_id=${seller.id}`)
     } catch (error: unknown) {
       const err = error as { message?: string }
-      console.error('Error creating seller:', err);
-      alert('حدث خطأ. يرجى المحاولة مرة أخرى.');
+      console.error("Error creating seller:", err)
+      alert("حدث خطأ. يرجى المحاولة مرة أخرى.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
+    <div className="container mx-auto max-w-2xl px-4 py-8">
       {/* Back Button */}
       <Link href="/dashboard/upgrade">
         <Button variant="ghost" className="mb-4 gap-2">
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="h-4 w-4" />
           العودة
         </Button>
       </Link>
@@ -98,7 +115,9 @@ export default function SellerFormPage() {
               <Input
                 id="store_name"
                 value={formData.store_name}
-                onChange={(e) => setFormData({ ...formData, store_name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, store_name: e.target.value })
+                }
                 placeholder="مثال: متجري الإلكتروني"
                 required
               />
@@ -109,7 +128,12 @@ export default function SellerFormPage() {
               <Textarea
                 id="store_description"
                 value={formData.store_description}
-                onChange={(e) => setFormData({ ...formData, store_description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    store_description: e.target.value,
+                  })
+                }
                 placeholder="وصف مختصر لمتجرك..."
                 rows={3}
               />
@@ -122,7 +146,9 @@ export default function SellerFormPage() {
                 <Input
                   id="phone"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
                   placeholder="0501234567"
                   required
                 />
@@ -133,7 +159,9 @@ export default function SellerFormPage() {
                   id="email"
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   placeholder="email@example.com"
                   required
                 />
@@ -147,7 +175,9 @@ export default function SellerFormPage() {
                 <Input
                   id="tax_number"
                   value={formData.tax_number}
-                  onChange={(e) => setFormData({ ...formData, tax_number: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, tax_number: e.target.value })
+                  }
                   placeholder="123456789"
                 />
               </div>
@@ -156,7 +186,12 @@ export default function SellerFormPage() {
                 <Input
                   id="commercial_registration"
                   value={formData.commercial_registration}
-                  onChange={(e) => setFormData({ ...formData, commercial_registration: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      commercial_registration: e.target.value,
+                    })
+                  }
                   placeholder="1010101010"
                 />
               </div>
@@ -169,7 +204,9 @@ export default function SellerFormPage() {
                 <Input
                   id="city"
                   value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, city: e.target.value })
+                  }
                   placeholder="الرياض"
                   required
                 />
@@ -179,28 +216,36 @@ export default function SellerFormPage() {
                 <Input
                   id="street"
                   value={formData.street}
-                  onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, street: e.target.value })
+                  }
                   placeholder="شارع التخصصي"
                 />
               </div>
             </div>
 
             {/* تنبيه */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
               <p className="text-sm text-blue-800">
-                <strong>ملاحظة:</strong> بعد حفظ المعلومات، سيتم إرسال طلبك للإدارة للمراجعة.
-                بعد الموافقة، ستتمكن من اختيار خطة الاشتراك وبدء البيع.
+                <strong>ملاحظة:</strong> بعد حفظ المعلومات، سيتم إرسال طلبك
+                للإدارة للمراجعة. بعد الموافقة، ستتمكن من اختيار خطة الاشتراك
+                وبدء البيع.
               </p>
             </div>
           </CardContent>
 
           <CardFooter>
-            <Button type="submit" className="w-full" size="lg" disabled={loading}>
-              {loading ? 'جاري الحفظ...' : 'حفظ والمتابعة لاختيار الخطة'}
+            <Button
+              type="submit"
+              className="w-full"
+              size="lg"
+              disabled={loading}
+            >
+              {loading ? "جاري الحفظ..." : "حفظ والمتابعة لاختيار الخطة"}
             </Button>
           </CardFooter>
         </form>
       </Card>
     </div>
-  );
+  )
 }

@@ -1,14 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
 import { createBrowserClient } from "@/lib/supabase/createBrowserClient"
 import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -16,7 +14,6 @@ import { CheckCircle, Clock, MessageSquare } from "lucide-react"
 import Link from "next/link"
 
 export default function UpgradeSuccessPage() {
-  const router = useRouter()
   const supabase = createBrowserClient()
   const [requestId, setRequestId] = useState<string | null>(null)
 
@@ -48,7 +45,7 @@ export default function UpgradeSuccessPage() {
     }
 
     getLastRequest()
-  }, [])
+  })
 
   return (
     <div className="container mx-auto px-4 py-16">
@@ -100,7 +97,7 @@ export default function UpgradeSuccessPage() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex gap-4">
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary font-bold text-white">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-white">
                   1
                 </div>
                 <div>
@@ -112,7 +109,7 @@ export default function UpgradeSuccessPage() {
               </div>
 
               <div className="flex gap-4">
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary font-bold text-white">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-white">
                   2
                 </div>
                 <div>
@@ -124,7 +121,7 @@ export default function UpgradeSuccessPage() {
               </div>
 
               <div className="flex gap-4">
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary font-bold text-white">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-white">
                   3
                 </div>
                 <div>
@@ -134,7 +131,7 @@ export default function UpgradeSuccessPage() {
               </div>
 
               <div className="flex gap-4">
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary font-bold text-white">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-white">
                   4
                 </div>
                 <div>
@@ -152,7 +149,7 @@ export default function UpgradeSuccessPage() {
         <Card className="mb-8 border-blue-200 bg-blue-50">
           <CardContent className="py-6">
             <div className="flex items-start gap-4">
-              <MessageSquare className="mt-1 h-6 w-6 flex-shrink-0 text-blue-500" />
+              <MessageSquare className="mt-1 h-6 w-6 shrink-0 text-blue-500" />
               <div>
                 <h3 className="mb-2 font-bold">هل لديك أسئلة؟</h3>
                 <p className="mb-3 text-gray-600">

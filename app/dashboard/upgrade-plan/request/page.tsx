@@ -16,15 +16,17 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { ArrowLeft, CheckCircle } from "lucide-react"
 import Link from "next/link"
+
+interface Plan {
+  id: string
+  name: string
+  name_ar: string
+  price_usd: number
+  max_products: number
+  features_ar?: string[]
+}
 
 function UpgradeRequestForm() {
   const router = useRouter()
@@ -33,7 +35,7 @@ function UpgradeRequestForm() {
   const planId = searchParams.get("plan")
 
   const [loading, setLoading] = useState(false)
-  const [plan, setPlan] = useState<any>(null)
+  const [plan, setPlan] = useState<Plan | null>(null)
   const [sellerId, setSellerId] = useState<string | null>(null)
 
   const [formData, setFormData] = useState({
@@ -71,7 +73,7 @@ function UpgradeRequestForm() {
     }
 
     loadData()
-  }, [planId])
+  }, [planId, supabase])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -245,7 +247,7 @@ function UpgradeRequestForm() {
 
             {/* تنبيه */}
             <div className="flex gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
-              <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-500" />
+              <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-blue-500" />
               <div className="text-sm text-blue-800">
                 <p className="mb-1 font-bold">ماذا سيحدث بعد الإرسال؟</p>
                 <ol className="list-inside list-decimal space-y-1">
