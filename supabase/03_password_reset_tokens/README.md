@@ -712,7 +712,7 @@ import { headers } from 'next/headers'
 import { sendResetEmail } from '@/lib/email'
 
 export async function requestPasswordReset(email: string) {
-  const supabase = createClient()
+  const supabase = createBrowserClient()
 
   // البحث عن المستخدم
   const { data: authData } = await supabase.auth.admin.getUserByEmail(email)
@@ -745,7 +745,7 @@ export async function requestPasswordReset(email: string) {
 }
 
 export async function verifyAndClaimToken(token: string) {
-  const supabase = createClient()
+  const supabase = createBrowserClient()
 
   const { data, error } = await supabase
     .rpc('claim_password_reset_token', { p_token: token })
@@ -767,7 +767,7 @@ export async function completePasswordReset(
   userId: string,
   newPassword: string
 ) {
-  const supabase = createClient()
+  const supabase = createBrowserClient()
 
   // التحقق النهائي
   const { data: claimData } = await supabase
@@ -803,7 +803,7 @@ import { headers } from 'next/headers'
 import { sendResetEmail } from '@/lib/email'
 
 export async function requestPasswordReset(email: string) {
-  const supabase = createClient()
+  const supabase = createBrowserClient()
 
   const { data: authData } = await supabase.auth.admin.getUserByEmail(email)
   if (!authData.user) {
@@ -835,7 +835,7 @@ export async function requestPasswordReset(email: string) {
 }
 
 export async function verifyAndClaimToken(token: string) {
-  const supabase = createClient()
+  const supabase = createBrowserClient()
 
   const { data, error } = await supabase
     .rpc('claim_password_reset_token', { p_token: token })
@@ -857,7 +857,7 @@ export async function completePasswordReset(
   userId: string,
   newPassword: string
 ) {
-  const supabase = createClient()
+  const supabase = createBrowserClient()
 
   // التحقق النهائي
   const { data: claimData } = await supabase

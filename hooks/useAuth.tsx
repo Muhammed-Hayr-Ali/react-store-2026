@@ -8,9 +8,9 @@ import {
   useCallback,
   useRef,
 } from "react"
-import { createClient } from "@/lib/supabase/createClient"
 import type { User } from "@supabase/supabase-js"
 import type { Profile } from "@/lib/types/profile"
+import { createBrowserClient } from "@/lib/supabase/createBrowserClient"
 
 type AuthStatus = "loading" | "authenticated" | "unauthenticated"
 
@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [status, setStatus] = useState<AuthStatus>("loading")
-  const supabase = createClient()
+  const supabase = createBrowserClient()
   const isProfileFetchingRef = useRef(false)
 
   const delay = (ms: number) =>
@@ -123,12 +123,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     void initializeAuth()
+
+    // Subscribe to auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("[useAuth] Auth state changed:", event, session?.user?.id)
+
+      if (event === "SIGNED_IN" && session?.user) {
+        setUser(session.user)
+        setStatus("authenticated")
+        if (!isProfileFetchingRef.current) {
+          isProfileFetchingRef.current = true
+          try {
+            const profileData = await fetchProfileWithRetry(session.user.id)
+            setProfile(profileData)
+          } finally {
+            isProfileFetchingRef.current = false
+          }
+        }
+      } else if (event === "SIGNED_OUT") {
+        setUser(null)
+        setProfile(null)
+        setStatus("unauthenticated")
+      } else if (session?.user) {
+        setUser(session.user)
+        setStatus("authenticated")
+      }
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [supabase, fetchProfileWithRetry])
+
   const signOut = async () => {
-    await supabase.auth.signOut()
     setUser(null)
     setProfile(null)
     setStatus("unauthenticated")
+    await supabase.auth.signOut()
   }
 
   const refreshProfile = async () => {

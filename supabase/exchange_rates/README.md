@@ -28,32 +28,32 @@
 
 ### 1.1 بنية الجدول
 
-| العمود | النوع | القيود | الوصف |
-|--------|-------|--------|-------|
-| `id` | UUID | PRIMARY KEY | المعرف الفريد |
-| `currency_code` | TEXT | NOT NULL, UNIQUE | رمز العملة (ISO 4217) |
-| `rate_from_usd` | NUMERIC(18, 6) | NOT NULL, CHECK > 0 | سعر الصرف مقابل الدولار |
-| `last_updated_at` | TIMESTAMPTZ | NOT NULL | آخر تحديث |
-| `created_at` | TIMESTAMPTZ | DEFAULT NOW() | تاريخ الإنشاء |
+| العمود            | النوع          | القيود              | الوصف                   |
+| ----------------- | -------------- | ------------------- | ----------------------- |
+| `id`              | UUID           | PRIMARY KEY         | المعرف الفريد           |
+| `currency_code`   | TEXT           | NOT NULL, UNIQUE    | رمز العملة (ISO 4217)   |
+| `rate_from_usd`   | NUMERIC(18, 6) | NOT NULL, CHECK > 0 | سعر الصرف مقابل الدولار |
+| `last_updated_at` | TIMESTAMPTZ    | NOT NULL            | آخر تحديث               |
+| `created_at`      | TIMESTAMPTZ    | DEFAULT NOW()       | تاريخ الإنشاء           |
 
 ### 1.2 القيود
 
-| القيد | الوصف |
-|-------|-------|
-| `currency_code_unique` | كل رمز عملة يجب أن يكون فريداً |
+| القيد                    | الوصف                           |
+| ------------------------ | ------------------------------- |
+| `currency_code_unique`   | كل رمز عملة يجب أن يكون فريداً  |
 | `rate_from_usd_positive` | سعر الصرف يجب أن يكون أكبر من 0 |
 
 ### 1.3 العملات المدعومة
 
-| الرمز | العملة | الدولة |
-|-------|--------|---------|
+| الرمز | العملة       | الدولة              |
+| ----- | ------------ | ------------------- |
 | `USD` | دولار أمريكي | 🇺🇸 الولايات المتحدة |
-| `SAR` | ريال سعودي | 🇸🇦 السعودية |
-| `EGP` | جنيه مصري | 🇪🇬 مصر |
-| `TRY` | ليرة تركية | 🇹🇷 تركيا |
-| `EUR` | يورو | 🇪🇺 الاتحاد الأوروبي |
-| `AED` | درهم إماراتي | 🇦🇪 الإمارات |
-| `SYP` | ليرة سورية | 🇸🇾 سوريا |
+| `SAR` | ريال سعودي   | 🇸🇦 السعودية         |
+| `EGP` | جنيه مصري    | 🇪🇬 مصر              |
+| `TRY` | ليرة تركية   | 🇹🇷 تركيا            |
+| `EUR` | يورو         | 🇪🇺 الاتحاد الأوروبي |
+| `AED` | درهم إماراتي | 🇦🇪 الإمارات         |
+| `SYP` | ليرة سورية   | 🇸🇾 سوريا            |
 
 ---
 
@@ -61,10 +61,10 @@
 
 تم إنشاء فهرسين لتحسين الأداء:
 
-| الفهرس | العمود | الغرض |
-|--------|--------|-------|
-| `idx_exchange_rates_currency_code` | `currency_code` | البحث السريع عن عملة معينة |
-| `idx_exchange_rates_last_updated` | `last_updated_at DESC` | ترتيب حسب آخر تحديث |
+| الفهرس                             | العمود                 | الغرض                      |
+| ---------------------------------- | ---------------------- | -------------------------- |
+| `idx_exchange_rates_currency_code` | `currency_code`        | البحث السريع عن عملة معينة |
+| `idx_exchange_rates_last_updated`  | `last_updated_at DESC` | ترتيب حسب آخر تحديث        |
 
 ---
 
@@ -101,11 +101,11 @@ CREATE POLICY "exchange_rates_service_write"
 
 ### 3.4 مصفوفة الوصول
 
-| المستخدم | CREATE | READ | UPDATE | DELETE |
-|----------|--------|------|--------|--------|
-| Anonymous | ❌ | ✅ | ❌ | ❌ |
-| Authenticated | ❌ | ✅ | ❌ | ❌ |
-| Service Role | ✅ | ✅ | ✅ | ✅ |
+| المستخدم      | CREATE | READ | UPDATE | DELETE |
+| ------------- | ------ | ---- | ------ | ------ |
+| Anonymous     | ❌     | ✅   | ❌     | ❌     |
+| Authenticated | ❌     | ✅   | ❌     | ❌     |
+| Service Role  | ✅     | ✅   | ✅     | ✅     |
 
 ---
 
@@ -116,6 +116,7 @@ CREATE POLICY "exchange_rates_service_write"
 **الوصف:** دالة مساعدة لجلب سعر صرف عملة معينة مقابل الدولار.
 
 **التوقيع:**
+
 ```sql
 CREATE FUNCTION get_exchange_rate(target_currency TEXT)
 RETURNS NUMERIC(18, 6)
@@ -129,12 +130,14 @@ RETURNS NUMERIC(18, 6)
 **الإرجاع:** `NUMERIC(18, 6)` - سعر الصرف
 
 **مثال:**
+
 ```sql
 SELECT get_exchange_rate('SAR');
 -- النتيجة: 3.750000
 ```
 
 **في TypeScript:**
+
 ```typescript
 const { data } = await supabase
   .rpc('get_exchange_rate', { target_currency: 'SAR' })
@@ -152,6 +155,7 @@ console.log(`1 USD = ${data} SAR`);
 **الوصف:** عرض مبسط لأسعار العملات مع حالة التحديث.
 
 **التعريف:**
+
 ```sql
 CREATE VIEW exchange_rates_summary AS
 SELECT
@@ -169,13 +173,14 @@ ORDER BY currency_code;
 
 **حالة التحديث:**
 
-| الحالة | المعنى | المدة |
-|--------|--------|-------|
-| `current` | محدث | آخر ساعة |
-| `recent` | حديث | آخر 24 ساعة |
-| `stale` | قديم | أكثر من 24 ساعة |
+| الحالة    | المعنى | المدة           |
+| --------- | ------ | --------------- |
+| `current` | محدث   | آخر ساعة        |
+| `recent`  | حديث   | آخر 24 ساعة     |
+| `stale`   | قديم   | أكثر من 24 ساعة |
 
 **مثال:**
+
 ```sql
 SELECT * FROM exchange_rates_summary;
 
@@ -216,13 +221,13 @@ SELECT * FROM exchange_rates_summary;
 
 **الجدول:** كل ساعة عند الدقيقة 0
 
-| الحقل | القيمة | الوصف |
-|-------|--------|-------|
-| Minute | 0 | عند الدقيقة 0 |
-| Hour | * | كل ساعة |
-| Day of Month | * | كل يوم |
-| Month | * | كل شهر |
-| Day of Week | * | كل يوم أسبوع |
+| الحقل        | القيمة | الوصف         |
+| ------------ | ------ | ------------- |
+| Minute       | 0      | عند الدقيقة 0 |
+| Hour         | \*     | كل ساعة       |
+| Day of Month | \*     | كل يوم        |
+| Month        | \*     | كل شهر        |
+| Day of Week  | \*     | كل يوم أسبوع  |
 
 ---
 
@@ -311,7 +316,7 @@ FROM exchange_rates
 ORDER BY currency_code;
 
 -- تحويل مبلغ من USD إلى عملة أخرى
-SELECT 
+SELECT
   100 * rate_from_usd as total
 FROM exchange_rates
 WHERE currency_code = 'SAR';
@@ -329,14 +334,14 @@ WHERE currency_code = 'SAR';
 import { createClient } from '@/lib/supabase/client'
 
 export async function getExchangeRate(currency: string) {
-  const supabase = createClient()
-  
+  const supabase = createBrowserClient()
+
   const { data, error } = await supabase
     .rpc('get_exchange_rate', { target_currency: currency })
     .single()
-  
+
   if (error) throw error
-  
+
   return data
 }
 
@@ -363,11 +368,11 @@ export async function convertCurrency(
     getExchangeRate(fromCurrency),
     getExchangeRate(toCurrency)
   ])
-  
+
   // التحويل عبر USD
   const amountInUSD = amount / fromRate
   const convertedAmount = amountInUSD * toRate
-  
+
   return convertedAmount
 }
 
@@ -385,12 +390,12 @@ console.log(`100 USD = ${result} SAR`) // 375 SAR
 import { createClient } from '@/lib/supabase/client'
 
 export async function ExchangeRateStatus() {
-  const supabase = createClient()
-  
+  const supabase = createBrowserClient()
+
   const { data: rates } = await supabase
     .from('exchange_rates_summary')
     .select('*')
-  
+
   return (
     <div>
       <h2>أسعار الصرف</h2>
@@ -424,13 +429,13 @@ function StatusBadge({ status }: { status: string }) {
     recent: 'bg-yellow-100 text-yellow-800',
     stale: 'bg-red-100 text-red-800',
   }
-  
+
   const labels = {
     current: 'محدث',
     recent: 'حديث',
     stale: 'قديم',
   }
-  
+
   return (
     <span className={`px-2 py-1 rounded text-xs ${colors[status]}`}>
       {labels[status]}
@@ -462,32 +467,32 @@ export function CurrencyConverter() {
   }, [])
 
   async function loadRates() {
-    const supabase = createClient()
+    const supabase = createBrowserClient()
     const { data } = await supabase
       .from('exchange_rates')
       .select('currency_code, rate_from_usd')
-    
+
     if (data) setRates(data)
   }
 
   async function convert() {
-    const supabase = createClient()
-    
+    const supabase = createBrowserClient()
+
     const fromRate = rates.find(r => r.currency_code === fromCurrency)?.rate_from_usd
     const toRate = rates.find(r => r.currency_code === toCurrency)?.rate_from_usd
-    
+
     if (!fromRate || !toRate) return
-    
+
     const amountInUSD = amount / fromRate
     const convertedAmount = amountInUSD * toRate
-    
+
     setResult(convertedAmount)
   }
 
   return (
     <div className="p-4 border rounded">
       <h3 className="text-lg font-bold mb-4">محول العملات</h3>
-      
+
       <div className="space-y-3">
         <input
           type="number"
@@ -496,7 +501,7 @@ export function CurrencyConverter() {
           className="w-full p-2 border rounded"
           placeholder="المبلغ"
         />
-        
+
         <select
           value={fromCurrency}
           onChange={(e) => setFromCurrency(e.target.value)}
@@ -508,9 +513,9 @@ export function CurrencyConverter() {
             </option>
           ))}
         </select>
-        
+
         <div className="text-center">⬇️</div>
-        
+
         <select
           value={toCurrency}
           onChange={(e) => setToCurrency(e.target.value)}
@@ -522,14 +527,14 @@ export function CurrencyConverter() {
             </option>
           ))}
         </select>
-        
+
         <button
           onClick={convert}
           className="w-full bg-primary text-primary-foreground p-2 rounded"
         >
           تحويل
         </button>
-        
+
         {result && (
           <div className="text-center text-2xl font-bold">
             {result.toFixed(2)} {toCurrency}
@@ -667,12 +672,12 @@ SET rate_from_usd = EXCLUDED.rate_from_usd,
 
 ### جداول شائعة لـ Cron
 
-| التعبير | الوصف |
-|---------|-------|
-| `0 * * * *` | كل ساعة |
-| `*/30 * * * *` | كل 30 دقيقة |
-| `0 */2 * * *` | كل ساعتين |
-| `0 0 * * *` | يومياً عند منتصف الليل |
+| التعبير        | الوصف                  |
+| -------------- | ---------------------- |
+| `0 * * * *`    | كل ساعة                |
+| `*/30 * * * *` | كل 30 دقيقة            |
+| `0 */2 * * *`  | كل ساعتين              |
+| `0 0 * * *`    | يومياً عند منتصف الليل |
 
 ---
 
