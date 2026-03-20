@@ -30,7 +30,6 @@ interface Plan {
 export default function SellerPlansPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user } = useAuth()
   const supabase = createBrowserClient()
   const sellerId = searchParams.get("seller_id")
 
