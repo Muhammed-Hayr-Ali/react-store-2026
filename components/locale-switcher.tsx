@@ -5,17 +5,7 @@ import { redirect, usePathname } from "next/navigation"
 import { LanguagesIcon } from "@/components/shared/icons"
 
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 
-const languages = {
-  ar: "العربية",
-  en: "English",
-}
 
 export function LocaleSwitcher() {
   const locale = useLocale()
