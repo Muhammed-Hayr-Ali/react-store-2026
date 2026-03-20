@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { createBrowserClient } from "@/lib/supabase/createBrowserClient"
-import { appRouter } from "@/lib/app-routes"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -40,6 +39,12 @@ import {
   MessageSquare,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
+import {
+  getAllUpgradeRequests,
+  approveUpgradeRequest,
+  rejectUpgradeRequest,
+  completeUpgradeRequest,
+} from "@/lib/actions/admin/upgradeRequests"
 
 interface UpgradeRequest {
   request_id: string
@@ -79,14 +84,8 @@ export default function AdminUpgradeRequests() {
 
   async function loadRequests() {
     setLoading(true)
-    const status = statusFilter === "all" ? null : statusFilter
-    const { data, error } = await supabase.rpc("get_all_upgrade_requests", {
-      p_status: status,
-    })
-
-    if (!error && data) {
-      setRequests(data)
-    }
+    const data = await getAllUpgradeRequests(statusFilter)
+    setRequests(data)
     setLoading(false)
   }
 
@@ -95,12 +94,15 @@ export default function AdminUpgradeRequests() {
 
     setActionLoading(true)
     try {
-      const { error } = await supabase.rpc("approve_upgrade_request", {
-        p_request_id: selectedRequest.request_id,
-        p_admin_notes: adminNotes,
+      const result = await approveUpgradeRequest({
+        requestId: selectedRequest.request_id,
+        adminNotes: adminNotes || "",
       })
 
-      if (error) throw error
+      if (!result.success) {
+        alert(t("errorApproving"))
+        return
+      }
 
       await loadRequests()
       setSelectedRequest(null)
@@ -119,12 +121,15 @@ export default function AdminUpgradeRequests() {
 
     setActionLoading(true)
     try {
-      const { error } = await supabase.rpc("reject_upgrade_request", {
-        p_request_id: selectedRequest.request_id,
-        p_admin_notes: adminNotes,
+      const result = await rejectUpgradeRequest({
+        requestId: selectedRequest.request_id,
+        adminNotes: adminNotes || "",
       })
 
-      if (error) throw error
+      if (!result.success) {
+        alert(t("errorRejecting"))
+        return
+      }
 
       await loadRequests()
       setSelectedRequest(null)
@@ -143,11 +148,12 @@ export default function AdminUpgradeRequests() {
 
     setActionLoading(true)
     try {
-      const { error } = await supabase.rpc("complete_upgrade_request", {
-        p_request_id: selectedRequest.request_id,
-      })
+      const result = await completeUpgradeRequest(selectedRequest.request_id)
 
-      if (error) throw error
+      if (!result.success) {
+        alert(t("errorCompleting"))
+        return
+      }
 
       await loadRequests()
       setSelectedRequest(null)
