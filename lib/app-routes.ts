@@ -5,23 +5,25 @@ export const appRouter = {
   terms: "/terms",
   privacy: "/privacy",
   // المصادقة
-  signIn: "/auth/signin",
-  signUp: "/auth/signup",
+  callback: "/auth/callback",
   forgotPassword: "/auth/forgot-password",
   resetPassword: "/auth/reset-password",
-  verifyOtp: "/auth/verify-otp",
-  twoFactorSetup: "/auth/two-factor-setup",
-  callback: "/auth/callback",
+  signIn: "/auth/sign-in",
+  signUp: "/auth/sign-up",
+
+  // mfa
+  verifyOtp: "/verify",
+  twoFactorSetup: "/two-factor/setup",
 
   // لوحة التحكم
   dashboard: "/dashboard",
 
   // الترقية
   upgrade: "/dashboard/upgrade",
-  upgradeSellerForm: "/dashboard/upgrade/seller-form",
-  upgradeSellerPlans: "/dashboard/upgrade/seller-plans",
   upgradeDeliveryForm: "/dashboard/upgrade/delivery-form",
   upgradeDeliveryPlans: "/dashboard/upgrade/delivery-plans",
+  upgradeSellerForm: "/dashboard/upgrade/seller-form",
+  upgradeSellerPlans: "/dashboard/upgrade/seller-plans",
   upgradeSuccess: "/dashboard/upgrade/success",
   upgradeStatus: "/dashboard/upgrade/status",
 

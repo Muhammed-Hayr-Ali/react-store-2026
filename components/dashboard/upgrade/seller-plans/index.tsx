@@ -18,6 +18,7 @@ import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { appRouter } from "@/lib/app-routes"
+import { createUpgradeRequest } from "@/lib/actions/subscriptions/createUpgradeRequest"
 
 interface Plan {
   id: string
@@ -70,15 +71,18 @@ function SellerPlansContent() {
         return
       }
 
-      const { error } = await supabase.rpc("create_upgrade_request", {
-        p_seller_id: sellerId,
-        p_target_plan_id: plan.id,
-        p_contact_method: "email",
-        p_contact_value: user.email || "",
-        p_seller_notes: `Upgrade to ${plan.name_ar} plan`,
+      const result = await createUpgradeRequest({
+        sellerId,
+        planId: plan.id,
+        contactMethod: "email",
+        contactValue: user.email || "",
+        notes: `Upgrade to ${plan.name_ar} plan`,
       })
 
-      if (error) throw error
+      if (!result.success) {
+        alert("An error occurred. Please try again.")
+        return
+      }
 
       router.push("/en/dashboard/upgrade/success?type=seller")
     } catch (error: unknown) {

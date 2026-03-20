@@ -18,6 +18,10 @@ import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { appRouter } from "@/lib/app-routes"
+import {
+  createDeliveryPartner,
+  CreateDeliveryPartnerInput,
+} from "@/lib/actions/delivery/createDeliveryPartner"
 
 export default function DeliveryFormPage() {
   const t = useTranslations("Dashboard.deliveryForm")
@@ -52,27 +56,34 @@ export default function DeliveryFormPage() {
         return
       }
 
-      const { data: partner, error: partnerError } = await supabase
-        .from("delivery_partners")
-        .insert({
-          user_id: user.id,
-          company_name: formData.company_name,
-          is_individual: true,
-          vehicle_types: [formData.vehicle_types],
-          phone: formData.phone,
-          email: formData.email,
-          license_number: formData.license_number,
-          insurance_number: formData.insurance_number,
-          coverage_areas: [{ city: formData.coverage_areas, zones: [] }],
-          max_delivery_radius: parseInt(formData.max_delivery_radius),
-          account_status: "pending",
-        })
-        .select()
-        .single()
+      const deliveryInput: CreateDeliveryPartnerInput = {
+        company_name: formData.company_name,
+        phone: formData.phone,
+        email: formData.email,
+        license_number: formData.license_number,
+        insurance_number: formData.insurance_number,
+        vehicle_types: formData.vehicle_types,
+        coverage_areas: formData.coverage_areas,
+        max_delivery_radius: parseInt(formData.max_delivery_radius),
+      }
 
-      if (partnerError) throw partnerError
+      const result = await createDeliveryPartner(deliveryInput)
 
-      router.push(`/dashboard/upgrade/delivery-plans?partner_id=${partner.id}`)
+      if (!result.success) {
+        if (result.error === "USER_NOT_AUTHENTICATED") {
+          alert("Please sign in first")
+          router.push(appRouter.signIn)
+        } else if (result.error === "DELIVERY_PARTNER_ALREADY_EXISTS") {
+          alert("You already have a delivery partner account")
+        } else {
+          alert("An error occurred. Please try again.")
+        }
+        return
+      }
+
+      router.push(
+        `/dashboard/upgrade/delivery-plans?partner_id=${result.partnerId}`
+      )
     } catch (error: unknown) {
       const err = error as { message?: string }
       console.error("Error creating delivery partner:", err)

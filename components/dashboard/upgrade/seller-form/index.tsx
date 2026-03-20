@@ -19,6 +19,10 @@ import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { appRouter } from "@/lib/app-routes"
+import {
+  createSeller,
+  CreateSellerInput,
+} from "@/lib/actions/sellers/createSeller"
 
 export default function UpgradeSellerForm() {
   const t = useTranslations("Dashboard.sellerForm")
@@ -54,32 +58,35 @@ export default function UpgradeSellerForm() {
         return
       }
 
-      const { data: seller, error: sellerError } = await supabase
-        .from("sellers")
-        .insert({
-          user_id: user.id,
-          store_name: formData.store_name,
-          store_slug: formData.store_name
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-"),
-          store_description: formData.store_description,
-          phone: formData.phone,
-          email: formData.email,
-          tax_number: formData.tax_number,
-          commercial_registration: formData.commercial_registration,
-          address: {
-            street: formData.street,
-            city: formData.city,
-            country: formData.country,
-          },
-          account_status: "pending",
-        })
-        .select()
-        .single()
+      const sellerInput: CreateSellerInput = {
+        store_name: formData.store_name,
+        store_description: formData.store_description,
+        phone: formData.phone,
+        email: formData.email,
+        tax_number: formData.tax_number,
+        commercial_registration: formData.commercial_registration,
+        street: formData.street,
+        city: formData.city,
+        country: formData.country,
+      }
 
-      if (sellerError) throw sellerError
+      const result = await createSeller(sellerInput)
 
-      router.push(`/dashboard/upgrade/seller-plans?seller_id=${seller.id}`)
+      if (!result.success) {
+        if (result.error === "USER_NOT_AUTHENTICATED") {
+          alert("Please sign in first")
+          router.push(appRouter.signIn)
+        } else if (result.error === "SELLER_ALREADY_EXISTS") {
+          alert("You already have a seller account")
+        } else {
+          alert("An error occurred. Please try again.")
+        }
+        return
+      }
+
+      router.push(
+        `/dashboard/upgrade/seller-plans?seller_id=${result.sellerId}`
+      )
     } catch (error: unknown) {
       const err = error as { message?: string }
       console.error("Error creating seller:", err)
