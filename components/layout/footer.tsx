@@ -8,13 +8,13 @@ import { useForm} from "react-hook-form"
 
 import { Spinner } from "@/components/ui/spinner"
 import { AppLogo } from "@/components/shared/app-logo"
-import { ModeToggle } from "@/components/shared/mode-toggle"
 import { siteConfig } from "@/lib/config/site_config"
 import {
   FacebookIcon,
   InstagramIcon,
   TwitterIcon,
 } from "@/components/shared/icons"
+import { ThemeToggle } from "../theme-toggle"
 
 type FormInputs = {
   email: string
@@ -82,7 +82,7 @@ const Footer = () => {
             &copy; {new Date().getFullYear()} {siteConfig.name}. All rights
             reserved.
           </p>
-          <ModeToggle />
+          <ThemeToggle />
         </div>
       </div>
     </footer>
