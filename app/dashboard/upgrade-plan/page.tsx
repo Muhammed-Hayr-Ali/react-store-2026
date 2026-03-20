@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/hooks/useAuth"
 import { createBrowserClient } from "@/lib/supabase/createBrowserClient"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle2, XCircle, AlertCircle } from "lucide-react"
+import { CheckCircleIcon } from "@/components/shared/icons"
 
 interface Plan {
   id: string
@@ -183,7 +182,7 @@ export default function UpgradePlanPage() {
               <ul className="space-y-3">
                 {plan.features_ar.map((feature, index) => (
                   <li key={index} className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-green-500" />
+                    <CheckCircleIcon className="h-5 w-5 flex-shrink-0 text-green-500" />
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -252,7 +251,7 @@ export default function UpgradePlanPage() {
                     key={plan.id || plan.name}
                     className="border p-4 text-center"
                   >
-                    <CheckCircle2 className="mx-auto h-5 w-5 text-green-500" />
+                    <CheckCircleIcon className="mx-auto h-5 w-5 text-green-500" />
                   </td>
                 ))}
               </tr>
@@ -266,9 +265,9 @@ export default function UpgradePlanPage() {
                     {index === 0 ? (
                       <span className="text-gray-400">أساسية</span>
                     ) : index === 1 ? (
-                      <CheckCircle2 className="mx-auto h-5 w-5 text-green-500" />
+                      <CheckCircleIcon className="mx-auto h-5 w-5 text-green-500" />
                     ) : (
-                      <CheckCircle2 className="mx-auto h-5 w-5 text-green-500" />
+                      <CheckCircleIcon className="mx-auto h-5 w-5 text-green-500" />
                     )}
                   </td>
                 ))}
