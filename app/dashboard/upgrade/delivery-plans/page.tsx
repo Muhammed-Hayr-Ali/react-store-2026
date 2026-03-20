@@ -22,16 +22,17 @@ interface Plan {
   name: string
   name_ar: string
   price_usd: number
-  max_products: number
+  max_orders_per_day: number
+  commission_rate: number
   features_ar: string[]
   is_popular?: boolean
 }
 
-function SellerPlansContent() {
+function DeliveryPlansContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createBrowserClient()
-  const sellerId = searchParams.get("seller_id")
+  const partnerId = searchParams.get("partner_id")
 
   const [loading, setLoading] = useState<string | null>(null)
   const [plans, setPlans] = useState<Plan[]>([])
@@ -39,9 +40,9 @@ function SellerPlansContent() {
   useEffect(() => {
     async function loadPlans() {
       const { data, error } = await supabase
-        .from("seller_subscription_plans")
+        .from("delivery_subscription_plans")
         .select("*")
-        .eq("plan_type", "seller")
+        .eq("plan_type", "delivery_partner")
         .eq("is_active", true)
         .order("sort_order")
 
@@ -57,20 +58,16 @@ function SellerPlansContent() {
     setLoading(plan.id)
 
     try {
-      // الحصول على المستخدم
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+      const { data: { user } } = await supabase.auth.getUser()
 
-      if (!user || !sellerId) {
+      if (!user || !partnerId) {
         alert("بيانات غير مكتملة")
         router.push("/dashboard/upgrade")
         return
       }
 
-      // 1. إنشاء طلب ترقية الاشتراك
-      const { error } = await supabase.rpc("create_upgrade_request", {
-        p_seller_id: sellerId,
+      const { error } = await supabase.rpc("create_delivery_upgrade_request", {
+        p_partner_id: partnerId,
         p_target_plan_id: plan.id,
         p_contact_method: "email",
         p_contact_value: user.email || "",
@@ -79,8 +76,7 @@ function SellerPlansContent() {
 
       if (error) throw error
 
-      // 2. الانتقال لصفحة النجاح
-      router.push("/dashboard/upgrade/success?type=seller")
+      router.push("/dashboard/upgrade/success?type=delivery")
     } catch (error: unknown) {
       const err = error as { message?: string }
       console.error("Error creating upgrade request:", err)
@@ -92,7 +88,6 @@ function SellerPlansContent() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Back Button */}
       <Link href="/dashboard/upgrade">
         <Button variant="ghost" className="mb-4 gap-2">
           <ArrowLeft className="h-4 w-4" />
@@ -100,7 +95,6 @@ function SellerPlansContent() {
         </Button>
       </Link>
 
-      {/* Header */}
       <div className="mb-12 text-center">
         <h1 className="mb-4 text-4xl font-bold">اختر خطة الاشتراك</h1>
         <p className="text-lg text-gray-600">
@@ -108,7 +102,6 @@ function SellerPlansContent() {
         </p>
       </div>
 
-      {/* Plans Grid */}
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 md:grid-cols-3">
         {plans.map((plan) => (
           <Card
@@ -133,6 +126,14 @@ function SellerPlansContent() {
 
             <CardContent className="flex-1">
               <ul className="space-y-3">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-green-500" />
+                  <span>{plan.max_orders_per_day === 999 ? 'طلبات غير محدودة' : `${plan.max_orders_per_day} طلب/يوم`}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-green-500" />
+                  <span>عمولة {plan.commission_rate}%</span>
+                </li>
                 {plan.features_ar.map((feature, index) => (
                   <li key={index} className="flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-green-500" />
@@ -155,42 +156,11 @@ function SellerPlansContent() {
           </Card>
         ))}
       </div>
-
-      {/* معلومات */}
-      <div className="mx-auto mt-12 max-w-4xl">
-        <Card className="border-yellow-200 bg-yellow-50">
-          <CardContent className="py-6">
-            <h3 className="mb-4 text-center font-bold">
-              ماذا سيحدث بعد الاختيار؟
-            </h3>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <div className="text-center">
-                <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary font-bold text-white">
-                  1
-                </div>
-                <p className="text-sm">مراجعة الإدارة لطلبك</p>
-              </div>
-              <div className="text-center">
-                <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary font-bold text-white">
-                  2
-                </div>
-                <p className="text-sm">التواصل معك للدفع</p>
-              </div>
-              <div className="text-center">
-                <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary font-bold text-white">
-                  3
-                </div>
-                <p className="text-sm">تفعيل الحساب والاشتراك</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   )
 }
 
-export default function SellerPlansPage() {
+export default function DeliveryPlansPage() {
   return (
     <Suspense
       fallback={
@@ -199,7 +169,7 @@ export default function SellerPlansPage() {
         </div>
       }
     >
-      <SellerPlansContent />
+      <DeliveryPlansContent />
     </Suspense>
   )
 }
