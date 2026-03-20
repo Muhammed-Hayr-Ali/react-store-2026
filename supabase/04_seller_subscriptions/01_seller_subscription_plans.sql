@@ -1,52 +1,56 @@
 -- =====================================================
--- Marketna E-Commerce - Subscription Plans Schema
--- File: 01_subscription_plans.sql
--- Description: جدول خطط الاشتراكات واشتراكات الباعة
+-- Marketna E-Commerce - Seller Subscription Plans Schema
+-- File: 01_seller_subscription_plans.sql
+-- Description: جدول خطط اشتراكات الباعة
 -- Dependency: يجب تشغيل 04_roles_permissions_system.sql أولاً
 -- =====================================================
 
 -- =====================================================
--- 1. جدول خطط الاشتراكات (Subscription Plans)
+-- 1. جدول خطط اشتراكات الباعة (Seller Subscription Plans)
 -- =====================================================
 
-CREATE TABLE IF NOT EXISTS public.subscription_plans (
+CREATE TABLE IF NOT EXISTS public.seller_subscription_plans (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name TEXT UNIQUE NOT NULL,              -- اسم الخطة: Free, Silver, Gold
+  plan_type TEXT DEFAULT 'seller' CHECK (plan_type IN ('seller', 'delivery_partner')),  -- نوع الخطة
+  name TEXT NOT NULL,              -- اسم الخطة: Free, Silver, Gold
   name_ar TEXT,                           -- الاسم بالعربي
   description TEXT,                       -- وصف الخطة
   description_ar TEXT,                    -- الوصف بالعربي
-  
+
   -- التسعير
   price_usd DECIMAL(10,2) NOT NULL DEFAULT 0,  -- السعر بالدولار
-  
-  -- حدود الخطة
+
+  -- حدود الخطة (للباعة)
   max_products INTEGER NOT NULL DEFAULT 50,        -- الحد الأقصى للمنتجات
   max_categories INTEGER DEFAULT NULL,             -- الحد الأقصى للأقسام (NULL = غير محدود)
   max_images_per_product INTEGER DEFAULT 5,        -- الحد الأقصى للصور لكل منتج
-  
+
   -- الميزات
   features JSONB DEFAULT '[]'::jsonb,     -- قائمة الميزات
   features_ar JSONB DEFAULT '[]'::jsonb,  -- الميزات بالعربي
-  
+
   -- إعدادات الخطة
   is_active BOOLEAN DEFAULT TRUE,         -- هل الخطة متاحة للتسجيل؟
   is_popular BOOLEAN DEFAULT FALSE,       -- هل هي الخطة الأكثر شعبية؟
   sort_order INTEGER DEFAULT 0,           -- ترتيب العرض
-  
+
   -- الفترة
   billing_period TEXT DEFAULT 'monthly' CHECK (billing_period IN ('monthly', 'yearly', 'lifetime')),
   trial_days INTEGER DEFAULT 0,           -- أيام التجربة المجانية
-  
+
   -- طوابع زمنية
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  -- قيود الفهرسة
+  UNIQUE(plan_type, name)
 );
 
-COMMENT ON TABLE public.subscription_plans IS 'خطط الاشتراكات المتاحة للباعة';
-COMMENT ON COLUMN public.subscription_plans.price_usd IS 'السعر بالدولار الأمريكي';
-COMMENT ON COLUMN public.subscription_plans.price_sar IS 'السعر بالريال السعودي (محسوب تلقائياً)';
-COMMENT ON COLUMN public.subscription_plans.max_products IS 'الحد الأقصى لعدد المنتجات المسموح بها';
-COMMENT ON COLUMN public.subscription_plans.billing_period IS 'فترة الفوترة: monthly, yearly, lifetime';
+COMMENT ON TABLE public.seller_subscription_plans IS 'خطط اشتراكات الباعة';
+COMMENT ON COLUMN public.seller_subscription_plans.plan_type IS 'نوع الخطة: seller, delivery_partner';
+COMMENT ON COLUMN public.seller_subscription_plans.price_usd IS 'السعر بالدولار الأمريكي';
+COMMENT ON COLUMN public.seller_subscription_plans.max_products IS 'الحد الأقصى لعدد المنتجات المسموح بها';
+COMMENT ON COLUMN public.seller_subscription_plans.billing_period IS 'فترة الفوترة: monthly, yearly, lifetime';
 
 -- =====================================================
 -- 2. جدول اشتراكات الباعة (Seller Subscriptions)
@@ -55,31 +59,31 @@ COMMENT ON COLUMN public.subscription_plans.billing_period IS 'فترة الفو
 CREATE TABLE IF NOT EXISTS public.seller_subscriptions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   seller_id UUID NOT NULL REFERENCES public.sellers(id) ON DELETE CASCADE,
-  plan_id UUID NOT NULL REFERENCES public.subscription_plans(id),
-  
+  plan_id UUID NOT NULL REFERENCES public.seller_subscription_plans(id),
+
   -- حالة الاشتراك
   status TEXT DEFAULT 'active' CHECK (status IN ('active', 'expired', 'cancelled', 'pending', 'trial')),
-  
+
   -- التواريخ
   start_date TIMESTAMPTZ DEFAULT NOW(),
   end_date TIMESTAMPTZ,                   -- تاريخ الانتهاء (NULL = دائم)
   trial_end_date TIMESTAMPTZ,             -- نهاية فترة التجربة
   cancelled_at TIMESTAMPTZ,               -- تاريخ الإلغاء
-  
+
   -- الدفع
   payment_provider TEXT,                  -- مزود الدفع: stripe, paypal, manual
   payment_intent_id TEXT,                 -- معرف عملية الدفع
   last_payment_date TIMESTAMPTZ,
   next_billing_date TIMESTAMPTZ,          -- تاريخ الفوترة القادم
-  
+
   -- السعر المدفوع
   amount_paid DECIMAL(10,2),
   currency TEXT DEFAULT 'USD',
-  
+
   -- ملاحظات
   notes TEXT,
   metadata JSONB DEFAULT '{}'::jsonb,
-  
+
   -- طوابع زمنية
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -93,40 +97,41 @@ COMMENT ON COLUMN public.seller_subscriptions.payment_provider IS 'مزود ال
 -- 3. الفهرسة (Indexing)
 -- =====================================================
 
-CREATE INDEX IF NOT EXISTS idx_subscription_plans_active ON public.subscription_plans(is_active);
-CREATE INDEX IF NOT EXISTS idx_subscription_plans_order ON public.subscription_plans(sort_order);
+CREATE INDEX IF NOT EXISTS idx_seller_subscription_plans_active ON public.seller_subscription_plans(is_active);
+CREATE INDEX IF NOT EXISTS idx_seller_subscription_plans_order ON public.seller_subscription_plans(sort_order);
+CREATE INDEX IF NOT EXISTS idx_seller_subscription_plans_type ON public.seller_subscription_plans(plan_type);
 CREATE INDEX IF NOT EXISTS idx_seller_subscriptions_seller ON public.seller_subscriptions(seller_id);
 CREATE INDEX IF NOT EXISTS idx_seller_subscriptions_plan ON public.seller_subscriptions(plan_id);
 CREATE INDEX IF NOT EXISTS idx_seller_subscriptions_status ON public.seller_subscriptions(status);
 CREATE INDEX IF NOT EXISTS idx_seller_subscriptions_end_date ON public.seller_subscriptions(end_date);
 
 -- =====================================================
--- 4. البيانات الافتراضية (خطط الاشتراك)
+-- 4. البيانات الافتراضية (خطط اشتراك الباعة)
 -- =====================================================
 
 -- الخطة المجانية (Free)
-INSERT INTO public.subscription_plans (name, name_ar, description, description_ar, price_usd, max_products, features, features_ar, is_active, billing_period, trial_days, sort_order) VALUES
-  ('free', 'مجانية', 'خطة أساسية للباعة الجدد', 'خطة أساسية للباعة الجدد', 0, 50, 
+INSERT INTO public.seller_subscription_plans (plan_type, name, name_ar, description, description_ar, price_usd, max_products, features, features_ar, is_active, billing_period, trial_days, sort_order) VALUES
+  ('seller', 'free', 'مجانية', 'خطة أساسية للباعة الجدد', 'خطة أساسية للباعة الجدد', 0, 50,
    '["50 products", "Basic dashboard", "Email support"]'::jsonb,
    '["50 منتج", "لوحة تحكم أساسية", "دعم عبر البريد"]'::jsonb,
    TRUE, 'monthly', 14, 1)
-ON CONFLICT (name) DO NOTHING;
+ON CONFLICT (plan_type, name) DO NOTHING;
 
 -- الخطة الفضية (Silver)
-INSERT INTO public.subscription_plans (name, name_ar, description, description_ar, price_usd, max_products, features, features_ar, is_active, is_popular, billing_period, sort_order) VALUES
-  ('silver', 'فضية', 'خطة متقدمة للباعة النشطين', 'خطة متقدمة للباعة النشطين', 29, 200,
+INSERT INTO public.seller_subscription_plans (plan_type, name, name_ar, description, description_ar, price_usd, max_products, features, features_ar, is_active, is_popular, billing_period, sort_order) VALUES
+  ('seller', 'silver', 'فضية', 'خطة متقدمة للباعة النشطين', 'خطة متقدمة للباعة النشطين', 29, 200,
    '["200 products", "Advanced analytics", "Priority support", "Custom domain"]'::jsonb,
    '["200 منتج", "إحصائيات متقدمة", "دعم أولوي", "نطاق مخصص"]'::jsonb,
    TRUE, TRUE, 'monthly', 2)
-ON CONFLICT (name) DO NOTHING;
+ON CONFLICT (plan_type, name) DO NOTHING;
 
 -- الخطة الذهبية (Gold)
-INSERT INTO public.subscription_plans (name, name_ar, description, description_ar, price_usd, max_products, features, features_ar, is_active, billing_period, sort_order) VALUES
-  ('gold', 'ذهبية', 'خطة احترافية للباعة الكبار', 'خطة احترافية للباعة الكبار', 99, 1000,
+INSERT INTO public.seller_subscription_plans (plan_type, name, name_ar, description, description_ar, price_usd, max_products, features, features_ar, is_active, billing_period, sort_order) VALUES
+  ('seller', 'gold', 'ذهبية', 'خطة احترافية للباعة الكبار', 'خطة احترافية للباعة الكبار', 99, 1000,
    '["1000 products", "Full analytics", "24/7 support", "API access", "White label"]'::jsonb,
    '["1000 منتج", "إحصائيات كاملة", "دعم 24/7", "وصول API", "علامة بيضاء"]'::jsonb,
    TRUE, 'monthly', 3)
-ON CONFLICT (name) DO NOTHING;
+ON CONFLICT (plan_type, name) DO NOTHING;
 
 -- =====================================================
 -- 5. دوال إدارة الاشتراكات (Management Functions)
@@ -147,7 +152,7 @@ RETURNS TABLE(
 ) AS $$
 BEGIN
   RETURN QUERY
-  SELECT 
+  SELECT
     ss.id,
     sp.name,
     sp.name_ar,
@@ -158,9 +163,10 @@ BEGIN
     ss.end_date,
     (SELECT COUNT(*) FROM public.products WHERE vendor_id = (SELECT user_id FROM public.sellers WHERE id = p_seller_id))
   FROM public.seller_subscriptions ss
-  JOIN public.subscription_plans sp ON sp.id = ss.plan_id
+  JOIN public.seller_subscription_plans sp ON sp.id = ss.plan_id
   WHERE ss.seller_id = COALESCE(p_seller_id, (SELECT id FROM public.sellers WHERE user_id = auth.uid()))
     AND ss.status = 'active'
+    AND sp.plan_type = 'seller'
   ORDER BY ss.start_date DESC
   LIMIT 1;
 END;

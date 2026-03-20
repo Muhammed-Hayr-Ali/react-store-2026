@@ -21,30 +21,16 @@ export function LocaleSwitcher() {
   const locale = useLocale()
   const pathname = usePathname()
 
-  function onSelectChange(nextLocale: string) {
-    // ✅ redirect من next-intl تدعم locale بشكل صحيح مع TypeScript
+  function toggleLocale() {
+    const nextLocale = locale === "en" ? "ar" : "en"
+
     redirect(`/${nextLocale}${pathname}`)
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
-          <LanguagesIcon className="h-5 w-5" />
-          <span className="sr-only">Change language</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="center">
-        {Object.entries(languages).map(([localeCode, name]) => (
-          <DropdownMenuItem
-            key={localeCode}
-            onClick={() => onSelectChange(localeCode)}
-            className={locale === localeCode ? "bg-accent" : ""}
-          >
-            {name}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Button variant="outline" size="icon" onClick={toggleLocale}>
+      <LanguagesIcon className="h-5 w-5" />
+      <span className="sr-only">Change language</span>
+    </Button>
   )
 }
