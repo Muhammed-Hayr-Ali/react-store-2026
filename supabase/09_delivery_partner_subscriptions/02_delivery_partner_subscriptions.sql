@@ -1,12 +1,12 @@
 -- =====================================================
 -- Marketna E-Commerce - Delivery Partner Subscriptions Schema
 -- File: 02_delivery_partner_subscriptions.sql
--- Description: جدول اشتراكات موظفي التوصيل الفعليّة
--- Dependency: يجب تشغيل 01_delivery_subscription_plans.sql و جدول delivery_partners أولاً
+-- Description: جدول اشتراكات موظفي التوصيل الفعلية
+-- Dependency: يجب تشغيل 01_delivery_subscription_plans.sql و 07_delivery_partners أولاً
 -- =====================================================
 
 -- =====================================================
--- 1. جدول اشتراكات التوصيل (Delivery Partner Subscriptions)
+-- 1. جدول اشتراكات موظفي التوصيل (Delivery Partner Subscriptions)
 -- =====================================================
 
 CREATE TABLE IF NOT EXISTS public.delivery_partner_subscriptions (
@@ -387,7 +387,7 @@ CREATE TRIGGER delivery_subscription_expiring_trigger
 -- 1. هذا الملف يعتمد على:
 --    - 04_roles_permissions_system.sql
 --    - 01_delivery_subscription_plans.sql (الخطط)
---    - جدول delivery_partners (يجب إنشاؤه قبل هذا الملف)
+--    - 07_delivery_partners (جدول موظفي التوصيل)
 -- 2. الأسعار بالدولار فقط (USD)
 -- 3. الخطة المجانية: 3 طلبات/يوم، عمولة 15%
 -- 4. الخطة الفضية: $19/شهر - 10 طلبات/يوم، عمولة 10%
