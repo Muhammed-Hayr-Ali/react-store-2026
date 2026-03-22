@@ -1,34 +1,34 @@
--- ملف إنشاء السياسات
+-- Policies Creation File
 
 -- =====================================================
 -- Marketna E-Commerce - Profile Plans Links Policies
 -- File: 06_profile_plans_links_policies.sql
 -- Version: 1.0
 -- Date: 2026-03-21
--- Description: سياسات الأمان لجدول ربط البروفايل بالخطط
+-- Description: Security policies for profile plans link table
 -- Dependencies: public.profile_plans
 -- =====================================================
 
 -- =====================================================
--- 📋 محتويات الملف
+-- 📋 File Contents
 -- =====================================================
--- 1. تفعيل RLS
--- 2. سياسة القراءة للمستخدمين
--- 3. سياسة الإدارة للمستخدمين
+-- 1. Enable RLS
+-- 2. User read policy
+-- 3. User management policy
 -- =====================================================
 
 
 -- =====================================================
--- 1️⃣ تفعيل RLS
+-- 1️⃣ Enable RLS
 -- =====================================================
 
 ALTER TABLE public.profile_plans ENABLE ROW LEVEL SECURITY;
 
 
 -- =====================================================
--- 2️⃣ سياسة القراءة للمستخدمين
+-- 2️⃣ User Read Policy
 -- =====================================================
--- المستخدم يقرأ خطته فقط
+-- User reads their own plan only
 
 DROP POLICY IF EXISTS "profile_plans_read_own" ON public.profile_plans;
 CREATE POLICY "profile_plans_read_own"
@@ -36,13 +36,13 @@ CREATE POLICY "profile_plans_read_own"
   TO authenticated
   USING (user_id = auth.uid());
 
-COMMENT ON POLICY "profile_plans_read_own" ON public.profile_plans IS 'المستخدم يقرأ خطته فقط';
+COMMENT ON POLICY "profile_plans_read_own" ON public.profile_plans IS 'User reads their own plan only';
 
 
 -- =====================================================
--- 3️⃣ سياسة الإدارة للمستخدمين
+-- 3️⃣ User Management Policy
 -- =====================================================
--- المستخدم يدير خطته فقط
+-- User manages their own plan only
 
 DROP POLICY IF EXISTS "profile_plans_manage_own" ON public.profile_plans;
 CREATE POLICY "profile_plans_manage_own"
@@ -51,9 +51,9 @@ CREATE POLICY "profile_plans_manage_own"
   USING (user_id = auth.uid())
   WITH CHECK (user_id = auth.uid());
 
-COMMENT ON POLICY "profile_plans_manage_own" ON public.profile_plans IS 'المستخدم يدير خطته فقط';
+COMMENT ON POLICY "profile_plans_manage_own" ON public.profile_plans IS 'User manages their own plan only';
 
 
 -- =====================================================
--- ✅ نهاية الملف
+-- ✅ End of File
 -- =====================================================

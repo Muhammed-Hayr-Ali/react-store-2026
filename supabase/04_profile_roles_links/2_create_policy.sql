@@ -1,35 +1,35 @@
--- ملف إنشاء السياسات
+-- Policies Creation File
 
 -- =====================================================
 -- Marketna E-Commerce - Profile Roles Links Policies
 -- File: 04_profile_roles_links_policies.sql
 -- Version: 1.0
 -- Date: 2026-03-21
--- Description: سياسات الأمان لجدول ربط البروفايل مع الأدوار
+-- Description: Security policies for profile roles link table
 -- Dependencies: public.profile_roles, public.roles
 -- =====================================================
 
 -- =====================================================
--- 📋 محتويات الملف
+-- 📋 File Contents
 -- =====================================================
--- 1. تفعيل RLS
--- 2. سياسة القراءة للمستخدمين
--- 3. سياسة القراءة للمدراء
--- 4. سياسة الإدارة للمدراء
+-- 1. Enable RLS
+-- 2. User read policy
+-- 3. Admin read policy
+-- 4. Admin management policy
 -- =====================================================
 
 
 -- =====================================================
--- 1️⃣ تفعيل RLS
+-- 1️⃣ Enable RLS
 -- =====================================================
 
 ALTER TABLE public.profile_roles ENABLE ROW LEVEL SECURITY;
 
 
 -- =====================================================
--- 2️⃣ سياسة القراءة للمستخدمين
+-- 2️⃣ User Read Policy
 -- =====================================================
--- المستخدم يقرأ أدواره النشطة فقط
+-- User reads their own active roles only
 
 DROP POLICY IF EXISTS "profile_roles_read_own" ON public.profile_roles;
 CREATE POLICY "profile_roles_read_own"
@@ -40,13 +40,13 @@ CREATE POLICY "profile_roles_read_own"
     AND is_active = true
   );
 
-COMMENT ON POLICY "profile_roles_read_own" ON public.profile_roles IS 'المستخدم يقرأ أدواره النشطة فقط';
+COMMENT ON POLICY "profile_roles_read_own" ON public.profile_roles IS 'User reads their own active roles only';
 
 
 -- =====================================================
--- 3️⃣ سياسة القراءة للمدراء
+-- 3️⃣ Admin Read Policy
 -- =====================================================
--- المدراء يقرأون جميع الأدوار
+-- Admins read all roles
 
 DROP POLICY IF EXISTS "profile_roles_admin_read_all" ON public.profile_roles;
 CREATE POLICY "profile_roles_admin_read_all"
@@ -63,13 +63,13 @@ CREATE POLICY "profile_roles_admin_read_all"
     )
   );
 
-COMMENT ON POLICY "profile_roles_admin_read_all" ON public.profile_roles IS 'المدراء يقرأون جميع الأدوار';
+COMMENT ON POLICY "profile_roles_admin_read_all" ON public.profile_roles IS 'Admins read all roles';
 
 
 -- =====================================================
--- 4️⃣ سياسة الإدارة للمدراء
+-- 4️⃣ Admin Management Policy
 -- =====================================================
--- فقط المدراء يمكنهم إدارة الأدوار
+-- Only admins can manage roles
 
 DROP POLICY IF EXISTS "profile_roles_admin_manage" ON public.profile_roles;
 CREATE POLICY "profile_roles_admin_manage"
@@ -87,9 +87,9 @@ CREATE POLICY "profile_roles_admin_manage"
   )
   WITH CHECK (true);
 
-COMMENT ON POLICY "profile_roles_admin_manage" ON public.profile_roles IS 'فقط المدراء يمكنهم إدارة الأدوار';
+COMMENT ON POLICY "profile_roles_admin_manage" ON public.profile_roles IS 'Only admins can manage roles';
 
 
 -- =====================================================
--- ✅ نهاية الملف
+-- ✅ End of File
 -- =====================================================

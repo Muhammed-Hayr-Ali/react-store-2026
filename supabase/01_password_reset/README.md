@@ -1,71 +1,71 @@
-# نظام رموز إعادة تعيين كلمة المرور (Password Reset Tokens)
+# Password Reset Tokens System
 
-## 📋 نظرة عامة
+## 📋 Overview
 
-نظام آمن لإدارة رموز إعادة تعيين كلمة المرور في منصة Marketna للتجارة الإلكترونية.
+Secure password reset token management system for the Marketna e-commerce platform.
 
-**الإصدار:** 1.0  
-**التاريخ:** 2026-03-21  
-**الاعتماديات:** لا يوجد (ملف مستقل)
-
----
-
-## 📁 محتويات المجلد
-
-| الملف | الوصف |
-|-------|-------|
-| `create_table.sql` | إنشاء جدول رموز إعادة التعيين والفهارس |
-| `create_function.sql` | دوال إنشاء والتحقق من الرموز |
-| `create_policy.sql` | سياسات الأمان (RLS) |
-| `create_data.sql` | البيانات الافتراضية (لا يوجد) |
+**Version:** 1.0
+**Date:** 2026-03-21
+**Dependencies:** None (Standalone file)
 
 ---
 
-## 📊 بنية الجدول
+## 📁 Folder Contents
+
+| File                  | Description                                    |
+| --------------------- | ---------------------------------------------- |
+| `create_table.sql`    | Create password reset tokens table and indexes |
+| `create_function.sql` | Token creation and verification functions      |
+| `create_policy.sql`   | Security policies (RLS)                        |
+| `create_data.sql`     | Default data (none)                            |
+
+---
+
+## 📊 Table Schema
 
 ### `public.password_reset_tokens`
 
-| العمود | النوع | الوصف |
-|--------|-------|-------|
-| `id` | UUID | المعرف الفريد للرمز |
-| `user_id` | UUID | معرف المستخدم |
-| `email` | TEXT | البريد الإلكتروني |
-| `token` | TEXT | الرمز السري (64 حرف) |
-| `expires_at` | TIMESTAMPTZ | وقت الانتهاء |
-| `used_at` | TIMESTAMPTZ | وقت الاستخدام |
-| `ip_address` | INET | عنوان IP للتدقيق |
-| `created_at` | TIMESTAMPTZ | تاريخ الإنشاء |
+| Column       | Type        | Description                  |
+| ------------ | ----------- | ---------------------------- |
+| `id`         | UUID        | Unique token identifier      |
+| `user_id`    | UUID        | User ID                      |
+| `email`      | TEXT        | Email address                |
+| `token`      | TEXT        | Secret token (64 characters) |
+| `expires_at` | TIMESTAMPTZ | Expiration time              |
+| `used_at`    | TIMESTAMPTZ | Usage timestamp              |
+| `ip_address` | INET        | IP address for audit         |
+| `created_at` | TIMESTAMPTZ | Creation timestamp           |
 
 ---
 
-## 🔧 الدوال المتاحة
+## 🔧 Available Functions
 
-| الدالة | الوصف |
-|--------|-------|
-| `create_password_reset_token()` | إنشاء رمز جديد |
-| `claim_password_reset_token()` | التحقق الذري والاستهلاك |
-| `verify_password_reset_token()` | التحقق فقط (للعرض) |
-| `cleanup_expired_reset_tokens()` | تنظيف الرموز القديمة |
-
----
-
-## 🔒 سياسات الأمان
-
-- ✅ منع القراءة العامة تماماً
-- ✅ الوصول الكامل للخدمة الخلفية فقط
+| Function                         | Description                         |
+| -------------------------------- | ----------------------------------- |
+| `create_password_reset_token()`  | Create a new token                  |
+| `claim_password_reset_token()`   | Atomic verification and consumption |
+| `verify_password_reset_token()`  | Verify only (for display)           |
+| `cleanup_expired_reset_tokens()` | Clean up old tokens                 |
 
 ---
 
-## 📝 طريقة الاستخدام
+## 🔒 Security Policies
+
+- ✅ Completely prevent public read
+- ✅ Backend service full access only
+
+---
+
+## 📝 Usage
 
 ```sql
--- إنشاء رمز
+-- Create a token
 SELECT create_password_reset_token('user-uuid', 'user@example.com', 60);
 
--- التحقق من الرمز
+-- Verify and claim token
 SELECT * FROM claim_password_reset_token('token-here');
 ```
 
 ---
 
-## ✅ نهاية الملف
+## ✅ End of File

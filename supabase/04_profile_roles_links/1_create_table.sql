@@ -1,24 +1,25 @@
--- ملف إنشاء الجداول
+-- Table Creation File
 
 -- =====================================================
 -- Marketna E-Commerce - Profile Roles Link Table
 -- File: 04_profile_roles_links.sql
 -- Version: 1.0
 -- Date: 2026-03-21
--- Description: جدول ربط البروفايل مع الأدوار
+-- Description: Profile roles linking table
 -- Dependencies: public.profiles, public.roles
 -- =====================================================
 
 -- =====================================================
--- 📋 محتويات الملف
+-- 📋 File Contents
 -- =====================================================
--- 1. تنظيف كامل قبل الإنشاء
--- 2. إنشاء جدول ربط البروفايل مع الأدوار
--- 3. الفهارس (Indexes)
+-- 1. Cleanup before creation
+-- 2. Create profile roles link table
+-- 3. Indexes
 -- =====================================================
 
+
 -- =====================================================
--- 1️⃣ إنشاء جدول ربط البروفايل مع الأدوار
+-- 1️⃣ Create Profile Roles Link Table
 -- =====================================================
 
 CREATE TABLE public.profile_roles (
@@ -26,33 +27,33 @@ CREATE TABLE public.profile_roles (
   role_id      UUID NOT NULL REFERENCES public.roles(id) ON DELETE CASCADE,
   is_active    BOOLEAN DEFAULT true,
   granted_at   TIMESTAMPTZ DEFAULT NOW(),
-  granted_by   UUID REFERENCES auth.users(id),
+  granted_by   UUID REFERENCES auth.profiles(id),
 
   PRIMARY KEY (user_id, role_id)
 );
 
 -- Comments
-COMMENT ON TABLE public.profile_roles IS 'جدول ربط البروفايل مع الأدوار';
-COMMENT ON COLUMN public.profile_roles.user_id IS 'معرف المستخدم (من profiles.id)';
-COMMENT ON COLUMN public.profile_roles.role_id IS 'معرف الدور (من roles.id)';
-COMMENT ON COLUMN public.profile_roles.is_active IS 'هل الدور نشط حالياً';
-COMMENT ON COLUMN public.profile_roles.granted_at IS 'تاريخ منح الدور';
-COMMENT ON COLUMN public.profile_roles.granted_by IS 'من قام بمنح الدور';
+COMMENT ON TABLE public.profile_roles IS 'Profile roles linking table';
+COMMENT ON COLUMN public.profile_roles.user_id IS 'User ID (from profiles.id)';
+COMMENT ON COLUMN public.profile_roles.role_id IS 'Role ID (from roles.id)';
+COMMENT ON COLUMN public.profile_roles.is_active IS 'Whether role is currently active';
+COMMENT ON COLUMN public.profile_roles.granted_at IS 'Role grant timestamp';
+COMMENT ON COLUMN public.profile_roles.granted_by IS 'Who granted the role';
 
 
 -- =====================================================
--- 2️⃣ الفهارس (Indexes)
+-- 2️⃣ Indexes
 -- =====================================================
 
 CREATE INDEX idx_profile_roles_user ON public.profile_roles(user_id);
 CREATE INDEX idx_profile_roles_role ON public.profile_roles(role_id);
 CREATE INDEX idx_profile_roles_active ON public.profile_roles(is_active);
 
-COMMENT ON INDEX idx_profile_roles_user IS 'بحث سريع بمعرف المستخدم';
-COMMENT ON INDEX idx_profile_roles_role IS 'بحث سريع بمعرف الدور';
-COMMENT ON INDEX idx_profile_roles_active IS 'تصفية الأدوار النشطة';
+COMMENT ON INDEX idx_profile_roles_user IS 'Fast search by user ID';
+COMMENT ON INDEX idx_profile_roles_role IS 'Fast search by role ID';
+COMMENT ON INDEX idx_profile_roles_active IS 'Filter active roles';
 
 
 -- =====================================================
--- ✅ نهاية الملف
+-- ✅ End of File
 -- =====================================================

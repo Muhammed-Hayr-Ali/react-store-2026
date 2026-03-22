@@ -1,68 +1,68 @@
-# نظام ربط البروفايل مع الأدوار (Profile Roles Links)
+# Profile Roles Links System
 
-## 📋 نظرة عامة
+## 📋 Overview
 
-جدول ربط المستخدمين بالأدوار في منصة Marketna للتجارة الإلكترونية.
+User roles linking table for the Marketna e-commerce platform.
 
-**الإصدار:** 1.0  
-**التاريخ:** 2026-03-21  
-**الاعتماديات:** `public.profiles`, `public.roles`
+**Version:** 1.0
+**Date:** 2026-03-21
+**Dependencies:** `public.profiles`, `public.roles`
 
 ---
 
-## 📁 محتويات المجلد
+## 📁 Folder Contents
 
-| الملف                 | الوصف                         |
+| File                  | Description                   |
 | --------------------- | ----------------------------- |
-| `create_table.sql`    | إنشاء جدول الربط والفهارس     |
-| `create_function.sql` | الدوال (لا يوجد)              |
-| `create_policy.sql`   | سياسات الأمان (RLS)           |
-| `create_data.sql`     | البيانات الافتراضية (لا يوجد) |
+| `create_table.sql`    | Create link table and indexes |
+| `create_function.sql` | Functions (none)              |
+| `create_policy.sql`   | Security policies (RLS)       |
+| `create_data.sql`     | Default data (none)           |
 
 ---
 
-## 📊 بنية الجدول
+## 📊 Table Schema
 
 ### `public.profile_roles`
 
-| العمود       | النوع       | الوصف                          |
-| ------------ | ----------- | ------------------------------ |
-| `user_id`    | UUID        | معرف المستخدم (من profiles.id) |
-| `role_id`    | UUID        | معرف الدور (من roles.id)       |
-| `is_active`  | BOOLEAN     | هل الدور نشط حالياً            |
-| `granted_at` | TIMESTAMPTZ | تاريخ منح الدور                |
-| `granted_by` | UUID        | من قام بمنح الدور              |
+| Column       | Type        | Description                      |
+| ------------ | ----------- | -------------------------------- |
+| `user_id`    | UUID        | User ID (from profiles.id)       |
+| `role_id`    | UUID        | Role ID (from roles.id)          |
+| `is_active`  | BOOLEAN     | Whether role is currently active |
+| `granted_at` | TIMESTAMPTZ | Role grant timestamp             |
+| `granted_by` | UUID        | Who granted the role             |
 
-**المفتاح الأساسي:** `(user_id, role_id)`
-
----
-
-## 🔧 الفهارس
-
-| الفهرس                     | الوصف                   |
-| -------------------------- | ----------------------- |
-| `idx_profile_roles_user`   | بحث سريع بمعرف المستخدم |
-| `idx_profile_roles_role`   | بحث سريع بمعرف الدور    |
-| `idx_profile_roles_active` | تصفية الأدوار النشطة    |
+**Primary Key:** `(user_id, role_id)`
 
 ---
 
-## 🔒 سياسات الأمان
+## 🔧 Indexes
 
-- ✅ المستخدم يقرأ أدواره النشطة فقط
-- ✅ المدراء يقرأون جميع الأدوار
-- ✅ فقط المدراء يمكنهم إدارة الأدوار
+| Index                      | Description            |
+| -------------------------- | ---------------------- |
+| `idx_profile_roles_user`   | Fast search by user ID |
+| `idx_profile_roles_role`   | Fast search by role ID |
+| `idx_profile_roles_active` | Filter active roles    |
 
 ---
 
-## 📝 طريقة الاستخدام
+## 🔒 Security Policies
+
+- ✅ User reads their own active roles only
+- ✅ Admins read all roles
+- ✅ Only admins can manage roles
+
+---
+
+## 📝 Usage
 
 ```sql
--- منح دور لمستخدم
+-- Grant a role to a user
 INSERT INTO public.profile_roles (user_id, role_id, is_active)
 VALUES ('user-uuid', 'role-uuid', true);
 
--- قراءة أدوار مستخدم
+-- Read user roles
 SELECT r.name, r.description
 FROM public.profile_roles pr
 JOIN public.roles r ON r.id = pr.role_id
@@ -71,4 +71,4 @@ WHERE pr.user_id = auth.uid() AND pr.is_active = true;
 
 ---
 
-## ✅ نهاية الملف
+## ✅ End of File

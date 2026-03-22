@@ -1,86 +1,86 @@
-# نظام ربط البروفايل بالخطط (Profile Plans Links)
+# Profile Plans Links System
 
-## 📋 نظرة عامة
+## 📋 Overview
 
-جدول ربط المستخدمين بالخطط في منصة Marketna للتجارة الإلكترونية.
+User plans linking table for the Marketna e-commerce platform.
 
-**الإصدار:** 1.0
-**التاريخ:** 2026-03-21
-**الاعتماديات:** `public.profiles`, `public.plans`
+**Version:** 1.0
+**Date:** 2026-03-21
+**Dependencies:** `public.profiles`, `public.plans`
 
 ---
 
-## 📁 محتويات المجلد
+## 📁 Folder Contents
 
-| الملف                 | الوصف                         |
+| File                  | Description                   |
 | --------------------- | ----------------------------- |
-| `create_table.sql`    | إنشاء جدول الربط والفهارس     |
-| `create_function.sql` | الدوال (لا يوجد)              |
-| `create_policy.sql`   | سياسات الأمان (RLS)           |
-| `create_data.sql`     | البيانات الافتراضية (لا يوجد) |
+| `create_table.sql`    | Create link table and indexes |
+| `create_function.sql` | Functions (none)              |
+| `create_policy.sql`   | Security policies (RLS)       |
+| `create_data.sql`     | Default data (none)           |
 
 ---
 
-## 📊 بنية الجدول
+## 📊 Table Schema
 
 ### `public.profile_plans`
 
-| العمود           | النوع       | الوصف                          |
-| ---------------- | ----------- | ------------------------------ |
-| `id`             | UUID        | المعرف الفريد للسجل            |
-| `user_id`        | UUID        | معرف المستخدم (من profiles.id) |
-| `plan_id`        | UUID        | معرف الخطة (من plans.id)       |
-| `status`         | TEXT        | حالة الخطة                     |
-| `start_date`     | TIMESTAMPTZ | تاريخ بدء الخطة                |
-| `end_date`       | TIMESTAMPTZ | تاريخ انتهاء الخطة             |
-| `trial_end_date` | TIMESTAMPTZ | تاريخ انتهاء الفترة التجريبية  |
-| `created_at`     | TIMESTAMPTZ | تاريخ إنشاء السجل              |
-| `updated_at`     | TIMESTAMPTZ | تاريخ آخر تحديث للسجل          |
+| Column           | Type        | Description                  |
+| ---------------- | ----------- | ---------------------------- |
+| `id`             | UUID        | Unique record identifier     |
+| `user_id`        | UUID        | User ID (from profiles.id)   |
+| `plan_id`        | UUID        | Plan ID (from plans.id)      |
+| `status`         | TEXT        | Plan status                  |
+| `start_date`     | TIMESTAMPTZ | Plan start date              |
+| `end_date`       | TIMESTAMPTZ | Plan end date                |
+| `trial_end_date` | TIMESTAMPTZ | Trial period end date        |
+| `created_at`     | TIMESTAMPTZ | Record creation timestamp    |
+| `updated_at`     | TIMESTAMPTZ | Record last update timestamp |
 
 ---
 
-## 🔧 حالات الخطة
+## 🔧 Plan Status
 
-| الحالة      | الوصف        |
-| ----------- | ------------ |
-| `active`    | خطة نشطة     |
-| `expired`   | خطة منتهية   |
-| `cancelled` | خطة ملغاة    |
-| `pending`   | خطة معلقة    |
-| `trial`     | فترة تجريبية |
-
----
-
-## 🔧 الفهارس
-
-| الفهرس                            | الوصف                          |
-| --------------------------------- | ------------------------------ |
-| `idx_profile_plans_active_unique` | ضمان خطة نشطة واحدة لكل مستخدم |
-| `idx_profile_plans_user`          | بحث سريع بمعرف المستخدم        |
-| `idx_profile_plans_plan`          | بحث سريع بمعرف الخطة           |
-| `idx_profile_plans_status`        | تصفية الخطط حسب الحالة         |
+| Status      | Description    |
+| ----------- | -------------- |
+| `active`    | Active plan    |
+| `expired`   | Expired plan   |
+| `cancelled` | Cancelled plan |
+| `pending`   | Pending plan   |
+| `trial`     | Trial period   |
 
 ---
 
-## 🔒 سياسات الأمان
+## 🔧 Indexes
 
-- ✅ المستخدم يقرأ خطته فقط
-- ✅ المستخدم يدير خطته فقط
+| Index                             | Description                     |
+| --------------------------------- | ------------------------------- |
+| `idx_profile_plans_active_unique` | Ensure one active plan per user |
+| `idx_profile_plans_user`          | Fast search by user ID          |
+| `idx_profile_plans_plan`          | Fast search by plan ID          |
+| `idx_profile_plans_status`        | Filter plans by status          |
 
 ---
 
-## 📝 طريقة الاستخدام
+## 🔒 Security Policies
+
+- ✅ User reads their own plan only
+- ✅ User manages their own plan only
+
+---
+
+## 📝 Usage
 
 ```sql
--- إنشاء خطة جديدة
+-- Create a new plan
 INSERT INTO public.profile_plans (user_id, plan_id, status, end_date)
 VALUES ('user-uuid', 'plan-uuid', 'active', NOW() + INTERVAL '1 year');
 
--- قراءة خطط مستخدم
+-- Read user plans
 SELECT * FROM public.profile_plans
 WHERE user_id = auth.uid() AND status = 'active';
 ```
 
 ---
 
-## ✅ نهاية الملف
+## ✅ End of File

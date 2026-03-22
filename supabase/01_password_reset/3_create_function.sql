@@ -1,28 +1,28 @@
--- ملف إنشاء الدوال
+-- Functions Creation File
 
 -- =====================================================
 -- Marketna E-Commerce - Password Reset Tokens Functions
 -- File: 01_password_reset_functions.sql
 -- Version: 1.0
 -- Date: 2026-03-21
--- Description: دوال إدارة رموز إعادة تعيين كلمة المرور
+-- Description: Password reset tokens management functions
 -- Dependencies: public.password_reset_tokens
 -- =====================================================
 
 -- =====================================================
--- 📋 محتويات الملف
+-- 📋 File Contents
 -- =====================================================
--- 1. دالة إنشاء رمز إعادة التعيين
--- 2. دالة التحقق والاستخدام الذري (Atomic Claim)
--- 3. دالة التحقق فقط (للعرض)
--- 4. دالة تنظيف الرموز القديمة
+-- 1. Create reset token function
+-- 2. Atomic claim function
+-- 3. Verify only function (for display)
+-- 4. Clean up old tokens function
 -- =====================================================
 
 
 -- =====================================================
--- 1️⃣ دالة إنشاء رمز إعادة التعيين
+-- 1️⃣ Create Reset Token Function
 -- =====================================================
--- تقوم تلقائياً بحذف أي رموز سابقة لنفس المستخدم لمنع التراكم
+-- Automatically deletes any previous tokens for the same user to prevent accumulation
 
 CREATE OR REPLACE FUNCTION public.create_password_reset_token(
   p_user_id UUID,
@@ -35,18 +35,18 @@ DECLARE
   v_token TEXT;
   v_expires_at TIMESTAMPTZ;
 BEGIN
-  -- 1. توليد رمز عشوائي آمن (64 حرف)
+  -- 1. Generate secure random token (64 characters)
   v_token := encode(gen_random_bytes(32), 'hex');
 
-  -- 2. حساب وقت الانتهاء
+  -- 2. Calculate expiration time
   v_expires_at := NOW() + (p_expires_in_minutes || ' minutes')::INTERVAL;
 
-  -- 3. حذف أي رموز نشطة سابقة لنفس المستخدم (أمان)
+  -- 3. Delete any previous active tokens for the same user (security)
   DELETE FROM public.password_reset_tokens
   WHERE user_id = p_user_id
     AND used_at IS NULL AND expires_at > NOW();
 
-  -- 4. إدخال الرمز الجديد
+  -- 4. Insert new token
   INSERT INTO public.password_reset_tokens (user_id, email, token, expires_at, ip_address)
   VALUES (p_user_id, p_email, v_token, v_expires_at, p_ip_address);
 
@@ -54,14 +54,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-COMMENT ON FUNCTION public.create_password_reset_token IS 'إنشاء رمز إعادة تعيين كلمة مرور جديد وحذف الرموز القديمة';
+COMMENT ON FUNCTION public.create_password_reset_token IS 'Create a new password reset token and delete old tokens';
 
 
 -- =====================================================
--- 2️⃣ دالة التحقق والاستخدام الذري (Atomic Claim)
+-- 2️⃣ Atomic Claim Function
 -- =====================================================
--- ✅ هذه الدالة هي الأكثر أماناً: تتحقق من الصلاحية وتعلم الرمز كمستخدم في نفس اللحظة
--- مما يمنع استخدام الرمز مرتين (Race Condition)
+-- ✅ This function is the most secure: verifies validity and marks token as used atomically
+-- preventing token reuse (Race Condition)
 
 CREATE OR REPLACE FUNCTION public.claim_password_reset_token(p_token TEXT)
 RETURNS TABLE (
@@ -85,7 +85,7 @@ BEGIN
       false::BOOLEAN,
       NULL::UUID,
       NULL::TEXT,
-      'رمز غير صحيح أو منتهي أو مُستخدم مسبقاً'::TEXT;
+      'Invalid, expired, or previously used token'::TEXT;
     RETURN;
   END IF;
 
@@ -93,17 +93,17 @@ BEGIN
     true::BOOLEAN,
     v_record.user_id,
     v_record.email,
-    'تم قبول الرمز بنجاح'::TEXT;
+    'Token accepted successfully'::TEXT;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-COMMENT ON FUNCTION public.claim_password_reset_token IS 'التحقق الذري من الرمز وتمييزه كمستخدم (يمنع الاستخدام المزدوج)';
+COMMENT ON FUNCTION public.claim_password_reset_token IS 'Atomic token verification and usage marking (prevents double use)';
 
 
 -- =====================================================
--- 3️⃣ دالة التحقق فقط (للعرض)
+-- 3️⃣ Verify Only Function (For Display)
 -- =====================================================
--- ⚠️ تحذير: لا تستخدم هذه الدالة كخطوة وحيدة للأمان
+-- ⚠️ Warning: Do not use this function as a standalone security step
 
 CREATE OR REPLACE FUNCTION public.verify_password_reset_token(p_token TEXT)
 RETURNS TABLE (
@@ -128,7 +128,7 @@ BEGIN
       NULL::UUID,
       NULL::TEXT,
       NULL::TIMESTAMPTZ,
-      'رمز غير صحيح أو منتهي الصلاحية'::TEXT;
+      'Invalid or expired token'::TEXT;
     RETURN;
   END IF;
 
@@ -137,17 +137,17 @@ BEGIN
     v_record.user_id,
     v_record.email,
     v_record.expires_at,
-    'رمز صالح'::TEXT;
+    'Valid token'::TEXT;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-COMMENT ON FUNCTION public.verify_password_reset_token IS 'فحص صلاحية الرمز دون استهلاكه (للعرض فقط)';
+COMMENT ON FUNCTION public.verify_password_reset_token IS 'Check token validity without consuming it (for display only)';
 
 
 -- =====================================================
--- 4️⃣ دالة تنظيف الرموز القديمة
+-- 4️⃣ Clean Up Old Tokens Function
 -- =====================================================
--- ✅ للاستخدام الخارجي - Cron Job
+-- ✅ For external use - Cron Job
 
 CREATE OR REPLACE FUNCTION public.cleanup_expired_reset_tokens()
 RETURNS INTEGER AS $$
@@ -164,9 +164,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-COMMENT ON FUNCTION public.cleanup_expired_reset_tokens IS 'حذف الرموز القديمة والمستخدمة - للاستخدام عبر Cron Job';
+COMMENT ON FUNCTION public.cleanup_expired_reset_tokens IS 'Delete old and used tokens - for use via Cron Job';
 
 
 -- =====================================================
--- ✅ نهاية الملف
+-- ✅ End of File
 -- =====================================================

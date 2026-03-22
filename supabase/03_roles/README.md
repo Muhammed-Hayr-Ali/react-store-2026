@@ -1,82 +1,82 @@
-# نظام الأدوار (Roles)
+# Roles System
 
-## 📋 نظرة عامة
+## 📋 Overview
 
-جدول تعريف الأدوار والصلاحيات في منصة Marketna للتجارة الإلكترونية.
+Roles and permissions definition table for the Marketna e-commerce platform.
 
-**الإصدار:** 1.0  
-**التاريخ:** 2026-03-21  
-**الاعتماديات:** لا يوجد (ملف مستقل)
-
----
-
-## 📁 محتويات المجلد
-
-| الملف                 | الوصف                         |
-| --------------------- | ----------------------------- |
-| `create_table.sql`    | إنشاء جدول الأدوار والفهارس   |
-| `create_function.sql` | الدوال (لا يوجد)              |
-| `create_policy.sql`   | سياسات الأمان (RLS)           |
-| `create_data.sql`     | البيانات الافتراضية (4 أدوار) |
+**Version:** 1.0
+**Date:** 2026-03-21
+**Dependencies:** None (Standalone file)
 
 ---
 
-## 📊 بنية الجدول
+## 📁 Folder Contents
+
+| File                  | Description                    |
+| --------------------- | ------------------------------ |
+| `create_table.sql`    | Create roles table and indexes |
+| `create_function.sql` | Functions (none)               |
+| `create_policy.sql`   | Security policies (RLS)        |
+| `create_data.sql`     | Default data (4 roles)         |
+
+---
+
+## 📊 Table Schema
 
 ### `public.roles`
 
-| العمود        | النوع       | الوصف                                         |
+| Column        | Type        | Description                                   |
 | ------------- | ----------- | --------------------------------------------- |
-| `id`          | UUID        | المعرف الفريد للدور                           |
-| `name`        | role_name   | اسم الدور (admin, vendor, delivery, customer) |
-| `description` | TEXT        | وصف الدور                                     |
-| `permissions` | JSONB       | مصفوفة الصلاحيات                              |
-| `created_at`  | TIMESTAMPTZ | تاريخ الإنشاء                                 |
-| `updated_at`  | TIMESTAMPTZ | تاريخ آخر تحديث                               |
+| `id`          | UUID        | Unique identifier for the role                |
+| `name`        | role_name   | Role name (admin, vendor, delivery, customer) |
+| `description` | TEXT        | Role description                              |
+| `permissions` | JSONB       | Permissions array                             |
+| `created_at`  | TIMESTAMPTZ | Creation timestamp                            |
+| `updated_at`  | TIMESTAMPTZ | Last update timestamp                         |
 
 ---
 
-## 🔧 الأنواع المتاحة
+## 🔧 Available Types
 
 ### `public.role_name` (ENUM)
 
-| القيمة     | الوصف       |
-| ---------- | ----------- |
-| `admin`    | مدير النظام |
-| `vendor`   | بائع/متجر   |
-| `delivery` | شريك توصيل  |
-| `customer` | عميل        |
+| Value      | Description          |
+| ---------- | -------------------- |
+| `admin`    | System administrator |
+| `vendor`   | Vendor/Store owner   |
+| `delivery` | Delivery partner     |
+| `customer` | Customer             |
 
 ---
 
-## 📋 الأدوار الافتراضية
+## 📋 Default Roles
 
-| الدور      | الصلاحيات               |
-| ---------- | ----------------------- |
-| `admin`    | صلاحيات كاملة للنظام    |
-| `vendor`   | إدارة المنتجات والطلبات |
-| `delivery` | إدارة التوصيلات         |
-| `customer` | تصفح وشراء              |
-
----
-
-## 🔒 سياسات الأمان
-
-- ✅ قراءة عامة لجميع الأدوار
-- ✅ فقط المدراء يمكنهم إدارة الأدوار
+| Role       | Permissions                |
+| ---------- | -------------------------- |
+| `admin`    | Full system access         |
+| `vendor`   | Manage products and orders |
+| `delivery` | Manage deliveries          |
+| `customer` | Browse and purchase        |
 
 ---
 
-## 📝 طريقة الاستخدام
+## 🔒 Security Policies
+
+- ✅ Public read for all roles
+- ✅ Only admins can manage roles
+
+---
+
+## 📝 Usage
 
 ```sql
--- قراءة جميع الأدوار
+-- Read all roles
 SELECT * FROM public.roles;
 
--- قراءة دور محدد
+-- Read a specific role
 SELECT * FROM public.roles WHERE name = 'vendor';
 ```
 
 ---
 
-## ✅ نهاية الملف
+## ✅ End of File

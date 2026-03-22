@@ -1,21 +1,21 @@
--- ملف إنشاء الدوال
+-- Functions Creation File
 
 -- =====================================================
--- Marketna E-Commerce - Subscriptions Functions
+-- Marketna E-Commerce - Subscription Plans Functions
 -- File: 05_subscriptions_functions.sql
 -- Version: 1.0
 -- Date: 2026-03-21
--- Description: دوال إدارة الاشتراكات
+-- Description: Subscription plans management functions
 -- Dependencies: public.plans
 -- =====================================================
 
 -- =====================================================
--- 📋 محتويات الملف
+-- 📋 File Contents
 -- =====================================================
--- لا توجد دوال حالية - الجدول يحتوي فقط على البيانات
+-- No functions currently - table contains data only
 -- =====================================================
 
 
 -- =====================================================
--- ✅ نهاية الملف
+-- ✅ End of File
 -- =====================================================

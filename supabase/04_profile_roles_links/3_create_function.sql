@@ -1,21 +1,21 @@
--- ملف إنشاء الدوال
+-- Functions Creation File
 
 -- =====================================================
 -- Marketna E-Commerce - Profile Roles Links Functions
 -- File: 04_profile_roles_links_functions.sql
 -- Version: 1.0
 -- Date: 2026-03-21
--- Description: دوال ربط البروفايل مع الأدوار
+-- Description: Profile roles link functions
 -- Dependencies: public.profile_roles, public.roles
 -- =====================================================
 
 -- =====================================================
--- 📋 محتويات الملف
+-- 📋 File Contents
 -- =====================================================
--- لا توجد دوال حالية - الجدول يحتوي فقط على البيانات
+-- No functions currently - table contains data only
 -- =====================================================
 
 
 -- =====================================================
--- ✅ نهاية الملف
+-- ✅ End of File
 -- =====================================================

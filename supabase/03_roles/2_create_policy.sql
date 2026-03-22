@@ -1,34 +1,34 @@
--- ملف إنشاء السياسات
+-- Policies Creation File
 
 -- =====================================================
 -- Marketna E-Commerce - Roles Policies
 -- File: 03_roles_policies.sql
 -- Version: 1.0
 -- Date: 2026-03-21
--- Description: سياسات الأمان لجدول الأدوار
+-- Description: Security policies for roles table
 -- Dependencies: public.roles, public.profile_roles
 -- =====================================================
 
 -- =====================================================
--- 📋 محتويات الملف
+-- 📋 File Contents
 -- =====================================================
--- 1. تفعيل RLS
--- 2. سياسة القراءة العامة
--- 3. سياسة الإدارة للمدراء
+-- 1. Enable RLS
+-- 2. Public read policy
+-- 3. Admin management policy
 -- =====================================================
 
 
 -- =====================================================
--- 1️⃣ تفعيل RLS
+-- 1️⃣ Enable RLS
 -- =====================================================
 
 ALTER TABLE public.roles ENABLE ROW LEVEL SECURITY;
 
 
 -- =====================================================
--- 2️⃣ سياسة القراءة العامة
+-- 2️⃣ Public Read Policy
 -- =====================================================
--- قراءة عامة لجميع الأدوار (للعرض فقط)
+-- Public read for all roles (view only)
 
 DROP POLICY IF EXISTS "roles_public_read" ON public.roles;
 CREATE POLICY "roles_public_read"
@@ -36,13 +36,13 @@ CREATE POLICY "roles_public_read"
   TO authenticated, anon
   USING (true);
 
-COMMENT ON POLICY "roles_public_read" ON public.roles IS 'قراءة عامة لجميع الأدوار';
+COMMENT ON POLICY "roles_public_read" ON public.roles IS 'Public read for all roles';
 
 
 -- =====================================================
--- 3️⃣ سياسة الإدارة للمدراء
+-- 3️⃣ Admin Management Policy
 -- =====================================================
--- فقط المدراء يمكنهم إدارة الأدوار
+-- Only admins can manage roles
 
 DROP POLICY IF EXISTS "roles_admin_manage" ON public.roles;
 CREATE POLICY "roles_admin_manage"
@@ -60,9 +60,9 @@ CREATE POLICY "roles_admin_manage"
   )
   WITH CHECK (true);
 
-COMMENT ON POLICY "roles_admin_manage" ON public.roles IS 'فقط المدراء يمكنهم إدارة الأدوار';
+COMMENT ON POLICY "roles_admin_manage" ON public.roles IS 'Only admins can manage roles';
 
 
 -- =====================================================
--- ✅ نهاية الملف
+-- ✅ End of File
 -- =====================================================

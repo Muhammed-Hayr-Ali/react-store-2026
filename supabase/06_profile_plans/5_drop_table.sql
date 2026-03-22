@@ -1,26 +1,26 @@
--- ملف حذف الجدول
+-- Table Drop File
 
 -- =====================================================
 -- Marketna E-Commerce - Profile Plans Links Drop
 -- File: drop_profile_plans_links.sql
 -- Version: 1.0
 -- Date: 2026-03-21
--- Description: حذف جدول ربط البروفايل بالخطط
+-- Description: Drop profile plans link table
 -- =====================================================
 
 -- =====================================================
--- 📋 محتويات الملف
+-- 📋 File Contents
 -- =====================================================
--- 1. حذف السياسات (Policies)
--- 2. حذف الدوال (Functions)
--- 3. حذف الفهارس (Indexes)
--- 4. حذف البيانات (Data)
--- 5. حذف الجدول (Table)
+-- 1. Drop Policies
+-- 2. Drop Functions
+-- 3. Drop Indexes
+-- 4. Drop Data
+-- 5. Drop Table
 -- =====================================================
 
 
 -- =====================================================
--- 1️⃣ حذف السياسات (Policies)
+-- 1️⃣ Drop Policies
 -- =====================================================
 
 DROP POLICY IF EXISTS "profile_plans_manage_own" ON public.profile_plans;
@@ -28,13 +28,13 @@ DROP POLICY IF EXISTS "profile_plans_read_own" ON public.profile_plans;
 
 
 -- =====================================================
--- 2️⃣ حذف الدوال (Functions)
+-- 2️⃣ Drop Functions
 -- =====================================================
--- لا توجد دوال لهذا الجدول
+-- No functions for this table
 
 
 -- =====================================================
--- 3️⃣ حذف الفهارس (Indexes)
+-- 3️⃣ Drop Indexes
 -- =====================================================
 
 DROP INDEX IF EXISTS idx_profile_plans_status;
@@ -44,19 +44,19 @@ DROP INDEX IF EXISTS idx_profile_plans_active_unique;
 
 
 -- =====================================================
--- 4️⃣ حذف البيانات (Data)
+-- 4️⃣ Drop Data
 -- =====================================================
 
 DELETE FROM public.profile_plans;
 
 
 -- =====================================================
--- 5️⃣ حذف الجدول (Table)
+-- 5️⃣ Drop Table
 -- =====================================================
 
 DROP TABLE IF EXISTS public.profile_plans CASCADE;
 
 
 -- =====================================================
--- ✅ نهاية الملف
+-- ✅ End of File
 -- =====================================================

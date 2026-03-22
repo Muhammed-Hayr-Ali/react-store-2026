@@ -1,21 +1,21 @@
--- ملف إنشاء الدوال
+-- Functions Creation File
 
 -- =====================================================
 -- Marketna E-Commerce - Profile Plans Links Functions
 -- File: 06_profile_plans_links_functions.sql
 -- Version: 1.0
 -- Date: 2026-03-21
--- Description: دوال ربط البروفايل بالخطط
+-- Description: Profile plans link functions
 -- Dependencies: public.profile_plans
 -- =====================================================
 
 -- =====================================================
--- 📋 محتويات الملف
+-- 📋 File Contents
 -- =====================================================
--- لا توجد دوال حالية - الجدول يحتوي فقط على البيانات
+-- No functions currently - table contains data only
 -- =====================================================
 
 
 -- =====================================================
--- ✅ نهاية الملف
+-- ✅ End of File
 -- =====================================================

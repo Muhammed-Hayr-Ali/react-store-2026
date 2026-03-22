@@ -1,27 +1,27 @@
--- ملف حذف الجدول
+-- Table Drop File
 
 -- =====================================================
--- Marketna E-Commerce - Subscriptions Drop
+-- Marketna E-Commerce - Subscription Plans Drop
 -- File: drop_subscriptions.sql
 -- Version: 1.0
 -- Date: 2026-03-21
--- Description: حذف جدول خطط الاشتراك
+-- Description: Drop subscription plans table
 -- =====================================================
 
 -- =====================================================
--- 📋 محتويات الملف
+-- 📋 File Contents
 -- =====================================================
--- 1. حذف السياسات (Policies)
--- 2. حذف الدوال (Functions)
--- 3. حذف الفهارس (Indexes)
--- 4. حذف البيانات (Data)
--- 5. حذف الجدول (Table)
--- 6. حذف النوع (ENUM Type)
+-- 1. Drop Policies
+-- 2. Drop Functions
+-- 3. Drop Indexes
+-- 4. Drop Data
+-- 5. Drop Table
+-- 6. Drop ENUM Type
 -- =====================================================
 
 
 -- =====================================================
--- 1️⃣ حذف السياسات (Policies)
+-- 1️⃣ Drop Policies
 -- =====================================================
 
 DROP POLICY IF EXISTS "plans_admin_write" ON public.plans;
@@ -29,13 +29,13 @@ DROP POLICY IF EXISTS "plans_public_read" ON public.plans;
 
 
 -- =====================================================
--- 2️⃣ حذف الدوال (Functions)
+-- 2️⃣ Drop Functions
 -- =====================================================
--- لا توجد دوال لهذا الجدول
+-- No functions for this table
 
 
 -- =====================================================
--- 3️⃣ حذف الفهارس (Indexes)
+-- 3️⃣ Drop Indexes
 -- =====================================================
 
 DROP INDEX IF EXISTS idx_plans_permissions;
@@ -43,26 +43,26 @@ DROP INDEX IF EXISTS idx_plans_category;
 
 
 -- =====================================================
--- 4️⃣ حذف البيانات (Data)
+-- 4️⃣ Drop Data
 -- =====================================================
 
 DELETE FROM public.plans;
 
 
 -- =====================================================
--- 5️⃣ حذف الجدول (Table)
+-- 5️⃣ Drop Table
 -- =====================================================
 
 DROP TABLE IF EXISTS public.plans CASCADE;
 
 
 -- =====================================================
--- 6️⃣ حذف النوع (ENUM Type)
+-- 6️⃣ Drop ENUM Type
 -- =====================================================
 
 DROP TYPE IF EXISTS plan_category CASCADE;
 
 
 -- =====================================================
--- ✅ نهاية الملف
+-- ✅ End of File
 -- =====================================================

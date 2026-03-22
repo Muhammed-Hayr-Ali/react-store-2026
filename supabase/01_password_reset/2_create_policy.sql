@@ -1,34 +1,34 @@
--- ملف إنشاء السياسات
+-- Policies Creation File
 
 -- =====================================================
 -- Marketna E-Commerce - Password Reset Tokens Policies
 -- File: 01_password_reset_policies.sql
 -- Version: 1.0
 -- Date: 2026-03-21
--- Description: سياسات الأمان لجدول رموز إعادة التعيين
+-- Description: Security policies for password reset tokens table
 -- Dependencies: public.password_reset_tokens
 -- =====================================================
 
 -- =====================================================
--- 📋 محتويات الملف
+-- 📋 File Contents
 -- =====================================================
--- 1. تفعيل RLS
--- 2. سياسة منع القراءة العامة
--- 3. سياسة الوصول الكامل للخدمة الخلفية
+-- 1. Enable RLS
+-- 2. Prevent public read policy
+-- 3. Backend service full access policy
 -- =====================================================
 
 
 -- =====================================================
--- 1️⃣ تفعيل RLS
+-- 1️⃣ Enable RLS
 -- =====================================================
 
 ALTER TABLE public.password_reset_tokens ENABLE ROW LEVEL SECURITY;
 
 
 -- =====================================================
--- 2️⃣ سياسة منع القراءة العامة تماماً
+-- 2️⃣ Prevent Public Read Policy
 -- =====================================================
--- يمنع أي قراءة من أي مستخدم (حتى المصادقين)
+-- Prevents any read from any user (even authenticated)
 
 DROP POLICY IF EXISTS "password_reset_tokens_no_public_read" ON public.password_reset_tokens;
 CREATE POLICY "password_reset_tokens_no_public_read"
@@ -36,13 +36,13 @@ CREATE POLICY "password_reset_tokens_no_public_read"
   TO authenticated, anon
   USING (false);
 
-COMMENT ON POLICY "password_reset_tokens_no_public_read" ON public.password_reset_tokens IS 'منع أي قراءة عامة - الرموز سرية تماماً';
+COMMENT ON POLICY "password_reset_tokens_no_public_read" ON public.password_reset_tokens IS 'Prevent any public read - tokens are completely secret';
 
 
 -- =====================================================
--- 3️⃣ سياسة الوصول الكامل للخدمة الخلفية
+-- 3️⃣ Backend Service Full Access Policy
 -- =====================================================
--- يسمح فقط للخدمة الخلفية (Service Role) بالوصول الكامل
+-- Allows only backend service (Service Role) full access
 
 DROP POLICY IF EXISTS "password_reset_tokens_service_full_access" ON public.password_reset_tokens;
 CREATE POLICY "password_reset_tokens_service_full_access"
@@ -51,10 +51,9 @@ CREATE POLICY "password_reset_tokens_service_full_access"
   USING (true)
   WITH CHECK (true);
 
-COMMENT ON POLICY "password_reset_tokens_service_full_access" ON public.password_reset_tokens IS 'الخدمة الخلفية فقط لها وصول كامل';
+COMMENT ON POLICY "password_reset_tokens_service_full_access" ON public.password_reset_tokens IS 'Only backend service has full access';
 
 
 -- =====================================================
--- ✅ نهاية الملف
+-- ✅ End of File
 -- =====================================================
-

@@ -1,99 +1,99 @@
-# نظام خطط الاشتراك (Subscription Plans)
+# Subscription Plans System
 
-## 📋 نظرة عامة
+## 📋 Overview
 
-جدول تعريف خطط الاشتراك في منصة Marketna للتجارة الإلكترونية.
+Subscription plans definition table for the Marketna e-commerce platform.
 
-**الإصدار:** 1.0  
-**التاريخ:** 2026-03-21  
-**الاعتماديات:** لا يوجد (ملف مستقل)
-
----
-
-## 📁 محتويات المجلد
-
-| الملف                 | الوصف                       |
-| --------------------- | --------------------------- |
-| `create_table.sql`    | إنشاء جدول الخطط والفهارس   |
-| `create_function.sql` | الدوال (لا يوجد)            |
-| `create_policy.sql`   | سياسات الأمان (RLS)         |
-| `create_data.sql`     | البيانات الافتراضية (8 خطط) |
+**Version:** 1.0
+**Date:** 2026-03-21
+**Dependencies:** None (Standalone file)
 
 ---
 
-## 📊 بنية الجدول
+## 📁 Folder Contents
+
+| File                  | Description                    |
+| --------------------- | ------------------------------ |
+| `create_table.sql`    | Create plans table and indexes |
+| `create_function.sql` | Functions (none)               |
+| `create_policy.sql`   | Security policies (RLS)        |
+| `create_data.sql`     | Default data (8 plans)         |
+
+---
+
+## 📊 Table Schema
 
 ### `public.plans`
 
-| العمود           | النوع         | الوصف                                  |
-| ---------------- | ------------- | -------------------------------------- |
-| `id`             | UUID          | المعرف الفريد للخطة                    |
-| `category`       | plan_category | فئة الخطة (seller, delivery, customer) |
-| `name`           | TEXT          | اسم الخطة                              |
-| `price`          | NUMERIC       | سعر الخطة                              |
-| `billing_period` | TEXT          | فترة الفوترة                           |
-| `permissions`    | JSONB         | صلاحيات الخطة                          |
-| `is_default`     | BOOLEAN       | هل هذه الخطة افتراضية                  |
-| `is_popular`     | BOOLEAN       | هل هذه الخطة شائعة                     |
+| Column           | Type          | Description                                |
+| ---------------- | ------------- | ------------------------------------------ |
+| `id`             | UUID          | Unique identifier for the plan             |
+| `category`       | plan_category | Plan category (seller, delivery, customer) |
+| `name`           | TEXT          | Plan name                                  |
+| `price`          | NUMERIC       | Plan price                                 |
+| `billing_period` | TEXT          | Billing period                             |
+| `permissions`    | JSONB         | Plan permissions                           |
+| `is_default`     | BOOLEAN       | Whether this plan is default               |
+| `is_popular`     | BOOLEAN       | Whether this plan is popular               |
 
 ---
 
-## 🔧 الأنواع المتاحة
+## 🔧 Available Types
 
 ### `plan_category` (ENUM)
 
-| القيمة     | الوصف      |
-| ---------- | ---------- |
-| `seller`   | بائع/متجر  |
-| `delivery` | شريك توصيل |
-| `customer` | عميل       |
+| Value      | Description      |
+| ---------- | ---------------- |
+| `seller`   | Seller/Store     |
+| `delivery` | Delivery Partner |
+| `customer` | Customer         |
 
 ---
 
-## 📋 الخطط الافتراضية
+## 📋 Default Plans
 
-### خطط البائعين (4 خطط)
+### Seller Plans (4 plans)
 
-| الخطة          | السعر  | الفترة   |
-| -------------- | ------ | -------- |
-| البائع المجاني | $0     | lifetime |
-| البائع المبتدئ | $29.99 | yearly   |
-| البائع المحترف | $59.99 | yearly   |
-| البائع المؤسسي | $99.99 | yearly   |
+| Plan                | Price  | Period   |
+| ------------------- | ------ | -------- |
+| Free Seller         | $0     | lifetime |
+| Starter Seller      | $29.99 | yearly   |
+| Professional Seller | $59.99 | yearly   |
+| Enterprise Seller   | $99.99 | yearly   |
 
-### خطط التوصيل (3 خطط)
+### Delivery Plans (3 plans)
 
-| الخطة                | السعر  | الفترة   |
-| -------------------- | ------ | -------- |
-| شريك التوصيل المجاني | $0     | lifetime |
-| شريك التوصيل المبتدئ | $29.99 | yearly   |
-| شريك التوصيل المحترف | $49.99 | yearly   |
+| Plan                          | Price  | Period   |
+| ----------------------------- | ------ | -------- |
+| Free Delivery Partner         | $0     | lifetime |
+| Starter Delivery Partner      | $29.99 | yearly   |
+| Professional Delivery Partner | $49.99 | yearly   |
 
-### خطط العملاء (1 خطة)
+### Customer Plans (1 plan)
 
-| الخطة     | السعر | الفترة   |
-| --------- | ----- | -------- |
-| عضو مجاني | $0    | lifetime |
-
----
-
-## 🔒 سياسات الأمان
-
-- ✅ قراءة عامة لجميع الخطط
-- ✅ المدراء يديرون جميع الخطط
+| Plan        | Price | Period   |
+| ----------- | ----- | -------- |
+| Free Member | $0    | lifetime |
 
 ---
 
-## 📝 طريقة الاستخدام
+## 🔒 Security Policies
+
+- ✅ Public read for all plans
+- ✅ Admins manage all plans
+
+---
+
+## 📝 Usage
 
 ```sql
--- قراءة جميع الخطط
+-- Read all plans
 SELECT * FROM public.plans ORDER BY category, price;
 
--- قراءة خطط فئة معينة
+-- Read plans for a specific category
 SELECT * FROM public.plans WHERE category = 'seller';
 ```
 
 ---
 
-## ✅ نهاية الملف
+## ✅ End of File

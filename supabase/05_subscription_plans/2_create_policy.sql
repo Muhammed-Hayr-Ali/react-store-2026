@@ -1,34 +1,34 @@
--- ملف إنشاء السياسات
+-- Policies Creation File
 
 -- =====================================================
 -- Marketna E-Commerce - Subscription Plans Policies
 -- File: 05_subscriptions_policies.sql
 -- Version: 1.0
 -- Date: 2026-03-21
--- Description: سياسات الأمان لجدول خطط الاشتراك
+-- Description: Security policies for subscription plans table
 -- Dependencies: public.plans
 -- =====================================================
 
 -- =====================================================
--- 📋 محتويات الملف
+-- 📋 File Contents
 -- =====================================================
--- 1. تفعيل RLS
--- 2. سياسة القراءة العامة
--- 3. سياسة الإدارة للمدراء
+-- 1. Enable RLS
+-- 2. Public read policy
+-- 3. Admin management policy
 -- =====================================================
 
 
 -- =====================================================
--- 1️⃣ تفعيل RLS
+-- 1️⃣ Enable RLS
 -- =====================================================
 
 ALTER TABLE public.plans ENABLE ROW LEVEL SECURITY;
 
 
 -- =====================================================
--- 2️⃣ سياسة القراءة العامة
+-- 2️⃣ Public Read Policy
 -- =====================================================
--- قراءة عامة لجميع خطط الاشتراك
+-- Public read for all subscription plans
 
 DROP POLICY IF EXISTS "plans_public_read" ON public.plans;
 CREATE POLICY "plans_public_read"
@@ -36,13 +36,13 @@ CREATE POLICY "plans_public_read"
   TO authenticated, anon
   USING (true);
 
-COMMENT ON POLICY "plans_public_read" ON public.plans IS 'قراءة عامة لجميع الخطط';
+COMMENT ON POLICY "plans_public_read" ON public.plans IS 'Public read for all plans';
 
 
 -- =====================================================
--- 3️⃣ سياسة الإدارة للمدراء
+-- 3️⃣ Admin Management Policy
 -- =====================================================
--- المدراء يديرون جميع الخطط
+-- Admins manage all plans
 
 DROP POLICY IF EXISTS "plans_admin_write" ON public.plans;
 CREATE POLICY "plans_admin_write"
@@ -51,9 +51,9 @@ CREATE POLICY "plans_admin_write"
   USING (true)
   WITH CHECK (true);
 
-COMMENT ON POLICY "plans_admin_write" ON public.plans IS 'المدراء يديرون جميع الخطط';
+COMMENT ON POLICY "plans_admin_write" ON public.plans IS 'Admins manage all plans';
 
 
 -- =====================================================
--- ✅ نهاية الملف
+-- ✅ End of File
 -- =====================================================

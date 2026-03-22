@@ -1,76 +1,76 @@
-# نظام البروفايل (Profiles)
+# Profiles System
 
-## 📋 نظرة عامة
+## 📋 Overview
 
-جدول إدارة بيانات البروفايل للمستخدمين في منصة Marketna للتجارة الإلكترونية.
+User profile management table for the Marketna e-commerce platform.
 
-**الإصدار:** 1.0  
-**التاريخ:** 2026-03-21  
-**الاعتماديات:** لا يوجد (ملف مستقل)
-
----
-
-## 📁 محتويات المجلد
-
-| الملف                 | الوصف                         |
-| --------------------- | ----------------------------- |
-| `create_table.sql`    | إنشاء جدول البروفايل والفهارس |
-| `create_function.sql` | دوال إنشاء وتحديث البروفايل   |
-| `create_policy.sql`   | سياسات الأمان (RLS)           |
-| `create_data.sql`     | البيانات الافتراضية (لا يوجد) |
+**Version:** 1.0
+**Date:** 2026-03-21
+**Dependencies:** None (Standalone file)
 
 ---
 
-## 📊 بنية الجدول
+## 📁 Folder Contents
+
+| File                  | Description                           |
+| --------------------- | ------------------------------------- |
+| `create_table.sql`    | Create profiles table and indexes     |
+| `create_function.sql` | Profile creation and update functions |
+| `create_policy.sql`   | Security policies (RLS)               |
+| `create_data.sql`     | Default data (none)                   |
+
+---
+
+## 📊 Table Schema
 
 ### `public.profiles`
 
-| العمود            | النوع       | الوصف                         |
-| ----------------- | ----------- | ----------------------------- |
-| `id`              | UUID        | المعرف الفريد (من auth.users) |
-| `email`           | TEXT        | البريد الإلكتروني             |
-| `provider`        | TEXT        | مزود المصادقة                 |
-| `first_name`      | TEXT        | الاسم الأول                   |
-| `last_name`       | TEXT        | اسم العائلة                   |
-| `full_name`       | TEXT        | الاسم الكامل (محسوب)          |
-| `phone`           | TEXT        | رقم الهاتف                    |
-| `phone_verified`  | BOOLEAN     | هل تم التحقق من الهاتف        |
-| `avatar_url`      | TEXT        | رابط الصورة الشخصية           |
-| `bio`             | TEXT        | نبذة تعريفية                  |
-| `email_verified`  | BOOLEAN     | هل تم التحقق من البريد        |
-| `created_at`      | TIMESTAMPTZ | تاريخ الإنشاء                 |
-| `updated_at`      | TIMESTAMPTZ | تاريخ آخر تحديث               |
-| `last_sign_in_at` | TIMESTAMPTZ | تاريخ آخر تسجيل دخول          |
+| Column            | Type        | Description                         |
+| ----------------- | ----------- | ----------------------------------- |
+| `id`              | UUID        | Unique identifier (from auth.users) |
+| `email`           | TEXT        | Email address                       |
+| `provider`        | TEXT        | Authentication provider             |
+| `first_name`      | TEXT        | First name                          |
+| `last_name`       | TEXT        | Last name                           |
+| `full_name`       | TEXT        | Full name (computed)                |
+| `phone`           | TEXT        | Phone number                        |
+| `phone_verified`  | BOOLEAN     | Phone verified status               |
+| `avatar_url`      | TEXT        | Profile picture URL                 |
+| `bio`             | TEXT        | Biography                           |
+| `email_verified`  | BOOLEAN     | Email verified status               |
+| `created_at`      | TIMESTAMPTZ | Creation timestamp                  |
+| `updated_at`      | TIMESTAMPTZ | Last update timestamp               |
+| `last_sign_in_at` | TIMESTAMPTZ | Last sign-in timestamp              |
 
 ---
 
-## 🔧 الدوال المتاحة
+## 🔧 Available Functions
 
-| الدالة                | الوصف                     |
-| --------------------- | ------------------------- |
-| `handle_new_user()`   | إنشاء بروفايل عند التسجيل |
-| `handle_user_login()` | تحديث وقت آخر دخول        |
-
----
-
-## 🔒 سياسات الأمان
-
-- ✅ المستخدم يقرأ ملفه الشخصي بالكامل
-- ✅ المستخدم يعدل ملفه الشخصي فقط
-- ✅ قراءة المعلومات العامة للمستخدمين الآخرين
+| Function              | Description              |
+| --------------------- | ------------------------ |
+| `handle_new_user()`   | Create profile on signup |
+| `handle_user_login()` | Update last sign-in time |
 
 ---
 
-## 📝 طريقة الاستخدام
+## 🔒 Security Policies
+
+- ✅ User reads their own full profile
+- ✅ User updates their own profile only
+- ✅ Public information readable for other users
+
+---
+
+## 📝 Usage
 
 ```sql
--- قراءة البروفايل الحالي
+-- Read current profile
 SELECT * FROM public.profiles WHERE id = auth.uid();
 
--- تحديث البروفايل
-UPDATE public.profiles SET first_name = 'أحمد' WHERE id = auth.uid();
+-- Update profile
+UPDATE public.profiles SET first_name = 'John' WHERE id = auth.uid();
 ```
 
 ---
 
-## ✅ نهاية الملف
+## ✅ End of File
