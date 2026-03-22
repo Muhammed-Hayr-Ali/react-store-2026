@@ -53,6 +53,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import { useAuth } from "@/lib/providers/auth-provider"
+import { del, i } from "motion/react-client"
 
 export default function Header() {
   const router = useRouter()
@@ -101,20 +102,7 @@ export default function Header() {
           {/* User Avatar / Menu - Right */}
           <nav className="flex grow-3 items-center justify-end gap-2">
             <div className="hidden items-center lg:flex">
-              {user ? (
-                <UserMenu />
-              ) : (
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="rounded-full px-4 shadow-none"
-                  asChild
-                >
-                  <Link href={appRouter.signIn}>
-                    <span>{t("getStarted")}</span>
-                  </Link>
-                </Button>
-              )}
+              <UserMenu />
             </div>
             {/* Mobile Menu Button */}
             <MenuButton
@@ -308,7 +296,8 @@ function UserMenu() {
   const locale = useLocale()
   const t = useTranslations("Header")
 
-  const { profile, user, signOut } = useAuth()
+  const { profile, user, signOut, isLoading } = useAuth()
+
   const avatar = profile?.avatar_url
   const menuItems = user ? siteConfig.userMenuItems : []
 
@@ -318,27 +307,50 @@ function UserMenu() {
   }
 
   function onSelectChange(nextLocale: string) {
-    redirect(`/${nextLocale}${pathname}`)
+    //redirect(`/${nextLocale}${pathname}`)
+    router.push(`/${nextLocale}${pathname}`)
+    // delay for animation
+    setTimeout(() => {
+      router.refresh()
+    }, 500)
+
   }
 
   function handleThemeChange(theme: string) {
     setTheme(theme)
   }
 
+  if (isLoading) <></>
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar className="size-8">
-          <AvatarImage
-            src={avatar || undefined}
-            alt={profile?.full_name || ""}
-          />
-          <AvatarFallback className="p-1.5">
-            <UserIcon className="size-max text-foreground" />
-          </AvatarFallback>
-        </Avatar>
+        {user ? (
+          <Avatar className="size-8">
+            <AvatarImage
+              src={avatar || undefined}
+              alt={profile?.full_name || ""}
+            />
+            <AvatarFallback className="p-1.5">
+              <UserIcon className="size-max text-foreground" />
+            </AvatarFallback>
+          </Avatar>
+        ) : (
+          <Button
+            variant="default"
+            size="sm"
+            className="rounded-full px-4 shadow-none"
+            asChild
+          >
+            <Link href={appRouter.signIn}>
+              <span>{t("getStarted")}</span>
+            </Link>
+          </Button>
+        )}
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-50" align="start">
+      <DropdownMenuContent
+        className="w-50"
+        align={locale === "ar" ? "start" : "end"}
+      >
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
             <Link href={appRouter.home}>
@@ -421,7 +433,6 @@ function UserMenu() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
 
-     
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
             <Link href={appRouter.home}>
