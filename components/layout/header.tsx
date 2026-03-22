@@ -307,8 +307,7 @@ function UserMenu() {
   }
 
   function onSelectChange(nextLocale: string) {
-    //redirect(`/${nextLocale}${pathname}`)
-    router.push(`/${nextLocale}${pathname}`)
+   redirect(`/${nextLocale}${pathname}`)
     // delay for animation
     setTimeout(() => {
       router.refresh()
