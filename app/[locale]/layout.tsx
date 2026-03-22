@@ -1,6 +1,5 @@
 import "../globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { AuthProvider } from "@/hooks/useAuth"
 import { cn } from "@/lib/utils"
 import { Geist_Mono, Inter, Cairo } from "next/font/google"
 import { NextIntlClientProvider } from "next-intl"
@@ -9,6 +8,7 @@ import { routing } from "@/i18n/routing"
 import { Toaster } from "sonner"
 import { Viewport, Metadata } from "next"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { AuthProvider } from "@/lib/providers/auth-provider"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 

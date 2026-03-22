@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCurrencyContext } from "@/lib/provider/currency-provider";
+import { useCurrencyContext } from "@/lib/providers/currency-provider";
 
 
 
