@@ -16,7 +16,7 @@ import { siteConfig } from "@/lib/config/site_config"
 import Link from "next/link"
 import { appRouter } from "@/lib/app-routes"
 import { useLocale, useTranslations } from "next-intl"
-import { EllipsisVertical, EllipsisVerticalIcon } from "lucide-react"
+import { EllipsisVerticalIcon } from "lucide-react"
 import {
   Accordion,
   AccordionContent,
@@ -53,8 +53,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import { useAuth } from "@/lib/providers/auth-provider"
-import { del, i, u } from "motion/react-client"
-import { ButtonGroup, ButtonGroupSeparator } from "../ui/button-group"
+import { ButtonGroup } from "../ui/button-group"
 
 export default function Header() {
   const router = useRouter()
@@ -352,7 +351,7 @@ function UserMenu() {
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-50"
+        className="w-62"
         align={locale === "ar" ? "start" : "end"}
       >
         <DropdownMenuGroup>
