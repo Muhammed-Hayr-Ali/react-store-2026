@@ -319,7 +319,7 @@ function UserMenu() {
     setTheme(theme)
   }
 
-  if (isLoading) <></>
+  if (isLoading) <div></div>
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
