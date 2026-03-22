@@ -1,1 +1,0 @@
-https://www.svgrepo.com/collection/solar-outline-icons/1

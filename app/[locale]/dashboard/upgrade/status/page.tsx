@@ -1,10 +1,7 @@
-import UpgradeStatus from "@/components/dashboard/upgrade/status"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getTranslations } from "next-intl/server"
+import UpgradeStatus from "@/components/dashboard/upgrade/status"
 
-/**
- * Generates the metadata for the upgrade status page.
- */
 export async function generateMetadata() {
   const t = await getTranslations()
 
@@ -15,9 +12,6 @@ export async function generateMetadata() {
   })
 }
 
-/**
- * A page that displays the upgrade request status.
- */
 export default function Page() {
   return <UpgradeStatus />
 }

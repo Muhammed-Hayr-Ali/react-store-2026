@@ -1,10 +1,7 @@
-import UpgradeSuccess from "@/components/dashboard/upgrade/success"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getTranslations } from "next-intl/server"
+import UpgradeSuccess from "@/components/dashboard/upgrade/success"
 
-/**
- * Generates the metadata for the upgrade success page.
- */
 export async function generateMetadata() {
   const t = await getTranslations()
 
@@ -15,9 +12,6 @@ export async function generateMetadata() {
   })
 }
 
-/**
- * A page that displays the upgrade success message.
- */
 export default function Page() {
   return <UpgradeSuccess />
 }

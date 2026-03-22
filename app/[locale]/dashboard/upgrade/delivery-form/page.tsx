@@ -1,10 +1,7 @@
-import UpgradeDeliveryForm from "@/components/dashboard/upgrade/delivery-form"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getTranslations } from "next-intl/server"
+import DeliveryFormWithPlan from "@/components/dashboard/upgrade/delivery-form"
 
-/**
- * Generates the metadata for the delivery form page.
- */
 export async function generateMetadata() {
   const t = await getTranslations()
 
@@ -15,9 +12,6 @@ export async function generateMetadata() {
   })
 }
 
-/**
- * A page that displays the delivery partner information form.
- */
 export default function Page() {
-  return <UpgradeDeliveryForm />
+  return <DeliveryFormWithPlan />
 }

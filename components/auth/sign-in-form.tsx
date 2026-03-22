@@ -43,7 +43,7 @@ export default function SignInForm({
       const result = await signInWithPassword(data)
 
       if (result.success) {
-        router.push(appRouter.dashboard)
+        router.push(appRouter.home)
         router.refresh()
       } else {
         toast.error(result.error)
