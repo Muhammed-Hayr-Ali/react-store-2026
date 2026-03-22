@@ -1,45 +1,35 @@
 -- =====================================================
--- Marketna E-Commerce - Profiles Functions (Final Fix)
+-- Marketna E-Commerce - Profiles Functions
 -- File: 02_profiles_functions.sql
--- Version: 4.2
+-- Version: 6.0 (Final Production Version)
 -- Date: 2026-03-22
--- Description: Corrected functions based on actual table schema
+-- Description: Profile management functions with permissions and robust error handling
 -- Dependencies: public.profiles, public.roles, public.plans,
---               public.profile_roles, public.profile_plans
+--               public.profile_roles, public.profile_plans, auth.users
 -- =====================================================
 
--- =====================================================
--- 📋 File Contents
--- =====================================================
--- 1. Cleanup (drop old triggers and functions)
--- 2. Create handle_new_user function
--- 3. Create handle_user_login function
--- 4. Create triggers on auth.users
--- =====================================================
-
-
--- =====================================================
 -- 1️⃣ CLEANUP
--- =====================================================
--- Drop triggers first to avoid dependency errors
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-DROP TRIGGER IF EXISTS on_auth_user_login ON auth.users;
+-- ملاحظة: قد تفشل عملية حذف التريجرز إذا لم تكن المالك لجدول auth.users في بعض بيئات Supabase.
+-- لذا نستخدم DO block لتجاوز الأخطاء إذا لم تكن الصلاحيات كافية، مع التركيز على تحديث الدوال.
+DO $$
+BEGIN
+    BEGIN
+        DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+        DROP TRIGGER IF EXISTS on_auth_user_login ON auth.users;
+    EXCEPTION WHEN OTHERS THEN
+        RAISE NOTICE 'Could not drop triggers on auth.users due to permissions. Skipping...';
+    END;
+END $$;
 
--- Drop functions with CASCADE to ensure triggers are removed
+-- حذف الدوال القديمة (هذا آمن دائماً للمالك)
 DROP FUNCTION IF EXISTS public.handle_new_user() CASCADE;
 DROP FUNCTION IF EXISTS public.handle_user_login() CASCADE;
 
 
--- =====================================================
 -- 2️⃣ CREATE FUNCTIONS
--- =====================================================
+-- إنشاء الدوال قبل منح الصلاحيات أو إنشاء التريجرز
 
--- ─────────────────────────────────────────────────────
 -- Function 1: Handle New User Signup
--- ─────────────────────────────────────────────────────
--- Assigns 'customer' role and 'Free Member' plan to new users
--- Links them through profile_roles and profile_plans tables
-
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -47,7 +37,6 @@ DECLARE
   v_free_plan_id UUID;
 BEGIN
   -- الخطوة 1: إنشاء الملف الشخصي (Profile)
-  -- ملاحظة: حقل email في جدول profiles هو NOT NULL
   INSERT INTO public.profiles (
     id,
     email,
@@ -60,7 +49,7 @@ BEGIN
   )
   VALUES (
     NEW.id,
-    COALESCE(NEW.email, ''), -- نضمن عدم كونه NULL لأن الجدول يتطلب قيمة
+    COALESCE(NEW.email, ''), -- الحقل NOT NULL في الجدول
     COALESCE(NEW.raw_app_meta_data->>'provider', 'email'),
     CASE
       WHEN NEW.raw_user_meta_data->>'first_name' IS NOT NULL AND NEW.raw_user_meta_data->>'first_name' <> ''
@@ -92,8 +81,7 @@ BEGIN
     updated_at = NOW();
 
   -- الخطوة 2: تعيين دور 'customer'
-  -- ملاحظة: حقل name في جدول roles هو من نوع USER-DEFINED (Enum)
-  -- يجب التأكد من أن القيمة 'customer' موجودة في الـ Enum الخاص بك
+  -- نحول name إلى text للمقارنة مع USER-DEFINED enum
   SELECT id INTO v_customer_role_id FROM public.roles WHERE name::text = 'customer' LIMIT 1;
   
   IF v_customer_role_id IS NOT NULL THEN
@@ -104,29 +92,20 @@ BEGIN
   END IF;
 
   -- الخطوة 3: تعيين الخطة الافتراضية
-  -- ملاحظة: حقل category في جدول plans هو من نوع USER-DEFINED (Enum)
+  -- نحول category إلى text للمقارنة مع USER-DEFINED enum
   SELECT id INTO v_free_plan_id FROM public.plans 
   WHERE category::text = 'customer' AND is_default = TRUE LIMIT 1;
   
   IF v_free_plan_id IS NOT NULL THEN
     INSERT INTO public.profile_plans (user_id, plan_id, status, start_date, updated_at)
-    VALUES (NEW.id, v_free_plan_id, 'active', NOW(), NOW())
-    -- جدول profile_plans ليس له مفتاح فريد على (user_id, plan_id) بل له id تلقائي
-    -- لذا نكتفي بالإدراج البسيط هنا
-    ;
+    VALUES (NEW.id, v_free_plan_id, 'active', NOW(), NOW());
   END IF;
 
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
-COMMENT ON FUNCTION public.handle_new_user IS 'Create profile with customer role and Free Member plan, linked via profile_roles and profile_plans tables';
-
-
--- ─────────────────────────────────────────────────────
 -- Function 2: Update Last Sign-in
--- ─────────────────────────────────────────────────────
-
 CREATE OR REPLACE FUNCTION public.handle_user_login()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -140,26 +119,41 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
-COMMENT ON FUNCTION public.handle_user_login IS 'Update last sign-in time when user signs in';
+
+-- 3️⃣ GRANT PERMISSIONS
+-- منح الصلاحيات للدوال المنشأة
+GRANT EXECUTE ON FUNCTION public.handle_new_user() TO postgres;
+GRANT EXECUTE ON FUNCTION public.handle_new_user() TO supabase_auth_admin;
+GRANT EXECUTE ON FUNCTION public.handle_user_login() TO postgres;
+GRANT EXECUTE ON FUNCTION public.handle_user_login() TO supabase_auth_admin;
+
+-- منح صلاحيات الوصول للمخطط والجداول لمستخدم المصادقة
+GRANT USAGE ON SCHEMA public TO supabase_auth_admin;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO supabase_auth_admin;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO supabase_auth_admin;
 
 
--- =====================================================
--- 3️⃣ CREATE TRIGGERS
--- =====================================================
+-- 4️⃣ CREATE TRIGGERS
+-- نستخدم DO block لإنشاء التريجرز فقط إذا لم تكن موجودة، لتجنب مشاكل الصلاحيات في الحذف.
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.triggers WHERE trigger_name = 'on_auth_user_created') THEN
+        CREATE TRIGGER on_auth_user_created
+          AFTER INSERT ON auth.users
+          FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+    END IF;
 
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-
-COMMENT ON TRIGGER on_auth_user_created ON auth.users IS 'Automatically creates profile, role, and plan on signup';
-
-CREATE TRIGGER on_auth_user_login
-  AFTER UPDATE OF last_sign_in_at ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_user_login();
-
-COMMENT ON TRIGGER on_auth_user_login ON auth.users IS 'Update last sign-in time when user signs in';
+    IF NOT EXISTS (SELECT 1 FROM information_schema.triggers WHERE trigger_name = 'on_auth_user_login') THEN
+        CREATE TRIGGER on_auth_user_login
+          AFTER UPDATE OF last_sign_in_at ON auth.users
+          FOR EACH ROW EXECUTE FUNCTION public.handle_user_login();
+    END IF;
+EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Could not manage triggers on auth.users. Please ensure you have sufficient permissions or triggers already exist.';
+END $$;
 
 
--- =====================================================
--- ✅ End of File
--- =====================================================
+-- 5️⃣ VERIFY SETUP
+-- استعلامات اختيارية للتأكد من الحالة
+SELECT trigger_name, event_object_table FROM information_schema.triggers WHERE trigger_name IN ('on_auth_user_created', 'on_auth_user_login');
+SELECT routine_name, security_type FROM information_schema.routines WHERE routine_schema = 'public' AND routine_name IN ('handle_new_user', 'handle_user_login');

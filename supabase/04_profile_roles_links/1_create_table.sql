@@ -27,7 +27,7 @@ CREATE TABLE public.profile_roles (
   role_id      UUID NOT NULL REFERENCES public.roles(id) ON DELETE CASCADE,
   is_active    BOOLEAN DEFAULT true,
   granted_at   TIMESTAMPTZ DEFAULT NOW(),
-  granted_by   UUID REFERENCES auth.profiles(id),
+  granted_by    UUID NOT NULL REFERENCES public.profiles(id),
 
   PRIMARY KEY (user_id, role_id)
 );
