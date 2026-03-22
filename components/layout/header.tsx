@@ -12,7 +12,6 @@ import {
   MobileMenuFooter,
   MobileMenuItem,
 } from "@/components/ui/mobile-menu"
-import { useAuth } from "@/hooks/useAuth"
 import { siteConfig } from "@/lib/config/site_config"
 import Link from "next/link"
 import { appRouter } from "@/lib/app-routes"
@@ -39,6 +38,7 @@ import {
   LifeBuoyIcon,
   BookIcon,
 } from "@/components/shared/icons"
+import { useAuth } from "@/lib/providers/auth-provider"
 
 export default function Header() {
   const pathname = usePathname()
