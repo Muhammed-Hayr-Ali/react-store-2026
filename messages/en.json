@@ -172,7 +172,11 @@
     "description": "Enter your email address and we'll send you a link to reset your password",
     "emailSent": "Email sent! Check your inbox",
     "backToSignIn": "Back to Sign In",
-    "sendResetLink": "Send Reset Link"
+    "sendResetLink": "Send Reset Link",
+    "email": "Email Address",
+    "emailPlaceholder": "m@example.com",
+    "emailRequired": "Email is required",
+    "invalidEmail": "Please enter a valid email address"
   },
   "ResetPassword": {
     "title": "Reset Password",
@@ -191,7 +195,18 @@
     "verify": "Verify",
     "backToSignIn": "Back to Sign In",
     "verificationSuccess": "Verification successful",
-    "verificationFailed": "Invalid verification code"
+    "verificationFailed": "Invalid verification code",
+    "setupTitle": "Set Up Two-Factor Authentication",
+    "setupDescription": "Scan the QR code below with your authenticator app",
+    "startSetup": "Start Setup",
+    "skip": "Skip",
+    "verifyDescription": "Enter the 6-digit code from your authenticator app",
+    "secretKey": "Secret Key",
+    "secretKeyDescription": "Can't scan the QR code? Enter this key manually",
+    "verifyAndContinue": "Verify and Continue",
+    "scanQrCodeSuccess": "QR code scanned successfully",
+    "verifyTitle": "Verify Your Code",
+    "verifySuccess": "Verification successful"
   },
   "Verify": {
     "title": "Verify Your Email",

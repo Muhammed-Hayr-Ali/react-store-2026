@@ -172,7 +172,11 @@
     "description": "أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور",
     "emailSent": "تم إرسال البريد! تحقق من صندوق الوارد",
     "backToSignIn": "العودة لتسجيل الدخول",
-    "sendResetLink": "إرسال رابط إعادة التعيين"
+    "sendResetLink": "إرسال رابط إعادة التعيين",
+    "email": "البريد الإلكتروني",
+    "emailPlaceholder": "m@example.com",
+    "emailRequired": "البريد الإلكتروني مطلوب",
+    "invalidEmail": "يرجى إدخال بريد إلكتروني صالح"
   },
   "ResetPassword": {
     "title": "إعادة تعيين كلمة المرور",
@@ -191,7 +195,18 @@
     "verify": "تحقق",
     "backToSignIn": "العودة لتسجيل الدخول",
     "verificationSuccess": "تم التحقق بنجاح",
-    "verificationFailed": "رمز التحقق غير صالح"
+    "verificationFailed": "رمز التحقق غير صالح",
+    "setupTitle": "إعداد المصادقة الثنائية",
+    "setupDescription": "امسح رمز QR أدناه باستخدام تطبيق المصادقة",
+    "startSetup": "بدء الإعداد",
+    "skip": "تخطي",
+    "verifyDescription": "أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة",
+    "secretKey": "المفتاح السري",
+    "secretKeyDescription": "لا يمكنك مسح رمز QR؟ أدخل هذا المفتاح يدوياً",
+    "verifyAndContinue": "تحقق وتابع",
+    "scanQrCodeSuccess": "تم مسح رمز QR بنجاح",
+    "verifyTitle": "تحقق من الرمز",
+    "verifySuccess": "تم التحقق بنجاح"
   },
   "Verify": {
     "title": "تحقق من بريدك الإلكتروني",
