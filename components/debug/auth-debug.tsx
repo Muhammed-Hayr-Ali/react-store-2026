@@ -1,6 +1,7 @@
 "use client"
 
-import { useAuth } from "@/hooks/useAuth"
+import { useAuth } from "@/lib/providers/auth-provider"
+
 
 /**
  * Component for debugging auth state
