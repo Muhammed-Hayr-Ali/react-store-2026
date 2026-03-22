@@ -36,8 +36,8 @@ import { useLocale } from "next-intl"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { siteConfig } from "@/lib/config/site_config"
-import { useAuth } from "@/hooks/useAuth"
 import { UserIcon } from "@/components/shared/icons"
+import { useAuth } from "@/lib/providers/auth-provider"
 
 export default function UserButtonClient() {
   const { user } = useAuth()
