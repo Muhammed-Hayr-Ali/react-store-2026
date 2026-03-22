@@ -43,9 +43,6 @@ export default function ComingSoonPage() {
       <Button variant="outline" disabled className="text-xs md:text-sm">
         {t("footer")}
       </Button>
-
-
-      <LocaleSwitcher/>
     </div>
   )
 }

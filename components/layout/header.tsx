@@ -37,6 +37,7 @@ import {
   CheckIcon,
   LifeBuoyIcon,
   BookIcon,
+  ThemeModeIcon,
 } from "@/components/shared/icons"
 import { useAuth } from "@/lib/providers/auth-provider"
 
@@ -169,8 +170,11 @@ export default function Header() {
           <Accordion type="single" collapsible defaultValue="item-2">
             <AccordionItem value="item-1">
               <AccordionTrigger className="p-0">
-                <MobileMenuItem key="language" className="w-auto">
-                  <GlobeIcon className="mr-2 h-4 w-4" />
+                <MobileMenuItem
+                  key="support"
+                  icon={GlobeIcon}
+                  className="w-auto"
+                >
                   {t("menuItems.language")}
                 </MobileMenuItem>
               </AccordionTrigger>
@@ -201,14 +205,13 @@ export default function Header() {
 
           <Accordion type="single" collapsible defaultValue="item-3">
             <AccordionItem value="item-1">
-              <AccordionTrigger className="p-0" suppressHydrationWarning>
-                <MobileMenuItem key="theme" className="w-auto">
-                  {theme === "light" && <SunIcon className="mr-2 h-4 w-4" />}
-                  {theme === "dark" && <MoonIcon className="mr-2 h-4 w-4" />}
-                  {theme === "system" && (
-                    <MonitorIcon className="mr-2 h-4 w-4" />
-                  )}
-
+              <AccordionTrigger className="p-0">
+                <MobileMenuItem
+                  key="support"
+                  icon={ThemeModeIcon}
+                  className="w-auto"
+                  suppressHydrationWarning
+                >
                   {t("menuItems.theme")}
                 </MobileMenuItem>
               </AccordionTrigger>

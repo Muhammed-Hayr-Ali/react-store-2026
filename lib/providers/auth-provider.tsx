@@ -118,18 +118,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           // ✅ SECURE: Uses get_my_complete_data() - no user_id parameter
           // This function internally uses auth.uid() for security
+          console.log(
+            `[AuthProvider] Calling get_my_complete_data() - attempt ${attempt}`
+          )
           const { data, error } = await supabase.rpc("get_my_complete_data")
 
-          if (error || !data) {
-            console.warn(
-              `[AuthProvider] Fetch attempt ${attempt} failed:`,
-              error
+          if (error) {
+            console.error(
+              `[AuthProvider] RPC Error (attempt ${attempt}):`,
+              JSON.stringify(error, null, 2)
             )
+          }
+
+          if (error || !data || (Array.isArray(data) && data.length === 0)) {
+            console.warn(`[AuthProvider] Fetch attempt ${attempt} failed:`, {
+              error: error ?? "No error object",
+              hasData: !!data,
+              dataLength: Array.isArray(data) ? data.length : "N/A",
+            })
 
             if (attempt === PROFILE_FETCH_RETRIES) {
               console.error(
                 "[AuthProvider] Error fetching profile after retries:",
-                error
+                {
+                  error,
+                  message:
+                    "RPC function may not exist or RLS policy blocks access",
+                  hint: "Run the SQL file in Supabase SQL Editor: supabase/02_profiles/user_data_functions_secure/user_data_functions_secure.sql",
+                }
               )
               return null
             }
@@ -137,43 +153,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             continue
           }
 
+          // ⚠️ RPC returns TABLE (array), get first row
+          const rpcResult = Array.isArray(data) ? data[0] : data
+
+          if (!rpcResult) {
+            console.warn(`[AuthProvider] No data in RPC response`)
+            if (attempt === PROFILE_FETCH_RETRIES) {
+              return null
+            }
+            await delay(PROFILE_FETCH_RETRY_DELAY * attempt)
+            continue
+          }
+
+          console.log(
+            `[AuthProvider] RPC response received for user:`,
+            rpcResult.user_id
+          )
+
           // Transform RPC response to Profile type
           const profileData: Profile = {
             // Basic fields
-            user_id: data.user_id,
-            email: data.email,
-            provider: data.provider,
-            first_name: data.first_name,
-            last_name: data.last_name,
-            full_name: data.full_name,
-            phone: data.phone,
-            phone_verified: data.phone_verified,
-            avatar_url: data.avatar_url,
-            bio: data.bio,
-            email_verified: data.email_verified,
-            created_at: data.created_at,
-            updated_at: data.updated_at,
-            last_sign_in_at: data.last_sign_in_at,
+            user_id: rpcResult.user_id,
+            email: rpcResult.email,
+            provider: rpcResult.provider,
+            first_name: rpcResult.first_name,
+            last_name: rpcResult.last_name,
+            full_name: rpcResult.full_name,
+            phone: rpcResult.phone,
+            phone_verified: rpcResult.phone_verified,
+            avatar_url: rpcResult.avatar_url,
+            bio: rpcResult.bio,
+            email_verified: rpcResult.email_verified,
+            created_at: rpcResult.created_at,
+            updated_at: rpcResult.updated_at,
+            last_sign_in_at: rpcResult.last_sign_in_at,
 
             // Roles - parse JSONB
-            roles: (data.roles as RoleInfo[]) || [],
-            role_names: data.role_names || [],
-            role_permissions: (data.role_permissions as string[]) || [],
+            roles: (rpcResult.roles as RoleInfo[]) || [],
+            role_names: rpcResult.role_names || [],
+            role_permissions: (rpcResult.role_permissions as string[]) || [],
 
             // Plans - parse JSONB
-            plans: (data.plans as PlanInfo[]) || [],
-            active_plan_name: data.active_plan_name,
-            active_plan_status: data.active_plan_status,
+            plans: (rpcResult.plans as PlanInfo[]) || [],
+            active_plan_name: rpcResult.active_plan_name,
+            active_plan_status: rpcResult.active_plan_status,
             plan_permissions:
-              (data.plan_permissions as Record<string, boolean>) || {},
+              (rpcResult.plan_permissions as Record<string, boolean>) || {},
 
             // Combined permissions
-            all_permissions: (data.all_permissions as string[]) || [],
+            all_permissions: (rpcResult.all_permissions as string[]) || [],
 
             // Setup status
-            has_active_role: data.has_active_role,
-            has_active_plan: data.has_active_plan,
-            is_fully_setup: data.is_fully_setup,
+            has_active_role: rpcResult.has_active_role,
+            has_active_plan: rpcResult.has_active_plan,
+            is_fully_setup: rpcResult.is_fully_setup,
           }
 
           return profileData

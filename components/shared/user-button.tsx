@@ -133,15 +133,15 @@ export const UserButton = () => {
                     onValueChange={setTheme}
                   >
                     <DropdownMenuRadioItem value="light" className="text-xs">
-                      <SunIcon />
+                      <SunIcon className="size-4" />
                       Light
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="dark" className="text-xs">
-                      <MoonIcon />
+                      <MoonIcon className="size-4" />
                       Dark
                     </DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="system" className="text-xs">
-                      <MonitorIcon />
+                      <MonitorIcon className="size-4" />
                       System
                     </DropdownMenuRadioItem>
                   </DropdownMenuRadioGroup>

@@ -22,6 +22,7 @@
 -- =====================================================
 -- ⚠️ SECURITY: No user_id parameter - uses auth.uid() internally
 -- This prevents users from accessing other users' data
+-- Returns: Profile + Roles + Plans + Permissions
 
 CREATE OR REPLACE FUNCTION public.get_my_complete_data()
 RETURNS TABLE (
@@ -40,31 +41,43 @@ RETURNS TABLE (
   created_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ,
   last_sign_in_at TIMESTAMPTZ,
-  
+
   -- Roles Information
-  roles JSONB,
-  role_names TEXT[],
-  role_permissions JSONB,
-  
+  roles JSONB,              -- Full role objects with details
+  role_names TEXT[],        -- Array of role names
+  role_permissions JSONB,   -- All permissions from roles
+
   -- Plans Information
-  plans JSONB,
-  active_plan_name TEXT,
-  active_plan_status TEXT,
-  plan_permissions JSONB,
-  
+  plans JSONB,              -- Full plan objects with details
+  active_plan_name TEXT,    -- Name of active plan
+  active_plan_status TEXT,  -- Status (active/trial)
+  plan_permissions JSONB,   -- All permissions from plans
+
   -- Combined Permissions
-  all_permissions JSONB,
-  
+  all_permissions JSONB,    -- Union of role + plan permissions
+
   -- Metadata
   has_active_role BOOLEAN,
   has_active_plan BOOLEAN,
   is_fully_setup BOOLEAN
 ) AS $$
+DECLARE
+  v_user_id UUID;
 BEGIN
+  -- Get current user ID
+  v_user_id := auth.uid();
+  
+  -- Security check: ensure user is authenticated
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'Authentication required';
+  END IF;
+
   -- ⚠️ SECURITY: Only return data for the authenticated user
   RETURN QUERY
   SELECT
+    -- =============================================
     -- Profile Information
+    -- =============================================
     p.id AS user_id,
     p.email,
     p.provider,
@@ -79,14 +92,17 @@ BEGIN
     p.created_at,
     p.updated_at,
     p.last_sign_in_at,
-    
+
+    -- =============================================
     -- Roles Information
+    -- =============================================
+    -- Full role objects with all details
     COALESCE(
       (
         SELECT jsonb_agg(
           jsonb_build_object(
             'role_id', r.id,
-            'role_name', r.name,
+            'role_name', r.name::TEXT,
             'description', r.description,
             'permissions', r.permissions,
             'is_active', pr.is_active,
@@ -94,42 +110,47 @@ BEGIN
           )
         )
         FROM public.profile_roles pr
-        JOIN public.roles r ON r.id = pr.role_id
+        INNER JOIN public.roles r ON r.id = pr.role_id
         WHERE pr.user_id = p.id AND pr.is_active = TRUE
       ),
       '[]'::jsonb
     ) AS roles,
-    
+
+    -- Array of role names (cast to TEXT)
     COALESCE(
       (
-        SELECT array_agg(r.name)
+        SELECT array_agg(DISTINCT r.name::TEXT)
         FROM public.profile_roles pr
-        JOIN public.roles r ON r.id = pr.role_id
+        INNER JOIN public.roles r ON r.id = pr.role_id
         WHERE pr.user_id = p.id AND pr.is_active = TRUE
       ),
       ARRAY[]::TEXT[]
     ) AS role_names,
-    
+
+    -- All permissions from roles (distinct)
     COALESCE(
       (
-        SELECT jsonb_agg(DISTINCT perm)
+        SELECT jsonb_agg(DISTINCT perm) FILTER (WHERE perm IS NOT NULL)
         FROM public.profile_roles pr
-        JOIN public.roles r ON r.id = pr.role_id,
-        jsonb_array_elements(r.permissions) AS perm
+        INNER JOIN public.roles r ON r.id = pr.role_id,
+        jsonb_array_elements_text(r.permissions) AS perm
         WHERE pr.user_id = p.id AND pr.is_active = TRUE
       ),
       '[]'::jsonb
     ) AS role_permissions,
-    
+
+    -- =============================================
     -- Plans Information
+    -- =============================================
+    -- Full plan objects with all details
     COALESCE(
       (
         SELECT jsonb_agg(
           jsonb_build_object(
             'plan_id', pl.id,
             'plan_name', pl.name,
-            'category', pl.category,
-            'price', pl.price,
+            'category', pl.category::TEXT,
+            'price', pl.price::NUMERIC,
             'billing_period', pl.billing_period,
             'permissions', pl.permissions,
             'status', pp.status,
@@ -139,73 +160,84 @@ BEGIN
           )
         )
         FROM public.profile_plans pp
-        JOIN public.plans pl ON pl.id = pp.plan_id
+        INNER JOIN public.plans pl ON pl.id = pp.plan_id
         WHERE pp.user_id = p.id AND pp.status IN ('active', 'trial')
       ),
       '[]'::jsonb
     ) AS plans,
-    
+
+    -- Name of the active plan (priority: active > trial)
     (
       SELECT pl.name
       FROM public.profile_plans pp
-      JOIN public.plans pl ON pl.id = pp.plan_id
+      INNER JOIN public.plans pl ON pl.id = pp.plan_id
       WHERE pp.user_id = p.id AND pp.status = 'active'
       LIMIT 1
     ) AS active_plan_name,
-    
+
+    -- Status of the active plan
     (
       SELECT pp.status
       FROM public.profile_plans pp
       WHERE pp.user_id = p.id AND pp.status IN ('active', 'trial')
       LIMIT 1
     ) AS active_plan_status,
-    
+
+    -- All permissions from plans (where value = true)
     COALESCE(
       (
         SELECT jsonb_object_agg(key, value)
         FROM public.profile_plans pp
-        JOIN public.plans pl ON pl.id = pp.plan_id,
+        INNER JOIN public.plans pl ON pl.id = pp.plan_id,
         jsonb_each(pl.permissions) AS perm(key, value)
-        WHERE pp.user_id = p.id 
+        WHERE pp.user_id = p.id
           AND pp.status IN ('active', 'trial')
-          AND perm.value = true
+          AND (perm.value)::boolean = TRUE
       ),
       '{}'::jsonb
     ) AS plan_permissions,
-    
-    -- All Combined Permissions
+
+    -- =============================================
+    -- Combined Permissions (Roles + Plans)
+    -- =============================================
     COALESCE(
       (
-        SELECT jsonb_agg(DISTINCT perm)
+        SELECT jsonb_agg(DISTINCT perm) FILTER (WHERE perm IS NOT NULL)
         FROM (
-          SELECT jsonb_array_elements(r.permissions) AS perm
+          -- Permissions from roles
+          SELECT jsonb_array_elements_text(r.permissions) AS perm
           FROM public.profile_roles pr
-          JOIN public.roles r ON r.id = pr.role_id
+          INNER JOIN public.roles r ON r.id = pr.role_id
           WHERE pr.user_id = p.id AND pr.is_active = TRUE
+          
           UNION
+          
+          -- Permissions from plans (where value = true)
           SELECT key AS perm
           FROM public.profile_plans pp
-          JOIN public.plans pl ON pl.id = pp.plan_id,
+          INNER JOIN public.plans pl ON pl.id = pp.plan_id,
           jsonb_each(pl.permissions) AS perm(key, value)
-          WHERE pp.user_id = p.id 
+          WHERE pp.user_id = p.id
             AND pp.status IN ('active', 'trial')
-            AND perm.value = true
+            AND (perm.value)::boolean = TRUE
         ) AS all_perms
       ),
       '[]'::jsonb
     ) AS all_permissions,
-    
-    -- Metadata
+
+    -- =============================================
+    -- Metadata / Setup Status
+    -- =============================================
     EXISTS (
       SELECT 1 FROM public.profile_roles pr
       WHERE pr.user_id = p.id AND pr.is_active = TRUE
     ) AS has_active_role,
-    
+
     EXISTS (
       SELECT 1 FROM public.profile_plans pp
       WHERE pp.user_id = p.id AND pp.status IN ('active', 'trial')
     ) AS has_active_plan,
-    
+
     (
       EXISTS (SELECT 1 FROM public.profiles WHERE id = p.id)
       AND EXISTS (
@@ -217,48 +249,58 @@ BEGIN
         WHERE pp.user_id = p.id AND pp.status IN ('active', 'trial')
       )
     ) AS is_fully_setup
-    
+
   FROM public.profiles p
-  WHERE p.id = auth.uid();  -- ⚠️ SECURITY: Only current user
+  WHERE p.id = v_user_id;  -- ⚠️ SECURITY: Only current user
 END;
 $$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public;
 
-COMMENT ON FUNCTION public.get_my_complete_data IS 'جلب بيانات المستخدم الحالي فقط (آمن - يستخدم auth.uid())';
+COMMENT ON FUNCTION public.get_my_complete_data IS 'جلب بيانات المستخدم الحالي فقط (آمن - يستخدم auth.uid()) - ملف شخصي + أدوار + خطط + صلاحيات';
 
 
 -- =====================================================
 -- 2️⃣ Get Current User Permissions (SECURE)
 -- =====================================================
 -- ⚠️ SECURITY: No user_id parameter - uses auth.uid() internally
+-- Returns: All permissions from roles + plans (where value = true)
 
 CREATE OR REPLACE FUNCTION public.get_my_permissions()
 RETURNS JSONB AS $$
 DECLARE
   v_permissions JSONB;
+  v_user_id UUID;
 BEGIN
-  SELECT jsonb_agg(DISTINCT perm) INTO v_permissions
+  v_user_id := auth.uid();
+  
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'Authentication required';
+  END IF;
+
+  SELECT jsonb_agg(DISTINCT perm) FILTER (WHERE perm IS NOT NULL) INTO v_permissions
   FROM (
-    SELECT jsonb_array_elements(r.permissions) AS perm
+    -- Permissions from roles
+    SELECT jsonb_array_elements_text(r.permissions) AS perm
     FROM public.profile_roles pr
-    JOIN public.roles r ON r.id = pr.role_id
-    WHERE pr.user_id = auth.uid() AND pr.is_active = TRUE
-    
+    INNER JOIN public.roles r ON r.id = pr.role_id
+    WHERE pr.user_id = v_user_id AND pr.is_active = TRUE
+
     UNION
-    
+
+    -- Permissions from plans (where value = true)
     SELECT key AS perm
     FROM public.profile_plans pp
-    JOIN public.plans pl ON pl.id = pp.plan_id,
+    INNER JOIN public.plans pl ON pl.id = pp.plan_id,
     jsonb_each(pl.permissions) AS perm(key, value)
-    WHERE pp.user_id = auth.uid() 
+    WHERE pp.user_id = v_user_id
       AND pp.status IN ('active', 'trial')
-      AND perm.value = true
+      AND (perm.value)::boolean = TRUE
   ) AS all_perms;
-  
+
   RETURN COALESCE(v_permissions, '[]'::jsonb);
 END;
 $$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public;
 
-COMMENT ON FUNCTION public.get_my_permissions IS 'جلب صلاحيات المستخدم الحالي فقط (آمن)';
+COMMENT ON FUNCTION public.get_my_permissions IS 'جلب صلاحيات المستخدم الحالي فقط (آمن) - من الأدوار والخطط';
 
 
 -- =====================================================
@@ -287,6 +329,7 @@ COMMENT ON FUNCTION public.do_i_have_permission IS 'التحقق من صلاحي
 -- 4️⃣ Get Current User Setup Status (SECURE)
 -- =====================================================
 -- ⚠️ SECURITY: No user_id parameter - uses auth.uid() internally
+-- Returns: Setup status with missing components
 
 CREATE OR REPLACE FUNCTION public.get_my_setup_status()
 RETURNS TABLE (
@@ -300,87 +343,104 @@ RETURNS TABLE (
   missing_components TEXT[],
   message TEXT
 ) AS $$
+DECLARE
+  v_user_id UUID;
 BEGIN
+  v_user_id := auth.uid();
+  
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'Authentication required';
+  END IF;
+
   RETURN QUERY
   SELECT
-    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid()) AS has_profile,
-    
+    -- Profile exists
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = v_user_id) AS has_profile,
+
+    -- Has active role
     EXISTS (
       SELECT 1 FROM public.profile_roles pr
-      WHERE pr.user_id = auth.uid() AND pr.is_active = TRUE
+      WHERE pr.user_id = v_user_id AND pr.is_active = TRUE
     ) AS has_active_role,
-    
+
+    -- Array of active role names
     COALESCE(
       (
-        SELECT array_agg(r.name)
+        SELECT array_agg(DISTINCT r.name::TEXT)
         FROM public.profile_roles pr
-        JOIN public.roles r ON r.id = pr.role_id
-        WHERE pr.user_id = auth.uid() AND pr.is_active = TRUE
+        INNER JOIN public.roles r ON r.id = pr.role_id
+        WHERE pr.user_id = v_user_id AND pr.is_active = TRUE
       ),
       ARRAY[]::TEXT[]
     ) AS active_roles,
-    
+
+    -- Has active plan
     EXISTS (
       SELECT 1 FROM public.profile_plans pp
-      WHERE pp.user_id = auth.uid() AND pp.status IN ('active', 'trial')
+      WHERE pp.user_id = v_user_id AND pp.status IN ('active', 'trial')
     ) AS has_active_plan,
-    
+
+    -- Active plan name
     (
       SELECT pl.name
       FROM public.profile_plans pp
-      JOIN public.plans pl ON pl.id = pp.plan_id
-      WHERE pp.user_id = auth.uid() AND pp.status = 'active'
+      INNER JOIN public.plans pl ON pl.id = pp.plan_id
+      WHERE pp.user_id = v_user_id AND pp.status = 'active'
       LIMIT 1
     ) AS active_plan_name,
-    
+
+    -- Active plan status
     (
       SELECT pp.status
       FROM public.profile_plans pp
-      WHERE pp.user_id = auth.uid() AND pp.status IN ('active', 'trial')
+      WHERE pp.user_id = v_user_id AND pp.status IN ('active', 'trial')
       LIMIT 1
     ) AS active_plan_status,
-    
+
+    -- Is fully setup (profile + role + plan)
     (
-      EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid())
+      EXISTS (SELECT 1 FROM public.profiles WHERE id = v_user_id)
       AND EXISTS (
         SELECT 1 FROM public.profile_roles pr
-        WHERE pr.user_id = auth.uid() AND pr.is_active = TRUE
+        WHERE pr.user_id = v_user_id AND pr.is_active = TRUE
       )
       AND EXISTS (
         SELECT 1 FROM public.profile_plans pp
-        WHERE pp.user_id = auth.uid() AND pp.status IN ('active', 'trial')
+        WHERE pp.user_id = v_user_id AND pp.status IN ('active', 'trial')
       )
     ) AS is_fully_setup,
-    
+
+    -- Missing components array
     (
       SELECT array_agg(component)
       FROM (
         SELECT 'profile' AS component
-        WHERE NOT EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid())
+        WHERE NOT EXISTS (SELECT 1 FROM public.profiles WHERE id = v_user_id)
         UNION ALL
         SELECT 'role' AS component
         WHERE NOT EXISTS (
           SELECT 1 FROM public.profile_roles pr
-          WHERE pr.user_id = auth.uid() AND pr.is_active = TRUE
+          WHERE pr.user_id = v_user_id AND pr.is_active = TRUE
         )
         UNION ALL
         SELECT 'plan' AS component
         WHERE NOT EXISTS (
           SELECT 1 FROM public.profile_plans pp
-          WHERE pp.user_id = auth.uid() AND pp.status IN ('active', 'trial')
+          WHERE pp.user_id = v_user_id AND pp.status IN ('active', 'trial')
         )
       ) AS missing
     ) AS missing_components,
-    
+
+    -- Human-readable message
     CASE
-      WHEN EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid())
+      WHEN EXISTS (SELECT 1 FROM public.profiles WHERE id = v_user_id)
         AND EXISTS (
           SELECT 1 FROM public.profile_roles pr
-          WHERE pr.user_id = auth.uid() AND pr.is_active = TRUE
+          WHERE pr.user_id = v_user_id AND pr.is_active = TRUE
         )
         AND EXISTS (
           SELECT 1 FROM public.profile_plans pp
-          WHERE pp.user_id = auth.uid() AND pp.status IN ('active', 'trial')
+          WHERE pp.user_id = v_user_id AND pp.status IN ('active', 'trial')
         )
       THEN 'إعداد كامل - جميع المكونات موجودة'
       ELSE 'إعداد ناقص - توجد مكونات مفقودة'
@@ -388,7 +448,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public;
 
-COMMENT ON FUNCTION public.get_my_setup_status IS 'التحقق من حالة إعداد المستخدم الحالي (آمن)';
+COMMENT ON FUNCTION public.get_my_setup_status IS 'التحقق من حالة إعداد المستخدم الحالي (آمن) - ملف شخصي + أدوار + خطط';
 
 
 -- =====================================================
@@ -425,22 +485,32 @@ RETURNS TABLE (
   has_active_plan BOOLEAN,
   is_fully_setup BOOLEAN
 ) AS $$
+DECLARE
+  v_caller_id UUID;
 BEGIN
+  v_caller_id := auth.uid();
+  
+  -- Security check: ensure user is authenticated
+  IF v_caller_id IS NULL THEN
+    RAISE EXCEPTION 'Authentication required';
+  END IF;
+
   -- ⚠️ SECURITY: Check if caller is admin first
   IF NOT EXISTS (
-    SELECT 1 
+    SELECT 1
     FROM public.profile_roles pr
-    JOIN public.roles r ON r.id = pr.role_id
-    WHERE pr.user_id = auth.uid()
-      AND r.name = 'admin'
+    INNER JOIN public.roles r ON r.id = pr.role_id
+    WHERE pr.user_id = v_caller_id
+      AND r.name::TEXT = 'admin'
       AND pr.is_active = TRUE
   ) THEN
     RAISE EXCEPTION 'Access denied: Admin role required';
   END IF;
-  
+
   -- Return data for target user (only if caller is admin)
   RETURN QUERY
   SELECT
+    -- Profile Information
     p.id AS user_id,
     p.email,
     p.provider,
@@ -455,36 +525,107 @@ BEGIN
     p.created_at,
     p.updated_at,
     p.last_sign_in_at,
+    
+    -- Roles Information
     COALESCE(
-      (SELECT jsonb_agg(jsonb_build_object('role_id', r.id, 'role_name', r.name, 'permissions', r.permissions))
-       FROM public.profile_roles pr JOIN public.roles r ON r.id = pr.role_id
+      (SELECT jsonb_agg(jsonb_build_object(
+          'role_id', r.id,
+          'role_name', r.name::TEXT,
+          'description', r.description,
+          'permissions', r.permissions,
+          'is_active', pr.is_active,
+          'granted_at', pr.granted_at
+        ))
+       FROM public.profile_roles pr
+       INNER JOIN public.roles r ON r.id = pr.role_id
        WHERE pr.user_id = p.id AND pr.is_active = TRUE),
       '[]'::jsonb
     ) AS roles,
-    COALESCE((SELECT array_agg(r.name) FROM public.profile_roles pr JOIN public.roles r ON r.id = pr.role_id
-              WHERE pr.user_id = p.id AND pr.is_active = TRUE), ARRAY[]::TEXT[]) AS role_names,
-    COALESCE((SELECT jsonb_agg(DISTINCT perm) FROM public.profile_roles pr JOIN public.roles r ON r.id = pr.role_id,
-              jsonb_array_elements(r.permissions) AS perm WHERE pr.user_id = p.id AND pr.is_active = TRUE), '[]'::jsonb) AS role_permissions,
-    COALESCE((SELECT jsonb_agg(jsonb_build_object('plan_id', pl.id, 'plan_name', pl.name, 'status', pp.status))
-              FROM public.profile_plans pp JOIN public.plans pl ON pl.id = pp.plan_id
-              WHERE pp.user_id = p.id AND pp.status IN ('active', 'trial')), '[]'::jsonb) AS plans,
-    (SELECT pl.name FROM public.profile_plans pp JOIN public.plans pl ON pl.id = pp.plan_id
-     WHERE pp.user_id = p.id AND pp.status = 'active' LIMIT 1) AS active_plan_name,
-    (SELECT pp.status FROM public.profile_plans pp WHERE pp.user_id = p.id AND pp.status IN ('active', 'trial') LIMIT 1) AS active_plan_status,
-    COALESCE((SELECT jsonb_object_agg(key, value) FROM public.profile_plans pp JOIN public.plans pl ON pl.id = pp.plan_id,
-              jsonb_each(pl.permissions) AS perm(key, value) WHERE pp.user_id = p.id AND pp.status IN ('active', 'trial')), '{}'::jsonb) AS plan_permissions,
-    COALESCE((SELECT jsonb_agg(DISTINCT perm) FROM (
-      SELECT jsonb_array_elements(r.permissions) AS perm FROM public.profile_roles pr JOIN public.roles r ON r.id = pr.role_id
-      WHERE pr.user_id = p.id AND pr.is_active = TRUE
-      UNION SELECT key AS perm FROM public.profile_plans pp JOIN public.plans pl ON pl.id = pp.plan_id,
-      jsonb_each(pl.permissions) AS perm(key, value) WHERE pp.user_id = p.id AND pp.status IN ('active', 'trial')
-    ) AS all_perms), '[]'::jsonb) AS all_permissions,
+    
+    COALESCE(
+      (SELECT array_agg(DISTINCT r.name::TEXT)
+       FROM public.profile_roles pr
+       INNER JOIN public.roles r ON r.id = pr.role_id
+       WHERE pr.user_id = p.id AND pr.is_active = TRUE),
+      ARRAY[]::TEXT[]
+    ) AS role_names,
+    
+    COALESCE(
+      (SELECT jsonb_agg(DISTINCT perm) FILTER (WHERE perm IS NOT NULL)
+       FROM public.profile_roles pr
+       INNER JOIN public.roles r ON r.id = pr.role_id,
+       jsonb_array_elements_text(r.permissions) AS perm
+       WHERE pr.user_id = p.id AND pr.is_active = TRUE),
+      '[]'::jsonb
+    ) AS role_permissions,
+    
+    -- Plans Information
+    COALESCE(
+      (SELECT jsonb_agg(jsonb_build_object(
+          'plan_id', pl.id,
+          'plan_name', pl.name,
+          'category', pl.category::TEXT,
+          'price', pl.price::NUMERIC,
+          'billing_period', pl.billing_period,
+          'permissions', pl.permissions,
+          'status', pp.status,
+          'start_date', pp.start_date,
+          'end_date', pp.end_date,
+          'trial_end_date', pp.trial_end_date
+        ))
+       FROM public.profile_plans pp
+       INNER JOIN public.plans pl ON pl.id = pp.plan_id
+       WHERE pp.user_id = p.id AND pp.status IN ('active', 'trial')),
+      '[]'::jsonb
+    ) AS plans,
+    
+    (SELECT pl.name
+     FROM public.profile_plans pp
+     INNER JOIN public.plans pl ON pl.id = pp.plan_id
+     WHERE pp.user_id = p.id AND pp.status = 'active'
+     LIMIT 1) AS active_plan_name,
+     
+    (SELECT pp.status
+     FROM public.profile_plans pp
+     WHERE pp.user_id = p.id AND pp.status IN ('active', 'trial')
+     LIMIT 1) AS active_plan_status,
+     
+    COALESCE(
+      (SELECT jsonb_object_agg(key, value)
+       FROM public.profile_plans pp
+       INNER JOIN public.plans pl ON pl.id = pp.plan_id,
+       jsonb_each(pl.permissions) AS perm(key, value)
+       WHERE pp.user_id = p.id AND pp.status IN ('active', 'trial')
+       AND (perm.value)::boolean = TRUE),
+      '{}'::jsonb
+    ) AS plan_permissions,
+    
+    COALESCE(
+      (SELECT jsonb_agg(DISTINCT perm) FILTER (WHERE perm IS NOT NULL)
+       FROM (
+         SELECT jsonb_array_elements_text(r.permissions) AS perm
+         FROM public.profile_roles pr
+         INNER JOIN public.roles r ON r.id = pr.role_id
+         WHERE pr.user_id = p.id AND pr.is_active = TRUE
+         UNION
+         SELECT key AS perm
+         FROM public.profile_plans pp
+         INNER JOIN public.plans pl ON pl.id = pp.plan_id,
+         jsonb_each(pl.permissions) AS perm(key, value)
+         WHERE pp.user_id = p.id AND pp.status IN ('active', 'trial')
+         AND (perm.value)::boolean = TRUE
+       ) AS all_perms),
+      '[]'::jsonb
+    ) AS all_permissions,
+    
+    -- Metadata
     EXISTS (SELECT 1 FROM public.profile_roles pr WHERE pr.user_id = p.id AND pr.is_active = TRUE) AS has_active_role,
     EXISTS (SELECT 1 FROM public.profile_plans pp WHERE pp.user_id = p.id AND pp.status IN ('active', 'trial')) AS has_active_plan,
     (EXISTS (SELECT 1 FROM public.profiles WHERE id = p.id)
      AND EXISTS (SELECT 1 FROM public.profile_roles pr WHERE pr.user_id = p.id AND pr.is_active = TRUE)
      AND EXISTS (SELECT 1 FROM public.profile_plans pp WHERE pp.user_id = p.id AND pp.status IN ('active', 'trial'))
     ) AS is_fully_setup
+    
   FROM public.profiles p
   WHERE p.id = p_target_user_id;
 END;

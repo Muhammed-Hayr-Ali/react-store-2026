@@ -9,6 +9,7 @@ import { Toaster } from "sonner"
 import { Viewport, Metadata } from "next"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { AuthProvider } from "@/lib/providers/auth-provider"
+import { AuthDebug } from "@/components/debug/auth-debug"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
@@ -63,14 +64,17 @@ export default async function RootLayout({
       )}
     >
       <body>
-        <TooltipProvider>
-          <NextIntlClientProvider messages={messages}>
-            <ThemeProvider>
-              <AuthProvider>{children}</AuthProvider>
-              <Toaster position="top-center" richColors />
-            </ThemeProvider>
-          </NextIntlClientProvider>
-        </TooltipProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <NextIntlClientProvider messages={messages}>
+              <ThemeProvider>
+                <AuthProvider>{children}</AuthProvider>
+                <Toaster position="top-center" richColors />
+              </ThemeProvider>
+            </NextIntlClientProvider>
+          </TooltipProvider>
+          <AuthDebug />
+        </AuthProvider>
       </body>
     </html>
   )
