@@ -58,13 +58,8 @@ export default function VerifyForm() {
           <CardTitle className="text-2xl">{t("title")}</CardTitle>
           <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2 text-center">
-            <h3 className="text-lg font-semibold">{t("enterCodeTitle")}</h3>
-            <p className="text-sm text-muted-foreground">
-              {t("enterCodeDescription")}
-            </p>
-          </div>
+        <CardContent className="space-y-6 pt-6">
+         
 
           <div className="flex justify-center">
             <InputOTP

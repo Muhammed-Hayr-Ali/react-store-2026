@@ -85,12 +85,12 @@ export default function Header() {
       <header className="fixed top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
         <div className="container mx-auto flex h-12 items-center gap-4 px-4">
           {/* Logo - Left */}
-          <div className="flex grow items-center justify-start">
+          <div className="flex basis-1/3 items-center justify-start">
             <AppLogo />
           </div>
 
           {/* Search - Center (macOS Spotlight style) */}
-          <div className="flex grow items-center justify-center">
+          <div className="flex basis-1/3 items-center justify-center">
             <Button
               variant="secondary"
               className="h-8 w-full max-w-md gap-2 rounded-full bg-background px-3 text-sm text-muted-foreground shadow-none hover:bg-background/80"
@@ -101,17 +101,16 @@ export default function Header() {
           </div>
 
           {/* User Avatar / Menu - Right */}
-          <nav className="flex grow items-center justify-end gap-2">
+          <nav className="flex basis-1/3 items-center justify-end gap-2">
             <div className="hidden items-center lg:flex">
               <ButtonGroup>
-               {!user && <Button
-                  size="sm"
-                  className="shadow-none px-6 "
-                >
-                  <Link href={appRouter.signIn}>
-                    <span>{t("getStarted")}</span>
-                  </Link>
-                </Button>}
+                {!user && (
+                  <Button size="sm" className="px-6 shadow-none">
+                    <Link href={appRouter.signIn}>
+                      <span>{t("getStarted")}</span>
+                    </Link>
+                  </Button>
+                )}
                 <UserMenu />
               </ButtonGroup>
             </div>

@@ -234,6 +234,23 @@
     "verificationFailed": "Invalid verification code",
     "backToSignIn": "Back to Sign In"
   },
+  "Verify": {
+    "title": "Two-Factor Authentication",
+    "description": "Enter the 6-digit code from your authenticator app",
+    "enterCode": "Enter verification code",
+    "verify": "Verify",
+    "resendCode": "Resend Code",
+    "codeSent": "Code sent! Check your email",
+    "verificationSuccess": "Verification successful",
+    "verificationFailed": "Invalid verification code",
+    "backToSignIn": "Back to Sign In",
+    "enterCodeTitle": "Enter the 6-Digit Code",
+    "enterCodeDescription": "Open your authenticator app and enter the code below",
+    "verifyAndContinue": "Verify and Continue",
+    "enterCodeError": "Please enter the 6-digit verification code",
+    "verifyFailed": "Invalid code. Please try again.",
+    "verifySuccess": "Verification successful! Redirecting..."
+  },
   "Legal": {
     "termsOfService": "Terms of Service",
     "privacyPolicy": "Privacy Policy",

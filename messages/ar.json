@@ -234,6 +234,23 @@
     "verificationFailed": "رمز التحقق غير صالح",
     "backToSignIn": "العودة لتسجيل الدخول"
   },
+  "Verify": {
+    "title": "المصادقة الثنائية",
+    "description": "أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة",
+    "enterCode": "أدخل رمز التحقق",
+    "verify": "تحقق",
+    "resendCode": "إعادة إرسال الرمز",
+    "codeSent": "تم إرسال الرمز! تحقق من بريدك",
+    "verificationSuccess": "تم التحقق بنجاح",
+    "verificationFailed": "رمز التحقق غير صالح",
+    "backToSignIn": "العودة لتسجيل الدخول",
+    "enterCodeTitle": "أدخل الرمز المكون من 6 أرقام",
+    "enterCodeDescription": "افتح تطبيق المصادقة وأدخل الرمز أدناه",
+    "verifyAndContinue": "تحقق وتابع",
+    "enterCodeError": "يرجى إدخال رمز التحقق المكون من 6 أرقام",
+    "verifyFailed": "رمز غير صالح. يرجى المحاولة مرة أخرى.",
+    "verifySuccess": "تم التحقق بنجاح! جاري إعادة التوجيه..."
+  },
   "Legal": {
     "termsOfService": "شروط الخدمة",
     "privacyPolicy": "سياسة الخصوصية",
