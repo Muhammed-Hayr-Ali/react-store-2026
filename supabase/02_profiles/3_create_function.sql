@@ -15,9 +15,18 @@
 -- 2. دالة تحديث آخر دخول (محسّنة)
 -- =====================================================
 
+-- =====================================================
+-- Marketna E-Commerce - Profiles Functions (Corrected)
+-- File: 02_profiles_functions.sql
+-- Version: 2.2
+-- Date: 2026-03-22
+-- Description: دوال إدارة البروفايل - مصححة حسب المخطط الفعلي
+-- Dependencies: public.profiles, public.roles, public.plans,
+--               public.profile_roles, public.profile_plans, auth.users
+-- =====================================================
 
 -- =====================================================
--- 1️⃣ دالة إنشاء البروفايل مع الدور والخطة (محسّنة)
+-- 1️⃣ دالة إنشاء البروفايل مع الدور والخطة (مصححة)
 -- =====================================================
 
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -25,6 +34,7 @@ RETURNS TRIGGER AS $$
 DECLARE
   v_customer_role_id UUID;
   v_free_plan_id UUID;
+  v_subscription_id UUID;
 BEGIN
   -- ─────────────────────────────────────────────────────
   -- الخطوة 1: إنشاء البروفايل
@@ -84,14 +94,16 @@ BEGIN
   -- ─────────────────────────────────────────────────────
   -- الخطوة 3: تعيين خطة "عضو مجاني" الافتراضية
   -- ─────────────────────────────────────────────────────
+  -- ✅ مصحح: استخدام جدول plans بدلاً من subscription_plans
   SELECT id INTO v_free_plan_id
-  FROM public.subscription_plans
+  FROM public.plans
   WHERE category = 'customer'
     AND is_default = TRUE
   LIMIT 1;
 
   IF v_free_plan_id IS NOT NULL THEN
-    INSERT INTO public.profile_subscriptions (
+    -- ✅ مصحح: استخدام جدول profile_plans بدلاً من profile_subscriptions
+    INSERT INTO public.profile_plans (
       user_id,
       plan_id,
       status,
@@ -107,7 +119,7 @@ BEGIN
       NULL,
       NULL
     )
-    ON CONFLICT ON CONSTRAINT profile_subscriptions_pkey DO NOTHING;
+    ON CONFLICT (id) DO NOTHING;
   END IF;
 
   RETURN NEW;
@@ -116,6 +128,70 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 COMMENT ON FUNCTION public.handle_new_user IS 'إنشاء بروفايل مع دور customer وخطة عضو مجاني عند تسجيل مستخدم جديد';
 
+
+-- =====================================================
+-- 2️⃣ دالة تحديث آخر دخول (محسّنة)
+-- =====================================================
+
+CREATE OR REPLACE FUNCTION public.handle_user_login()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- تحديث وقت آخر تسجيل الدخول فقط إذا تغير
+  IF NEW.last_sign_in_at IS DISTINCT FROM OLD.last_sign_in_at THEN
+    UPDATE public.profiles
+    SET last_sign_in_at = NEW.last_sign_in_at,
+        updated_at = NOW()
+    WHERE id = NEW.id;
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_login ON auth.users;
+CREATE TRIGGER on_auth_user_login
+  AFTER UPDATE OF last_sign_in_at ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_user_login();
+
+COMMENT ON FUNCTION public.handle_user_login IS 'تحديث وقت آخر تسجيل دخول عند تسجيل الدخول';
+
+
+-- =====================================================
+-- تفعيل Trigger إنشاء المستخدم الجديد
+-- =====================================================
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+COMMENT ON TRIGGER on_auth_user_created ON auth.users IS 'ينشئ البروفايل والدور والخطة تلقائياً عند التسجيل';
+
+
+-- =====================================================
+-- ✅ نهاية الملف
+-- =====================================================
+
+-- عرض معلومات الدوال
+SELECT
+  routine_name,
+  routine_type,
+  data_type,
+  security_type
+FROM information_schema.routines
+WHERE routine_schema = 'public'
+  AND routine_name IN ('handle_new_user', 'handle_user_login')
+ORDER BY routine_name;
+
+-- عرض معلومات الـ Triggers
+SELECT
+  trigger_name,
+  event_manipulation,
+  event_object_table,
+  action_timing,
+  action_statement
+FROM information_schema.triggers
+WHERE trigger_name IN ('on_auth_user_created', 'on_auth_user_login');
 
 -- =====================================================
 -- 2️⃣ دالة تحديث آخر دخول (محسّنة)
