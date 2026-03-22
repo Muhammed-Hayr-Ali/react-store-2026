@@ -23,12 +23,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { redirect, usePathname } from "next/navigation"
+import { redirect, usePathname, useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
 import {
-  MonitorIcon,
-  MoonIcon,
-  SunIcon,
   UserIcon,
   SearchIcon,
   HomeIcon,
@@ -39,9 +36,26 @@ import {
   BookIcon,
   ThemeModeIcon,
 } from "@/components/shared/icons"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 import { useAuth } from "@/lib/providers/auth-provider"
 
 export default function Header() {
+  const router = useRouter()
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
   const locale = useLocale()
@@ -53,6 +67,7 @@ export default function Header() {
 
   const handleLogout = async () => {
     await signOut()
+    router.refresh()
   }
 
   function onSelectChange(nextLocale: string) {
@@ -87,15 +102,7 @@ export default function Header() {
           <nav className="flex grow-3 items-center justify-end gap-2">
             <div className="hidden items-center lg:flex">
               {user ? (
-                <Avatar className="size-8">
-                  <AvatarImage
-                    src={avatar || undefined}
-                    alt={profile?.full_name || ""}
-                  />
-                  <AvatarFallback className="p-1.5">
-                    <UserIcon className="size-max text-foreground" />
-                  </AvatarFallback>
-                </Avatar>
+                <UserMenu />
               ) : (
                 <Button
                   variant="default"
@@ -291,5 +298,153 @@ export default function Header() {
         </MobileMenuFooter>
       </MobileMenu>
     </>
+  )
+}
+
+function UserMenu() {
+  const router = useRouter()
+  const pathname = usePathname()
+  const { theme, setTheme } = useTheme()
+  const locale = useLocale()
+  const t = useTranslations("Header")
+
+  const { profile, user, signOut } = useAuth()
+  const avatar = profile?.avatar_url
+  const menuItems = user ? siteConfig.userMenuItems : []
+
+  const handleLogout = async () => {
+    await signOut()
+    router.refresh()
+  }
+
+  function onSelectChange(nextLocale: string) {
+    redirect(`/${nextLocale}${pathname}`)
+  }
+
+  function handleThemeChange(theme: string) {
+    setTheme(theme)
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Avatar className="size-8">
+          <AvatarImage
+            src={avatar || undefined}
+            alt={profile?.full_name || ""}
+          />
+          <AvatarFallback className="p-1.5">
+            <UserIcon className="size-max text-foreground" />
+          </AvatarFallback>
+        </Avatar>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-50" align="start">
+        <DropdownMenuGroup>
+          <DropdownMenuItem asChild>
+            <Link href={appRouter.home}>
+              <HomeIcon className="h-4 w-4" />
+              {t("menuItems.home")}
+            </Link>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem asChild>
+            <Link href={appRouter.home}>
+              <PackageIcon className="h-4 w-4" />
+              {t("menuItems.products")}
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+
+          <DropdownMenuLabel>{t("menuItems.account")}</DropdownMenuLabel>
+
+          {menuItems.map((item) => (
+            <DropdownMenuItem asChild key={`/${item.key}`}>
+              <Link href={item.href}>
+                <item.icon className="h-4 w-4" />
+                {t("menuItems." + item.key)}
+              </Link>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <GlobeIcon className="h-4 w-4" />
+              {t("menuItems.language")}
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent>
+                <DropdownMenuCheckboxItem
+                  checked={locale === "ar"}
+                  onCheckedChange={() => onSelectChange("ar")}
+                >
+                  {t("menuItems.arabic")}
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={locale === "en"}
+                  onCheckedChange={() => onSelectChange("en")}
+                >
+                  {t("menuItems.english")}
+                </DropdownMenuCheckboxItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <ThemeModeIcon className="h-4 w-4" />
+              {t("menuItems.theme")}
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent>
+                <DropdownMenuCheckboxItem
+                  checked={theme === "system"}
+                  onCheckedChange={() => handleThemeChange("system")}
+                >
+                  {t("menuItems.system")}
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={theme === "dark"}
+                  onCheckedChange={() => handleThemeChange("dark")}
+                >
+                  {t("menuItems.dark")}
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={theme === "light"}
+                  onCheckedChange={() => handleThemeChange("light")}
+                >
+                  {t("menuItems.light")}
+                </DropdownMenuCheckboxItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+
+     
+        <DropdownMenuGroup>
+          <DropdownMenuItem asChild>
+            <Link href={appRouter.home}>
+              <LifeBuoyIcon className="h-4 w-4" />
+              {t("menuItems.support")}
+            </Link>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem asChild>
+            <Link href={appRouter.home}>
+              <BookIcon className="h-4 w-4" />
+              {t("menuItems.documentation")}
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem onClick={handleLogout}>
+            {t("signOut")}
+            <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

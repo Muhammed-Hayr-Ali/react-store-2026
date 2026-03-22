@@ -312,10 +312,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Sign Out
   // ───────────────────────────────────────────────────
   const signOut = async () => {
-    setUser(null)
-    setProfile(null)
-    setStatus("unauthenticated")
     await supabase.auth.signOut()
+    
   }
 
   // ───────────────────────────────────────────────────

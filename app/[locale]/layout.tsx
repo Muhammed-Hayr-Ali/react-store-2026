@@ -73,7 +73,6 @@ export default async function RootLayout({
               </ThemeProvider>
             </NextIntlClientProvider>
           </TooltipProvider>
-          <AuthDebug />
         </AuthProvider>
       </body>
     </html>

@@ -43,7 +43,7 @@ export function AuthDebug() {
   }
 
   return (
-    <div className="fixed right-4 bottom-4 z-50 max-h-[80vh] w-[32rem] overflow-auto rounded-lg border bg-background p-4 text-xs shadow-lg">
+    <div className="fixed right-4 bottom-4 z-50 max-h-[80vh] w-lg overflow-auto rounded-lg border bg-background p-4 text-xs shadow-lg">
       <div className="mb-3 flex items-center justify-between border-b pb-2">
         <h3 className="font-semibold">🔐 Auth Debug</h3>
         <button

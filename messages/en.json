@@ -25,6 +25,7 @@
       "orders": "Orders",
       "coupons": "Coupons",
       "dashboard": "Dashboard",
+      "account": "My Account",
       "language": "Language",
       "arabic": "Arabic",
       "english": "English",
@@ -480,6 +481,8 @@
       }
     },
     "dashboard": {
+      "title": "Dashboard | Marketna",
+      "description": "Manage your account and track your progress",
       "upgrade": {
         "title": "Upgrade Account | Marketna",
         "description": "Upgrade your account to seller or delivery partner"
