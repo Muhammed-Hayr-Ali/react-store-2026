@@ -54,6 +54,8 @@ import {
 
 import { useAuth } from "@/lib/providers/auth-provider"
 import { ButtonGroup } from "../ui/button-group"
+import { signOut } from "@/lib/actions/authentication/signOut"
+import { toast } from "sonner"
 
 export default function Header() {
   const router = useRouter()
@@ -305,13 +307,17 @@ function UserMenu() {
   const locale = useLocale()
   const t = useTranslations("Header")
 
-  const { profile, user, signOut, isLoading } = useAuth()
+  const { profile, user, isLoading } = useAuth()
 
   const avatar = profile?.avatar_url
   const menuItems = user ? siteConfig.userMenuItems : []
 
   const handleLogout = async () => {
-    await signOut()
+    const { error } = await signOut()
+
+    if (error) {
+      return toast.error(error)
+    }
     router.refresh()
   }
 
@@ -342,10 +348,7 @@ function UserMenu() {
             </AvatarFallback>
           </Avatar>
         ) : (
-          <Button
-            size="icon-sm"
-            className="shadow-none"
-          >
+          <Button size="icon-sm" className="shadow-none">
             <EllipsisVerticalIcon />
           </Button>
         )}
