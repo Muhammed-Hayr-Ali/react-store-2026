@@ -67,7 +67,10 @@ function useHeaderLogic() {
   const { profile, user, signOut, isLoading } = useAuth()
 
   // ✅ Memoize avatar to prevent unnecessary re-renders
-  const avatar = React.useMemo(() => profile?.avatar_url, [profile?.avatar_url])
+  const avatar = React.useMemo(
+    () => profile?.avatar_url ?? null,
+    [profile?.avatar_url]
+  )
 
   // ✅ Memoize menu items to avoid recalculation on every render
   const menuItems = React.useMemo(
@@ -221,10 +224,10 @@ function LanguageSelector({
 }
 
 // ============================================================================
-// 🎨 Theme Selector Component (Reusable)
+// 🎨 Theme Selector Component (Reusable) - ✅ Fixed TypeScript
 // ============================================================================
 interface ThemeSelectorProps {
-  theme: string
+  theme: string | undefined
   onThemeChange: (theme: string) => void
   t: ReturnType<typeof useTranslations>
   mode: "mobile" | "desktop"
@@ -238,6 +241,12 @@ function ThemeSelector({ theme, onThemeChange, t, mode }: ThemeSelectorProps) {
       { key: "light", label: t("menuItems.light") },
     ],
     [t]
+  )
+
+  // ✅ Helper to safely check theme equality (handles undefined)
+  const isThemeActive = React.useCallback(
+    (themeKey: string) => theme === themeKey,
+    [theme]
   )
 
   if (mode === "mobile") {
@@ -259,11 +268,11 @@ function ThemeSelector({ theme, onThemeChange, t, mode }: ThemeSelectorProps) {
               <MobileMenuItem
                 key={tOption.key}
                 className={
-                  theme === tOption.key ? "" : "ml-9 rtl:mr-9 rtl:ml-0"
+                  isThemeActive(tOption.key) ? "" : "ml-9 rtl:mr-9 rtl:ml-0"
                 }
                 onClick={() => onThemeChange(tOption.key)}
               >
-                {theme === tOption.key && (
+                {isThemeActive(tOption.key) && (
                   <CheckIcon className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
                 )}
                 {tOption.label}
@@ -287,7 +296,7 @@ function ThemeSelector({ theme, onThemeChange, t, mode }: ThemeSelectorProps) {
           {themes.map((tOption) => (
             <DropdownMenuCheckboxItem
               key={tOption.key}
-              checked={theme === tOption.key}
+              checked={isThemeActive(tOption.key)}
               onCheckedChange={() => onThemeChange(tOption.key)}
             >
               {tOption.label}
@@ -300,10 +309,10 @@ function ThemeSelector({ theme, onThemeChange, t, mode }: ThemeSelectorProps) {
 }
 
 // ============================================================================
-// 👤 UserMenu Component (Desktop) - Receives props to avoid hook duplication
+// 👤 UserMenu Component (Desktop) - ✅ Fixed TypeScript for avatar
 // ============================================================================
 interface UserMenuProps {
-  avatar: string | undefined
+  avatar: string | null | undefined
   menuItems: typeof siteConfig.userMenuItems
   handleLogout: () => Promise<void>
   handleLocaleChange: (locale: string) => void
@@ -425,8 +434,8 @@ function UserMenu({
         {user ? (
           <Avatar className="size-8">
             <AvatarImage
-              src={avatar || undefined}
-              alt={profile?.full_name || ""}
+              src={avatar ?? undefined}
+              alt={profile?.full_name ?? ""}
             />
             <AvatarFallback className="p-1.5">
               <UserIcon className="size-max text-foreground" />
@@ -517,8 +526,8 @@ export default function Header() {
         <MobileMenuHeader className="flex items-center gap-3">
           <Avatar className="size-10">
             <AvatarImage
-              src={avatar || undefined}
-              alt={profile?.full_name || ""}
+              src={avatar ?? undefined}
+              alt={profile?.full_name ?? ""}
             />
             <AvatarFallback className="p-1.5">
               <UserIcon className="size-max text-foreground" />
@@ -527,10 +536,10 @@ export default function Header() {
 
           <div className="flex flex-col">
             <span className="text-base leading-none font-semibold">
-              {profile?.full_name || "Guest"}
+              {profile?.full_name ?? "Guest"}
             </span>
             <span className="text-sm text-muted-foreground">
-              {profile?.email || ""}
+              {profile?.email ?? ""}
             </span>
           </div>
         </MobileMenuHeader>
