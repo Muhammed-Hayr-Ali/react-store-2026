@@ -1,56 +1,81 @@
--- Table Creation File
-
 -- =====================================================
 -- Marketna E-Commerce - Profiles Schema
 -- File: 02_profiles.sql
--- Version: 1.0
--- Date: 2026-03-21
--- Description: Profiles table - basic data only
--- Dependencies: None (Standalone)
+-- Version: 3.0 (Final)
+-- Date: 2026-03-22
+-- Description: Profiles table - basic user information
+-- Dependencies: auth.users (Supabase Auth)
 -- =====================================================
 
 -- =====================================================
 -- 📋 File Contents
 -- =====================================================
--- 1. Extensions
--- 2. Create profiles table
--- 3. Indexes
+-- 1. Cleanup before creation
+-- 2. Extensions (pgcrypto for gen_random_uuid)
+-- 3. Create profiles table
+-- 4. Indexes
+-- 5. RLS Policies
+-- 6. Trigger for updated_at
+-- 7. Verification
 -- =====================================================
 
 
 -- =====================================================
--- 1️⃣ Extensions
+-- 1️⃣ CLEANUP
 -- =====================================================
 
+-- Drop policies first
+DROP POLICY IF EXISTS "profiles_read_own" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_update_own" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_insert_own" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_admin_read_all" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_admin_manage" ON public.profiles;
+
+-- Drop trigger
+DROP TRIGGER IF EXISTS profiles_updated_at_trigger ON public.profiles;
+
+-- Drop function
+DROP FUNCTION IF EXISTS public.update_profiles_updated_at() CASCADE;
+
+-- Drop indexes
+DROP INDEX IF EXISTS idx_profiles_email;
+DROP INDEX IF EXISTS idx_profiles_provider;
+DROP INDEX IF EXISTS idx_profiles_created_at;
+DROP INDEX IF EXISTS idx_profiles_last_sign_in;
+
+-- Drop table
+DROP TABLE IF EXISTS public.profiles CASCADE;
+
+
+-- =====================================================
+-- 2️⃣ EXTENSIONS
+-- =====================================================
+
+-- ✅ pgcrypto provides gen_random_uuid() (not uuid-ossp)
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- uuid-ossp is optional (for uuid_generate_v4() if needed)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 
 -- =====================================================
--- 2️⃣ Create Profiles Table
+-- 3️⃣ CREATE TABLE
 -- =====================================================
 
-CREATE TABLE IF NOT EXISTS public.profiles (
-  -- === Identity and Linking ===
+CREATE TABLE public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT NOT NULL,
-
-  -- === Authentication Provider ===
   provider TEXT DEFAULT 'email',
-
-  -- === Basic Information ===
   first_name TEXT,
   last_name TEXT,
+  -- ✅ GENERATED COLUMN (PostgreSQL 12+)
   full_name TEXT GENERATED ALWAYS AS (
     NULLIF(TRIM(COALESCE(first_name, '') || ' ' || COALESCE(last_name, '')), '')
   ) STORED,
-
-  -- === Contact Information ===
   phone TEXT,
   phone_verified BOOLEAN DEFAULT FALSE,
   avatar_url TEXT,
   bio TEXT,
-
-  -- === Status and Dates ===
   email_verified BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
@@ -76,13 +101,13 @@ COMMENT ON COLUMN public.profiles.last_sign_in_at IS 'Last sign-in timestamp';
 
 
 -- =====================================================
--- 3️⃣ Indexes
+-- 4️⃣ INDEXES
 -- =====================================================
 
-CREATE INDEX IF NOT EXISTS idx_profiles_email ON public.profiles(email);
-CREATE INDEX IF NOT EXISTS idx_profiles_provider ON public.profiles(provider);
-CREATE INDEX IF NOT EXISTS idx_profiles_created_at ON public.profiles(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_profiles_last_sign_in ON public.profiles(last_sign_in_at DESC);
+CREATE INDEX idx_profiles_email ON public.profiles(email);
+CREATE INDEX idx_profiles_provider ON public.profiles(provider);
+CREATE INDEX idx_profiles_created_at ON public.profiles(created_at DESC);
+CREATE INDEX idx_profiles_last_sign_in ON public.profiles(last_sign_in_at DESC);
 
 COMMENT ON INDEX idx_profiles_email IS 'Search by email';
 COMMENT ON INDEX idx_profiles_provider IS 'Search by authentication provider';
@@ -91,5 +116,89 @@ COMMENT ON INDEX idx_profiles_last_sign_in IS 'Order by last sign-in';
 
 
 -- =====================================================
--- ✅ End of File
+-- 5️⃣ ROW LEVEL SECURITY (RLS)
 -- =====================================================
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+-- =====================================================
+-- Policy 1: Users can read their own profile
+-- =====================================================
+CREATE POLICY "profiles_read_own"
+  ON public.profiles FOR SELECT TO authenticated
+  USING (id = auth.uid());
+
+-- =====================================================
+-- Policy 2: Users can update their own profile
+-- =====================================================
+CREATE POLICY "profiles_update_own"
+  ON public.profiles FOR UPDATE TO authenticated
+  USING (id = auth.uid())
+  WITH CHECK (id = auth.uid());
+
+-- =====================================================
+-- Policy 3: Users can insert their own profile
+-- =====================================================
+CREATE POLICY "profiles_insert_own"
+  ON public.profiles FOR INSERT TO authenticated
+  WITH CHECK (id = auth.uid());
+
+-- =====================================================
+-- Policy 4: Admins can read all profiles
+-- =====================================================
+-- ⚠️ This will fail if profile_roles doesn't exist yet
+-- Create this policy later in a separate file if needed
+-- CREATE POLICY "profiles_admin_read_all"
+--   ON public.profiles FOR SELECT TO authenticated
+--   USING (
+--     EXISTS (
+--       SELECT 1 FROM public.profile_roles pr
+--       INNER JOIN public.roles r ON r.id = pr.role_id
+--       WHERE pr.user_id = auth.uid() AND r.name = 'admin' AND pr.is_active = TRUE
+--     )
+--   );
+
+-- =====================================================
+-- Policy 5: Admins can manage all profiles
+-- =====================================================
+-- ⚠️ Same as above - create later if needed
+-- CREATE POLICY "profiles_admin_manage"
+--   ON public.profiles FOR ALL TO authenticated
+--   USING (
+--     EXISTS (
+--       SELECT 1 FROM public.profile_roles pr
+--       INNER JOIN public.roles r ON r.id = pr.role_id
+--       WHERE pr.user_id = auth.uid() AND r.name = 'admin' AND pr.is_active = TRUE
+--     )
+--   )
+--   WITH CHECK (true);
+
+
+-- =====================================================
+-- 6️⃣ TRIGGER: Auto-update updated_at
+-- =====================================================
+
+CREATE OR REPLACE FUNCTION public.update_profiles_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER profiles_updated_at_trigger
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_profiles_updated_at();
+
+
+-- =====================================================
+-- 7️⃣ VERIFICATION
+-- =====================================================
+
+SELECT 
+  '✅ Profiles table created successfully!' AS status,
+  (SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'profiles') AS columns,
+  (SELECT COUNT(*) FROM pg_indexes WHERE tablename = 'profiles') AS indexes,
+  (SELECT COUNT(*) FROM pg_policies WHERE tablename = 'profiles') AS policies,
+  (SELECT COUNT(*) FROM information_schema.triggers WHERE trigger_name = 'profiles_updated_at_trigger') AS triggers;
