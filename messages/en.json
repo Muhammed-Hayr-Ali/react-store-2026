@@ -473,82 +473,202 @@
   "seo": {
     "auth": {
       "signIn": {
-        "title": "Sign In | Marketna",
+        "title": "Sign In",
         "description": "Sign in to your Marketna account to access premium features"
       },
       "signUp": {
-        "title": "Sign Up | Marketna",
+        "title": "Sign Up",
         "description": "Create a Marketna account to experience premium shopping"
       },
       "forgotPassword": {
-        "title": "Forgot Password | Marketna",
+        "title": "Forgot Password",
         "description": "Reset your Marketna account password"
       },
       "resetPassword": {
-        "title": "Reset Password | Marketna",
+        "title": "Reset Password",
         "description": "Set a new password for your Marketna account"
       },
       "callback": {
-        "title": "Authentication | Marketna",
+        "title": "Authentication",
         "description": "Processing authentication"
       },
       "verifyOtp": {
-        "title": "Verify OTP | Marketna",
+        "title": "Verify OTP",
         "description": "Verify your authentication code"
       },
       "twoFactorSetup": {
-        "title": "Two-Factor Setup | Marketna",
+        "title": "Two-Factor Setup",
         "description": "Set up two-factor authentication"
       }
     },
     "dashboard": {
-      "title": "Dashboard | Marketna",
+      "title": "Dashboard",
       "description": "Manage your account and track your progress",
       "upgrade": {
-        "title": "Upgrade Account | Marketna",
+        "title": "Upgrade Account",
         "description": "Upgrade your account to seller or delivery partner"
       },
       "sellerForm": {
-        "title": "Seller Information | Marketna",
+        "title": "Seller Information",
         "description": "Enter your store information to become a seller"
       },
       "sellerPlans": {
-        "title": "Seller Plans | Marketna",
+        "title": "Seller Plans",
         "description": "Choose a subscription plan for your store"
       },
       "deliveryForm": {
-        "title": "Delivery Partner Information | Marketna",
+        "title": "Delivery Partner Information",
         "description": "Enter your information to become a delivery partner"
       },
       "deliveryPlans": {
-        "title": "Delivery Partner Plans | Marketna",
+        "title": "Delivery Partner Plans",
         "description": "Choose a subscription plan for delivery services"
       },
       "success": {
-        "title": "Upgrade Success | Marketna",
+        "title": "Upgrade Success",
         "description": "Your upgrade request has been submitted successfully"
       },
       "status": {
-        "title": "Upgrade Status | Marketna",
+        "title": "Upgrade Status",
         "description": "Track your upgrade request status"
+      },
+      "nav": {
+        "admin": {
+          "dashboard": "Dashboard",
+          "userManagement": "User Management",
+          "allUsers": "All Users",
+          "addUser": "Add User",
+          "rolesPermissions": "Roles & Permissions",
+          "profileRoles": "Profile Roles",
+          "roles": "Roles",
+          "allRoles": "All Roles",
+          "createRole": "Create Role",
+          "permissions": "Permissions",
+          "subscriptionPlans": "Subscription Plans",
+          "allPlans": "All Plans",
+          "sellerPlans": "Seller Plans",
+          "deliveryPlans": "Delivery Plans",
+          "customerPlans": "Customer Plans",
+          "subscriptions": "Subscriptions",
+          "system": "System",
+          "settings": "Settings",
+          "configuration": "Configuration",
+          "logs": "Logs",
+          "security": "Security",
+          "reportsAnalytics": "Reports & Analytics",
+          "analyticsDashboard": "Analytics Dashboard",
+          "revenueReports": "Revenue Reports",
+          "userActivity": "User Activity",
+          "systemReports": "System Reports"
+        },
+        "vendor": {
+          "dashboard": "Dashboard",
+          "products": "Products",
+          "allProducts": "All Products",
+          "addProduct": "Add Product",
+          "categories": "Categories",
+          "inventory": "Inventory",
+          "orders": "Orders",
+          "allOrders": "All Orders",
+          "pendingOrders": "Pending Orders",
+          "processing": "Processing",
+          "completed": "Completed",
+          "cancelled": "Cancelled",
+          "updateStatus": "Update Status",
+          "analytics": "Analytics",
+          "salesAnalytics": "Sales Analytics",
+          "productPerformance": "Product Performance",
+          "revenue": "Revenue",
+          "myStats": "My Stats",
+          "subscription": "Subscription",
+          "myPlan": "My Plan",
+          "upgradePlan": "Upgrade Plan",
+          "billingHistory": "Billing History"
+        },
+        "customer": {
+          "dashboard": "Dashboard",
+          "orders": "Orders",
+          "allOrders": "All Orders",
+          "pending": "Pending",
+          "processing": "Processing",
+          "shipped": "Shipped",
+          "completed": "Completed",
+          "trackOrder": "Track Order",
+          "shopping": "Shopping",
+          "browseProducts": "Browse Products",
+          "wishlist": "Wishlist",
+          "cart": "Cart",
+          "reviews": "Reviews",
+          "myReviews": "My Reviews",
+          "writeReview": "Write Review",
+          "account": "Account",
+          "profile": "Profile",
+          "addresses": "Addresses",
+          "paymentMethods": "Payment Methods",
+          "settings": "Settings"
+        },
+        "delivery": {
+          "dashboard": "Dashboard",
+          "deliveries": "Deliveries",
+          "availableDeliveries": "Available Deliveries",
+          "myDeliveries": "My Deliveries",
+          "active": "Active",
+          "completed": "Completed",
+          "schedule": "Schedule",
+          "acceptDelivery": "Accept Delivery",
+          "orders": "Orders",
+          "assignedOrders": "Assigned Orders",
+          "updateDelivery": "Update Delivery",
+          "deliveryHistory": "Delivery History",
+          "earnings": "Earnings",
+          "todaysEarnings": "Today's Earnings",
+          "thisWeek": "This Week",
+          "thisMonth": "This Month",
+          "paymentHistory": "Payment History",
+          "withdraw": "Withdraw",
+          "performance": "Performance",
+          "statistics": "Statistics",
+          "myRating": "My Rating",
+          "completionRate": "Completion Rate",
+          "reports": "Reports",
+          "subscription": "Subscription",
+          "myPlan": "My Plan",
+          "upgradePlan": "Upgrade Plan",
+          "benefits": "Benefits",
+          "map": "Map"
+        }
+      },
+      "planStatus": {
+        "active": "Active",
+        "trial": "Trial",
+        "expired": "Expired",
+        "cancelled": "Cancelled",
+        "pending": "Pending"
+      },
+      "planInfo": {
+        "plan": "Plan",
+        "status": "Status",
+        "started": "Started",
+        "ends": "Ends",
+        "daysLeft": "days left"
       }
     },
     "admin": {
       "upgradeRequests": {
-        "title": "Upgrade Requests | Marketna",
+        "title": "Upgrade Requests",
         "description": "Manage and review subscription upgrade requests"
       }
     },
     "home": {
-      "title": "Coming Soon | Marketna",
+      "title": "Coming Soon",
       "description": "Marketna is crafting a digital masterpiece. Something extraordinary is launching soon."
     },
     "terms": {
-      "title": "Terms of Service | Marketna",
+      "title": "Terms of Service",
       "description": "Marketna Terms of Service and Conditions"
     },
     "privacy": {
-      "title": "Privacy Policy | Marketna",
+      "title": "Privacy Policy",
       "description": "Marketna Privacy Policy - Learn about how we protect your data"
     }
   }

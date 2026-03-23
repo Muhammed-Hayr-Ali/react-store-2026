@@ -23,6 +23,18 @@ import {
 } from "@/components/dashboard"
 import { roleNavData } from "@/lib/data/sidebar-data"
 import { getDirectionData } from "@/lib/utils/direction"
+import { createMetadata } from "@/lib/config/metadata_generator"
+import { getTranslations } from "next-intl/server"
+
+export async function generateMetadata() {
+  const t = await getTranslations()
+
+  return createMetadata({
+    siteName: t("siteName"),
+    title: t("seo.dashboard.title"),
+    description: t("seo.dashboard.description"),
+  })
+}
 
 // عناوين لكل دور
 const roleTitles: Record<string, string> = {
