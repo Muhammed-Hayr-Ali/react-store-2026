@@ -1,20 +1,34 @@
-import { createMetadata } from "@/lib/config/metadata_generator"
-import { getTranslations } from "next-intl/server"
+import { getUserRole } from "@/lib/actions/user/get_user_role"
+import { redirect } from "next/navigation"
+import AdminPage from "./admin/page"
+import VendorPage from "./vendor/page"
+import DeliveryPage from "./delivery/page"
+import CustomerPage from "./customer/page"
 
-export async function generateMetadata() {
-  const t = await getTranslations()
+export default async function Page() {
+  const res = await getUserRole()
 
-  return createMetadata({
-    siteName: t("siteName"),
-    title: t("seo.dashboard.title"),
-    description: t("seo.dashboard.description"),
-  })
-}
+  if (!res) {
+    redirect("/")
+  }
+  // ;(admin, vendor, delivery, customer)
 
-export default function Page() {
-  return (
-    <>
-     dashboard
-    </>
-  )
+  if (res.role === "admin") {
+    return <AdminPage />
+  }
+
+  if (res.role === "vendor") {
+    return <VendorPage />
+  }
+
+  if (res.role === "delivery") {
+    return <DeliveryPage />
+  }
+
+  if (res.role === "customer") {
+    return <CustomerPage />
+  }
+
+
+  return <></>
 }
