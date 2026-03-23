@@ -1,5 +1,4 @@
-'use client'
-
+"use client"
 
 import {
   createContext,
@@ -7,8 +6,10 @@ import {
   useEffect,
   useState,
   useCallback,
+  useMemo,
+  useRef,
 } from "react"
-import type { User } from "@supabase/supabase-js"
+import type { User, Session } from "@supabase/supabase-js"
 import { createBrowserClient } from "@/lib/supabase/createBrowserClient"
 
 // ─────────────────────────────────────────────────────
@@ -84,8 +85,7 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 // ─────────────────────────────────────────────────────
-// AuthProvider - Secure Production Version
-// ✅ Always uses getUser() - never trusts session.user directly
+// AuthProvider - Optimized Production Version
 // ─────────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -93,156 +93,133 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [status, setStatus] = useState<AuthStatus>("loading")
   const [error, setError] = useState<string | null>(null)
-  const supabase = createBrowserClient()
 
-  // ───────────────────────────────────────────────────
-  // 🔐 SECURE: Always verify user with server via getUser()
-  // Never use session.user directly - it comes from local storage
-  // ───────────────────────────────────────────────────
-  const getVerifiedUser = useCallback(async (): Promise<User | null> => {
-    try {
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser()
-      if (authError) {
-        // console.error("Supabase Auth Error (getUser):", authError.message)
-        setError(authError.message)
-        return null
-      }
-      setError(null)
-      return user
-    } catch (e: unknown) {
-      if (e instanceof Error) {
-        // console.error("Unexpected error during getUser:", e.message)
-        setError(e.message)
-      } else {
-        // console.error("Unexpected error during getUser:", e)
-        setError("An unknown error occurred during user verification.")
-      }
-      return null
-    }
-  }, [supabase])
+  // Use a ref to track the latest profile fetch to avoid race conditions
+  const lastFetchId = useRef<string | null>(null)
+  const supabase = useMemo(() => createBrowserClient(), [])
 
-  // ───────────────────────────────────────────────────
-  // Fetch Profile - Simple & Direct
-  // ───────────────────────────────────────────────────
+  /**
+   * Fetch Profile with Optimized Error Handling and Race Condition Protection
+   */
   const fetchProfile = useCallback(
     async (userId: string): Promise<Profile | null> => {
+      const currentFetchId = Math.random().toString(36).substring(7)
+      lastFetchId.current = currentFetchId
+
       try {
-        // Try secure RPC function first
+        // Parallelize or optimize: Try RPC first as it's usually faster and returns all data in one go
         const { data, error: rpcError } = await supabase.rpc(
           "get_current_user_data"
         )
+
+        // If this isn't the latest fetch, ignore it
+        if (lastFetchId.current !== currentFetchId) return null
+
         if (!rpcError && data?.[0]) {
-          setError(null)
           return data[0] as Profile
         }
-        if (rpcError) {
-          // console.warn(
-          //   "RPC \'get_current_user_data\' failed, falling back to direct query:",
-          //   rpcError.message
-          // )
-        }
 
-        // Fallback: direct table query
+        // Fallback: direct table query (only if RPC fails)
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("*")
           .eq("id", userId)
           .single()
 
+        if (lastFetchId.current !== currentFetchId) return null
+
         if (profileError) {
-          // console.error("Supabase Profile Fetch Error:", profileError.message)
           setError(profileError.message)
           return null
         }
 
-        if (profileData) {
-          setError(null)
-          return {
-            ...profileData,
-            roles: [],
-            role_names: [],
-            role_permissions: [],
-            plans: [],
-            active_plan_name: null,
-            active_plan_status: null,
-            plan_permissions: {},
-            all_permissions: [],
-            has_active_role: false,
-            has_active_plan: false,
-            is_fully_setup: false,
-          } as Profile
-        }
+        return {
+          ...profileData,
+          roles: [],
+          role_names: [],
+          role_permissions: [],
+          plans: [],
+          active_plan_name: null,
+          active_plan_status: null,
+          plan_permissions: {},
+          all_permissions: [],
+          has_active_role: false,
+          has_active_plan: false,
+          is_fully_setup: false,
+        } as Profile
       } catch (e: unknown) {
-        if (e instanceof Error) {
-          // console.error("Unexpected error during fetchProfile:", e.message)
-          setError(e.message)
-        } else {
-          // console.error("Unexpected error during fetchProfile:", e)
-          setError("An unknown error occurred during profile fetch.")
-        }
+        setError("An unknown error occurred during profile fetch.")
+        return null
       }
-      return null
     },
     [supabase]
   )
 
-  // ───────────────────────────────────────────────────
-  // Initialize Auth - Run Once on Mount
-  // ───────────────────────────────────────────────────
-  useEffect(() => {
-    let mounted = true
-
-    const initializeAuth = async () => {
-      // ✅ SECURE: Verify user with server on initial load
-      const verifiedUser = await getVerifiedUser()
-
-      if (!mounted) return
-
-      if (!verifiedUser) {
-        setStatus("unauthenticated")
+  /**
+   * Unified Auth State Handler
+   */
+  const handleAuthStateChange = useCallback(
+    async (session: Session | null) => {
+      if (!session?.user) {
         setUser(null)
         setProfile(null)
+        setStatus("unauthenticated")
         return
       }
 
-      setUser(verifiedUser)
+      const currentUser = session.user
+      setUser(currentUser)
       setStatus("authenticated")
 
-      // Fetch profile in background
-      fetchProfile(verifiedUser.id).then((p) => {
-        if (mounted) {
-          setProfile(p)
-          if (!p) setError("لم يتم تحميل البروفايل")
-        }
-      })
-    }
+      // Fetch profile in background without blocking UI
+      const p = await fetchProfile(currentUser.id)
+      if (p) {
+        setProfile(p)
+        setError(null)
+      } else {
+        setError("لم يتم تحميل بيانات البروفايل")
+      }
+    },
+    [fetchProfile]
+  )
 
-    initializeAuth() // Call the async function
+  /**
+   * Initialization and Subscription
+   */
+  useEffect(() => {
+    let mounted = true
 
-    // ─────────────────────────────────────────────────
-    // Subscribe to auth state changes
-    // ✅ SECURE: Always re-verify with getUser(), never use session.user
-    // ─────────────────────────────────────────────────
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, _session) => {
+    const initialize = async () => {
+      // 1. Check initial session (fastest way)
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
       if (!mounted) return
 
-      // 🔐 CRITICAL FIX:
-      // Never use _session?.user here - it\'s from local storage!
-      // Always call getUser() to verify with Supabase Auth server
-      const verifiedUser = await getVerifiedUser()
+      if (session) {
+        // 2. If session exists, handle it and verify user in background
+        await handleAuthStateChange(session)
 
-      setUser(verifiedUser)
-      setProfile(null) // Clear profile, will refetch below
-      setError(null)
-      setStatus(verifiedUser ? "authenticated" : "unauthenticated")
+        // Optional: verify with server in background to ensure session is still valid
+        supabase.auth.getUser().then(({ data: { user: verifiedUser } }) => {
+          if (mounted && !verifiedUser) {
+            handleAuthStateChange(null)
+          }
+        })
+      } else {
+        setStatus("unauthenticated")
+      }
+    }
 
-      if (verifiedUser) {
-        fetchProfile(verifiedUser.id).then(setProfile)
+    initialize()
+
+    // 3. Listen for changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (mounted) {
+        handleAuthStateChange(session)
       }
     })
 
@@ -250,40 +227,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [supabase, getVerifiedUser, fetchProfile]) // Added dependencies
+  }, [supabase, handleAuthStateChange])
 
-  // ───────────────────────────────────────────────────
-  // Actions
-  // ───────────────────────────────────────────────────
-
+  /**
+   * Actions
+   */
   const signOut = useCallback(async () => {
-    // Update UI state optimistically, then confirm with backend
+    // Optimistic UI update
     setUser(null)
     setProfile(null)
-    setError(null)
     setStatus("unauthenticated")
-    const { error: signOutError } = await supabase.auth.signOut()
-    if (signOutError) {
-      // console.error("Supabase SignOut Error:", signOutError.message)
-      setError(signOutError.message)
-      // Optionally, revert UI state if signOut fails critically
-      // For simplicity, we assume signOut is generally reliable
-    }
+    setError(null)
+
+    await supabase.auth.signOut()
   }, [supabase])
 
   const refreshProfile = useCallback(async () => {
     if (user) {
       const p = await fetchProfile(user.id)
-      setProfile(p)
-      if (!p) setError("فشل تحديث البروفايل")
-      else setError(null)
+      if (p) {
+        setProfile(p)
+        setError(null)
+      }
     }
   }, [user, fetchProfile])
 
-  // ───────────────────────────────────────────────────
-  // Permission Helpers - Simple & Fast
-  // ───────────────────────────────────────────────────
-
+  /**
+   * Permission Helpers (Memoized for performance)
+   */
   const hasPermission = useCallback(
     (permission: string) =>
       !!profile?.all_permissions?.includes(permission) ||
@@ -303,19 +274,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [profile]
   )
 
-  const value = {
-    user,
-    profile,
-    status,
-    isLoading: status === "loading",
-    isAuthenticated: status === "authenticated",
-    error,
-    signOut,
-    refreshProfile,
-    hasPermission,
-    hasRole,
-    hasActivePlan,
-  }
+  const value = useMemo(
+    () => ({
+      user,
+      profile,
+      status,
+      isLoading: status === "loading",
+      isAuthenticated: status === "authenticated",
+      error,
+      signOut,
+      refreshProfile,
+      hasPermission,
+      hasRole,
+      hasActivePlan,
+    }),
+    [
+      user,
+      profile,
+      status,
+      error,
+      signOut,
+      refreshProfile,
+      hasPermission,
+      hasRole,
+      hasActivePlan,
+    ]
+  )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
