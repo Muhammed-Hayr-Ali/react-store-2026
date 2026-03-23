@@ -11,9 +11,16 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { NavSecondary } from "./ui/nav-secondary"
+import { siteConfig } from "./shared/site"
+import { Badge } from "./ui/badge"
+import Link from "next/link"
+import { appRouter } from "@/lib/app-routes"
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   role?: "admin" | "vendor" | "customer" | "delivery"
@@ -66,12 +73,31 @@ export function AppSidebar({
 
   return (
     <Sidebar collapsible="icon" {...props} side={side}>
-      <SidebarHeader className="flex h-16 items-center gap-2 px-4">
-        <AppLogo size="xs" />
-        <span className="text-lg font-semibold group-data-[collapsible=icon]:hidden">
-          Marketna
-        </span>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="xl" asChild>
+              <Link href={appRouter.home}>
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <AppLogo className="size-4" />
+                </div>
+                <div className="flex w-full items-center justify-between text-start leading-none">
+                  <span className="truncate text-base font-bold">
+                    {siteConfig.name}
+                  </span>
+                  <Badge
+                    variant="destructive"
+                    className="bg-blue-50 text-[10px] text-blue-700 dark:bg-blue-950 dark:text-blue-300"
+                  >
+                    v{siteConfig.virsion}
+                  </Badge>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
+
       <SidebarContent>
         <NavMain items={navItems || []} role={role} />
         <NavSecondary className="mt-auto" />

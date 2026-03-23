@@ -21,6 +21,7 @@ export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
   name: "Marketna",
+  virsion: "1.0.0",
   description: `Marketna: Your smart destination for everyday essentials where quality, variety, and speed come together.`,
   defaultRobots: "index, follow",
   url: "https://markatna.com",

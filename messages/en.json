@@ -41,6 +41,343 @@
       "documentation": "Documentation"
     }
   },
+  "SidebarNav": {
+    "roles": {
+      "admin": "Admin",
+      "vendor": "Vendor",
+      "customer": "Customer",
+      "delivery": "Delivery"
+    },
+    "dashboard": {
+      "admin": "Admin Dashboard",
+      "vendor": "Vendor Dashboard",
+      "customer": "Customer Dashboard",
+      "delivery": "Delivery Dashboard",
+      "home": "Home"
+    },
+    "planStatus": {
+      "active": "Active",
+      "trial": "Trial",
+      "inactive": "Inactive",
+      "expired": "Expired"
+    },
+    "planNames": {
+      "free_seller": "Free Seller",
+      "starter_seller": "Starter Seller",
+      "professional_seller": "Professional Seller",
+      "enterprise_seller": "Enterprise Seller",
+      "free_delivery_partner": "Free Delivery Partner",
+      "starter_delivery_partner": "Starter Delivery Partner",
+      "professional_delivery_partner": "Professional Delivery Partner",
+      "free_member": "Free Member",
+      "enterprise": "Enterprise",
+      "seller": "Seller",
+      "delivery": "Delivery",
+      "customer": "Customer",
+      "basic": "Basic",
+      "premium": "Premium",
+      "professional": "Professional"
+    },
+    "userMenu": {
+      "upgradePlan": "Upgrade Plan",
+      "account": "Account",
+      "billing": "Billing",
+      "notifications": "Notifications",
+      "logout": "Log out"
+    },
+    "admin": {
+      "dashboard": "Dashboard",
+      "userManagement": "User Management",
+      "allUsers": "All Users",
+      "addUser": "Add User",
+      "rolesPermissions": "Roles & Permissions",
+      "profileRoles": "Profile Roles",
+      "roles": "Roles",
+      "allRoles": "All Roles",
+      "createRole": "Create Role",
+      "permissions": "Permissions",
+      "subscriptionPlans": "Subscription Plans",
+      "allPlans": "All Plans",
+      "sellerPlans": "Seller Plans",
+      "deliveryPlans": "Delivery Plans",
+      "customerPlans": "Customer Plans",
+      "subscriptions": "Subscriptions",
+      "system": "System",
+      "settings": "Settings",
+      "configuration": "Configuration",
+      "logs": "Logs",
+      "security": "Security",
+      "reportsAnalytics": "Reports & Analytics",
+      "analyticsDashboard": "Analytics Dashboard",
+      "revenueReports": "Revenue Reports",
+      "userActivity": "User Activity",
+      "systemReports": "System Reports"
+    },
+    "vendor": {
+      "dashboard": "Dashboard",
+      "products": "Products",
+      "allProducts": "All Products",
+      "addProduct": "Add Product",
+      "categories": "Categories",
+      "inventory": "Inventory",
+      "orders": "Orders",
+      "allOrders": "All Orders",
+      "pendingOrders": "Pending Orders",
+      "processing": "Processing",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "updateStatus": "Update Status",
+      "analytics": "Analytics",
+      "salesAnalytics": "Sales Analytics",
+      "productPerformance": "Product Performance",
+      "revenue": "Revenue",
+      "myStats": "My Stats",
+      "subscription": "Subscription",
+      "myPlan": "My Plan",
+      "upgradePlan": "Upgrade Plan",
+      "billingHistory": "Billing History"
+    },
+    "customer": {
+      "dashboard": "Dashboard",
+      "orders": "Orders",
+      "allOrders": "All Orders",
+      "pending": "Pending",
+      "processing": "Processing",
+      "shipped": "Shipped",
+      "completed": "Completed",
+      "trackOrder": "Track Order",
+      "shopping": "Shopping",
+      "browseProducts": "Browse Products",
+      "wishlist": "Wishlist",
+      "cart": "Cart",
+      "reviews": "Reviews",
+      "myReviews": "My Reviews",
+      "writeReview": "Write Review",
+      "account": "Account",
+      "profile": "Profile",
+      "addresses": "Addresses",
+      "paymentMethods": "Payment Methods",
+      "settings": "Settings"
+    },
+    "delivery": {
+      "dashboard": "Dashboard",
+      "deliveries": "Deliveries",
+      "availableDeliveries": "Available Deliveries",
+      "myDeliveries": "My Deliveries",
+      "active": "Active",
+      "completed": "Completed",
+      "schedule": "Schedule",
+      "acceptDelivery": "Accept Delivery",
+      "orders": "Orders",
+      "assignedOrders": "Assigned Orders",
+      "updateDelivery": "Update Delivery",
+      "history": "History",
+      "earnings": "Earnings",
+      "todayEarnings": "Today's Earnings",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "paymentHistory": "Payment History",
+      "withdraw": "Withdraw",
+      "performance": "Performance",
+      "statistics": "Statistics",
+      "myRating": "My Rating",
+      "completionRate": "Completion Rate",
+      "reports": "Reports",
+      "subscription": "Subscription",
+      "myPlan": "My Plan",
+      "upgradePlan": "Upgrade Plan",
+      "benefits": "Benefits",
+      "map": "Map"
+    }
+  },
+  "adminDashboard": {
+    "title": "Admin Dashboard",
+    "description": "Manage users, roles, subscription plans, and system configuration",
+    "stats": {
+      "totalUsers": "Total Users",
+      "totalRevenue": "Total Revenue",
+      "activeSubscriptions": "Active Subscriptions",
+      "growth": "Growth",
+      "fromLastMonth": "from last month"
+    },
+    "recentUsers": {
+      "title": "Recent Users",
+      "description": "Latest registered users with their roles"
+    },
+    "subscriptionPlans": {
+      "title": "Subscription Plans",
+      "description": "Active plans distribution",
+      "freeSeller": "Free Seller",
+      "professionalSeller": "Professional Seller",
+      "freeDelivery": "Free Delivery",
+      "freeMember": "Free Member"
+    },
+    "systemActivity": {
+      "title": "System Activity",
+      "description": "Real-time system metrics",
+      "serverLoad": "Server Load",
+      "databaseConnections": "Database Connections",
+      "apiRequests": "API Requests/min"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "description": "Common admin tasks",
+      "addUser": "Add User",
+      "createRole": "Create Role",
+      "newPlan": "New Plan",
+      "viewLogs": "View Logs"
+    }
+  },
+  "customerDashboard": {
+    "title": "Customer Dashboard",
+    "description": "View your orders, wishlist, reviews, and account settings",
+    "stats": {
+      "totalOrders": "Total Orders",
+      "wishlist": "Wishlist",
+      "coupons": "Coupons",
+      "reviews": "Reviews",
+      "pendingDelivery": "pending delivery",
+      "itemsOnSale": "items on sale",
+      "expiresSoon": "expires soon",
+      "averageRating": "average rating"
+    },
+    "recentOrders": {
+      "title": "Recent Orders",
+      "description": "Your latest purchases and their status",
+      "track": "Track",
+      "reorder": "Reorder",
+      "view": "View"
+    },
+    "wishlist": {
+      "title": "My Wishlist",
+      "description": "Saved items for later",
+      "addToCart": "Add to Cart",
+      "onSale": "On Sale"
+    },
+    "coupons": {
+      "title": "Available Coupons",
+      "description": "Your active discount codes",
+      "expiresIn": "Expires in"
+    },
+    "addresses": {
+      "title": "Saved Addresses",
+      "description": "Your delivery addresses",
+      "home": "Home",
+      "work": "Work",
+      "edit": "Edit",
+      "addNew": "+ Add New Address"
+    },
+    "reviews": {
+      "title": "My Reviews",
+      "description": "Products you have reviewed",
+      "editReview": "Edit Review"
+    }
+  },
+  "deliveryDashboard": {
+    "title": "Delivery Partner Dashboard",
+    "description": "Manage deliveries, track earnings, and view your performance",
+    "stats": {
+      "availableDeliveries": "Available Deliveries",
+      "completedToday": "Completed Today",
+      "earnings": "Earnings",
+      "rating": "Rating",
+      "urgent": "urgent",
+      "goal": "Goal",
+      "fromYesterday": "from yesterday",
+      "basedOnReviews": "Based on reviews"
+    },
+    "availableDeliveries": {
+      "title": "Available Deliveries",
+      "description": "Delivery tasks you can accept",
+      "away": "away",
+      "urgent": "Urgent",
+      "standard": "Standard",
+      "accept": "Accept"
+    },
+    "route": {
+      "title": "Today's Route",
+      "description": "Active delivery stops",
+      "stop": "Stop",
+      "completed": "Completed",
+      "inProgress": "In progress",
+      "pending": "Pending",
+      "eta": "ETA"
+    },
+    "earnings": {
+      "title": "Earnings Overview",
+      "description": "Your income breakdown",
+      "today": "Today",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "deliveriesCompleted": "Deliveries Completed",
+      "withdrawEarnings": "Withdraw Earnings"
+    },
+    "performance": {
+      "title": "Performance Stats",
+      "description": "Your delivery metrics",
+      "onTimeRate": "On-Time Rate",
+      "customerSatisfaction": "Customer Satisfaction",
+      "completionRate": "Completion Rate",
+      "level": "Level",
+      "partner": "Partner",
+      "moreDeliveriesTo": "more deliveries to"
+    },
+    "subscription": {
+      "title": "My Subscription Plan",
+      "description": "Current plan and benefits",
+      "freeDeliveryPartner": "Free Delivery Partner",
+      "basicFeatures": "Basic features",
+      "upgradePlan": "Upgrade Plan",
+      "acceptDeliveries": "Accept Deliveries",
+      "trackEarnings": "Track Earnings",
+      "schedule": "Schedule",
+      "exportData": "Export Data"
+    }
+  },
+  "vendorDashboard": {
+    "title": "Vendor Dashboard",
+    "description": "Manage your products, inventory, orders, and sales analytics",
+    "stats": {
+      "totalProducts": "Total Products",
+      "totalSales": "Total Sales",
+      "pendingOrders": "Pending Orders",
+      "growth": "Growth",
+      "newThisWeek": "new this week",
+      "fromLastMonth": "from last month",
+      "needAttention": "need attention",
+      "fromLastWeek": "from last week"
+    },
+    "recentOrders": {
+      "title": "Recent Orders",
+      "description": "Latest customer orders that need attention",
+      "pending": "Pending",
+      "processing": "Processing",
+      "readyToShip": "Ready to ship",
+      "updateStatus": "Update Status"
+    },
+    "topProducts": {
+      "title": "Top Products",
+      "description": "Best selling items this month",
+      "sales": "sales"
+    },
+    "inventory": {
+      "title": "Low Stock Alerts",
+      "description": "Products that need restocking",
+      "leftInStock": "left in stock",
+      "restock": "Restock"
+    },
+    "subscription": {
+      "title": "My Subscription Plan",
+      "description": "Current plan and features",
+      "professionalSeller": "Professional Seller",
+      "upgrade": "Upgrade",
+      "unlimitedProducts": "Unlimited products",
+      "analyticsReports": "Analytics & reports",
+      "exportOrders": "Export orders",
+      "apiAccess": "API access",
+      "enterpriseOnly": "(Enterprise only)"
+    }
+  },
   "HomePage": {
     "titlePart1": "Coming Soon",
     "titlePart2": "Something Extraordinary",

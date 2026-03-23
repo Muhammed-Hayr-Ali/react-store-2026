@@ -1,3 +1,5 @@
+"use client"
+
 import {
   Card,
   CardContent,
@@ -17,18 +19,17 @@ import {
   Navigation,
   CreditCard,
 } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 export default function DeliveryDashboard() {
+  const t = useTranslations("deliveryDashboard")
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Delivery Partner Dashboard
-        </h1>
-        <p className="text-muted-foreground">
-          Manage deliveries, track earnings, and view your performance
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("description")}</p>
       </div>
 
       {/* Stats Cards */}
@@ -36,49 +37,59 @@ export default function DeliveryDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Available Deliveries
+              {t("stats.availableDeliveries")}
             </CardTitle>
             <Truck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">7</div>
-            <p className="text-xs text-muted-foreground">3 urgent</p>
+            <p className="text-xs text-muted-foreground">
+              3 {t("stats.urgent")}
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Completed Today
+              {t("stats.completedToday")}
             </CardTitle>
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">Goal: 15</p>
+            <p className="text-xs text-muted-foreground">
+              {t("stats.goal")}: 15
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Earnings</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("stats.earnings")}
+            </CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">$234</div>
-            <p className="text-xs text-muted-foreground">+12% from yesterday</p>
+            <p className="text-xs text-muted-foreground">
+              +12% {t("stats.fromYesterday")}
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Rating</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("stats.rating")}
+            </CardTitle>
             <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">4.8</div>
             <p className="text-xs text-muted-foreground">
-              Based on 156 reviews
+              {t("stats.basedOnReviews")} 156
             </p>
           </CardContent>
         </Card>
@@ -87,10 +98,12 @@ export default function DeliveryDashboard() {
       {/* Main Content Sections */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         {/* Active Deliveries */}
-        <Card className="col-span-4">
+        <Card className="lg:col-span-4">
           <CardHeader>
-            <CardTitle>Available Deliveries</CardTitle>
-            <CardDescription>Delivery tasks you can accept</CardDescription>
+            <CardTitle>{t("availableDeliveries.title")}</CardTitle>
+            <CardDescription>
+              {t("availableDeliveries.description")}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -111,7 +124,7 @@ export default function DeliveryDashboard() {
                         <MapPin className="h-3 w-3" />
                         <span>
                           {i === 1 ? "2.5 km" : i === 2 ? "5.1 km" : "8.3 km"}{" "}
-                          away
+                          {t("availableDeliveries.away")}
                         </span>
                       </div>
                     </div>
@@ -119,14 +132,16 @@ export default function DeliveryDashboard() {
                   <div className="flex items-center gap-4">
                     <div className="text-right">
                       <div className="text-sm font-medium">
-                        ${(Math.random() * 15 + 5).toFixed(2)}
+                        ${[12.5, 8.75, 15.25, 10.0, 18.99][i - 1]}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {i === 1 ? "Urgent" : "Standard"}
+                        {i === 1
+                          ? t("availableDeliveries.urgent")
+                          : t("availableDeliveries.standard")}
                       </div>
                     </div>
                     <button className="rounded bg-primary px-3 py-1.5 text-xs text-primary-foreground hover:bg-primary/90">
-                      Accept
+                      {t("availableDeliveries.accept")}
                     </button>
                   </div>
                 </div>
@@ -136,10 +151,10 @@ export default function DeliveryDashboard() {
         </Card>
 
         {/* Today's Route */}
-        <Card className="col-span-3">
+        <Card className="lg:col-span-3">
           <CardHeader>
-            <CardTitle>Today's Route</CardTitle>
-            <CardDescription>Active delivery stops</CardDescription>
+            <CardTitle>{t("route.title")}</CardTitle>
+            <CardDescription>{t("route.description")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {[1, 2, 3, 4, 5].map((i) => (
@@ -158,14 +173,14 @@ export default function DeliveryDashboard() {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium">
-                    Stop {i}: Customer {i}
+                    {t("route.stop")} {i}: Customer {i}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {i === 1
-                      ? "Completed"
+                      ? t("route.completed")
                       : i === 2
-                        ? "In progress - ETA 15 min"
-                        : "Pending"}
+                        ? `${t("route.inProgress")} - ${t("route.eta")} 15 min`
+                        : t("route.pending")}
                   </p>
                 </div>
                 {i === 2 && <Navigation className="h-4 w-4 text-primary" />}
@@ -181,28 +196,34 @@ export default function DeliveryDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5" />
-              Earnings Overview
+              {t("earnings.title")}
             </CardTitle>
-            <CardDescription>Your income breakdown</CardDescription>
+            <CardDescription>{t("earnings.description")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-3 gap-4">
               <div className="rounded-lg bg-muted/50 p-3 text-center">
-                <p className="text-xs text-muted-foreground">Today</p>
+                <p className="text-xs text-muted-foreground">
+                  {t("earnings.today")}
+                </p>
                 <p className="text-lg font-bold">$234</p>
               </div>
               <div className="rounded-lg bg-muted/50 p-3 text-center">
-                <p className="text-xs text-muted-foreground">This Week</p>
+                <p className="text-xs text-muted-foreground">
+                  {t("earnings.thisWeek")}
+                </p>
                 <p className="text-lg font-bold">$1,456</p>
               </div>
               <div className="rounded-lg bg-muted/50 p-3 text-center">
-                <p className="text-xs text-muted-foreground">This Month</p>
+                <p className="text-xs text-muted-foreground">
+                  {t("earnings.thisMonth")}
+                </p>
                 <p className="text-lg font-bold">$5,234</p>
               </div>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>Deliveries Completed</span>
+                <span>{t("earnings.deliveriesCompleted")}</span>
                 <span>45/50</span>
               </div>
               <div className="h-2 rounded-full bg-muted">
@@ -210,7 +231,7 @@ export default function DeliveryDashboard() {
               </div>
             </div>
             <button className="w-full text-sm text-primary hover:underline">
-              Withdraw Earnings
+              {t("earnings.withdrawEarnings")}
             </button>
           </CardContent>
         </Card>
@@ -219,14 +240,14 @@ export default function DeliveryDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Star className="h-5 w-5" />
-              Performance Stats
+              {t("performance.title")}
             </CardTitle>
-            <CardDescription>Your delivery metrics</CardDescription>
+            <CardDescription>{t("performance.description")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>On-Time Rate</span>
+                <span>{t("performance.onTimeRate")}</span>
                 <span>94%</span>
               </div>
               <div className="h-2 rounded-full bg-muted">
@@ -235,7 +256,7 @@ export default function DeliveryDashboard() {
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>Customer Satisfaction</span>
+                <span>{t("performance.customerSatisfaction")}</span>
                 <span>4.8/5</span>
               </div>
               <div className="h-2 rounded-full bg-muted">
@@ -244,7 +265,7 @@ export default function DeliveryDashboard() {
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>Completion Rate</span>
+                <span>{t("performance.completionRate")}</span>
                 <span>98%</span>
               </div>
               <div className="h-2 rounded-full bg-muted">
@@ -255,10 +276,13 @@ export default function DeliveryDashboard() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  <span className="text-sm font-medium">Level 2 Partner</span>
+                  <span className="text-sm font-medium">
+                    {t("performance.level")} 2 {t("performance.partner")}
+                  </span>
                 </div>
                 <span className="text-xs text-muted-foreground">
-                  12 more deliveries to Level 3
+                  12 {t("performance.moreDeliveriesTo")}{" "}
+                  {t("performance.level")} 3
                 </span>
               </div>
             </div>
@@ -271,38 +295,48 @@ export default function DeliveryDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5" />
-            My Subscription Plan
+            {t("subscription.title")}
           </CardTitle>
-          <CardDescription>Current plan and benefits</CardDescription>
+          <CardDescription>{t("subscription.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between rounded-lg bg-primary/10 p-4">
             <div>
               <p className="text-lg font-bold text-primary">
-                Free Delivery Partner
+                {t("subscription.freeDeliveryPartner")}
               </p>
-              <p className="text-xs text-muted-foreground">Basic features</p>
+              <p className="text-xs text-muted-foreground">
+                {t("subscription.basicFeatures")}
+              </p>
             </div>
             <button className="text-sm text-primary hover:underline">
-              Upgrade Plan
+              {t("subscription.upgradePlan")}
             </button>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-primary">∞</div>
-              <p className="text-xs text-muted-foreground">Accept Deliveries</p>
+              <p className="text-xs text-muted-foreground">
+                {t("subscription.acceptDeliveries")}
+              </p>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-primary">✓</div>
-              <p className="text-xs text-muted-foreground">Track Earnings</p>
+              <p className="text-xs text-muted-foreground">
+                {t("subscription.trackEarnings")}
+              </p>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-muted-foreground">✗</div>
-              <p className="text-xs text-muted-foreground">Schedule</p>
+              <p className="text-xs text-muted-foreground">
+                {t("subscription.schedule")}
+              </p>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-muted-foreground">✗</div>
-              <p className="text-xs text-muted-foreground">Export Data</p>
+              <p className="text-xs text-muted-foreground">
+                {t("subscription.exportData")}
+              </p>
             </div>
           </div>
         </CardContent>

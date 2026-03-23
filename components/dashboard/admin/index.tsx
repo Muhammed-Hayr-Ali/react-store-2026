@@ -1,3 +1,5 @@
+"use client"
+
 import {
   Card,
   CardContent,
@@ -15,40 +17,32 @@ import {
   ClipboardList,
   Activity,
 } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 export default function AdminDashboard() {
+  const t = useTranslations("adminDashboard")
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-        <p className="text-muted-foreground">
-          Manage users, roles, subscription plans, and system configuration
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("description")}</p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("stats.totalUsers")}
+            </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">1,234</div>
-            <p className="text-xs text-muted-foreground">+20 from last month</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$45,231</div>
             <p className="text-xs text-muted-foreground">
-              +20.1% from last month
+              +20 {t("stats.fromLastMonth")}
             </p>
           </CardContent>
         </Card>
@@ -56,7 +50,22 @@ export default function AdminDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Active Subscriptions
+              {t("stats.totalRevenue")}
+            </CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">$45,231</div>
+            <p className="text-xs text-muted-foreground">
+              +20.1% {t("stats.fromLastMonth")}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {t("stats.activeSubscriptions")}
             </CardTitle>
             <Tag className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -70,12 +79,16 @@ export default function AdminDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Growth</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("stats.growth")}
+            </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">+12.5%</div>
-            <p className="text-xs text-muted-foreground">+4% from last month</p>
+            <p className="text-xs text-muted-foreground">
+              +4% {t("stats.fromLastMonth")}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -83,12 +96,10 @@ export default function AdminDashboard() {
       {/* Main Content Sections */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         {/* Recent Users Table */}
-        <Card className="col-span-4">
+        <Card className="lg:col-span-4">
           <CardHeader>
-            <CardTitle>Recent Users</CardTitle>
-            <CardDescription>
-              Latest registered users with their roles
-            </CardDescription>
+            <CardTitle>{t("recentUsers.title")}</CardTitle>
+            <CardDescription>{t("recentUsers.description")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -121,21 +132,35 @@ export default function AdminDashboard() {
         </Card>
 
         {/* Subscription Plans Overview */}
-        <Card className="col-span-3">
+        <Card className="lg:col-span-3">
           <CardHeader>
-            <CardTitle>Subscription Plans</CardTitle>
-            <CardDescription>Active plans distribution</CardDescription>
+            <CardTitle>{t("subscriptionPlans.title")}</CardTitle>
+            <CardDescription>
+              {t("subscriptionPlans.description")}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {[
-              { name: "Free Seller", count: 234, color: "bg-blue-500" },
               {
-                name: "Professional Seller",
+                name: t("subscriptionPlans.freeSeller"),
+                count: 234,
+                color: "bg-blue-500",
+              },
+              {
+                name: t("subscriptionPlans.professionalSeller"),
                 count: 156,
                 color: "bg-green-500",
               },
-              { name: "Free Delivery", count: 89, color: "bg-orange-500" },
-              { name: "Free Member", count: 754, color: "bg-purple-500" },
+              {
+                name: t("subscriptionPlans.freeDelivery"),
+                count: 89,
+                color: "bg-orange-500",
+              },
+              {
+                name: t("subscriptionPlans.freeMember"),
+                count: 754,
+                color: "bg-purple-500",
+              },
             ].map((plan) => (
               <div
                 key={plan.name}
@@ -158,14 +183,14 @@ export default function AdminDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity className="h-5 w-5" />
-              System Activity
+              {t("systemActivity.title")}
             </CardTitle>
-            <CardDescription>Real-time system metrics</CardDescription>
+            <CardDescription>{t("systemActivity.description")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>Server Load</span>
+                <span>{t("systemActivity.serverLoad")}</span>
                 <span>45%</span>
               </div>
               <div className="h-2 rounded-full bg-muted">
@@ -174,7 +199,7 @@ export default function AdminDashboard() {
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>Database Connections</span>
+                <span>{t("systemActivity.databaseConnections")}</span>
                 <span>72/100</span>
               </div>
               <div className="h-2 rounded-full bg-muted">
@@ -183,7 +208,7 @@ export default function AdminDashboard() {
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>API Requests/min</span>
+                <span>{t("systemActivity.apiRequests")}</span>
                 <span>1,234</span>
               </div>
               <div className="h-2 rounded-full bg-muted">
@@ -195,22 +220,22 @@ export default function AdminDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Common admin tasks</CardDescription>
+            <CardTitle>{t("quickActions.title")}</CardTitle>
+            <CardDescription>{t("quickActions.description")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-3">
               <button className="rounded-lg border p-3 text-sm hover:bg-accent">
-                Add User
+                {t("quickActions.addUser")}
               </button>
               <button className="rounded-lg border p-3 text-sm hover:bg-accent">
-                Create Role
+                {t("quickActions.createRole")}
               </button>
               <button className="rounded-lg border p-3 text-sm hover:bg-accent">
-                New Plan
+                {t("quickActions.newPlan")}
               </button>
               <button className="rounded-lg border p-3 text-sm hover:bg-accent">
-                View Logs
+                {t("quickActions.viewLogs")}
               </button>
             </div>
           </CardContent>

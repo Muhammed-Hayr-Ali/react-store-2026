@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/sidebar"
 import { ChevronRightIcon } from "lucide-react"
 import { roleNavIcons } from "@/lib/data/sidebar-icons"
+import Link from "next/link"
+import { useTranslations } from "next-intl"
 
 type Role = "admin" | "vendor" | "customer" | "delivery"
 type IconKey = keyof (typeof roleNavIcons)[Role]
@@ -37,6 +39,8 @@ export function NavMain({
   }[]
   role?: Role
 }) {
+  const t = useTranslations("SidebarNav")
+
   const getIcon = (
     iconKey: string | React.ReactNode | undefined,
     role: Role | undefined
@@ -55,10 +59,20 @@ export function NavMain({
     return null
   }
 
+  const getTranslationKey = (key: string, role: Role | undefined) => {
+    if (!role) return key
+    return `${role}.${key}`
+  }
+
+  const getRoleLabel = (role: Role | undefined) => {
+    if (!role) return ""
+    return t(`roles.${role}`)
+  }
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
-        {role ? role.charAt(0).toUpperCase() + role.slice(1) : "Platform"}
+        {getRoleLabel(role)}
       </SidebarGroupLabel>
       <SidebarMenu className="gap-1">
         {items.map((item) => {
@@ -72,12 +86,12 @@ export function NavMain({
                   size="md"
                   className="group-data-[collapsible=icon]:justify-center"
                 >
-                  <a href={item.url}>
+                  <Link href={item.url}>
                     {getIcon(item.icon, role)}
                     <span className="group-data-[collapsible=icon]:hidden">
-                      {item.title}
+                      {t(getTranslationKey(item.title, role))}
                     </span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             )
@@ -100,7 +114,7 @@ export function NavMain({
                   >
                     {getIcon(item.icon, role)}
                     <span className="group-data-[collapsible=icon]:hidden">
-                      {item.title}
+                      {t(getTranslationKey(item.title, role))}
                     </span>
                     <ChevronRightIcon className="ms-auto transition-transform duration-200 group-data-[collapsible=icon]:hidden group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180" />
                   </SidebarMenuButton>
@@ -111,7 +125,9 @@ export function NavMain({
                       <SidebarMenuSubItem key={subItem.title}>
                         <SidebarMenuSubButton asChild>
                           <a href={subItem.url}>
-                            <span>{subItem.title}</span>
+                            <span>
+                              {t(getTranslationKey(subItem.title, role))}
+                            </span>
                           </a>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>

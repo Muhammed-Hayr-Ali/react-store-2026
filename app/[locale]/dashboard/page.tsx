@@ -25,6 +25,7 @@ import { roleNavData } from "@/lib/data/sidebar-data"
 import { getDirectionData } from "@/lib/utils/direction"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getTranslations } from "next-intl/server"
+import { appRouter } from "@/lib/app-routes"
 
 export async function generateMetadata() {
   const t = await getTranslations()
@@ -36,14 +37,6 @@ export async function generateMetadata() {
   })
 }
 
-// عناوين لكل دور
-const roleTitles: Record<string, string> = {
-  admin: "Admin Dashboard",
-  vendor: "Vendor Dashboard",
-  customer: "Customer Dashboard",
-  delivery: "Delivery Dashboard",
-}
-
 export default async function Page() {
   const res = await getUserRole()
 
@@ -52,6 +45,7 @@ export default async function Page() {
   }
 
   const role = res.role as "admin" | "vendor" | "customer" | "delivery"
+  const t = await getTranslations("SidebarNav")
 
   // اختيار المكون بناءً على الدور
   const DashboardComponent =
@@ -81,12 +75,14 @@ export default async function Page() {
             />
             <Breadcrumb>
               <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
+                <BreadcrumbItem>
+                  <BreadcrumbPage>{t(`dashboard.${role}`)}</BreadcrumbPage>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>{roleTitles[role]}</BreadcrumbPage>
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink href={appRouter.dashboard}>
+                    {t("dashboard.home")}
+                  </BreadcrumbLink>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>

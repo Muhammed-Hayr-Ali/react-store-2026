@@ -1,3 +1,5 @@
+"use client"
+
 import {
   Card,
   CardContent,
@@ -15,63 +17,78 @@ import {
   CreditCard,
   MapPin,
 } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 export default function CustomerDashboard() {
+  const t = useTranslations("customerDashboard")
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Customer Dashboard
-        </h1>
-        <p className="text-muted-foreground">
-          View your orders, wishlist, reviews, and account settings
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("description")}</p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("stats.totalOrders")}
+            </CardTitle>
             <ShoppingBag className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">15</div>
-            <p className="text-xs text-muted-foreground">3 pending delivery</p>
+            <p className="text-xs text-muted-foreground">
+              3 {t("stats.pendingDelivery")}
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Wishlist</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("stats.wishlist")}
+            </CardTitle>
             <Heart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground">2 items on sale</p>
+            <p className="text-xs text-muted-foreground">
+              2 {t("stats.itemsOnSale")}
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Coupons</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("stats.coupons")}
+            </CardTitle>
             <Ticket className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">3</div>
-            <p className="text-xs text-muted-foreground">1 expires soon</p>
+            <p className="text-xs text-muted-foreground">
+              1 {t("stats.expiresSoon")}
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Reviews</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("stats.reviews")}
+            </CardTitle>
             <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">4.8 average rating</p>
+            <p className="text-xs text-muted-foreground">
+              4.8 {t("stats.averageRating")}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -79,12 +96,10 @@ export default function CustomerDashboard() {
       {/* Main Content Sections */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         {/* Recent Orders */}
-        <Card className="col-span-4">
+        <Card className="lg:col-span-4">
           <CardHeader>
-            <CardTitle>Recent Orders</CardTitle>
-            <CardDescription>
-              Your latest purchases and their status
-            </CardDescription>
+            <CardTitle>{t("recentOrders.title")}</CardTitle>
+            <CardDescription>{t("recentOrders.description")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -112,10 +127,14 @@ export default function CustomerDashboard() {
                   </div>
                   <div className="text-right">
                     <div className="text-sm font-medium">
-                      ${(Math.random() * 100 + 30).toFixed(2)}
+                      ${[78.81, 64.39, 45.5, 129.99, 89.25][i - 1]}
                     </div>
                     <button className="text-xs text-primary hover:underline">
-                      {i === 1 ? "Track" : i === 4 ? "Reorder" : "View"}
+                      {i === 1
+                        ? t("recentOrders.track")
+                        : i === 4
+                          ? t("recentOrders.reorder")
+                          : t("recentOrders.view")}
                     </button>
                   </div>
                 </div>
@@ -125,10 +144,10 @@ export default function CustomerDashboard() {
         </Card>
 
         {/* Wishlist Items */}
-        <Card className="col-span-3">
+        <Card className="lg:col-span-3">
           <CardHeader>
-            <CardTitle>My Wishlist</CardTitle>
-            <CardDescription>Saved items for later</CardDescription>
+            <CardTitle>{t("wishlist.title")}</CardTitle>
+            <CardDescription>{t("wishlist.description")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {[1, 2, 3, 4].map((i) => (
@@ -141,14 +160,14 @@ export default function CustomerDashboard() {
                     <p className="text-sm font-medium">Product {i}</p>
                     <p className="text-xs text-muted-foreground">
                       {i === 2
-                        ? "On Sale! -20%"
-                        : `$${(Math.random() * 50 + 20).toFixed(2)}`}
+                        ? `${t("wishlist.onSale")}! -20%`
+                        : `$${[39.99, 49.99, 69.99, 29.99][i - 1]}`}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button className="text-xs text-primary hover:underline">
-                    Add to Cart
+                    {t("wishlist.addToCart")}
                   </button>
                   <Heart className="h-4 w-4 fill-red-500 text-red-500" />
                 </div>
@@ -164,9 +183,9 @@ export default function CustomerDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Ticket className="h-5 w-5" />
-              Available Coupons
+              {t("coupons.title")}
             </CardTitle>
-            <CardDescription>Your active discount codes</CardDescription>
+            <CardDescription>{t("coupons.description")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-3">
@@ -185,7 +204,7 @@ export default function CustomerDashboard() {
                   </p>
                   <p className="text-lg font-semibold">{coupon.discount}</p>
                   <p className="text-xs text-muted-foreground">
-                    Expires in {coupon.expires}
+                    {t("coupons.expiresIn")} {coupon.expires}
                   </p>
                 </div>
               ))}
@@ -197,9 +216,9 @@ export default function CustomerDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MapPin className="h-5 w-5" />
-              Saved Addresses
+              {t("addresses.title")}
             </CardTitle>
-            <CardDescription>Your delivery addresses</CardDescription>
+            <CardDescription>{t("addresses.description")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -212,7 +231,7 @@ export default function CustomerDashboard() {
                     <MapPin className="mt-0.5 h-5 w-5 text-muted-foreground" />
                     <div>
                       <p className="text-sm font-medium">
-                        {i === 1 ? "Home" : "Work"}
+                        {i === 1 ? t("addresses.home") : t("addresses.work")}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {i === 1
@@ -222,12 +241,12 @@ export default function CustomerDashboard() {
                     </div>
                   </div>
                   <button className="text-xs text-primary hover:underline">
-                    Edit
+                    {t("addresses.edit")}
                   </button>
                 </div>
               ))}
               <button className="w-full text-center text-sm text-primary hover:underline">
-                + Add New Address
+                {t("addresses.addNew")}
               </button>
             </div>
           </CardContent>
@@ -239,9 +258,9 @@ export default function CustomerDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Star className="h-5 w-5" />
-            My Reviews
+            {t("reviews.title")}
           </CardTitle>
-          <CardDescription>Products you have reviewed</CardDescription>
+          <CardDescription>{t("reviews.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -267,7 +286,7 @@ export default function CustomerDashboard() {
                   </div>
                 </div>
                 <button className="text-xs text-primary hover:underline">
-                  Edit Review
+                  {t("reviews.editReview")}
                 </button>
               </div>
             ))}

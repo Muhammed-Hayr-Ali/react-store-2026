@@ -27,20 +27,23 @@ export default function ComingSoonPage() {
         <ThemeToggle />
       </div> */}
       <div className="flex flex-col items-center gap-6">
-        <Badge variant="secondary" className="px-3 bg-background/50">
+        <Badge
+          variant="secondary"
+          className="bg-background/50 px-4 py-1.5 text-sm"
+        >
           {t("titlePart1")}
         </Badge>
 
-        <h1 className="pt-4 text-2xl font-bold tracking-tight md:text-4xl lg:text-5xl">
+        <h1 className="pt-4 text-3xl font-bold tracking-tight md:text-5xl lg:text-6xl">
           {t("titlePart2")}
         </h1>
 
-        <p className="max-w-105 text-xs text-balance text-muted-foreground md:text-sm lg:text-base">
+        <p className="max-w-xl text-sm text-balance text-muted-foreground md:text-base lg:text-lg">
           {t("subtitle")}
         </p>
       </div>
 
-      <Button variant="outline" disabled className="text-xs md:text-sm">
+      <Button variant="outline" disabled className="text-sm md:text-base">
         {t("footer")}
       </Button>
     </div>

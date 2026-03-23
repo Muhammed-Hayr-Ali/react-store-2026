@@ -11,10 +11,12 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/lib/providers/auth-provider"
+import { useTranslations } from "next-intl"
 
 export function NavSecondary({
   ...props
 }: React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
+  const t = useTranslations("SidebarNav")
   const { profile, hasRole } = useAuth()
 
   // لا تعرض القسم للـ Admin
@@ -42,6 +44,17 @@ export function NavSecondary({
     }
   }
 
+  const getStatusLabel = (status: string) => {
+    return t(`planStatus.${status}`) || status
+  }
+
+  const getPlanName = (planName: string | undefined) => {
+    if (!planName) return ""
+    // تحويل اسم الخطة إلى مفتاح ترجمة (مثال: "Enterprise Seller" -> "enterprise_seller")
+    const key = planName.toLowerCase().replace(/\s+/g, "_")
+    return t(`planNames.${key}`) || planName
+  }
+
   return (
     <SidebarGroup
       {...props}
@@ -54,7 +67,9 @@ export function NavSecondary({
             <SidebarMenuButton asChild size="sm">
               <div className="flex items-center gap-2">
                 <CreditCard className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{activePlan.plan_name}</span>
+                <span className="text-sm">
+                  {getPlanName(activePlan.plan_name)}
+                </span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -64,8 +79,8 @@ export function NavSecondary({
             <SidebarMenuButton asChild size="sm">
               <div className="flex items-center gap-2">
                 {getStatusIcon()}
-                <span className="text-xs text-muted-foreground capitalize">
-                  {activePlan.status}
+                <span className="text-xs text-muted-foreground">
+                  {getStatusLabel(activePlan.status)}
                 </span>
               </div>
             </SidebarMenuButton>

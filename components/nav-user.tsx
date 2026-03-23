@@ -27,6 +27,7 @@ import {
 } from "lucide-react"
 import { useAuth } from "@/lib/providers/auth-provider"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 
 export function NavUser({
   user,
@@ -37,6 +38,7 @@ export function NavUser({
     avatar: string
   }
 }) {
+  const t = useTranslations("SidebarNav")
   const { isMobile } = useSidebar()
   const { signOut, profile, hasRole } = useAuth()
   const router = useRouter()
@@ -110,7 +112,7 @@ export function NavUser({
                 <DropdownMenuGroup>
                   <DropdownMenuItem>
                     <SparklesIcon />
-                    Upgrade Plan
+                    {t("userMenu.upgradePlan")}
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
               </>
@@ -119,21 +121,21 @@ export function NavUser({
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <BadgeCheckIcon />
-                Account
+                {t("userMenu.account")}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <CreditCardIcon />
-                Billing
+                {t("userMenu.billing")}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <BellIcon />
-                Notifications
+                {t("userMenu.notifications")}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut}>
               <LogOutIcon />
-              Log out
+              {t("userMenu.logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
