@@ -1,5 +1,9 @@
 {
   "siteName": "ماركتنا",
+  "callback": {
+    "loading": "جاري التحميل...",
+    "processingSignIn": "جاري معالجة تسجيل الدخول..."
+  },
   "Header": {
     "home": "الرئيسية",
     "dashboard": "لوحة التحكم",

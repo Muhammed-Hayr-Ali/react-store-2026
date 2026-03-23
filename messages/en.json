@@ -1,5 +1,9 @@
 {
   "siteName": "Marketna",
+  "callback": {
+    "loading": "Loading...",
+    "processingSignIn": "Processing your sign in..."
+  },
   "Header": {
     "home": "Home",
     "dashboard": "Dashboard",
