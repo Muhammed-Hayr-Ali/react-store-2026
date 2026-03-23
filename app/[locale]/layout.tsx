@@ -63,16 +63,16 @@ export default async function RootLayout({
       )}
     >
       <body>
-        <AuthProvider>
-          <TooltipProvider>
-            <NextIntlClientProvider messages={messages}>
-              <ThemeProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <TooltipProvider>
+              <NextIntlClientProvider messages={messages}>
                 {children}
                 <Toaster position="top-center" richColors />
-              </ThemeProvider>
-            </NextIntlClientProvider>
-          </TooltipProvider>
-        </AuthProvider>
+              </NextIntlClientProvider>
+            </TooltipProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
