@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sidebar"
 import { ChevronRightIcon } from "lucide-react"
 import { roleNavIcons } from "@/lib/data/sidebar-icons"
+import Link from "next/link"
 
 type Role = "admin" | "vendor" | "customer" | "delivery"
 type IconKey = keyof (typeof roleNavIcons)[Role]
@@ -72,12 +73,12 @@ export function NavMain({
                   size="md"
                   className="group-data-[collapsible=icon]:justify-center"
                 >
-                  <a href={item.url}>
+                  <Link href={item.url}>
                     {getIcon(item.icon, role)}
                     <span className="group-data-[collapsible=icon]:hidden">
                       {item.title}
                     </span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             )

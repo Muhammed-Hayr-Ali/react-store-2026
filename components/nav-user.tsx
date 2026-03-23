@@ -17,12 +17,13 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import {
-  ChevronsUpDownIcon,
   SparklesIcon,
   BadgeCheckIcon,
   CreditCardIcon,
   BellIcon,
   LogOutIcon,
+  User2,
+  ChevronRightIcon,
 } from "lucide-react"
 import { useAuth } from "@/lib/providers/auth-provider"
 import { useRouter } from "next/navigation"
@@ -54,17 +55,26 @@ export function NavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="px-2 py-8 bg-background  group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="bg-background px-2 py-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarImage
+                  src={profile?.avatar_url || user.avatar}
+                  alt={profile?.full_name || user.name}
+                />
+                <AvatarFallback className="rounded-lg">
+                  <User2 />
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
+                <span className="truncate font-medium">
+                  {profile?.full_name || user.name}
+                </span>
+                <span className="truncate text-xs">
+                  {profile?.email || user.email}
+                </span>
               </div>
-              {/* <ChevronsUpDownIcon className="ms-auto size-4 group-data-[collapsible=icon]:hidden" /> */}
+              <ChevronRightIcon className="ms-auto transition-transform duration-200 group-data-[collapsible=icon]:hidden group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -76,12 +86,21 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarImage
+                    src={profile?.avatar_url || user.avatar}
+                    alt={profile?.full_name || user.name}
+                  />
+                  <AvatarFallback className="rounded-lg">
+                    <User2 />
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
+                  <span className="truncate font-medium">
+                    {profile?.full_name || user.name}
+                  </span>
+                  <span className="truncate text-xs">
+                    {profile?.email || user.email}
+                  </span>
                 </div>
               </div>
             </DropdownMenuLabel>
