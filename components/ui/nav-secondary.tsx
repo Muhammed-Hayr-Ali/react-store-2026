@@ -43,7 +43,10 @@ export function NavSecondary({
   }
 
   return (
-    <SidebarGroup {...props}>
+    <SidebarGroup
+      {...props}
+      className="mt-auto group-data-[collapsible=icon]:hidden"
+    >
       <SidebarGroupContent>
         <SidebarMenu>
           {/* اسم الخطة */}

@@ -65,11 +65,18 @@ export function NavMain({
           // إذا كان العنصر لا يحتوي على عناصر فرعية (مثل Dashboard)
           if (!item.items || item.items.length === 0) {
             return (
-              <SidebarMenuItem key={item.title} className="">
-                <SidebarMenuButton asChild tooltip={item.title} size="lg">
+              <SidebarMenuItem key={item.title} className="mb-1">
+                <SidebarMenuButton
+                  asChild
+                  tooltip={item.title}
+                  size="md"
+                  className="group-data-[collapsible=icon]:justify-center"
+                >
                   <a href={item.url}>
                     {getIcon(item.icon, role)}
-                    <span>{item.title}</span>
+                    <span className="group-data-[collapsible=icon]:hidden">
+                      {item.title}
+                    </span>
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -84,12 +91,18 @@ export function NavMain({
               defaultOpen={item.isActive}
               className="group/collapsible"
             >
-              <SidebarMenuItem className="">
+              <SidebarMenuItem className="mb-1">
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton tooltip={item.title} size="lg">
+                  <SidebarMenuButton
+                    tooltip={item.title}
+                    size="md"
+                    className="group-data-[collapsible=icon]:justify-center"
+                  >
                     {getIcon(item.icon, role)}
-                    <span>{item.title}</span>
-                    <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    <span className="group-data-[collapsible=icon]:hidden">
+                      {item.title}
+                    </span>
+                    <ChevronRightIcon className="ms-auto transition-transform duration-200 group-data-[collapsible=icon]:hidden group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180" />
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
