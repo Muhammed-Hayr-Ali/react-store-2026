@@ -7,7 +7,8 @@ export default async function Page() {
   if (!res) {
     redirect("/")
   }
-  // ;(admin, vendor, delivery, customer)
+  
+  // (admin, vendor, delivery, customer)
 
   if (res.role === "admin") {
     redirect("/dashboard/admin")
