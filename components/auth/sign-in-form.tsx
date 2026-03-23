@@ -39,31 +39,25 @@ export default function SignInForm({
   } = useForm<SignInInput>()
 
   const onSubmit = async (data: SignInInput) => {
-    try {
-      const result = await signInWithPassword(data)
+    const result = await signInWithPassword(data)
 
-      if (result.success) {
-        router.push(appRouter.home)
-        router.refresh()
-      } else {
-        toast.error(result.error)
-      }
-    } catch (error) {
-      toast.error((error as Error).message)
+    if (!result.success) {
+      toast.error(result.error)
+      return
     }
+    router.push(appRouter.home)
+    router.refresh()
   }
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true)
-    try {
-      const result = await signInWithGoogle()
-      if (!result.success) {
-        toast.error(result.error)
-      }
-    } catch (error) {
-      toast.error((error as Error).message)
-      setIsLoading(false)
+    const result = await signInWithGoogle()
+    if (!result.success) {
+      toast.error(result.error)
+      return
     }
+    router.push(appRouter.home)
+    router.refresh()
   }
 
   return (
