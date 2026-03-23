@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   // const functionName = searchParams.get("function")
   const supabase = await createServerClient()
 
-   const res = await supabase.auth.getUser()
+   const res = await getUserRole()
 
 
   if (!res) {

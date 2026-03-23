@@ -1,89 +1,87 @@
 "use server"
 
 import { createServerClient } from "@/lib/supabase/createServerClient"
-import { revalidateTag } from "next/cache"
+import { i } from "motion/react-client"
+// {
+// "is_active": true,
+// "granted_by": "5ad15737-19ac-4716-b804-45b598ff2822",
+// "roles": {
+// "id": "857ceec0-3010-4f36-a48c-9898acc14b4f",
+// "name": "customer"
+// }
+// }
 
-export interface UserRole {
-  id: string
-  name: "admin" | "vendor" | "delivery" | "customer"
-  description: string | null
-  permissions: string[]
+type StructuredRole = {
   is_active: boolean
-  granted_at: string
+  granted_by: string
+  roles: {
+    id: string
+    name: string
+  }
+
 }
 
-export type GetUserRoleResult = 
-  | { success: true;  role: UserRole | null }
-  | { success: false; error: string; code?: string }
+type Role = {
+  is_active: boolean
+  granted_by: string
+  roles: {
+    id: string
+    name: string
+  }
+}
 
 export async function getUserRole() {
   const supabase = await createServerClient()
 
-  // ─────────────────────────────────────────────────────
-  // 1. Get the authenticated user
-  // ─────────────────────────────────────────────────────
-  const {  data , error: userError } = await supabase.auth.getUser()
+  // 1. التحقق من هوية المستخدم (مهم جداً في السيرفر)
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
 
-  if (userError || !data || !data.user.id) {
-    console.error("[getUserRole] Auth error:", userError)
-    return {
-      success: false,
-      error: "USER_NOT_AUTHENTICATED",
-      code: "AUTH_ERROR",
-    }
+  if (authError || !user) {
+    console.warn("⚠️ No authenticated user found:", authError?.message)
+    return null
   }
 
-  try {
-    // ─────────────────────────────────────────────────────
-    // 2. Query profile_roles joined with roles
-    //    - Get ONLY active roles for current user
-    //    - Parse JSONB permissions array
-    // ─────────────────────────────────────────────────────
-    const { data: roleData, error: queryError } = await supabase
-      .from("profile_roles")
-      .select(
-        `
-        is_active,
-        granted_at,
-        roles (
-          id,
-          name,
-          description,
-          permissions
-        )
+  // 2. الاستعلام مع الربط (Join) وجلب دور واحد نشط فقط
+  // ملاحظة: في السيرفر نستخدم .single() لأننا نتوقع دوراً واحداً لكل مستخدم
+  const { data: roleData, error: queryError } = await supabase
+    .from("profile_roles")
+    .select(
       `
+      is_active,
+      granted_by,
+      roles:role_id (
+      id,
+      name      
       )
-      .eq("user_id", data.user.id)
-      .eq("is_active", true)
-      .maybeSingle()  // Returns null if no row found (not an error)
+    `
+    )
+    .eq("user_id", user.id)
+    .eq("is_active", true) // جلب الأدوار النشطة فقط
+    .single() // إرجاع null إذا لم يوجد دور (أكثر أماناً من .single() التي ترمي خطأ)
 
-    if (queryError) {
-      console.error("[getUserRole] Query error:", queryError)
-      return {
-        success: false,
-        error: "Failed to fetch user role",
-        code: queryError.code || "QUERY_ERROR"
-      }
-    }
+  // 3. معالجة الأخطاء
+  if (queryError) {
+    console.error("❌ Database Error:", {
+      code: queryError.code,
+      message: queryError.message,
+      hint: queryError.hint,
+      details: queryError.details,
+    })
 
-    // ─────────────────────────────────────────────────────
-    // 3. Transform response to UserRole interface
-    // ─────────────────────────────────────────────────────
-    if (!roleData || !roleData.roles) {
-      // User exists but has no active role assigned yet
-      return { success: true,  role: null }
-    }
+    return null
+  }
 
-    
+  const role: StructuredRole = roleData as unknown as StructuredRole
 
-    return { success: true,  role: roleData.roles }
 
-  } catch (err) {
-    console.error("[getUserRole] Unexpected error:", err)
-    return {
-      success: false,
-      error: "An unexpected error occurred",
-      code: "INTERNAL_ERROR"
-    }
+
+  return {
+    id: role.roles.id,
+    role: role.roles.name,
+    isActive: role.is_active,
+    grantedBy: role.granted_by,
   }
 }
