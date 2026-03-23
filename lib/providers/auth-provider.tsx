@@ -1,6 +1,13 @@
-"use client"
+'use client'
 
-import { createContext, useContext, useEffect, useState } from "react"
+
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react"
 import type { User } from "@supabase/supabase-js"
 import { createBrowserClient } from "@/lib/supabase/createBrowserClient"
 
@@ -77,7 +84,8 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 // ─────────────────────────────────────────────────────
-// AuthProvider - Secure, Minimal & Fast
+// AuthProvider - Secure Production Version
+// ✅ Always uses getUser() - never trusts session.user directly
 // ─────────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -88,56 +96,98 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabase = createBrowserClient()
 
   // ───────────────────────────────────────────────────
-  // Fetch Profile - Simple & Direct
+  // 🔐 SECURE: Always verify user with server via getUser()
+  // Never use session.user directly - it comes from local storage
   // ───────────────────────────────────────────────────
-  const fetchProfile = async (userId: string): Promise<Profile | null> => {
+  const getVerifiedUser = useCallback(async (): Promise<User | null> => {
     try {
-      // Try secure RPC function first
-      const { data, error } = await supabase.rpc("get_current_user_data")
-      
-      if (!error && data?.[0]) {
-        return data[0] as Profile
-      }
-      
-      // Fallback: direct table query (minimal profile)
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single()
-      
-      if (profileData) {
-        return {
-          ...profileData,
-          roles: [], role_names: [], role_permissions: [],
-          plans: [], active_plan_name: null, active_plan_status: null,
-          plan_permissions: {}, all_permissions: [],
-          has_active_role: false, has_active_plan: false, is_fully_setup: false,
-        } as Profile
-      }
-    } catch {
-      // Silent fail
-    }
-    return null
-  }
-
-  // ───────────────────────────────────────────────────
-  // Verify & Load User - Always uses getUser() for security
-  // ───────────────────────────────────────────────────
-  const verifyAndLoadUser = async (): Promise<User | null> => {
-    try {
-      // ✅ SECURE: Always verify with server via getUser()
-      const { data:  { user }, error } = await supabase.auth.getUser()
-      
-      if (error || !user) {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser()
+      if (authError) {
+        console.error("Supabase Auth Error (getUser):", authError.message)
+        setError(authError.message)
         return null
       }
-      
+      setError(null)
       return user
-    } catch {
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        console.error("Unexpected error during getUser:", e.message)
+        setError(e.message)
+      } else {
+        console.error("Unexpected error during getUser:", e)
+        setError("An unknown error occurred during user verification.")
+      }
       return null
     }
-  }
+  }, [supabase])
+
+  // ───────────────────────────────────────────────────
+  // Fetch Profile - Simple & Direct
+  // ───────────────────────────────────────────────────
+  const fetchProfile = useCallback(
+    async (userId: string): Promise<Profile | null> => {
+      try {
+        // Try secure RPC function first
+        const { data, error: rpcError } = await supabase.rpc(
+          "get_current_user_data"
+        )
+        if (!rpcError && data?.[0]) {
+          setError(null)
+          return data[0] as Profile
+        }
+        if (rpcError) {
+          console.warn(
+            "RPC \'get_current_user_data\' failed, falling back to direct query:",
+            rpcError.message
+          )
+        }
+
+        // Fallback: direct table query
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", userId)
+          .single()
+
+        if (profileError) {
+          console.error("Supabase Profile Fetch Error:", profileError.message)
+          setError(profileError.message)
+          return null
+        }
+
+        if (profileData) {
+          setError(null)
+          return {
+            ...profileData,
+            roles: [],
+            role_names: [],
+            role_permissions: [],
+            plans: [],
+            active_plan_name: null,
+            active_plan_status: null,
+            plan_permissions: {},
+            all_permissions: [],
+            has_active_role: false,
+            has_active_plan: false,
+            is_fully_setup: false,
+          } as Profile
+        }
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          console.error("Unexpected error during fetchProfile:", e.message)
+          setError(e.message)
+        } else {
+          console.error("Unexpected error during fetchProfile:", e)
+          setError("An unknown error occurred during profile fetch.")
+        }
+      }
+      return null
+    },
+    [supabase]
+  )
 
   // ───────────────────────────────────────────────────
   // Initialize Auth - Run Once on Mount
@@ -145,21 +195,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let mounted = true
 
-    const init = async () => {
-      // ✅ Always verify user with server (not from local storage)
-      const verifiedUser = await verifyAndLoadUser()
-      
+    const initializeAuth = async () => {
+      // ✅ SECURE: Verify user with server on initial load
+      const verifiedUser = await getVerifiedUser()
+
       if (!mounted) return
-      
+
       if (!verifiedUser) {
         setStatus("unauthenticated")
+        setUser(null)
+        setProfile(null)
         return
       }
 
       setUser(verifiedUser)
       setStatus("authenticated")
-      
-      // Fetch profile in background (non-blocking)
+
+      // Fetch profile in background
       fetchProfile(verifiedUser.id).then((p) => {
         if (mounted) {
           setProfile(p)
@@ -168,20 +220,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
     }
 
-    init()
+    initializeAuth() // Call the async function
 
+    // ─────────────────────────────────────────────────
     // Subscribe to auth state changes
+    // ✅ SECURE: Always re-verify with getUser(), never use session.user
+    // ─────────────────────────────────────────────────
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event) => {
+    } = supabase.auth.onAuthStateChange(async (_event, _session) => {
       if (!mounted) return
 
-      // ✅ On auth change, ALWAYS re-verify with getUser()
-      // Never trust session.user directly from the event
-      const verifiedUser = await verifyAndLoadUser()
+      // 🔐 CRITICAL FIX:
+      // Never use _session?.user here - it\'s from local storage!
+      // Always call getUser() to verify with Supabase Auth server
+      const verifiedUser = await getVerifiedUser()
 
       setUser(verifiedUser)
-      setProfile(null)
+      setProfile(null) // Clear profile, will refetch below
       setError(null)
       setStatus(verifiedUser ? "authenticated" : "unauthenticated")
 
@@ -194,47 +250,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [supabase])
+  }, [supabase, getVerifiedUser, fetchProfile]) // Added dependencies
 
   // ───────────────────────────────────────────────────
   // Actions
   // ───────────────────────────────────────────────────
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
+    // Update UI state optimistically, then confirm with backend
     setUser(null)
     setProfile(null)
     setError(null)
     setStatus("unauthenticated")
-    await supabase.auth.signOut()
-  }
+    const { error: signOutError } = await supabase.auth.signOut()
+    if (signOutError) {
+      console.error("Supabase SignOut Error:", signOutError.message)
+      setError(signOutError.message)
+      // Optionally, revert UI state if signOut fails critically
+      // For simplicity, we assume signOut is generally reliable
+    }
+  }, [supabase])
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     if (user) {
       const p = await fetchProfile(user.id)
       setProfile(p)
       if (!p) setError("فشل تحديث البروفايل")
       else setError(null)
     }
-  }
+  }, [user, fetchProfile])
 
   // ───────────────────────────────────────────────────
   // Permission Helpers - Simple & Fast
   // ───────────────────────────────────────────────────
 
-  const hasPermission = (permission: string) =>
-    !!profile?.all_permissions?.includes(permission) ||
-    !!profile?.all_permissions?.includes("*:*")
+  const hasPermission = useCallback(
+    (permission: string) =>
+      !!profile?.all_permissions?.includes(permission) ||
+      !!profile?.all_permissions?.includes("*:*"),
+    [profile]
+  )
 
-  const hasRole = (roleName: string) =>
-    !!profile?.role_names?.includes(roleName)
+  const hasRole = useCallback(
+    (roleName: string) => !!profile?.role_names?.includes(roleName),
+    [profile]
+  )
 
-  const hasActivePlan = (planName?: string) =>
-    !!profile?.has_active_plan &&
-    (!planName || profile.active_plan_name === planName)
-
-  // ───────────────────────────────────────────────────
-  // Context Value
-  // ───────────────────────────────────────────────────
+  const hasActivePlan = useCallback(
+    (planName?: string) =>
+      !!profile?.has_active_plan &&
+      (!planName || profile.active_plan_name === planName),
+    [profile]
+  )
 
   const value = {
     user,

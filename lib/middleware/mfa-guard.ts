@@ -6,22 +6,28 @@ export async function MfaGuard() {
   // Create a new server client
   const supabase = await createServerClient()
 
-  // Get the MFA assurance level
-  const { data: aalData, error: aalError } =
-    await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
 
-  // Check for errors
-  if (aalError) {
-    console.error("AalGuard Error:", aalError)
+  const jwt = session?.access_token
+
+  if (!jwt) {
     return null
   }
 
-  // Check if MFA is needed
-  const needsMfaVerification =
-    aalData.currentLevel === "aal1" && aalData.nextLevel === "aal2"
+  const { data, error } =
+    await supabase.auth.mfa.getAuthenticatorAssuranceLevel(jwt)
 
-  // Redirect to MFA verification page
-  if (needsMfaVerification) {
+  if (error) {
+    console.error("AalGuard Error:", error)
+    return null
+  }
+
+  const currentLevel = data.currentLevel
+  const nextLevel = data.nextLevel
+
+  if (currentLevel === "aal1" && nextLevel === "aal2") {
     return redirect(appRouter.verifyOtp)
   }
 
