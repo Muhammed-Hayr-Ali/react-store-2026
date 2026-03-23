@@ -54,8 +54,6 @@ import {
 
 import { useAuth } from "@/lib/providers/auth-provider"
 import { ButtonGroup } from "../ui/button-group"
-import { signOut } from "@/lib/actions/authentication/signOut"
-import { toast } from "sonner"
 
 export default function Header() {
   const router = useRouter()
@@ -307,17 +305,13 @@ function UserMenu() {
   const locale = useLocale()
   const t = useTranslations("Header")
 
-  const { profile, user, isLoading } = useAuth()
+  const { profile, user, signOut, isLoading } = useAuth()
 
   const avatar = profile?.avatar_url
   const menuItems = user ? siteConfig.userMenuItems : []
 
   const handleLogout = async () => {
-    const { error } = await signOut()
-
-    if (error) {
-      return toast.error(error)
-    }
+    await signOut()
     router.refresh()
   }
 

@@ -1,15 +1,7 @@
 "use server"
 
 import { createServerClient } from "@/lib/supabase/createServerClient"
-import { i } from "motion/react-client"
-// {
-// "is_active": true,
-// "granted_by": "5ad15737-19ac-4716-b804-45b598ff2822",
-// "roles": {
-// "id": "857ceec0-3010-4f36-a48c-9898acc14b4f",
-// "name": "customer"
-// }
-// }
+
 
 type StructuredRole = {
   is_active: boolean
@@ -21,14 +13,6 @@ type StructuredRole = {
 
 }
 
-type Role = {
-  is_active: boolean
-  granted_by: string
-  roles: {
-    id: string
-    name: string
-  }
-}
 
 export async function getUserRole() {
   const supabase = await createServerClient()

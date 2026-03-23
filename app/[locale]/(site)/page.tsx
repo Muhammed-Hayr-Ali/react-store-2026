@@ -1,5 +1,4 @@
 import ComingSoonPage from "@/components/common-soon/common-soon"
-import { AuthDebug } from "@/components/debug/auth-debug"
 import Header from "@/components/layout/header"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getTranslations } from "next-intl/server"
@@ -19,7 +18,6 @@ export default function Page() {
     <>
       <Header />
       <ComingSoonPage />
-      <AuthDebug />
     </>
   )
 }

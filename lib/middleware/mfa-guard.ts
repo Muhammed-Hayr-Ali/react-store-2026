@@ -10,9 +10,12 @@ export async function MfaGuard() {
     data: { session },
   } = await supabase.auth.getSession()
 
+  if (!session) {
+    return null
+  }
   const jwt = session?.access_token
 
-  if (!jwt) {
+  if (!jwt || jwt === "") {
     return null
   }
 

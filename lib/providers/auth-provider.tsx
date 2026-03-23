@@ -106,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         error: authError,
       } = await supabase.auth.getUser()
       if (authError) {
-        console.error("Supabase Auth Error (getUser):", authError.message)
+        // console.error("Supabase Auth Error (getUser):", authError.message)
         setError(authError.message)
         return null
       }
@@ -114,10 +114,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return user
     } catch (e: unknown) {
       if (e instanceof Error) {
-        console.error("Unexpected error during getUser:", e.message)
+        // console.error("Unexpected error during getUser:", e.message)
         setError(e.message)
       } else {
-        console.error("Unexpected error during getUser:", e)
+        // console.error("Unexpected error during getUser:", e)
         setError("An unknown error occurred during user verification.")
       }
       return null
@@ -139,10 +139,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return data[0] as Profile
         }
         if (rpcError) {
-          console.warn(
-            "RPC \'get_current_user_data\' failed, falling back to direct query:",
-            rpcError.message
-          )
+          // console.warn(
+          //   "RPC \'get_current_user_data\' failed, falling back to direct query:",
+          //   rpcError.message
+          // )
         }
 
         // Fallback: direct table query
@@ -153,7 +153,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .single()
 
         if (profileError) {
-          console.error("Supabase Profile Fetch Error:", profileError.message)
+          // console.error("Supabase Profile Fetch Error:", profileError.message)
           setError(profileError.message)
           return null
         }
@@ -177,10 +177,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (e: unknown) {
         if (e instanceof Error) {
-          console.error("Unexpected error during fetchProfile:", e.message)
+          // console.error("Unexpected error during fetchProfile:", e.message)
           setError(e.message)
         } else {
-          console.error("Unexpected error during fetchProfile:", e)
+          // console.error("Unexpected error during fetchProfile:", e)
           setError("An unknown error occurred during profile fetch.")
         }
       }
@@ -264,7 +264,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setStatus("unauthenticated")
     const { error: signOutError } = await supabase.auth.signOut()
     if (signOutError) {
-      console.error("Supabase SignOut Error:", signOutError.message)
+      // console.error("Supabase SignOut Error:", signOutError.message)
       setError(signOutError.message)
       // Optionally, revert UI state if signOut fails critically
       // For simplicity, we assume signOut is generally reliable
