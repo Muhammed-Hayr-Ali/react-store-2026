@@ -10,11 +10,8 @@ import {
 import {
   Users,
   DollarSign,
-  ShoppingCart,
   TrendingUp,
-  Package,
   Tag,
-  ClipboardList,
   Activity,
 } from "lucide-react"
 import { useTranslations } from "next-intl"

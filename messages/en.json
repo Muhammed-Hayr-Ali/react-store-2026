@@ -565,17 +565,6 @@
     "verifySuccess": "Verification successful"
   },
   "Verify": {
-    "title": "Verify Your Email",
-    "description": "We've sent a verification code to your email",
-    "enterCode": "Enter verification code",
-    "verify": "Verify",
-    "resendCode": "Resend Code",
-    "codeSent": "Code sent! Check your email",
-    "verificationSuccess": "Email verified successfully",
-    "verificationFailed": "Invalid verification code",
-    "backToSignIn": "Back to Sign In"
-  },
-  "Verify": {
     "title": "Two-Factor Authentication",
     "description": "Enter the 6-digit code from your authenticator app",
     "enterCode": "Enter verification code",
