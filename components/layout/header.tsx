@@ -53,7 +53,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import { useAuth } from "@/lib/providers/auth-provider"
-import { ButtonGroup } from "../ui/button-group"
+import { ButtonGroup } from "@/components/ui/button-group"
+import NotificationBell from "@/components/notifications/NotificationBell"
 
 // ============================================================================
 // 🎣 Custom Hook: shared logic for Header components
@@ -478,6 +479,7 @@ export default function Header() {
           {/* Logo - Left */}
           <div className="flex basis-1/3 items-center justify-start">
             <AppLogo />
+            <NotificationBell />
           </div>
 
           {/* Search - Center (macOS Spotlight style) */}

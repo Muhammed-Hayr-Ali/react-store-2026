@@ -6,10 +6,20 @@ import { createBrowserClient } from "@/lib/supabase/createBrowserClient"
 
 import type { Notification } from "@/components/notifications/types"
 
-export function useNotifications() {
+interface UseNotificationsReturn {
+  notifications: Notification[]
+  loading: boolean
+  unreadCount: number
+  markAsRead: (id: string) => Promise<void>
+  markAllAsRead: () => Promise<void>
+}
+
+export function useNotifications(): UseNotificationsReturn {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = createBrowserClient()
+
+  const unreadCount = notifications.filter((n) => !n.is_read).length
 
   useEffect(() => {
     async function fetchNotifications() {
@@ -41,7 +51,7 @@ export function useNotifications() {
 
     fetchNotifications()
 
-    // الاشتراك في Realtime
+    // Subscribe to Realtime updates
     const channel = supabase
       .channel("notifications-channel")
       .on(
@@ -78,8 +88,6 @@ export function useNotifications() {
     await markAll()
     setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })))
   }
-
-  const unreadCount = notifications.filter((n) => !n.is_read).length
 
   return {
     notifications,

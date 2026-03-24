@@ -1,7 +1,11 @@
+// Client Components
 export { default as NotificationBell } from "./NotificationBell"
+
+// Server Components (ONLY import in Server Components)
 export { default as NotificationBellServer } from "./NotificationBellServer"
-export { NotificationIcon } from "./NotificationIcon"
-export { NotificationItem } from "./NotificationItem"
-export { NotificationList } from "./NotificationList"
+
+// Hooks
 export { useNotifications } from "@/hooks/useNotifications"
+
+// Types
 export type { Notification } from "./types"
