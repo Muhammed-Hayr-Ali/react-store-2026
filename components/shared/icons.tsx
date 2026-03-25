@@ -26,7 +26,6 @@ export interface IconProps
 
 export const SearchIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -43,7 +42,6 @@ export const SearchIcon = ({ size, className, ...props }: IconProps) => (
 
 export const HomeIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -60,7 +58,6 @@ export const HomeIcon = ({ size, className, ...props }: IconProps) => (
 
 export const MenuIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -78,7 +75,6 @@ export const MenuIcon = ({ size, className, ...props }: IconProps) => (
 
 export const XIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -95,7 +91,6 @@ export const XIcon = ({ size, className, ...props }: IconProps) => (
 
 export const ChevronLeftIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -111,7 +106,6 @@ export const ChevronLeftIcon = ({ size, className, ...props }: IconProps) => (
 
 export const ChevronRightIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -127,7 +121,6 @@ export const ChevronRightIcon = ({ size, className, ...props }: IconProps) => (
 
 export const ChevronUpIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -143,7 +136,6 @@ export const ChevronUpIcon = ({ size, className, ...props }: IconProps) => (
 
 export const ChevronDownIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -159,7 +151,6 @@ export const ChevronDownIcon = ({ size, className, ...props }: IconProps) => (
 
 export const ArrowLeftIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -176,7 +167,6 @@ export const ArrowLeftIcon = ({ size, className, ...props }: IconProps) => (
 
 export const ArrowRightIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -193,7 +183,6 @@ export const ArrowRightIcon = ({ size, className, ...props }: IconProps) => (
 
 export const ArrowUpIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -210,7 +199,6 @@ export const ArrowUpIcon = ({ size, className, ...props }: IconProps) => (
 
 export const ArrowDownIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -231,7 +219,6 @@ export const ArrowDownIcon = ({ size, className, ...props }: IconProps) => (
 
 export const PlusIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -248,7 +235,6 @@ export const PlusIcon = ({ size, className, ...props }: IconProps) => (
 
 export const MinusIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -264,7 +250,6 @@ export const MinusIcon = ({ size, className, ...props }: IconProps) => (
 
 export const EditIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -281,7 +266,6 @@ export const EditIcon = ({ size, className, ...props }: IconProps) => (
 
 export const TrashIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -301,7 +285,6 @@ export const TrashIcon = ({ size, className, ...props }: IconProps) => (
 
 export const CopyIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -318,7 +301,6 @@ export const CopyIcon = ({ size, className, ...props }: IconProps) => (
 
 export const CheckIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -334,7 +316,6 @@ export const CheckIcon = ({ size, className, ...props }: IconProps) => (
 
 export const XCircleIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -352,7 +333,6 @@ export const XCircleIcon = ({ size, className, ...props }: IconProps) => (
 
 export const CheckCircleIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -369,7 +349,6 @@ export const CheckCircleIcon = ({ size, className, ...props }: IconProps) => (
 
 export const AlertCircleIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -387,7 +366,6 @@ export const AlertCircleIcon = ({ size, className, ...props }: IconProps) => (
 
 export const InfoIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -405,7 +383,6 @@ export const InfoIcon = ({ size, className, ...props }: IconProps) => (
 
 export const AlertTriangleIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -423,7 +400,6 @@ export const AlertTriangleIcon = ({ size, className, ...props }: IconProps) => (
 
 export const XOctagonIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -445,7 +421,6 @@ export const XOctagonIcon = ({ size, className, ...props }: IconProps) => (
 
 export const SettingsIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -462,7 +437,6 @@ export const SettingsIcon = ({ size, className, ...props }: IconProps) => (
 
 export const BellIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -479,7 +453,6 @@ export const BellIcon = ({ size, className, ...props }: IconProps) => (
 
 export const CalendarIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -498,7 +471,6 @@ export const CalendarIcon = ({ size, className, ...props }: IconProps) => (
 
 export const ClockIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -515,7 +487,6 @@ export const ClockIcon = ({ size, className, ...props }: IconProps) => (
 
 export const ExternalLinkIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -533,7 +504,6 @@ export const ExternalLinkIcon = ({ size, className, ...props }: IconProps) => (
 
 export const LinkIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -550,7 +520,6 @@ export const LinkIcon = ({ size, className, ...props }: IconProps) => (
 
 export const DownloadIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -568,7 +537,6 @@ export const DownloadIcon = ({ size, className, ...props }: IconProps) => (
 
 export const UploadIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -586,7 +554,6 @@ export const UploadIcon = ({ size, className, ...props }: IconProps) => (
 
 export const ShareIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -608,7 +575,6 @@ export const MoreHorizontalIcon = ({
   ...props
 }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -626,7 +592,6 @@ export const MoreHorizontalIcon = ({
 
 export const MoreVerticalIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -644,7 +609,6 @@ export const MoreVerticalIcon = ({ size, className, ...props }: IconProps) => (
 
 export const HelpCircleIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -662,7 +626,6 @@ export const HelpCircleIcon = ({ size, className, ...props }: IconProps) => (
 
 export const LanguagesIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -683,7 +646,6 @@ export const LanguagesIcon = ({ size, className, ...props }: IconProps) => (
 
 export const LayoutDashboard = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -702,7 +664,6 @@ export const LayoutDashboard = ({ size, className, ...props }: IconProps) => (
 
 export const Package = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -721,7 +682,6 @@ export const Package = ({ size, className, ...props }: IconProps) => (
 
 export const PaletteIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -741,7 +701,6 @@ export const PaletteIcon = ({ size, className, ...props }: IconProps) => (
 
 export const Ticket = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -764,7 +723,6 @@ export const Ticket = ({ size, className, ...props }: IconProps) => (
 
 export const ShoppingCartIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -782,7 +740,6 @@ export const ShoppingCartIcon = ({ size, className, ...props }: IconProps) => (
 
 export const CreditCardIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -799,7 +756,6 @@ export const CreditCardIcon = ({ size, className, ...props }: IconProps) => (
 
 export const PackageIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -818,7 +774,6 @@ export const PackageIcon = ({ size, className, ...props }: IconProps) => (
 
 export const TagIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -835,7 +790,6 @@ export const TagIcon = ({ size, className, ...props }: IconProps) => (
 
 export const WalletIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -856,7 +810,6 @@ export const WalletIcon = ({ size, className, ...props }: IconProps) => (
 
 export const MailIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -873,7 +826,6 @@ export const MailIcon = ({ size, className, ...props }: IconProps) => (
 
 export const PhoneIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -889,7 +841,6 @@ export const PhoneIcon = ({ size, className, ...props }: IconProps) => (
 
 export const MessageSquareIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -905,7 +856,6 @@ export const MessageSquareIcon = ({ size, className, ...props }: IconProps) => (
 
 export const MessageCircleIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -921,7 +871,6 @@ export const MessageCircleIcon = ({ size, className, ...props }: IconProps) => (
 
 export const SendIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -942,7 +891,6 @@ export const SendIcon = ({ size, className, ...props }: IconProps) => (
 
 export const ImageIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -960,7 +908,6 @@ export const ImageIcon = ({ size, className, ...props }: IconProps) => (
 
 export const VideoIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -977,7 +924,6 @@ export const VideoIcon = ({ size, className, ...props }: IconProps) => (
 
 export const PlayIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -993,7 +939,6 @@ export const PlayIcon = ({ size, className, ...props }: IconProps) => (
 
 export const PauseIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1010,7 +955,6 @@ export const PauseIcon = ({ size, className, ...props }: IconProps) => (
 
 export const VolumeIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1028,7 +972,6 @@ export const VolumeIcon = ({ size, className, ...props }: IconProps) => (
 
 export const VolumeXIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1046,7 +989,6 @@ export const VolumeXIcon = ({ size, className, ...props }: IconProps) => (
 
 export const MicIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1064,7 +1006,6 @@ export const MicIcon = ({ size, className, ...props }: IconProps) => (
 
 export const MicOffIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1084,7 +1025,6 @@ export const MicOffIcon = ({ size, className, ...props }: IconProps) => (
 
 export const CameraIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1105,7 +1045,6 @@ export const CameraIcon = ({ size, className, ...props }: IconProps) => (
 
 export const FileIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1122,7 +1061,6 @@ export const FileIcon = ({ size, className, ...props }: IconProps) => (
 
 export const FileTextIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1142,7 +1080,6 @@ export const FileTextIcon = ({ size, className, ...props }: IconProps) => (
 
 export const FolderIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1158,7 +1095,6 @@ export const FolderIcon = ({ size, className, ...props }: IconProps) => (
 
 export const FolderOpenIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1174,7 +1110,6 @@ export const FolderOpenIcon = ({ size, className, ...props }: IconProps) => (
 
 export const BookmarkIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1190,7 +1125,6 @@ export const BookmarkIcon = ({ size, className, ...props }: IconProps) => (
 
 export const BookIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1206,7 +1140,6 @@ export const BookIcon = ({ size, className, ...props }: IconProps) => (
 
 export const LifeBuoyIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1232,7 +1165,6 @@ export const LifeBuoyIcon = ({ size, className, ...props }: IconProps) => (
 
 export const GithubIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1249,7 +1181,6 @@ export const GithubIcon = ({ size, className, ...props }: IconProps) => (
 
 export const TwitterIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1265,7 +1196,6 @@ export const TwitterIcon = ({ size, className, ...props }: IconProps) => (
 
 export const FacebookIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1281,7 +1211,6 @@ export const FacebookIcon = ({ size, className, ...props }: IconProps) => (
 
 export const InstagramIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1299,7 +1228,6 @@ export const InstagramIcon = ({ size, className, ...props }: IconProps) => (
 
 export const LinkedinIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1317,7 +1245,6 @@ export const LinkedinIcon = ({ size, className, ...props }: IconProps) => (
 
 export const YoutubeIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1334,7 +1261,6 @@ export const YoutubeIcon = ({ size, className, ...props }: IconProps) => (
 
 export const WhatsappIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1357,7 +1283,6 @@ export const WhatsappIcon = ({ size, className, ...props }: IconProps) => (
 
 export const SunIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1381,7 +1306,6 @@ export const SunIcon = ({ size, className, ...props }: IconProps) => (
 
 export const MoonIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1397,7 +1321,6 @@ export const MoonIcon = ({ size, className, ...props }: IconProps) => (
 
 export const CloudIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1413,7 +1336,6 @@ export const CloudIcon = ({ size, className, ...props }: IconProps) => (
 
 export const CloudRainIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1432,7 +1354,6 @@ export const CloudRainIcon = ({ size, className, ...props }: IconProps) => (
 
 export const CloudSnowIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1454,7 +1375,6 @@ export const CloudSnowIcon = ({ size, className, ...props }: IconProps) => (
 
 export const LightningIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1490,7 +1410,6 @@ export const UserIcon = ({ size, className, ...props }: IconProps) => (
 
 export const UsersIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1509,7 +1428,6 @@ export const UsersIcon = ({ size, className, ...props }: IconProps) => (
 
 export const LogOutIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1527,7 +1445,6 @@ export const LogOutIcon = ({ size, className, ...props }: IconProps) => (
 
 export const LogInIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1545,7 +1462,6 @@ export const LogInIcon = ({ size, className, ...props }: IconProps) => (
 
 export const UserPlusIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1564,7 +1480,6 @@ export const UserPlusIcon = ({ size, className, ...props }: IconProps) => (
 
 export const UserMinusIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1586,7 +1501,6 @@ export const UserMinusIcon = ({ size, className, ...props }: IconProps) => (
 
 export const LockIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1603,7 +1517,6 @@ export const LockIcon = ({ size, className, ...props }: IconProps) => (
 
 export const UnlockIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1620,7 +1533,6 @@ export const UnlockIcon = ({ size, className, ...props }: IconProps) => (
 
 export const KeyIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1638,7 +1550,6 @@ export const KeyIcon = ({ size, className, ...props }: IconProps) => (
 
 export const ShieldIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1654,7 +1565,6 @@ export const ShieldIcon = ({ size, className, ...props }: IconProps) => (
 
 export const ShieldCheckIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1675,7 +1585,6 @@ export const ShieldCheckIcon = ({ size, className, ...props }: IconProps) => (
 
 export const MapPinIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1692,7 +1601,6 @@ export const MapPinIcon = ({ size, className, ...props }: IconProps) => (
 
 export const MapIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1710,7 +1618,6 @@ export const MapIcon = ({ size, className, ...props }: IconProps) => (
 
 export const NavigationIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1726,7 +1633,6 @@ export const NavigationIcon = ({ size, className, ...props }: IconProps) => (
 
 export const CompassIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1743,7 +1649,6 @@ export const CompassIcon = ({ size, className, ...props }: IconProps) => (
 
 export const GlobeIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1765,7 +1670,6 @@ export const GlobeIcon = ({ size, className, ...props }: IconProps) => (
 
 export const StarIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1781,7 +1685,6 @@ export const StarIcon = ({ size, className, ...props }: IconProps) => (
 
 export const StarHalfIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1798,7 +1701,6 @@ export const StarHalfIcon = ({ size, className, ...props }: IconProps) => (
 
 export const HeartIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1814,7 +1716,6 @@ export const HeartIcon = ({ size, className, ...props }: IconProps) => (
 
 export const HeartOffIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1832,7 +1733,6 @@ export const HeartOffIcon = ({ size, className, ...props }: IconProps) => (
 
 export const ThumbsUpIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1849,7 +1749,6 @@ export const ThumbsUpIcon = ({ size, className, ...props }: IconProps) => (
 
 export const ThumbsDownIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1866,7 +1765,6 @@ export const ThumbsDownIcon = ({ size, className, ...props }: IconProps) => (
 
 export const FrownIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1885,7 +1783,6 @@ export const FrownIcon = ({ size, className, ...props }: IconProps) => (
 
 export const MehIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1904,7 +1801,6 @@ export const MehIcon = ({ size, className, ...props }: IconProps) => (
 
 export const SmileIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1927,7 +1823,6 @@ export const SmileIcon = ({ size, className, ...props }: IconProps) => (
 
 export const LoaderIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1943,7 +1838,6 @@ export const LoaderIcon = ({ size, className, ...props }: IconProps) => (
 
 export const LoaderCircleIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1966,7 +1860,6 @@ export const LoaderCircleIcon = ({ size, className, ...props }: IconProps) => (
 
 export const RefreshIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -1985,7 +1878,6 @@ export const RefreshIcon = ({ size, className, ...props }: IconProps) => (
 
 export const RotateCwIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2002,7 +1894,6 @@ export const RotateCwIcon = ({ size, className, ...props }: IconProps) => (
 
 export const RotateCcwIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2019,7 +1910,6 @@ export const RotateCcwIcon = ({ size, className, ...props }: IconProps) => (
 
 export const ZapIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2035,7 +1925,6 @@ export const ZapIcon = ({ size, className, ...props }: IconProps) => (
 
 export const SparklesIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2059,7 +1948,6 @@ export const SparklesIcon = ({ size, className, ...props }: IconProps) => (
 
 export const EyeIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2076,7 +1964,6 @@ export const EyeIcon = ({ size, className, ...props }: IconProps) => (
 
 export const EyeOffIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2095,7 +1982,6 @@ export const EyeOffIcon = ({ size, className, ...props }: IconProps) => (
 
 export const MaximizeIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2114,7 +2000,6 @@ export const MaximizeIcon = ({ size, className, ...props }: IconProps) => (
 
 export const MinimizeIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2133,7 +2018,6 @@ export const MinimizeIcon = ({ size, className, ...props }: IconProps) => (
 
 export const ExpandIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2152,7 +2036,6 @@ export const ExpandIcon = ({ size, className, ...props }: IconProps) => (
 
 export const ShrinkIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2175,7 +2058,6 @@ export const ShrinkIcon = ({ size, className, ...props }: IconProps) => (
 
 export const FilterIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2195,7 +2077,6 @@ export const SlidersHorizontalIcon = ({
   ...props
 }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2219,7 +2100,6 @@ export const SlidersHorizontalIcon = ({
 
 export const ListIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2240,7 +2120,6 @@ export const ListIcon = ({ size, className, ...props }: IconProps) => (
 
 export const GridIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2259,7 +2138,6 @@ export const GridIcon = ({ size, className, ...props }: IconProps) => (
 
 export const LayoutGridIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2277,7 +2155,6 @@ export const LayoutGridIcon = ({ size, className, ...props }: IconProps) => (
 
 export const SortAscIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2296,7 +2173,6 @@ export const SortAscIcon = ({ size, className, ...props }: IconProps) => (
 
 export const SortDescIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2319,7 +2195,6 @@ export const SortDescIcon = ({ size, className, ...props }: IconProps) => (
 
 export const SmartphoneIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2336,7 +2211,6 @@ export const SmartphoneIcon = ({ size, className, ...props }: IconProps) => (
 
 export const LaptopIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2353,7 +2227,6 @@ export const LaptopIcon = ({ size, className, ...props }: IconProps) => (
 
 export const MonitorIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2371,7 +2244,6 @@ export const MonitorIcon = ({ size, className, ...props }: IconProps) => (
 
 export const TabletIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2388,7 +2260,6 @@ export const TabletIcon = ({ size, className, ...props }: IconProps) => (
 
 export const BatteryIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2405,7 +2276,6 @@ export const BatteryIcon = ({ size, className, ...props }: IconProps) => (
 
 export const BatteryFullIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2425,7 +2295,6 @@ export const BatteryFullIcon = ({ size, className, ...props }: IconProps) => (
 
 export const WifiIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2444,7 +2313,6 @@ export const WifiIcon = ({ size, className, ...props }: IconProps) => (
 
 export const WifiOffIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2466,7 +2334,6 @@ export const WifiOffIcon = ({ size, className, ...props }: IconProps) => (
 
 export const BluetoothIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2482,7 +2349,6 @@ export const BluetoothIcon = ({ size, className, ...props }: IconProps) => (
 
 export const UsbIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2506,7 +2372,6 @@ export const UsbIcon = ({ size, className, ...props }: IconProps) => (
 
 export const PrinterIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2524,7 +2389,6 @@ export const PrinterIcon = ({ size, className, ...props }: IconProps) => (
 
 export const ScanIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2544,7 +2408,6 @@ export const ScanIcon = ({ size, className, ...props }: IconProps) => (
 
 export const QrCodeIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2571,7 +2434,6 @@ export const QrCodeIcon = ({ size, className, ...props }: IconProps) => (
 
 export const BarcodeIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2589,16 +2451,10 @@ export const BarcodeIcon = ({ size, className, ...props }: IconProps) => (
   </svg>
 )
 
-
-
-
-
 // Other
-
 
 export const ThemeModeIcon = ({ size, className, ...props }: IconProps) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -2616,6 +2472,3 @@ export const ThemeModeIcon = ({ size, className, ...props }: IconProps) => (
     <path d="M12 19.6l8.85 -8.85"></path>
   </svg>
 )
-
-
-

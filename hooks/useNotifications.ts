@@ -1,99 +1,191 @@
-"use client"
-
-import { useEffect, useState } from "react"
-
+import { useEffect, useState, useCallback, useRef, useMemo } from "react"
 import { createBrowserClient } from "@/lib/supabase/createBrowserClient"
-
+import {
+  getNotifications,
+  markAllAsRead,
+  markNotificationAsRead,
+  deleteAllNotifications,
+  deleteReadNotifications,
+} from "@/lib/actions/notifications"
 import type { Notification } from "@/components/notifications/types"
 
-interface UseNotificationsReturn {
+interface UseNotificationsResult {
   notifications: Notification[]
-  loading: boolean
   unreadCount: number
-  markAsRead: (id: string) => Promise<void>
-  markAllAsRead: () => Promise<void>
+  isLoading: boolean
+  error: string | null
+  handleMarkAsRead: (id: string) => Promise<void>
+  handleMarkAllRead: () => Promise<void>
+  handleDeleteAll: () => Promise<void>
+  handleDeleteRead: () => Promise<void>
 }
 
-export function useNotifications(): UseNotificationsReturn {
-  const [notifications, setNotifications] = useState<Notification[]>([])
-  const [loading, setLoading] = useState(true)
-  const supabase = createBrowserClient()
+export const useNotifications = (
+  initialNotifications: Notification[] = []
+): UseNotificationsResult => {
+  const [notifications, setNotifications] =
+    useState<Notification[]>(initialNotifications)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null) // حالة لتخزين user_id
 
-  const unreadCount = notifications.filter((n) => !n.is_read).length
+  const supabase = useMemo(() => createBrowserClient(), [])
+  const hasFetchedInitialNotifications = useRef(false)
 
+  // Effect لجلب user_id الحالي
   useEffect(() => {
-    async function fetchNotifications() {
+    let isMounted = true
+    const fetchUser = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser()
-
-      if (!user) {
-        setLoading(false)
-        return
+      if (isMounted) {
+        setUserId(user?.id || null)
       }
+    }
+    fetchUser()
 
-      const { data, error } = await supabase
-        .from("notifications")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(20)
-
-      if (error) {
-        console.error("Error fetching notifications:", error)
-        setLoading(false)
-        return
+    // الاستماع لتغييرات حالة المصادقة لتحديث user_id
+    const { data: authData } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (isMounted) {
+          setUserId(session?.user?.id || null)
+        }
       }
+    )
 
-      setNotifications(data || [])
-      setLoading(false)
+    return () => {
+      isMounted = false
+      authData.subscription.unsubscribe()
+    }
+  }, [supabase]) // يعتمد على supabase فقط لضمان استقراره
+
+  // Effect لإدارة جلب الإشعارات والاشتراك في Realtime، يعتمد على userId
+  useEffect(() => {
+    let isMounted = true
+    if (!userId) {
+      // إذا لم يكن هناك user_id، لا يوجد ما نجلبه أو نشترك فيه
+      setNotifications([])
+      setIsLoading(false)
+      return
     }
 
-    fetchNotifications()
+    const initializeNotifications = async () => {
+      // 1. جلب الإشعارات الأولية إذا لزم الأمر (للمستخدم الحالي)
+      if (
+        initialNotifications.length === 0 &&
+        !hasFetchedInitialNotifications.current
+      ) {
+        try {
+          // يجب أن تكون دالة getNotifications قادرة على استقبال userId
+          const result = await getNotifications()
+          if (isMounted) {
+            if (result.success && result.data) {
+              setNotifications(result.data)
+              hasFetchedInitialNotifications.current = true
+            } else if (result.error) {
+              setError(result.error)
+            }
+          }
+        } catch  {
+          if (isMounted) setError("Failed to fetch notifications")
+        } finally {
+          if (isMounted) setIsLoading(false)
+        }
+      } else {
+        if (isMounted) setIsLoading(false)
+      }
+    }
 
-    // Subscribe to Realtime updates
+    initializeNotifications()
+
+    // 2. إعداد اشتراك Realtime (مفلتر بواسطة user_id)
     const channel = supabase
-      .channel("notifications-channel")
+      .channel(`notifications_for_${userId}`) // اسم قناة فريد لكل مستخدم
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
           table: "notifications",
+          filter: `user_id=eq.${userId}`, // فلترة الإشعارات حسب user_id
         },
         (payload) => {
           const newNotification = payload.new as Notification
-          setNotifications((prev) => [newNotification, ...prev])
+          if (isMounted) {
+            setNotifications((prev) => [newNotification, ...prev])
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          const deletedNotification = payload.old as Notification
+          if (isMounted) {
+            setNotifications((prev) =>
+              prev.filter((n) => n.id !== deletedNotification.id)
+            )
+          }
         }
       )
       .subscribe()
 
     return () => {
+      isMounted = false
       supabase.removeChannel(channel)
     }
-  }, [supabase])
+  }, [supabase, userId, initialNotifications.length]) // يعاد تشغيله عند تغيير userId أو طول initialNotifications
 
-  const markAsRead = async (id: string) => {
-    const { markNotificationAsRead } =
-      await import("@/lib/actions/notifications")
-    await markNotificationAsRead(id)
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
-    )
-  }
+  const unreadCount = notifications.filter((n) => !n.is_read).length
 
-  const markAllAsRead = async () => {
-    const { markAllAsRead: markAll } =
-      await import("@/lib/actions/notifications")
-    await markAll()
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })))
-  }
+  const handleMarkAsRead = useCallback(async (id: string) => {
+    const result = await markNotificationAsRead(id)
+    if (result.success) {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+      )
+    } else if (result.error) {
+      console.error("Failed to mark notification as read:", result.error)
+    }
+  }, [])
+
+  const handleMarkAllRead = useCallback(async () => {
+    const result = await markAllAsRead()
+    if (result.success) {
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })))
+    } else if (result.error) {
+      console.error("Failed to mark all notifications as read:", result.error)
+    }
+  }, [])
+
+  const handleDeleteAll = useCallback(async () => {
+    const result = await deleteAllNotifications()
+    if (result.success) {
+      setNotifications([])
+    }
+  }, [])
+
+  const handleDeleteRead = useCallback(async () => {
+    const result = await deleteReadNotifications()
+    if (result.success) {
+      setNotifications((prev) => prev.filter((n) => !n.is_read))
+    }
+  }, [])
 
   return {
     notifications,
-    loading,
     unreadCount,
-    markAsRead,
-    markAllAsRead,
+    isLoading,
+    error,
+    handleMarkAsRead,
+    handleMarkAllRead,
+    handleDeleteAll,
+    handleDeleteRead,
   }
 }
