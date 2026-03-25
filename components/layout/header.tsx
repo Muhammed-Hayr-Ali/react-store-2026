@@ -422,6 +422,8 @@ function UserMenu({
     handleThemeChange,
     handleLogout,
     profile,
+    avatar,
+   
   ])
 
   // ✅ Better loading state with skeleton

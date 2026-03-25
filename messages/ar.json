@@ -564,7 +564,6 @@
     "verifyTitle": "تحقق من الرمز",
     "verifySuccess": "تم التحقق بنجاح"
   },
-
   "Verify": {
     "title": "المصادقة الثنائية",
     "description": "أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة",
@@ -997,6 +996,38 @@
     "privacy": {
       "title": "سياسة الخصوصية",
       "description": "سياسة خصوصية ماركتنا - تعرف على كيف نحمي بياناتك"
+    }
+  },
+  "Notifications": {
+    "title": "مركز الإشعارات",
+    "markAllRead": "وضع الكل كمقروء",
+    "seeAll": "عرض الكل",
+    "tabs": {
+      "today": "اليوم",
+      "week": "هذا الأسبوع",
+      "earlier": "سابقاً"
+    },
+    "empty": {
+      "title": "لا توجد إشعارات بعد",
+      "description": "ستظهر الإشعارات هنا عند وصولها"
+    },
+    "time": {
+      "now": "الآن",
+      "minutesAgo": "منذ {minutes} دقيقة",
+      "hoursAgo": "منذ {hours} ساعة",
+      "daysAgo": "منذ {days} يوم"
+    },
+    "types": {
+      "order": "طلب",
+      "promo": "عرض ترويجي",
+      "sale": "تخفيضات",
+      "analytics": "تحليلات",
+      "info": "معلومات"
+    },
+    "actions": {
+      "markAllRead": "وضع الكل كمقروء",
+      "deleteRead": "حذف المقروء",
+      "deleteAll": "حذف الكل"
     }
   }
 }

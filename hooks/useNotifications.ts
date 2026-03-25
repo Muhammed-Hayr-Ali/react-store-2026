@@ -75,7 +75,7 @@ export function useNotifications(): UseNotificationsReturn {
 
   const markAsRead = async (id: string) => {
     const { markNotificationAsRead } =
-      await import("@/lib/actions/notifications/notifications")
+      await import("@/lib/actions/notifications")
     await markNotificationAsRead(id)
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
@@ -84,7 +84,7 @@ export function useNotifications(): UseNotificationsReturn {
 
   const markAllAsRead = async () => {
     const { markAllAsRead: markAll } =
-      await import("@/lib/actions/notifications/notifications")
+      await import("@/lib/actions/notifications")
     await markAll()
     setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })))
   }

@@ -997,5 +997,37 @@
       "title": "Privacy Policy",
       "description": "Marketna Privacy Policy - Learn about how we protect your data"
     }
+  },
+  "Notifications": {
+    "title": "Notification Center",
+    "markAllRead": "Mark all as read",
+    "seeAll": "See All",
+    "tabs": {
+      "today": "Today",
+      "week": "This Week",
+      "earlier": "Earlier"
+    },
+    "empty": {
+      "title": "No notifications yet",
+      "description": "Notifications will appear here when they arrive"
+    },
+    "time": {
+      "now": "Now",
+      "minutesAgo": "{minutes}m ago",
+      "hoursAgo": "{hours}h ago",
+      "daysAgo": "{days}d ago"
+    },
+    "types": {
+      "order": "Order",
+      "promo": "Promotion",
+      "sale": "Sale",
+      "analytics": "Analytics",
+      "info": "Information"
+    },
+    "actions": {
+      "markAllRead": "Mark all as read",
+      "deleteRead": "Delete read",
+      "deleteAll": "Delete all"
+    }
   }
 }

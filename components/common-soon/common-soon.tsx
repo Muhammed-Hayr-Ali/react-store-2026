@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { LocaleSwitcher } from "../locale-switcher"
 
 export default function ComingSoonPage() {
   const t = useTranslations("HomePage")
