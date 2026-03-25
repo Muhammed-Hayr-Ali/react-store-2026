@@ -16,7 +16,7 @@ import { siteConfig } from "@/lib/config/site_config"
 import Link from "next/link"
 import { appRouter } from "@/lib/app-routes"
 import { useLocale, useTranslations } from "next-intl"
-import { EllipsisVerticalIcon } from "lucide-react"
+import { Bell, EllipsisVerticalIcon } from "lucide-react"
 import {
   Accordion,
   AccordionContent,
@@ -55,6 +55,7 @@ import {
 import { useAuth } from "@/lib/providers/auth-provider"
 import { ButtonGroup } from "@/components/ui/button-group"
 import NotificationBell from "@/components/notifications/NotificationBell"
+import { BellSimpleIcon } from "@phosphor-icons/react"
 
 // ============================================================================
 // 🎣 Custom Hook: shared logic for Header components
@@ -423,7 +424,6 @@ function UserMenu({
     handleLogout,
     profile,
     avatar,
-   
   ])
 
   // ✅ Better loading state with skeleton
@@ -435,6 +435,8 @@ function UserMenu({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         {user ? (
+
+          
           <Avatar className="size-8">
             <AvatarImage
               src={avatar ?? undefined}
@@ -481,7 +483,6 @@ export default function Header() {
           {/* Logo - Left */}
           <div className="flex basis-1/3 items-center justify-start">
             <AppLogo />
-            <NotificationBell />
           </div>
 
           {/* Search - Center (macOS Spotlight style) */}
@@ -497,7 +498,10 @@ export default function Header() {
 
           {/* User Avatar / Menu - Right */}
           <nav className="flex basis-1/3 items-center justify-end gap-2">
-            <div className="hidden items-center lg:flex">
+            <div className="hidden items-center lg:flex gap-4">
+              <NotificationBell className="bg-violet-800 size-10">
+                <Bell className="size-6" />
+              </NotificationBell>
               <ButtonGroup>
                 {!user && (
                   <Button size="sm" className="px-6 shadow-none">

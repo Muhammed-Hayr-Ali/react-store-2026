@@ -1,3 +1,13 @@
+/**
+ * @fileoverview useNotifications Hook
+ * @description Custom React hook for managing notifications with real-time updates
+ * @author Mohammed Kher Ali
+ * @date 2026-03-25
+ * @copyright (c) 2026 Mohammed Kher Ali
+ *
+ * @module hooks/useNotifications
+ */
+
 import { useEffect, useState, useCallback, useRef, useMemo } from "react"
 import { createBrowserClient } from "@/lib/supabase/createBrowserClient"
 import {
@@ -9,10 +19,17 @@ import {
 } from "@/lib/actions/notifications"
 import type { Notification } from "@/components/notifications/types"
 
+/**
+ * @interface UseNotificationsResult
+ * @description Return type for the useNotifications hook containing notification state and actions
+ */
 interface UseNotificationsResult {
   notifications: Notification[]
   unreadCount: number
-  isLoading: boolean
+  isLoading: boolean // Unified loading state for ANY operation
+  isMarkingAllAsRead: boolean // Granular state for specific UI feedback
+  isDeletingAll: boolean
+  isDeletingRead: boolean
   error: string | null
   handleMarkAsRead: (id: string) => Promise<void>
   handleMarkAllRead: () => Promise<void>
@@ -23,34 +40,72 @@ interface UseNotificationsResult {
 export const useNotifications = (
   initialNotifications: Notification[] = []
 ): UseNotificationsResult => {
+  // ===========================================================================
+  // State Management
+  // ===========================================================================
+
   const [notifications, setNotifications] =
     useState<Notification[]>(initialNotifications)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
-  const [userId, setUserId] = useState<string | null>(null) // حالة لتخزين user_id
 
+  // State for initial fetch only
+  const [isFetchingInitial, setIsFetchingInitial] = useState<boolean>(true)
+
+  // Counter for active mutation operations (handles concurrency correctly)
+  const [mutationCount, setMutationCount] = useState<number>(0)
+
+  const [error, setError] = useState<string | null>(null)
+
+  // Granular loading states for specific UI controls (e.g., disabling specific buttons)
+  const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState<boolean>(false)
+  const [isDeletingAll, setIsDeletingAll] = useState<boolean>(false)
+  const [isDeletingRead, setIsDeletingRead] = useState<boolean>(false)
+
+  const [userId, setUserId] = useState<string | null>(null)
   const supabase = useMemo(() => createBrowserClient(), [])
   const hasFetchedInitialNotifications = useRef(false)
 
-  // Effect لجلب user_id الحالي
+  // ===========================================================================
+  // Computed Values
+  // ===========================================================================
+
+  /**
+   * Unified loading state:
+   * True if: Initial fetch is running OR any mutation is in progress
+   */
+  const isLoading = isFetchingInitial || mutationCount > 0
+
+  const unreadCount = useMemo(
+    () => notifications.filter((n) => !n.is_read).length,
+    [notifications]
+  )
+
+  // Helper functions for mutation counter
+  const startMutation = useCallback(() => {
+    setMutationCount((prev) => prev + 1)
+  }, [])
+
+  const endMutation = useCallback(() => {
+    setMutationCount((prev) => Math.max(0, prev - 1))
+  }, [])
+
+  // ===========================================================================
+  // Effect: Authentication State Management
+  // ===========================================================================
+
   useEffect(() => {
     let isMounted = true
+
     const fetchUser = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser()
-      if (isMounted) {
-        setUserId(user?.id || null)
-      }
+      if (isMounted) setUserId(user?.id || null)
     }
     fetchUser()
 
-    // الاستماع لتغييرات حالة المصادقة لتحديث user_id
     const { data: authData } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (isMounted) {
-          setUserId(session?.user?.id || null)
-        }
+        if (isMounted) setUserId(session?.user?.id || null)
       }
     )
 
@@ -58,26 +113,27 @@ export const useNotifications = (
       isMounted = false
       authData.subscription.unsubscribe()
     }
-  }, [supabase]) // يعتمد على supabase فقط لضمان استقراره
+  }, [supabase])
 
-  // Effect لإدارة جلب الإشعارات والاشتراك في Realtime، يعتمد على userId
+  // ===========================================================================
+  // Effect: Notifications Management & Real-time Subscription
+  // ===========================================================================
+
   useEffect(() => {
     let isMounted = true
+
     if (!userId) {
-      // إذا لم يكن هناك user_id، لا يوجد ما نجلبه أو نشترك فيه
       setNotifications([])
-      setIsLoading(false)
+      setIsFetchingInitial(false)
       return
     }
 
     const initializeNotifications = async () => {
-      // 1. جلب الإشعارات الأولية إذا لزم الأمر (للمستخدم الحالي)
       if (
         initialNotifications.length === 0 &&
         !hasFetchedInitialNotifications.current
       ) {
         try {
-          // يجب أن تكون دالة getNotifications قادرة على استقبال userId
           const result = await getNotifications()
           if (isMounted) {
             if (result.success && result.data) {
@@ -90,25 +146,24 @@ export const useNotifications = (
         } catch {
           if (isMounted) setError("Failed to fetch notifications")
         } finally {
-          if (isMounted) setIsLoading(false)
+          if (isMounted) setIsFetchingInitial(false)
         }
       } else {
-        if (isMounted) setIsLoading(false)
+        if (isMounted) setIsFetchingInitial(false)
       }
     }
 
     initializeNotifications()
 
-    // 2. إعداد اشتراك Realtime (مفلتر بواسطة user_id)
     const channel = supabase
-      .channel(`notifications_for_${userId}`) // اسم قناة فريد لكل مستخدم
+      .channel(`notifications_for_${userId}`)
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
           table: "notifications",
-          filter: `user_id=eq.${userId}`, // فلترة الإشعارات حسب user_id
+          filter: `user_id=eq.${userId}`,
         },
         (payload) => {
           const newNotification = payload.new as Notification
@@ -140,50 +195,88 @@ export const useNotifications = (
       isMounted = false
       supabase.removeChannel(channel)
     }
-  }, [supabase, userId, initialNotifications.length]) // يعاد تشغيله عند تغيير userId أو طول initialNotifications
+  }, [supabase, userId, initialNotifications.length])
 
-  const unreadCount = notifications.filter((n) => !n.is_read).length
+  // ===========================================================================
+  // Action Handlers
+  // ===========================================================================
 
-  const handleMarkAsRead = useCallback(async (id: string) => {
-    const result = await markNotificationAsRead(id)
-    if (result.success) {
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
-      )
-    } else if (result.error) {
-      console.error("Failed to mark notification as read:", result.error)
-    }
-  }, [])
+  const handleMarkAsRead = useCallback(
+    async (id: string) => {
+      startMutation()
+      try {
+        const result = await markNotificationAsRead(id)
+        if (result.success) {
+          setNotifications((prev) =>
+            prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+          )
+        } else if (result.error) {
+          console.error("Failed to mark notification as read:", result.error)
+        }
+      } finally {
+        endMutation()
+      }
+    },
+    [startMutation, endMutation]
+  )
 
   const handleMarkAllRead = useCallback(async () => {
-    const result = await markAllAsRead()
-    if (result.success) {
-      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })))
-    } else if (result.error) {
-      console.error("Failed to mark all notifications as read:", result.error)
+    setIsMarkingAllAsRead(true)
+    startMutation()
+    try {
+      const result = await markAllAsRead()
+      if (result.success) {
+        setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })))
+      } else if (result.error) {
+        console.error("Failed to mark all notifications as read:", result.error)
+      }
+    } finally {
+      setIsMarkingAllAsRead(false)
+      endMutation()
     }
-  }, [])
+  }, [startMutation, endMutation])
 
   const handleDeleteAll = useCallback(async () => {
-    const result = await deleteAllNotifications()
-    if (result.success) {
-      setNotifications([])
-    } else if (result.error) {
-      console.error("Failed to delete all notifications:", result.error)
+    setIsDeletingAll(true)
+    startMutation()
+    try {
+      const result = await deleteAllNotifications()
+      if (result.success) {
+        setNotifications([])
+      } else if (result.error) {
+        console.error("Failed to delete all notifications:", result.error)
+      }
+    } finally {
+      setIsDeletingAll(false)
+      endMutation()
     }
-  }, [])
+  }, [startMutation, endMutation])
 
   const handleDeleteRead = useCallback(async () => {
-    const result = await deleteReadNotifications()
-    if (result.success) {
-      setNotifications((prev) => prev.filter((n) => !n.is_read))
+    setIsDeletingRead(true)
+    startMutation()
+    try {
+      const result = await deleteReadNotifications()
+      if (result.success) {
+        setNotifications((prev) => prev.filter((n) => !n.is_read))
+      }
+    } finally {
+      setIsDeletingRead(false)
+      endMutation()
     }
-  }, [])
+  }, [startMutation, endMutation])
+
+  // ===========================================================================
+  // Return Value
+  // ===========================================================================
 
   return {
     notifications,
     unreadCount,
-    isLoading,
+    isLoading, // Now covers ALL operations
+    isMarkingAllAsRead,
+    isDeletingAll,
+    isDeletingRead,
     error,
     handleMarkAsRead,
     handleMarkAllRead,
