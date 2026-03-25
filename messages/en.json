@@ -1028,6 +1028,14 @@
       "markAllRead": "Mark all as read",
       "deleteRead": "Delete read",
       "deleteAll": "Delete all"
+    },
+    "confirmations": {
+      "deleteAll": {
+        "title": "Delete all notifications?",
+        "description": "This action cannot be undone. All notifications will be permanently deleted."
+      },
+      "cancel": "Cancel",
+      "delete": "Delete"
     }
   }
 }

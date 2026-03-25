@@ -87,7 +87,7 @@ export const useNotifications = (
               setError(result.error)
             }
           }
-        } catch  {
+        } catch {
           if (isMounted) setError("Failed to fetch notifications")
         } finally {
           if (isMounted) setIsLoading(false)
@@ -168,6 +168,8 @@ export const useNotifications = (
     const result = await deleteAllNotifications()
     if (result.success) {
       setNotifications([])
+    } else if (result.error) {
+      console.error("Failed to delete all notifications:", result.error)
     }
   }, [])
 

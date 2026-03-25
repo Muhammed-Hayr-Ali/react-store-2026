@@ -32,6 +32,16 @@ import {
   PopoverHeader,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 import { useNotifications } from "@/hooks/useNotifications"
 import type { Notification } from "./types"
@@ -65,11 +75,10 @@ const NotificationTriggerIcon = React.forwardRef<
     {unreadCount > 0 && (
       <div
         className={cn(
-          "absolute top-2.5 right-2 rtl:left-2 flex size-2 rounded-full",
+          "absolute top-2.5 right-2 flex size-2 rounded-full rtl:left-2",
           getUnreadColor(unreadCount)
         )}
       />
-     
     )}
   </button>
 ))
@@ -351,7 +360,7 @@ export default function NotificationBell({
         <NotificationTriggerIcon unreadCount={unreadCount} />
       </PopoverTrigger>
       <PopoverContent
-        align={locale === "ar" ? "start" : "end"}
+        align="start"
         className="w-80 overflow-hidden border-muted/40 p-0 shadow-xl"
       >
         <PopoverHeader className="p-0">
@@ -402,7 +411,7 @@ export default function NotificationBell({
 
           <PopoverDescription className="p-0">
             <NotificationTabs
-              activeTab="today"
+              activeTab={activeTab}
               onTabChange={(v) =>
                 setActiveTab(v as "today" | "week" | "earlier")
               }
@@ -413,7 +422,7 @@ export default function NotificationBell({
         <NotificationBody>
           {isLoading ? (
             <div className="flex items-center justify-center py-10">
-              <Spinner/>
+              <Spinner />
             </div>
           ) : error ? (
             <div className="p-4 text-center">

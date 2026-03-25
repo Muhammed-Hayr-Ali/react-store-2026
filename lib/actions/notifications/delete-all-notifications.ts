@@ -8,10 +8,9 @@
 
 "use server"
 
-import { createAdminClient } from "@/lib/supabase/createAdminClient "
+import { createServerClient } from "@/lib/supabase/createServerClient"
 import { ApiResult } from "@/lib/types/common"
 import { revalidatePath } from "next/cache"
-import { cookies } from "next/headers"
 
 // ===============================================================================
 // Types
@@ -32,34 +31,23 @@ export interface DeleteAllNotificationsResult extends ApiResult {
  */
 export async function deleteAllNotifications(): Promise<DeleteAllNotificationsResult> {
   try {
-    const supabase = await createAdminClient()
-    const cookieStore = await cookies()
-    const authToken = cookieStore.get("sb-access-token")?.value
+    const supabase = await createServerClient()
 
-    if (!authToken) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
       return {
         success: false,
         error: "USER_NOT_AUTHENTICATED",
       }
     }
-
-    // الحصول على بيانات المستخدم من التوكن
-    const { data: userData, error: userError } =
-      await supabase.auth.getUser(authToken)
-
-    if (userError || !userData.user) {
-      return {
-        success: false,
-        error: "USER_NOT_AUTHENTICATED",
-      }
-    }
-
-    const userId = userData.user.id
 
     const { error } = await supabase
       .from("notifications")
       .delete()
-      .eq("user_id", userId)
+      .eq("user_id", user.id)
 
     if (error) {
       console.error("Error deleting all notifications:", error)
