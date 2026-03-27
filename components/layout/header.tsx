@@ -1,10 +1,37 @@
 "use client"
 
 import * as React from "react"
-import { AppLogo } from "@/components/shared/app-logo"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import Link from "next/link"
+import { redirect, usePathname, useRouter } from "next/navigation"
+import { useLocale, useTranslations } from "next-intl"
+import { useTheme } from "next-themes"
+
+// ─────────────────────────────────────────────────────────────
+// 🧩 UI Components
+// ─────────────────────────────────────────────────────────────
 import { Button } from "@/components/ui/button"
-import MenuButton from "@/components/shared/menu_button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+  DropdownMenuItem,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
+  DropdownMenuSubContent,
+  DropdownMenuCheckboxItem,
+} from "@/components/ui/dropdown-menu"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 import {
   MobileMenu,
   MobileMenuHeader,
@@ -12,53 +39,59 @@ import {
   MobileMenuFooter,
   MobileMenuItem,
 } from "@/components/ui/mobile-menu"
+
+// ─────────────────────────────────────────────────────────────
+// 📦 Shared & Config
+// ─────────────────────────────────────────────────────────────
+import { AppLogo } from "@/components/shared/app-logo"
+import MenuButton from "@/components/shared/menu_button"
+import NotificationBell from "@/components/notifications/NotificationBell"
 import { siteConfig } from "@/lib/config/site_config"
-import Link from "next/link"
 import { appRouter } from "@/lib/app-routes"
-import { useLocale, useTranslations } from "next-intl"
-import { Bell, EllipsisVerticalIcon } from "lucide-react"
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
-import { redirect, usePathname, useRouter } from "next/navigation"
-import { useTheme } from "next-themes"
+import { useAuth } from "@/lib/providers/auth-provider"
+
+// ─────────────────────────────────────────────────────────────
+// 🎨 Icons
+// ─────────────────────────────────────────────────────────────
+import { Bell, SearchIcon, LogInIcon, UserPlus, CheckIcon } from "lucide-react"
 import {
   UserIcon,
-  SearchIcon,
+  GlobeIcon,
+  ThemeModeIcon,
   HomeIcon,
   PackageIcon,
-  GlobeIcon,
-  CheckIcon,
   LifeBuoyIcon,
   BookIcon,
-  ThemeModeIcon,
 } from "@/components/shared/icons"
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-
-import { useAuth } from "@/lib/providers/auth-provider"
-import { ButtonGroup } from "@/components/ui/button-group"
-import NotificationBell from "@/components/notifications/NotificationBell"
-import { BellSimpleIcon } from "@phosphor-icons/react"
 
 // ============================================================================
-// 🎣 Custom Hook: shared logic for Header components
+// 🔗 SafeLink: رابط آمن يمنع أخطاء href=undefined (بدون تعديل الروابط الأصلية)
+// ============================================================================
+function SafeLink({
+  href,
+  children,
+  className,
+  ...props
+}: {
+  href: string | undefined
+  children: React.ReactNode
+  className?: string
+} & Omit<React.ComponentProps<typeof Link>, "href" | "children">) {
+  if (!href)
+    return (
+      <span className={className ?? "opacity-50"} {...props}>
+        {children}
+      </span>
+    )
+  return (
+    <Link href={href} className={className} {...props}>
+      {children}
+    </Link>
+  )
+}
+
+// ============================================================================
+// 🎣 Custom Hook: منطق الهيدر (مركّز ومُحسّن)
 // ============================================================================
 function useHeaderLogic() {
   const router = useRouter()
@@ -68,35 +101,25 @@ function useHeaderLogic() {
   const t = useTranslations("Header")
   const { profile, user, signOut, isLoading } = useAuth()
 
-  // ✅ Memoize avatar to prevent unnecessary re-renders
   const avatar = React.useMemo(
     () => profile?.avatar_url ?? null,
     [profile?.avatar_url]
   )
-
-  // ✅ Memoize menu items to avoid recalculation on every render
   const menuItems = React.useMemo(
     () => (user ? siteConfig.userMenuItems : []),
     [user]
   )
 
-  // ✅ Memoize handlers with useCallback to maintain referential equality
   const handleLogout = React.useCallback(async () => {
     await signOut()
     router.refresh()
   }, [signOut, router])
-
   const handleLocaleChange = React.useCallback(
-    (nextLocale: string) => {
-      redirect(`/${nextLocale}${pathname}`)
-    },
+    (loc: string) => redirect(`/${loc}${pathname}`),
     [pathname]
   )
-
   const handleThemeChange = React.useCallback(
-    (newTheme: string) => {
-      setTheme(newTheme)
-    },
+    (th: string) => setTheme(th),
     [setTheme]
   )
 
@@ -114,86 +137,108 @@ function useHeaderLogic() {
     handleLogout,
     handleLocaleChange,
     handleThemeChange,
-  }
+  } as const
 }
 
 // ============================================================================
-// 🧩 Reusable: Menu Items Renderer (DRY Principle)
+// 🧩 Shared: عرض عناصر القائمة (نمط واحد للسطح المكتب والجوال)
 // ============================================================================
-function renderMenuItemsList(
-  items: typeof siteConfig.userMenuItems,
-  t: ReturnType<typeof useTranslations>,
-  renderMode: "mobile" | "desktop"
-) {
-  return items.map((item) => {
-    if (renderMode === "mobile") {
-      return (
-        <MobileMenuItem
-          key={`mobile-${item.key}`}
-          href={item.href}
-          icon={item.icon}
-        >
-          {t("menuItems." + item.key)}
-        </MobileMenuItem>
-      )
-    }
+type MenuItem = (typeof siteConfig.userMenuItems)[number]
 
-    return (
-      <DropdownMenuItem asChild key={`desktop-${item.key}`}>
-        <Link href={item.href}>
-          <item.icon className="h-4 w-4" />
-          {t("menuItems." + item.key)}
-        </Link>
-      </DropdownMenuItem>
-    )
-  })
-}
-
-// ============================================================================
-// 🌐 Language Selector Component (Reusable)
-// ============================================================================
-interface LanguageSelectorProps {
-  locale: string
-  onLocaleChange: (locale: string) => void
-  t: ReturnType<typeof useTranslations>
-  mode: "mobile" | "desktop"
-}
-
-function LanguageSelector({
-  locale,
-  onLocaleChange,
+function MenuItemsList({
+  items,
   t,
   mode,
-}: LanguageSelectorProps) {
-  const languages = React.useMemo(
-    () => [
-      { key: "ar", label: t("menuItems.arabic") },
-      { key: "en", label: t("menuItems.english") },
-    ],
-    [t]
+}: {
+  items: MenuItem[]
+  t: ReturnType<typeof useTranslations>
+  mode: "mobile" | "desktop"
+}) {
+  return (
+    <>
+      {items.map((item) => {
+        const content = (
+          <>
+            <item.icon className="h-4 w-4" />
+            <span>{t(`menuItems.${item.key}`)}</span>
+          </>
+        )
+        return mode === "mobile" ? (
+          <MobileMenuItem
+            key={item.key}
+            href={item.href ?? "#"}
+            icon={item.icon}
+          >
+            {t(`menuItems.${item.key}`)}
+          </MobileMenuItem>
+        ) : (
+          <DropdownMenuItem asChild key={item.key}>
+            <SafeLink href={item.href}>{content}</SafeLink>
+          </DropdownMenuItem>
+        )
+      })}
+    </>
+  )
+}
+
+// ============================================================================
+// 🎨 Shared: مكون الاختيارات الموحد (لغة/سمة) - يلغي التكرار
+// ============================================================================
+function Selector({
+  title,
+  Icon,
+  options,
+  selected,
+  onSelect,
+  mode,
+}: {
+  title: string
+  Icon: React.ElementType
+  options: { key: string; label: string }[]
+  selected: string
+  onSelect: (k: string) => void
+  mode: "mobile" | "desktop"
+}) {
+  const Option = ({ opt }: { opt: { key: string; label: string } }) => (
+    <>
+      {mode === "mobile" ? (
+        <MobileMenuItem
+          className={selected === opt.key ? "" : "ml-9 rtl:mr-9 rtl:ml-0"}
+          onClick={() => onSelect(opt.key)}
+        >
+          {selected === opt.key && (
+            <CheckIcon className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
+          )}
+          {opt.label}
+        </MobileMenuItem>
+
+
+
+
+
+      ) : (
+        <DropdownMenuCheckboxItem
+          checked={selected === opt.key}
+          onCheckedChange={() => onSelect(opt.key)}
+        >
+          {opt.label}
+        </DropdownMenuCheckboxItem>
+      )}
+    </>
   )
 
   if (mode === "mobile") {
     return (
       <Accordion type="single" collapsible>
-        <AccordionItem value="language">
+        <AccordionItem value={title}>
           <AccordionTrigger className="p-0">
-            <MobileMenuItem key="language" icon={GlobeIcon} className="w-auto">
-              {t("menuItems.language")}
+            <MobileMenuItem icon={Icon} className="w-auto">
+              {title}
             </MobileMenuItem>
           </AccordionTrigger>
           <AccordionContent>
-            {languages.map((lang) => (
-              <MobileMenuItem
-                key={lang.key}
-                className={locale === lang.key ? "" : "ml-9 rtl:mr-9 rtl:ml-0"}
-                onClick={() => onLocaleChange(lang.key)}
-              >
-                {locale === lang.key && (
-                  <CheckIcon className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
-                )}
-                {lang.label}
-              </MobileMenuItem>
+            {options.map((opt) => (
+              <Option key={opt.key} opt={opt} />
             ))}
           </AccordionContent>
         </AccordionItem>
@@ -201,23 +246,16 @@ function LanguageSelector({
     )
   }
 
-  // Desktop version using DropdownMenuSub
   return (
     <DropdownMenuSub>
       <DropdownMenuSubTrigger>
-        <GlobeIcon className="h-4 w-4" />
-        {t("menuItems.language")}
+        <Icon className="h-4 w-4" />
+        {title}
       </DropdownMenuSubTrigger>
       <DropdownMenuPortal>
         <DropdownMenuSubContent>
-          {languages.map((lang) => (
-            <DropdownMenuCheckboxItem
-              key={lang.key}
-              checked={locale === lang.key}
-              onCheckedChange={() => onLocaleChange(lang.key)}
-            >
-              {lang.label}
-            </DropdownMenuCheckboxItem>
+          {options.map((opt) => (
+            <Option key={opt.key} opt={opt} />
           ))}
         </DropdownMenuSubContent>
       </DropdownMenuPortal>
@@ -226,16 +264,30 @@ function LanguageSelector({
 }
 
 // ============================================================================
-// 🎨 Theme Selector Component (Reusable) - ✅ Fixed TypeScript
+// 👤 Desktop: قائمة المستخدم (تستقبل البيانات عبر الـ props فقط)
 // ============================================================================
-interface ThemeSelectorProps {
-  theme: string | undefined
-  onThemeChange: (theme: string) => void
-  t: ReturnType<typeof useTranslations>
-  mode: "mobile" | "desktop"
-}
+function DesktopUserMenu({ avatar }: { avatar: string | null }) {
+  const {
+    theme,
+    locale,
+    t,
+    user,
+    isLoading,
+    profile,
+    menuItems,
+    handleLogout,
+    handleLocaleChange,
+    handleThemeChange,
+  } = useHeaderLogic()
 
-function ThemeSelector({ theme, onThemeChange, t, mode }: ThemeSelectorProps) {
+  const languages = React.useMemo(
+    () => [
+      { key: "ar", label: t("menuItems.arabic") },
+      { key: "en", label: t("menuItems.english") },
+    ],
+    [t]
+  )
+
   const themes = React.useMemo(
     () => [
       { key: "system", label: t("menuItems.system") },
@@ -245,215 +297,179 @@ function ThemeSelector({ theme, onThemeChange, t, mode }: ThemeSelectorProps) {
     [t]
   )
 
-  // ✅ Helper to safely check theme equality (handles undefined)
-  const isThemeActive = React.useCallback(
-    (themeKey: string) => theme === themeKey,
-    [theme]
-  )
+  if (isLoading)
+    return <div className="size-8 animate-pulse rounded-full bg-muted" />
 
-  if (mode === "mobile") {
-    return (
-      <Accordion type="single" collapsible>
-        <AccordionItem value="theme">
-          <AccordionTrigger className="p-0">
-            <MobileMenuItem
-              key="theme"
-              icon={ThemeModeIcon}
-              className="w-auto"
-              suppressHydrationWarning
-            >
-              {t("menuItems.theme")}
-            </MobileMenuItem>
-          </AccordionTrigger>
-          <AccordionContent>
-            {themes.map((tOption) => (
-              <MobileMenuItem
-                key={tOption.key}
-                className={
-                  isThemeActive(tOption.key) ? "" : "ml-9 rtl:mr-9 rtl:ml-0"
-                }
-                onClick={() => onThemeChange(tOption.key)}
-              >
-                {isThemeActive(tOption.key) && (
-                  <CheckIcon className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
-                )}
-                {tOption.label}
-              </MobileMenuItem>
-            ))}
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    )
-  }
-
-  // Desktop version using DropdownMenuSub
   return (
-    <DropdownMenuSub>
-      <DropdownMenuSubTrigger>
-        <ThemeModeIcon className="h-4 w-4" />
-        {t("menuItems.theme")}
-      </DropdownMenuSubTrigger>
-      <DropdownMenuPortal>
-        <DropdownMenuSubContent>
-          {themes.map((tOption) => (
-            <DropdownMenuCheckboxItem
-              key={tOption.key}
-              checked={isThemeActive(tOption.key)}
-              onCheckedChange={() => onThemeChange(tOption.key)}
-            >
-              {tOption.label}
-            </DropdownMenuCheckboxItem>
-          ))}
-        </DropdownMenuSubContent>
-      </DropdownMenuPortal>
-    </DropdownMenuSub>
-  )
-}
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          size="icon"
+          variant="secondary"
+          className="overflow-hidden rounded-full shadow-none"
+        >
+          <Avatar>
+            <AvatarImage
+              src={avatar ?? undefined}
+              alt={profile?.full_name ?? ""}
+            />
+            <AvatarFallback className="p-0">
+              <UserIcon className="size-4 text-foreground" />
+            </AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
 
-// ============================================================================
-// 👤 UserMenu Component (Desktop) - ✅ Fixed TypeScript for avatar
-// ============================================================================
-interface UserMenuProps {
-  avatar: string | null | undefined
-  menuItems: typeof siteConfig.userMenuItems
-  handleLogout: () => Promise<void>
-  handleLocaleChange: (locale: string) => void
-  handleThemeChange: (theme: string) => void
-}
-
-function UserMenu({
-  avatar,
-  menuItems,
-  handleLogout,
-  handleLocaleChange,
-  handleThemeChange,
-}: UserMenuProps) {
-  const { theme, locale, t, user, isLoading, profile } = useHeaderLogic()
-
-  // ✅ Memoize dropdown content to prevent re-rendering on parent updates
-  const dropdownContent = React.useMemo(() => {
-    if (isLoading) return null
-
-    return (
       <DropdownMenuContent
         className="w-62"
         align={locale === "ar" ? "start" : "end"}
       >
+        {/* Quick Links */}
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            <Link href={appRouter.home}>
+            <SafeLink href={appRouter.home}>
               <HomeIcon className="h-4 w-4" />
               {t("menuItems.home")}
-            </Link>
+            </SafeLink>
           </DropdownMenuItem>
-
           <DropdownMenuItem asChild>
-            <Link href={appRouter.home}>
+            <SafeLink href={appRouter.home}>
               <PackageIcon className="h-4 w-4" />
               {t("menuItems.products")}
-            </Link>
+            </SafeLink>
           </DropdownMenuItem>
 
           {user && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuLabel>{t("menuItems.account")}</DropdownMenuLabel>
+              <MenuItemsList items={menuItems} t={t} mode="desktop" />
             </>
           )}
-
-          {renderMenuItemsList(menuItems, t, "desktop")}
         </DropdownMenuGroup>
 
+        {/* Preferences */}
         <DropdownMenuSeparator />
-
         <DropdownMenuGroup>
-          <LanguageSelector
-            locale={locale}
-            onLocaleChange={handleLocaleChange}
-            t={t}
+          <Selector
+            title={t("menuItems.language")}
+            Icon={GlobeIcon}
+            options={languages}
+            selected={locale}
+            onSelect={handleLocaleChange}
             mode="desktop"
           />
-          <ThemeSelector
-            theme={theme}
-            onThemeChange={handleThemeChange}
-            t={t}
+          <Selector
+            title={t("menuItems.theme")}
+            Icon={ThemeModeIcon}
+            options={themes}
+            selected={theme ?? "system"}
+            onSelect={handleThemeChange}
             mode="desktop"
           />
         </DropdownMenuGroup>
 
+        {/* Support */}
         <DropdownMenuSeparator />
-
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            <Link href={appRouter.home}>
+            <SafeLink href={appRouter.home}>
               <LifeBuoyIcon className="h-4 w-4" />
               {t("menuItems.support")}
-            </Link>
+            </SafeLink>
           </DropdownMenuItem>
-
           <DropdownMenuItem asChild>
-            <Link href={appRouter.home}>
+            <SafeLink href={appRouter.home}>
               <BookIcon className="h-4 w-4" />
               {t("menuItems.documentation")}
-            </Link>
+            </SafeLink>
           </DropdownMenuItem>
         </DropdownMenuGroup>
 
-        {user && (
+        {/* Auth Actions */}
+        <DropdownMenuSeparator />
+        {user ? (
+          <DropdownMenuItem onClick={handleLogout}>
+            {t("signOut")}
+            <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+          </DropdownMenuItem>
+        ) : (
           <>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem onClick={handleLogout}>
-                {t("signOut")}
-                <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
+            <DropdownMenuItem asChild>
+              <SafeLink href={appRouter.signIn}>
+                <LogInIcon className="h-4 w-4" />
+                {t("signIn")}
+              </SafeLink>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <SafeLink href={appRouter.signUp}>
+                <UserPlus className="h-4 w-4" />
+                {t("createAccount")}
+              </SafeLink>
+            </DropdownMenuItem>
           </>
         )}
       </DropdownMenuContent>
-    )
-  }, [
-    isLoading,
-    locale,
-    t,
-    user,
-    menuItems,
-    theme,
-    handleLocaleChange,
-    handleThemeChange,
-    handleLogout,
-    profile,
-    avatar,
-  ])
+    </DropdownMenu>
+  )
+}
 
-  // ✅ Better loading state with skeleton
-  if (isLoading) {
-    return <div className="size-8 animate-pulse rounded-full bg-muted" />
-  }
+// ============================================================================
+// 📱 Mobile: محتوى القائمة (يعيد استخدام المكونات المشتركة)
+// ============================================================================
+function MobileMenuContent() {
+  const { theme, locale, t, menuItems, handleLocaleChange, handleThemeChange } =
+    useHeaderLogic()
+
+  const languages = React.useMemo(
+    () => [
+      { key: "ar", label: t("menuItems.arabic") },
+      { key: "en", label: t("menuItems.english") },
+    ],
+    [t]
+  )
+
+  const themes = React.useMemo(
+    () => [
+      { key: "system", label: t("menuItems.system") },
+      { key: "dark", label: t("menuItems.dark") },
+      { key: "light", label: t("menuItems.light") },
+    ],
+    [t]
+  )
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        {user ? (
-
-          
-          <Avatar className="size-8">
-            <AvatarImage
-              src={avatar ?? undefined}
-              alt={profile?.full_name ?? ""}
-            />
-            <AvatarFallback className="p-1.5">
-              <UserIcon className="size-max text-foreground" />
-            </AvatarFallback>
-          </Avatar>
-        ) : (
-          <Button size="icon-sm" className="shadow-none">
-            <EllipsisVerticalIcon />
-          </Button>
-        )}
-      </DropdownMenuTrigger>
-      {dropdownContent}
-    </DropdownMenu>
+    <>
+      <MobileMenuItem href={appRouter.home ?? "#"} icon={HomeIcon}>
+        {t("menuItems.home")}
+      </MobileMenuItem>
+      <MobileMenuItem href={appRouter.home ?? "#"} icon={PackageIcon}>
+        {t("menuItems.products")}
+      </MobileMenuItem>
+      <MenuItemsList items={menuItems} t={t} mode="mobile" />
+      <Selector
+        title={t("menuItems.language")}
+        Icon={GlobeIcon}
+        options={languages}
+        selected={locale}
+        onSelect={handleLocaleChange}
+        mode="mobile"
+      />
+      <Selector
+        title={t("menuItems.theme")}
+        Icon={ThemeModeIcon}
+        options={themes}
+        selected={theme ?? "system"}
+        onSelect={handleThemeChange}
+        mode="mobile"
+      />
+      <MobileMenuItem href={appRouter.home ?? "#"} icon={LifeBuoyIcon}>
+        {t("menuItems.support")}
+      </MobileMenuItem>
+      <MobileMenuItem href={appRouter.home ?? "#"} icon={BookIcon}>
+        {t("menuItems.documentation")}
+      </MobileMenuItem>
+    </>
   )
 }
 
@@ -462,64 +478,29 @@ function UserMenu({
 // ============================================================================
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
-  const {
-    theme,
-    locale,
-    t,
-    profile,
-    user,
-    isLoading,
-    avatar,
-    menuItems,
-    handleLogout,
-    handleLocaleChange,
-    handleThemeChange,
-  } = useHeaderLogic()
+  const { profile, user, isLoading, avatar, handleLogout, t } = useHeaderLogic()
 
   return (
     <>
-      <header className="fixed top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-        <div className="container mx-auto flex h-12 items-center gap-4 px-4">
-          {/* Logo - Left */}
+      {/* Desktop Header */}
+      <header className="fixed top-0 z-50 w-full border-b bg-background">
+        <div className="container mx-auto flex h-14 items-center gap-4 px-4">
           <div className="flex basis-1/3 items-center justify-start">
-            <AppLogo />
+            <AppLogo size="sm" />
           </div>
-
-          {/* Search - Center (macOS Spotlight style) */}
           <div className="flex basis-1/3 items-center justify-center">
-            <Button
-              variant="secondary"
-              className="h-8 w-full max-w-md gap-2 rounded-full bg-background px-3 text-sm text-muted-foreground shadow-none hover:bg-background/80"
-            >
+            <Button variant="secondary" className="w-full shadow-none">
               <SearchIcon className="size-4" />
               <span>{t("search")}</span>
             </Button>
           </div>
-
-          {/* User Avatar / Menu - Right */}
-          <nav className="flex basis-1/3 items-center justify-end gap-2">
-            <div className="hidden items-center lg:flex gap-4">
-              <NotificationBell className="bg-violet-800 size-10">
-                <Bell className="size-6" />
+          <nav className="flex basis-1/3 items-center justify-end gap-4">
+            <div className="hidden items-center gap-4 lg:flex">
+              <NotificationBell className="rounded-full">
+                <Bell className="size-3.5" />
               </NotificationBell>
-              <ButtonGroup>
-                {!user && (
-                  <Button size="sm" className="px-6 shadow-none">
-                    <Link href={appRouter.signIn}>
-                      <span>{t("getStarted")}</span>
-                    </Link>
-                  </Button>
-                )}
-                <UserMenu
-                  avatar={avatar}
-                  menuItems={menuItems}
-                  handleLogout={handleLogout}
-                  handleLocaleChange={handleLocaleChange}
-                  handleThemeChange={handleThemeChange}
-                />
-              </ButtonGroup>
+              <DesktopUserMenu avatar={avatar} />
             </div>
-            {/* Mobile Menu Button */}
             <MenuButton
               isOpen={isMenuOpen}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -529,7 +510,7 @@ export default function Header() {
         </div>
       </header>
 
-      {/* ✅ Mobile Menu - Fixed typo: "Monile Mwnu" → "Mobile Menu" */}
+      {/* Mobile Menu */}
       <MobileMenu isOpen={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <MobileMenuHeader className="flex items-center gap-3">
           <Avatar className="size-10">
@@ -541,7 +522,6 @@ export default function Header() {
               <UserIcon className="size-max text-foreground" />
             </AvatarFallback>
           </Avatar>
-
           <div className="flex flex-col">
             <span className="text-base leading-none font-semibold">
               {profile?.full_name ?? "Guest"}
@@ -553,54 +533,10 @@ export default function Header() {
         </MobileMenuHeader>
 
         <MobileMenuBody>
-          <MobileMenuItem key="home" href={appRouter.home} icon={HomeIcon}>
-            {t("menuItems.home")}
-          </MobileMenuItem>
-
-          <MobileMenuItem
-            key="products"
-            href={appRouter.home}
-            icon={PackageIcon}
-          >
-            {t("menuItems.products")}
-          </MobileMenuItem>
-
-          {/* ✅ Reuse menu items renderer */}
-          {renderMenuItemsList(menuItems, t, "mobile")}
-
-          {/* ✅ Reuse Language & Theme selectors */}
-          <LanguageSelector
-            locale={locale}
-            onLocaleChange={handleLocaleChange}
-            t={t}
-            mode="mobile"
-          />
-          <ThemeSelector
-            theme={theme}
-            onThemeChange={handleThemeChange}
-            t={t}
-            mode="mobile"
-          />
-
-          <MobileMenuItem
-            key="support"
-            href={appRouter.home}
-            icon={LifeBuoyIcon}
-          >
-            {t("menuItems.support")}
-          </MobileMenuItem>
-
-          <MobileMenuItem
-            key="documentation"
-            href={appRouter.home}
-            icon={BookIcon}
-          >
-            {t("menuItems.documentation")}
-          </MobileMenuItem>
+          <MobileMenuContent />
         </MobileMenuBody>
 
         <MobileMenuFooter>
-          {/* ✅ Improved loading state */}
           {isLoading ? (
             <Button variant="ghost" className="w-full" disabled>
               Loading...
@@ -616,10 +552,12 @@ export default function Header() {
           ) : (
             <div className="flex gap-2">
               <Button className="flex-1" asChild>
-                <Link href={appRouter.signIn}>{t("signIn")}</Link>
+                <SafeLink href={appRouter.signIn}>{t("signIn")}</SafeLink>
               </Button>
               <Button variant="outline" className="flex-1" asChild>
-                <Link href={appRouter.signUp}>{t("createAccount")}</Link>
+                <SafeLink href={appRouter.signUp}>
+                  {t("createAccount")}
+                </SafeLink>
               </Button>
             </div>
           )}

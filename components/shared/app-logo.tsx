@@ -5,12 +5,12 @@ import { cn } from "@/lib/utils"
 const logoVariants = cva("", {
   variants: {
     size: {
-      default: "size-6",
+      default: "size-8",
       xs: "size-6",
-      sm: "size-8",
-      md: "size-10",
-      lg: "size-12",
-      xl: "size-14",
+      sm: "size-7",
+      md: "size-8",
+      lg: "size-9",
+      xl: "size-10",
     },
   },
   defaultVariants: {

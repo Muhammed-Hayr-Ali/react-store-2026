@@ -33,7 +33,7 @@ import {
   Trash,
   Trash2,
 } from "lucide-react"
-import { ProgressBar } from "../ui/progress-bar"
+import { ProgressBar } from "@/components/ui/progress-bar"
 
 // --- Helper Functions ---
 
@@ -105,10 +105,13 @@ const NotificationTabs = React.forwardRef<
   { activeTab: string; onTabChange: (value: string) => void }
 >(({ activeTab, onTabChange }, ref) => {
   const t = useTranslations("Notifications")
+  const locale = useLocale()
   return (
     <div ref={ref} className="px-0.5">
-      <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
+      <Tabs value={activeTab} onValueChange={onTabChange} className="w-full" dir={locale === "ar" ? "rtl" : "ltr"}>
         <TabsList className="grid h-7 w-full grid-cols-3 rounded-md bg-zinc-100 p-0.5 dark:bg-zinc-800/60">
+          
+          
           <TabsTrigger
             value="today"
             className="rounded-sm text-[10px] font-medium text-zinc-600 data-[state=active]:bg-white data-[state=active]:text-zinc-900 data-[state=active]:shadow-sm dark:text-zinc-400 dark:data-[state=active]:bg-zinc-700/80 dark:data-[state=active]:text-zinc-100"
@@ -126,6 +129,7 @@ const NotificationTabs = React.forwardRef<
             className="rounded-sm text-[10px] font-medium text-zinc-600 data-[state=active]:bg-white data-[state=active]:text-zinc-900 data-[state=active]:shadow-sm dark:text-zinc-400 dark:data-[state=active]:bg-zinc-700/80 dark:data-[state=active]:text-zinc-100"
           >
             {t("tabs.earlier")}
+      
           </TabsTrigger>
         </TabsList>
       </Tabs>
@@ -387,11 +391,14 @@ export default function NotificationBell({
       <PopoverTrigger asChild>
         {/* <NotificationTriggerIcon unreadCount={unreadCount} /> */}
         <Button
-          variant="ghost"
-          className={cn("relative rounded-full size-8", className)}
+          size="icon"
+          variant="secondary"
+          className={cn("relative", className)}
           {...props}
         >
-          <div className="absolute top-0 right-0 rtl:right-auto rtl:left-0 size-4 flex items-center justify-center text-white text-[10px] font-light rounded-full bg-red-500">{unreadCount}</div>
+      { unreadCount > 0 &&   <div className="absolute -top-1 -right-1 flex size-3.5 items-center justify-center rounded-full bg-red-500  font-light text-white text-[10px] rtl:right-auto rtl:-left-1">
+            {unreadCount}
+          </div>}
           {children}
         </Button>
       </PopoverTrigger>
