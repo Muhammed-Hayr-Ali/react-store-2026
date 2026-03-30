@@ -1,12 +1,14 @@
 -- =====================================================
 -- Marketna E-Commerce - Profile Plans Link Table
 -- File: 06_profile_plans_links.sql
--- Version: 4.0 (Final)
+-- Version: 4.2 (Final Audited - Phase 1 Only)
 -- Date: 2026-03-22
--- Description: Profile plans linking table - assigns plans to users
+-- Description: Profile plans linking table - assigns subscription plans to users
 -- Dependencies: public.profiles, public.plans
--- Links: user_id → profiles.id, plan_id → plans.id
 -- =====================================================
+
+-- ⚠️ NOTE: Admin policies moved to Phase 2 (12_profile_plans_admin_policies.sql)
+-- to maintain consistency with Phase 1/Phase 2 separation
 
 -- =====================================================
 -- 📋 File Contents
@@ -14,8 +16,9 @@
 -- 1. Cleanup before creation
 -- 2. Create profile plans table
 -- 3. Indexes
--- 4. Row Level Security (RLS)
--- 5. Verification
+-- 4. Row Level Security (RLS) - Phase 1 Only
+-- 5. Trigger for updated_at
+-- 6. Verification
 -- =====================================================
 
 
@@ -23,21 +26,22 @@
 -- 1️⃣ CLEANUP
 -- =====================================================
 
--- Drop policies first (with error handling)
 DO $$ BEGIN
   DROP POLICY IF EXISTS "profile_plans_read_own" ON public.profile_plans;
   DROP POLICY IF EXISTS "profile_plans_admin_read_all" ON public.profile_plans;
   DROP POLICY IF EXISTS "profile_plans_admin_manage" ON public.profile_plans;
 EXCEPTION WHEN OTHERS THEN NULL; END $$;
 
--- Drop indexes
+DROP TRIGGER IF EXISTS profile_plans_updated_at_trigger ON public.profile_plans;
+DROP FUNCTION IF EXISTS public.update_profile_plans_updated_at() CASCADE;
+
 DROP INDEX IF EXISTS idx_profile_plans_active_unique;
 DROP INDEX IF EXISTS idx_profile_plans_user;
 DROP INDEX IF EXISTS idx_profile_plans_plan;
 DROP INDEX IF EXISTS idx_profile_plans_status;
 DROP INDEX IF EXISTS idx_profile_plans_created_at;
+DROP INDEX IF EXISTS idx_profile_plans_end_date;
 
--- Drop table (CASCADE removes all constraints)
 DROP TABLE IF EXISTS public.profile_plans CASCADE;
 
 
@@ -46,14 +50,9 @@ DROP TABLE IF EXISTS public.profile_plans CASCADE;
 -- =====================================================
 
 CREATE TABLE public.profile_plans (
-  -- Primary Key (auto-generated UUID)
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  
-  -- Foreign Keys
   user_id           UUID NOT NULL,
   plan_id           UUID NOT NULL,
-  
-  -- Status & Dates
   status            TEXT DEFAULT 'active' CHECK (status IN ('active', 'expired', 'cancelled', 'pending', 'trial')),
   start_date        TIMESTAMPTZ DEFAULT NOW(),
   end_date          TIMESTAMPTZ,
@@ -61,7 +60,6 @@ CREATE TABLE public.profile_plans (
   created_at        TIMESTAMPTZ DEFAULT NOW(),
   updated_at        TIMESTAMPTZ DEFAULT NOW(),
 
-  -- Constraints
   CONSTRAINT profile_plans_user_id_fkey
     FOREIGN KEY (user_id) REFERENCES public.profiles(id) ON DELETE CASCADE,
   CONSTRAINT profile_plans_plan_id_fkey
@@ -97,17 +95,18 @@ CREATE INDEX idx_profile_plans_user ON public.profile_plans(user_id);
 CREATE INDEX idx_profile_plans_plan ON public.profile_plans(plan_id);
 CREATE INDEX idx_profile_plans_status ON public.profile_plans(status);
 CREATE INDEX idx_profile_plans_created_at ON public.profile_plans(created_at DESC);
+CREATE INDEX idx_profile_plans_end_date ON public.profile_plans(end_date) WHERE end_date IS NOT NULL;
 
--- Comments
 COMMENT ON INDEX idx_profile_plans_active_unique IS 'Ensure one active plan per user per plan type';
 COMMENT ON INDEX idx_profile_plans_user IS 'Fast search by user ID';
 COMMENT ON INDEX idx_profile_plans_plan IS 'Fast search by plan ID';
 COMMENT ON INDEX idx_profile_plans_status IS 'Filter plans by status';
 COMMENT ON INDEX idx_profile_plans_created_at IS 'Order by creation date';
+COMMENT ON INDEX idx_profile_plans_end_date IS 'Find expiring plans quickly';
 
 
 -- =====================================================
--- 4️⃣ ROW LEVEL SECURITY (RLS)
+-- 4️⃣ ROW LEVEL SECURITY (RLS) - Phase 1 Only
 -- =====================================================
 
 ALTER TABLE public.profile_plans ENABLE ROW LEVEL SECURITY;
@@ -117,40 +116,31 @@ ALTER TABLE public.profile_plans ENABLE ROW LEVEL SECURITY;
 -- =====================================================
 CREATE POLICY "profile_plans_read_own"
   ON public.profile_plans FOR SELECT TO authenticated
-  USING (
-    user_id = (SELECT id FROM public.profiles WHERE id = auth.uid())
-  );
+  USING (user_id = auth.uid());
 
--- =====================================================
--- Policy 2: Admins can read all plans
--- =====================================================
-CREATE POLICY "profile_plans_admin_read_all"
-  ON public.profile_plans FOR SELECT TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.profile_roles pr
-      INNER JOIN public.roles r ON r.id = pr.role_id
-      WHERE pr.user_id = auth.uid() AND r.name = 'admin' AND pr.is_active = TRUE
-    )
-  );
-
--- =====================================================
--- Policy 3: Admins can manage all plans (CRUD)
--- =====================================================
-CREATE POLICY "profile_plans_admin_manage"
-  ON public.profile_plans FOR ALL TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.profile_roles pr
-      INNER JOIN public.roles r ON r.id = pr.role_id
-      WHERE pr.user_id = auth.uid() AND r.name = 'admin' AND pr.is_active = TRUE
-    )
-  )
-  WITH CHECK (true);
+-- 🔹 سياسات Admin تم نقلها لـ Phase 2 (12_profile_plans_admin_policies.sql)
 
 
 -- =====================================================
--- 5️⃣ VERIFICATION
+-- 5️⃣ TRIGGER: Auto-update updated_at
+-- =====================================================
+
+CREATE OR REPLACE FUNCTION public.update_profile_plans_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER profile_plans_updated_at_trigger
+  BEFORE UPDATE ON public.profile_plans
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_profile_plans_updated_at();
+
+
+-- =====================================================
+-- 6️⃣ VERIFICATION
 -- =====================================================
 
 SELECT 
@@ -160,3 +150,28 @@ SELECT
   (SELECT COUNT(*) FROM pg_policies WHERE tablename = 'profile_plans') AS policies,
   (SELECT COUNT(*) FROM information_schema.table_constraints WHERE table_name = 'profile_plans' AND constraint_type = 'FOREIGN KEY') AS foreign_keys,
   (SELECT COUNT(*) FROM information_schema.table_constraints WHERE table_name = 'profile_plans' AND constraint_type = 'CHECK') AS check_constraints;
+
+
+-- =====================================================
+-- 7️⃣ PHASE 2 REMINDER
+-- =====================================================
+/*
+📋 PHASE 2 - Admin Policies (Execute after 03b_roles_functions.sql):
+
+File: 12_profile_plans_admin_policies.sql
+
+CREATE POLICY "profile_plans_admin_read_all"
+  ON public.profile_plans FOR SELECT TO authenticated
+  USING (
+    public.check_user_has_role('admin') OR user_id = auth.uid()
+  );
+
+CREATE POLICY "profile_plans_admin_manage"
+  ON public.profile_plans FOR ALL TO authenticated
+  USING (
+    public.check_user_has_role('admin')
+  )
+  WITH CHECK (
+    public.check_user_has_role('admin')
+  );
+*/

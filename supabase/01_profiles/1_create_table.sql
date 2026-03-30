@@ -1,49 +1,31 @@
 -- =====================================================
 -- Marketna E-Commerce - Profiles Schema
 -- File: 02_profiles.sql
--- Version: 3.0 (Final)
+-- Version: 3.3 (Phase 1 - Basic Policies Only)
 -- Date: 2026-03-22
 -- Description: Profiles table - basic user information
 -- Dependencies: auth.users (Supabase Auth)
 -- =====================================================
 
 -- =====================================================
--- 📋 File Contents
--- =====================================================
--- 1. Cleanup before creation
--- 2. Extensions (pgcrypto for gen_random_uuid)
--- 3. Create profiles table
--- 4. Indexes
--- 5. RLS Policies
--- 6. Trigger for updated_at
--- 7. Verification
--- =====================================================
-
-
--- =====================================================
 -- 1️⃣ CLEANUP
 -- =====================================================
 
--- Drop policies first
 DROP POLICY IF EXISTS "profiles_read_own" ON public.profiles;
 DROP POLICY IF EXISTS "profiles_update_own" ON public.profiles;
 DROP POLICY IF EXISTS "profiles_insert_own" ON public.profiles;
+-- 🔹 سياسات Admin تم نقلها لـ Phase 2
 DROP POLICY IF EXISTS "profiles_admin_read_all" ON public.profiles;
 DROP POLICY IF EXISTS "profiles_admin_manage" ON public.profiles;
 
--- Drop trigger
 DROP TRIGGER IF EXISTS profiles_updated_at_trigger ON public.profiles;
-
--- Drop function
 DROP FUNCTION IF EXISTS public.update_profiles_updated_at() CASCADE;
 
--- Drop indexes
 DROP INDEX IF EXISTS idx_profiles_email;
 DROP INDEX IF EXISTS idx_profiles_provider;
 DROP INDEX IF EXISTS idx_profiles_created_at;
 DROP INDEX IF EXISTS idx_profiles_last_sign_in;
 
--- Drop table
 DROP TABLE IF EXISTS public.profiles CASCADE;
 
 
@@ -51,10 +33,7 @@ DROP TABLE IF EXISTS public.profiles CASCADE;
 -- 2️⃣ EXTENSIONS
 -- =====================================================
 
--- ✅ pgcrypto provides gen_random_uuid() (not uuid-ossp)
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-
--- uuid-ossp is optional (for uuid_generate_v4() if needed)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 
@@ -68,7 +47,6 @@ CREATE TABLE public.profiles (
   provider TEXT DEFAULT 'email',
   first_name TEXT,
   last_name TEXT,
-  -- ✅ GENERATED COLUMN (PostgreSQL 12+)
   full_name TEXT GENERATED ALWAYS AS (
     NULLIF(TRIM(COALESCE(first_name, '') || ' ' || COALESCE(last_name, '')), '')
   ) STORED,
@@ -79,7 +57,7 @@ CREATE TABLE public.profiles (
   email_verified BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
-  last_sign_in_at TIMESTAMPTZ DEFAULT NOW()
+  last_sign_in_at TIMESTAMPTZ
 );
 
 -- Comments
@@ -116,7 +94,7 @@ COMMENT ON INDEX idx_profiles_last_sign_in IS 'Order by last sign-in';
 
 
 -- =====================================================
--- 5️⃣ ROW LEVEL SECURITY (RLS)
+-- 5️⃣ ROW LEVEL SECURITY (RLS) - Phase 1 Only
 -- =====================================================
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -143,35 +121,7 @@ CREATE POLICY "profiles_insert_own"
   ON public.profiles FOR INSERT TO authenticated
   WITH CHECK (id = auth.uid());
 
--- =====================================================
--- Policy 4: Admins can read all profiles
--- =====================================================
--- ⚠️ This will fail if profile_roles doesn't exist yet
--- Create this policy later in a separate file if needed
--- CREATE POLICY "profiles_admin_read_all"
---   ON public.profiles FOR SELECT TO authenticated
---   USING (
---     EXISTS (
---       SELECT 1 FROM public.profile_roles pr
---       INNER JOIN public.roles r ON r.id = pr.role_id
---       WHERE pr.user_id = auth.uid() AND r.name = 'admin' AND pr.is_active = TRUE
---     )
---   );
-
--- =====================================================
--- Policy 5: Admins can manage all profiles
--- =====================================================
--- ⚠️ Same as above - create later if needed
--- CREATE POLICY "profiles_admin_manage"
---   ON public.profiles FOR ALL TO authenticated
---   USING (
---     EXISTS (
---       SELECT 1 FROM public.profile_roles pr
---       INNER JOIN public.roles r ON r.id = pr.role_id
---       WHERE pr.user_id = auth.uid() AND r.name = 'admin' AND pr.is_active = TRUE
---     )
---   )
---   WITH CHECK (true);
+-- 🔹 سياسات Admin تم نقلها لـ Phase 2 (10_profiles_admin_policies.sql)
 
 
 -- =====================================================
@@ -202,3 +152,28 @@ SELECT
   (SELECT COUNT(*) FROM pg_indexes WHERE tablename = 'profiles') AS indexes,
   (SELECT COUNT(*) FROM pg_policies WHERE tablename = 'profiles') AS policies,
   (SELECT COUNT(*) FROM information_schema.triggers WHERE trigger_name = 'profiles_updated_at_trigger') AS triggers;
+
+
+-- =====================================================
+-- 8️⃣ PHASE 2 REMINDER
+-- =====================================================
+/*
+📋 PHASE 2 - Admin Policies (Execute after all tables are created):
+
+File: 10_profiles_admin_policies.sql
+
+CREATE POLICY "profiles_admin_read_all"
+  ON public.profiles FOR SELECT TO authenticated
+  USING (
+    public.check_user_has_role('admin')
+    OR id = auth.uid()
+  );
+
+CREATE POLICY "profiles_admin_manage"
+  ON public.profiles FOR ALL TO authenticated
+  USING (
+    public.check_user_has_role('admin')
+    OR id = auth.uid()
+  )
+  WITH CHECK (true);
+*/

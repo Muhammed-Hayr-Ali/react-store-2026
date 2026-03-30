@@ -1,11 +1,14 @@
 -- =====================================================
 -- Marketna E-Commerce - Password Reset Tokens Schema
 -- File: 01_password_reset_tokens.sql
--- Version: 2.0 (Corrected)
+-- Version: 2.2 (Final Audited - Phase 1)
 -- Date: 2026-03-22
 -- Description: Secure password reset system
--- Dependencies: auth.users (Supabase Auth)
+-- Dependencies: public.profiles (MUST be created first)
 -- =====================================================
+
+-- ⚠️ IMPORTANT: This file MUST be executed AFTER 02_profiles.sql
+-- Despite the file number, it depends on profiles table existing first
 
 -- =====================================================
 -- 📋 File Contents
@@ -23,24 +26,21 @@
 -- 1️⃣ CLEANUP
 -- =====================================================
 
--- Drop functions first (depend on table)
 DROP FUNCTION IF EXISTS public.create_password_reset_token(UUID, TEXT, INTEGER, INET) CASCADE;
 DROP FUNCTION IF EXISTS public.claim_password_reset_token(TEXT) CASCADE;
 DROP FUNCTION IF EXISTS public.verify_password_reset_token(TEXT) CASCADE;
 DROP FUNCTION IF EXISTS public.cleanup_expired_reset_tokens() CASCADE;
 
--- Drop policies
 DROP POLICY IF EXISTS "password_reset_tokens_no_public_read" ON public.password_reset_tokens;
 DROP POLICY IF EXISTS "password_reset_tokens_service_full_access" ON public.password_reset_tokens;
 
--- Drop indexes
 DROP INDEX IF EXISTS idx_password_reset_tokens_token;
 DROP INDEX IF EXISTS idx_password_reset_tokens_user_id;
 DROP INDEX IF EXISTS idx_password_reset_tokens_email;
 DROP INDEX IF EXISTS idx_password_reset_tokens_expires_at;
 DROP INDEX IF EXISTS idx_password_reset_tokens_created_at;
+DROP INDEX IF EXISTS idx_password_reset_tokens_active;
 
--- Drop table
 DROP TABLE IF EXISTS public.password_reset_tokens CASCADE;
 
 
@@ -50,9 +50,8 @@ DROP TABLE IF EXISTS public.password_reset_tokens CASCADE;
 
 CREATE TABLE public.password_reset_tokens (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id      UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id      UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   email        TEXT NOT NULL,
-  -- ✅ Added: CHECK constraint for 64 character token format
   token        TEXT UNIQUE NOT NULL CHECK (token ~ '^[A-Za-z0-9]{64}$'),
   expires_at   TIMESTAMPTZ NOT NULL,
   used_at      TIMESTAMPTZ,
@@ -63,7 +62,7 @@ CREATE TABLE public.password_reset_tokens (
 -- Comments
 COMMENT ON TABLE public.password_reset_tokens IS 'Password reset tokens - valid for 60 minutes';
 COMMENT ON COLUMN public.password_reset_tokens.id IS 'Unique identifier for the token';
-COMMENT ON COLUMN public.password_reset_tokens.user_id IS 'Target user ID (from auth.users)';
+COMMENT ON COLUMN public.password_reset_tokens.user_id IS 'Target user ID (from public.profiles)';
 COMMENT ON COLUMN public.password_reset_tokens.email IS 'User email address';
 COMMENT ON COLUMN public.password_reset_tokens.token IS 'Secret token (64 alphanumeric characters)';
 COMMENT ON COLUMN public.password_reset_tokens.expires_at IS 'Expiration time';
@@ -81,12 +80,14 @@ CREATE INDEX idx_password_reset_tokens_user_id ON public.password_reset_tokens(u
 CREATE INDEX idx_password_reset_tokens_email ON public.password_reset_tokens(email);
 CREATE INDEX idx_password_reset_tokens_expires_at ON public.password_reset_tokens(expires_at);
 CREATE INDEX idx_password_reset_tokens_created_at ON public.password_reset_tokens(created_at DESC);
+CREATE INDEX idx_password_reset_tokens_active ON public.password_reset_tokens(user_id, used_at, expires_at);
 
 COMMENT ON INDEX idx_password_reset_tokens_token IS 'Fast token lookup (primary use case)';
 COMMENT ON INDEX idx_password_reset_tokens_user_id IS 'Query tokens for a specific user';
 COMMENT ON INDEX idx_password_reset_tokens_email IS 'Search by email';
 COMMENT ON INDEX idx_password_reset_tokens_expires_at IS 'Clean up expired tokens';
 COMMENT ON INDEX idx_password_reset_tokens_created_at IS 'Chronological ordering';
+COMMENT ON INDEX idx_password_reset_tokens_active IS 'Optimized for active token queries';
 
 
 -- =====================================================
@@ -97,11 +98,12 @@ ALTER TABLE public.password_reset_tokens ENABLE ROW LEVEL SECURITY;
 
 -- =====================================================
 -- Policy 1: Block ALL public reads (security)
+-- 🔹 تم إزالة anon للوضوح (الرموز سرية تماماً)
 -- =====================================================
 DROP POLICY IF EXISTS "password_reset_tokens_no_public_read" ON public.password_reset_tokens;
 CREATE POLICY "password_reset_tokens_no_public_read"
   ON public.password_reset_tokens FOR SELECT
-  TO authenticated, anon
+  TO authenticated
   USING (false);
 
 COMMENT ON POLICY "password_reset_tokens_no_public_read" ON public.password_reset_tokens 
@@ -199,7 +201,6 @@ BEGIN
   END IF;
 
   -- Atomic UPDATE: verify + mark as used in one operation
-  -- This prevents race conditions and double-use
   UPDATE public.password_reset_tokens prt
   SET used_at = NOW()
   WHERE prt.token = p_token
@@ -288,7 +289,6 @@ RETURNS INTEGER AS $$
 DECLARE
   v_deleted INTEGER;
 BEGIN
-  -- Delete in batches to avoid long locks
   DELETE FROM public.password_reset_tokens
   WHERE id IN (
     SELECT id FROM public.password_reset_tokens
@@ -316,3 +316,18 @@ SELECT
   (SELECT COUNT(*) FROM pg_indexes WHERE tablename = 'password_reset_tokens') AS indexes,
   (SELECT COUNT(*) FROM pg_policies WHERE tablename = 'password_reset_tokens') AS policies,
   (SELECT COUNT(*) FROM information_schema.routines WHERE routine_schema = 'public' AND routine_name LIKE 'password_reset%') AS functions;
+
+
+-- =====================================================
+-- 7️⃣ EXECUTION ORDER WARNING
+-- =====================================================
+/*
+⚠️ CRITICAL: This file depends on public.profiles table!
+
+Correct Execution Order:
+1. 02_profiles.sql              ← MUST run first (creates profiles table)
+2. 01_password_reset_tokens.sql ← This file (references profiles.id)
+
+Despite the file number (01_), this file MUST be executed AFTER profiles.
+Consider renaming to: 01b_password_reset_tokens.sql or 07_password_reset_tokens.sql
+*/

@@ -52,7 +52,7 @@ export function AppSidebar({
         name:
           profile.full_name || profile.first_name || profile.email || "User",
         email: profile.email,
-        avatar: profile.avatar_url || "/avatars/default.jpg",
+        avatar: profile.avatar_url || undefined,
       }
     }
 
@@ -60,14 +60,14 @@ export function AppSidebar({
       return {
         name: user.email?.split("@")[0] || "User",
         email: user.email || "",
-        avatar: user.user_metadata?.avatar_url || "/avatars/default.jpg",
+        avatar: user.user_metadata?.avatar_url || undefined,
       }
     }
 
     return {
       name: "User",
       email: "user@example.com",
-      avatar: "/avatars/default.jpg",
+      avatar: undefined,
     }
   }, [profile, user])
 

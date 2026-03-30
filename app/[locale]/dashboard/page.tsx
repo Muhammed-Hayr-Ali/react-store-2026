@@ -1,4 +1,3 @@
-import { getUserRole } from "@/lib/actions/user/get_user_role"
 import { redirect } from "next/navigation"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
@@ -26,6 +25,7 @@ import { getDirectionData } from "@/lib/utils/direction"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getTranslations } from "next-intl/server"
 import { appRouter } from "@/lib/app-routes"
+import { getUserRole } from "@/lib/actions/roles/get_user_role"
 
 export async function generateMetadata() {
   const t = await getTranslations()
@@ -44,7 +44,7 @@ export default async function Page() {
     redirect("/")
   }
 
-  const role = res.role as "admin" | "vendor" | "customer" | "delivery"
+  const role = "customer"
   const t = await getTranslations("SidebarNav")
 
   // اختيار المكون بناءً على الدور
@@ -63,7 +63,7 @@ export default async function Page() {
   const { sidebarSide } = await getDirectionData()
 
   return (
-    <SidebarProvider>
+    <SidebarProvider suppressHydrationWarning>
       <AppSidebar role={role} side={sidebarSide} navItems={navItems} />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">

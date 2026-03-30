@@ -1,53 +1,55 @@
 -- =====================================================
--- Marketna E-Commerce - Roles RLS Policies
--- File: 03b_roles_rls_policies.sql
--- Version: 1.1 (Final)
+-- Marketna E-Commerce - Roles Helper Functions
+-- File: 03b_roles_functions.sql
+-- Version: 1.0 (Phase 1 - After profile_roles)
+-- Date: 2026-03-22
+-- Description: Helper functions that depend on profile_roles
+-- Dependencies: public.roles, public.profile_roles
 -- Run AFTER: 04_profile_roles_links.sql
 -- =====================================================
 
 -- =====================================================
--- Cleanup
+-- 1️⃣ CLEANUP
 -- =====================================================
-DROP POLICY IF EXISTS "roles_admin_read_all" ON public.roles;
-DROP POLICY IF EXISTS "roles_admin_manage" ON public.roles;
+DROP FUNCTION IF EXISTS public.check_user_has_role(TEXT) CASCADE;
+
 
 -- =====================================================
--- Policy 1: Admins can read all roles
+-- 2️⃣ HELPER FUNCTION: Check User Role
+-- 🔹 SECURITY DEFINER bypasses RLS safely
 -- =====================================================
-CREATE POLICY "roles_admin_read_all"
-  ON public.roles FOR SELECT TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.profile_roles pr
-      INNER JOIN public.roles r ON r.id = pr.role_id
-      WHERE pr.user_id = auth.uid() AND r.name = 'admin' AND pr.is_active = TRUE
-    )
+CREATE OR REPLACE FUNCTION public.check_user_has_role(required_role TEXT)
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 
+    FROM public.profile_roles pr
+    JOIN public.roles r ON r.id = pr.role_id
+    WHERE pr.user_id = auth.uid() 
+      AND r.name = required_role::public.role_name
+      AND pr.is_active = TRUE
   );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
-COMMENT ON POLICY "roles_admin_read_all" ON public.roles IS 'Admins can read all roles';
+COMMENT ON FUNCTION public.check_user_has_role IS 'Check if current user has a specific role (bypasses RLS safely)';
 
--- =====================================================
--- Policy 2: Admins can manage all roles (CRUD)
--- =====================================================
-CREATE POLICY "roles_admin_manage"
-  ON public.roles FOR ALL TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.profile_roles pr
-      INNER JOIN public.roles r ON r.id = pr.role_id
-      WHERE pr.user_id = auth.uid() AND r.name = 'admin' AND pr.is_active = TRUE
-    )
-  )
-  WITH CHECK (true);
-
-COMMENT ON POLICY "roles_admin_manage" ON public.roles IS 'Admins can manage all roles (CRUD)';
 
 -- =====================================================
--- Verification
+-- 3️⃣ GRANT PERMISSIONS
+-- =====================================================
+GRANT EXECUTE ON FUNCTION public.check_user_has_role(TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.check_user_has_role(TEXT) TO postgres;
+GRANT EXECUTE ON FUNCTION public.check_user_has_role(TEXT) TO service_role;
+
+
+-- =====================================================
+-- 4️⃣ VERIFICATION
 -- =====================================================
 SELECT 
-  '✅ Admin policies created successfully!' AS status,
-  COUNT(*) AS policy_count
-FROM pg_policies 
-WHERE tablename = 'roles' 
-  AND policyname IN ('roles_admin_read_all', 'roles_admin_manage');
+  '✅ check_user_has_role() function created!' AS status,
+  proname AS function_name,
+  CASE prosecdef WHEN true THEN 'SECURITY DEFINER' ELSE 'INVOKER' END AS security
+FROM pg_proc
+WHERE proname = 'check_user_has_role'
+  AND pronamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'public');

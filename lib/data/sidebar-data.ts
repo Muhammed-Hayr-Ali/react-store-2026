@@ -247,5 +247,5 @@ export const roleNavData = {
 export const userData = {
   name: "User",
   email: "user@example.com",
-  avatar: "/avatars/default.jpg",
+  avatar: undefined,
 }

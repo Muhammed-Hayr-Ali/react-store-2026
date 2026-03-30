@@ -1,7 +1,7 @@
 -- =====================================================
 -- Marketna E-Commerce - Subscription Plans Definitions
 -- File: 05_subscriptions.sql
--- Version: 3.1 (Final with minor improvements)
+-- Version: 3.3 (Final Audited - Phase 1)
 -- Date: 2026-03-22
 -- Description: Subscription plans definition table with category ENUM
 -- Dependencies: None (Standalone)
@@ -14,9 +14,10 @@
 -- 2. Create ENUM for plan categories
 -- 3. Create plans table
 -- 4. Indexes
--- 5. RLS Policies (safe - no dependencies)
--- 6. Default Data (8 plans across 3 categories)
--- 7. Verification
+-- 5. RLS Policies (Phase 1 only)
+-- 6. Trigger for updated_at
+-- 7. Default Data
+-- 8. Verification
 -- =====================================================
 
 
@@ -24,16 +25,19 @@
 -- 1️⃣ CLEANUP
 -- =====================================================
 
--- Drop policies first
 DROP POLICY IF EXISTS "plans_public_read" ON public.plans;
 DROP POLICY IF EXISTS "plans_admin_read_all" ON public.plans;
 DROP POLICY IF EXISTS "plans_admin_manage" ON public.plans;
 
--- Drop indexes
+DROP TRIGGER IF EXISTS plans_updated_at_trigger ON public.plans;
+DROP FUNCTION IF EXISTS public.update_plans_updated_at() CASCADE;
+
 DROP INDEX IF EXISTS idx_plans_category;
 DROP INDEX IF EXISTS idx_plans_permissions;
+DROP INDEX IF EXISTS idx_plans_is_default;
+DROP INDEX IF EXISTS idx_plans_is_popular;
+DROP INDEX IF EXISTS idx_plans_created_at;
 
--- Drop table and type
 DROP TABLE IF EXISTS public.plans CASCADE;
 DROP TYPE IF EXISTS public.plan_category CASCADE;
 
@@ -86,30 +90,56 @@ COMMENT ON COLUMN public.plans.updated_at IS 'Plan last update timestamp';
 
 CREATE INDEX idx_plans_category ON public.plans(category);
 CREATE INDEX idx_plans_permissions ON public.plans USING GIN(permissions);
+CREATE INDEX idx_plans_is_default ON public.plans(is_default) WHERE is_default = TRUE;
+CREATE INDEX idx_plans_is_popular ON public.plans(is_popular) WHERE is_popular = TRUE;
+CREATE INDEX idx_plans_created_at ON public.plans(created_at DESC);
 
 COMMENT ON INDEX idx_plans_category IS 'Fast search by plan category';
 COMMENT ON INDEX idx_plans_permissions IS 'Search inside JSONB permissions';
+COMMENT ON INDEX idx_plans_is_default IS 'Find default plan quickly';
+COMMENT ON INDEX idx_plans_is_popular IS 'Find popular plans quickly';
+COMMENT ON INDEX idx_plans_created_at IS 'Order plans by creation date';
 
 
 -- =====================================================
--- 5️⃣ ROW LEVEL SECURITY (RLS)
+-- 5️⃣ ROW LEVEL SECURITY (RLS) - Phase 1 Only
 -- =====================================================
 
 ALTER TABLE public.plans ENABLE ROW LEVEL SECURITY;
 
 -- =====================================================
--- Policy 1: Public read (safe - no dependencies)
+-- Policy 1: Public read (plans are public information)
 -- =====================================================
 CREATE POLICY "plans_public_read"
   ON public.plans FOR SELECT TO authenticated, anon
   USING (true);
 
--- ⚠️ Policy 2 & 3: Admin policies created in 05b_plans_rls_policies.sql
--- (after profile_roles table exists)
+COMMENT ON POLICY "plans_public_read" ON public.plans 
+  IS 'Plans are publicly readable (marketing pages)';
+
+-- 🔹 سياسات Admin مؤجلة لـ Phase 2 (12_profile_plans_admin_policies.sql)
 
 
 -- =====================================================
--- 6️⃣ DEFAULT DATA
+-- 6️⃣ TRIGGER: Auto-update updated_at
+-- =====================================================
+
+CREATE OR REPLACE FUNCTION public.update_plans_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER plans_updated_at_trigger
+  BEFORE UPDATE ON public.plans
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_plans_updated_at();
+
+
+-- =====================================================
+-- 7️⃣ DEFAULT DATA
 -- =====================================================
 
 -- =====================================================
@@ -173,7 +203,7 @@ SET price = EXCLUDED.price,
 
 
 -- =====================================================
--- 7️⃣ VERIFICATION
+-- 8️⃣ VERIFICATION
 -- =====================================================
 
 SELECT 
@@ -185,3 +215,22 @@ SELECT
   COUNT(*) FILTER (WHERE is_default = true) AS default_plans,
   COUNT(*) FILTER (WHERE is_popular = true) AS popular_plans
 FROM public.plans;
+
+
+-- =====================================================
+-- 9️⃣ PHASE 2 REMINDER
+-- =====================================================
+/*
+📋 PHASE 2 - Admin Policies (Execute after all tables are created):
+
+File: 12_plans_admin_policies.sql
+
+CREATE POLICY "plans_admin_read_all"
+  ON public.plans FOR SELECT TO authenticated
+  USING (public.check_user_has_role('admin'));
+
+CREATE POLICY "plans_admin_manage"
+  ON public.plans FOR ALL TO authenticated
+  USING (public.check_user_has_role('admin'))
+  WITH CHECK (public.check_user_has_role('admin'));
+*/

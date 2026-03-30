@@ -230,9 +230,9 @@ export function AuthDebug() {
                 🎭 Roles ({profile.roles.length})
               </span>
             </div>
-            {profile.roles.map((role) => (
+            {profile.roles.map((role, index) => (
               <div
-                key={role.role_id}
+                key={`${role.role_id}-${index}`}
                 className="mb-1 rounded bg-background p-2"
               >
                 <div className="flex items-center justify-between">
@@ -256,7 +256,7 @@ export function AuthDebug() {
                   <div className="mt-1 flex flex-wrap gap-1">
                     {role.permissions.slice(0, 5).map((perm: string) => (
                       <span
-                        key={perm}
+                        key={`${perm}-${index}`}
                         className="rounded bg-orange-500/20 px-1 text-[9px] text-orange-500"
                       >
                         {perm}
@@ -329,9 +329,9 @@ export function AuthDebug() {
                 📦 Plans ({profile.plans.length})
               </span>
             </div>
-            {profile.plans.map((plan) => (
+            {profile.plans.map((plan, index) => (
               <div
-                key={plan.plan_id}
+                key={`${plan.plan_id}-${index}`}
                 className="mb-1 rounded bg-background p-2"
               >
                 <div className="flex items-center justify-between">
@@ -392,9 +392,9 @@ export function AuthDebug() {
                         {Object.entries(plan.permissions)
                           .filter(([_, value]) => value === true)
                           .slice(0, 5)
-                          .map(([key]) => (
+                          .map(([key], permIndex) => (
                             <span
-                              key={key}
+                              key={`${key}-${index}-${permIndex}`}
                               className="rounded bg-purple-500/20 px-1 text-[9px] text-purple-500"
                             >
                               {key}

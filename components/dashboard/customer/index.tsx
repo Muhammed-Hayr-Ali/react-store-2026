@@ -11,10 +11,8 @@ import {
   Package,
   Heart,
   Ticket,
-  Truck,
   ShoppingBag,
   Star,
-  CreditCard,
   MapPin,
 } from "lucide-react"
 import { useTranslations } from "next-intl"

@@ -1,23 +1,51 @@
 -- =====================================================
 -- Marketna E-Commerce - Roles Definitions
 -- File: 03_roles.sql
--- Version: 3.1 (Final with minor improvements)
+-- Version: 3.3 (Final Audited - Phase 1 Table Only)
+-- Date: 2026-03-22
+-- Description: Roles definition table with category ENUM
+-- Dependencies: None (Standalone)
 -- =====================================================
 
+-- ⚠️ NOTE: check_user_has_role() function moved to 03b_roles_functions.sql
+-- to avoid dependency on profile_roles table (created in 04_)
+
 -- =====================================================
--- 1️⃣ Cleanup
+-- 📋 File Contents
+-- =====================================================
+-- 1. Cleanup
+-- 2. Create ENUM
+-- 3. Create Table
+-- 4. Indexes
+-- 5. RLS Policies (Phase 1 only)
+-- 6. Trigger for updated_at
+-- 7. Default Data
+-- 8. Verification
+-- =====================================================
+
+
+-- =====================================================
+-- 1️⃣ CLEANUP
 -- =====================================================
 DROP POLICY IF EXISTS "roles_public_read" ON public.roles;
 DROP POLICY IF EXISTS "roles_admin_manage" ON public.roles;
 DROP POLICY IF EXISTS "roles_admin_read_all" ON public.roles;
+
+DROP TRIGGER IF EXISTS roles_updated_at_trigger ON public.roles;
+DROP FUNCTION IF EXISTS public.update_roles_updated_at() CASCADE;
+-- 🔹 تم إزالة check_user_has_role من هنا (ستُنشأ في 03b_roles_functions.sql)
+DROP FUNCTION IF EXISTS public.check_user_has_role(TEXT) CASCADE;
+
 DROP INDEX IF EXISTS idx_roles_name;
 DROP INDEX IF EXISTS idx_roles_permissions;
 DROP INDEX IF EXISTS idx_roles_created_at;
+
 DROP TABLE IF EXISTS public.roles CASCADE;
 DROP TYPE IF EXISTS public.role_name CASCADE;
 
+
 -- =====================================================
--- 2️⃣ Create ENUM
+-- 2️⃣ CREATE ENUM
 -- =====================================================
 CREATE TYPE public.role_name AS ENUM (
   'admin',
@@ -28,8 +56,9 @@ CREATE TYPE public.role_name AS ENUM (
 
 COMMENT ON TYPE public.role_name IS 'Available role types in the system';
 
+
 -- =====================================================
--- 3️⃣ Create Table
+-- 3️⃣ CREATE TABLE
 -- =====================================================
 CREATE TABLE public.roles (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -48,8 +77,9 @@ COMMENT ON COLUMN public.roles.permissions IS 'Default permissions array for the
 COMMENT ON COLUMN public.roles.created_at IS 'Role creation timestamp';
 COMMENT ON COLUMN public.roles.updated_at IS 'Role last update timestamp';
 
+
 -- =====================================================
--- 4️⃣ Indexes
+-- 4️⃣ INDEXES
 -- =====================================================
 CREATE INDEX idx_roles_name ON public.roles(name);
 CREATE INDEX idx_roles_permissions ON public.roles USING GIN(permissions);
@@ -59,21 +89,42 @@ COMMENT ON INDEX idx_roles_name IS 'Fast search by role name';
 COMMENT ON INDEX idx_roles_permissions IS 'Search inside JSONB permissions array';
 COMMENT ON INDEX idx_roles_created_at IS 'Order roles by creation date';
 
+
 -- =====================================================
--- 5️⃣ RLS Policies
+-- 5️⃣ RLS Policies (Phase 1 Only)
 -- =====================================================
 ALTER TABLE public.roles ENABLE ROW LEVEL SECURITY;
 
--- Policy 1: Public read (safe - no dependencies)
+-- Policy 1: Authenticated users can read roles
 CREATE POLICY "roles_public_read"
-  ON public.roles FOR SELECT TO authenticated, anon
+  ON public.roles FOR SELECT TO authenticated
   USING (true);
 
--- ⚠️ Policy 2 & 3: Admin policies created in 03b_roles_rls_policies.sql
--- (after profile_roles table exists)
+COMMENT ON POLICY "roles_public_read" ON public.roles 
+  IS 'Authenticated users can read all roles (needed for permission checks)';
+
+-- 🔹 سياسات Admin مؤجلة لـ Phase 2 (10_profiles_admin_policies.sql)
+
 
 -- =====================================================
--- 6️⃣ Default Data
+-- 6️⃣ TRIGGER: Auto-update updated_at
+-- =====================================================
+CREATE OR REPLACE FUNCTION public.update_roles_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER roles_updated_at_trigger
+  BEFORE UPDATE ON public.roles
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_roles_updated_at();
+
+
+-- =====================================================
+-- 7️⃣ DEFAULT DATA
 -- =====================================================
 INSERT INTO public.roles (name, description, permissions)
 VALUES
@@ -93,8 +144,9 @@ SET description = EXCLUDED.description,
     permissions = EXCLUDED.permissions,
     updated_at = NOW();
 
+
 -- =====================================================
--- 7️⃣ Verification
+-- 8️⃣ VERIFICATION
 -- =====================================================
 SELECT 
   '✅ Roles table created successfully!' AS status,
@@ -104,3 +156,27 @@ SELECT
   COUNT(*) FILTER (WHERE name = 'delivery') AS delivery_count,
   COUNT(*) FILTER (WHERE name = 'customer') AS customer_count
 FROM public.roles;
+
+
+-- =====================================================
+-- 9️⃣ NEXT STEP: Create check_user_has_role() function
+-- =====================================================
+/*
+📋 IMPORTANT: After running 04_profile_roles_links.sql, create the function:
+
+File: 03b_roles_functions.sql
+
+CREATE OR REPLACE FUNCTION public.check_user_has_role(required_role TEXT)
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 
+    FROM public.profile_roles pr
+    JOIN public.roles r ON r.id = pr.role_id
+    WHERE pr.user_id = auth.uid() 
+      AND r.name = required_role::public.role_name
+      AND pr.is_active = TRUE
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+*/
