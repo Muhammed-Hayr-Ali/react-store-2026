@@ -1,6 +1,6 @@
 -- =====================================================
 -- Marketna E-Commerce - Profile Plans Link Table
--- File: 06_profile_plans_links.sql
+-- File: 06_profile_plans_links/1_create_table.sql
 -- Version: 4.2 (Final Audited - Phase 1 Only)
 -- Date: 2026-03-22
 -- Description: Profile plans linking table - assigns subscription plans to users
@@ -156,7 +156,7 @@ SELECT
 -- 7️⃣ PHASE 2 REMINDER
 -- =====================================================
 /*
-📋 PHASE 2 - Admin Policies (Execute after 03b_roles_functions.sql):
+📋 PHASE 2 - Admin Policies (Execute after 03_roles/2_create_policy.sql):
 
 File: 12_profile_plans_admin_policies.sql
 

@@ -1,6 +1,6 @@
 -- =====================================================
 -- Marketna E-Commerce - Exchange Rates Schema
--- File: 07_exchange_rates.sql
+-- File: 07_exchange_rates/1_create_table.sql
 -- Version: 2.0 (Final)
 -- Date: 2026-03-22
 -- Description: Exchange rates table - auto-updated via Cron Job

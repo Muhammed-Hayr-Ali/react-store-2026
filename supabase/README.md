@@ -1,141 +1,102 @@
 # Marketna E-Commerce - Supabase Database Setup
 
-## 📁 ترتيب تنفيذ الملفات
+## 📁 ترتيب تنفيذ الملفات (Execution Order)
 
-**⚠️ مهم جدًا:** نفّذ الملفات بالترتيب التالي لضمان عمل النظام بشكل صحيح.
+**⚠️ مهم جدًا:** يجب تنفيذ الملفات بالترتيب الرقمي للمجلدات لضمان معالجة التبعيات (Dependencies) بشكل صحيح.
 
 ---
 
-## الترتيب الصحيح
+## 🚀 الترتيب الصحيح للتنفيذ
 
-### 1️⃣ الجداول الأساسية (Tables)
+### 1️⃣ المرحلة الأولى: الجداول والبيانات الأساسية
 
 ```sql
--- 1. الملفات الشخصية
-supabase/02_profiles/1_create_table.sql
+-- 1. ملفات التعريف (Profiles)
+supabase/01_profiles/1_create_table.sql
+supabase/01_profiles/2_create_function.sql
 
--- 2. الأدوار
+-- 2. استعادة كلمة المرور (Password Reset)
+supabase/02_password_reset/1_create_table.sql
+
+-- 3. الأدوار وصلاحيات الوصول (Roles)
 supabase/03_roles/1_create_table.sql
+supabase/03_roles/2_create_policy.sql
 
--- 3. ربط الملفات بالأدوار
+-- 4. ربط المستخدمين بالأدوار
 supabase/04_profile_roles_links/1_create_table.sql
 
--- 4. خطط الاشتراك
+-- 5. خطط الاشتراك (Subscription Plans)
 supabase/05_subscription_plans/1_create_table.sql
+supabase/05_subscription_plans/2_create_policy.sql
 
--- 5. ربط الملفات بالخطط
-supabase/06_profile_plans/1_create_table.sql
+-- 6. ربط المستخدمين بالخطط
+supabase/06_profile_plans_links/1_create_table.sql
 ```
 
-### 2️⃣ البيانات الافتراضية (Default Data)
+### 2️⃣ المرحلة الثانية: الخدمات الإضافية
 
 ```sql
--- 1. بيانات الأدوار (admin, vendor, delivery, customer)
-supabase/03_roles/4_create_data.sql
+-- 7. أسعار الصرف (Exchange Rates)
+supabase/07_exchange_rates/1_create_table.sql
 
--- 2. بيانات خطط الاشتراك
-supabase/05_subscription_plans/4_create_data.sql
-```
-
-### 3️⃣ الدوال والـ Triggers (Functions & Triggers)
-
-```sql
--- ⭐ ملف واحد يحتوي على كل شيء
-supabase/02_profiles/3_create_function.sql
+-- 8. التنبيهات داخل التطبيق (In-App Notifications)
+supabase/08_In-App Notifications/1_create_table.sql
 ```
 
 ---
 
-## 📋 تنفيذ سريع (كل الملفات بالترتيب)
+## 📋 كيفية التنفيذ (How to Execute)
 
-```sql
--- === 1. TABLES ===
-\i supabase/02_profiles/1_create_table.sql
-\i supabase/03_roles/1_create_table.sql
-\i supabase/04_profile_roles_links/1_create_table.sql
-\i supabase/05_subscription_plans/1_create_table.sql
-\i supabase/06_profile_plans/1_create_table.sql
+### الخيار 1: عبر Supabase SQL Editor (موصى به)
+1. افتح مشروعك في [Supabase Dashboard](https://supabase.com/dashboard).
+2. اذهب إلى قسم **SQL Editor**.
+3. انسخ محتوى كل ملف SQL بالترتيب المذكور أعلاه والصقه في المحرر.
+4. اضغط على الزر **Run**.
 
--- === 2. DATA ===
-\i supabase/03_roles/4_create_data.sql
-\i supabase/05_subscription_plans/4_create_data.sql
-
--- === 3. FUNCTIONS & TRIGGERS ===
-\i supabase/02_profiles/3_create_function.sql
-```
-
----
-
-## 🚀 كيفية التنفيذ
-
-### الطريقة 1: عبر Supabase Dashboard (موصى بها)
-
-1. افتح [Supabase Dashboard](https://supabase.com/dashboard)
-2. اختر مشروعك
-3. اذهب إلى **SQL Editor**
-4. انسخ محتويات كل ملف والصقها بالترتيب
-5. اضغط **Run** لكل ملف
-
-### الطريقة 2: عبر psql
-
+### الخيار 2: عبر psql
 ```bash
-psql -h db.<project-ref>.supabase.co -U postgres -d postgres -f setup_all.sql
-```
-
-### الطريقة 3: عبر Supabase CLI
-
-```bash
-npx supabase login
-npx supabase link --project-ref <your-project-ref>
-npx supabase db execute --file supabase/02_profiles/1_create_table.sql
-# ... كرر لكل ملف بالترتيب
+psql -h db.<project-ref>.supabase.co -U postgres -d postgres -f <file_path>
 ```
 
 ---
 
-## ✅ ما يحدث عند التنفيذ
+## ✅ ما الذي يوفره هذا النظام؟
 
-بعد تنفيذ جميع الملفات، عند تسجيل مستخدم جديد:
-
-1. ✅ يتم إنشاء ملفه في `public.profiles` تلقائيًا
-2. ✅ يتم منحه دور `customer` في `public.profile_roles`
-3. ✅ يتم منحه خطة `Free Member` في `public.profile_plans`
-
----
-
-## 🔍 التحقق من النجاح
-
-```sql
--- التحقق من الـ triggers
-SELECT trigger_name, event_manipulation, event_object_table
-FROM information_schema.triggers
-WHERE trigger_name IN ('on_auth_user_created', 'on_auth_user_login');
-
--- التحقق من الدوال
-SELECT routine_name, security_type
-FROM information_schema.routines
-WHERE routine_schema = 'public'
-  AND routine_name IN ('handle_new_user', 'handle_user_login');
-
--- التحقق من الأدوار
-SELECT name, description FROM public.roles ORDER BY name;
-
--- التحقق من الخطط
-SELECT category, name, price, is_default FROM public.plans ORDER BY category, name;
-```
+بمجرد تنفيذ جميع الملفات بالترتيب، سيقوم النظام تلقائياً بـ:
+1. إنشاء ملف الشخصي (Profile) لأي مستخدم جديد يسجل عبر Auth.
+2. تعيين دور `customer` افتراضياً للمستخدم الجديد.
+3. تفعيل خطة "Free Member" للمستخدم الجديد.
+4. إعداد نظام آمن لاستعادة كلمة المرور عبر التوكنات (Tokens).
 
 ---
 
-## 📊 هيكل قاعدة البيانات
+## 🛠️ استكشاف الأخطاء (Troubleshooting)
+
+### خطأ "Foreign Key Constraint"
+**السبب:** محاولة تنفيذ ملف قبل ملف آخر يعتمد عليه (مثلاً تنفيذ `02_password_reset` قبل `01_profiles`).
+**الحل:** التزم بالترتيب الرقمي للمجلدات (01 -> 02 -> 03...).
+
+### خطأ "Trigger function does not exist"
+**السبب:** عدم تنفيذ ملف `2_create_function.sql` في مجلد `01_profiles`.
+**الحل:** تأكد من تنفيذ جميع ملفات المجلد قبل الانتقال للمجلد التالي.
+
+---
+
+## 📂 هيكل المجلدات الحالي
 
 ```
 supabase/
-├── 01_password_reset/          ← استعادة كلمة المرور
-├── 02_profiles/                ← الملفات الشخصية
-│   ├── 1_create_table.sql
-│   └── 3_create_function.sql   ← ⭐ الدوال + triggers
-├── 03_roles/                   ← الأدوار
-│   ├── 1_create_table.sql
+├── 01_profiles/               # الملفات الشخصية والوظائف الأساسية
+├── 02_password_reset/         # نظام استعادة كلمة المرور
+├── 03_roles/                  # تعريف الأدوار (Admin, Vendor, etc.)
+├── 04_profile_roles_links/    # ربط المستخدمين بالأدوار
+├── 05_subscription_plans/     # تعريف خطط الاشتراك
+├── 06_profile_plans_links/    # ربط المستخدمين بالخطط
+├── 07_exchange_rates/         # نظام أسعار الصرف
+├── 08_In-App Notifications/   # نظام التنبيهات الداخلية
+└── templates/                 # قوالب SQL للاستخدام المستقبلي
+```
+ble.sql
 │   └── 4_create_data.sql
 ├── 04_profile_roles_links/     ← ربط الملفات بالأدوار
 │   └── 1_create_table.sql

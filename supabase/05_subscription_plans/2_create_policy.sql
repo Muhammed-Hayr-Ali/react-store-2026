@@ -1,6 +1,6 @@
 -- =====================================================
 -- Marketna E-Commerce - Plans Admin Policies
--- File: 13_plans_admin_policies.sql
+-- File: 05_subscription_plans/2_create_policy.sql
 -- Version: 1.0 (Phase 2 - Final)
 -- Date: 2026-03-22
 -- Description: Admin policies for plans table
@@ -74,10 +74,8 @@ WHERE tablename = 'plans'
 ┌───┬──────────────────────────────────────┬──────────┐
 │ # │ File                                 │ Status   │
 ├───┼──────────────────────────────────────┼──────────┤
-│ 1 │ 10_roles_admin_policies.sql          │ ✅       │
-│ 2 │ 11_profiles_admin_policies.sql       │ ⏳       │
-│ 3 │ 12_profile_roles_admin_policies.sql  │ ⏳       │
-│ 4 │ 13_plans_admin_policies.sql          │ ✅ This  │
-│ 5 │ 14_password_reset_admin_policies.sql │ ⏳       │
+│ 1 │ 03_roles/2_create_policy.sql         │ ✅       │
+│ 2 │ 01_profiles/2_create_function.sql    │ ✅       │
+│ 3 │ 05_subscription_plans/2_policy.sql   │ ✅ This  │
 └───┴──────────────────────────────────────┴──────────┘
 */

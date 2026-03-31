@@ -1,6 +1,6 @@
 -- =====================================================
 -- Marketna E-Commerce - Password Reset Tokens Schema
--- File: 01_password_reset_tokens.sql
+-- File: 02_password_reset/1_create_table.sql
 -- Version: 2.2 (Final Audited - Phase 1)
 -- Date: 2026-03-22
 -- Description: Secure password reset system
@@ -325,8 +325,8 @@ SELECT
 ⚠️ CRITICAL: This file depends on public.profiles table!
 
 Correct Execution Order:
-1. 02_profiles.sql              ← MUST run first (creates profiles table)
-2. 01_password_reset_tokens.sql ← This file (references profiles.id)
+1. 01_profiles/1_create_table.sql   ← MUST run first
+2. 02_password_reset/1_create_table.sql ← This file
 
 Despite the file number (01_), this file MUST be executed AFTER profiles.
 Consider renaming to: 01b_password_reset_tokens.sql or 07_password_reset_tokens.sql

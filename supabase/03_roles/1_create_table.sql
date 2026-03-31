@@ -1,6 +1,6 @@
 -- =====================================================
 -- Marketna E-Commerce - Roles Definitions
--- File: 03_roles.sql
+-- File: 03_roles/1_create_table.sql
 -- Version: 3.3 (Final Audited - Phase 1 Table Only)
 -- Date: 2026-03-22
 -- Description: Roles definition table with category ENUM
@@ -164,7 +164,7 @@ FROM public.roles;
 /*
 📋 IMPORTANT: After running 04_profile_roles_links.sql, create the function:
 
-File: 03b_roles_functions.sql
+File: (Merged into 01_profiles/2_create_function.sql)
 
 CREATE OR REPLACE FUNCTION public.check_user_has_role(required_role TEXT)
 RETURNS BOOLEAN AS $$

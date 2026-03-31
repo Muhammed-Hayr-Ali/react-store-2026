@@ -1,6 +1,6 @@
 -- =====================================================
 -- Marketna E-Commerce - Profiles Functions
--- File: 02_profiles_functions.sql
+-- File: 01_profiles/2_create_function.sql
 -- Version: 7.2 (Final Audited - Phase 1 Last)
 -- Date: 2026-03-22
 -- Description: Profile management functions with auto-onboarding
@@ -265,14 +265,13 @@ SELECT
 ┌───┬──────────────────────────────────────┬──────────┐
 │ # │ File                                 │ Status   │
 ├───┼──────────────────────────────────────┼──────────┤
-│ 1 │ 02_profiles.sql                      │ ✅ First │
-│ 2 │ 01_password_reset_tokens.sql         │ ✅       │
-│ 3 │ 03_roles.sql                         │ ✅       │
-│ 4 │ 04_profile_roles_links.sql           │ ✅       │
-│ 5 │ 03b_roles_functions.sql              │ ✅       │
-│ 6 │ 05_subscriptions.sql                 │ ✅       │
-│ 7 │ 06_profile_plans_links.sql           │ ✅       │
-│ 8 │ 02_profiles_functions.sql            │ ✅ Last  │
+│ 1 │ 01_profiles/1_create_table.sql       │ ✅ First │
+│ 2 │ 02_password_reset/1_create_table.sql │ ✅       │
+│ 3 │ 03_roles/1_create_table.sql          │ ✅       │
+│ 4 │ 04_profile_roles_links/1_table.sql   │ ✅       │
+│ 5 │ 05_subscription_plans/1_table.sql    │ ✅       │
+│ 6 │ 06_profile_plans_links/1_table.sql   │ ✅       │
+│ 7 │ 01_profiles/2_create_function.sql    │ ✅ Last  │
 └───┴──────────────────────────────────────┴──────────┘
 
 📋 PHASE 2 - Admin Policies (After Phase 1 complete):

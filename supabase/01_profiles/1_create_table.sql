@@ -1,6 +1,6 @@
 -- =====================================================
 -- Marketna E-Commerce - Profiles Schema
--- File: 02_profiles.sql
+-- File: 01_profiles/1_create_table.sql
 -- Version: 3.3 (Phase 1 - Basic Policies Only)
 -- Date: 2026-03-22
 -- Description: Profiles table - basic user information

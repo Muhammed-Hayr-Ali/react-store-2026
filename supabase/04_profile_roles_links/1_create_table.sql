@@ -1,6 +1,6 @@
 -- =====================================================
 -- Marketna E-Commerce - Profile Roles Link Table
--- File: 04_profile_roles_links.sql
+-- File: 04_profile_roles_links/1_create_table.sql
 -- Version: 5.2 (Final Audited - Phase 1 Only)
 -- Date: 2026-03-22
 -- Description: Profile roles linking table - assigns roles to users
@@ -145,7 +145,7 @@ SELECT
 -- 7️⃣ PHASE 2 REMINDER
 -- =====================================================
 /*
-📋 PHASE 2 - Admin Policies (Execute after 03b_roles_functions.sql):
+📋 PHASE 2 - Admin Policies (Execute after 03_roles/2_create_policy.sql):
 
 File: 11_profile_roles_admin_policies.sql
 

@@ -1,6 +1,6 @@
 -- =====================================================
 -- Marketna E-Commerce - Subscription Plans Definitions
--- File: 05_subscriptions.sql
+-- File: 05_subscription_plans/1_create_table.sql
 -- Version: 3.3 (Final Audited - Phase 1)
 -- Date: 2026-03-22
 -- Description: Subscription plans definition table with category ENUM

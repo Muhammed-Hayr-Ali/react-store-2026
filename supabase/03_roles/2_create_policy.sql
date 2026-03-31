@@ -1,6 +1,6 @@
 -- =====================================================
 -- Marketna E-Commerce - Roles Helper Functions
--- File: 03b_roles_functions.sql
+-- File: 03_roles/2_create_policy.sql
 -- Version: 1.0 (Phase 1 - After profile_roles)
 -- Date: 2026-03-22
 -- Description: Helper functions that depend on profile_roles

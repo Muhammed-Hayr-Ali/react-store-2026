@@ -1,6 +1,6 @@
 -- =====================================================
 -- Marketna E-Commerce - Notifications Schema
--- File: 08_notifications.sql
+-- File: 08_In-App Notifications/1_create_table.sql
 -- Version: 1.0
 -- Date: 2026-03-24
 -- Description: In-app notifications table
@@ -62,7 +62,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE public.notifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   message TEXT NOT NULL,
   type TEXT DEFAULT 'info',
