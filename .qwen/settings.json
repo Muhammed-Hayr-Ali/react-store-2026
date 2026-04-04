@@ -21,7 +21,9 @@
       "Bash(findstr *)",
       "Bash(npm *)",
       "Bash(@powershell *)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   },
   "$version": 3

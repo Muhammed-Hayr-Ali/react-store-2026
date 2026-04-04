@@ -1,3 +1,4 @@
+// @ts-expect-error global.css is handled by Next.js
 import "../globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
