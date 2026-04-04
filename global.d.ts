@@ -15,7 +15,24 @@ interface Window {
           use_fedcm_for_prompt?: boolean
         }) => void
         prompt: (
-          notificationCallback?: (res: { promptState: number }) => void
+          notificationCallback?: (notification: {
+            isNotDisplayed: () => boolean
+            isSkippedMoment: () => boolean
+            isDismissedMoment: () => boolean
+            getNotDisplayedReason: () => string
+            getSkippedReason: () => string
+            getDismissedReason: () => string
+          }) => void
+        ) => void
+        renderButton: (
+          parent: HTMLElement,
+          options?: {
+            theme?: "outline" | "filled_blue"
+            size?: "large" | "medium" | "small"
+            shape?: "rectangular" | "pill" | "circle" | "square"
+            text?: "signin_with" | "signup_with" | "continue_with" | "signin"
+            width?: number
+          }
         ) => void
       }
     }
