@@ -1,9 +1,9 @@
-import { createBrowserClient } from "@/lib/supabase/createBrowserClient"
-import { ApiResult } from "@/lib/types/common"
-import { appRouter } from "@/lib/app-routes"
+import { createClient } from "@/lib/database/supabase/client"
+import { ApiResult } from "@/lib/database/types"
+import { appRouter } from "@/lib/navigation"
 
 export async function signInWithGoogle(): Promise<ApiResult> {
-  const supabase = createBrowserClient()
+  const supabase = createClient()
   const appUrl = process.env.NEXT_PUBLIC_APP_URL
 
   const { error } = await supabase.auth.signInWithOAuth({
