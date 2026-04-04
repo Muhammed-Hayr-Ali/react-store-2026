@@ -1,76 +1,82 @@
 "use client"
 import Script from "next/script"
 import { useRouter } from "next/navigation"
-import { useEffect, useRef, useCallback } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { createClient } from "@/lib/database/supabase/client"
 
 export default function GoogleOneTap() {
   const router = useRouter()
-  const handleLoginRef = useRef<
-    ((response: { credential: string }) => Promise<void>) | null
-  >(null)
+  const [shouldShow, setShouldShow] = useState(false)
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("[OneTap] Session check:", session ? "logged in" : "guest")
+      if (!session) {
+        setShouldShow(true)
+      }
+    })
+  }, [])
 
   const handleLogin = useCallback(
     async (response: { credential: string }) => {
+      console.log("[OneTap] Login callback triggered")
       const supabase = createClient()
       const { error } = await supabase.auth.signInWithIdToken({
         provider: "google",
         token: response.credential,
       })
-      if (!error) router.refresh()
+      if (!error) {
+        console.log("[OneTap] Login success, refreshing")
+        router.refresh()
+      } else {
+        console.error("[OneTap] Login error:", error)
+      }
     },
     [router]
   )
 
-  // Keep ref updated so global callback always has latest version
-  useEffect(() => {
-    handleLoginRef.current = handleLogin
-  }, [handleLogin])
+  const handleScriptLoad = useCallback(() => {
+    console.log("[OneTap] Google script loaded")
+    if (!shouldShow) {
+      console.log("[OneTap] User already logged in, skipping")
+      return
+    }
 
-  useEffect(() => {
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
-    if (!clientId) return
+    console.log("[OneTap] Client ID:", clientId ? "✅ present" : "❌ missing")
 
-    const checkAndInit = () => {
-      if (!window.google?.accounts?.id) return
-
-      const callback = async (response: { credential: string }) => {
-        if (handleLoginRef.current) {
-          await handleLoginRef.current(response)
-        }
-      }
-
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback,
-        auto_select: false,
-        use_fedcm_for_prompt: true,
+    if (!clientId || !window.google?.accounts?.id) {
+      console.log("[OneTap] Google API not ready:", {
+        clientId: !!clientId,
+        google: !!window.google,
       })
-
-      window.google.accounts.id.prompt()
+      return
     }
 
-    // Poll until Google script is loaded
-    const interval = setInterval(() => {
-      if (window.google?.accounts?.id) {
-        clearInterval(interval)
-        checkAndInit()
-      }
-    }, 100)
+    console.log("[OneTap] Initializing Google One Tap")
+    window.google.accounts.id.initialize({
+      client_id: clientId,
+      callback: handleLogin,
+      auto_select: false,
+      use_fedcm_for_prompt: true,
+    })
 
-    // Timeout after 10 seconds
-    const timeout = setTimeout(() => clearInterval(interval), 10000)
+    console.log("[OneTap] Calling prompt()")
+    window.google.accounts.id.prompt()
+  }, [shouldShow, handleLogin])
 
-    return () => {
-      clearInterval(interval)
-      clearTimeout(timeout)
-    }
-  }, [])
+  if (!shouldShow) {
+    console.log("[OneTap] Not rendering - user logged in or checking")
+    return null
+  }
 
   return (
     <Script
       src="https://accounts.google.com/gsi/client"
       strategy="afterInteractive"
+      onLoad={handleScriptLoad}
     />
   )
 }

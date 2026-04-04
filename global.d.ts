@@ -20,5 +20,4 @@ interface Window {
       }
     }
   }
-  handleGoogleOneTap?: (response: { credential: string }) => Promise<void>
 }
