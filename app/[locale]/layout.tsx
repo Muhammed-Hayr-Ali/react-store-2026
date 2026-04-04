@@ -1,4 +1,3 @@
-// @ts-expect-error global.css is handled by Next.js
 import "../globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
@@ -10,7 +9,6 @@ import { Toaster } from "sonner"
 import { Viewport, Metadata } from "next"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { AuthProvider } from "@/lib/providers/auth-provider"
-import GoogleOneTap from "@/components/GoogleOneTap"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
@@ -71,7 +69,6 @@ export default async function RootLayout({
               <AuthProvider>
                 {children}
                 <Toaster position="top-center" richColors />
-                <GoogleOneTap />
               </AuthProvider>
             </NextIntlClientProvider>
           </TooltipProvider>
