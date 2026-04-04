@@ -14,8 +14,11 @@ interface Window {
           auto_select?: boolean
           use_fedcm_for_prompt?: boolean
         }) => void
-        prompt: () => void
+        prompt: (
+          notificationCallback?: (res: { promptState: number }) => void
+        ) => void
       }
     }
   }
+  handleGoogleOneTap?: (response: { credential: string }) => Promise<void>
 }
