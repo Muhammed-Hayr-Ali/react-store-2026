@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation"
-import { createServerClient } from "@/lib/supabase/createServerClient"
-import { appRouter } from "@/lib/app-routes"
+import { createClient } from "@/lib/database/supabase/server"
+import { appRouter } from "@/lib/navigation"
 
 export async function MfaGuard() {
   try {
-    const supabase = await createServerClient()
+    const supabase = await createClient()
 
     const {
       data: { session },
@@ -27,7 +27,7 @@ export async function MfaGuard() {
       console.error("[MfaGuard] AAL check failed:", {
         message: error.message ?? "Unknown error",
         status: error.status ?? "N/A",
-        code:  "N/A",
+        code: "N/A",
         error: JSON.stringify(error),
       })
       return null

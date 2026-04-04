@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(select-string *)",
+      "Bash(npm install *)",
+      "Bash(select-object *)",
+      "Bash(del *)",
+      "Bash(taskkill *)",
+      "Bash(rmdir *)",
+      "Bash(timeout *)",
+      "Bash(move *)",
+      "Bash(powershell *)",
+      "Bash(ren *)",
+      "Bash(mkdir *)",
+      "Bash(d *)",
+      "Bash(@echo *)",
+      "Bash(dir *)",
+      "Bash(echo.)",
+      "Bash(npx *)",
+      "Bash(findstr *)",
+      "Bash(npm *)",
+      "Bash(@powershell *)",
+      "Bash(node *)"
+    ]
+  },
+  "$version": 3
+}

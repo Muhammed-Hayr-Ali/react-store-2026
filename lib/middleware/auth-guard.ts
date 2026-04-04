@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
-import { createServerClient } from "@/lib/supabase/createServerClient"
-import { appRouter } from "@/lib/app-routes"
+import { createClient } from "@/lib/database/supabase/server"
+import { appRouter } from "@/lib/navigation"
 
 export async function AuthGuard({
   redirectPath = appRouter.signIn,
@@ -8,7 +8,7 @@ export async function AuthGuard({
   redirectPath?: string
 }) {
   // Create a new server client
-  const supabase = await createServerClient()
+  const supabase = await createClient()
 
   // Get the user
   const { error } = await supabase.auth.getUser()

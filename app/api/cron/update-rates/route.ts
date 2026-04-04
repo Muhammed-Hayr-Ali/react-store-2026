@@ -1,7 +1,7 @@
 // app/api/cron/update-rates/route.ts
 
-import { siteConfig } from "@/lib/config/site_config"
-import { createAdminClient } from "@/lib/supabase/createAdminClient "
+import { createAdminClient } from "@/lib/database/supabase/admin"
+import { CurrencyCode } from "@/lib/database/types/enums"
 import { NextResponse } from "next/server"
 
 // Force dynamic rendering - Required for API routes
@@ -17,30 +17,8 @@ interface ExchangeRateResponse {
   }
 }
 
-/**
- * Cron Job Handler for Updating Exchange Rates
- *
- * Called automatically by Vercel Cron based on vercel.json schedule
- * Fetches latest USD exchange rates and updates the database
- *
- * @example
- * curl http://localhost:3000/api/cron/update-rates
- */
 export async function GET() {
   try {
-    // 2. التحقق من وجود متغيرات البيئة
-    if (!process.env.EXCHANGERATE_API_KEY) {
-      console.error("❌ EXCHANGERATE_API_KEY is not configured")
-      return new NextResponse(
-        JSON.stringify({
-          success: false,
-          error: "EXCHANGERATE_API_KEY not configured",
-        }),
-        { status: 500 }
-      )
-    }
-
-    // 3. الاتصال بـ API أسعار الصرف
     console.log("💱 Fetching latest exchange rates...")
     const apiKey = process.env.EXCHANGERATE_API_KEY
     const response = await fetch(
@@ -57,11 +35,11 @@ export async function GET() {
       throw new Error("Exchange rate API did not return success.")
     }
 
-    // 4. تحديد العملات التي نهتم بها
-    const ratesToUpsert = siteConfig.targetCurrencies
+    const ratesToUpsert = ["SYP", "SAR", "EGP", "TRY", "EUR", "AED"]
+
       .filter((code) => data.conversion_rates[code])
       .map((code) => ({
-        currency_code: code,
+        currency_code: code as CurrencyCode,
         rate_from_usd: data.conversion_rates[code],
         last_updated_at: new Date().toISOString(),
       }))

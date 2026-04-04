@@ -5,13 +5,16 @@ import Link from "next/link"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useRouter } from "next/navigation"
-import { appRouter } from "@/lib/app-routes"
 
-import { signInWithPassword } from "@/lib/actions/authentication/signInWithPassword"
-import { signInWithGoogle } from "@/lib/actions/authentication/signIn-with-google"
-import { SignInInput } from "@/lib/types/auth"
+import { signInWithPassword, signInWithGoogle } from "@/lib/actions/auth"
 import { cn } from "@/lib/utils"
+import { appRouter } from "@/lib/navigation"
 import { Button } from "@/components/ui/button"
+import { Spinner } from "../ui/spinner"
+import { AppLogo } from "../shared/app-logo"
+import { toast } from "sonner"
+import { useAuth } from "@/lib/providers/auth-provider"
+import { createClient } from "@/lib/database/supabase/client.ts"
 import {
   Field,
   FieldDescription,
@@ -20,9 +23,6 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Spinner } from "../ui/spinner"
-import { AppLogo } from "../shared/app-logo"
-import { toast } from "sonner"
 
 export default function SignInForm({
   className,
@@ -30,23 +30,42 @@ export default function SignInForm({
 }: React.ComponentProps<"form">) {
   const t = useTranslations("Auth")
   const router = useRouter()
+  const { refresh } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<SignInInput>()
+  } = useForm<{ email: string; password: string }>()
 
-  const onSubmit = async (data: SignInInput) => {
-    const result = await signInWithPassword(data)
+  const onSubmit = async (data: { email: string; password: string }) => {
+    const result = await signInWithPassword({
+      email: data.email,
+      password: data.password,
+      remember: false,
+    })
 
     if (!result.success) {
       toast.error(result.error)
       return
     }
+
+    // Set the session in the browser client (tokens returned from Server Action)
+    const tokens = result.data as
+      | { accessToken?: string; refreshToken?: string }
+      | undefined
+    if (tokens?.accessToken && tokens?.refreshToken) {
+      const browserClient = createClient()
+      await browserClient.auth.setSession({
+        access_token: tokens.accessToken,
+        refresh_token: tokens.refreshToken,
+      })
+    }
+
+    // Refresh AuthProvider to pick up the new session
+    await refresh()
     router.push(appRouter.home)
-    router.refresh()
   }
 
   const handleGoogleSignIn = async () => {
@@ -54,10 +73,7 @@ export default function SignInForm({
     const result = await signInWithGoogle()
     if (!result.success) {
       toast.error(result.error)
-      return
     }
-    router.push(appRouter.home)
-    router.refresh()
   }
 
   return (
@@ -142,11 +158,7 @@ export default function SignInForm({
           )}
         </Field>
         <Field>
-          <Button
-            type="button"
-            onClick={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
-          >
+          <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? <Spinner /> : t("submitSignIn")}
           </Button>
         </Field>

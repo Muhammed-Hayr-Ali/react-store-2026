@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl"
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { CopyIcon } from "@/components/shared/icons"
 
 import { enrollMfa, verifyMfa } from "@/lib/actions/mfa/mfa"
 import { Button } from "@/components/ui/button"
@@ -21,9 +20,10 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { toast } from "sonner"
-import { appRouter } from "@/lib/app-routes"
+import { appRouter } from "@/lib/navigation"
 import { Spinner } from "../ui/spinner"
 import { cn } from "@/lib/utils"
+import { CopyIcon } from "lucide-react"
 
 export default function TwoFactorSetupPage() {
   const t = useTranslations("TwoFactor")

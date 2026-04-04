@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 // import { createServerClient } from "@/lib/supabase/createServerClient"
-import { createServerClient } from "@/lib/supabase/createServerClient"
-import { getUserRole } from "@/lib/actions/roles/get_user_role"
 
 export async function GET(request: NextRequest) {
-  // const searchParams = request.nextUrl.searchParams
-  // const functionName = searchParams.get("function")
+  const searchParams = request.nextUrl.searchParams
 
-   const res = await getUserRole()
+   const res = searchParams
 
 
   if (!res) {

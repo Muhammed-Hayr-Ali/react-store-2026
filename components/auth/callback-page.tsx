@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
-import { appRouter } from "@/lib/app-routes"
+import { appRouter } from "@/lib/navigation"
 import { useEffect, useState } from "react"
 import { LockIcon } from "@/components/shared/icons"
 

@@ -1,63 +1,69 @@
-import { createAdminClient } from "@/lib/supabase/createAdminClient "
+// =====================================================
+// 🧹 Cron Job: Cleanup Expired Password Reset Tokens
+// =====================================================
+// 📅 Schedule: Daily at 2:00 AM (configured in vercel.json)
+// 🔒 Protected by CRON_SECRET
+// =====================================================
+
+import { createAdminClient } from "@/lib/database/supabase/admin"
 import { NextResponse } from "next/server"
 
 // Force dynamic rendering - Required for API routes
 export const dynamic = "force-dynamic"
 export const runtime = "nodejs"
 
-/**
- * Cron Job Handler for Cleaning Up Expired Password Reset Tokens
- *
- * Called automatically by Vercel Cron based on vercel.json schedule
- * Can also be called manually for testing
- *
- * @example
- * curl http://localhost:3000/api/cron/cleanup-tokens
- */
 export async function GET() {
+  // ── Security: Verify cron secret ──────────────────
+  const cronSecret = process.env.CRON_SECRET
+  if (cronSecret) {
+    const { headers } = await import("next/headers")
+    const headersList = await headers()
+    const authHeader = headersList.get("authorization")
+
+    if (authHeader !== `Bearer ${cronSecret}`) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+  }
+
   try {
-    // 1. التحقق من وجود متغيرات البيئة
-    if (
-      !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-      !process.env.SUPABASE_SERVICE_ROLE_KEY
-    ) {
-      console.error("❌ Supabase credentials not configured")
-      return new NextResponse(
-        JSON.stringify({
-          success: false,
-          error: "Supabase credentials not configured",
-        }),
+    console.log("🧹 Starting cleanup of expired password reset tokens...")
+    const supabase = createAdminClient()
+
+    // ── Call cleanup function ────────────────────────
+    const { data, error } = await supabase.rpc("cleanup_expired_reset_tokens", {
+      p_batch_size: 5000,
+    } as never)
+
+    if (error) {
+      console.error("❌ Cleanup failed:", error)
+      return NextResponse.json(
+        { success: false, error: error.message },
         { status: 500 }
       )
     }
 
-    // 2. الاتصال بـ Supabase باستخدام Service Role
-    const supabase = createAdminClient()
+    const deletedCount = (data as number) ?? 0
 
-    // 3. استدعاء دالة التنظيف
-    console.log("🧹 Starting cleanup of expired tokens...")
-    const { data, error } = await supabase.rpc("cleanup_expired_reset_tokens")
-
-    if (error) {
-      console.error("❌ Cleanup failed:", error)
-      throw error
-    }
-
-    console.log(`✅ Cleanup completed. Deleted ${data} tokens.`)
+    console.log(`✅ Cleanup complete. Deleted ${deletedCount} tokens.`)
 
     return NextResponse.json({
       success: true,
-      message: "Cleanup completed successfully",
-      deleted_count: data,
+      deletedCount,
+      message: `Deleted ${deletedCount} expired/used tokens.`,
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
     console.error("❌ Cron job error:", error)
+
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 500 }
+      )
+    }
+
     return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : "Cleanup failed",
-      },
+      { success: false, error: "Unknown error" },
       { status: 500 }
     )
   }

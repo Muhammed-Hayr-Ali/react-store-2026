@@ -2,8 +2,8 @@
 
 import { v4 as uuidv4 } from "uuid";
 import { AuthMFAVerifyResponseData, Factor } from "@supabase/supabase-js";
-import { createServerClient } from "@/lib/supabase/createServerClient";
-import { ApiResult } from "@/lib/types/common";
+import { createClient } from "@/lib/database/supabase/server";
+import { ApiResult } from "@/lib/database/types";
 
 // ===============================================================================
 // File Name: mfa.ts
@@ -31,7 +31,7 @@ export interface EnrollmentData {
 //===============================================================================
 export async function getMfaFactors(): Promise<ApiResult<Factor | null>> {
   // Create a new server client
-  const supabase = await createServerClient()
+  const supabase = await createClient()
 
   // Get the MFA factors
   const { data: listFactorsData, error: listFactorsError } =
@@ -83,7 +83,7 @@ export async function verifyMfa(
 ): Promise<ApiResult<AuthMFAVerifyResponseData>> {
 
   // Create a new server client
-  const supabase = await createServerClient();
+  const supabase = await createClient()
 
   // Get the MFA challenge
   const { data: challengeData, error: challengeError } =
@@ -132,7 +132,7 @@ export async function unenrollMfa(
 ): Promise<ApiResult<string>> {
 
   // Create a new server client
-  const supabase = await createServerClient();
+  const supabase = await createClient()
 
   // Unenroll the MFA
   const { data, error } = await supabase.auth.mfa.unenroll({
@@ -160,7 +160,7 @@ export async function enrollMfa(): Promise<ApiResult<EnrollmentData>> {
 
 
   // Create a new server client
-  const supabase = await createServerClient();
+  const supabase = await createClient()
   
   // Generate a friendly name from uuid
   const friendlyName = uuidv4();

@@ -1,0 +1,631 @@
+// =====================================================
+// 🚀 Multi-Vendor E-Commerce Database Schema
+// Compatible with dbdiagram.io
+// =====================================================
+
+// =====================================================
+// 1️⃣ ENUMS - أنواع البيانات الثابتة
+// =====================================================
+
+Enum delivery_status {
+  pending
+  assigned
+  picked_up
+  in_transit
+  delivered
+  cancelled
+  returned
+}
+
+Enum vendor_status {
+  pending
+  active
+  suspended
+  rejected
+  archived
+}
+
+Enum role_name {
+  admin
+  vendor
+  customer
+  delivery
+  support
+}
+
+Enum plan_category {
+  free
+  seller
+  delivery
+  enterprise
+}
+
+Enum sub_status {
+  active
+  expired
+  cancelled
+  pending_payment
+  trialing
+}
+
+Enum notify_type {
+  order_event
+  system_alert
+  promo
+  review
+  ticket
+}
+
+Enum order_status {
+  pending
+  confirmed
+  processing
+  shipping
+  delivered
+  cancelled
+}
+
+Enum ticket_status {
+  open
+  in_progress
+  resolved
+  closed
+}
+
+Enum ticket_priority {
+  low
+  medium
+  high
+  urgent
+}
+
+Enum error_severity {
+  info
+  warning
+  error
+  critical
+}
+
+Enum payment_method {
+  cod
+  card
+  wallet
+}
+
+Enum payment_status {
+  pending
+  paid
+  failed
+  refunded
+}
+
+// =====================================================
+// 2️⃣ CORE MODULE - المستخدمين والصلاحيات
+// =====================================================
+
+Table core_profile {
+  id uuid [pk, default: `gen_random_uuid()`]
+  email varchar(255) [unique, not null]
+  first_name text
+  last_name text
+  full_name text
+  avatar_url text
+  phone_number varchar(20) [unique]
+  is_phone_verified boolean [default: false]
+  preferred_language text [default: 'ar']
+  timezone text [default: 'Asia/Damascus']
+  deleted_at timestamptz
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+  
+  indexes {
+    deleted_at
+    created_at
+    email
+    phone_number
+  }
+}
+
+Table auth_password_reset {
+  id uuid [pk, default: `gen_random_uuid()`]
+  profile_id uuid [not null]
+  email text [not null]
+  token text [unique, not null]
+  expires_at timestamptz [not null]
+  used_at timestamptz
+  is_revoked boolean [default: false]
+  ip_address text
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+  
+  indexes {
+    profile_id
+    expires_at
+    token
+  }
+}
+
+Table core_role {
+  id uuid [pk, default: `gen_random_uuid()`]
+  code role_name [unique, not null]
+  description text
+  permissions jsonb [not null, default: '[]']
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table core_profile_role {
+  profile_id uuid
+  role_id uuid
+  assigned_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+  
+  indexes {
+    (profile_id, role_id) [pk]
+    profile_id
+    role_id
+  }
+}
+
+Table core_address {
+  id uuid [pk, default: `gen_random_uuid()`]
+  profile_id uuid [not null]
+  title_ar text [not null]
+  address_details text [not null]
+  latitude numeric(10, 6)
+  longitude numeric(10, 6)
+  is_default boolean [default: false]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+  
+  indexes {
+    profile_id
+    is_default
+  }
+}
+
+// =====================================================
+// 3️⃣ SAAS MODULE - الاشتراكات والخطط
+// =====================================================
+
+Table saas_plan {
+  id uuid [pk, default: `gen_random_uuid()`]
+  category plan_category [not null]
+  name_ar text [not null]
+  name_en text
+  price numeric(10, 2) [not null, default: 0]
+  price_usd numeric(10, 2)
+  currency varchar(3) [default: 'USD']
+  billing_cycle text [default: 'monthly']
+  features jsonb [default: '[]']
+  permissions jsonb [not null, default: '[]']
+  is_digital boolean [default: false]
+  is_shippable boolean [default: true]
+  requires_prescription boolean [default: false]
+  is_active boolean [default: true]
+  sort_order integer [default: 0]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table saas_subscription {
+  id uuid [pk, default: `gen_random_uuid()`]
+  profile_id uuid [not null]
+  plan_id uuid [not null]
+  status sub_status [default: 'active']
+  starts_at timestamptz [default: `now()`]
+  ends_at timestamptz
+  auto_renew boolean [default: true]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+  
+  indexes {
+    profile_id
+    plan_id
+    status
+    ends_at
+  }
+}
+
+// =====================================================
+// 4️⃣ STORE MODULE - المتاجر والمنتجات
+// =====================================================
+
+Table store_vendor {
+  id uuid [pk, default: `gen_random_uuid()`]
+  profile_id uuid [unique, not null]
+  name_ar text [not null]
+  name_en text
+  slug text [unique, not null]
+  status vendor_status [default: 'pending']
+  city text
+  address text
+  latitude numeric(10, 6)
+  longitude numeric(10, 6)
+  default_currency varchar(3) [default: 'USD']
+  rating_avg numeric(3, 2) [default: 0]
+  review_count int [default: 0]
+  sales_count int [default: 0]
+  deleted_at timestamptz
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+  
+  indexes {
+    profile_id
+    slug
+    deleted_at
+    default_currency
+  }
+}
+
+Table store_category {
+  id uuid [pk, default: `gen_random_uuid()`]
+  vendor_id uuid
+  parent_id uuid
+  name_ar text [not null]
+  name_en text
+  slug text [not null]
+  is_active boolean [default: true]
+  sort_order integer [default: 0]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+  
+  indexes {
+    vendor_id
+    parent_id
+    (vendor_id, slug) [unique]
+    is_active
+  }
+}
+
+Table store_product {
+  id uuid [pk, default: `gen_random_uuid()`]
+  vendor_id uuid [not null]
+  category_id uuid [not null]
+  name_ar text [not null]
+  name_en text
+  slug text [not null]
+  description_ar text
+  description_en text
+  price_base numeric(10, 2) [not null]
+  price_discount numeric(10, 2)
+  stock_qty int [default: 0]
+  rating_avg numeric(3, 2) [default: 0]
+  review_count int [default: 0]
+  is_active boolean [default: true]
+  created_by uuid
+  updated_by uuid
+  deleted_at timestamptz
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+  
+  indexes {
+    vendor_id
+    category_id
+    (vendor_id, slug) [unique]
+    is_active
+    deleted_at
+    created_by
+    updated_by
+  }
+}
+
+Table product_image {
+  id uuid [pk, default: `gen_random_uuid()`]
+  product_id uuid [not null]
+  url text [not null]
+  alt_text text
+  is_primary boolean [default: false]
+  sort_order int [default: 0]
+  created_at timestamptz [default: `now()`]
+  
+  indexes {
+    product_id
+  }
+}
+
+Table product_variant {
+  id uuid [pk, default: `gen_random_uuid()`]
+  product_id uuid [not null]
+  name_ar text [not null]
+  value_ar text [not null]
+  price_adjustment numeric(10, 2) [default: 0]
+  stock_qty int [default: 0]
+  created_at timestamptz [default: `now()`]
+  
+  indexes {
+    product_id
+  }
+}
+
+// =====================================================
+// 5️⃣ TRADE MODULE - الطلبات والمبيعات
+// =====================================================
+
+Table trade_order {
+  id uuid [pk, default: `gen_random_uuid()`]
+  order_number text [unique, not null]
+  customer_id uuid [not null]
+  vendor_id uuid [not null]
+  status order_status [default: 'pending']
+  items_total numeric(10, 2) [not null]
+  delivery_fee numeric(10, 2) [default: 0]
+  discount_amount numeric(10, 2) [default: 0]
+  grand_total numeric(10, 2) [not null]
+  payment_method payment_method [default: 'cod']
+  payment_status payment_status [default: 'pending']
+  currency varchar(3) [default: 'USD']
+  currency_rate numeric(18, 6) [default: 1]
+  shipping_address jsonb [not null]
+  delivery_latitude numeric(10, 6)
+  delivery_longitude numeric(10, 6)
+  is_confirmed boolean [default: false]
+  created_by uuid
+  updated_by uuid
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+  
+  indexes {
+    order_number
+    customer_id
+    vendor_id
+    status
+    created_at
+    is_confirmed
+    (currency, created_at)
+  }
+}
+
+Table trade_order_item {
+  id uuid [pk, default: `gen_random_uuid()`]
+  order_id uuid [not null]
+  product_id uuid [not null]
+  variant_id uuid
+  quantity int [not null]
+  unit_price numeric(10, 2) [not null]
+  subtotal numeric(10, 2) [not null]
+  
+  indexes {
+    order_id
+    product_id
+    variant_id
+  }
+}
+
+// =====================================================
+// 6️⃣ FLEET MODULE - التوصيل والسائقين
+// =====================================================
+
+Table fleet_driver {
+  id uuid [pk, default: `gen_random_uuid()`]
+  profile_id uuid [unique, not null]
+  is_online boolean [default: false]
+  is_verified boolean [default: false]
+  vehicle_type text
+  license_plate varchar(50)
+  current_latitude numeric(10, 6)
+  current_longitude numeric(10, 6)
+  last_location_update timestamptz
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+  
+  indexes {
+    profile_id
+    is_online
+    is_verified
+  }
+}
+
+Table fleet_delivery {
+  id uuid [pk, default: `gen_random_uuid()`]
+  order_id uuid [unique, not null]
+  driver_id uuid
+  status delivery_status [default: 'pending']
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+  
+  indexes {
+    order_id
+    driver_id
+    status
+  }
+}
+
+// =====================================================
+// 7️⃣ SOCIAL MODULE - التقييمات والمفضلة
+// =====================================================
+
+Table social_review {
+  id uuid [pk, default: `gen_random_uuid()`]
+  vendor_id uuid [not null]
+  product_id uuid
+  author_id uuid [not null]
+  rating int [not null]
+  comment text
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+  
+  indexes {
+    vendor_id
+    product_id
+    author_id
+    rating
+    (author_id, product_id)
+    (author_id, vendor_id)
+  }
+}
+
+Table customer_favorite {
+  id uuid [pk, default: `gen_random_uuid()`]
+  customer_id uuid [not null]
+  vendor_id uuid
+  product_id uuid
+  created_at timestamptz [default: `now()`]
+  
+  indexes {
+    customer_id
+    vendor_id
+    product_id
+  }
+}
+
+// =====================================================
+// 8️⃣ SUPPORT MODULE - الدعم الفني
+// =====================================================
+
+Table support_ticket {
+  id uuid [pk, default: `gen_random_uuid()`]
+  ticket_number varchar(50) [unique, not null]
+  reporter_id uuid [not null]
+  assigned_to uuid
+  order_id uuid
+  subject text [not null]
+  description text [not null]
+  status ticket_status [default: 'open']
+  priority ticket_priority [default: 'medium']
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+  
+  indexes {
+    ticket_number
+    reporter_id
+    assigned_to
+    order_id
+    status
+  }
+}
+
+Table ticket_message {
+  id uuid [pk, default: `gen_random_uuid()`]
+  ticket_id uuid [not null]
+  sender_id uuid [not null]
+  content text [not null]
+  attachment_url text
+  is_internal boolean [default: false]
+  created_at timestamptz [default: `now()`]
+  
+  indexes {
+    ticket_id
+    sender_id
+  }
+}
+
+// =====================================================
+// 9️⃣ SYSTEM MODULE - الإشعارات والسجلات
+// =====================================================
+
+Table sys_notification {
+  id uuid [pk, default: `gen_random_uuid()`]
+  recipient_id uuid [not null]
+  type notify_type [not null]
+  title_ar text [not null]
+  title_en text
+  content_ar text [not null]
+  content_en text
+  action_url text
+  data jsonb [default: '{}']
+  is_read boolean [default: false]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+  
+  indexes {
+    recipient_id
+    type
+    is_read
+    created_at
+  }
+}
+
+Table system_error_log {
+  id uuid [pk, default: `gen_random_uuid()`]
+  error_message text [not null]
+  error_context text
+  error_details jsonb [default: '{}']
+  severity error_severity [default: 'error']
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+  
+  indexes {
+    created_at
+    severity
+  }
+}
+
+// =====================================================
+// 🔟 EXCHANGE RATES MODULE - أسعار الصرف
+// =====================================================
+
+Table exchange_rates {
+  id uuid [pk, default: `gen_random_uuid()`]
+  currency_code varchar(3) [unique, not null]
+  rate_from_usd numeric(18, 6) [not null]
+  last_updated_at timestamptz [not null, default: `now()`]
+  created_at timestamptz [default: `now()`]
+  
+  indexes {
+    currency_code
+    last_updated_at
+    (currency_code, last_updated_at)
+  }
+}
+
+// =====================================================
+// 🔗 RELATIONS - العلاقات بين الجداول
+// =====================================================
+
+// Core Module Relations
+Ref: auth.users.id < core_profile.id [delete: cascade]
+Ref: core_profile_role.profile_id > core_profile.id [delete: cascade]
+Ref: core_profile_role.role_id > core_role.id [delete: cascade]
+Ref: core_address.profile_id > core_profile.id [delete: cascade]
+Ref: auth_password_reset.profile_id > core_profile.id [delete: cascade]
+
+// SaaS Module Relations
+Ref: saas_subscription.profile_id > core_profile.id [delete: cascade]
+Ref: saas_subscription.plan_id > saas_plan.id [delete: restrict]
+Ref: saas_plan.currency > exchange_rates.currency_code [delete: restrict]
+
+// Store Module Relations
+Ref: store_vendor.profile_id > core_profile.id [delete: cascade]
+Ref: store_category.vendor_id > store_vendor.id [delete: cascade]
+Ref: store_category.parent_id > store_category.id [delete: set null]
+Ref: store_product.vendor_id > store_vendor.id [delete: cascade]
+Ref: store_product.category_id > store_category.id [delete: restrict]
+Ref: store_product.created_by > core_profile.id [delete: set null]
+Ref: store_product.updated_by > core_profile.id [delete: set null]
+Ref: product_image.product_id > store_product.id [delete: cascade]
+Ref: product_variant.product_id > store_product.id [delete: cascade]
+Ref: store_vendor.default_currency > exchange_rates.currency_code [delete: restrict]
+
+// Trade Module Relations
+Ref: trade_order.customer_id > core_profile.id [delete: restrict]
+Ref: trade_order.vendor_id > store_vendor.id [delete: restrict]
+Ref: trade_order.created_by > core_profile.id [delete: set null]
+Ref: trade_order.updated_by > core_profile.id [delete: set null]
+Ref: trade_order.currency > exchange_rates.currency_code [delete: restrict]
+Ref: trade_order_item.order_id > trade_order.id [delete: cascade]
+Ref: trade_order_item.product_id > store_product.id [delete: restrict]
+Ref: trade_order_item.variant_id > product_variant.id [delete: set null]
+
+// Fleet Module Relations
+Ref: fleet_driver.profile_id > core_profile.id [delete: cascade]
+Ref: fleet_delivery.order_id > trade_order.id [delete: cascade]
+Ref: fleet_delivery.driver_id > fleet_driver.id [delete: set null]
+
+// Social Module Relations
+Ref: social_review.vendor_id > store_vendor.id [delete: cascade]
+Ref: social_review.product_id > store_product.id [delete: set null]
+Ref: social_review.author_id > core_profile.id [delete: cascade]
+Ref: customer_favorite.customer_id > core_profile.id [delete: cascade]
+Ref: customer_favorite.vendor_id > store_vendor.id [delete: cascade]
+Ref: customer_favorite.product_id > store_product.id [delete: cascade]
+
+// Support Module Relations
+Ref: support_ticket.reporter_id > core_profile.id [delete: cascade]
+Ref: support_ticket.assigned_to > core_profile.id [delete: set null]
+Ref: support_ticket.order_id > trade_order.id [delete: set null]
+Ref: ticket_message.ticket_id > support_ticket.id [delete: cascade]
+Ref: ticket_message.sender_id > core_profile.id [delete: cascade]
+
+// System Module Relations
+Ref: sys_notification.recipient_id > core_profile.id [delete: cascade]

@@ -1,4 +1,4 @@
-import { MfaGuard } from "@/lib/middleware/mfa-guard"
+import { AuthDebug } from "@/components/debug/auth-debug"
 
 export default async function MainLayout({
   children,
@@ -7,8 +7,8 @@ export default async function MainLayout({
 }>) {
   return (
     <main>
-      <MfaGuard />
       {children}
+      <AuthDebug />
     </main>
   )
 }

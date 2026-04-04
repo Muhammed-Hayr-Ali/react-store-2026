@@ -9,6 +9,7 @@ import { Toaster } from "sonner"
 import { Viewport, Metadata } from "next"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { AuthProvider } from "@/lib/providers/auth-provider"
+import GoogleOneTap from "@/components/GoogleOneTap"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
@@ -64,14 +65,15 @@ export default async function RootLayout({
     >
       <body>
         <ThemeProvider>
-          <AuthProvider>
-            <TooltipProvider>
-              <NextIntlClientProvider messages={messages}>
+          <TooltipProvider>
+            <NextIntlClientProvider messages={messages}>
+              <AuthProvider>
                 {children}
                 <Toaster position="top-center" richColors />
-              </NextIntlClientProvider>
-            </TooltipProvider>
-          </AuthProvider>
+                <GoogleOneTap />
+              </AuthProvider>
+            </NextIntlClientProvider>
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>
