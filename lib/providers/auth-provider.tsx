@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react"
 import { Session, User } from "@supabase/supabase-js"
-import { createClient } from "@/lib/database/supabase/client.ts"
+import { createClient } from "@/lib/database/supabase/client"
 
 // =====================================================
 // 📋 Types
