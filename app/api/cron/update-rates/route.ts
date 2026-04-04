@@ -2,7 +2,6 @@
 
 import { createAdminClient } from "@/lib/database/supabase/admin"
 import { CurrencyCode } from "@/lib/database/types/enums"
-import { Database } from "@/lib/database/types"
 import { NextResponse } from "next/server"
 
 // Force dynamic rendering - Required for API routes
@@ -36,14 +35,13 @@ export async function GET() {
       throw new Error("Exchange rate API did not return success.")
     }
 
-    const ratesToUpsert: Database["public"]["Tables"]["exchange_rates"]["Insert"][] =
-      ["SYP", "SAR", "EGP", "TRY", "EUR", "AED"]
-        .filter((code) => data.conversion_rates[code])
-        .map((code) => ({
-          currency_code: code as CurrencyCode,
-          rate_from_usd: data.conversion_rates[code],
-          last_updated_at: new Date().toISOString(),
-        }))
+    const ratesToUpsert = ["SYP", "SAR", "EGP", "TRY", "EUR", "AED"]
+      .filter((code) => data.conversion_rates[code])
+      .map((code) => ({
+        currency_code: code as CurrencyCode,
+        rate_from_usd: data.conversion_rates[code],
+        last_updated_at: new Date().toISOString(),
+      }))
 
     if (ratesToUpsert.length === 0) {
       throw new Error("No target currencies found in API response.")
@@ -54,8 +52,9 @@ export async function GET() {
 
     console.log(`📊 Updating ${ratesToUpsert.length} exchange rates...`)
     const { error: upsertError } = await supabaseAdmin
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .from("exchange_rates")
-      .upsert(ratesToUpsert, { onConflict: "currency_code" })
+      .upsert(ratesToUpsert as any, { onConflict: "currency_code" })
 
     if (upsertError) {
       console.error("❌ Database upsert failed:", upsertError)
