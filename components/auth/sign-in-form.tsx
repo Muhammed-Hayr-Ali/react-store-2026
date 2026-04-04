@@ -1,80 +1,64 @@
-"use client"
+"use client";
 
-import { useTranslations } from "next-intl"
-import Link from "next/link"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 
-import { signInWithPassword, signInWithGoogle } from "@/lib/actions/auth"
-import { cn } from "@/lib/utils"
-import { appRouter } from "@/lib/navigation"
-import { Button } from "@/components/ui/button"
-import { Spinner } from "../ui/spinner"
-import { AppLogo } from "../shared/app-logo"
-import { toast } from "sonner"
-import { useAuth } from "@/lib/providers/auth-provider"
-import { createClient } from "@/lib/database/supabase/client"
+import { signInWithPassword } from "@/lib/actions/authentication/signInWithPassword";
+import { signInWithGoogle } from "@/lib/actions/authentication/signIn-with-google";
+import type { SignInInput } from "@/lib/actions/authentication/types";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "../ui/spinner";
+import { AppLogo } from "../shared/app-logo";
+import { toast } from "sonner";
+import { appRouter } from "@/lib/navigation";
 
 export default function SignInForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
-  const t = useTranslations("Auth")
-  const router = useRouter()
-  const { refresh } = useAuth()
-  const [isLoading, setIsLoading] = useState(false)
+  const t = useTranslations("Auth");
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<{ email: string; password: string }>()
+  } = useForm<SignInInput>();
 
-  const onSubmit = async (data: { email: string; password: string }) => {
-    const result = await signInWithPassword({
-      email: data.email,
-      password: data.password,
-      remember: false,
-    })
+  const onSubmit = async (data: SignInInput) => {
+    const result = await signInWithPassword(data);
 
     if (!result.success) {
-      toast.error(result.error)
-      return
+      toast.error(result.error);
+      return;
     }
-
-    // Set the session in the browser client (tokens returned from Server Action)
-    const tokens = result.data as
-      | { accessToken?: string; refreshToken?: string }
-      | undefined
-    if (tokens?.accessToken && tokens?.refreshToken) {
-      const browserClient = createClient()
-      await browserClient.auth.setSession({
-        access_token: tokens.accessToken,
-        refresh_token: tokens.refreshToken,
-      })
-    }
-
-    // Refresh AuthProvider to pick up the new session
-    await refresh()
-    router.push(appRouter.home)
-  }
+    router.push(appRouter.home);
+    router.refresh();
+  };
 
   const handleGoogleSignIn = async () => {
-    setIsLoading(true)
-    const result = await signInWithGoogle()
+    setIsLoading(true);
+    const result = await signInWithGoogle();
     if (!result.success) {
-      toast.error(result.error)
+      toast.error(result.error);
+      return;
     }
-  }
+    router.push(appRouter.home);
+    router.refresh();
+  };
 
   return (
     <form
@@ -158,7 +142,11 @@ export default function SignInForm({
           )}
         </Field>
         <Field>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button
+            type="button"
+            onClick={handleSubmit(onSubmit)}
+            disabled={isSubmitting}
+          >
             {isSubmitting ? <Spinner /> : t("submitSignIn")}
           </Button>
         </Field>
@@ -208,5 +196,5 @@ export default function SignInForm({
         </p>
       </FieldGroup>
     </form>
-  )
+  );
 }

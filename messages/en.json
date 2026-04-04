@@ -207,7 +207,11 @@
       "passwordMinLength": "Password must be at least 6 characters",
       "passwordMaxLength": "Password must be no more than 100 characters",
       "confirmPasswordRequired": "Please confirm your password",
-      "passwordsDoNotMatch": "Passwords do not match"
+      "passwordsDoNotMatch": "Passwords do not match",
+      "invalidToken": "Invalid Token",
+      "invalidTokenTitle": "Invalid Token",
+      "invalidTokenDescription": "The password reset token is invalid or has expired.",
+      "requestNewLink": "Request a new link"
     },
     "TwoFactor": {
       "title": "Two-Factor Authentication",

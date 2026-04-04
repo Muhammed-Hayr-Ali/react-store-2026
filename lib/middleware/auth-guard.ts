@@ -1,22 +1,22 @@
-import { redirect } from "next/navigation"
-import { createClient } from "@/lib/database/supabase/server"
-import { appRouter } from "@/lib/navigation"
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/database/supabase/server";
+import { appRouter } from "@/lib/navigation";
 
 export async function AuthGuard({
   redirectPath = appRouter.signIn,
 }: {
-  redirectPath?: string
-}) {
+  redirectPath?: string;
+}): Promise<null> {
   // Create a new server client
-  const supabase = await createClient()
+  const supabase = await createClient();
 
   // Get the user
-  const { error } = await supabase.auth.getUser()
+  const { error } = await supabase.auth.getUser();
 
   // Check for errors
   if (error) {
-    return redirect(redirectPath)
+    return redirect(redirectPath);
   }
 
-  return null
+  return null;
 }

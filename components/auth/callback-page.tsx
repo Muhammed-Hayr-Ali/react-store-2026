@@ -16,8 +16,8 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { createClient } from "@/lib/database/supabase/client"
 import { appRouter } from "@/lib/navigation"
+import { createBrowserClient } from "@/lib/database/supabase/client"
 import { LockIcon } from "lucide-react"
 
 export default function CallbackPage() {
@@ -28,7 +28,7 @@ export default function CallbackPage() {
   const [isSuccess, setIsSuccess] = useState(false)
 
   useEffect(() => {
-    const supabase = createClient()
+    const supabase = createBrowserClient()
     let isMounted = true
 
     const handleCallback = async () => {

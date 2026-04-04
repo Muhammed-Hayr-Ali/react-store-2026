@@ -208,7 +208,11 @@
     "passwordMinLength": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
     "passwordMaxLength": "كلمة المرور يجب ألا تزيد عن 100 حرف",
     "confirmPasswordRequired": "يرجى تأكيد كلمة المرور",
-    "passwordsDoNotMatch": "كلمات المرور غير متطابقة"
+    "passwordsDoNotMatch": "كلمات المرور غير متطابقة",
+    "invalidToken": "رمز غير صالح",
+    "invalidTokenTitle": "رمز غير صالح",
+    "invalidTokenDescription": "رمز إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية.",
+    "requestNewLink": "طلب رابط جديد"
   },
   "TwoFactor": {
     "title": "المصادقة الثنائية",

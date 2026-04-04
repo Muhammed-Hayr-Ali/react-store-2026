@@ -20,9 +20,9 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { toast } from "sonner"
-import { appRouter } from "@/lib/navigation"
 import { Spinner } from "../ui/spinner"
 import { cn } from "@/lib/utils"
+import { appRouter } from "@/lib/navigation"
 import { CopyIcon } from "lucide-react"
 
 export default function TwoFactorSetupPage() {

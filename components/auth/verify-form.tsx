@@ -19,9 +19,9 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { toast } from "sonner"
-import { appRouter } from "@/lib/navigation"
 import { Spinner } from "@/components/ui/spinner"
 import { ShieldCheckIcon } from "lucide-react"
+import { appRouter } from "@/lib/navigation"
 
 export default function VerifyForm() {
   const t = useTranslations("Verify")

@@ -4,8 +4,10 @@ import { useState, useTransition, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
-import { Lock, CheckCircle } from "lucide-react"
-import { resetPassword, verifyResetToken } from "@/lib/actions/auth"
+import {
+  resetPassword,
+  verifyResetToken,
+} from "@/lib/actions/authentication/resetPassword"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { FieldLabel, FieldDescription } from "@/components/ui/field"
@@ -13,6 +15,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import { appRouter } from "@/lib/navigation"
+import { CheckCircleIcon, LockIcon } from "lucide-react"
 
 function ResetPasswordFormContent() {
   const t = useTranslations("ResetPassword")
@@ -73,10 +76,7 @@ function ResetPasswordFormContent() {
     }
 
     startTransition(async () => {
-      const result = await resetPassword(
-        { password: data.password, confirmPassword: data.confirmPassword },
-        token
-      )
+      const result = await resetPassword(token, data.password)
 
       if (result.success) {
         setIsSuccess(true)
@@ -106,7 +106,7 @@ function ResetPasswordFormContent() {
       <div className="space-y-6 text-center">
         <div className="space-y-2">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
-            <Lock className="h-8 w-8 text-red-600 dark:text-red-400" />
+            <LockIcon className="h-8 w-8 text-red-600 dark:text-red-400" />
           </div>
           <h2 className="text-2xl font-semibold">{t("invalidTokenTitle")}</h2>
           <p className="text-muted-foreground">
@@ -130,7 +130,7 @@ function ResetPasswordFormContent() {
       <div className="space-y-6 text-center">
         <div className="space-y-2">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
-            <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+            <CheckCircleIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
           </div>
           <h2 className="text-2xl font-semibold">{t("successTitle")}</h2>
           <p className="text-muted-foreground">{t("successDescription")}</p>

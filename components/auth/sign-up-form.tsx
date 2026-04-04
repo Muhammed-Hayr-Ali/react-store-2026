@@ -1,89 +1,93 @@
-"use client"
+"use client";
 
-import { useTranslations } from "next-intl"
-import Link from "next/link"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 
-import { signUpWithPassword, signInWithGoogle } from "@/lib/actions/auth"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { signUpWithPassword } from "@/lib/actions/authentication/signUpWithPassword";
+import type { SignUpInput } from "@/lib/actions/authentication/types";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { appRouter } from "@/lib/navigation"
-import { Spinner } from "../ui/spinner"
-import { AppLogo } from "../shared/app-logo"
-import { toast } from "sonner"
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { AppLogo } from "../shared/app-logo";
+import { signInWithGoogle } from "@/lib/actions/authentication/signIn-with-google";
+import { toast } from "sonner";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { appRouter } from "@/lib/navigation";
+import { Spinner } from "../ui/spinner";
 
 export default function SignUpForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
-  const t = useTranslations("Auth")
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
+  const t = useTranslations("Auth");
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   const {
     register,
     handleSubmit,
     getValues,
     formState: { errors, isSubmitting },
-  } = useForm<{
-    first_name: string
-    last_name: string
-    email: string
-    password: string
-    confirm_password: string
-  }>()
+  } = useForm<SignUpInput & { confirm_password?: string }>();
 
-  const onSubmit = async (data: {
-    first_name: string
-    last_name: string
-    email: string
-    password: string
-    confirm_password: string
-  }) => {
+  const onSubmit = async (data: SignUpInput) => {
     try {
-      const result = await signUpWithPassword({
-        email: data.email,
-        password: data.password,
-        confirmPassword: data.password,
-        first_name: data.first_name,
-        last_name: data.last_name,
-        phone_number: "",
-        accept_terms: true,
-      })
+      const result = await signUpWithPassword(data);
 
       if (!result.success) {
-        toast.error(result.error)
-      } else if (result.data?.needsEmailVerification) {
-        toast.success("تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني")
+        toast.error(result.error);
+      } else {
+        setShowSuccessDialog(true);
       }
-      // Redirect to dashboard happens in server action
     } catch (error) {
-      toast.error((error as Error).message)
+      toast.error((error as Error).message);
     }
-  }
+  };
 
   const handleGoogleSignIn = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const result = await signInWithGoogle()
+      const result = await signInWithGoogle();
       if (!result.success) {
-        toast.error(result.error)
+        toast.error(result.error);
       }
     } catch (error) {
-      toast.error((error as Error).message)
-      setIsLoading(false)
+      toast.error((error as Error).message);
+      setIsLoading(false);
     }
-  }
+  };
+
+  const handleClose = () => {
+    setShowSuccessDialog(false);
+    router.push(appRouter.home);
+  };
+
+  const handleTwoFactorSetup = () => {
+    setShowSuccessDialog(false);
+    router.push(appRouter.twoFactorSetup);
+  };
 
   return (
     <form
@@ -223,8 +227,8 @@ export default function SignUpForm({
                 message: t("passwordTooShort"),
               },
               validate: (value) => {
-                const { password } = getValues()
-                return value === password || t("passwordsDoNotMatch") // إرجاع رسالة خطأ هو الأفضل
+                const { password } = getValues();
+                return value === password || t("passwordsDoNotMatch"); // إرجاع رسالة خطأ هو الأفضل
               },
             })}
           />
@@ -288,6 +292,42 @@ export default function SignUpForm({
           .
         </p>
       </FieldGroup>
+
+      {/* Success Dialog */}
+
+      <AlertDialog open={showSuccessDialog}>
+        <AlertDialogContent size="sm" className="min-w-96 space-y-4">
+          <AlertDialogHeader>
+            <AlertDialogMedia className="size-16 rounded-full">
+              <svg
+                className="size-10 text-green-600 dark:text-green-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </AlertDialogMedia>
+            <AlertDialogTitle>{t("accountCreatedSuccess")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("twoFactorSetupDesc")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleClose}>
+              {t("continueToHome")}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleTwoFactorSetup}>
+              {t("enableTwoFactor")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </form>
-  )
+  );
 }
