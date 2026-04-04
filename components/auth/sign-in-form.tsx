@@ -14,7 +14,7 @@ import { Spinner } from "../ui/spinner"
 import { AppLogo } from "../shared/app-logo"
 import { toast } from "sonner"
 import { useAuth } from "@/lib/providers/auth-provider"
-import { createClient } from "@/lib/database/supabase/client.ts"
+import { createClient } from "@/lib/database/supabase/client"
 import {
   Field,
   FieldDescription,
