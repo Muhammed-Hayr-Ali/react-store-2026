@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { appRouter } from "@/lib/navigation"
 import { useEffect, useState } from "react"
-import { LockIcon } from "@/components/shared/icons"
+import { createClient } from "@/lib/database/supabase/client"
 
 import {
   AlertDialog,
@@ -18,7 +18,7 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { createBrowserClient } from "@/lib/supabase/createBrowserClient"
+import { LockIcon } from "lucide-react"
 
 export default function CallbackPage() {
   const t = useTranslations("callback")
@@ -28,7 +28,7 @@ export default function CallbackPage() {
   const [isSuccess, setIsSuccess] = useState(false)
 
   useEffect(() => {
-    const supabase = createBrowserClient()
+    const supabase = createClient()
     let isMounted = true
 
     const handleCallback = async () => {
