@@ -3,9 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
-import { appRouter } from "@/lib/navigation"
 import { useEffect, useState } from "react"
-import { createClient } from "@/lib/database/supabase/client"
 
 import {
   AlertDialog,
@@ -18,6 +16,8 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { createClient } from "@/lib/database/supabase/client"
+import { appRouter } from "@/lib/navigation"
 import { LockIcon } from "lucide-react"
 
 export default function CallbackPage() {
