@@ -8,11 +8,13 @@
 // ✅ تبويبات: اليوم / هذا الأسبوع / السابق
 // ✅ تحديد كمقروء عند النقر
 // ✅ Realtime عبر Supabase
+// ✅ التنقل إلى action_url عند النقر
 // =====================================================
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@/lib/database/supabase/client";
-import { Bell, Check, CheckCheck, Trash2, X } from "lucide-react";
+import { Bell, CheckCheck, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -20,8 +22,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatDistanceToNow } from "date-fns";
-import { ar } from "date-fns/locale/ar";
 import { toast } from "sonner";
 import type { Notification } from "./notification-item";
 import { NotificationItem } from "./notification-item";
@@ -30,13 +30,45 @@ type NotificationBellProps = {
   userId?: string;
 };
 
+// ── تصنيف الإشعارات حسب الوقت (خارج المكون) ──
+function categorizeNotifications(notifs: Notification[]): {
+  today: Notification[];
+  thisWeek: Notification[];
+  earlier: Notification[];
+} {
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const weekStart = new Date(todayStart);
+  weekStart.setDate(weekStart.getDate() - 7);
+
+  return notifs.reduce(
+    (acc, n) => {
+      const date = new Date(n.created_at);
+      if (date >= todayStart) {
+        acc.today.push(n);
+      } else if (date >= weekStart) {
+        acc.thisWeek.push(n);
+      } else {
+        acc.earlier.push(n);
+      }
+      return acc;
+    },
+    {
+      today: [] as Notification[],
+      thisWeek: [] as Notification[],
+      earlier: [] as Notification[],
+    },
+  );
+}
+
 export function NotificationBell({ userId }: NotificationBellProps) {
+  const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const supabase = createBrowserClient();
+  const supabase = useMemo(() => createBrowserClient(), []);
 
   // ── جلب الإشعارات ──
   const fetchNotifications = useCallback(async () => {
@@ -74,10 +106,15 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   const markAsRead = async (notificationId: string) => {
     if (!userId) return;
 
-    await supabase.rpc("mark_notification_read", {
+    const { error } = await supabase.rpc("mark_notification_read", {
       p_notification_id: notificationId,
       p_user_id: userId,
     });
+
+    if (error) {
+      toast.error("فشل تحديد الإشعار كمقروء");
+      return;
+    }
 
     setNotifications((prev) =>
       prev.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n)),
@@ -89,15 +126,18 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   const markAllAsRead = async () => {
     if (!userId) return;
 
-    const { data } = await supabase.rpc("mark_all_notifications_read", {
+    const { data, error } = await supabase.rpc("mark_all_notifications_read", {
       p_user_id: userId,
     });
 
-    if (data !== null) {
-      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-      setUnreadCount(0);
-      toast.success("تم تحديد الكل كمقروء");
+    if (error) {
+      toast.error("فشل تحديد الكل كمقروء");
+      return;
     }
+
+    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    setUnreadCount(0);
+    toast.success("تم تحديد الكل كمقروء");
   };
 
   // ── حذف المقروءة فقط ──
@@ -106,16 +146,38 @@ export function NotificationBell({ userId }: NotificationBellProps) {
 
     const readNotifications = notifications.filter((n) => n.is_read);
 
-    for (const notification of readNotifications) {
-      await supabase.rpc("delete_notification", {
-        p_notification_id: notification.id,
-        p_user_id: userId,
-      });
-    }
+    const results = await Promise.all(
+      readNotifications.map((n) =>
+        supabase.rpc("delete_notification", {
+          p_notification_id: n.id,
+          p_user_id: userId,
+        }),
+      ),
+    );
+
+    const failures = results.filter((r) => r.error);
+    const successCount = readNotifications.length - failures.length;
 
     setNotifications((prev) => prev.filter((n) => !n.is_read));
-    toast.success(`تم حذف ${readNotifications.length} إشعار مقروء`);
+
+    if (failures.length > 0) {
+      toast.error(`فشل حذف ${failures.length} إشعار`);
+    }
+    if (successCount > 0) {
+      toast.success(`تم حذف ${successCount} إشعار مقروء`);
+    }
   };
+
+  // ── تصنيف الإشعارات ──
+  const { today, thisWeek, earlier } = useMemo(
+    () => categorizeNotifications(notifications),
+    [notifications],
+  );
+
+  const readCount = useMemo(
+    () => notifications.filter((n) => n.is_read).length,
+    [notifications],
+  );
 
   // ── Realtime Subscription ──
   useEffect(() => {
@@ -136,7 +198,10 @@ export function NotificationBell({ userId }: NotificationBellProps) {
         },
         (payload) => {
           const newNotification = payload.new as unknown as Notification;
-          setNotifications((prev) => [newNotification, ...prev]);
+          setNotifications((prev) => {
+            if (prev.some((n) => n.id === newNotification.id)) return prev;
+            return [newNotification, ...prev];
+          });
           setUnreadCount((prev) => prev + 1);
         },
       )
@@ -145,54 +210,15 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, supabase, fetchNotifications, fetchUnreadCount]);
+  }, [userId, fetchNotifications, fetchUnreadCount]);
 
   // ── عند فتح الـ Popover ──
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && notifications.length === 0) {
       setIsLoading(true);
-      fetchNotifications().then(() => setIsLoading(false));
+      fetchNotifications().finally(() => setIsLoading(false));
     }
-  }, [isOpen, fetchNotifications]);
-
-  // ── تصنيف الإشعارات حسب الوقت ──
-  const categorizeNotifications = (
-    notifs: Notification[],
-  ): {
-    today: Notification[];
-    thisWeek: Notification[];
-    earlier: Notification[];
-  } => {
-    const now = new Date();
-    const todayStart = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-    );
-    const weekStart = new Date(todayStart);
-    weekStart.setDate(weekStart.getDate() - 7);
-
-    return notifs.reduce(
-      (acc, n) => {
-        const date = new Date(n.created_at);
-        if (date >= todayStart) {
-          acc.today.push(n);
-        } else if (date >= weekStart) {
-          acc.thisWeek.push(n);
-        } else {
-          acc.earlier.push(n);
-        }
-        return acc;
-      },
-      {
-        today: [] as Notification[],
-        thisWeek: [] as Notification[],
-        earlier: [] as Notification[],
-      },
-    );
-  };
-
-  const { today, thisWeek, earlier } = categorizeNotifications(notifications);
+  }, [isOpen, fetchNotifications, notifications.length]);
 
   // ── عرض العداد ──
   const displayCount = unreadCount > 9 ? "9+" : String(unreadCount);
@@ -248,7 +274,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
               size="sm"
               className="h-7 gap-1 px-2 text-xs"
               onClick={deleteReadOnly}
-              disabled={notifications.filter((n) => n.is_read).length === 0}
+              disabled={readCount === 0}
             >
               <Trash2 className="h-3 w-3" />
               حذف المقروءة
@@ -309,6 +335,10 @@ export function NotificationBell({ userId }: NotificationBellProps) {
                 <NotificationList
                   notifications={today}
                   onMarkAsRead={markAsRead}
+                  onNavigate={(url) => {
+                    setIsOpen(false);
+                    router.push(url);
+                  }}
                   emptyMessage="لا توجد إشعارات اليوم"
                 />
               </TabsContent>
@@ -320,6 +350,10 @@ export function NotificationBell({ userId }: NotificationBellProps) {
                 <NotificationList
                   notifications={thisWeek}
                   onMarkAsRead={markAsRead}
+                  onNavigate={(url) => {
+                    setIsOpen(false);
+                    router.push(url);
+                  }}
                   emptyMessage="لا توجد إشعارات هذا الأسبوع"
                 />
               </TabsContent>
@@ -331,6 +365,10 @@ export function NotificationBell({ userId }: NotificationBellProps) {
                 <NotificationList
                   notifications={earlier}
                   onMarkAsRead={markAsRead}
+                  onNavigate={(url) => {
+                    setIsOpen(false);
+                    router.push(url);
+                  }}
                   emptyMessage="لا توجد إشعارات سابقة"
                 />
               </TabsContent>
@@ -349,10 +387,12 @@ export function NotificationBell({ userId }: NotificationBellProps) {
 function NotificationList({
   notifications,
   onMarkAsRead,
+  onNavigate,
   emptyMessage,
 }: {
   notifications: Notification[];
   onMarkAsRead: (id: string) => void;
+  onNavigate: (url: string) => void;
   emptyMessage: string;
 }) {
   if (notifications.length === 0) {
@@ -372,6 +412,9 @@ function NotificationList({
           onClick={() => {
             if (!notification.is_read) {
               onMarkAsRead(notification.id);
+            }
+            if (notification.action_url) {
+              onNavigate(notification.action_url);
             }
           }}
         />

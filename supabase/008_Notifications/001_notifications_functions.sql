@@ -248,6 +248,7 @@ $$;
 
 -- =====================================================
 -- 8️⃣ دالة حذف الإشعارات القديمة (تنظيف)
+-- ⚠️ متاحة للمشرفين فقط (admin role)
 -- =====================================================
 
 CREATE OR REPLACE FUNCTION cleanup_old_notifications(
@@ -262,6 +263,17 @@ DECLARE
   v_count int;
   v_cutoff timestamptz;
 BEGIN
+  -- التحقق من صلاحية المدير
+  IF NOT EXISTS (
+    SELECT 1
+    FROM core_profile_role pr
+    JOIN core_role r ON r.id = pr.role_id
+    WHERE pr.profile_id = auth.uid()
+      AND r.code = 'admin'
+  ) THEN
+    RAISE EXCEPTION 'Permission denied: admin role required';
+  END IF;
+
   v_cutoff := now() - (p_days_old || ' days')::interval;
 
   DELETE FROM sys_notification
@@ -325,8 +337,7 @@ $$;
 CREATE OR REPLACE FUNCTION notify_new_order(
   p_customer_id uuid,
   p_order_id uuid,
-  p_order_number text,
-  p_vendor_id uuid
+  p_order_number text
 ) RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -344,9 +355,6 @@ BEGIN
     p_action_url := '/dashboard/orders/' || p_order_id,
     p_data := jsonb_build_object('order_id', p_order_id, 'order_number', p_order_number)
   );
-
-  -- إشعار للبائع
-  -- (يمكن تنفيذه لاحقاً عبر Trigger)
 END;
 $$;
 

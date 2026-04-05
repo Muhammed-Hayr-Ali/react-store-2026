@@ -6,6 +6,9 @@
 --    2. إنشاء تذكرة دعم جديدة
 --    3. رد على تذكرة
 --    4. إضافة تقييم جديد
+--    5. تعيين سائق للتوصيل
+-- =====================================================
+-- ⚠️ جميع المشغلات محمية بـ EXCEPTION لمنع فشل العمليات التجارية
 -- =====================================================
 
 -- =====================================================
@@ -19,15 +22,12 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  v_status_text text;
   v_title_ar text;
   v_title_en text;
   v_content_ar text;
   v_content_en text;
 BEGIN
-  -- فقط إذا تغيرت الحالة
   IF OLD.status IS DISTINCT FROM NEW.status THEN
-    -- تحديد النص حسب الحالة
     CASE NEW.status
       WHEN 'confirmed' THEN
         v_title_ar := 'تم تأكيد طلبك';
@@ -58,21 +58,24 @@ BEGIN
         RETURN NEW;
     END CASE;
 
-    -- إنشاء الإشعار
-    PERFORM create_notification(
-      p_recipient_id := NEW.customer_id,
-      p_type := 'order_event',
-      p_title_ar := v_title_ar,
-      p_title_en := v_title_en,
-      p_content_ar := v_content_ar,
-      p_content_en := v_content_en,
-      p_action_url := '/dashboard/orders/' || NEW.id,
-      p_data := jsonb_build_object(
-        'order_id', NEW.id,
-        'order_number', NEW.order_number,
-        'status', NEW.status
-      )
-    );
+    BEGIN
+      PERFORM create_notification(
+        p_recipient_id := NEW.customer_id,
+        p_type := 'order_event',
+        p_title_ar := v_title_ar,
+        p_title_en := v_title_en,
+        p_content_ar := v_content_ar,
+        p_content_en := v_content_en,
+        p_action_url := '/dashboard/orders/' || NEW.id,
+        p_data := jsonb_build_object(
+          'order_id', NEW.id,
+          'order_number', NEW.order_number,
+          'status', NEW.status
+        )
+      );
+    EXCEPTION WHEN OTHERS THEN
+      RAISE WARNING 'Failed to create order notification for %: %', NEW.order_number, SQLERRM;
+    END;
   END IF;
 
   RETURN NEW;
@@ -95,22 +98,25 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  -- إشعار للمشرف (إذا تم تعيينه)
   IF NEW.assigned_to IS NOT NULL THEN
-    PERFORM create_notification(
-      p_recipient_id := NEW.assigned_to,
-      p_type := 'ticket',
-      p_title_ar := 'تذكرة جديدة مُعدة لك',
-      p_title_en := 'New ticket assigned to you',
-      p_content_ar := 'تم تعيين تذكرة رقم ' || NEW.ticket_number || ' لك',
-      p_content_en := 'Ticket ' || NEW.ticket_number || ' has been assigned to you',
-      p_action_url := '/dashboard/support/' || NEW.id,
-      p_data := jsonb_build_object(
-        'ticket_id', NEW.id,
-        'ticket_number', NEW.ticket_number,
-        'priority', NEW.priority
-      )
-    );
+    BEGIN
+      PERFORM create_notification(
+        p_recipient_id := NEW.assigned_to,
+        p_type := 'ticket',
+        p_title_ar := 'تذكرة جديدة مُعدة لك',
+        p_title_en := 'New ticket assigned to you',
+        p_content_ar := 'تم تعيين تذكرة رقم ' || NEW.ticket_number || ' لك',
+        p_content_en := 'Ticket ' || NEW.ticket_number || ' has been assigned to you',
+        p_action_url := '/dashboard/support/' || NEW.id,
+        p_data := jsonb_build_object(
+          'ticket_id', NEW.id,
+          'ticket_number', NEW.ticket_number,
+          'priority', NEW.priority
+        )
+      );
+    EXCEPTION WHEN OTHERS THEN
+      RAISE WARNING 'Failed to create ticket notification for %: %', NEW.ticket_number, SQLERRM;
+    END;
   END IF;
 
   RETURN NEW;
@@ -138,14 +144,17 @@ BEGIN
   SELECT * INTO v_ticket FROM support_ticket WHERE id = NEW.ticket_id;
 
   IF FOUND THEN
-    -- استدعاء دالة الإشعار
-    PERFORM notify_new_ticket_message(
-      p_ticket_id := NEW.ticket_id,
-      p_reporter_id := v_ticket.reporter_id,
-      p_assigned_to := v_ticket.assigned_to,
-      p_sender_id := NEW.sender_id,
-      p_ticket_number := v_ticket.ticket_number
-    );
+    BEGIN
+      PERFORM notify_new_ticket_message(
+        p_ticket_id := NEW.ticket_id,
+        p_reporter_id := v_ticket.reporter_id,
+        p_assigned_to := v_ticket.assigned_to,
+        p_sender_id := NEW.sender_id,
+        p_ticket_number := v_ticket.ticket_number
+      );
+    EXCEPTION WHEN OTHERS THEN
+      RAISE WARNING 'Failed to create ticket message notification for %: %', v_ticket.ticket_number, SQLERRM;
+    END;
   END IF;
 
   RETURN NEW;
@@ -171,47 +180,56 @@ DECLARE
   v_product RECORD;
   v_title_ar text;
   v_content_ar text;
+  v_recipient_id uuid;
 BEGIN
-  -- إذا كان التقييم لمنتج
   IF NEW.product_id IS NOT NULL THEN
     SELECT * INTO v_product FROM store_product WHERE id = NEW.product_id;
 
     IF FOUND THEN
       v_title_ar := 'تقييم جديد على منتجك';
       v_content_ar := 'حصل منتجك "' || v_product.name_ar || '" على تقييم ' || NEW.rating || '/5';
+      v_recipient_id := (SELECT vendor_id FROM store_product WHERE id = NEW.product_id);
 
+      BEGIN
+        PERFORM create_notification(
+          p_recipient_id := v_recipient_id,
+          p_type := 'review',
+          p_title_ar := v_title_ar,
+          p_title_en := 'New review on your product',
+          p_content_ar := v_content_ar,
+          p_content_en := 'Your product "' || COALESCE(v_product.name_en, v_product.name_ar) || '" received a ' || NEW.rating || '/5 rating',
+          p_action_url := '/dashboard/products/' || NEW.product_id || '/reviews',
+          p_data := jsonb_build_object(
+            'product_id', NEW.product_id,
+            'vendor_id', NEW.vendor_id,
+            'rating', NEW.rating,
+            'review_id', NEW.id
+          )
+        );
+      EXCEPTION WHEN OTHERS THEN
+        RAISE WARNING 'Failed to create product review notification: %', SQLERRM;
+      END;
+    END IF;
+
+  ELSIF NEW.vendor_id IS NOT NULL THEN
+    BEGIN
       PERFORM create_notification(
-        p_recipient_id := v_product.vendor_id,
+        p_recipient_id := NEW.vendor_id,
         p_type := 'review',
-        p_title_ar := v_title_ar,
-        p_title_en := 'New review on your product',
-        p_content_ar := v_content_ar,
-        p_content_en := 'Your product "' || COALESCE(v_product.name_en, v_product.name_ar) || '" received a ' || NEW.rating || '/5 rating',
-        p_action_url := '/dashboard/products/' || NEW.product_id || '/reviews',
+        p_title_ar := 'تقييم جديد لمتجرك',
+        p_title_en := 'New review for your store',
+        p_content_ar := 'حصل متجرك على تقييم ' || NEW.rating || '/5',
+        p_content_en := 'Your store received a ' || NEW.rating || '/5 rating',
+        p_action_url := '/dashboard/reviews',
         p_data := jsonb_build_object(
-          'product_id', NEW.product_id,
           'vendor_id', NEW.vendor_id,
           'rating', NEW.rating,
           'review_id', NEW.id
         )
       );
-    END IF;
-  -- إذا كان التقييم لبائع
-  ELSIF NEW.vendor_id IS NOT NULL THEN
-    PERFORM create_notification(
-      p_recipient_id := NEW.vendor_id,
-      p_type := 'review',
-      p_title_ar := 'تقييم جديد لمتجرك',
-      p_title_en := 'New review for your store',
-      p_content_ar := 'حصل متجرك على تقييم ' || NEW.rating || '/5',
-      p_content_en := 'Your store received a ' || NEW.rating || '/5 rating',
-      p_action_url := '/dashboard/reviews',
-      p_data := jsonb_build_object(
-        'vendor_id', NEW.vendor_id,
-        'rating', NEW.rating,
-        'review_id', NEW.id
-      )
-    );
+    EXCEPTION WHEN OTHERS THEN
+      RAISE WARNING 'Failed to create vendor review notification: %', SQLERRM;
+    END;
   END IF;
 
   RETURN NEW;
@@ -235,28 +253,29 @@ SET search_path = public
 AS $$
 DECLARE
   v_order RECORD;
-  v_driver_profile RECORD;
 BEGIN
-  -- فقط عند تعيين سائق
   IF NEW.driver_id IS NOT NULL AND OLD.driver_id IS NULL THEN
     SELECT * INTO v_order FROM trade_order WHERE id = NEW.order_id;
 
     IF FOUND THEN
-      -- إشعار للعميل
-      PERFORM create_notification(
-        p_recipient_id := v_order.customer_id,
-        p_type := 'order_event',
-        p_title_ar := 'تم تعيين سائق لطلبك',
-        p_title_en := 'Driver assigned to your order',
-        p_content_ar := 'تم تعيين سائق لطلبك رقم ' || v_order.order_number,
-        p_content_en := 'A driver has been assigned to your order ' || v_order.order_number,
-        p_action_url := '/dashboard/orders/' || NEW.order_id,
-        p_data := jsonb_build_object(
-          'order_id', NEW.order_id,
-          'order_number', v_order.order_number,
-          'driver_id', NEW.driver_id
-        )
-      );
+      BEGIN
+        PERFORM create_notification(
+          p_recipient_id := v_order.customer_id,
+          p_type := 'order_event',
+          p_title_ar := 'تم تعيين سائق لطلبك',
+          p_title_en := 'Driver assigned to your order',
+          p_content_ar := 'تم تعيين سائق لطلبك رقم ' || v_order.order_number,
+          p_content_en := 'A driver has been assigned to your order ' || v_order.order_number,
+          p_action_url := '/dashboard/orders/' || NEW.order_id,
+          p_data := jsonb_build_object(
+            'order_id', NEW.order_id,
+            'order_number', v_order.order_number,
+            'driver_id', NEW.driver_id
+          )
+        );
+      EXCEPTION WHEN OTHERS THEN
+        RAISE WARNING 'Failed to create delivery notification for %: %', v_order.order_number, SQLERRM;
+      END;
     END IF;
   END IF;
 

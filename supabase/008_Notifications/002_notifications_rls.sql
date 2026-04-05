@@ -47,24 +47,19 @@ CREATE POLICY "Users can delete their own notifications"
 -- =====================================================
 
 --admins يمكنهم رؤية كل الإشعارات
-DO $$
-BEGIN
-  -- تحقق إذا كان الدور admin موجود
-  IF EXISTS (SELECT 1 FROM core_role WHERE code = 'admin') THEN
-    CREATE POLICY "Admins can view all notifications"
-      ON sys_notification
-      FOR SELECT
-      USING (
-        EXISTS (
-          SELECT 1
-          FROM core_profile_role pr
-          JOIN core_role r ON r.id = pr.role_id
-          WHERE pr.profile_id = auth.uid()
-            AND r.code = 'admin'
-        )
-      );
-  END IF;
-END $$;
+-- ✅ السياسة تُنشأ دائماً - لن تطابق أي صفوف حتى يتم إنشاء دور admin
+CREATE POLICY "Admins can view all notifications"
+  ON sys_notification
+  FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1
+      FROM core_profile_role pr
+      JOIN core_role r ON r.id = pr.role_id
+      WHERE pr.profile_id = auth.uid()
+        AND r.code = 'admin'
+    )
+  );
 
 -- =====================================================
 -- 6️⃣ Realtime - السماح بالاستماع للتغييرات
