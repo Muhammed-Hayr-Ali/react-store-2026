@@ -37,6 +37,9 @@ type NotificationBellProps = {
   userId?: string;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type RpcCall = (fn: string, args: Record<string, unknown>) => Promise<any>;
+
 // ── تصنيف الإشعارات حسب الوقت (خارج المكون) ──
 function categorizeNotifications(notifs: Notification[]): {
   today: Notification[];
@@ -76,21 +79,19 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const supabase = useMemo(() => createBrowserClient(), []);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rpc = supabase.rpc as unknown as RpcCall;
 
   // ── جلب الإشعارات ──
   const fetchNotifications = useCallback(async () => {
     if (!userId) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase.rpc as any)(
-      "get_user_notifications",
-      {
-        p_user_id: userId,
-        p_page: 1,
-        p_limit: 50,
-        p_unread_only: false,
-      },
-    );
+    const { data, error } = await rpc("get_user_notifications", {
+      p_user_id: userId,
+      p_page: 1,
+      p_limit: 50,
+      p_unread_only: false,
+    });
 
     if (error) {
       console.error("Failed to fetch notifications:", error);
@@ -104,8 +105,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   const fetchUnreadCount = useCallback(async () => {
     if (!userId) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase.rpc as any)("get_unread_count", {
+    const { data, error } = await rpc("get_unread_count", {
       p_user_id: userId,
     });
 
@@ -118,8 +118,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   const markAsRead = async (notificationId: string) => {
     if (!userId) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase.rpc as any)("mark_notification_read", {
+    const { error } = await rpc("mark_notification_read", {
       p_notification_id: notificationId,
       p_user_id: userId,
     });
@@ -139,13 +138,9 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   const markAllAsRead = async () => {
     if (!userId) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase.rpc as any)(
-      "mark_all_notifications_read",
-      {
-        p_user_id: userId,
-      },
-    );
+    const { data, error } = await rpc("mark_all_notifications_read", {
+      p_user_id: userId,
+    });
 
     if (error) {
       toast.error("فشل تحديد الكل كمقروء");
@@ -157,6 +152,9 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     toast.success("تم تحديد الكل كمقروء");
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const notificationTable = supabase.from("sys_notification") as any;
+
   // ── حذف المقروءة فقط ──
   const deleteReadOnly = async () => {
     if (!userId) return;
@@ -164,13 +162,9 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     const readNotifications = notifications.filter((n) => n.is_read);
     if (readNotifications.length === 0) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const results = await Promise.all(
       readNotifications.map((n) =>
-        (supabase.from("sys_notification") as any)
-          .delete()
-          .eq("id", n.id)
-          .eq("recipient_id", userId),
+        notificationTable.delete().eq("id", n.id).eq("recipient_id", userId),
       ),
     );
 
@@ -197,13 +191,9 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     if (!userId) return;
     if (notifications.length === 0) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const results = await Promise.all(
       notifications.map((n) =>
-        (supabase.from("sys_notification") as any)
-          .delete()
-          .eq("id", n.id)
-          .eq("recipient_id", userId),
+        notificationTable.delete().eq("id", n.id).eq("recipient_id", userId),
       ),
     );
 
@@ -294,13 +284,13 @@ export function NotificationBell({ userId }: NotificationBellProps) {
       </PopoverTrigger>
 
       <PopoverContent
-        className="w-[360px] p-0"
+        className="w-90 p-0"
         align="end"
         side="bottom"
         sideOffset={8}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center justify-between px-2 pt-2">
           <div className="flex items-center gap-2">
             <h3 className="font-semibold">الإشعارات</h3>
             {unreadCount > 0 && (
@@ -345,8 +335,8 @@ export function NotificationBell({ userId }: NotificationBellProps) {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="today" className="w-full">
-          <TabsList className="h-9 w-full grid grid-cols-3">
+        <Tabs defaultValue="today" className="w-full ">
+          <TabsList className="h-9 w-full grid grid-cols-3 rounded-none">
             <TabsTrigger value="today" className="text-xs">
               اليوم
               {today.length > 0 && (
