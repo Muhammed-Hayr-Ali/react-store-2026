@@ -6,13 +6,9 @@
 // =====================================================
 
 import { NextResponse } from "next/server";
-import {
-  checkRateLimit,
-  rateLimitHeaders,
-  handleCors,
-  logSecurityEvent,
-  logApiCall,
-} from "@/lib/security";
+import { checkRateLimit, rateLimitHeaders } from "./rate-limiter";
+import { handleCors } from "./cors";
+import { logSecurityEvent, logApiCall } from "./audit-logger";
 
 type ApiHandler = (request: Request) => Promise<NextResponse>;
 
@@ -44,7 +40,9 @@ export function withApiSecurity(handler: ApiHandler): ApiHandler {
     const corsResponse = handleCors(request);
     if (corsResponse) return corsResponse;
 
-    const rateLimitConfig = isAuthRoute(path) ? AUTH_RATE_LIMIT : DEFAULT_RATE_LIMIT;
+    const rateLimitConfig = isAuthRoute(path)
+      ? AUTH_RATE_LIMIT
+      : DEFAULT_RATE_LIMIT;
     const rateLimit = checkRateLimit(request.headers, rateLimitConfig);
 
     if (!rateLimit.success) {
@@ -77,7 +75,13 @@ export function withApiSecurity(handler: ApiHandler): ApiHandler {
       }
 
       const duration = Date.now() - startTime;
-      logApiCall(path, request.method, response.status, request.headers, duration);
+      logApiCall(
+        path,
+        request.method,
+        response.status,
+        request.headers,
+        duration,
+      );
 
       return response;
     } catch (error) {

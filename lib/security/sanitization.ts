@@ -14,9 +14,6 @@ export function sanitizeHtml(input: string): string {
   return DOMPurify.sanitize(input, {
     ALLOWED_TAGS: ["b", "i", "em", "strong", "a", "p", "br", "ul", "ol", "li"],
     ALLOWED_ATTR: ["href", "title", "target", "rel"],
-    ADD_ATTR: ["rel"],
-    ADD_DATA_URI: false,
-    ADD_URI_SAFE_ATTR: ["data-*"],
   });
 }
 

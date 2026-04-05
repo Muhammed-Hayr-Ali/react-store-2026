@@ -52,10 +52,7 @@ export const lastNameSchema = z
 export const phoneSchema = z
   .string()
   .optional()
-  .refine(
-    (val) => !val || PHONE_REGEX.test(val),
-    "رقم هاتف غير صالح",
-  );
+  .refine((val) => !val || PHONE_REGEX.test(val), "رقم هاتف غير صالح");
 
 export const tokenSchema = z
   .string()
@@ -117,7 +114,7 @@ export function validateInput<T extends z.ZodType>(
   if (!result.success) {
     return {
       success: false,
-      errors: result.error.errors.map((e) => e.message),
+      errors: result.error.issues.map((e) => e.message),
     };
   }
 
