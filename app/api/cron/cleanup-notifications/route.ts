@@ -7,11 +7,8 @@
 
 import { createAdminClient } from "@/lib/database/supabase/admin";
 import { NextResponse } from "next/server";
-import {
-  checkRateLimit,
-  rateLimitHeaders,
-  logSecurityEvent,
-} from "@/lib/security";
+import { checkRateLimit, rateLimitHeaders } from "@/lib/security/rate-limiter";
+import { logSecurityEvent } from "@/lib/security/audit-logger";
 
 // Force dynamic rendering - Required for API routes
 export const dynamic = "force-dynamic";
