@@ -4,6 +4,10 @@
 -- ✅ المستخدم يرى فقط إشعاراته
 -- ✅ لا يمكن لأي مستخدم تعديل أو حذف إشعارات غيره
 -- =====================================================
+DROP POLICY IF EXISTS "Users can view their own notifications" ON sys_notification;
+DROP POLICY IF EXISTS "Users can update their own notifications" ON sys_notification;
+DROP POLICY IF EXISTS "Users can delete their own notifications" ON sys_notification;
+DROP POLICY IF EXISTS "Admins can view all notifications" ON sys_notification;
 
 -- تمكين Row Level Security على جدول الإشعارات
 ALTER TABLE sys_notification ENABLE ROW LEVEL SECURITY;

@@ -10,6 +10,19 @@
 -- =====================================================
 -- ⚠️ جميع المشغلات محمية بـ EXCEPTION لمنع فشل العمليات التجارية
 -- =====================================================
+-- حذف المشغلات القديمة لتجنب التعارض
+DROP TRIGGER IF EXISTS on_order_status_change ON trade_order;
+DROP TRIGGER IF EXISTS on_new_ticket ON support_ticket;
+DROP TRIGGER IF EXISTS on_new_ticket_message ON ticket_message;
+DROP TRIGGER IF EXISTS on_new_review ON social_review;
+DROP TRIGGER IF EXISTS on_delivery_assigned ON fleet_delivery;
+
+-- حذف الدوال القديمة
+DROP FUNCTION IF EXISTS trigger_notify_order_status_change();
+DROP FUNCTION IF EXISTS trigger_notify_new_ticket();
+DROP FUNCTION IF EXISTS trigger_notify_ticket_message();
+DROP FUNCTION IF EXISTS trigger_notify_new_review();
+DROP FUNCTION IF EXISTS trigger_notify_delivery_assigned();
 
 -- =====================================================
 -- 1️⃣ إشعار عند تغيير حالة الطلب

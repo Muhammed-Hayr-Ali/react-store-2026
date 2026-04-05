@@ -4,12 +4,16 @@ import { useTranslations } from "next-intl"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { NotificationBell } from "../notifications"
+import { useAuth } from "@/lib/providers/auth-provider"
 
 export default function ComingSoonPage() {
   const t = useTranslations("HomePage")
+  const { user } = useAuth();
 
   return (
     <div className="relative flex h-screen w-full flex-col items-center justify-center gap-8 overflow-hidden px-4 py-8 text-center">
+      {user && <NotificationBell userId={user.id} />}
       {/* Animated Gradient Background */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div
@@ -46,5 +50,5 @@ export default function ComingSoonPage() {
         {t("footer")}
       </Button>
     </div>
-  )
+  );
 }

@@ -155,26 +155,33 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     if (!userId) return;
 
     const readNotifications = notifications.filter((n) => n.is_read);
+    if (readNotifications.length === 0) return;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const results = await Promise.all(
       readNotifications.map((n) =>
-        (supabase.rpc as any)("delete_notification", {
-          p_notification_id: n.id,
-          p_user_id: userId,
-        }),
+        (supabase.from("sys_notification") as any)
+          .delete()
+          .eq("id", n.id)
+          .eq("recipient_id", userId),
       ),
     );
 
+    const successes = results.filter((r) => !r.error);
     const failures = results.filter((r) => r.error);
-    const successCount = readNotifications.length - failures.length;
 
-    setNotifications((prev) => prev.filter((n) => !n.is_read));
+    if (successes.length > 0) {
+      const deletedIds = successes
+        .map((_, i) => readNotifications[i]?.id)
+        .filter(Boolean);
+      setNotifications((prev) =>
+        prev.filter((n) => !deletedIds.includes(n.id)),
+      );
+      toast.success(`تم حذف ${successes.length} إشعار مقروء`);
+    }
 
     if (failures.length > 0) {
       toast.error(`فشل حذف ${failures.length} إشعار`);
-    }
-    if (successCount > 0) {
-      toast.success(`تم حذف ${successCount} إشعار مقروء`);
     }
   };
 

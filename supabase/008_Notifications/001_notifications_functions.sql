@@ -14,6 +14,8 @@
 --    2. ✅ 002_notifications_rls.sql         ← سياسات الأمان
 --    3. ✅ 003_notifications_triggers.sql    ← المشغلات التلقائية
 -- =====================================================
+DROP FUNCTION IF EXISTS notify_new_order(uuid, uuid, text, uuid);
+DROP FUNCTION IF EXISTS notify_new_ticket_message(uuid, uuid, uuid, uuid, text);
 
 -- =====================================================
 -- 1️⃣ دالة إنشاء إشعار جديد
