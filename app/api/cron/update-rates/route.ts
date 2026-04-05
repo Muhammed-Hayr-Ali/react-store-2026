@@ -11,7 +11,6 @@ import {
 
 // Force dynamic rendering - Required for API routes
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 // تعريف نوع البيانات للاستجابة من API
 interface ExchangeRateResponse {

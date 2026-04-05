@@ -15,7 +15,6 @@ import {
 
 // Force dynamic rendering - Required for API routes
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 async function verifyCronSecret(request: Request): Promise<boolean> {
   const cronSecret = process.env.CRON_SECRET;
