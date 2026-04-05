@@ -33,7 +33,8 @@
       "WebFetch(localhost)",
       "Bash(git init)",
       "Bash(git fetch *)",
-      "Bash(git merge *)"
+      "Bash(git merge *)",
+      "Bash(type *)"
     ]
   },
   "$version": 3
