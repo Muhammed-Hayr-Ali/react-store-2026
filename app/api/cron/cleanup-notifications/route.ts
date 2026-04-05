@@ -53,22 +53,54 @@ export async function GET(request: Request) {
     console.log("🗑️ Starting cleanup of old notifications...");
     const supabase = createAdminClient();
 
-    // ── Call cleanup function ────────────────────────
-    const { data, error } = await supabase.rpc("cleanup_old_notifications", {
-      p_days_old: 90,
-      p_batch_size: 5000,
-    } as never);
+    // ── Calculate cutoff date ───────────────────────
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 90);
+    const cutoffISOString = cutoffDate.toISOString();
 
-    if (error) {
-      console.error("❌ Cleanup failed:", error);
+    // ── Fetch old read notifications to delete ──────
+    const { data: oldNotifications, error: fetchError } = await supabase
+      .from("sys_notification")
+      .select("id")
+      .lt("created_at", cutoffISOString)
+      .eq("is_read", true)
+      .limit(5000);
+
+    if (fetchError) {
+      console.error("❌ Failed to fetch old notifications:", fetchError);
       return NextResponse.json(
-        { success: false, error: error.message },
+        { success: false, error: fetchError.message },
         { status: 500 },
       );
     }
 
-    const deletedCount = (data as number) ?? 0;
+    if (!oldNotifications || oldNotifications.length === 0) {
+      console.log("✅ No old notifications to clean up.");
+      return NextResponse.json({
+        success: true,
+        deletedCount: 0,
+        message: "No read notifications older than 90 days found.",
+        timestamp: new Date().toISOString(),
+      });
+    }
 
+    // ── Delete old notifications ────────────────────
+    const notificationIds = oldNotifications.map((n) => n.id);
+
+    const { error: deleteError } = await supabase
+      .from("sys_notification")
+      .delete()
+      .in("id", notificationIds);
+
+    if (deleteError) {
+      console.error("❌ Failed to delete notifications:", deleteError);
+      return NextResponse.json(
+        { success: false, error: deleteError.message },
+        { status: 500 },
+      );
+    }
+
+    const deletedCount = notificationIds.length;
     console.log(`✅ Cleanup complete. Deleted ${deletedCount} notifications.`);
 
     return NextResponse.json({
