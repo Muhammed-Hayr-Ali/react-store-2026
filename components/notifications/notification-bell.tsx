@@ -14,13 +14,20 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@/lib/database/supabase/client";
-import { Bell, CheckCheck, Trash2 } from "lucide-react";
+import { Bell, CheckCheck, Trash2, MoreVertical, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import type { Notification } from "./notification-item";
@@ -185,6 +192,35 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     }
   };
 
+  // ── حذف الكل ──
+  const deleteAll = async () => {
+    if (!userId) return;
+    if (notifications.length === 0) return;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const results = await Promise.all(
+      notifications.map((n) =>
+        (supabase.from("sys_notification") as any)
+          .delete()
+          .eq("id", n.id)
+          .eq("recipient_id", userId),
+      ),
+    );
+
+    const successes = results.filter((r) => !r.error);
+    const failures = results.filter((r) => r.error);
+
+    if (successes.length > 0) {
+      setNotifications([]);
+      setUnreadCount(0);
+      toast.success(`تم حذف ${successes.length} إشعار`);
+    }
+
+    if (failures.length > 0) {
+      toast.error(`فشل حذف ${failures.length} إشعار`);
+    }
+  };
+
   // ── تصنيف الإشعارات ──
   const { today, thisWeek, earlier } = useMemo(
     () => categorizeNotifications(notifications),
@@ -274,29 +310,38 @@ export function NotificationBell({ userId }: NotificationBellProps) {
             )}
           </div>
 
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 gap-1 px-2 text-xs"
-              onClick={markAllAsRead}
-              disabled={unreadCount === 0}
-            >
-              <CheckCheck className="h-3 w-3" />
-              تحديد الكل كمقروء
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 gap-1 px-2 text-xs"
-              onClick={deleteReadOnly}
-              disabled={readCount === 0}
-            >
-              <Trash2 className="h-3 w-3" />
-              حذف المقروءة
-            </Button>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-7 w-7">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem
+                onClick={markAllAsRead}
+                disabled={unreadCount === 0}
+              >
+                <CheckCheck className="ml-2 h-4 w-4" />
+                جعل الكل مقروء
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={deleteReadOnly}
+                disabled={readCount === 0}
+              >
+                <Trash2 className="ml-2 h-4 w-4" />
+                حذف المقروء
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={deleteAll}
+                disabled={notifications.length === 0}
+                className="text-red-600 focus:text-red-600"
+              >
+                <Trash className="ml-2 h-4 w-4" />
+                حذف الكل
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Tabs */}
