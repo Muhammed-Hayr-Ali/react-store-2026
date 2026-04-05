@@ -37,8 +37,10 @@ type NotificationBellProps = {
   userId?: string;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type RpcCall = (fn: string, args: Record<string, unknown>) => Promise<any>;
+type RpcCall = (
+  fn: string,
+  args: Record<string, unknown>,
+) => Promise<{ data: unknown | null; error: { message: string } | null }>;
 
 // ── تصنيف الإشعارات حسب الوقت (خارج المكون) ──
 function categorizeNotifications(notifs: Notification[]): {
@@ -79,8 +81,10 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const supabase = useMemo(() => createBrowserClient(), []);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rpc = supabase.rpc as unknown as RpcCall;
+  const rpc = useMemo(
+    () => supabase.rpc.bind(supabase) as unknown as RpcCall,
+    [supabase],
+  );
 
   // ── جلب الإشعارات ──
   const fetchNotifications = useCallback(async () => {
@@ -98,11 +102,11 @@ export function NotificationBell({ userId }: NotificationBellProps) {
       return;
     }
 
-    setNotifications(data || []);
+    setNotifications((data as Notification[]) || []);
   }, [userId, rpc]);
 
   // ── جلب عدد غير المقروءة ──
-  const fetchUnreadCount = useCallback(async () => {
+  useCallback(async () => {
     if (!userId) return;
 
     const { data, error } = await rpc("get_unread_count", {
@@ -138,7 +142,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   const markAllAsRead = async () => {
     if (!userId) return;
 
-    const { data, error } = await rpc("mark_all_notifications_read", {
+    const { error } = await rpc("mark_all_notifications_read", {
       p_user_id: userId,
     });
 
@@ -239,7 +243,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
           rpc("get_unread_count", { p_user_id: userId }),
         ]);
 
-      if (!error) setNotifications(data || []);
+      if (!error) setNotifications((data as Notification[]) || []);
       if (!unreadError && unreadData !== null)
         setUnreadCount(Number(unreadData));
     };
@@ -270,7 +274,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, rpc]);
+  }, [userId, rpc, supabase]);
 
   // ── عند فتح الـ Popover ──
   const handleOpenChange = async (open: boolean) => {
@@ -388,10 +392,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
             </div>
           ) : (
             <>
-              <TabsContent
-                value="today"
-                className="m-0 max-h-[360px] overflow-y-auto"
-              >
+              <TabsContent value="today" className="m-0 max-90 overflow-y-auto">
                 <NotificationList
                   notifications={today}
                   onMarkAsRead={markAsRead}
@@ -405,7 +406,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
 
               <TabsContent
                 value="thisWeek"
-                className="m-0 max-h-[360px] overflow-y-auto"
+                className="m-0 max-h-90 overflow-y-auto"
               >
                 <NotificationList
                   notifications={thisWeek}
@@ -420,7 +421,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
 
               <TabsContent
                 value="earlier"
-                className="m-0 max-h-[360px] overflow-y-auto"
+                className="m-0 max-h-90 overflow-y-auto"
               >
                 <NotificationList
                   notifications={earlier}
