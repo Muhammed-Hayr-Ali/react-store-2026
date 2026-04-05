@@ -74,12 +74,16 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   const fetchNotifications = useCallback(async () => {
     if (!userId) return;
 
-    const { data, error } = await supabase.rpc("get_user_notifications", {
-      p_user_id: userId,
-      p_page: 1,
-      p_limit: 50,
-      p_unread_only: false,
-    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.rpc as any)(
+      "get_user_notifications",
+      {
+        p_user_id: userId,
+        p_page: 1,
+        p_limit: 50,
+        p_unread_only: false,
+      },
+    );
 
     if (error) {
       console.error("Failed to fetch notifications:", error);
@@ -93,7 +97,8 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   const fetchUnreadCount = useCallback(async () => {
     if (!userId) return;
 
-    const { data, error } = await supabase.rpc("get_unread_count", {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.rpc as any)("get_unread_count", {
       p_user_id: userId,
     });
 
@@ -106,7 +111,8 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   const markAsRead = async (notificationId: string) => {
     if (!userId) return;
 
-    const { error } = await supabase.rpc("mark_notification_read", {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase.rpc as any)("mark_notification_read", {
       p_notification_id: notificationId,
       p_user_id: userId,
     });
@@ -126,9 +132,13 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   const markAllAsRead = async () => {
     if (!userId) return;
 
-    const { data, error } = await supabase.rpc("mark_all_notifications_read", {
-      p_user_id: userId,
-    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.rpc as any)(
+      "mark_all_notifications_read",
+      {
+        p_user_id: userId,
+      },
+    );
 
     if (error) {
       toast.error("فشل تحديد الكل كمقروء");
@@ -148,7 +158,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
 
     const results = await Promise.all(
       readNotifications.map((n) =>
-        supabase.rpc("delete_notification", {
+        (supabase.rpc as any)("delete_notification", {
           p_notification_id: n.id,
           p_user_id: userId,
         }),
