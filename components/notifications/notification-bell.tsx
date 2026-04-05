@@ -99,7 +99,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     }
 
     setNotifications(data || []);
-  }, [userId, supabase]);
+  }, [userId, rpc]);
 
   // ── جلب عدد غير المقروءة ──
   const fetchUnreadCount = useCallback(async () => {
@@ -112,7 +112,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     if (!error && data !== null) {
       setUnreadCount(Number(data));
     }
-  }, [userId, supabase]);
+  }, [userId, rpc]);
 
   // ── تحديد إشعار كمقروء ──
   const markAsRead = async (notificationId: string) => {
@@ -226,8 +226,25 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   useEffect(() => {
     if (!userId) return;
 
-    fetchNotifications();
-    fetchUnreadCount();
+    // Initial fetch (inline to avoid cascading renders)
+    const init = async () => {
+      const [{ data, error }, { data: unreadData, error: unreadError }] =
+        await Promise.all([
+          rpc("get_user_notifications", {
+            p_user_id: userId,
+            p_page: 1,
+            p_limit: 50,
+            p_unread_only: false,
+          }),
+          rpc("get_unread_count", { p_user_id: userId }),
+        ]);
+
+      if (!error) setNotifications(data || []);
+      if (!unreadError && unreadData !== null)
+        setUnreadCount(Number(unreadData));
+    };
+
+    void init();
 
     const channel = supabase
       .channel("notifications")
@@ -253,7 +270,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, fetchNotifications, fetchUnreadCount]);
+  }, [userId, rpc]);
 
   // ── عند فتح الـ Popover ──
   useEffect(() => {
