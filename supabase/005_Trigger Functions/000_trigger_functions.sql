@@ -186,11 +186,21 @@ CREATE TRIGGER update_system_error_log_updated_at
   EXECUTE FUNCTION public.update_updated_at_column();
 
 -- exchange_rates
+CREATE OR REPLACE FUNCTION public.update_exchange_rate_timestamp()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.last_updated_at = NOW();
+  RETURN NEW;
+END;
+$$;
+
 DROP TRIGGER IF EXISTS update_exchange_rates_updated_at ON public.exchange_rates;
 CREATE TRIGGER update_exchange_rates_updated_at
   BEFORE UPDATE ON public.exchange_rates
   FOR EACH ROW
-  EXECUTE FUNCTION public.update_updated_at_column();
+  EXECUTE FUNCTION public.update_exchange_rate_timestamp();
 
 -- =====================================================
 -- 📌 Triggers for tables without updated_at triggers yet

@@ -75,7 +75,6 @@ export async function GET(request: Request) {
       .map((code) => ({
         currency_code: code as CurrencyCode,
         rate_from_usd: data.conversion_rates[code],
-        last_updated_at: new Date().toISOString(),
       }));
 
     if (ratesToUpsert.length === 0) {
