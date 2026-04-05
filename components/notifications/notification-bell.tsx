@@ -256,7 +256,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
           table: "sys_notification",
           filter: `recipient_id=eq.${userId}`,
         },
-        (payload) => {
+        (payload: { new: Record<string, unknown> }) => {
           const newNotification = payload.new as unknown as Notification;
           setNotifications((prev) => {
             if (prev.some((n) => n.id === newNotification.id)) return prev;
