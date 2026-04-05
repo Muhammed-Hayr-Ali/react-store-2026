@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useTransition, useActionState } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { requestPasswordReset } from "@/lib/actions/authentication/requestPasswordReset";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FieldLabel, FieldDescription } from "@/components/ui/field";
+import { FieldLabel } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -19,24 +19,24 @@ export default function ForgotPasswordForm() {
   const router = useRouter();
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const [state, formAction, isPending] = useActionState(
-    async (_prevState: unknown, formData: FormData) => {
-      const result = await requestPasswordReset(_prevState, formData);
+  const [isPending, startTransition] = useTransition();
+
+  const onSubmit = async (formData: FormData) => {
+    startTransition(async () => {
+      const result = await requestPasswordReset(undefined, formData);
 
       if (result.success) {
         setIsSubmitted(true);
         toast.success(t("emailSent"));
       } else {
-        const message = tErrors.has(result.error)
-          ? tErrors(result.error)
-          : result.error;
+        const message =
+          result.error && tErrors.has(result.error)
+            ? tErrors(result.error)
+            : result.error;
         toast.error(message || t("emailSent"));
       }
-
-      return result;
-    },
-    { success: false, error: "" },
-  );
+    });
+  };
 
   if (isSubmitted) {
     return (
@@ -70,7 +70,7 @@ export default function ForgotPasswordForm() {
         <p className="text-muted-foreground">{t("description")}</p>
       </div>
 
-      <form action={formAction} className="space-y-4">
+      <form action={onSubmit} className="space-y-4">
         <CsrfTokenInput />
         <div className="space-y-2">
           <FieldLabel htmlFor="email">{t("email")}</FieldLabel>

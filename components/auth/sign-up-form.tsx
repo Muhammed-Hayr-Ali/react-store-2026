@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useState, useActionState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { signUpWithPassword } from "@/lib/actions/authentication/signUpWithPassword";
@@ -45,9 +45,11 @@ export default function SignUpForm({
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
-  const [state, formAction, isPending] = useActionState(
-    async (_prevState: unknown, formData: FormData) => {
-      const result = await signUpWithPassword(_prevState, formData);
+  const [isPending, startTransition] = useTransition();
+
+  const onSubmit = async (formData: FormData) => {
+    startTransition(async () => {
+      const result = await signUpWithPassword(undefined, formData);
 
       if (!result.success) {
         const message =
@@ -55,14 +57,11 @@ export default function SignUpForm({
             ? tErrors(result.error)
             : result.error;
         toast.error(message);
-        return result;
+      } else {
+        setShowSuccessDialog(true);
       }
-
-      setShowSuccessDialog(true);
-      return result;
-    },
-    { success: false, error: "" },
-  );
+    });
+  };
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
@@ -91,7 +90,7 @@ export default function SignUpForm({
     <form
       className={cn("flex flex-col gap-8", className)}
       {...props}
-      action={formAction}
+      action={onSubmit}
     >
       <CsrfTokenInput />
       <FieldGroup className="gap-6">

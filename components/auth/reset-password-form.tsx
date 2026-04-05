@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useState,
-  useTransition,
-  useEffect,
-  Suspense,
-  useActionState,
-} from "react";
+import { useState, useTransition, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -15,7 +9,7 @@ import {
 } from "@/lib/actions/authentication/resetPassword";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FieldLabel, FieldDescription } from "@/components/ui/field";
+import { FieldLabel } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -35,14 +29,16 @@ function ResetPasswordFormContent() {
   const [isTokenValid, setIsTokenValid] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const [state, formAction, isPending] = useActionState(
-    async (_prevState: unknown, formData: FormData) => {
-      if (!token) {
-        toast.error(t("missingToken"));
-        return { success: false, error: t("missingToken") };
-      }
+  const [isPending, startTransition] = useTransition();
 
-      const result = await resetPassword(_prevState, formData);
+  const onSubmit = async (formData: FormData) => {
+    if (!token) {
+      toast.error(t("missingToken"));
+      return;
+    }
+
+    startTransition(async () => {
+      const result = await resetPassword(undefined, formData);
 
       if (result.success) {
         setIsSuccess(true);
@@ -52,16 +48,14 @@ function ResetPasswordFormContent() {
           router.push(appRouter.signIn);
         }, 3000);
       } else {
-        const message = tErrors.has(result.error)
-          ? tErrors(result.error)
-          : result.error;
+        const message =
+          result.error && tErrors.has(result.error)
+            ? tErrors(result.error)
+            : result.error;
         toast.error(message || t("invalidToken"));
       }
-
-      return result;
-    },
-    { success: false, error: "" },
-  );
+    });
+  };
 
   useEffect(() => {
     if (!token) {
@@ -153,7 +147,7 @@ function ResetPasswordFormContent() {
         <p className="text-muted-foreground">{t("description")}</p>
       </div>
 
-      <form action={formAction} className="space-y-4">
+      <form action={onSubmit} className="space-y-4">
         <CsrfTokenInput />
         <input type="hidden" name="token" value={token || ""} />
 
