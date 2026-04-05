@@ -294,13 +294,13 @@ export function NotificationBell({ userId }: NotificationBellProps) {
       </PopoverTrigger>
 
       <PopoverContent
-        className="w-[420px] p-0"
+        className="w-[360px] p-0"
         align="end"
         side="bottom"
         sideOffset={8}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b px-4 py-3">
+        <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             <h3 className="font-semibold">الإشعارات</h3>
             {unreadCount > 0 && (
@@ -346,43 +346,32 @@ export function NotificationBell({ userId }: NotificationBellProps) {
 
         {/* Tabs */}
         <Tabs defaultValue="today" className="w-full">
-          <div className="border-b px-4">
-            <TabsList className="h-9 w-full bg-transparent">
-              <TabsTrigger
-                value="today"
-                className="flex-1 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-              >
-                اليوم
-                {today.length > 0 && (
-                  <span className="ml-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-muted text-[10px]">
-                    {today.length}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger
-                value="thisWeek"
-                className="flex-1 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-              >
-                هذا الأسبوع
-                {thisWeek.length > 0 && (
-                  <span className="ml-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-muted text-[10px]">
-                    {thisWeek.length}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger
-                value="earlier"
-                className="flex-1 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-              >
-                السابق
-                {earlier.length > 0 && (
-                  <span className="ml-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-muted text-[10px]">
-                    {earlier.length}
-                  </span>
-                )}
-              </TabsTrigger>
-            </TabsList>
-          </div>
+          <TabsList className="h-9 w-full grid grid-cols-3">
+            <TabsTrigger value="today" className="text-xs">
+              اليوم
+              {today.length > 0 && (
+                <span className="mr-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-muted text-[10px]">
+                  {today.length}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="thisWeek" className="text-xs">
+              هذا الأسبوع
+              {thisWeek.length > 0 && (
+                <span className="mr-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-muted text-[10px]">
+                  {thisWeek.length}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="earlier" className="text-xs">
+              السابق
+              {earlier.length > 0 && (
+                <span className="mr-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-muted text-[10px]">
+                  {earlier.length}
+                </span>
+              )}
+            </TabsTrigger>
+          </TabsList>
 
           {isLoading ? (
             <div className="flex h-40 items-center justify-center">
