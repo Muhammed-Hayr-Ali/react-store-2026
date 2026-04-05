@@ -2,10 +2,19 @@
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+<<<<<<< HEAD
 import { useState, useActionState } from "react";
 import { useRouter } from "next/navigation";
 
 import { signUpWithPassword } from "@/lib/actions/authentication/signUpWithPassword";
+=======
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+
+import { signUpWithPassword } from "@/lib/actions/authentication/signUpWithPassword";
+import type { SignUpInput } from "@/lib/actions/authentication/types";
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,13 +42,17 @@ import {
 } from "@/components/ui/alert-dialog";
 import { appRouter } from "@/lib/navigation";
 import { Spinner } from "../ui/spinner";
+<<<<<<< HEAD
 import { CsrfTokenInput } from "../shared/csrf-token-input";
+=======
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
 
 export default function SignUpForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
   const t = useTranslations("Auth");
+<<<<<<< HEAD
   const tErrors = useTranslations("Errors");
   const router = useRouter();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -66,6 +79,35 @@ export default function SignUpForm({
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
+=======
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    formState: { errors, isSubmitting },
+  } = useForm<SignUpInput & { confirm_password?: string }>();
+
+  const onSubmit = async (data: SignUpInput) => {
+    try {
+      const result = await signUpWithPassword(data);
+
+      if (!result.success) {
+        toast.error(result.error);
+      } else {
+        setShowSuccessDialog(true);
+      }
+    } catch (error) {
+      toast.error((error as Error).message);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
     try {
       const result = await signInWithGoogle();
       if (!result.success) {
@@ -73,7 +115,11 @@ export default function SignUpForm({
       }
     } catch (error) {
       toast.error((error as Error).message);
+<<<<<<< HEAD
       setIsGoogleLoading(false);
+=======
+      setIsLoading(false);
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
     }
   };
 
@@ -91,9 +137,14 @@ export default function SignUpForm({
     <form
       className={cn("flex flex-col gap-8", className)}
       {...props}
+<<<<<<< HEAD
       action={formAction}
     >
       <CsrfTokenInput />
+=======
+      onSubmit={handleSubmit(onSubmit)}
+    >
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
       <FieldGroup className="gap-6">
         <div className="mb-2 flex flex-col items-center gap-3 text-center">
           <Link href={appRouter.home}>
@@ -109,36 +160,95 @@ export default function SignUpForm({
             <FieldLabel htmlFor="first_name">{t("firstName")}</FieldLabel>
             <Input
               id="first_name"
+<<<<<<< HEAD
               name="first_name"
               type="text"
               autoComplete="given-name"
               placeholder={t("firstNamePlaceholder")}
               disabled={isPending}
             />
+=======
+              type="text"
+              autoComplete="first_name"
+              placeholder={t("firstNamePlaceholder")}
+              disabled={isSubmitting}
+              aria-invalid={errors.first_name ? "true" : "false"}
+              {...register("first_name", {
+                required: t("firstNameRequired"),
+              })}
+            />
+            {errors.first_name && (
+              <FieldDescription>{errors.first_name.message}</FieldDescription>
+            )}
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
           </Field>
 
           <Field>
             <FieldLabel htmlFor="last_name">{t("lastName")}</FieldLabel>
             <Input
               id="last_name"
+<<<<<<< HEAD
               name="last_name"
               type="text"
               autoComplete="family-name"
               placeholder={t("lastNamePlaceholder")}
               disabled={isPending}
             />
+=======
+              type="text"
+              autoComplete="last_name"
+              placeholder={t("lastNamePlaceholder")}
+              disabled={isSubmitting}
+              aria-invalid={errors.last_name ? "true" : "false"}
+              {...register("last_name", {
+                required: t("lastNameRequired"),
+              })}
+            />
+
+            {errors.last_name && (
+              <FieldDescription>{errors.last_name.message}</FieldDescription>
+            )}
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
           </Field>
         </div>
         <Field>
           <FieldLabel htmlFor="email">{t("email")}</FieldLabel>
           <Input
             id="email"
+<<<<<<< HEAD
             name="email"
             type="email"
             autoComplete="email"
             placeholder={t("emailPlaceholder")}
             disabled={isPending}
           />
+=======
+            type="email"
+            autoComplete="email"
+            placeholder={t("emailPlaceholder")}
+            disabled={isSubmitting}
+            aria-invalid={errors.email ? "true" : "false"}
+            {...register("email", {
+              required: t("emailRequired"),
+              pattern: {
+                value:
+                  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
+                message: t("invalidEmail"),
+              },
+              maxLength: {
+                value: 100,
+                message: t("emailTooLong"),
+              },
+              minLength: {
+                value: 8,
+                message: t("emailTooShort"),
+              },
+            })}
+          />
+          {errors.email && (
+            <FieldDescription>{errors.email.message}</FieldDescription>
+          )}
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
           <FieldDescription className="text-xs">
             {t("emailInclusion")}
           </FieldDescription>
@@ -147,6 +257,7 @@ export default function SignUpForm({
           <FieldLabel htmlFor="password">{t("password")}</FieldLabel>
           <Input
             id="password"
+<<<<<<< HEAD
             name="password"
             type="password"
             autoComplete="new-password"
@@ -156,6 +267,32 @@ export default function SignUpForm({
           <FieldDescription className="text-xs">
             {t("passwordRequirement")}
           </FieldDescription>
+=======
+            type="password"
+            autoComplete="new-password"
+            placeholder={t("passwordPlaceholder")}
+            disabled={isSubmitting}
+            aria-invalid={errors.password ? "true" : "false"}
+            {...register("password", {
+              required: t("passwordRequired"),
+              maxLength: {
+                value: 100,
+                message: t("passwordTooLong"),
+              },
+              minLength: {
+                value: 8,
+                message: t("passwordTooShort"),
+              },
+            })}
+          />
+          {errors.password ? (
+            <FieldDescription>{errors.password.message}</FieldDescription>
+          ) : (
+            <FieldDescription className="text-xs">
+              {t("passwordRequirement")}
+            </FieldDescription>
+          )}
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
         </Field>
         <Field>
           <FieldLabel htmlFor="confirm-password">
@@ -163,6 +300,7 @@ export default function SignUpForm({
           </FieldLabel>
           <Input
             id="confirm-password"
+<<<<<<< HEAD
             name="confirm_password"
             type="password"
             autoComplete="new-password"
@@ -173,6 +311,42 @@ export default function SignUpForm({
         <Field>
           <Button type="submit" disabled={isPending}>
             {isPending ? <Spinner /> : t("submitSignUp")}
+=======
+            type="password"
+            autoComplete="new-password"
+            placeholder={t("passwordPlaceholder")}
+            disabled={isSubmitting}
+            aria-invalid={errors.confirm_password ? "true" : "false"}
+            {...register("confirm_password", {
+              required: t("confirmPasswordRequired"),
+              maxLength: {
+                value: 100,
+                message: t("passwordTooLong"),
+              },
+              minLength: {
+                value: 8,
+                message: t("passwordTooShort"),
+              },
+              validate: (value) => {
+                const { password } = getValues();
+                return value === password || t("passwordsDoNotMatch"); // إرجاع رسالة خطأ هو الأفضل
+              },
+            })}
+          />
+          {errors.confirm_password && (
+            <FieldDescription>
+              {errors.confirm_password.message}
+            </FieldDescription>
+          )}
+        </Field>
+        <Field>
+          <Button
+            type="button"
+            onClick={handleSubmit(onSubmit)}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? <Spinner /> : t("submitSignUp")}
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
           </Button>
         </Field>
         <FieldSeparator className="my-2">{t("continueWith")}</FieldSeparator>
@@ -181,9 +355,15 @@ export default function SignUpForm({
             variant="outline"
             type="button"
             onClick={handleGoogleSignIn}
+<<<<<<< HEAD
             disabled={isGoogleLoading}
           >
             {isGoogleLoading ? (
+=======
+            disabled={isLoading}
+          >
+            {isLoading ? (
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
               <Spinner />
             ) : (
               <div className="flex items-center gap-2">
@@ -221,6 +401,11 @@ export default function SignUpForm({
         </p>
       </FieldGroup>
 
+<<<<<<< HEAD
+=======
+      {/* Success Dialog */}
+
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
       <AlertDialog open={showSuccessDialog}>
         <AlertDialogContent size="sm" className="min-w-96 space-y-4">
           <AlertDialogHeader>

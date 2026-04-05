@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { AuthGuard } from "@/lib/middleware/auth-guard";
 import { appRouter } from "@/lib/navigation/routes";
 
@@ -24,4 +25,20 @@ export default async function MfaLayout({
       {children}
     </main>
   );
+=======
+import { appRouter } from "@/lib/app-routes"
+import { AuthGuard } from "@/lib/middleware/auth-guard"
+
+export default async function MainLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
+  return (
+    <main>
+      <AuthGuard redirectPath={appRouter.home} />
+      {children}
+    </main>
+  )
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
 }

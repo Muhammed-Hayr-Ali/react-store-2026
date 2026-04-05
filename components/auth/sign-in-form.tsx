@@ -2,11 +2,20 @@
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+<<<<<<< HEAD
 import { useState, useActionState } from "react";
+=======
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
 import { useRouter } from "next/navigation";
 
 import { signInWithPassword } from "@/lib/actions/authentication/signInWithPassword";
 import { signInWithGoogle } from "@/lib/actions/authentication/signIn-with-google";
+<<<<<<< HEAD
+=======
+import type { SignInInput } from "@/lib/actions/authentication/types";
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,13 +30,17 @@ import { Spinner } from "../ui/spinner";
 import { AppLogo } from "../shared/app-logo";
 import { toast } from "sonner";
 import { appRouter } from "@/lib/navigation";
+<<<<<<< HEAD
 import { CsrfTokenInput } from "../shared/csrf-token-input";
+=======
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
 
 export default function SignInForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
   const t = useTranslations("Auth");
+<<<<<<< HEAD
   const tErrors = useTranslations("Errors");
   const router = useRouter();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -53,6 +66,30 @@ export default function SignInForm({
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
+=======
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<SignInInput>();
+
+  const onSubmit = async (data: SignInInput) => {
+    const result = await signInWithPassword(data);
+
+    if (!result.success) {
+      toast.error(result.error);
+      return;
+    }
+    router.push(appRouter.home);
+    router.refresh();
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
     const result = await signInWithGoogle();
     if (!result.success) {
       toast.error(result.error);
@@ -66,9 +103,14 @@ export default function SignInForm({
     <form
       className={cn("flex flex-col gap-8", className)}
       {...props}
+<<<<<<< HEAD
       action={formAction}
     >
       <CsrfTokenInput />
+=======
+      onSubmit={handleSubmit(onSubmit)}
+    >
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
       <FieldGroup className="gap-6">
         <div className="mb-2 flex flex-col items-center gap-3 text-center">
           <Link href={appRouter.home}>
@@ -83,17 +125,46 @@ export default function SignInForm({
           <FieldLabel htmlFor="email">{t("email")}</FieldLabel>
           <Input
             id="email"
+<<<<<<< HEAD
             name="email"
             type="email"
             autoComplete="email"
             placeholder={t("emailPlaceholder")}
             disabled={isPending}
           />
+=======
+            type="email"
+            autoComplete="email"
+            placeholder={t("emailPlaceholder")}
+            disabled={isSubmitting}
+            aria-invalid={errors.email ? "true" : "false"}
+            {...register("email", {
+              required: t("emailRequired"),
+              pattern: {
+                value:
+                  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
+                message: t("invalidEmail"),
+              },
+              maxLength: {
+                value: 100,
+                message: t("emailTooLong"),
+              },
+              minLength: {
+                value: 8,
+                message: t("emailTooShort"),
+              },
+            })}
+          />
+          {errors.email && (
+            <FieldDescription>{errors.email.message}</FieldDescription>
+          )}
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
         </Field>
         <Field>
           <FieldLabel htmlFor="password">{t("password")}</FieldLabel>
           <Input
             id="password"
+<<<<<<< HEAD
             name="password"
             type="password"
             autoComplete="current-password"
@@ -113,6 +184,46 @@ export default function SignInForm({
         <Field>
           <Button type="submit" disabled={isPending}>
             {isPending ? <Spinner /> : t("submitSignIn")}
+=======
+            type="password"
+            autoComplete="current-password"
+            placeholder={t("passwordPlaceholder")}
+            disabled={isSubmitting}
+            aria-invalid={errors.password ? "true" : "false"}
+            {...register("password", {
+              required: t("passwordRequired"),
+              maxLength: {
+                value: 100,
+                message: t("passwordTooLong"),
+              },
+              minLength: {
+                value: 8,
+                message: t("passwordTooShort"),
+              },
+            })}
+          />
+          {errors.password ? (
+            <FieldDescription>{errors.password.message}</FieldDescription>
+          ) : (
+            <FieldDescription className="flex items-center justify-between text-xs">
+              <span>{t("passwordRequirement")}</span>
+              <Link
+                href={appRouter.forgotPassword}
+                className="text-primary hover:underline"
+              >
+                {t("forgotPassword")}
+              </Link>
+            </FieldDescription>
+          )}
+        </Field>
+        <Field>
+          <Button
+            type="button"
+            onClick={handleSubmit(onSubmit)}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? <Spinner /> : t("submitSignIn")}
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
           </Button>
         </Field>
         <FieldSeparator className="my-2">{t("continueWith")}</FieldSeparator>
@@ -121,9 +232,15 @@ export default function SignInForm({
             variant="outline"
             type="button"
             onClick={handleGoogleSignIn}
+<<<<<<< HEAD
             disabled={isGoogleLoading}
           >
             {isGoogleLoading ? (
+=======
+            disabled={isLoading}
+          >
+            {isLoading ? (
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
               <Spinner />
             ) : (
               <div className="flex items-center gap-2">

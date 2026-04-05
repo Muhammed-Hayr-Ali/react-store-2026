@@ -3,7 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+<<<<<<< HEAD
     "dev": "next dev --turbopack",
+=======
+    "dev": "next dev",
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -80,4 +84,8 @@
     "tailwindcss": "^4.1.18",
     "typescript": "^5"
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2

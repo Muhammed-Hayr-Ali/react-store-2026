@@ -2,12 +2,15 @@
 
 import { createAdminClient } from "@/lib/database/supabase/admin";
 import { ApiResult } from "@/lib/database/types";
+<<<<<<< HEAD
 import {
   resetPasswordSchema,
   validateInput,
   logAuthentication,
 } from "@/lib/security";
 import { verifyCsrfToken } from "@/lib/security/csrf-server-action";
+=======
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
 
 // ===============================================================================
 // Reset Password with Token
@@ -20,6 +23,7 @@ export interface ResetPasswordResult extends ApiResult {
 /**
  * إعادة تعيين كلمة المرور باستخدام الرمز
  *
+<<<<<<< HEAD
  * @param _prevState حالة النموذج
  * @param formData بيانات النموذج
  * @returns نتيجة العملية
@@ -54,6 +58,21 @@ export async function resetPassword(
   try {
     const supabase = createAdminClient();
 
+=======
+ * @param token رمز إعادة التعيين
+ * @param password كلمة المرور الجديدة
+ * @returns نتيجة العملية
+ */
+export async function resetPassword(
+  token: string,
+  password: string,
+): Promise<ResetPasswordResult> {
+  try {
+    const supabase = createAdminClient();
+
+    // 1. التحقق الذري من الرمز واستهلاكه (Atomic Claim)
+    // ✅ هذه هي الدالة الآمنة التي تمنع الاستخدام المزدوج
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
     type ClaimTokenResult = {
       data:
         | {
@@ -71,6 +90,7 @@ export async function resetPassword(
         fn: string,
         args: Record<string, unknown>,
       ) => Promise<ClaimTokenResult>
+<<<<<<< HEAD
     )("claim_password_reset_token", {
       p_token: validatedToken,
     });
@@ -122,6 +142,64 @@ export async function resetPassword(
     return {
       success: false,
       error: "UNEXPECTED_ERROR",
+=======
+    )(
+      "claim_password_reset_token",
+      { p_token: token?.trim() }, // ✅ Trim any whitespace
+    );
+
+    if (claimError || !claimData?.[0]?.is_valid) {
+      return {
+        success: false,
+        error: claimData?.[0]?.message || "رمز غير صالح أو منتهي الصلاحية",
+      };
+    }
+
+    // دعم كل من user_id و profile_id
+    const userId = claimData[0].user_id || claimData[0].profile_id;
+
+    if (!userId) {
+      console.error(
+        "claim_password_reset_token returned no user_id or profile_id",
+        {
+          claimData,
+        },
+      );
+      return {
+        success: false,
+        error: "فشل في تحديد هوية المستخدم",
+      };
+    }
+
+    // 2. تحديث كلمة المرور في Supabase Auth
+    const { error: updateError } = await supabase.auth.admin.updateUserById(
+      userId,
+      { password },
+    );
+
+    if (updateError) {
+      console.error("updateUserById failed:", {
+        userId,
+        error: updateError.message,
+        status: updateError.status,
+      });
+      return {
+        success: false,
+        error: "فشل تحديث كلمة المرور",
+      };
+    }
+
+    // ✅ الرمز تم استهلاكه تلقائياً عبر claim_password_reset_token
+    // لا حاجة لاستدعاء دالة منفصلة
+
+    return {
+      success: true,
+    };
+  } catch {
+    return {
+      success: false,
+      error: "حدث خطأ غير متوقع",
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
     };
   }
 }
@@ -152,7 +230,11 @@ export async function verifyResetToken(
         args: Record<string, unknown>,
       ) => Promise<VerifyTokenResult>
     )("verify_password_reset_token", {
+<<<<<<< HEAD
       p_token: token.trim(),
+=======
+      p_token: token?.trim(), // ✅ Trim any whitespace
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
     });
 
     if (error || !data?.[0]?.is_valid) {

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 "use client";
 
 import { useState, useTransition, useActionState } from "react";
@@ -37,6 +38,47 @@ export default function ForgotPasswordForm() {
     },
     { success: false, error: "" },
   );
+=======
+"use client"
+
+import { useState, useTransition } from "react"
+import { useForm } from "react-hook-form"
+import { toast } from "sonner"
+import { requestPasswordReset } from "@/lib/actions/authentication/requestPasswordReset"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { FieldLabel, FieldDescription } from "@/components/ui/field"
+import { Spinner } from "@/components/ui/spinner"
+import { useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
+import { appRouter } from "@/lib/navigation"
+import { ArrowLeftIcon, MailIcon } from "lucide-react"
+
+export default function ForgotPasswordForm() {
+  const t = useTranslations("ForgotPassword")
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [isSubmitted, setIsSubmitted] = useState(false)
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<{ email: string }>()
+
+  const onSubmit = async (data: { email: string }) => {
+    startTransition(async () => {
+      const result = await requestPasswordReset(data.email)
+
+      if (result.success) {
+        setIsSubmitted(true)
+        toast.success(t("emailSent"))
+      } else {
+        toast.error(result.error || t("emailSent"))
+      }
+    })
+  }
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
 
   if (isSubmitted) {
     return (
@@ -60,7 +102,11 @@ export default function ForgotPasswordForm() {
           </Button>
         </div>
       </div>
+<<<<<<< HEAD
     );
+=======
+    )
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
   }
 
   return (
@@ -70,18 +116,42 @@ export default function ForgotPasswordForm() {
         <p className="text-muted-foreground">{t("description")}</p>
       </div>
 
+<<<<<<< HEAD
       <form action={formAction} className="space-y-4">
         <CsrfTokenInput />
+=======
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
         <div className="space-y-2">
           <FieldLabel htmlFor="email">{t("email")}</FieldLabel>
           <Input
             id="email"
+<<<<<<< HEAD
             name="email"
+=======
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
             type="email"
             autoComplete="email"
             placeholder={t("emailPlaceholder")}
             disabled={isPending}
+<<<<<<< HEAD
           />
+=======
+            aria-invalid={errors.email ? "true" : "false"}
+            {...register("email", {
+              required: t("emailRequired"),
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: t("invalidEmail"),
+              },
+            })}
+          />
+          {errors.email && (
+            <FieldDescription className="text-destructive">
+              {errors.email.message}
+            </FieldDescription>
+          )}
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
         </div>
 
         <Button type="submit" className="w-full" disabled={isPending}>
@@ -107,5 +177,9 @@ export default function ForgotPasswordForm() {
         </Button>
       </div>
     </div>
+<<<<<<< HEAD
   );
+=======
+  )
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
 }

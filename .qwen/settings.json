@@ -31,7 +31,9 @@
       "Bash(exist *)",
       "Bash(echo *)",
       "WebFetch(localhost)",
-      "Bash(git init)"
+      "Bash(git init)",
+      "Bash(foreach-object *)",
+      "Bash(do *)"
     ]
   },
   "$version": 3

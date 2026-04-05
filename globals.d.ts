@@ -2,6 +2,7 @@ declare module "*.css" {
   const content: Record<string, string>;
   export default content;
 }
+<<<<<<< HEAD
 
 declare module "@supabase/ssr" {
   import { SupabaseClient } from "@supabase/supabase-js";
@@ -34,3 +35,5 @@ declare module "@supabase/ssr" {
     options?: Partial<CreateClientOptions>,
   ): SupabaseClient<Database>;
 }
+=======
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2

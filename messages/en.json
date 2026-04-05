@@ -276,6 +276,7 @@
       "limitationOfLiability": "Limitation of Liability",
       "governingLaw": "Governing Law",
       "contactUs": "Contact Us"
+<<<<<<< HEAD
     },
     "Errors": {
       "CSRF_ERROR": "Security error: invalid request. Please refresh the page and try again.",
@@ -289,6 +290,8 @@
       "MFA_VERIFY_FAILED": "Invalid verification code. Please try again.",
       "MFA_SETUP_FAILED": "Failed to set up two-factor authentication.",
       "EMAIL_SEND_FAILED": "Failed to send email. Please try again later."
+=======
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
     }
   }
 }

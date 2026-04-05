@@ -79,6 +79,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+<<<<<<< HEAD
   async headers() {
     return [
       {
@@ -135,6 +136,8 @@ const nextConfig: NextConfig = {
     ];
   },
   poweredByHeader: false,
+=======
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
 };
 
 const withNextIntl = createNextIntlPlugin();

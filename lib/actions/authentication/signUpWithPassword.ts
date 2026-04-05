@@ -4,6 +4,7 @@
 import { createBrowserClient } from "@/lib/database/supabase/client";
 import { ApiResult } from "@/lib/database/types";
 import type { SignUpInput } from "./types";
+<<<<<<< HEAD
 import { signUpSchema, validateInput, logAuthentication } from "@/lib/security";
 import { verifyCsrfToken } from "@/lib/security/csrf-server-action";
 
@@ -37,6 +38,16 @@ export async function signUpWithPassword(
   }
 
   const { first_name, last_name, email, password } = validation.data;
+=======
+
+// ===============================================================================
+export async function signUpWithPassword({
+  first_name,
+  last_name,
+  email,
+  password,
+}: SignUpInput): Promise<ApiResult> {
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
   const supabase = createBrowserClient();
   const { error } = await supabase.auth.signUp({
     email,
@@ -50,6 +61,11 @@ export async function signUpWithPassword(
   });
 
   if (error) {
+<<<<<<< HEAD
+=======
+    console.error("Error signing up:", error);
+
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
     if (error.message === "User already registered") {
       return {
         success: false,
@@ -63,12 +79,15 @@ export async function signUpWithPassword(
     };
   }
 
+<<<<<<< HEAD
   logAuthentication("SIGN_UP", undefined, undefined, {
     email,
     first_name,
     last_name,
   });
 
+=======
+>>>>>>> f36a4adfff5056eceaacf66323cb179b9952a5a2
   return {
     success: true,
   };
