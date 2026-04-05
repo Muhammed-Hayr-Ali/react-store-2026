@@ -31,7 +31,9 @@
       "Bash(exist *)",
       "Bash(echo *)",
       "WebFetch(localhost)",
-      "Bash(git init)"
+      "Bash(git init)",
+      "Bash(git fetch *)",
+      "Bash(git merge *)"
     ]
   },
   "$version": 3
