@@ -273,18 +273,20 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   }, [userId, rpc]);
 
   // ── عند فتح الـ Popover ──
-  useEffect(() => {
-    if (isOpen && notifications.length === 0) {
+  const handleOpenChange = async (open: boolean) => {
+    setIsOpen(open);
+    if (open && notifications.length === 0) {
       setIsLoading(true);
-      fetchNotifications().finally(() => setIsLoading(false));
+      await fetchNotifications();
+      setIsLoading(false);
     }
-  }, [isOpen, fetchNotifications, notifications.length]);
+  };
 
   // ── عرض العداد ──
   const displayCount = unreadCount > 9 ? "9+" : String(unreadCount);
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
