@@ -424,6 +424,118 @@ export interface Database {
           permissions: string[];
         };
       };
+      // Notification Functions
+      create_notification: {
+        Args: {
+          p_recipient_id: string;
+          p_type: string;
+          p_title_ar: string;
+          p_title_en?: string;
+          p_content_ar: string;
+          p_content_en?: string;
+          p_action_url?: string;
+          p_data?: Record<string, unknown>;
+        };
+        Returns: string;
+      };
+      create_bulk_notifications: {
+        Args: {
+          p_recipient_ids: string[];
+          p_type: string;
+          p_title_ar: string;
+          p_title_en?: string;
+          p_content_ar: string;
+          p_content_en?: string;
+          p_action_url?: string;
+          p_data?: Record<string, unknown>;
+        };
+        Returns: number;
+      };
+      get_user_notifications: {
+        Args: {
+          p_user_id: string;
+          p_page: number;
+          p_limit: number;
+          p_unread_only: boolean;
+        };
+        Returns: {
+          id: string;
+          type: string;
+          title_ar: string;
+          title_en: string | null;
+          content_ar: string;
+          content_en: string | null;
+          action_url: string | null;
+          data: Record<string, unknown>;
+          is_read: boolean;
+          created_at: string;
+        }[];
+      };
+      get_unread_count: {
+        Args: { p_user_id: string };
+        Returns: number;
+      };
+      mark_notification_read: {
+        Args: {
+          p_notification_id: string;
+          p_user_id: string;
+        };
+        Returns: boolean;
+      };
+      mark_all_notifications_read: {
+        Args: { p_user_id: string };
+        Returns: number;
+      };
+      delete_notification: {
+        Args: {
+          p_notification_id: string;
+          p_user_id: string;
+        };
+        Returns: boolean;
+      };
+      cleanup_old_notifications: {
+        Args: {
+          p_days_old: number;
+          p_batch_size: number;
+        };
+        Returns: number;
+      };
+      get_new_notifications_since: {
+        Args: {
+          p_user_id: string;
+          p_since: string;
+        };
+        Returns: {
+          id: string;
+          type: string;
+          title_ar: string;
+          title_en: string | null;
+          content_ar: string;
+          content_en: string | null;
+          action_url: string | null;
+          data: Record<string, unknown>;
+          is_read: boolean;
+          created_at: string;
+        }[];
+      };
+      notify_new_order: {
+        Args: {
+          p_customer_id: string;
+          p_order_id: string;
+          p_order_number: string;
+        };
+        Returns: void;
+      };
+      notify_new_ticket_message: {
+        Args: {
+          p_ticket_id: string;
+          p_reporter_id: string;
+          p_assigned_to: string;
+          p_sender_id: string;
+          p_ticket_number: string;
+        };
+        Returns: void;
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
