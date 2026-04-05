@@ -11,6 +11,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/lib/providers/auth-provider";
 import { CsrfProvider } from "@/lib/providers/csrf-provider";
 import { MfaGuard } from "@/lib/middleware/mfa-guard";
+import { validateEnvOrThrow } from "@/lib/security/env-validation";
+
+// ── التحقق من متغيرات البيئة عند بدء التشغيل ──
+validateEnvOrThrow();
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 

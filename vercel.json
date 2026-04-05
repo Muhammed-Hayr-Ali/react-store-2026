@@ -1,8 +1,16 @@
 {
     "crons": [
         {
-            "path": "/api/cron/update-rates",
+            "path": "/api/cron/cleanup-tokens",
             "schedule": "0 5 * * *"
+        },
+        {
+            "path": "/api/cron/cleanup-notifications",
+            "schedule": "5 5 * * *"
+        },
+        {
+            "path": "/api/cron/update-rates",
+            "schedule": "10 5 * * *"
         }
     ]
 }

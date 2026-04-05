@@ -91,8 +91,8 @@ export async function GET(request: Request) {
 
     console.log(`📊 Updating ${ratesToUpsert.length} exchange rates...`);
     const { error: upsertError } = await supabaseAdmin
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .from("exchange_rates")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .upsert(ratesToUpsert as any, { onConflict: "currency_code" });
 
     if (upsertError) {
