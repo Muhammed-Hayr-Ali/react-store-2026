@@ -64,7 +64,8 @@ export async function GET(request: Request) {
       .select("id")
       .lt("created_at", cutoffISOString)
       .eq("is_read", true)
-      .limit(5000);
+      .limit(5000)
+      .returns<{ id: string }[]>();
 
     if (fetchError) {
       console.error("❌ Failed to fetch old notifications:", fetchError);
