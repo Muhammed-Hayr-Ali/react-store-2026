@@ -1,56 +1,54 @@
-import { AppSidebar } from "@/components/app-sidebar"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
+import { redirect } from "next/navigation";
+import { checkUserRoles } from "@/lib/middleware/dashboard-permission-guard";
+import { appRouter } from "@/lib/navigation";
+import DashboardCustomer from "@/components/dashboard/dashboard-customer";
+import DashboardSeller from "@/components/dashboard/dashboard-seller";
+import DashboardDriver from "@/components/dashboard/dashboard-driver";
+import DashboardAdmin from "@/components/dashboard/dashboard-admin";
+import { createMetadata } from "@/lib/config/metadata_generator";
+import { getTranslations } from "next-intl/server";
 
-export default function Page() {
+// =====================================================
+// 🧭 Dashboard Router (URL موحد — لا يظهر الدور في الرابط)
+// =====================================================
 
-  return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-          <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
-            <Separator
-              orientation="vertical"
-              className="mr-2 data-vertical:h-4 data-vertical:self-auto"
-            />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
-                    Build Your Application
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-        </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="aspect-video rounded-xl bg-muted/50" />
-            <div className="aspect-video rounded-xl bg-muted/50" />
-            <div className="aspect-video rounded-xl bg-muted/50" />
-          </div>
-          <div className="min-h-screen flex-1 rounded-xl bg-muted/50 md:min-h-min" />
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
-  )
+export async function generateMetadata() {
+  const t = await getTranslations();
+
+  return createMetadata({
+    siteName: t("siteName"),
+    title: t("seo.dashboard.title"),
+    description: t("seo.dashboard.description"),
+  });
+}
+
+export default async function DashboardPage() {
+  const session = await checkUserRoles();
+
+  // غير مسجل دخول → صفحة تسجيل الدخول
+  if (!session) {
+    return redirect(appRouter.signIn);
+  }
+
+  const { roles } = session;
+
+  // ترتيب الأولوية: admin > seller > driver > customer
+  if (roles.includes("admin")) {
+    return <DashboardAdmin />;
+  }
+
+  if (roles.includes("vendor")) {
+    return <DashboardSeller />;
+  }
+
+  if (roles.includes("delivery")) {
+    return <DashboardDriver />;
+  }
+
+  if (roles.includes("customer")) {
+    return <DashboardCustomer />;
+  }
+
+  // ما عنده أي دور → unauthorized
+  return redirect("/unauthorized");
 }

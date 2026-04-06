@@ -8,6 +8,10 @@
     "footer": "Marketna"
   },
   "seo": {
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "Your Marketna dashboard"
+    },
     "home": {
       "title": "Coming Soon",
       "description": "Marketna is building a digital footprint. Something Extraordinary will launch soon."
@@ -49,6 +53,10 @@
         "title": "Two-Factor Setup",
         "description": "Set up two-factor authentication"
       }
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "Your Marketna dashboard"
     },
     "Auth": {
       "signIn": "Sign In",
@@ -289,6 +297,31 @@
       "MFA_VERIFY_FAILED": "Invalid verification code. Please try again.",
       "MFA_SETUP_FAILED": "Failed to set up two-factor authentication.",
       "EMAIL_SEND_FAILED": "Failed to send email. Please try again later."
+    }
+  },
+  "dashboard": {
+    "customer": {
+      "welcome": "Welcome back",
+      "welcomeDesc": "Here's an overview of your activity",
+      "totalOrders": "Total Orders",
+      "activeOrders": "Active Orders",
+      "favorites": "Favorites",
+      "points": "Reward Points",
+      "recentOrders": "Recent Orders",
+      "noOrders": "No orders yet",
+      "orderNumber": "Order #",
+      "store": "Store",
+      "status": "Status",
+      "amount": "Amount",
+      "date": "Date"
+    },
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "processing": "Processing",
+      "shipping": "Shipping",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
     }
   }
 }

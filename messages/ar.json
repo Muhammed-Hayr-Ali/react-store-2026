@@ -49,6 +49,10 @@
         "title": "إعداد المصادقة الثنائية",
         "description": "إعداد المصادقة الثنائية لحسابك"
       }
+    },
+    "dashboard": {
+      "title": "لوحة التحكم",
+      "description": "لوحة التحكم في ماركتنا"
     }
   },
   "Auth": {
@@ -290,6 +294,30 @@
     "MFA_VERIFY_FAILED": "رمز التحقق غير صالح. يرجى المحاولة مرة أخرى.",
     "MFA_SETUP_FAILED": "فشل في إعداد المصادقة الثنائية.",
     "EMAIL_SEND_FAILED": "فشل في إرسال البريد الإلكتروني. يرجى المحاولة لاحقاً."
+  },
+  "dashboard": {
+    "customer": {
+      "welcome": "مرحباً بعودتك",
+      "welcomeDesc": "إليك نظرة عامة على نشاطك",
+      "totalOrders": "إجمالي الطلبات",
+      "activeOrders": "الطلبات النشطة",
+      "favorites": "المفضلات",
+      "points": "نقاط المكافآت",
+      "recentOrders": "آخر الطلبات",
+      "noOrders": "لا توجد طلبات بعد",
+      "orderNumber": "رقم الطلب",
+      "store": "المتجر",
+      "status": "الحالة",
+      "amount": "المبلغ",
+      "date": "التاريخ"
+    },
+    "status": {
+      "pending": "قيد الانتظار",
+      "confirmed": "مؤكد",
+      "processing": "قيد المعالجة",
+      "shipping": "قيد الشحن",
+      "delivered": "تم التسليم",
+      "cancelled": "ملغي"
+    }
   }
-}
 }

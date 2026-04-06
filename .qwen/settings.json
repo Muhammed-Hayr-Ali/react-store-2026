@@ -34,7 +34,9 @@
       "Bash(git init)",
       "Bash(git fetch *)",
       "Bash(git merge *)",
-      "Bash(type *)"
+      "Bash(type *)",
+      "Bash(reg *)",
+      "Bash(set *)"
     ]
   },
   "$version": 3

@@ -8,9 +8,9 @@ export default createMiddleware({
   // اللغة الافتراضية التي سيتم استخدامها إذا لم يتم تحديد لغة في المسار
   defaultLocale: "en",
 
-  // هل يجب أن يكون defaultLocale دائمًا في المسار؟
-  // إذا كان false، فإن /en/about ستصبح /about
-  localePrefix: "never", // 'always' | 'never' | 'as-needed'
+  // إظهار اللغة فقط عندما تختلف عن الافتراضية
+  // /dashboard (en) vs /ar/dashboard (ar)
+  localePrefix: "as-needed", // 'always' | 'never' | 'as-needed'
 });
 
 export const config = {

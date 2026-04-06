@@ -1,6 +1,6 @@
 // i18n/routing.ts
-import { siteConfig } from "@/lib/config/site_config"
-import { defineRouting } from "next-intl/routing"
+import { siteConfig } from "@/lib/config/site_config";
+import { defineRouting } from "next-intl/routing";
 
 /**
  * Routing Configuration for next-intl
@@ -22,7 +22,7 @@ export const routing = defineRouting({
   // Used when no locale matches
   defaultLocale: siteConfig.defaultLocale,
 
-  // IMPORTANT: Hide locale from URL
-  // This makes URLs cleaner: / instead of /ar/ or /en/
-  localePrefix: "never",
-})
+  // IMPORTANT: Show locale in URL only when different from default
+  // /dashboard (en) vs /ar/dashboard (ar)
+  localePrefix: "as-needed",
+});
