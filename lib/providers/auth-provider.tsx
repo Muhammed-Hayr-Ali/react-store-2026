@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   createContext,
@@ -7,101 +7,102 @@ import {
   useState,
   useCallback,
   type ReactNode,
-} from "react"
-import { Session, User } from "@supabase/supabase-js"
-import { createClient } from "@/lib/database/supabase/client"
+} from "react";
+import { Session, User } from "@supabase/supabase-js";
+import { createClient } from "@/lib/database/supabase/client";
 
 // =====================================================
 // 📋 Types
 // =====================================================
 
 type Role = {
-  code: string
-  description: string | null
-  permissions: string[]
-}
+  code: string;
+  description: string | null;
+  permissions: string[];
+};
 
 type Subscription = {
-  plan_id: string
-  category: string
-  name_ar: string
-  name_en: string | null
-  price: number
-  currency: string
-  billing_cycle: string
-  permissions: string[]
-  features: string[]
-  status: string
-  starts_at: string | null
-  ends_at: string | null
-  auto_renew: boolean | null
-}
+  plan_id: string;
+  category: string;
+  name_ar: string;
+  name_en: string | null;
+  price: number;
+  currency: string;
+  billing_cycle: string;
+  permissions: string[];
+  features: string[];
+  status: string;
+  starts_at: string | null;
+  ends_at: string | null;
+  auto_renew: boolean | null;
+};
 
 type UserProfile = {
-  id: string | null
-  email: string | null
-  first_name: string | null
-  last_name: string | null
-  full_name: string | null
-  avatar_url: string | null
-  phone_number: string | null
-  is_phone_verified: boolean
-  preferred_language: string
-  timezone: string
-  created_at: string | null
-}
+  id: string | null;
+  email: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  full_name: string | null;
+  avatar_url: string | null;
+  phone_number: string | null;
+  is_phone_verified: boolean;
+  preferred_language: string;
+  timezone: string;
+  created_at: string | null;
+};
 
 type FullProfile = {
-  profile: UserProfile
-  roles: Role[]
-  subscriptions: Subscription[]
-  permissions: string[]
-}
+  profile: UserProfile;
+  roles: Role[];
+  subscriptions: Subscription[];
+  permissions: string[];
+  user: User | null;
+};
 
 type AuthState = {
-  session: Session | null
-  user: User | null
-  profile: FullProfile | null
-  isLoading: boolean
-  isAuthenticated: boolean
-}
+  session: Session | null;
+  user: User | null;
+  profile: FullProfile | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+};
 
 type AuthContextValue = AuthState & {
-  refresh: () => Promise<void>
-  signOut: () => Promise<void>
-  hasRole: (code: string) => boolean
-  hasPermission: (permission: string) => boolean
-  hasAnyPermission: (permission: string) => boolean
-  hasActivePlan: () => boolean
-  getActivePlan: () => Subscription | null
-}
+  refresh: () => Promise<void>;
+  signOut: () => Promise<void>;
+  hasRole: (code: string) => boolean;
+  hasPermission: (permission: string) => boolean;
+  hasAnyPermission: (permission: string) => boolean;
+  hasActivePlan: () => boolean;
+  getActivePlan: () => Subscription | null;
+};
 
 // =====================================================
 // 🔐 Context
 // =====================================================
 
-const AuthContext = createContext<AuthContextValue | null>(null)
+const AuthContext = createContext<AuthContextValue | null>(null);
 
 function useAuthContext(): AuthContextValue {
-  const ctx = useContext(AuthContext)
+  const ctx = useContext(AuthContext);
   if (!ctx) {
-    throw new Error("useAuth must be used within AuthProvider")
+    throw new Error("useAuth must be used within AuthProvider");
   }
-  return ctx
+  return ctx;
 }
 
-export { useAuthContext as useAuth }
+export { useAuthContext as useAuth };
 
 // =====================================================
 // 🏗️ Provider
 // =====================================================
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const supabase = createClient()
-  const [session, setSession] = useState<Session | null>(null)
-  const [user, setUser] = useState<User | null>(null)
-  const [profile, setProfile] = useState<FullProfile | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const supabase = createClient();
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<FullProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // ── جلب البروفايل الكامل ──
   const refresh = useCallback(async () => {
@@ -109,107 +110,107 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const {
       data: { user: currentUser },
       error: userError,
-    } = await supabase.auth.getUser()
+    } = await supabase.auth.getUser();
 
     if (userError || !currentUser) {
-      setSession(null)
-      setUser(null)
-      setProfile(null)
-      setIsLoading(false)
-      return
+      setSession(null);
+      setUser(null);
+      setProfile(null);
+      setIsLoading(false);
+      return;
     }
 
     // Get current session
     const {
       data: { session: currentSession },
-    } = await supabase.auth.getSession()
+    } = await supabase.auth.getSession();
 
-    setSession(currentSession)
-    setUser(currentUser)
+    setSession(currentSession);
+    setUser(currentUser);
 
     try {
-      const { data, error } = await supabase.rpc("get_user_full_profile")
+      const { data, error } = await supabase.rpc("get_user_full_profile");
       if (error) {
-        console.error("Failed to fetch user profile:", error)
-        setProfile(null)
+        console.error("Failed to fetch user profile:", error);
+        setProfile(null);
       } else {
-        setProfile(normalizeProfile(data))
+        setProfile({ ...normalizeProfile(data), user: currentUser });
       }
     } catch {
-      setProfile(null)
+      setProfile(null);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [supabase])
+  }, [supabase]);
 
   // ── تسجيل الخروج ──
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut()
-    setSession(null)
-    setUser(null)
-    setProfile(null)
-  }, [supabase])
+    await supabase.auth.signOut();
+    setSession(null);
+    setUser(null);
+    setProfile(null);
+  }, [supabase]);
 
   // ── الاستماع لتغيرات المصادقة ──
   useEffect(() => {
-    refresh()
+    refresh();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession)
-      setUser(newSession?.user ?? null)
+      setSession(newSession);
+      setUser(newSession?.user ?? null);
       if (newSession) {
-        refresh()
+        refresh();
       } else {
-        setProfile(null)
-        setIsLoading(false)
+        setProfile(null);
+        setIsLoading(false);
       }
-    })
+    });
 
-    return () => subscription.unsubscribe()
-  }, [refresh, supabase])
+    return () => subscription.unsubscribe();
+  }, [refresh, supabase]);
 
   // ── دوال المساعدة ──
   const hasRole = useCallback(
     (code: string) => profile?.roles.some((r) => r.code === code) ?? false,
-    [profile?.roles]
-  )
+    [profile?.roles],
+  );
 
   const hasPermission = useCallback(
     (permission: string) => profile?.permissions.includes(permission) ?? false,
-    [profile?.permissions]
-  )
+    [profile?.permissions],
+  );
 
   const hasAnyPermission = useCallback(
     (permission: string) => {
-      if (!profile) return false
+      if (!profile) return false;
       // التحقق من الصلاحية المطلقة
-      if (profile.permissions.includes("*:*")) return true
-      return profile.permissions.includes(permission)
+      if (profile.permissions.includes("*:*")) return true;
+      return profile.permissions.includes(permission);
     },
-    [profile?.permissions]
-  )
+    [profile?.permissions],
+  );
 
   const hasActivePlan = useCallback(() => {
-    if (!profile) return false
+    if (!profile) return false;
     return profile.subscriptions.some(
       (s) =>
         (s.status === "active" || s.status === "trialing") &&
-        (!s.ends_at || new Date(s.ends_at) > new Date())
-    )
-  }, [profile?.subscriptions])
+        (!s.ends_at || new Date(s.ends_at) > new Date()),
+    );
+  }, [profile?.subscriptions]);
 
   const getActivePlan = useCallback(() => {
-    if (!profile) return null
+    if (!profile) return null;
     return (
       profile.subscriptions.find(
         (s) =>
           (s.status === "active" || s.status === "trialing") &&
-          (!s.ends_at || new Date(s.ends_at) > new Date())
+          (!s.ends_at || new Date(s.ends_at) > new Date()),
       ) ?? null
-    )
-  }, [profile?.subscriptions])
+    );
+  }, [profile?.subscriptions]);
 
   const value: AuthContextValue = {
     session,
@@ -224,9 +225,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     hasAnyPermission,
     hasActivePlan,
     getActivePlan,
-  }
+  };
 
-  return <AuthContext value={value}>{children}</AuthContext>
+  return <AuthContext value={value}>{children}</AuthContext>;
 }
 
 // =====================================================
@@ -234,8 +235,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 // =====================================================
 
 function normalizeProfile(raw: unknown): FullProfile {
-  const d = raw as Record<string, unknown>
-  const p = (d.profile ?? {}) as Record<string, unknown>
+  const d = raw as Record<string, unknown>;
+  const p = (d.profile ?? {}) as Record<string, unknown>;
 
   return {
     profile: {
@@ -251,6 +252,7 @@ function normalizeProfile(raw: unknown): FullProfile {
       timezone: (p.timezone as string | undefined) ?? "Asia/Riyadh",
       created_at: (p.created_at as string | undefined) ?? null,
     },
+    user: null,
     roles: Array.isArray(d.roles)
       ? d.roles.map((r: Record<string, unknown>) => ({
           code: (r.code as string) ?? "",
@@ -282,5 +284,5 @@ function normalizeProfile(raw: unknown): FullProfile {
     permissions: Array.isArray(d.permissions)
       ? (d.permissions as string[])
       : [],
-  }
+  };
 }
