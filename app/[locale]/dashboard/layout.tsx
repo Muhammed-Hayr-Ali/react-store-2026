@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { AuthGuard } from "@/lib/middleware/auth-guard";
+import { MfaGuard } from "@/lib/middleware/mfa-guard";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,11 +16,14 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Check MFA status - redirect to verify if MFA is required
+  await MfaGuard("/dashboard");
+
   return (
     <div>
       <AuthGuard />

@@ -2,15 +2,12 @@
 // 📊 TABLE TYPES — واجهات الجداول
 // =====================================================
 // ⚠️ يجب أن تطابق أعمدة الجداول في قاعدة البيانات تماماً
-// المصدر: 001_Schema/001_schema.sql
+// المصدر: 001_Schema/000_dbml.dbml
 // =====================================================
 
 import type {
   DeliveryStatus,
-  VendorStatus,
   RoleName,
-  PlanCategory,
-  SubStatus,
   NotifyType,
   OrderStatus,
   TicketStatus,
@@ -18,12 +15,11 @@ import type {
   ErrorSeverity,
   PaymentMethod,
   PaymentStatus,
-  BillingCycle,
   CurrencyCode,
   UUID,
   Timestamp,
   Decimal,
-} from './enums';
+} from "./enums";
 
 // =====================================================
 // 1️⃣ CORE MODULE — المستخدمين والصلاحيات
@@ -200,7 +196,6 @@ export type StoreVendor = {
  */
 export type StoreCategory = {
   id: UUID;
-  vendor_id: UUID | null;
   parent_id: UUID | null;
   name_ar: string;
   name_en: string | null;
@@ -217,8 +212,8 @@ export type StoreCategory = {
  */
 export type StoreProduct = {
   id: UUID;
-  vendor_id: UUID;
   category_id: UUID | null; // FK → SET NULL on category delete
+  user_id: UUID | null; // Owner of the product (for future multi-vendor)
   name_ar: string;
   name_en: string | null;
   slug: string;
@@ -230,8 +225,6 @@ export type StoreProduct = {
   rating_avg: Decimal; // CHECK: 0-5
   review_count: number; // CHECK: >= 0
   is_active: boolean;
-  created_by: UUID | null;
-  updated_by: UUID | null;
   deleted_at: Timestamp | null;
   created_at: Timestamp;
   updated_at: Timestamp;
@@ -279,7 +272,6 @@ export type TradeOrder = {
   id: UUID;
   order_number: string;
   customer_id: UUID;
-  vendor_id: UUID;
   status: OrderStatus;
   items_total: Decimal; // CHECK: >= 0
   delivery_fee: Decimal; // CHECK: >= 0
@@ -307,43 +299,26 @@ export type TradeOrderItem = {
   id: UUID;
   order_id: UUID;
   product_id: UUID;
-  variant_id: UUID | null;
+  variant_id: UUID | null; // FK to product_variant (optional)
   quantity: number; // CHECK: > 0
   unit_price: Decimal; // CHECK: >= 0
   subtotal: Decimal; // CHECK: >= 0
 };
 
-// =====================================================
-// 6️⃣ FLEET MODULE — التوصيل والسائقين
-// =====================================================
-
 /**
- * سائق التوصيل
- * المصدر: CREATE TABLE "fleet_driver"
+ * تسليم الطلب (QR Code Verification)
+ * المصدر: CREATE TABLE "trade_order_delivery"
  */
-export type FleetDriver = {
-  id: UUID;
-  profile_id: UUID;
-  is_online: boolean;
-  is_verified: boolean;
-  vehicle_type: string | null;
-  license_plate: string | null;
-  current_latitude: Decimal | null;
-  current_longitude: Decimal | null;
-  last_location_update: Timestamp | null;
-  created_at: Timestamp;
-  updated_at: Timestamp;
-};
-
-/**
- * عملية التوصيل
- * المصدر: CREATE TABLE "fleet_delivery"
- */
-export type FleetDeliveryType = {
+export type TradeOrderDelivery = {
   id: UUID;
   order_id: UUID;
-  driver_id: UUID | null;
-  status: DeliveryStatus;
+  delivery_status: DeliveryStatus;
+  verification_code: string; // QR code unique identifier
+  delivered_at: Timestamp | null;
+  delivered_by: UUID | null; // staff member who delivered
+  customer_verified: boolean;
+  delivery_notes: string | null;
+  failed_reason: string | null;
   created_at: Timestamp;
   updated_at: Timestamp;
 };
@@ -358,7 +333,6 @@ export type FleetDeliveryType = {
  */
 export type SocialReview = {
   id: UUID;
-  vendor_id: UUID;
   product_id: UUID | null;
   author_id: UUID;
   rating: number; // CHECK: 1-5
@@ -370,13 +344,11 @@ export type SocialReview = {
 /**
  * المفضلة لدى العميل
  * المصدر: CREATE TABLE "customer_favorite"
- * CHECK: vendor_id IS NOT NULL OR product_id IS NOT NULL
  */
 export type CustomerFavorite = {
   id: UUID;
   customer_id: UUID;
-  vendor_id: UUID | null;
-  product_id: UUID | null;
+  product_id: UUID;
   created_at: Timestamp;
 };
 

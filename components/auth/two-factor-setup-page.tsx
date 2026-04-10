@@ -1,79 +1,84 @@
-"use client"
+"use client";
 
-import { useTranslations } from "next-intl"
-import { useState, useTransition } from "react"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
+import { useTranslations } from "next-intl";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
-import { enrollMfa, verifyMfa } from "@/lib/actions/mfa/mfa"
-import { Button } from "@/components/ui/button"
+import { enrollMfa, verifyMfa } from "@/lib/actions/mfa/mfa";
+import { Button } from "@/components/ui/button";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
-} from "@/components/ui/input-otp"
+} from "@/components/ui/input-otp";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { toast } from "sonner"
-import { Spinner } from "../ui/spinner"
-import { cn } from "@/lib/utils"
-import { appRouter } from "@/lib/navigation"
-import { CopyIcon } from "lucide-react"
+} from "@/components/ui/card";
+import { toast } from "sonner";
+import { Spinner } from "../ui/spinner";
+import { cn } from "@/lib/utils";
+import { appRouter } from "@/lib/navigation";
+import { CopyIcon } from "lucide-react";
+import { useAuth } from "@/lib/providers/auth-provider";
 
 export default function TwoFactorSetupPage() {
-  const t = useTranslations("TwoFactor")
-  const router = useRouter()
-  const [isPending, startTransition] = useTransition()
-  const [code, setCode] = useState("")
-  const [qrCode, setQrCode] = useState<string | null>(null)
-  const [secretKey, setSecretKey] = useState<string | null>(null)
-  const [factorId, setFactorId] = useState<string | null>(null)
-  const [step, setStep] = useState<"setup" | "verify">("setup")
+  const t = useTranslations("TwoFactor");
+  const router = useRouter();
+  const { refresh } = useAuth();
+  const [isPending, startTransition] = useTransition();
+  const [code, setCode] = useState("");
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [secretKey, setSecretKey] = useState<string | null>(null);
+  const [factorId, setFactorId] = useState<string | null>(null);
+  const [step, setStep] = useState<"setup" | "verify">("setup");
 
   const handleEnroll = async () => {
     startTransition(async () => {
-      const result = await enrollMfa()
+      const result = await enrollMfa();
 
       if (!result.success || !result.data) {
-        toast.error(t("enrollFailed"))
-        return
+        toast.error(t("enrollFailed"));
+        return;
       }
 
-      setQrCode(result.data.totp.qr_code)
-      setSecretKey(result.data.totp.secret)
-      setFactorId(result.data.id)
-      setStep("verify")
-      toast.success(t("scanQrCodeSuccess"))
-    })
-  }
+      setQrCode(result.data.totp.qr_code);
+      setSecretKey(result.data.totp.secret);
+      setFactorId(result.data.id);
+      setStep("verify");
+      toast.success(t("scanQrCodeSuccess"));
+    });
+  };
 
   const handleVerify = () => {
     startTransition(async () => {
       if (!factorId || !code) {
-        toast.error(t("enterCodeError"))
-        return
+        toast.error(t("enterCodeError"));
+        return;
       }
 
-      const result = await verifyMfa(factorId, code)
+      const result = await verifyMfa(factorId, code);
 
       if (!result.success) {
-        toast.error(t("verifyFailed"))
-        return
+        toast.error(t("verifyFailed"));
+        return;
       }
 
-      toast.success(t("verifySuccess"))
-      router.push(appRouter.home)
-    })
-  }
+      // Refresh the auth profile to update is_mfa_enabled status
+      await refresh();
+
+      toast.success(t("verifySuccess"));
+      router.push(appRouter.home);
+    });
+  };
 
   const handleSkip = () => {
-    router.push(appRouter.home)
-  }
+    router.push(appRouter.home);
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
@@ -117,7 +122,7 @@ export default function TwoFactorSetupPage() {
                   <div
                     className={cn(
                       "rounded-lg border p-4",
-                      isPending && "opacity-50"
+                      isPending && "opacity-50",
                     )}
                   >
                     <Image
@@ -156,8 +161,8 @@ export default function TwoFactorSetupPage() {
                       variant="secondary"
                       className="hidden h-9 w-12 sm:inline-flex"
                       onClick={() => {
-                        navigator.clipboard.writeText(secretKey)
-                        toast.success(t("copiedToClipboard") || "Copied!")
+                        navigator.clipboard.writeText(secretKey);
+                        toast.success(t("copiedToClipboard") || "Copied!");
                       }}
                     >
                       <CopyIcon className="h-4 w-4" />
@@ -207,5 +212,5 @@ export default function TwoFactorSetupPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

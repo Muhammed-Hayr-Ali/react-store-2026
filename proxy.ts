@@ -10,7 +10,7 @@ export default createMiddleware({
 
   // إظهار اللغة في URL عندما تختلف عن الافتراضية
   // /dashboard (en) vs /ar/dashboard (ar)
-  localePrefix: "as-needed", // 'always' | 'never' | 'as-needed'
+  localePrefix: "never", // 'always' | 'never' | 'as-needed'
 });
 
 export const config = {

@@ -1,5 +1,5 @@
 // =====================================================
-// 📦 Database Types — Central Export
+// 📦 Database Types — Central Export (Single-Merchant)
 // =====================================================
 // ⚠️ تصدير مركزي لجميع الأنواع
 // =====================================================
@@ -10,17 +10,11 @@ export * from "./enums";
 // 🔹 Tables
 export * from "./tables";
 
-// 🔹 Relations & Composite Types
-export * from "./relations";
-
 // 🔹 Utilities
 export * from "./utils";
 
 // =====================================================
 // 🗄️ Supabase Database Type
-// =====================================================
-// تُستخدم كمعامل نوعي عند إنشاء عميل Supabase
-// تطابق هيكل قاعدة البيانات بالكامل
 // =====================================================
 
 import type {
@@ -29,18 +23,15 @@ import type {
   CoreRole,
   CoreProfileRole,
   CoreAddress,
+  StoreSettings,
   ExchangeRate,
-  SaaSPlan,
-  SaaSSubscription,
-  StoreVendor,
   StoreCategory,
   StoreProduct,
   ProductImage,
   ProductVariant,
   TradeOrder,
+  TradeOrderDelivery,
   TradeOrderItem,
-  FleetDriver,
-  FleetDeliveryType,
   SocialReview,
   CustomerFavorite,
   SupportTicket,
@@ -67,8 +58,8 @@ export interface Database {
       };
       auth_password_reset: {
         Row: AuthPasswordReset;
-        Insert: AuthPasswordReset;
-        Update: AuthPasswordReset;
+        Insert: Insertable<AuthPasswordReset>;
+        Update: Updatable<AuthPasswordReset>;
         Relationships: [
           {
             foreignTable: "core_profile";
@@ -108,62 +99,28 @@ export interface Database {
           },
         ];
       };
+      store_settings: {
+        Row: StoreSettings;
+        Insert: Insertable<StoreSettings>;
+        Update: Updatable<StoreSettings>;
+        Relationships: [
+          {
+            foreignTable: "exchange_rates";
+            constraintName: "store_settings_default_currency_fkey";
+          },
+        ];
+      };
       exchange_rates: {
         Row: ExchangeRate;
         Insert: Insertable<ExchangeRate>;
         Update: Updatable<ExchangeRate>;
         Relationships: [];
       };
-      saas_plan: {
-        Row: SaaSPlan;
-        Insert: Insertable<SaaSPlan>;
-        Update: Updatable<SaaSPlan>;
-        Relationships: [
-          {
-            foreignTable: "exchange_rates";
-            constraintName: "saas_plan_currency_fkey";
-          },
-        ];
-      };
-      saas_subscription: {
-        Row: SaaSSubscription;
-        Insert: Insertable<SaaSSubscription>;
-        Update: Updatable<SaaSSubscription>;
-        Relationships: [
-          {
-            foreignTable: "core_profile";
-            constraintName: "saas_subscription_profile_id_fkey";
-          },
-          {
-            foreignTable: "saas_plan";
-            constraintName: "saas_subscription_plan_id_fkey";
-          },
-        ];
-      };
-      store_vendor: {
-        Row: StoreVendor;
-        Insert: Insertable<StoreVendor>;
-        Update: Updatable<StoreVendor>;
-        Relationships: [
-          {
-            foreignTable: "core_profile";
-            constraintName: "store_vendor_profile_id_fkey";
-          },
-          {
-            foreignTable: "exchange_rates";
-            constraintName: "store_vendor_default_currency_fkey";
-          },
-        ];
-      };
       store_category: {
         Row: StoreCategory;
         Insert: Insertable<StoreCategory>;
         Update: Updatable<StoreCategory>;
         Relationships: [
-          {
-            foreignTable: "store_vendor";
-            constraintName: "store_category_vendor_id_fkey";
-          },
           {
             foreignTable: "store_category";
             constraintName: "store_category_parent_id_fkey";
@@ -176,20 +133,12 @@ export interface Database {
         Update: Updatable<StoreProduct>;
         Relationships: [
           {
-            foreignTable: "store_vendor";
-            constraintName: "store_product_vendor_id_fkey";
-          },
-          {
             foreignTable: "store_category";
             constraintName: "store_product_category_id_fkey";
           },
           {
             foreignTable: "core_profile";
-            constraintName: "store_product_created_by_fkey";
-          },
-          {
-            foreignTable: "core_profile";
-            constraintName: "store_product_updated_by_fkey";
+            constraintName: "store_product_user_id_fkey";
           },
         ];
       };
@@ -225,10 +174,6 @@ export interface Database {
             constraintName: "trade_order_customer_id_fkey";
           },
           {
-            foreignTable: "store_vendor";
-            constraintName: "trade_order_vendor_id_fkey";
-          },
-          {
             foreignTable: "core_profile";
             constraintName: "trade_order_created_by_fkey";
           },
@@ -239,6 +184,21 @@ export interface Database {
           {
             foreignTable: "exchange_rates";
             constraintName: "trade_order_currency_fkey";
+          },
+        ];
+      };
+      trade_order_delivery: {
+        Row: TradeOrderDelivery;
+        Insert: Insertable<TradeOrderDelivery>;
+        Update: Updatable<TradeOrderDelivery>;
+        Relationships: [
+          {
+            foreignTable: "trade_order";
+            constraintName: "trade_order_delivery_order_id_fkey";
+          },
+          {
+            foreignTable: "core_profile";
+            constraintName: "trade_order_delivery_delivered_by_fkey";
           },
         ];
       };
@@ -261,41 +221,11 @@ export interface Database {
           },
         ];
       };
-      fleet_driver: {
-        Row: FleetDriver;
-        Insert: Insertable<FleetDriver>;
-        Update: Updatable<FleetDriver>;
-        Relationships: [
-          {
-            foreignTable: "core_profile";
-            constraintName: "fleet_driver_profile_id_fkey";
-          },
-        ];
-      };
-      fleet_delivery: {
-        Row: FleetDeliveryType;
-        Insert: Insertable<FleetDeliveryType>;
-        Update: Updatable<FleetDeliveryType>;
-        Relationships: [
-          {
-            foreignTable: "trade_order";
-            constraintName: "fleet_delivery_order_id_fkey";
-          },
-          {
-            foreignTable: "fleet_driver";
-            constraintName: "fleet_delivery_driver_id_fkey";
-          },
-        ];
-      };
       social_review: {
         Row: SocialReview;
         Insert: Insertable<SocialReview>;
         Update: Updatable<SocialReview>;
         Relationships: [
-          {
-            foreignTable: "store_vendor";
-            constraintName: "social_review_vendor_id_fkey";
-          },
           {
             foreignTable: "store_product";
             constraintName: "social_review_product_id_fkey";
@@ -314,10 +244,6 @@ export interface Database {
           {
             foreignTable: "core_profile";
             constraintName: "customer_favorite_customer_id_fkey";
-          },
-          {
-            foreignTable: "store_vendor";
-            constraintName: "customer_favorite_vendor_id_fkey";
           },
           {
             foreignTable: "store_product";
@@ -394,8 +320,8 @@ export interface Database {
         };
         Returns: {
           is_valid: boolean;
-          user_id: string | null;
           profile_id: string | null;
+          email: string | null;
           message: string;
         }[];
       };
@@ -405,8 +331,10 @@ export interface Database {
         };
         Returns: {
           is_valid: boolean;
-          email: string;
-          expires_at: string;
+          profile_id: string | null;
+          email: string | null;
+          expires_at: string | null;
+          message: string;
         }[];
       };
       cleanup_expired_reset_tokens: {
@@ -420,121 +348,8 @@ export interface Database {
         Returns: {
           profile: Record<string, unknown>;
           roles: Record<string, unknown>[];
-          subscriptions: Record<string, unknown>[];
           permissions: string[];
-        };
-      };
-      // Notification Functions
-      create_notification: {
-        Args: {
-          p_recipient_id: string;
-          p_type: string;
-          p_title_ar: string;
-          p_title_en?: string;
-          p_content_ar: string;
-          p_content_en?: string;
-          p_action_url?: string;
-          p_data?: Record<string, unknown>;
-        };
-        Returns: string;
-      };
-      create_bulk_notifications: {
-        Args: {
-          p_recipient_ids: string[];
-          p_type: string;
-          p_title_ar: string;
-          p_title_en?: string;
-          p_content_ar: string;
-          p_content_en?: string;
-          p_action_url?: string;
-          p_data?: Record<string, unknown>;
-        };
-        Returns: number;
-      };
-      get_user_notifications: {
-        Args: {
-          p_user_id: string;
-          p_page: number;
-          p_limit: number;
-          p_unread_only: boolean;
-        };
-        Returns: {
-          id: string;
-          type: string;
-          title_ar: string;
-          title_en: string | null;
-          content_ar: string;
-          content_en: string | null;
-          action_url: string | null;
-          data: Record<string, unknown>;
-          is_read: boolean;
-          created_at: string;
-        }[];
-      };
-      get_unread_count: {
-        Args: { p_user_id: string };
-        Returns: number;
-      };
-      mark_notification_read: {
-        Args: {
-          p_notification_id: string;
-          p_user_id: string;
-        };
-        Returns: boolean;
-      };
-      mark_all_notifications_read: {
-        Args: { p_user_id: string };
-        Returns: number;
-      };
-      delete_notification: {
-        Args: {
-          p_notification_id: string;
-          p_user_id: string;
-        };
-        Returns: boolean;
-      };
-      cleanup_old_notifications: {
-        Args: {
-          p_days_old: number;
-          p_batch_size: number;
-        };
-        Returns: number;
-      };
-      get_new_notifications_since: {
-        Args: {
-          p_user_id: string;
-          p_since: string;
-        };
-        Returns: {
-          id: string;
-          type: string;
-          title_ar: string;
-          title_en: string | null;
-          content_ar: string;
-          content_en: string | null;
-          action_url: string | null;
-          data: Record<string, unknown>;
-          is_read: boolean;
-          created_at: string;
-        }[];
-      };
-      notify_new_order: {
-        Args: {
-          p_customer_id: string;
-          p_order_id: string;
-          p_order_number: string;
-        };
-        Returns: void;
-      };
-      notify_new_ticket_message: {
-        Args: {
-          p_ticket_id: string;
-          p_reporter_id: string;
-          p_assigned_to: string;
-          p_sender_id: string;
-          p_ticket_number: string;
-        };
-        Returns: void;
+        } | null;
       };
     };
     Enums: Record<string, never>;
@@ -553,23 +368,18 @@ export type DatabaseTables = {
   core_role: CoreRole;
   core_profile_role: CoreProfileRole;
   core_address: CoreAddress;
-  // Exchange
-  exchange_rates: ExchangeRate;
-  // SaaS
-  saas_plan: SaaSPlan;
-  saas_subscription: SaaSSubscription;
   // Store
-  store_vendor: StoreVendor;
+  store_settings: StoreSettings;
   store_category: StoreCategory;
   store_product: StoreProduct;
   product_image: ProductImage;
   product_variant: ProductVariant;
+  // Exchange
+  exchange_rates: ExchangeRate;
   // Trade
   trade_order: TradeOrder;
+  trade_order_delivery: TradeOrderDelivery;
   trade_order_item: TradeOrderItem;
-  // Fleet
-  fleet_driver: FleetDriver;
-  fleet_delivery: FleetDeliveryType;
   // Social
   social_review: SocialReview;
   customer_favorite: CustomerFavorite;
@@ -612,7 +422,7 @@ export function isValidOrderStatus(
     "pending",
     "confirmed",
     "processing",
-    "shipping",
+    "out_for_delivery",
     "delivered",
     "cancelled",
   ];

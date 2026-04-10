@@ -15,7 +15,7 @@ DROP TRIGGER IF EXISTS on_order_status_change ON trade_order;
 DROP TRIGGER IF EXISTS on_new_ticket ON support_ticket;
 DROP TRIGGER IF EXISTS on_new_ticket_message ON ticket_message;
 DROP TRIGGER IF EXISTS on_new_review ON social_review;
-DROP TRIGGER IF EXISTS on_delivery_assigned ON fleet_delivery;
+DROP TRIGGER IF EXISTS on_delivery_assigned ON trade_order_delivery;
 
 -- حذف الدوال القديمة
 DROP FUNCTION IF EXISTS trigger_notify_order_status_change();
@@ -255,7 +255,7 @@ CREATE TRIGGER on_new_review
   EXECUTE FUNCTION trigger_notify_new_review();
 
 -- =====================================================
--- 5️⃣ إشعار عند إنشاء طلب توصيل جديد
+-- 5️⃣ إشعار عند تعيين سائق للتوصيل (تحديث حالة التوصيل)
 -- =====================================================
 
 CREATE OR REPLACE FUNCTION trigger_notify_delivery_assigned()
@@ -267,7 +267,8 @@ AS $$
 DECLARE
   v_order RECORD;
 BEGIN
-  IF NEW.driver_id IS NOT NULL AND OLD.driver_id IS NULL THEN
+  -- Trigger when delivery status changes from pending to out_for_delivery
+  IF OLD.delivery_status = 'pending' AND NEW.delivery_status = 'out_for_delivery' THEN
     SELECT * INTO v_order FROM trade_order WHERE id = NEW.order_id;
 
     IF FOUND THEN
@@ -275,15 +276,40 @@ BEGIN
         PERFORM create_notification(
           p_recipient_id := v_order.customer_id,
           p_type := 'order_event',
-          p_title_ar := 'تم تعيين سائق لطلبك',
-          p_title_en := 'Driver assigned to your order',
-          p_content_ar := 'تم تعيين سائق لطلبك رقم ' || v_order.order_number,
-          p_content_en := 'A driver has been assigned to your order ' || v_order.order_number,
+          p_title_ar := 'طلبك في الطريق',
+          p_title_en := 'Your order is on the way',
+          p_content_ar := 'طلبك رقم ' || v_order.order_number || ' في الطريق إليك',
+          p_content_en := 'Your order ' || v_order.order_number || ' is on its way to you',
           p_action_url := '/dashboard/orders/' || NEW.order_id,
           p_data := jsonb_build_object(
             'order_id', NEW.order_id,
             'order_number', v_order.order_number,
-            'driver_id', NEW.driver_id
+            'delivery_status', NEW.delivery_status
+          )
+        );
+      EXCEPTION WHEN OTHERS THEN
+        RAISE WARNING 'Failed to create delivery notification for %: %', v_order.order_number, SQLERRM;
+      END;
+    END IF;
+  
+  -- Trigger when delivery is completed
+  ELSIF OLD.delivery_status IS DISTINCT FROM 'delivered' AND NEW.delivery_status = 'delivered' THEN
+    SELECT * INTO v_order FROM trade_order WHERE id = NEW.order_id;
+
+    IF FOUND THEN
+      BEGIN
+        PERFORM create_notification(
+          p_recipient_id := v_order.customer_id,
+          p_type := 'order_event',
+          p_title_ar := 'تم تسليم طلبك',
+          p_title_en := 'Your order has been delivered',
+          p_content_ar := 'تم تسليم طلبك رقم ' || v_order.order_number || ' بنجاح',
+          p_content_en := 'Your order ' || v_order.order_number || ' has been delivered successfully',
+          p_action_url := '/dashboard/orders/' || NEW.order_id,
+          p_data := jsonb_build_object(
+            'order_id', NEW.order_id,
+            'order_number', v_order.order_number,
+            'delivery_status', NEW.delivery_status
           )
         );
       EXCEPTION WHEN OTHERS THEN
@@ -297,7 +323,7 @@ END;
 $$;
 
 CREATE TRIGGER on_delivery_assigned
-  AFTER UPDATE ON fleet_delivery
+  AFTER UPDATE ON trade_order_delivery
   FOR EACH ROW
   EXECUTE FUNCTION trigger_notify_delivery_assigned();
 

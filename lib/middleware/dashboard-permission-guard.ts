@@ -4,18 +4,19 @@ import { appRouter } from "@/lib/navigation";
 import type { User } from "@supabase/supabase-js";
 
 // =====================================================
-// 🔐 Dashboard Permission Guard
+// 🔐 Dashboard Permission Guard (Single-Merchant)
 // =====================================================
 
-export type DashboardRole = "customer" | "seller" | "driver" | "admin";
-
-type RoleRow = {
-  core_role: { code: string } | null;
-};
+// الأدوار المسموح لها بدخول الداشبورد
+export type DashboardRole =
+  | "admin"
+  | "vendor"
+  | "customer"
+  | "delivery"
+  | "support";
 
 /**
  * فحص صلاحية الداشبورد
- *
  * 1. هل المستخدم مسجل دخول؟
  * 2. جلب أدوار المستخدم
  * 3. هل الدور موجود في القائمة المسموح بها؟
@@ -35,28 +36,28 @@ export async function requireDashboardRole(
     return redirect(appRouter.signIn);
   }
 
-  // 2️⃣ جلب أدوار المستخدم
-  const { data: roles, error } = await supabase
-    .from("core_profile_role")
-    .select(
-      `
-      core_role (
-        code
-      )
-    `,
-    )
-    .eq("profile_id", user.id)
-    .returns<RoleRow[]>();
+  // 2️⃣ التحقق من الدور (باستخدام RPC إذا كان متوفراً أو Query مباشر)
+  const { data: profileData, error: profileError } = await supabase.rpc(
+    "get_user_full_profile",
+  );
 
-  if (error) {
-    return redirect("/unauthorized");
+  if (profileError || !profileData) {
+    // في حال عدم وجود RPC، نستخدم Query المباشر
+    const { data: roles } = await supabase
+      .from("core_profile_role")
+      .select("core_role(code)")
+      .eq("profile_id", user.id);
+
+    const userRoles =
+      roles?.map((r: any) => r.core_role?.code).filter(Boolean) || [];
+    if (!userRoles.includes(allowedRole)) {
+      return redirect("/unauthorized");
+    }
+    return;
   }
 
-  const userRoles = roles
-    .map((r) => r.core_role?.code)
-    .filter((code): code is string => !!code);
-
-  // 3️⃣ التحقق من الصلاحية
+  // استخدام بيانات البروفايل الكاملة
+  const userRoles = profileData.roles?.map((r: any) => r.code) || [];
   if (!userRoles.includes(allowedRole)) {
     return redirect("/unauthorized");
   }
@@ -64,7 +65,7 @@ export async function requireDashboardRole(
 
 /**
  * فحص أدوار المستخدم فقط (بدون منع)
- * يُستخدم في Smart Router
+ * يُستخدم في Smart Router للداشبورد
  */
 export async function checkUserRoles(): Promise<{
   user: User;
@@ -72,6 +73,7 @@ export async function checkUserRoles(): Promise<{
 } | null> {
   const supabase = await createClient();
 
+  // 1️⃣ فحص تسجيل الدخول
   const {
     data: { user },
     error: authError,
@@ -81,25 +83,23 @@ export async function checkUserRoles(): Promise<{
     return null;
   }
 
-  const { data: roles, error } = await supabase
-    .from("core_profile_role")
-    .select(
-      `
-      core_role (
-        code
-      )
-    `,
-    )
-    .eq("profile_id", user.id)
-    .returns<RoleRow[]>();
+  // 2️⃣ جلب الأدوار (نستخدم RPC لأنه الأسرع والأشمل)
+  const { data: profileData, error } = await supabase.rpc(
+    "get_user_full_profile",
+  );
 
   if (error) {
-    return { user, roles: [] };
+    // Fallback في حال عدم وجود الدالة
+    const { data: roles } = await supabase
+      .from("core_profile_role")
+      .select("core_role(code)")
+      .eq("profile_id", user.id);
+
+    const userRoles =
+      roles?.map((r: any) => r.core_role?.code).filter(Boolean) || [];
+    return { user, roles: userRoles };
   }
 
-  const userRoles = roles
-    .map((r) => r.core_role?.code)
-    .filter((code): code is string => !!code);
-
-  return { user, roles: userRoles };
+  const roles = profileData?.roles?.map((r: any) => r.code) || [];
+  return { user, roles };
 }

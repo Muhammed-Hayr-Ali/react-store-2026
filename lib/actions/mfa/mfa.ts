@@ -27,51 +27,90 @@ export interface EnrollmentData {
 }
 
 //===============================================================================
-// Get MFA Factors
+// Check MFA Status (Client-safe)
 //===============================================================================
-export async function getMfaFactors(): Promise<ApiResult<Factor | null>> {
+export async function checkMfaStatus(): Promise<ApiResult<boolean>> {
   // Create a new server client
-  const supabase = await createClient()
+  const supabase = await createClient();
 
   // Get the MFA factors
   const { data: listFactorsData, error: listFactorsError } =
-    await supabase.auth.mfa.listFactors()
+    await supabase.auth.mfa.listFactors();
 
   // Check for errors
   if (listFactorsError) {
-    console.error("Error listing MFA factors:", listFactorsError.message)
+    console.error("Error checking MFA status:", listFactorsError.message);
     return {
       success: false,
-      error: "MFA_LIST_FACTORS_FAILED"
-    }
+      error: "MFA_CHECK_FAILED",
+    };
   }
 
   // Check for errors
   if (!listFactorsData) {
     return {
       success: false,
-      error: "MFA_LIST_FACTORS_FAILED"
-    }
+      error: "MFA_CHECK_FAILED",
+    };
+  }
+
+  // Check if there's a verified TOTP factor
+  const hasVerifiedFactor = listFactorsData.all.some(
+    (f) => f.factor_type === "totp" && f.status === "verified",
+  );
+
+  return {
+    success: true,
+    data: hasVerifiedFactor,
+  };
+}
+
+//===============================================================================
+// Get MFA Factors
+//===============================================================================
+export async function getMfaFactors(): Promise<ApiResult<Factor | null>> {
+  // Create a new server client
+  const supabase = await createClient();
+
+  // Get the MFA factors
+  const { data: listFactorsData, error: listFactorsError } =
+    await supabase.auth.mfa.listFactors();
+
+  // Check for errors
+  if (listFactorsError) {
+    console.error("Error listing MFA factors:", listFactorsError.message);
+    return {
+      success: false,
+      error: "MFA_LIST_FACTORS_FAILED",
+    };
+  }
+
+  // Check for errors
+  if (!listFactorsData) {
+    return {
+      success: false,
+      error: "MFA_LIST_FACTORS_FAILED",
+    };
   }
 
   // Get the TOTP factor
   const factor =
     listFactorsData.all.find(
-      (f) => f.factor_type === "totp" && f.status === "verified"
-    ) || null
+      (f) => f.factor_type === "totp" && f.status === "verified",
+    ) || null;
 
   // Check for errors
   if (!factor) {
     return {
       success: false,
-      error: "MFA_LIST_FACTORS_FAILED"
-    }
+      error: "MFA_LIST_FACTORS_FAILED",
+    };
   }
 
   return {
     success: true,
-    data: factor
-  }
+    data: factor,
+  };
 }
 
 //===============================================================================
@@ -81,9 +120,8 @@ export async function verifyMfa(
   factorId: string,
   code: string,
 ): Promise<ApiResult<AuthMFAVerifyResponseData>> {
-
   // Create a new server client
-  const supabase = await createClient()
+  const supabase = await createClient();
 
   // Get the MFA challenge
   const { data: challengeData, error: challengeError } =
@@ -95,7 +133,7 @@ export async function verifyMfa(
   if (challengeError) {
     return {
       success: false,
-      error: "MFA_VERIFY_FAILED"
+      error: "MFA_VERIFY_FAILED",
     };
   }
 
@@ -114,13 +152,13 @@ export async function verifyMfa(
   if (verifyError) {
     return {
       success: false,
-      error: "MFA_VERIFY_FAILED"
+      error: "MFA_VERIFY_FAILED",
     };
   }
 
   return {
     success: true,
-    data: verifyData
+    data: verifyData,
   };
 }
 
@@ -130,9 +168,8 @@ export async function verifyMfa(
 export async function unenrollMfa(
   factorId: string,
 ): Promise<ApiResult<string>> {
-
   // Create a new server client
-  const supabase = await createClient()
+  const supabase = await createClient();
 
   // Unenroll the MFA
   const { data, error } = await supabase.auth.mfa.unenroll({
@@ -143,13 +180,13 @@ export async function unenrollMfa(
   if (error) {
     return {
       success: false,
-      error: "MFA_UNENROLL_FAILED"
+      error: "MFA_UNENROLL_FAILED",
     };
   }
 
   return {
     success: true,
-    data: data.id
+    data: data.id,
   };
 }
 
@@ -157,11 +194,9 @@ export async function unenrollMfa(
 // Enroll MFA
 //===============================================================================
 export async function enrollMfa(): Promise<ApiResult<EnrollmentData>> {
-
-
   // Create a new server client
-  const supabase = await createClient()
-  
+  const supabase = await createClient();
+
   // Generate a friendly name from uuid
   const friendlyName = uuidv4();
 
@@ -176,12 +211,12 @@ export async function enrollMfa(): Promise<ApiResult<EnrollmentData>> {
   if (enrollError) {
     return {
       success: false,
-      error: "MFA_ENROLL_FAILED"
+      error: "MFA_ENROLL_FAILED",
     };
   }
 
   return {
     success: true,
-    data: enrollData
+    data: enrollData,
   };
 }

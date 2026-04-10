@@ -5,7 +5,12 @@
 --    بعد: 001_Schema/001_schema.sql
 --          002_Utility Functions/000_utility_functions.sql
 --    قبل: 004_Seed Data/001_role_seed.sql
---          004_Seed Data/002_plan_seed.sql
+-- =====================================================
+-- 📋 هذا الملف يحتوي على جميع سياسات الأمان (RLS Policies)
+--    لحماية البيانات على مستوى الصفوف
+-- =====================================================
+-- 📊 إجمالي السياسات: 65+ سياسة
+-- 📦 الجداول المحمية: 20 جدول
 -- =====================================================
 
 -- =====================================================
@@ -20,7 +25,7 @@ REVOKE ALL ON TABLE public.core_profile FROM authenticated;
 GRANT SELECT (id, full_name, avatar_url, created_at) ON TABLE public.core_profile TO PUBLIC;
 
 -- منح صلاحية قراءة الأعمدة للمستخدمين المسجلين
-GRANT SELECT (id, email, phone_number, first_name, last_name, preferred_language, timezone) ON TABLE public.core_profile TO authenticated;
+GRANT SELECT (id, email, phone_number, first_name, last_name) ON TABLE public.core_profile TO authenticated;
 
 -- =====================================================
 -- 2️⃣ تفعيل RLS على جميع الجداول
@@ -31,17 +36,14 @@ ALTER TABLE public.auth_password_reset ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.core_role ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.core_profile_role ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.core_address ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.saas_plan ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.saas_subscription ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.store_vendor ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.store_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.store_category ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.store_product ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.product_image ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.product_variant ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.trade_order ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.trade_order_delivery ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.trade_order_item ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.fleet_driver ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.fleet_delivery ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.social_review ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.customer_favorite ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.support_ticket ENABLE ROW LEVEL SECURITY;
@@ -188,78 +190,24 @@ USING (public.is_admin())
 WITH CHECK (public.is_admin());
 
 -- =====================================================
--- 8️⃣ سياسات جدول الخطط (saas_plan)
+-- 8️⃣ سياسات جدول إعدادات المتجر (store_settings)
 -- =====================================================
 
--- ✅ جديد: الخطط النشطة عامة للقراءة
-CREATE POLICY "plans_public_viewable"
-ON public.saas_plan FOR SELECT
+-- ✅ إعدادات المتجر عامة للقراءة
+CREATE POLICY "store_settings_public_viewable"
+ON public.store_settings FOR SELECT
 TO PUBLIC
 USING ("is_active" = true);
 
--- ✅ جديد: الأدمن يدير الخطط
-CREATE POLICY "admins_manage_plans"
-ON public.saas_plan FOR ALL
+-- ✅ الأدمن يدير إعدادات المتجر
+CREATE POLICY "admins_manage_store_settings"
+ON public.store_settings FOR ALL
 TO authenticated
 USING (public.is_admin())
 WITH CHECK (public.is_admin());
 
 -- =====================================================
--- 9️⃣ سياسات جدول الاشتراكات (saas_subscription)
--- =====================================================
-
--- ✅ جديد: المستخدم يرى اشتراكاته فقط
-CREATE POLICY "users_view_own_subscriptions"
-ON public.saas_subscription FOR SELECT
-TO authenticated
-USING ("profile_id" = public.current_user_id());
-
--- ✅ جديد: المستخدم ينشئ اشتراكه فقط
-CREATE POLICY "users_insert_own_subscriptions"
-ON public.saas_subscription FOR INSERT
-TO authenticated
-WITH CHECK ("profile_id" = public.current_user_id());
-
--- ✅ جديد: المستخدم يعدل اشتراكه فقط
-CREATE POLICY "users_update_own_subscriptions"
-ON public.saas_subscription FOR UPDATE
-TO authenticated
-USING ("profile_id" = public.current_user_id())
-WITH CHECK ("profile_id" = public.current_user_id());
-
--- ✅ جديد: الأدمن يدير جميع الاشتراكات
-CREATE POLICY "admins_manage_subscriptions"
-ON public.saas_subscription FOR ALL
-TO authenticated
-USING (public.is_admin())
-WITH CHECK (public.is_admin());
-
--- =====================================================
--- 🔟 سياسات جدول المتاجر (store_vendor)
--- =====================================================
-
--- المتاجر النشطة عامة للقراءة
-CREATE POLICY "vendors_public_viewable"
-ON public.store_vendor FOR SELECT
-TO PUBLIC
-USING ("status" = 'active' AND "deleted_at" IS NULL);
-
--- البائع يدير متجره فقط
-CREATE POLICY "vendors_manage_own_store"
-ON public.store_vendor FOR ALL
-TO authenticated
-USING ("profile_id" = public.current_user_id())
-WITH CHECK ("profile_id" = public.current_user_id());
-
--- الأدمن يدير جميع المتاجر
-CREATE POLICY "admins_manage_all_vendors"
-ON public.store_vendor FOR ALL
-TO authenticated
-USING (public.is_admin())
-WITH CHECK (public.is_admin());
-
--- =====================================================
--- 1️⃣1️⃣ سياسات جدول الفئات (store_category)
+-- 9️⃣ سياسات جدول الفئات (store_category)
 -- =====================================================
 
 -- ✅ جديد: الفئات النشطة عامة للقراءة
@@ -268,21 +216,6 @@ ON public.store_category FOR SELECT
 TO PUBLIC
 USING ("is_active" = true);
 
--- ✅ جديد: البائع يدير فئات متجره فقط
-CREATE POLICY "vendors_manage_own_categories"
-ON public.store_category FOR ALL
-TO authenticated
-USING (
-  "vendor_id" = public.get_vendor_id()
-  OR
-  public.is_admin()
-)
-WITH CHECK (
-  "vendor_id" = public.get_vendor_id()
-  OR
-  public.is_admin()
-);
-
 -- ✅ جديد: الأدمن يدير جميع الفئات
 CREATE POLICY "admins_manage_all_categories"
 ON public.store_category FOR ALL
@@ -290,8 +223,15 @@ TO authenticated
 USING (public.is_admin())
 WITH CHECK (public.is_admin());
 
+-- الموظف/البائع يدير الفئات
+CREATE POLICY "vendors_manage_categories"
+ON public.store_category FOR ALL
+TO authenticated
+USING (public.is_vendor() OR public.is_admin())
+WITH CHECK (public.is_vendor() OR public.is_admin());
+
 -- =====================================================
--- 1️⃣2️⃣ سياسات جدول المنتجات (store_product)
+-- 🔟 سياسات جدول المنتجات (store_product)
 -- =====================================================
 
 -- المنتجات النشطة عامة للقراءة
@@ -300,12 +240,18 @@ ON public.store_product FOR SELECT
 TO PUBLIC
 USING ("is_active" = true AND "deleted_at" IS NULL);
 
--- البائع يدير منتجاته فقط
-CREATE POLICY "vendors_manage_own_products"
+-- المستخدم يرى ويدير منتجاته فقط
+CREATE POLICY "users_manage_own_products"
 ON public.store_product FOR ALL
 TO authenticated
-USING ("vendor_id" = public.get_vendor_id())
-WITH CHECK ("vendor_id" = public.get_vendor_id());
+USING (
+  "user_id" = public.current_user_id()
+  OR public.is_admin()
+)
+WITH CHECK (
+  "user_id" = public.current_user_id()
+  OR public.is_admin()
+);
 
 -- الأدمن يدير جميع المنتجات
 CREATE POLICY "admins_manage_all_products"
@@ -314,8 +260,15 @@ TO authenticated
 USING (public.is_admin())
 WITH CHECK (public.is_admin());
 
+-- البائع (vendor) يدير المنتجات (للتوافق مع دور vendor)
+CREATE POLICY "vendors_manage_products"
+ON public.store_product FOR ALL
+TO authenticated
+USING (public.is_vendor())
+WITH CHECK (public.is_vendor());
+
 -- =====================================================
--- 1️⃣3️⃣ سياسات جدول صور المنتجات (product_image)
+-- 1️⃣1️⃣ سياسات جدول صور المنتجات (product_image)
 -- =====================================================
 
 -- صور المنتجات عامة للقراءة (فقط المنتجات النشطة وغير المحذوفة)
@@ -329,22 +282,31 @@ USING (
   )
 );
 
--- البائع يدير صور منتجاته فقط
+-- الموظف يدير صور منتجاته فقط
 CREATE POLICY "vendors_manage_own_images"
 ON public.product_image FOR ALL
 TO authenticated
 USING (
   "product_id" IN (
     SELECT sp.id FROM public.store_product sp
-    WHERE sp.vendor_id = public.get_vendor_id()
+    WHERE sp.user_id = public.current_user_id()
   )
+  OR public.is_admin()
 )
 WITH CHECK (
   "product_id" IN (
     SELECT sp.id FROM public.store_product sp
-    WHERE sp.vendor_id = public.get_vendor_id()
+    WHERE sp.user_id = public.current_user_id()
   )
+  OR public.is_admin()
 );
+
+-- البائع يدير جميع صور المنتجات
+CREATE POLICY "vendors_manage_images"
+ON public.product_image FOR ALL
+TO authenticated
+USING (public.is_vendor())
+WITH CHECK (public.is_vendor());
 
 -- الأدمن يدير جميع الصور
 CREATE POLICY "admins_manage_all_images"
@@ -354,7 +316,7 @@ USING (public.is_admin())
 WITH CHECK (public.is_admin());
 
 -- =====================================================
--- 1️⃣4️⃣ سياسات جدول متغيرات المنتجات (product_variant)
+-- 1️⃣2️⃣ سياسات جدول متغيرات المنتجات (product_variant)
 -- =====================================================
 
 -- ✅ جديد: المتغيرات عامة للقراءة (فقط المنتجات النشطة وغير المحذوفة)
@@ -368,22 +330,31 @@ USING (
   )
 );
 
--- ✅ جديد: البائع يدير متغيرات منتجاته
+-- ✅ جديد: الموظف يدير متغيرات منتجاته
 CREATE POLICY "vendors_manage_own_variants"
 ON public.product_variant FOR ALL
 TO authenticated
 USING (
   "product_id" IN (
     SELECT sp.id FROM public.store_product sp
-    WHERE sp.vendor_id = public.get_vendor_id()
+    WHERE sp.user_id = public.current_user_id()
   )
+  OR public.is_admin()
 )
 WITH CHECK (
   "product_id" IN (
     SELECT sp.id FROM public.store_product sp
-    WHERE sp.vendor_id = public.get_vendor_id()
+    WHERE sp.user_id = public.current_user_id()
   )
+  OR public.is_admin()
 );
+
+-- ✅ جديد: البائع يدير جميع متغيرات المنتجات
+CREATE POLICY "vendors_manage_variants"
+ON public.product_variant FOR ALL
+TO authenticated
+USING (public.is_vendor())
+WITH CHECK (public.is_vendor());
 
 -- ✅ جديد: الأدمن يدير جميع المتغيرات
 CREATE POLICY "admins_manage_all_variants"
@@ -393,7 +364,7 @@ USING (public.is_admin())
 WITH CHECK (public.is_admin());
 
 -- =====================================================
--- 1️⃣5️⃣ سياسات جدول الطلبات (trade_order)
+-- 1️⃣3️⃣ سياسات جدول الطلبات (trade_order)
 -- =====================================================
 
 -- العميل يرى طلباته فقط
@@ -402,11 +373,11 @@ ON public.trade_order FOR SELECT
 TO authenticated
 USING ("customer_id" = public.current_user_id());
 
--- البائع يرى طلبات متجره فقط
-CREATE POLICY "vendors_view_own_orders"
+-- الموظف/الأدمن يرى جميع الطلبات
+CREATE POLICY "vendors_view_orders"
 ON public.trade_order FOR SELECT
 TO authenticated
-USING ("vendor_id" = public.get_vendor_id());
+USING (public.is_vendor() OR public.is_admin());
 
 -- العميل ينشئ طلباته فقط
 CREATE POLICY "customers_insert_own_orders"
@@ -421,12 +392,12 @@ TO authenticated
 USING ("customer_id" = public.current_user_id() AND "is_confirmed" = false)
 WITH CHECK ("customer_id" = public.current_user_id());
 
--- البائع يعدل حالة طلبات متجره
-CREATE POLICY "vendors_update_own_orders"
+-- الموظف/الأدمن يعدل حالة الطلبات
+CREATE POLICY "vendors_update_orders"
 ON public.trade_order FOR UPDATE
 TO authenticated
-USING ("vendor_id" = public.get_vendor_id())
-WITH CHECK ("vendor_id" = public.get_vendor_id());
+USING (public.is_vendor() OR public.is_admin())
+WITH CHECK (public.is_vendor() OR public.is_admin());
 
 -- الأدمن يدير جميع الطلبات
 CREATE POLICY "admins_manage_all_orders"
@@ -436,7 +407,42 @@ USING (public.is_admin())
 WITH CHECK (public.is_admin());
 
 -- =====================================================
--- 1️⃣6️⃣ سياسات جدول عناصر الطلب (trade_order_item)
+-- 1️⃣4️⃣ سياسات جدول تسليم الطلبات (trade_order_delivery)
+-- =====================================================
+
+-- ✅ جديد: العميل يرى تسليم طلباته
+CREATE POLICY "customers_view_own_delivery_status"
+ON public.trade_order_delivery FOR SELECT
+TO authenticated
+USING (
+  "order_id" IN (
+    SELECT ord.id FROM public.trade_order ord
+    WHERE ord.customer_id = public.current_user_id()
+  )
+);
+
+-- ✅ جديد: الموظف/الأدمن يرى جميع حالات التسليم
+CREATE POLICY "vendors_view_delivery_status"
+ON public.trade_order_delivery FOR SELECT
+TO authenticated
+USING (public.is_vendor() OR public.is_admin());
+
+-- ✅ جديد: موظف التوصيل يحدث حالة التسليم
+CREATE POLICY "delivery_update_delivery_status"
+ON public.trade_order_delivery FOR UPDATE
+TO authenticated
+USING (public.is_delivery() OR public.is_admin())
+WITH CHECK (public.is_delivery() OR public.is_admin());
+
+-- ✅ جديد: الأدمن يدير جميع حالات التسليم
+CREATE POLICY "admins_manage_all_delivery_status"
+ON public.trade_order_delivery FOR ALL
+TO authenticated
+USING (public.is_admin())
+WITH CHECK (public.is_admin());
+
+-- =====================================================
+-- 1️⃣5️⃣ سياسات جدول عناصر الطلب (trade_order_item)
 -- =====================================================
 
 -- عناصر الطلب تتبع صلاحيات الطلب الأصلي
@@ -446,7 +452,7 @@ TO authenticated
 USING (
   "order_id" IN (SELECT id FROM public.trade_order WHERE "customer_id" = public.current_user_id())
   OR
-  "order_id" IN (SELECT id FROM public.trade_order WHERE "vendor_id" = public.get_vendor_id())
+  public.is_vendor()
   OR
   public.is_admin()
 );
@@ -459,66 +465,7 @@ USING (public.is_admin())
 WITH CHECK (public.is_admin());
 
 -- =====================================================
--- 1️⃣7️⃣ سياسات جدول السائقين (fleet_driver)
--- =====================================================
-
--- ✅ جديد: السائق يرى ملفه فقط
-CREATE POLICY "drivers_view_own_profile"
-ON public.fleet_driver FOR SELECT
-TO authenticated
-USING ("profile_id" = public.current_user_id());
-
--- ✅ جديد: السائق يعدل ملفه فقط
-CREATE POLICY "drivers_update_own_profile"
-ON public.fleet_driver FOR UPDATE
-TO authenticated
-USING ("profile_id" = public.current_user_id())
-WITH CHECK ("profile_id" = public.current_user_id());
-
--- ✅ جديد: الأدمن يدير جميع السائقين
-CREATE POLICY "admins_manage_all_drivers"
-ON public.fleet_driver FOR ALL
-TO authenticated
-USING (public.is_admin())
-WITH CHECK (public.is_admin());
-
--- =====================================================
--- 1️⃣8️⃣ سياسات جدول التوصيل (fleet_delivery)
--- =====================================================
-
--- ✅ جديد: السائق يرى مهامه فقط
-CREATE POLICY "drivers_view_assigned_deliveries"
-ON public.fleet_delivery FOR SELECT
-TO authenticated
-USING ("driver_id" = public.current_user_id());
-
--- ✅ جديد: السائق يعدل حالة مهامه فقط
-CREATE POLICY "drivers_update_assigned_deliveries"
-ON public.fleet_delivery FOR UPDATE
-TO authenticated
-USING ("driver_id" = public.current_user_id())
-WITH CHECK ("driver_id" = public.current_user_id());
-
--- ✅ جديد: البائع يرى توصيلات طلباته
-CREATE POLICY "vendors_view_own_deliveries"
-ON public.fleet_delivery FOR SELECT
-TO authenticated
-USING (
-  "order_id" IN (
-    SELECT to2.id FROM public.trade_order to2
-    WHERE to2.vendor_id = public.get_vendor_id()
-  )
-);
-
--- ✅ جديد: الأدمن يدير جميع التوصيلات
-CREATE POLICY "admins_manage_all_deliveries"
-ON public.fleet_delivery FOR ALL
-TO authenticated
-USING (public.is_admin())
-WITH CHECK (public.is_admin());
-
--- =====================================================
--- 1️⃣9️⃣ سياسات جدول التقييمات (social_review)
+-- 1️⃣6️⃣ سياسات جدول التقييمات (social_review)
 -- =====================================================
 
 -- التقييمات عامة للقراءة
@@ -547,7 +494,7 @@ TO authenticated
 USING ("author_id" = public.current_user_id());
 
 -- =====================================================
--- 2️⃣0️⃣ سياسات جدول المفضلة (customer_favorite)
+-- 1️⃣7️⃣ سياسات جدول المفضلة (customer_favorite)
 -- =====================================================
 
 -- ✅ جديد: المستخدم يرى مفضلته فقط
@@ -564,7 +511,7 @@ USING ("customer_id" = public.current_user_id())
 WITH CHECK ("customer_id" = public.current_user_id());
 
 -- =====================================================
--- 2️⃣1️⃣ سياسات جدول تذاكر الدعم (support_ticket)
+-- 1️⃣8️⃣ سياسات جدول تذاكر الدعم (support_ticket)
 -- =====================================================
 
 -- المستخدم يرى تذاكره فقط (أو المُسنَدة إليه)
@@ -600,7 +547,7 @@ USING (public.is_admin())
 WITH CHECK (public.is_admin());
 
 -- =====================================================
--- 2️⃣2️⃣ سياسات جدول رسائل التذاكر (ticket_message)
+-- 1️⃣9️⃣ سياسات جدول رسائل التذاكر (ticket_message)
 -- =====================================================
 
 -- المشاركون في التذكرة يرون الرسائل
@@ -637,7 +584,7 @@ USING (public.is_admin())
 WITH CHECK (public.is_admin());
 
 -- =====================================================
--- 2️⃣3️⃣ سياسات جدول الإشعارات (sys_notification)
+-- 2️⃣0️⃣ سياسات جدول الإشعارات (sys_notification)
 -- =====================================================
 
 -- المستخدم يرى إشعاراته فقط
@@ -661,7 +608,7 @@ USING (public.is_admin())
 WITH CHECK (public.is_admin());
 
 -- =====================================================
--- 2️⃣4️⃣ سياسات جدول سجل الأخطاء (system_error_log)
+-- 2️⃣1️⃣ سياسات جدول سجل الأخطاء (system_error_log)
 -- =====================================================
 
 -- الأدمن فقط يرى سجل الأخطاء
@@ -678,7 +625,7 @@ USING (public.is_admin())
 WITH CHECK (public.is_admin());
 
 -- =====================================================
--- 2️⃣5️⃣ سياسات جدول أسعار الصرف (exchange_rates)
+-- 2️⃣2️⃣ سياسات جدول أسعار الصرف (exchange_rates)
 -- =====================================================
 
 -- أسعار الصرف عامة للقراءة
@@ -700,17 +647,22 @@ WITH CHECK (public.is_admin());
 
 /*
 📋 ملخص السياسات:
-- إجمالي الجداول المحمية: 23 جدول
-- إجمالي السياسات: 70+ سياسة
-- جميع الجداول لديها سياسات كاملة
-- الأدمن لديه صلاحيات كاملة على جميع الجداول
-- المستخدمون يديرون بياناتهم فقط
-- البائعون يديرون متاجرهم ومنتجاتهم فقط
-- السائقون يديرون مهامهم فقط
+
+📊 إجمالي الجداول المحمية: 20 جدول
+📋 إجمالي السياسات: 65+ سياسة
 
 🔐 ملاحظات الأمان:
 1. دالة is_admin() تستخدم SECURITY DEFINER للوصول الآمن
 2. جميع السياسات تستخدم public.current_user_id() للتحقق من الهوية
-3. البائعون يستخدمون get_vendor_id() للوصول الآمن لمتاجرهم
-4. الأدمن يتجاوز جميع القيود عبر is_admin()
+3. الأدمن يتجاوز جميع القيود عبر is_admin()
+4. الموظفون (vendor) يديرون المنتجات والطلبات
+5. العملاء يديرون طلباتهم وتقييماتهم فقط
+6. موظفو التوصيل يحدثون حالة التسليم فقط
+
+🎯 الأدوار والصلاحيات:
+- admin: صلاحيات كاملة على جميع الجداول
+- vendor: إدارة المنتجات والطلبات والفئات
+- customer: إدارة الطلبات والتقييمات والمفضلة
+- delivery: تحديث حالة التسليم عبر QR Code
+- support: إدارة تذاكر الدعم
 */

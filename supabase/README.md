@@ -1,6 +1,6 @@
-# 🗄️ Supabase Database — Multi-Vendor E-Commerce
+# 🗄️ Supabase Database — Single-Merchant E-Commerce
 
-> **قاعدة بيانات شاملة لمنصة تجارة إلكترونية متعددة البائعين مع نظام SaaS**
+> **قاعدة بيانات شاملة لمنصة تجارة إلكترونية (تاجر واحد) مع نظام توصيل ورمز QR**
 >
 > PostgreSQL 14+ | UTF-8 | Row Level Security | Production Ready
 
@@ -12,34 +12,38 @@
 
 ```
 supabase/
-├── 001_Schema/                    ← الخطوة 1: الجداول والعلاقات
+├── 000_Cleanup/                     ← (اختياري) حذف كل شيء للبدء من جديد
+│   └── drop_all_tables.sql
+│
+├── 001_Schema/                      ← الخطوة 1: الجداول والعلاقات
 │   ├── README.md
 │   ├── 000_dbml.dbml
 │   └── 001_schema.sql
 │
-├── 002_Utility Functions/         ← الخطوة 2: الدوال المساعدة
+├── 002_Utility Functions/           ← الخطوة 2: الدوال المساعدة
 │   ├── README.md
 │   └── 000_utility_functions.sql
 │
-├── 003_RLS Policies/              ← الخطوة 3: سياسات الأمان
-│   └── 002_rls_policies.sql
-│
-├── 004_Seed Data/                 ← الخطوة 4-5: البيانات الأولية
+├── 003_RLS Policies/                ← الخطوة 3: سياسات الأمان
 │   ├── README.md
-│   ├── 001_role_seed.sql
-│   ├── 002_plan_seed.sql
-│   └── 002_plan_functions.xlsx
+│   └── 000_rls_policies.sql
 │
-├── 005_Trigger Functions/         ← الخطوة 6-7: المشغلات + اختباريين
-│   ├── README.md
+├── 004_Seed Data/                   ← الخطوة 4: البيانات الأولية
+│   ├── 001_role_seed.sql            ← بيانات الأدوار
+│   └── 002_store_seed.sql           ← إعدادات المتجر وأسعار الصرف
+│
+├── 005_Trigger Functions/           ← الخطوة 5: المشغلات الآلية
 │   ├── 000_trigger_functions.sql
 │   └── 002_create_test_user.sql
 │
-├── 006_Tests/                     ← الخطوة 8: الاختبارات
-│   ├── README.md
+├── 006_Tests/                       ← الخطوة 6: الاختبارات
 │   └── 001_test_rls_policies.sql
 │
-└── README.md                      ← 📖 هذا الملف
+├── 007_Password Reset/              ← نظام استعادة كلمة السر
+├── 008_Notifications/               ← نظام الإشعارات
+├── 009_Storage/                     ← إعدادات التخزين
+│
+└── README.md                        ← 📖 هذا الملف
 ```
 
 ---
@@ -50,88 +54,78 @@ supabase/
 
 ```sql
 -- 001_Schema/001_schema.sql
--- يُنشئ 23 جدول + 12 ENUM + 60 فهرس + 31 مفتاح خارجي
+-- يُنشئ 20 جدول + 9 ENUMs + 60+ فهرس + 30+ مفتاح خارجي
 ```
 
 ### الخطوة 2: إنشاء الدوال المساعدة
 
 ```sql
 -- 002_Utility Functions/000_utility_functions.sql
--- 20 دالة للتحقق من الصلاحيات والأدوار والاشتراكات
+-- 14 دالة للتحقق من الصلاحيات، الأدوار، والتوصيل عبر QR
 ```
 
 ### الخطوة 3: تفعيل سياسات الأمان
 
 ```sql
--- 003_RLS Policies/002_rls_policies.sql
--- 70+ سياسة RLS لحماية البيانات
+-- 003_RLS Policies/000_rls_policies.sql
+-- 65+ سياسة RLS لحماية البيانات
 ```
 
 ### الخطوة 4: إدخال بيانات الأدوار
 
 ```sql
 -- 004_Seed Data/001_role_seed.sql
--- 5 أدوار نظام مع صلاحياتها
+-- 5 أدوار نظام (admin, vendor, customer, delivery, support)
 ```
 
-### الخطوة 5: إدخال الخطط وأسعار الصرف
+### الخطوة 4.5: إعداد المتجر وأسعار الصرف
 
 ```sql
--- 004_Seed Data/002_plan_seed.sql
--- 11 عملة + 9 خطط SaaS
+-- 004_Seed Data/002_store_seed.sql
+-- إعدادات المتجر الافتراضية + 8 عملات
 ```
 
-### الخطوة 6: إعداد المشغلات الآلية
+### الخطوة 5: إعداد المشغلات الآلية
 
 ```sql
 -- 005_Trigger Functions/000_trigger_functions.sql
--- مزامنة البروفايل + تحديث الطوابع الزمنية (19 trigger)
+-- مزامنة البروفايل + تحديث الطوابع الزمنية
 ```
 
-### الخطوة 7: مستخدمين اختباريين (تطوير فقط!)
-
-```sql
--- 005_Trigger Functions/002_create_test_user.sql
--- 3 مستخدمين للتجربة
-```
-
-### الخطوة 8: تشغيل الاختبارات
+### الخطوة 6: تشغيل الاختبارات (تطوير فقط!)
 
 ```sql
 -- 006_Tests/001_test_rls_policies.sql
--- 28 اختبار للتحقق من صحة كل شيء
+-- التحقق من صحة سياسات الأمان
 ```
 
 ---
 
 ## 📊 إحصائيات قاعدة البيانات
 
-| العنصر            | العدد  |
-| ----------------- | :----: |
-| **جداول**         |   23   |
-| **ENUMs**         |   12   |
-| **فهارس**         |   60   |
-| **مفاتيح خارجية** |   31   |
-| **Triggers**      |   19   |
-| **سياسات RLS**    |  70+   |
-| **دوال مساعدة**   |   26   |
-| **بيانات أولية**  | 25 سجل |
+| العنصر                | العدد |
+| --------------------- | :---: |
+| **جداول**             |  20   |
+| **ENUMs**             |   9   |
+| **فهارس**             |  60+  |
+| **مفاتيح خارجية**     |  29   |
+| **سياسات RLS**        |  65+  |
+| **دوال (Functions)**  |  23+  |
+| **مشغلات (Triggers)** |  18   |
 
 ---
 
 ## 🏗️ الوحدات (Modules)
 
-| #   | الوحدة         | الجداول | الوصف                         |
-| --- | -------------- | :-----: | ----------------------------- |
-| 2️⃣  | CORE           |    5    | المستخدمين، الأدوار، العناوين |
-| 🔟  | EXCHANGE RATES |    1    | أسعار صرف العملات             |
-| 3️⃣  | SAAS           |    2    | الخطط والاشتراكات             |
-| 4️⃣  | STORE          |    5    | المتاجر، الفئات، المنتجات     |
-| 5️⃣  | TRADE          |    2    | الطلبات والمبيعات             |
-| 6️⃣  | FLEET          |    2    | التوصيل والسائقين             |
-| 7️⃣  | SOCIAL         |    2    | التقييمات والمفضلة            |
-| 8️⃣  | SUPPORT        |    2    | تذاكر الدعم                   |
-| 9️⃣  | SYSTEM         |    2    | الإشعارات وسجل الأخطاء        |
+| #   | الوحدة         | الجداول | الوصف                                 |
+| --- | -------------- | :-----: | ------------------------------------- |
+| 1️⃣  | CORE           |    5    | المستخدمين، الأدوار، العناوين         |
+| 2️⃣  | STORE          |    5    | إعدادات المتجر، الفئات، المنتجات      |
+| 3️⃣  | EXCHANGE RATES |    1    | أسعار صرف العملات                     |
+| 4️⃣  | TRADE          |    3    | الطلبات، التسليم عبر QR Code، العناصر |
+| 5️⃣  | SOCIAL         |    2    | التقييمات والمفضلة                    |
+| 6️⃣  | SUPPORT        |    2    | تذاكر الدعم                           |
+| 7️⃣  | SYSTEM         |    2    | الإشعارات وسجل الأخطاء                |
 
 ---
 
@@ -139,21 +133,25 @@ supabase/
 
 ### سياسات RLS:
 
-- ✅ جميع الجداول الـ 23 محمية بـ Row Level Security
-- ✅ **PUBLIC** يمكنه فقط رؤية البيانات العامة (منتجات نشطة، متاجر، تقييمات)
+- ✅ جميع الجداول الـ 20 محمية بـ Row Level Security
+- ✅ **PUBLIC** يمكنه فقط رؤية البيانات العامة (منتجات نشطة، تقييمات)
 - ✅ **authenticated** يدير بياناته فقط
 - ✅ **admin** يتجاوز جميع القيود
+- ✅ **vendor** يدير المنتجات والطلبات
+- ✅ **delivery** يحدث حالة التسليم عبر QR فقط
 - ✅ صلاحيات الأعمدة (Column-Level) على `core_profile`
 
 ### الدوال الأمنية:
 
-| الدالة                  | الوصف                          |
-| ----------------------- | ------------------------------ |
-| `current_user_id()`     | معرف المستخدم من جلسة المصادقة |
-| `is_admin()`            | التحقق من صفة المدير           |
-| `get_vendor_id()`       | معرف متجر البائع               |
-| `has_permission()`      | التحقق من صلاحية معينة         |
-| `has_plan_permission()` | صلاحية من الخطة النشطة         |
+| الدالة               | الوصف                             |
+| -------------------- | --------------------------------- |
+| `current_user_id()`  | معرف المستخدم من جلسة المصادقة    |
+| `is_admin()`         | التحقق من صفة المدير              |
+| `is_vendor()`        | التحقق من صفة الموظف/البائع       |
+| `is_delivery()`      | التحقق من صفة سائق التوصيل        |
+| `has_permission()`   | التحقق من صلاحية معينة            |
+| `is_product_owner()` | التحقق من ملكية المنتج (user_id)  |
+| `verify_delivery()`  | التحقق من تسليم الطلب عبر QR Code |
 
 ---
 
@@ -166,9 +164,7 @@ supabase/
 | `001_Schema/`            |   1    | [📖 README](./001_Schema/README.md)              |
 | `002_Utility Functions/` |   2    | [📖 README](./002_Utility%20Functions/README.md) |
 | `003_RLS Policies/`      |   3    | [📖 README](./003_RLS%20Policies/README.md)      |
-| `004_Seed Data/`         |  4-5   | [📖 README](./004_Seed%20Data/README.md)         |
-| `005_Trigger Functions/` |  6-7   | [📖 README](./005_Trigger%20Functions/README.md) |
-| `006_Tests/`             |   8    | [📖 README](./006_Tests/README.md)               |
+| `005_Trigger Functions/` |   5    | [📖 README](./005_Trigger%20Functions/README.md) |
 
 ---
 
@@ -199,12 +195,10 @@ supabase db push
 psql -h <host> -U postgres -d postgres \
   -f "001_Schema/001_schema.sql" \
   -f "002_Utility Functions/000_utility_functions.sql" \
-  -f "003_RLS Policies/002_rls_policies.sql" \
+  -f "003_RLS Policies/000_rls_policies.sql" \
   -f "004_Seed Data/001_role_seed.sql" \
-  -f "004_Seed Data/002_plan_seed.sql" \
-  -f "005_Trigger Functions/000_trigger_functions.sql" \
-  -f "005_Trigger Functions/002_create_test_user.sql" \
-  -f "006_Tests/001_test_rls_policies.sql"
+  -f "004_Seed Data/002_store_seed.sql" \
+  -f "005_Trigger Functions/000_trigger_functions.sql"
 ```
 
 ---
@@ -212,10 +206,10 @@ psql -h <host> -U postgres -d postgres \
 ## 📝 ملاحظات مهمة
 
 - ✅ **ترتيب الملفات مهم:** كل ملف يعتمد على الملفات السابقة
-- ✅ **آمن للتشغيل المتكرر:** جميع ملفات Seed Data تستخدم `ON CONFLICT DO UPDATE`
-- 🔴 **لا تشغّل ملفات الاختبار في الإنتاج:** `002_create_test_user.sql` و `001_test_rls_policies.sql`
-- ✅ **مراجعة أمان:** تم إزالة PUBLIC access على `auth_password_reset` tokens
-- ✅ **حذف آمن:** `cleanup_unsynced_profiles()` يستخدم soft delete
+- ✅ **آمن للتشغيل المتكرر:** دوال التحقق من الملكية تستخدم `user_id`
+- 🔴 **لا تشغّل ملفات الاختبار في الإنتاج:** `006_Tests/`
+- ✅ **مراجعة أمان:** تم تحديث جميع السياسات لتعكس `user_id` بدلاً من `vendor_id`
+- ✅ **نظام QR:** جداول `trade_order_delivery` مخصصة للتحقق من التسليم
 
 ---
 

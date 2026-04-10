@@ -10,6 +10,7 @@ import {
 } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/database/supabase/client";
+import { checkMfaStatusClient } from "@/lib/actions/mfa/check-mfa-status";
 
 // =====================================================
 // 📋 Types
@@ -21,22 +22,6 @@ type Role = {
   permissions: string[];
 };
 
-type Subscription = {
-  plan_id: string;
-  category: string;
-  name_ar: string;
-  name_en: string | null;
-  price: number;
-  currency: string;
-  billing_cycle: string;
-  permissions: string[];
-  features: string[];
-  status: string;
-  starts_at: string | null;
-  ends_at: string | null;
-  auto_renew: boolean | null;
-};
-
 type UserProfile = {
   id: string | null;
   email: string | null;
@@ -46,15 +31,13 @@ type UserProfile = {
   avatar_url: string | null;
   phone_number: string | null;
   is_phone_verified: boolean;
-  preferred_language: string;
-  timezone: string;
+  is_mfa_enabled: boolean;
   created_at: string | null;
 };
 
 type FullProfile = {
   profile: UserProfile;
   roles: Role[];
-  subscriptions: Subscription[];
   permissions: string[];
   user: User | null;
 };
@@ -73,8 +56,6 @@ type AuthContextValue = AuthState & {
   hasRole: (code: string) => boolean;
   hasPermission: (permission: string) => boolean;
   hasAnyPermission: (permission: string) => boolean;
-  hasActivePlan: () => boolean;
-  getActivePlan: () => Subscription | null;
 };
 
 // =====================================================
@@ -134,7 +115,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error("Failed to fetch user profile:", error);
         setProfile(null);
       } else {
-        setProfile({ ...normalizeProfile(data), user: currentUser });
+        // Check MFA status directly from Supabase Auth API
+        const isMfaEnabled = await checkMfaStatusClient();
+
+        // Merge MFA status into profile
+        const profileData = normalizeProfile(data);
+        profileData.profile.is_mfa_enabled = isMfaEnabled;
+        profileData.user = currentUser;
+
+        setProfile(profileData);
       }
     } catch {
       setProfile(null);
@@ -192,26 +181,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [profile?.permissions],
   );
 
-  const hasActivePlan = useCallback(() => {
-    if (!profile) return false;
-    return profile.subscriptions.some(
-      (s) =>
-        (s.status === "active" || s.status === "trialing") &&
-        (!s.ends_at || new Date(s.ends_at) > new Date()),
-    );
-  }, [profile?.subscriptions]);
-
-  const getActivePlan = useCallback(() => {
-    if (!profile) return null;
-    return (
-      profile.subscriptions.find(
-        (s) =>
-          (s.status === "active" || s.status === "trialing") &&
-          (!s.ends_at || new Date(s.ends_at) > new Date()),
-      ) ?? null
-    );
-  }, [profile?.subscriptions]);
-
   const value: AuthContextValue = {
     session,
     user,
@@ -223,8 +192,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     hasRole,
     hasPermission,
     hasAnyPermission,
-    hasActivePlan,
-    getActivePlan,
   };
 
   return <AuthContext value={value}>{children}</AuthContext>;
@@ -248,8 +215,7 @@ function normalizeProfile(raw: unknown): FullProfile {
       avatar_url: (p.avatar_url as string | undefined) ?? null,
       phone_number: (p.phone_number as string | undefined) ?? null,
       is_phone_verified: (p.is_phone_verified as boolean | undefined) ?? false,
-      preferred_language: (p.preferred_language as string | undefined) ?? "ar",
-      timezone: (p.timezone as string | undefined) ?? "Asia/Riyadh",
+      is_mfa_enabled: false, // Will be set by checkMfaStatusClient
       created_at: (p.created_at as string | undefined) ?? null,
     },
     user: null,
@@ -260,25 +226,6 @@ function normalizeProfile(raw: unknown): FullProfile {
           permissions: Array.isArray(r.permissions)
             ? (r.permissions as string[])
             : [],
-        }))
-      : [],
-    subscriptions: Array.isArray(d.subscriptions)
-      ? d.subscriptions.map((s: Record<string, unknown>) => ({
-          plan_id: (s.plan_id as string) ?? "",
-          category: (s.category as string) ?? "",
-          name_ar: (s.name_ar as string) ?? "",
-          name_en: (s.name_en as string | undefined) ?? null,
-          price: (s.price as number) ?? 0,
-          currency: (s.currency as string) ?? "USD",
-          billing_cycle: (s.billing_cycle as string) ?? "",
-          permissions: Array.isArray(s.permissions)
-            ? (s.permissions as string[])
-            : [],
-          features: Array.isArray(s.features) ? (s.features as string[]) : [],
-          status: (s.status as string) ?? "",
-          starts_at: (s.starts_at as string | undefined) ?? null,
-          ends_at: (s.ends_at as string | undefined) ?? null,
-          auto_renew: (s.auto_renew as boolean | undefined) ?? false,
         }))
       : [],
     permissions: Array.isArray(d.permissions)

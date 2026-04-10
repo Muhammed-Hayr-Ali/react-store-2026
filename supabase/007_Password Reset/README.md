@@ -179,7 +179,7 @@ SELECT cleanup_expired_reset_tokens(500);
 
 ## 🔒 سياسات RLS (`002_rls_policies.sql`)
 
-| السياسة                              | 为谁            | الغرض                           |
+| السياسة                              | المستخدم        | الغرض                           |
 | ------------------------------------ | --------------- | ------------------------------- |
 | `password_reset_no_public_read`      | `authenticated` | منع أي قراءة عامة — الرموز سرية |
 | `password_reset_service_full_access` | `service_role`  | صلاحية كاملة لخدمة الخادم       |
@@ -194,9 +194,9 @@ SELECT cleanup_expired_reset_tokens(500);
 ### `requestPasswordReset(input)` — طلب استعادة كلمة المرور
 
 ```ts
-import { requestPasswordReset } from "@/lib/actions/auth"
+import { requestPasswordReset } from "@/lib/actions/auth";
 
-await requestPasswordReset({ email: "user@example.com" })
+await requestPasswordReset({ email: "user@example.com" });
 // → يُنشئ رمز + يرسل بريد + يرجع success دائماً
 ```
 
@@ -211,15 +211,15 @@ await requestPasswordReset({ email: "user@example.com" })
 ### `resetPassword(input, token)` — استعادة كلمة المرور
 
 ```ts
-import { resetPassword } from "@/lib/actions/auth"
+import { resetPassword } from "@/lib/actions/auth";
 
 await resetPassword(
   {
     password: "NewP@ssw0rd123",
     confirmPassword: "NewP@ssw0rd123",
   },
-  "a1b2c3d4e5f6..."  // الرمز من الرابط
-)
+  "a1b2c3d4e5f6...", // الرمز من الرابط
+);
 // → تستهلك الرمز + تحدث كلمة المرور → redirect("/sign-in?reset=success")
 ```
 
@@ -233,9 +233,9 @@ await resetPassword(
 ### `verifyResetToken(token)` — التحقق (للعرض فقط)
 
 ```ts
-import { verifyResetToken } from "@/lib/actions/auth"
+import { verifyResetToken } from "@/lib/actions/auth";
 
-const result = await verifyResetToken("a1b2c3d4e5f6...")
+const result = await verifyResetToken("a1b2c3d4e5f6...");
 // → { isValid: true, email: "user@example.com", expiresAt: "2025-..." }
 ```
 
