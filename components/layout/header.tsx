@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import { redirect, usePathname, useRouter } from "next/navigation"
-import { useLocale, useTranslations } from "next-intl"
-import { useTheme } from "next-themes"
+import * as React from "react";
+import Link from "next/link";
+import { redirect, usePathname, useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
 
 // ─────────────────────────────────────────────────────────────
 // 🧩 UI Components
 // ─────────────────────────────────────────────────────────────
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -25,35 +25,42 @@ import {
   DropdownMenuPortal,
   DropdownMenuSubContent,
   DropdownMenuCheckboxItem,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
+} from "@/components/ui/accordion";
 import {
   MobileMenu,
   MobileMenuHeader,
   MobileMenuBody,
   MobileMenuFooter,
   MobileMenuItem,
-} from "@/components/ui/mobile-menu"
+} from "@/components/ui/mobile-menu";
 
 // ─────────────────────────────────────────────────────────────
 // 📦 Shared & Config
 // ─────────────────────────────────────────────────────────────
-import { AppLogo } from "@/components/shared/app-logo"
-import MenuButton from "@/components/shared/menu_button"
-import NotificationBell from "@/components/notifications/NotificationBell"
-import { siteConfig } from "@/lib/config/site_config"
-import { appRouter } from "@/lib/app-routes"
-import { useAuth } from "@/lib/providers/auth-provider"
+import { AppLogo } from "@/components/shared/app-logo";
+import NotificationBell from "@/components/notifications/NotificationBell";
+import { siteConfig } from "@/lib/config/site_config";
+import { appRouter } from "@/lib/app-routes";
+import { useAuth } from "@/lib/providers/auth-provider";
 
 // ─────────────────────────────────────────────────────────────
 // 🎨 Icons
 // ─────────────────────────────────────────────────────────────
-import { Bell, SearchIcon, LogInIcon, UserPlus, CheckIcon } from "lucide-react"
+import {
+  Bell,
+  SearchIcon,
+  LogInIcon,
+  UserPlus,
+  CheckIcon,
+  Menu,
+  X,
+} from "lucide-react";
 import {
   UserIcon,
   GlobeIcon,
@@ -62,7 +69,7 @@ import {
   PackageIcon,
   LifeBuoyIcon,
   BookIcon,
-} from "@/components/shared/icons"
+} from "@/components/shared/icons";
 
 // ============================================================================
 // 🔗 SafeLink: رابط آمن يمنع أخطاء href=undefined (بدون تعديل الروابط الأصلية)
@@ -73,55 +80,55 @@ function SafeLink({
   className,
   ...props
 }: {
-  href: string | undefined
-  children: React.ReactNode
-  className?: string
+  href: string | undefined;
+  children: React.ReactNode;
+  className?: string;
 } & Omit<React.ComponentProps<typeof Link>, "href" | "children">) {
   if (!href)
     return (
       <span className={className ?? "opacity-50"} {...props}>
         {children}
       </span>
-    )
+    );
   return (
     <Link href={href} className={className} {...props}>
       {children}
     </Link>
-  )
+  );
 }
 
 // ============================================================================
 // 🎣 Custom Hook: منطق الهيدر (مركّز ومُحسّن)
 // ============================================================================
 function useHeaderLogic() {
-  const router = useRouter()
-  const pathname = usePathname()
-  const { theme, setTheme } = useTheme()
-  const locale = useLocale()
-  const t = useTranslations("Header")
-  const { profile, user, signOut, isLoading } = useAuth()
+  const router = useRouter();
+  const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
+  const locale = useLocale();
+  const t = useTranslations("Header");
+  const { profile, user, signOut, isLoading } = useAuth();
 
   const avatar = React.useMemo(
     () => profile?.avatar_url ?? null,
-    [profile?.avatar_url]
-  )
+    [profile?.avatar_url],
+  );
   const menuItems = React.useMemo(
     () => (user ? siteConfig.userMenuItems : []),
-    [user]
-  )
+    [user],
+  );
 
   const handleLogout = React.useCallback(async () => {
-    await signOut()
-    router.refresh()
-  }, [signOut, router])
+    await signOut();
+    router.refresh();
+  }, [signOut, router]);
   const handleLocaleChange = React.useCallback(
     (loc: string) => redirect(`/${loc}${pathname}`),
-    [pathname]
-  )
+    [pathname],
+  );
   const handleThemeChange = React.useCallback(
     (th: string) => setTheme(th),
-    [setTheme]
-  )
+    [setTheme],
+  );
 
   return {
     router,
@@ -137,22 +144,22 @@ function useHeaderLogic() {
     handleLogout,
     handleLocaleChange,
     handleThemeChange,
-  } as const
+  } as const;
 }
 
 // ============================================================================
 // 🧩 Shared: عرض عناصر القائمة (نمط واحد للسطح المكتب والجوال)
 // ============================================================================
-type MenuItem = (typeof siteConfig.userMenuItems)[number]
+type MenuItem = (typeof siteConfig.userMenuItems)[number];
 
 function MenuItemsList({
   items,
   t,
   mode,
 }: {
-  items: MenuItem[]
-  t: ReturnType<typeof useTranslations>
-  mode: "mobile" | "desktop"
+  items: MenuItem[];
+  t: ReturnType<typeof useTranslations>;
+  mode: "mobile" | "desktop";
 }) {
   return (
     <>
@@ -162,7 +169,7 @@ function MenuItemsList({
             <item.icon className="h-4 w-4" />
             <span>{t(`menuItems.${item.key}`)}</span>
           </>
-        )
+        );
         return mode === "mobile" ? (
           <MobileMenuItem
             key={item.key}
@@ -175,10 +182,10 @@ function MenuItemsList({
           <DropdownMenuItem asChild key={item.key}>
             <SafeLink href={item.href}>{content}</SafeLink>
           </DropdownMenuItem>
-        )
+        );
       })}
     </>
-  )
+  );
 }
 
 // ============================================================================
@@ -192,12 +199,12 @@ function Selector({
   onSelect,
   mode,
 }: {
-  title: string
-  Icon: React.ElementType
-  options: { key: string; label: string }[]
-  selected: string
-  onSelect: (k: string) => void
-  mode: "mobile" | "desktop"
+  title: string;
+  Icon: React.ElementType;
+  options: { key: string; label: string }[];
+  selected: string;
+  onSelect: (k: string) => void;
+  mode: "mobile" | "desktop";
 }) {
   const Option = ({ opt }: { opt: { key: string; label: string } }) => (
     <>
@@ -211,11 +218,6 @@ function Selector({
           )}
           {opt.label}
         </MobileMenuItem>
-
-
-
-
-
       ) : (
         <DropdownMenuCheckboxItem
           checked={selected === opt.key}
@@ -225,7 +227,7 @@ function Selector({
         </DropdownMenuCheckboxItem>
       )}
     </>
-  )
+  );
 
   if (mode === "mobile") {
     return (
@@ -243,7 +245,7 @@ function Selector({
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-    )
+    );
   }
 
   return (
@@ -260,7 +262,7 @@ function Selector({
         </DropdownMenuSubContent>
       </DropdownMenuPortal>
     </DropdownMenuSub>
-  )
+  );
 }
 
 // ============================================================================
@@ -278,15 +280,15 @@ function DesktopUserMenu({ avatar }: { avatar: string | null }) {
     handleLogout,
     handleLocaleChange,
     handleThemeChange,
-  } = useHeaderLogic()
+  } = useHeaderLogic();
 
   const languages = React.useMemo(
     () => [
       { key: "ar", label: t("menuItems.arabic") },
       { key: "en", label: t("menuItems.english") },
     ],
-    [t]
-  )
+    [t],
+  );
 
   const themes = React.useMemo(
     () => [
@@ -294,11 +296,11 @@ function DesktopUserMenu({ avatar }: { avatar: string | null }) {
       { key: "dark", label: t("menuItems.dark") },
       { key: "light", label: t("menuItems.light") },
     ],
-    [t]
-  )
+    [t],
+  );
 
   if (isLoading)
-    return <div className="size-8 animate-pulse rounded-full bg-muted" />
+    return <div className="size-8 animate-pulse rounded-full bg-muted" />;
 
   return (
     <DropdownMenu>
@@ -411,7 +413,7 @@ function DesktopUserMenu({ avatar }: { avatar: string | null }) {
         )}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
 
 // ============================================================================
@@ -419,15 +421,15 @@ function DesktopUserMenu({ avatar }: { avatar: string | null }) {
 // ============================================================================
 function MobileMenuContent() {
   const { theme, locale, t, menuItems, handleLocaleChange, handleThemeChange } =
-    useHeaderLogic()
+    useHeaderLogic();
 
   const languages = React.useMemo(
     () => [
       { key: "ar", label: t("menuItems.arabic") },
       { key: "en", label: t("menuItems.english") },
     ],
-    [t]
-  )
+    [t],
+  );
 
   const themes = React.useMemo(
     () => [
@@ -435,8 +437,8 @@ function MobileMenuContent() {
       { key: "dark", label: t("menuItems.dark") },
       { key: "light", label: t("menuItems.light") },
     ],
-    [t]
-  )
+    [t],
+  );
 
   return (
     <>
@@ -470,15 +472,16 @@ function MobileMenuContent() {
         {t("menuItems.documentation")}
       </MobileMenuItem>
     </>
-  )
+  );
 }
 
 // ============================================================================
 // 🚀 Main Header Component
 // ============================================================================
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false)
-  const { profile, user, isLoading, avatar, handleLogout, t } = useHeaderLogic()
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const { profile, user, isLoading, avatar, handleLogout, t } =
+    useHeaderLogic();
 
   return (
     <>
@@ -501,11 +504,18 @@ export default function Header() {
               </NotificationBell>
               <DesktopUserMenu avatar={avatar} />
             </div>
-            <MenuButton
-              isOpen={isMenuOpen}
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="block lg:hidden"
-            />
+            >
+              {isMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </Button>
           </nav>
         </div>
       </header>
@@ -564,5 +574,5 @@ export default function Header() {
         </MobileMenuFooter>
       </MobileMenu>
     </>
-  )
+  );
 }
