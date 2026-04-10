@@ -8,51 +8,10 @@
 // ─── Database ENUMs (تطابق SQL حرفياً) ───────────────
 
 /**
- * حالة عملية التوصيل
- * المصدر: CREATE TYPE "delivery_status"
- */
-export type DeliveryStatus =
-  | "pending"
-  | "assigned"
-  | "picked_up"
-  | "in_transit"
-  | "delivered"
-  | "cancelled"
-  | "returned";
-
-/**
- * حالة البائع/المتجر
- * المصدر: CREATE TYPE "vendor_status"
- */
-export type VendorStatus =
-  | "pending"
-  | "active"
-  | "suspended"
-  | "rejected"
-  | "archived";
-
-/**
  * أسماء الأدوار في النظام
  * المصدر: CREATE TYPE "role_name"
  */
 export type RoleName = "admin" | "vendor" | "customer" | "delivery" | "support";
-
-/**
- * فئة خطة الاشتراك
- * المصدر: CREATE TYPE "plan_category"
- */
-export type PlanCategory = "free" | "seller" | "delivery" | "enterprise";
-
-/**
- * حالة الاشتراك الفرعي
- * المصدر: CREATE TYPE "sub_status"
- */
-export type SubStatus =
-  | "active"
-  | "expired"
-  | "cancelled"
-  | "pending_payment"
-  | "trialing";
 
 /**
  * نوع الإشعار
@@ -117,6 +76,33 @@ export type PaymentMethod = "cod";
  * المصدر: CREATE TYPE "payment_status"
  */
 export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
+
+// ─── TypeScript-Only Types (ليست في SQL لكن مستخدمة في الكود) ─────────────
+
+/**
+ * حالة البائع/المتجر (مشتقة من المنطق البرمجي)
+ */
+export type VendorStatus =
+  | "pending"
+  | "active"
+  | "suspended"
+  | "rejected"
+  | "archived";
+
+/**
+ * فئة خطة الاشتراك (مشتقة من المنطق البرمجي)
+ */
+export type PlanCategory = "free" | "seller" | "delivery" | "enterprise";
+
+/**
+ * حالة الاشتراك الفرعي (مشتقة من المنطق البرمجي)
+ */
+export type SubStatus =
+  | "active"
+  | "expired"
+  | "cancelled"
+  | "pending_payment"
+  | "trialing";
 
 // ─── Helper Types (مشتقة من SQL) ─────────────────────
 

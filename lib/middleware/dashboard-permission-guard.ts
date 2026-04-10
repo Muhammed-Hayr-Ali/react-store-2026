@@ -15,6 +15,17 @@ export type DashboardRole =
   | "delivery"
   | "support";
 
+// نوع بيانات البروفايل من RPC
+type UserProfileData = {
+  profile: Record<string, unknown>;
+  roles: Array<{
+    code: string;
+    description: string | null;
+    permissions: string[];
+  }>;
+  permissions: string[];
+};
+
 /**
  * فحص صلاحية الداشبورد
  * 1. هل المستخدم مسجل دخول؟
@@ -57,7 +68,8 @@ export async function requireDashboardRole(
   }
 
   // استخدام بيانات البروفايل الكاملة
-  const userRoles = profileData.roles?.map((r: any) => r.code) || [];
+  const typedProfile = profileData as UserProfileData;
+  const userRoles = typedProfile.roles?.map((r) => r.code) || [];
   if (!userRoles.includes(allowedRole)) {
     return redirect("/unauthorized");
   }
@@ -100,6 +112,7 @@ export async function checkUserRoles(): Promise<{
     return { user, roles: userRoles };
   }
 
-  const roles = profileData?.roles?.map((r: any) => r.code) || [];
+  const typedProfile = profileData as UserProfileData;
+  const roles = typedProfile?.roles?.map((r) => r.code) || [];
   return { user, roles };
 }

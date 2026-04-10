@@ -1,4 +1,3 @@
-import { AuthDebug } from "@/components/debug/auth-debug";
 import Footer from "@/components/layout/footer";
 import { MfaGuard } from "@/lib/middleware/mfa-guard";
 

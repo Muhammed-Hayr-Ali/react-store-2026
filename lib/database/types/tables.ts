@@ -15,10 +15,14 @@ import type {
   ErrorSeverity,
   PaymentMethod,
   PaymentStatus,
+  VendorStatus,
+  PlanCategory,
+  SubStatus,
   CurrencyCode,
   UUID,
   Timestamp,
   Decimal,
+  BillingCycle,
 } from "./enums";
 
 // =====================================================
@@ -116,6 +120,21 @@ export type ExchangeRate = {
   rate_from_usd: Decimal; // CHECK: > 0
   last_updated_at: Timestamp;
   created_at: Timestamp;
+};
+
+/**
+ * إعدادات المتجر
+ * المصدر: CREATE TABLE "store_settings"
+ */
+export type StoreSettings = {
+  id: UUID;
+  store_name_ar: string;
+  store_name_en: string | null;
+  default_currency: CurrencyCode;
+  language: string;
+  timezone: string;
+  created_at: Timestamp;
+  updated_at: Timestamp;
 };
 
 // =====================================================
@@ -303,6 +322,42 @@ export type TradeOrderItem = {
   quantity: number; // CHECK: > 0
   unit_price: Decimal; // CHECK: >= 0
   subtotal: Decimal; // CHECK: >= 0
+};
+
+// =====================================================
+// 6️⃣ FLEET MODULE — التوصيل والسائقين
+// =====================================================
+
+/**
+ * سائق التوصيل
+ * المصدر: CREATE TABLE "fleet_driver"
+ */
+export type FleetDriver = {
+  id: UUID;
+  profile_id: UUID;
+  license_number: string | null;
+  vehicle_type: string | null;
+  vehicle_plate: string | null;
+  is_available: boolean;
+  rating_avg: Decimal; // CHECK: 0-5
+  rating_count: number; // CHECK: >= 0
+  created_at: Timestamp;
+  updated_at: Timestamp;
+};
+
+/**
+ * نوع التوصيل
+ * المصدر: CREATE TABLE "fleet_delivery_type"
+ */
+export type FleetDeliveryType = {
+  id: UUID;
+  name_ar: string;
+  name_en: string | null;
+  base_price: Decimal; // CHECK: >= 0
+  estimated_minutes: number; // CHECK: > 0
+  is_active: boolean;
+  created_at: Timestamp;
+  updated_at: Timestamp;
 };
 
 /**

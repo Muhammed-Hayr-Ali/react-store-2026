@@ -4,7 +4,6 @@ import { useAuth } from "@/lib/providers/auth-provider";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Shield,
@@ -56,7 +55,7 @@ export function AuthDebug() {
     try {
       await refresh();
       toast.success("Auth refreshed successfully");
-    } catch (error) {
+    } catch {
       toast.error("Failed to refresh auth");
     } finally {
       setIsRefreshing(false);
@@ -89,9 +88,9 @@ export function AuthDebug() {
   const toggleJson = () => setShowJson((prev) => !prev);
 
   return (
-    <div className="fixed right-4 bottom-4 z-50 max-h-[80vh] w-[420px] overflow-hidden rounded-xl border bg-card shadow-2xl">
+    <div className="fixed right-4 bottom-4 z-50 max-h-[80vh] w-105 overflow-hidden rounded-xl border bg-card shadow-2xl">
       {/* ===== Header ===== */}
-      <div className="border-b bg-gradient-to-r from-primary/5 to-primary/10 p-4">
+      <div className="border-b bg-linear-to-r from-primary/5 to-primary/10 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">

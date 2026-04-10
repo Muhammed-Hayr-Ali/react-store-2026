@@ -44,7 +44,6 @@ import {
 // 📦 Shared & Config
 // ─────────────────────────────────────────────────────────────
 import { AppLogo } from "@/components/shared/app-logo";
-import NotificationBell from "@/components/notifications/NotificationBell";
 import { siteConfig } from "@/lib/config/site_config";
 import { appRouter } from "@/lib/app-routes";
 import { useAuth } from "@/lib/providers/auth-provider";
@@ -108,10 +107,16 @@ function useHeaderLogic() {
   const t = useTranslations("Header");
   const { profile, user, signOut, isLoading } = useAuth();
 
-  const avatar = React.useMemo(
-    () => profile?.avatar_url ?? null,
-    [profile?.avatar_url],
-  );
+  const avatar = React.useMemo(() => {
+    if (profile?.profile.avatar_url) return profile.profile.avatar_url;
+    if (profile?.profile.full_name) {
+      const initials = profile.profile.full_name
+        .split(" ")
+        .map((n) => n[0])
+        .join("");
+      return `https://ui-avatars.com/api/?name=${initials}&background=random&color=fff`;
+    }
+  }, [profile]);
   const menuItems = React.useMemo(
     () => (user ? siteConfig.userMenuItems : []),
     [user],
@@ -313,7 +318,7 @@ function DesktopUserMenu({ avatar }: { avatar: string | null }) {
           <Avatar>
             <AvatarImage
               src={avatar ?? undefined}
-              alt={profile?.full_name ?? ""}
+              alt={profile?.profile.full_name ?? ""}
             />
             <AvatarFallback className="p-0">
               <UserIcon className="size-4 text-foreground" />
@@ -499,10 +504,10 @@ export default function Header() {
           </div>
           <nav className="flex basis-1/3 items-center justify-end gap-4">
             <div className="hidden items-center gap-4 lg:flex">
-              <NotificationBell className="rounded-full">
-                <Bell className="size-3.5" />
-              </NotificationBell>
-              <DesktopUserMenu avatar={avatar} />
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <Bell className="size-5" />
+              </Button>
+              <DesktopUserMenu avatar={avatar ?? ""} />
             </div>
             <Button
               variant="ghost"
@@ -526,7 +531,7 @@ export default function Header() {
           <Avatar className="size-10">
             <AvatarImage
               src={avatar ?? undefined}
-              alt={profile?.full_name ?? ""}
+              alt={profile?.profile.full_name ?? ""}
             />
             <AvatarFallback className="p-1.5">
               <UserIcon className="size-max text-foreground" />
@@ -534,10 +539,10 @@ export default function Header() {
           </Avatar>
           <div className="flex flex-col">
             <span className="text-base leading-none font-semibold">
-              {profile?.full_name ?? "Guest"}
+              {profile?.profile.full_name ?? "Guest"}
             </span>
             <span className="text-sm text-muted-foreground">
-              {profile?.email ?? ""}
+              {profile?.profile.email ?? ""}
             </span>
           </div>
         </MobileMenuHeader>

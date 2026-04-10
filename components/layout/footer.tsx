@@ -165,7 +165,7 @@ function NewsletterSection() {
 
       toast.success("Thanks for subscribing! 🎉");
       setEmail("");
-    } catch (error) {
+    } catch {
       toast.error("Failed to subscribe. Please try again.");
     } finally {
       setIsSubmitting(false);

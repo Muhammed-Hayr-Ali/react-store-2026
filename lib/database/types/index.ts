@@ -23,15 +23,20 @@ import type {
   CoreRole,
   CoreProfileRole,
   CoreAddress,
-  StoreSettings,
   ExchangeRate,
+  StoreSettings,
   StoreCategory,
   StoreProduct,
   ProductImage,
   ProductVariant,
+  SaaSPlan,
+  SaaSSubscription,
+  StoreVendor,
   TradeOrder,
   TradeOrderDelivery,
   TradeOrderItem,
+  FleetDriver,
+  FleetDeliveryType,
   SocialReview,
   CustomerFavorite,
   SupportTicket,
@@ -199,6 +204,59 @@ export interface Database {
           {
             foreignTable: "core_profile";
             constraintName: "trade_order_delivery_delivered_by_fkey";
+          },
+          {
+            foreignTable: "fleet_driver";
+            constraintName: "trade_order_delivery_driver_id_fkey";
+          },
+        ];
+      };
+      fleet_driver: {
+        Row: FleetDriver;
+        Insert: Insertable<FleetDriver>;
+        Update: Updatable<FleetDriver>;
+        Relationships: [
+          {
+            foreignTable: "core_profile";
+            constraintName: "fleet_driver_profile_id_fkey";
+          },
+        ];
+      };
+      fleet_delivery_type: {
+        Row: FleetDeliveryType;
+        Insert: Insertable<FleetDeliveryType>;
+        Update: Updatable<FleetDeliveryType>;
+        Relationships: [];
+      };
+      saas_plan: {
+        Row: SaaSPlan;
+        Insert: Insertable<SaaSPlan>;
+        Update: Updatable<SaaSPlan>;
+        Relationships: [];
+      };
+      saas_subscription: {
+        Row: SaaSSubscription;
+        Insert: Insertable<SaaSSubscription>;
+        Update: Updatable<SaaSSubscription>;
+        Relationships: [
+          {
+            foreignTable: "core_profile";
+            constraintName: "saas_subscription_profile_id_fkey";
+          },
+          {
+            foreignTable: "saas_plan";
+            constraintName: "saas_subscription_plan_id_fkey";
+          },
+        ];
+      };
+      store_vendor: {
+        Row: StoreVendor;
+        Insert: Insertable<StoreVendor>;
+        Update: Updatable<StoreVendor>;
+        Relationships: [
+          {
+            foreignTable: "core_profile";
+            constraintName: "store_vendor_profile_id_fkey";
           },
         ];
       };
@@ -370,16 +428,23 @@ export type DatabaseTables = {
   core_address: CoreAddress;
   // Store
   store_settings: StoreSettings;
+  store_vendor: StoreVendor;
   store_category: StoreCategory;
   store_product: StoreProduct;
   product_image: ProductImage;
   product_variant: ProductVariant;
   // Exchange
   exchange_rates: ExchangeRate;
+  // SaaS
+  saas_plan: SaaSPlan;
+  saas_subscription: SaaSSubscription;
   // Trade
   trade_order: TradeOrder;
   trade_order_delivery: TradeOrderDelivery;
   trade_order_item: TradeOrderItem;
+  // Fleet
+  fleet_driver: FleetDriver;
+  fleet_delivery_type: FleetDeliveryType;
   // Social
   social_review: SocialReview;
   customer_favorite: CustomerFavorite;
