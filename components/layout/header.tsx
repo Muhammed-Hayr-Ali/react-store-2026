@@ -52,7 +52,6 @@ import { useAuth } from "@/lib/providers/auth-provider";
 // 🎨 Icons
 // ─────────────────────────────────────────────────────────────
 import {
-  Bell,
   SearchIcon,
   LogInIcon,
   UserPlus,
@@ -69,6 +68,7 @@ import {
   LifeBuoyIcon,
   BookIcon,
 } from "@/components/shared/icons";
+import { NotificationBell } from "../notifications";
 
 // ============================================================================
 // 🔗 SafeLink: رابط آمن يمنع أخطاء href=undefined (بدون تعديل الروابط الأصلية)
@@ -504,9 +504,8 @@ export default function Header() {
           </div>
           <nav className="flex basis-1/3 items-center justify-end gap-4">
             <div className="hidden items-center gap-4 lg:flex">
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Bell className="size-5" />
-              </Button>
+              
+                <NotificationBell />
               <DesktopUserMenu avatar={avatar ?? ""} />
             </div>
             <Button

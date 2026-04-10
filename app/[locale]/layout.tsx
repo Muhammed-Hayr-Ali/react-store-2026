@@ -1,7 +1,6 @@
 import "../globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
-import { Geist_Mono, Inter, Cairo } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { routing } from "@/i18n/routing";
@@ -11,18 +10,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/lib/providers/auth-provider";
 import { CsrfProvider } from "@/lib/providers/csrf-provider";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-
-const cairo = Cairo({
-  subsets: ["arabic", "latin"],
-  variable: "--font-cairo",
-  weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
-});
-
-const fontMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-});
+// Use local system fonts to avoid network-dependent build errors
+// Fonts should be loaded from local fallback instead of Google Fonts
 
 export const viewport: Viewport = {
   width: "device-width",

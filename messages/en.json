@@ -7,6 +7,33 @@
     "launchingSoon": "Coming Soon",
     "footer": "Marketna"
   },
+  "Header": {
+    "search": "Search",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "createAccount": "Create Account",
+    "menuItems": {
+      "home": "Home",
+      "products": "Products",
+      "cart": "Cart",
+      "wishlist": "Wishlist",
+      "orders": "Orders",
+      "coupons": "Coupons",
+      "dashboard": "Dashboard",
+      "account": "Account",
+      "profile": "Profile",
+      "settings": "Settings",
+      "language": "Language",
+      "theme": "Theme",
+      "support": "Support",
+      "documentation": "Documentation",
+      "arabic": "Arabic",
+      "english": "English",
+      "system": "System",
+      "dark": "Dark",
+      "light": "Light"
+    }
+  },
   "seo": {
     "dashboard": {
       "title": "Dashboard",
