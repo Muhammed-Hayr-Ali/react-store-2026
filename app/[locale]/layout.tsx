@@ -9,9 +9,14 @@ import { Viewport, Metadata } from "next";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/lib/providers/auth-provider";
 import { CsrfProvider } from "@/lib/providers/csrf-provider";
+import { Inter, Cairo, JetBrains_Mono } from "next/font/google";
 
-// Use local system fonts to avoid network-dependent build errors
-// Fonts should be loaded from local fallback instead of Google Fonts
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const cairo = Cairo({ subsets: ["arabic", "latin"], variable: "--font-cairo" });
+const fontMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+});
 
 export const viewport: Viewport = {
   width: "device-width",
