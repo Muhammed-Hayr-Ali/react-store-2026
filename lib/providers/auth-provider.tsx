@@ -32,6 +32,7 @@ type UserProfile = {
   phone_number: string | null;
   is_phone_verified: boolean;
   is_mfa_enabled: boolean;
+  preferred_language: string | null;
   created_at: string | null;
 };
 
@@ -216,6 +217,7 @@ function normalizeProfile(raw: unknown): FullProfile {
       phone_number: (p.phone_number as string | undefined) ?? null,
       is_phone_verified: (p.is_phone_verified as boolean | undefined) ?? false,
       is_mfa_enabled: false, // Will be set by checkMfaStatusClient
+      preferred_language: (p.preferred_language as string | undefined) ?? null,
       created_at: (p.created_at as string | undefined) ?? null,
     },
     user: null,
