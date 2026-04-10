@@ -27,8 +27,6 @@ import {
   Loader2,
   Mail,
   Phone,
-  Globe,
-  Clock,
   CheckCircle2,
   AlertCircle,
   Upload,
@@ -39,17 +37,6 @@ import { useTranslations, useLocale } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { toast } from "sonner";
 import type { User } from "@supabase/supabase-js";
-
-const TIMEZONES = [
-  { value: "Asia/Damascus", label: "Asia/Damascus (GMT+3)" },
-  { value: "Asia/Riyadh", label: "Asia/Riyadh (GMT+3)" },
-  { value: "Asia/Dubai", label: "Asia/Dubai (GMT+4)" },
-  { value: "Asia/Kuwait", label: "Asia/Kuwait (GMT+3)" },
-  { value: "Africa/Cairo", label: "Africa/Cairo (GMT+2)" },
-  { value: "Europe/London", label: "Europe/London (GMT+0)" },
-  { value: "America/New_York", label: "America/New_York (GMT-5)" },
-  { value: "America/Los_Angeles", label: "America/Los_Angeles (GMT-8)" },
-];
 
 export default function AccountSettingsPage() {
   const t = useTranslations("settings");
@@ -374,66 +361,6 @@ export default function AccountSettingsPage() {
                 placeholder={t("phonePlaceholder")}
                 className="max-w-md"
               />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Preferences */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("preferences")}</CardTitle>
-            <CardDescription>{t("preferencesDescription")}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Language */}
-            <div className="space-y-2">
-              <Label
-                htmlFor="preferred_language"
-                className="flex items-center gap-2"
-              >
-                <Globe className="h-4 w-4" />
-                {t("language")}
-              </Label>
-              <Select
-                name="preferred_language"
-                key={profile?.profile?.preferred_language || "loading"}
-                defaultValue={profile?.profile?.preferred_language || "en"}
-              >
-                <SelectTrigger className="max-w-md">
-                  <SelectValue placeholder={t("selectLanguage")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="ar">العربية</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                {t("languageHint")}
-              </p>
-            </div>
-
-            {/* Timezone */}
-            <div className="space-y-2">
-              <Label htmlFor="timezone" className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                {t("timezone")}
-              </Label>
-              <Select
-                name="timezone"
-                key={profile?.profile?.timezone || "loading"}
-                defaultValue={profile?.profile?.timezone || "Asia/Riyadh"}
-              >
-                <SelectTrigger className="max-w-md">
-                  <SelectValue placeholder={t("selectTimezone")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {TIMEZONES.map((tz) => (
-                    <SelectItem key={tz.value} value={tz.value}>
-                      {tz.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
           </CardContent>
         </Card>
