@@ -2,30 +2,29 @@
 // 🛡️ XSS Sanitization Helpers
 // =====================================================
 // ✅ ينظف المدخلات من scripts و HTML الضار
-// ✅ يستخدم DOMPurify (موجود بالفعل في المشروع)
+// ✅ يستخدم sanitize-html (لا يعتمد على jsdom)
 // ✅ يمنع XSS attacks
 // =====================================================
 
-import createDOMPurify from "isomorphic-dompurify";
-
-const DOMPurify = createDOMPurify();
+import sanitizeHtmlLib from "sanitize-html";
 
 export function sanitizeHtml(input: string): string {
-  return DOMPurify.sanitize(input, {
-    ALLOWED_TAGS: ["b", "i", "em", "strong", "a", "p", "br", "ul", "ol", "li"],
-    ALLOWED_ATTR: ["href", "title", "target", "rel"],
+  return sanitizeHtmlLib(input, {
+    allowedTags: ["b", "i", "em", "strong", "a", "p", "br", "ul", "ol", "li"],
+    allowedAttributes: {
+      a: ["href", "title", "target", "rel"],
+    },
   });
 }
 
 export function sanitizeText(input: string): string {
-  return DOMPurify.sanitize(input, { ALLOWED_TAGS: [] });
+  return sanitizeHtmlLib(input, { allowedTags: [] });
 }
 
 export function sanitizeUrl(input: string): string {
-  const sanitized = DOMPurify.sanitize(input, {
-    ALLOWED_TAGS: [],
-    ALLOWED_URI_REGEXP:
-      /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.-]+(?:[^a-z+.-:]|$))/i,
+  const sanitized = sanitizeHtmlLib(input, {
+    allowedTags: [],
+    allowedSchemes: ["http", "https", "mailto", "tel"],
   });
   return sanitized || "#";
 }
