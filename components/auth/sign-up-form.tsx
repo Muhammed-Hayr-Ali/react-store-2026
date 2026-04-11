@@ -2,15 +2,22 @@
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
 
 import { signUpWithPassword } from "@/lib/actions/authentication/signUpWithPassword";
+import {
+  signUpSchema,
+  type SignUpFormValues,
+} from "@/lib/validations/signUpSchema";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
@@ -19,7 +26,6 @@ import { Input } from "@/components/ui/input";
 import { AppLogo } from "../shared/app-logo";
 import { signInWithGoogle } from "@/lib/actions/authentication/signIn-with-google";
 import { toast } from "sonner";
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,7 +39,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { appRouter } from "@/lib/navigation";
 import { Spinner } from "../ui/spinner";
-import { CsrfTokenInput } from "../shared/csrf-token-input";
 
 export default function SignUpForm({
   className,
@@ -44,12 +49,25 @@ export default function SignUpForm({
   const router = useRouter();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [isPending, startTransition] = useTransition();
+  const form = useForm<SignUpFormValues>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      first_name: "",
+      last_name: "",
+      email: "",
+      password: "",
+      confirm_password: "",
+    },
+    mode: "onChange",
+  });
 
-  const onSubmit = async (formData: FormData) => {
-    startTransition(async () => {
-      const result = await signUpWithPassword(undefined, formData);
+  async function onSubmit(data: SignUpFormValues) {
+    setIsSubmitting(true);
+
+    try {
+      const result = await signUpWithPassword(data);
 
       if (!result.success) {
         const message =
@@ -60,7 +78,17 @@ export default function SignUpForm({
       } else {
         setShowSuccessDialog(true);
       }
-    });
+    } catch {
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  // Translate validation errors
+  const translateError = (errorKey: string | undefined): string => {
+    if (!errorKey) return "";
+    return tErrors.has(errorKey) ? tErrors(errorKey) : errorKey;
   };
 
   const handleGoogleSignIn = async () => {
@@ -90,9 +118,8 @@ export default function SignUpForm({
     <form
       className={cn("flex flex-col gap-8", className)}
       {...props}
-      action={onSubmit}
+      onSubmit={form.handleSubmit(onSubmit)}
     >
-      <CsrfTokenInput />
       <FieldGroup className="gap-6">
         <div className="mb-2 flex flex-col items-center gap-3 text-center">
           <Link href={appRouter.home}>
@@ -103,78 +130,145 @@ export default function SignUpForm({
             {t("enterDetailsSignUp")}
           </p>
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field>
-            <FieldLabel htmlFor="first_name">{t("firstName")}</FieldLabel>
-            <Input
-              id="first_name"
-              name="first_name"
-              type="text"
-              autoComplete="given-name"
-              placeholder={t("firstNamePlaceholder")}
-              disabled={isPending}
-            />
-          </Field>
 
-          <Field>
-            <FieldLabel htmlFor="last_name">{t("lastName")}</FieldLabel>
-            <Input
-              id="last_name"
-              name="last_name"
-              type="text"
-              autoComplete="family-name"
-              placeholder={t("lastNamePlaceholder")}
-              disabled={isPending}
-            />
-          </Field>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Controller
+            name="first_name"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>{t("firstName")}</FieldLabel>
+                <Input
+                  {...field}
+                  id={field.name}
+                  type="text"
+                  autoComplete="given-name"
+                  placeholder={t("firstNamePlaceholder")}
+                  disabled={isSubmitting}
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && (
+                  <FieldError>
+                    {translateError(fieldState.error?.message)}
+                  </FieldError>
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            name="last_name"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>{t("lastName")}</FieldLabel>
+                <Input
+                  {...field}
+                  id={field.name}
+                  type="text"
+                  autoComplete="family-name"
+                  placeholder={t("lastNamePlaceholder")}
+                  disabled={isSubmitting}
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && (
+                  <FieldError>
+                    {translateError(fieldState.error?.message)}
+                  </FieldError>
+                )}
+              </Field>
+            )}
+          />
         </div>
+
+        <Controller
+          name="email"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>{t("email")}</FieldLabel>
+              <Input
+                {...field}
+                id={field.name}
+                type="email"
+                autoComplete="email"
+                placeholder={t("emailPlaceholder")}
+                disabled={isSubmitting}
+                aria-invalid={fieldState.invalid}
+              />
+              <FieldDescription className="text-xs">
+                {t("emailInclusion")}
+              </FieldDescription>
+              {fieldState.invalid && (
+                <FieldError>
+                  {translateError(fieldState.error?.message)}
+                </FieldError>
+              )}
+            </Field>
+          )}
+        />
+
+        <Controller
+          name="password"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>{t("password")}</FieldLabel>
+              <Input
+                {...field}
+                id={field.name}
+                type="password"
+                autoComplete="new-password"
+                placeholder={t("passwordPlaceholder")}
+                disabled={isSubmitting}
+                aria-invalid={fieldState.invalid}
+              />
+              <FieldDescription className="text-xs">
+                {t("passwordRequirement")}
+              </FieldDescription>
+              {fieldState.invalid && (
+                <FieldError>
+                  {translateError(fieldState.error?.message)}
+                </FieldError>
+              )}
+            </Field>
+          )}
+        />
+
+        <Controller
+          name="confirm_password"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>
+                {t("confirmPassword")}
+              </FieldLabel>
+              <Input
+                {...field}
+                id={field.name}
+                type="password"
+                autoComplete="new-password"
+                placeholder={t("passwordPlaceholder")}
+                disabled={isSubmitting}
+                aria-invalid={fieldState.invalid}
+              />
+              {fieldState.invalid && (
+                <FieldError>
+                  {translateError(fieldState.error?.message)}
+                </FieldError>
+              )}
+            </Field>
+          )}
+        />
+
         <Field>
-          <FieldLabel htmlFor="email">{t("email")}</FieldLabel>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            placeholder={t("emailPlaceholder")}
-            disabled={isPending}
-          />
-          <FieldDescription className="text-xs">
-            {t("emailInclusion")}
-          </FieldDescription>
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="password">{t("password")}</FieldLabel>
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            placeholder={t("passwordPlaceholder")}
-            disabled={isPending}
-          />
-          <FieldDescription className="text-xs">
-            {t("passwordRequirement")}
-          </FieldDescription>
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="confirm-password">
-            {t("confirmPassword")}
-          </FieldLabel>
-          <Input
-            id="confirm-password"
-            name="confirm_password"
-            type="password"
-            autoComplete="new-password"
-            placeholder={t("passwordPlaceholder")}
-            disabled={isPending}
-          />
-        </Field>
-        <Field>
-          <Button type="submit" disabled={isPending}>
-            {isPending ? <Spinner /> : t("submitSignUp")}
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? <Spinner /> : t("submitSignUp")}
           </Button>
         </Field>
+
         <FieldSeparator className="my-2">{t("continueWith")}</FieldSeparator>
+
         <Field>
           <Button
             variant="outline"
@@ -197,6 +291,7 @@ export default function SignUpForm({
             )}
           </Button>
         </Field>
+
         <FieldDescription className="text-center text-sm">
           {t("haveAccount")} <Link href={appRouter.signIn}>{t("signIn")}</Link>
         </FieldDescription>

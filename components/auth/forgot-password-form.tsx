@@ -1,46 +1,84 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+
 import { requestPasswordReset } from "@/lib/actions/authentication/requestPasswordReset";
+import {
+  forgotPasswordSchema,
+  type ForgotPasswordFormValues,
+} from "@/lib/validations/forgotPasswordSchema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 import { appRouter } from "@/lib/navigation";
 import { ArrowLeftIcon, MailIcon } from "lucide-react";
-import { CsrfTokenInput } from "../shared/csrf-token-input";
+import { AppLogo } from "../shared/app-logo";
+import Link from "next/link";
 
 export default function ForgotPasswordForm() {
-  const t = useTranslations("ForgotPassword");
+  const t = useTranslations("Auth");
   const tErrors = useTranslations("Errors");
   const router = useRouter();
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [isPending, startTransition] = useTransition();
+  const form = useForm<ForgotPasswordFormValues>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: "",
+    },
+    mode: "onChange",
+  });
 
-  const onSubmit = async (formData: FormData) => {
-    startTransition(async () => {
-      const result = await requestPasswordReset(undefined, formData);
+  // Translate validation errors
+  const translateError = (errorKey: string | undefined): string => {
+    if (!errorKey) return "";
+    return tErrors.has(errorKey) ? tErrors(errorKey) : errorKey;
+  };
+
+  async function onSubmit(data: ForgotPasswordFormValues) {
+    setIsSubmitting(true);
+
+    try {
+      const result = await requestPasswordReset(data);
 
       if (result.success) {
         setIsSubmitted(true);
-        toast.success(t("emailSent"));
+        toast.success(t("checkYourEmail"));
       } else {
         const message =
           result.error && tErrors.has(result.error)
             ? tErrors(result.error)
             : result.error;
-        toast.error(message || t("emailSent"));
+        toast.error(message);
       }
-    });
-  };
+    } catch {
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   if (isSubmitted) {
     return (
       <div className="space-y-6 text-center">
+        <div className="mb-2 flex flex-col items-center gap-3 text-center">
+          <Link href={appRouter.home}>
+            <AppLogo size="lg" />
+          </Link>
+        </div>
+
         <div className="space-y-2">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
             <MailIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
@@ -64,48 +102,71 @@ export default function ForgotPasswordForm() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2 text-center">
-        <h1 className="text-2xl font-semibold">{t("title")}</h1>
-        <p className="text-muted-foreground">{t("description")}</p>
-      </div>
-
-      <form action={onSubmit} className="space-y-4">
-        <CsrfTokenInput />
-        <div className="space-y-2">
-          <FieldLabel htmlFor="email">{t("email")}</FieldLabel>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            placeholder={t("emailPlaceholder")}
-            disabled={isPending}
-          />
+    <form
+      className="flex flex-col gap-8"
+      onSubmit={form.handleSubmit(onSubmit)}
+    >
+      <FieldGroup className="gap-6">
+        <div className="mb-2 flex flex-col items-center gap-3 text-center">
+          <Link href={appRouter.home}>
+            <AppLogo size="lg" />
+          </Link>
+          <h1 className="mt-2 text-2xl font-bold">
+            {t("forgotPasswordTitle")}
+          </h1>
+          <p className="text-sm text-balance text-muted-foreground">
+            {t("forgotPasswordDesc")}
+          </p>
         </div>
 
-        <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? (
-            <>
-              <Spinner className="ml-2" />
-              {t("sending")}
-            </>
-          ) : (
-            t("sendResetLink")
+        <Controller
+          name="email"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>{t("email")}</FieldLabel>
+              <Input
+                {...field}
+                id={field.name}
+                type="email"
+                autoComplete="email"
+                placeholder={t("emailPlaceholder")}
+                disabled={isSubmitting}
+                aria-invalid={fieldState.invalid}
+              />
+              {fieldState.invalid && (
+                <FieldError>
+                  {translateError(fieldState.error?.message)}
+                </FieldError>
+              )}
+            </Field>
           )}
-        </Button>
-      </form>
+        />
 
-      <div className="text-center">
-        <Button
-          variant="link"
-          className="text-muted-foreground"
-          onClick={() => router.push(appRouter.signIn)}
-        >
-          <ArrowLeftIcon className="ml-2 h-4 w-4" />
-          {t("backToSignIn")}
-        </Button>
-      </div>
-    </div>
+        <Field>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Spinner className="mr-2" />
+                {t("sending")}
+              </>
+            ) : (
+              t("sendResetLink")
+            )}
+          </Button>
+        </Field>
+
+        <Field className="text-center">
+          <Button
+            variant="link"
+            className="text-muted-foreground"
+            onClick={() => router.push(appRouter.signIn)}
+          >
+            <ArrowLeftIcon className="ml-2 h-4 w-4" />
+            {t("backToSignIn")}
+          </Button>
+        </Field>
+      </FieldGroup>
+    </form>
   );
 }

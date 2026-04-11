@@ -2,12 +2,10 @@
 
 import { createAdminClient } from "@/lib/database/supabase/admin";
 import { ApiResult } from "@/lib/database/types";
-import {
-  resetPasswordSchema,
-  validateInput,
-  logAuthentication,
-} from "@/lib/security";
+import { resetPasswordSchema } from "@/lib/validations/resetPasswordSchema";
+import { logAuthentication } from "@/lib/security";
 import { verifyCsrfToken } from "@/lib/security/csrf-server-action";
+import type { z } from "zod";
 
 // ===============================================================================
 // Reset Password with Token
@@ -25,26 +23,14 @@ export interface ResetPasswordResult extends ApiResult {
  * @returns نتيجة العملية
  */
 export async function resetPassword(
-  _prevState: unknown,
-  formData: FormData,
+  data: z.infer<typeof resetPasswordSchema>,
 ): Promise<ResetPasswordResult> {
-  const csrfCheck = await verifyCsrfToken(formData);
-  if (!csrfCheck.valid) {
-    return {
-      success: false,
-      error: "CSRF_ERROR",
-    };
-  }
-
-  const token = formData.get("token") as string;
-  const password = formData.get("password") as string;
-
-  const validation = validateInput(resetPasswordSchema, { token, password });
+  const validation = resetPasswordSchema.safeParse(data);
 
   if (!validation.success) {
     return {
       success: false,
-      error: validation.errors.join(", "),
+      error: validation.error.issues.map((e) => e.message).join(", "),
     };
   }
 

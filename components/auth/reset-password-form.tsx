@@ -1,24 +1,38 @@
 "use client";
 
-import { useState, useTransition, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+
 import {
   resetPassword,
   verifyResetToken,
 } from "@/lib/actions/authentication/resetPassword";
+import {
+  resetPasswordSchema,
+  type ResetPasswordFormValues,
+} from "@/lib/validations/resetPasswordSchema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 import { appRouter } from "@/lib/navigation";
-import { CheckCircleIcon, LockIcon } from "lucide-react";
-import { CsrfTokenInput } from "../shared/csrf-token-input";
+import { ArrowLeftIcon, CheckCircleIcon, LockIcon } from "lucide-react";
+import { AppLogo } from "../shared/app-logo";
+import Link from "next/link";
 
 function ResetPasswordFormContent() {
-  const t = useTranslations("ResetPassword");
+  const t = useTranslations("Auth");
   const tErrors = useTranslations("Errors");
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -28,17 +42,38 @@ function ResetPasswordFormContent() {
   const [isValidating, setIsValidating] = useState(true);
   const [isTokenValid, setIsTokenValid] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [isPending, startTransition] = useTransition();
+  const form = useForm<ResetPasswordFormValues>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      token: token || "",
+      password: "",
+      confirm_password: "",
+    },
+    mode: "onChange",
+  });
 
-  const onSubmit = async (formData: FormData) => {
+  // Translate validation errors
+  const translateError = (errorKey: string | undefined): string => {
+    if (!errorKey) return "";
+    return tErrors.has(errorKey) ? tErrors(errorKey) : errorKey;
+  };
+
+  async function onSubmit(data: ResetPasswordFormValues) {
     if (!token) {
       toast.error(t("missingToken"));
       return;
     }
 
-    startTransition(async () => {
-      const result = await resetPassword(undefined, formData);
+    setIsSubmitting(true);
+
+    try {
+      const result = await resetPassword({
+        token,
+        password: data.password,
+        confirm_password: data.confirm_password,
+      });
 
       if (result.success) {
         setIsSuccess(true);
@@ -52,10 +87,14 @@ function ResetPasswordFormContent() {
           result.error && tErrors.has(result.error)
             ? tErrors(result.error)
             : result.error;
-        toast.error(message || t("invalidToken"));
+        toast.error(message);
       }
-    });
-  };
+    } catch {
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   useEffect(() => {
     if (!token) {
@@ -95,14 +134,18 @@ function ResetPasswordFormContent() {
   if (!isTokenValid) {
     return (
       <div className="space-y-6 text-center">
+        <div className="mb-2 flex flex-col items-center gap-3 text-center">
+          <Link href={appRouter.home}>
+            <AppLogo size="lg" />
+          </Link>
+        </div>
+
         <div className="space-y-2">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
             <LockIcon className="h-8 w-8 text-red-600 dark:text-red-400" />
           </div>
           <h2 className="text-2xl font-semibold">{t("invalidTokenTitle")}</h2>
-          <p className="text-muted-foreground">
-            {t("invalidTokenDescription")}
-          </p>
+          <p className="text-muted-foreground">{t("invalidTokenDesc")}</p>
         </div>
 
         <Button
@@ -119,12 +162,18 @@ function ResetPasswordFormContent() {
   if (isSuccess) {
     return (
       <div className="space-y-6 text-center">
+        <div className="mb-2 flex flex-col items-center gap-3 text-center">
+          <Link href={appRouter.home}>
+            <AppLogo size="lg" />
+          </Link>
+        </div>
+
         <div className="space-y-2">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
             <CheckCircleIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
           </div>
           <h2 className="text-2xl font-semibold">{t("successTitle")}</h2>
-          <p className="text-muted-foreground">{t("successDescription")}</p>
+          <p className="text-muted-foreground">{t("successDesc")}</p>
         </div>
 
         <div className="space-y-4">
@@ -141,64 +190,99 @@ function ResetPasswordFormContent() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2 text-center">
-        <h1 className="text-2xl font-semibold">{t("title")}</h1>
-        <p className="text-muted-foreground">{t("description")}</p>
-      </div>
-
-      <form action={onSubmit} className="space-y-4">
-        <CsrfTokenInput />
-        <input type="hidden" name="token" value={token || ""} />
-
-        <div className="space-y-2">
-          <FieldLabel htmlFor="password">{t("newPassword")}</FieldLabel>
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            placeholder="••••••••"
-            disabled={isPending}
-          />
+    <form
+      className="flex flex-col gap-8"
+      onSubmit={form.handleSubmit(onSubmit)}
+    >
+      <FieldGroup className="gap-6">
+        <div className="mb-2 flex flex-col items-center gap-3 text-center">
+          <Link href={appRouter.home}>
+            <AppLogo size="lg" />
+          </Link>
+          <h1 className="mt-2 text-2xl font-bold">{t("resetPasswordTitle")}</h1>
+          <p className="text-sm text-balance text-muted-foreground">
+            {t("resetPasswordDesc")}
+          </p>
         </div>
 
-        <div className="space-y-2">
-          <FieldLabel htmlFor="confirmPassword">
-            {t("confirmPassword")}
-          </FieldLabel>
-          <Input
-            id="confirmPassword"
-            name="confirmPassword"
-            type="password"
-            autoComplete="new-password"
-            placeholder="••••••••"
-            disabled={isPending}
-          />
-        </div>
-
-        <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? (
-            <>
-              <Spinner className="ml-2" />
-              {t("resetting")}
-            </>
-          ) : (
-            t("resetPassword")
+        <Controller
+          name="password"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>{t("newPassword")}</FieldLabel>
+              <Input
+                {...field}
+                id={field.name}
+                type="password"
+                autoComplete="new-password"
+                placeholder={t("passwordPlaceholder")}
+                disabled={isSubmitting}
+                aria-invalid={fieldState.invalid}
+              />
+              <FieldDescription className="text-xs">
+                {t("passwordHint")}
+              </FieldDescription>
+              {fieldState.invalid && (
+                <FieldError>
+                  {translateError(fieldState.error?.message)}
+                </FieldError>
+              )}
+            </Field>
           )}
-        </Button>
-      </form>
+        />
 
-      <div className="text-center">
-        <Button
-          variant="link"
-          className="text-muted-foreground"
-          onClick={() => router.push(appRouter.signIn)}
-        >
-          {t("backToSignIn")}
-        </Button>
-      </div>
-    </div>
+        <Controller
+          name="confirm_password"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>
+                {t("confirmPassword")}
+              </FieldLabel>
+              <Input
+                {...field}
+                id={field.name}
+                type="password"
+                autoComplete="new-password"
+                placeholder={t("passwordPlaceholder")}
+                disabled={isSubmitting}
+                aria-invalid={fieldState.invalid}
+              />
+              {fieldState.invalid && (
+                <FieldError>
+                  {translateError(fieldState.error?.message)}
+                </FieldError>
+              )}
+            </Field>
+          )}
+        />
+
+        <Field>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Spinner className="mr-2" />
+                {t("resetting")}
+              </>
+            ) : (
+              t("resetPassword")
+            )}
+          </Button>
+        </Field>
+
+        <Field className="text-center">
+          <Button
+            variant="link"
+            className="text-muted-foreground"
+            onClick={() => router.push(appRouter.signIn)}
+          >
+            <ArrowLeftIcon className="ml-2 h-4 w-4" />
+            {t("backToSignIn")}
+          </Button>
+        </Field>
+      </FieldGroup>
+    </form>
   );
 }
 

@@ -409,6 +409,93 @@ export interface Database {
           permissions: string[];
         } | null;
       };
+      // Utility Functions - الدوال المساعدة
+      current_user_id: {
+        Args: Record<string, never>;
+        Returns: string;
+      };
+      has_role: {
+        Args: { p_role: string };
+        Returns: boolean;
+      };
+      is_admin: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      is_vendor: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      is_delivery: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      get_user_roles: {
+        Args: Record<string, never>;
+        Returns: {
+          role_id: string;
+          role_code: string;
+          role_description: string;
+        }[];
+      };
+      has_permission: {
+        Args: { p_permission: string };
+        Returns: boolean;
+      };
+      get_user_permissions: {
+        Args: Record<string, never>;
+        Returns: string[];
+      };
+      is_product_owner: {
+        Args: { p_product_id: string };
+        Returns: boolean;
+      };
+      get_store_settings: {
+        Args: Record<string, never>;
+        Returns: {
+          id: string;
+          name_ar: string;
+          name_en: string;
+          description_ar: string;
+          description_en: string;
+          email: string;
+          phone: string;
+          address: string;
+          city: string;
+          default_currency: string;
+          logo_url: string;
+          banner_url: string;
+          is_active: boolean;
+        }[];
+      };
+      create_delivery_verification: {
+        Args: { p_order_id: string };
+        Returns: string;
+      };
+      verify_delivery: {
+        Args: { p_verification_code: string };
+        Returns: boolean;
+      };
+      admin_get_order_stats: {
+        Args: Record<string, never>;
+        Returns: {
+          status: string;
+          total_orders: number;
+          total_revenue: number;
+        }[];
+      };
+      admin_get_all_orders: {
+        Args: Record<string, never>;
+        Returns: {
+          order_id: string;
+          order_number: string;
+          customer_email: string;
+          customer_name: string;
+          status: string;
+          grand_total: number;
+          created_at: string;
+        }[];
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation";
-import { checkUserRoles } from "@/lib/middleware/dashboard-permission-guard";
 import { appRouter } from "@/lib/navigation";
-import DashboardCustomer from "@/components/dashboard/dashboard-customer";
-import DashboardSeller from "@/components/dashboard/dashboard-seller";
-import DashboardDriver from "@/components/dashboard/dashboard-driver";
-import DashboardAdmin from "@/components/dashboard/dashboard-admin";
 import { createMetadata } from "@/lib/config/metadata_generator";
 import { getTranslations } from "next-intl/server";
+import { getUserRole } from "@/lib/actions/user";
+import DashboardAdmin from "@/components/DashboardAdmin/dashboard-admin";
+import DashboardSeller from "@/components/DashboardSeller/dashboard-seller";
+import DashboardDriver from "@/components/DashboardDriver/dashboard-driver";
+import DashboardCustomer from "@/components/DashboardCustomer/dashboard-customer";
 
 // =====================================================
 // 🧭 Dashboard Router (URL موحد — لا يظهر الدور في الرابط)
@@ -23,32 +23,35 @@ export async function generateMetadata() {
 }
 
 export default async function DashboardPage() {
-  const session = await checkUserRoles();
+
+
+
+  
+   const role = await getUserRole()
 
   // غير مسجل دخول → صفحة تسجيل الدخول
-  if (!session) {
+  if (!role.success || !role.data) {
     return redirect(appRouter.signIn);
   }
 
-  const { roles } = session;
+  const roleCode = role.data.role_code;
 
   // ترتيب الأولوية: admin > seller > driver > customer
-  if (roles.includes("admin")) {
+  if (roleCode.includes("admin")) {
     return <DashboardAdmin />;
   }
 
-  if (roles.includes("vendor")) {
+  if (roleCode.includes("vendor")) {
     return <DashboardSeller />;
   }
 
-  if (roles.includes("delivery")) {
+  if (roleCode.includes("delivery")) {
     return <DashboardDriver />;
   }
 
-  if (roles.includes("customer")) {
+  if (roleCode.includes("customer")) {
     return <DashboardCustomer />;
   }
 
-  // ما عنده أي دور → unauthorized
-  return redirect("/unauthorized");
+  return redirect(appRouter.home);
 }

@@ -15,6 +15,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { getUserRole } from "@/lib/actions/user/get-user-role";
 
 export default async function DashboardLayout({
   children,
@@ -23,12 +24,15 @@ export default async function DashboardLayout({
 }>) {
   // Check MFA status - redirect to verify if MFA is required
   await MfaGuard("/dashboard");
+  const role = await getUserRole();
+  const roleCode = role.data?.role_code || "customer"; // Default to 'customer' if role is not found
+
 
   return (
     <div>
       <AuthGuard />
       <SidebarProvider>
-        <AppSidebar />
+        <AppSidebar userRole={roleCode} />
         <SidebarInset>
           <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
             <div className="flex items-center gap-2 px-4">

@@ -3,47 +3,23 @@
 import { createAdminClient } from "@/lib/database/supabase/admin";
 import { ApiResult } from "@/lib/database/types";
 import { sendPasswordResetEmail } from "@/lib/email";
-import {
-  emailSchema,
-  validateInput,
-  logAuthentication,
-  checkRateLimit,
-} from "@/lib/security";
-import { verifyCsrfToken } from "@/lib/security/csrf-server-action";
+import { forgotPasswordSchema } from "@/lib/validations/forgotPasswordSchema";
+import { logAuthentication, checkRateLimit } from "@/lib/security";
+import type { z } from "zod";
 
-// ===============================================================================
-// Request Password Reset
-// ===============================================================================
-
-export interface ForgotPasswordResult extends ApiResult {
-  error?: string;
-}
-
-/**
- * طلب إعادة تعيين كلمة المرور
- *
- * @param _prevState حالة النموذج
- * @param formData بيانات النموذج
- * @returns نتيجة العملية
- */
 export async function requestPasswordReset(
-  _prevState: unknown,
-  formData: FormData,
-): Promise<ForgotPasswordResult> {
+  data: z.infer<typeof forgotPasswordSchema>,
+): Promise<ApiResult> {
   try {
-    const csrfCheck = await verifyCsrfToken(formData);
-    if (!csrfCheck.valid) {
-      return { success: false, error: "CSRF_ERROR" };
-    }
-
-    const rawEmail = formData.get("email") as string;
-
-    const validation = validateInput(emailSchema, rawEmail);
+    const validation = forgotPasswordSchema.safeParse(data);
     if (!validation.success) {
-      return { success: false, error: validation.errors.join(", ") };
+      return {
+        success: false,
+        error: validation.error.issues.map((e) => e.message).join(", "),
+      };
     }
 
-    const email = validation.data;
+    const email = validation.data.email;
 
     const rateLimit = checkRateLimit(new Headers(), {
       maxRequests: 5,

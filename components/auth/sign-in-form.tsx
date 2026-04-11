@@ -2,16 +2,23 @@
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
 
 import { signInWithPassword } from "@/lib/actions/authentication/signInWithPassword";
+import {
+  signInSchema,
+  type SignInFormValues,
+} from "@/lib/validations/signInSchema";
 import { signInWithGoogle } from "@/lib/actions/authentication/signIn-with-google";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
@@ -31,12 +38,28 @@ export default function SignInForm({
   const tErrors = useTranslations("Errors");
   const router = useRouter();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [isPending, startTransition] = useTransition();
+  const form = useForm<SignInFormValues>({
+    resolver: zodResolver(signInSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    mode: "onChange",
+  });
 
-  const onSubmit = async (formData: FormData) => {
-    startTransition(async () => {
-      const result = await signInWithPassword(undefined, formData);
+  // Translate validation errors
+  const translateError = (errorKey: string | undefined): string => {
+    if (!errorKey) return "";
+    return tErrors.has(errorKey) ? tErrors(errorKey) : errorKey;
+  };
+
+  async function onSubmit(data: SignInFormValues) {
+    setIsSubmitting(true);
+
+    try {
+      const result = await signInWithPassword(data);
 
       if (!result.success) {
         const message =
@@ -49,8 +72,12 @@ export default function SignInForm({
 
       router.push(appRouter.home);
       router.refresh();
-    });
-  };
+    } catch {
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
@@ -67,7 +94,7 @@ export default function SignInForm({
     <form
       className={cn("flex flex-col gap-8", className)}
       {...props}
-      action={onSubmit}
+      onSubmit={form.handleSubmit(onSubmit)}
     >
       <CsrfTokenInput />
       <FieldGroup className="gap-6">
@@ -80,43 +107,72 @@ export default function SignInForm({
             {t("enterDetailsSignIn")}
           </p>
         </div>
+
+        <Controller
+          name="email"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>{t("email")}</FieldLabel>
+              <Input
+                {...field}
+                id={field.name}
+                type="email"
+                autoComplete="email"
+                placeholder={t("emailPlaceholder")}
+                disabled={isSubmitting}
+                aria-invalid={fieldState.invalid}
+              />
+              {fieldState.invalid && (
+                <FieldError>
+                  {translateError(fieldState.error?.message)}
+                </FieldError>
+              )}
+            </Field>
+          )}
+        />
+
+        <Controller
+          name="password"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>{t("password")}</FieldLabel>
+              <Input
+                {...field}
+                id={field.name}
+                type="password"
+                autoComplete="current-password"
+                placeholder={t("passwordPlaceholder")}
+                disabled={isSubmitting}
+                aria-invalid={fieldState.invalid}
+              />
+              <FieldDescription className="flex items-center justify-between text-xs">
+                <span>{t("passwordRequirement")}</span>
+                <Link
+                  href={appRouter.forgotPassword}
+                  className="text-primary hover:underline"
+                >
+                  {t("forgotPassword")}
+                </Link>
+              </FieldDescription>
+              {fieldState.invalid && (
+                <FieldError>
+                  {translateError(fieldState.error?.message)}
+                </FieldError>
+              )}
+            </Field>
+          )}
+        />
+
         <Field>
-          <FieldLabel htmlFor="email">{t("email")}</FieldLabel>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            placeholder={t("emailPlaceholder")}
-            disabled={isPending}
-          />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="password">{t("password")}</FieldLabel>
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            placeholder={t("passwordPlaceholder")}
-            disabled={isPending}
-          />
-          <FieldDescription className="flex items-center justify-between text-xs">
-            <span>{t("passwordRequirement")}</span>
-            <Link
-              href={appRouter.forgotPassword}
-              className="text-primary hover:underline"
-            >
-              {t("forgotPassword")}
-            </Link>
-          </FieldDescription>
-        </Field>
-        <Field>
-          <Button type="submit" disabled={isPending}>
-            {isPending ? <Spinner /> : t("submitSignIn")}
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? <Spinner /> : t("submitSignIn")}
           </Button>
         </Field>
+
         <FieldSeparator className="my-2">{t("continueWith")}</FieldSeparator>
+
         <Field>
           <Button
             variant="outline"
@@ -139,6 +195,7 @@ export default function SignInForm({
             )}
           </Button>
         </Field>
+
         <FieldDescription className="text-center text-sm">
           {t("haveAccount")} <Link href={appRouter.signUp}>{t("signUp")}</Link>
         </FieldDescription>
