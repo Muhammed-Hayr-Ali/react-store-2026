@@ -2,7 +2,7 @@
 // 📧 Email Service — خدمة البريد الإلكتروني (متعدد اللغات)
 // =====================================================
 
-import { sendEmail, type EmailOptions } from "./transporter"
+import { sendEmail } from "./transporter"
 import {
   emailVerificationTemplate,
   passwordResetTemplate,

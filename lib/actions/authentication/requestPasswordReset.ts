@@ -100,7 +100,15 @@ export async function requestPasswordReset(
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
       const resetLink = `${appUrl}/reset-password?token=${manualToken}`;
 
-      await sendPasswordResetEmail(userEmail, "مستخدم", resetLink);
+      const emailResult = await sendPasswordResetEmail(
+        userEmail,
+        "مستخدم",
+        resetLink,
+      );
+
+      if (!emailResult.success) {
+        console.error("Password reset email failed:", emailResult.error);
+      }
 
       logAuthentication("PASSWORD_RESET_REQUEST", userId, undefined, {
         email,
@@ -114,22 +122,25 @@ export async function requestPasswordReset(
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const resetLink = `${appUrl}/reset-password?token=${token}`;
 
-    try {
-      await sendPasswordResetEmail(userEmail, "مستخدم", resetLink);
-    } catch {
-      // Token created, email failure is logged but doesn't block response
+    const emailResult = await sendPasswordResetEmail(
+      userEmail,
+      "مستخدم",
+      resetLink,
+    );
+
+    if (!emailResult.success) {
+      console.error("Password reset email failed:", emailResult.error);
     }
 
     logAuthentication("PASSWORD_RESET_REQUEST", userId, undefined, { email });
 
     return { success: true };
   } catch (error) {
-    logAuthentication(
-      "PASSWORD_RESET_REQUEST",
-      undefined,
-      undefined,
-      error instanceof Error ? { error: error.message } : { error: "unknown" },
-    );
+    const errorMessage = error instanceof Error ? error.message : "unknown";
+    console.error("Password reset request failed:", errorMessage);
+    logAuthentication("PASSWORD_RESET_REQUEST", undefined, undefined, {
+      error: errorMessage,
+    });
     return {
       success: false,
       error: "UNEXPECTED_ERROR",
