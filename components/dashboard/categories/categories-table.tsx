@@ -82,6 +82,7 @@ import {
   GripVertical,
   PlusIcon,
 } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import CreateCategorySheet from "./create-category"
 import DeleteCategoryDialog from "./delete-category"
@@ -260,9 +261,7 @@ const columns = columnHelper.columns([
               Edit
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() =>
-                meta.duplicateCategory(row.original)
-              }
+              onClick={() => meta.duplicateCategory(row.original)}
             >
               Make a copy
             </DropdownMenuItem>
@@ -316,6 +315,7 @@ export function CategoriesTable({
 }: {
   data: z.infer<typeof schema>[]
 }) {
+  const router = useRouter()
   const [data, setData] = React.useState(() => initialData)
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
@@ -337,60 +337,50 @@ export function CategoriesTable({
     useSensor(KeyboardSensor, {})
   )
 
-  const dataIds = React.useMemo<UniqueIdentifier[]>(
-    () => data?.map(({ id }) => id) || [],
-    [data]
-  )
+  // // Dialog & sheet state for delete confirmation
+  // const [actions, setActions] = React.useState<{
+  //   isOpen: string | null
+  //   item: Category | null
+  //   items: Category[] | null
+  // }>({
+  //   isOpen: null,
+  //   item: null,
+  //   items: null,
+  // })
 
-  // Dialog & sheet state for delete confirmation
-  const [actions, setActions] = React.useState<{
-    isOpen: string | null
-    item: Category | null
-    items: Category[] | null
+  // Dialog & sheet state
+  const [dialogState, setDialogState] = React.useState<{
+    activeDialog: string | null
+    data: Category | null
   }>({
-    isOpen: null,
-    item: null,
-    items: null,
+    activeDialog: null,
+    data: null,
   })
 
-  const resetActions = () => {
-    setActions({ isOpen: null, item: null, items: null })
+  // handle Dialog Close
+  const handleDialogChange = (open: boolean) => {
+    if (!open) {
+      setDialogState({ activeDialog: null, data: null })
+    }
   }
 
-  // CRUD Operations
-
-  // Create
-  const handleCreateSuccess = (newCategory: Category) => {
-    setData((prev) => {
-      const updatedData = [...prev, newCategory]
-      // ترتيب البيانات حسب sort_order للحفاظ على التناسق
-      return updatedData.sort((a, b) => a.sort_order - b.sort_order)
+  // handle Open Dialog
+  const openDialog = (dialogName: string, data?: Category | null) => {
+    setDialogState({
+      activeDialog: dialogName,
+      data: data || null,
     })
   }
 
-  // Update
-  const handleUpdateSuccess = (updatedCategory: Category) => {
-    setData((prev) =>
-      prev.map((item) =>
-        item.id === updatedCategory.id ? updatedCategory : item
-      )
-    )
-  }
-
-  // Delete
-  const handleDeleteSuccess = (deletedCategoryId: string) => {
-    setData((prev) => prev.filter((item) => item.id !== deletedCategoryId))
-  }
-
-  // Dublicate
+  // Handle Duplicate Category
   const handleDuplicateCategory = async (categoryToDuplicate: Category) => {
-    // 1. تجهيز البيانات الجديدة مع تجنب التعديل المباشر وتجنب تكرار الـ Slug
+    // 1. تجهيز البيانات الجديدة
     const payload = {
       name: `${categoryToDuplicate.name} (Copy)`,
       name_ar: categoryToDuplicate.name_ar
         ? `${categoryToDuplicate.name_ar} (نسخة)`
         : null,
-      slug: `${categoryToDuplicate.slug}-copy`, // مهم جداً لتجنب خطأ الـ Unique Constraint
+      slug: `${categoryToDuplicate.slug}-copy-${Date.now()}`, // 💡 تحسين: إضافة timestamp لتجنب تكرار الـ slug تماماً إذا تم النسخ مرتين
       description: categoryToDuplicate.description,
       parent_id: categoryToDuplicate.parent_id,
       is_active: categoryToDuplicate.is_active,
@@ -399,18 +389,15 @@ export function CategoriesTable({
       image_alt: categoryToDuplicate.image_alt,
     }
 
-    // 2. استخدام toast.promise مع التحقق الصحيح من ApiResult
+    // 2. استخدام toast.promise
     toast.promise(
       (async () => {
         const result = await createCategory(payload)
 
-        // إذا فشل الحفظ، نرمي خطأ ليتم التقاطه من قبل toast
         if (!result.success) {
           throw new Error(result.error || "Failed to duplicate category")
         }
 
-        // 🔑 الحل السحري: فحص صريح للتأكد من أن البيانات ليست null
-        // هذا يخبر TypeScript أن النوع هنا هو Category فقط وليس Category | null
         if (!result.data) {
           throw new Error(
             "Category duplicated but no data was returned from server."
@@ -422,59 +409,34 @@ export function CategoriesTable({
       {
         loading: "Duplicating category...",
         success: (newlyCreatedCategory) => {
-          // هنا TypeScript متأكد الآن أن newlyCreatedCategory هي من نوع Category فقط
+          // 💡 خطوة التصحيح: تأكد من وصول البيانات عبر الكونسول
+          console.log(
+            "✅ Successfully duplicated and received:",
+            newlyCreatedCategory
+          )
+
+          // ✅ الحل: إضافة العنصر الجديد ثم ترتيب المصفوفة فوراً
           setData((prev) => {
             const updatedData = [...prev, newlyCreatedCategory]
-            // ترتيب البيانات حسب sort_order للحفاظ على التناسق
             return updatedData.sort((a, b) => a.sort_order - b.sort_order)
           })
+
           return "Category duplicated successfully."
         },
-        error: (err) =>
-          err.message || "Failed to duplicate category. Please try again.",
+        error: (err) => {
+          console.error("❌ Duplication failed:", err)
+          return (
+            err.message || "Failed to duplicate category. Please try again."
+          )
+        },
       }
     )
   }
 
-  const table = useTable({
-    features,
-    data,
-    columns,
-    state: {
-      sorting,
-      columnVisibility,
-      rowSelection,
-      columnFilters,
-      pagination,
-    },
-    getRowId: (row) => row.id.toString(),
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    onPaginationChange: setPagination,
-    meta: {
-      onOpen: ({
-        isOpen,
-        item,
-        items,
-      }: {
-        isOpen: string
-        item: Category
-        items: Category[]
-      }) => {
-        setActions({ isOpen, item, items })
-      },
-      duplicateCategory: handleDuplicateCategory,
-    },
-  })
-
-  // ✅ حالة لتتبع الفلتر النشط (الكل، نشط، غير نشط)
+  // Filter State
   const [statusFilter, setStatusFilter] = React.useState<string>("all")
-
-  // ✅ دالة لتطبيق الفلترة على عمود is_active
-  const handleStatusFilterChange = (value: string) => {
+  // Handle Filter
+  function handleFilterChange(value: string) {
     setStatusFilter(value)
 
     if (value === "all") {
@@ -509,8 +471,35 @@ export function CategoriesTable({
       })
     }
   }
+  // CRUD Operations
 
-  // 
+  // Handle Create Success
+  function handleCreateSuccess(newCategory: Category) {
+    setData((prev) => {
+      const updatedData = [...prev, newCategory]
+      return updatedData.sort((a, b) => a.sort_order - b.sort_order)
+    })
+  }
+
+  // Handle Update Success
+  function handleUpdateSuccess(updatedCategory: Category) {
+    setData((prev) =>
+      prev.map((item) =>
+        item.id === updatedCategory.id ? updatedCategory : item
+      )
+    )
+  }
+
+  // Handle Delete Success
+  function handleDeleteSuccess(deletedCategoryId: string) {
+    setData((prev) => prev.filter((item) => item.id !== deletedCategoryId))
+  }
+
+  // Drag and Drop
+  const dataIds = React.useMemo<UniqueIdentifier[]>(
+    () => data?.map(({ id }) => id) || [],
+    [data]
+  )
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
     if (active && over && active.id !== over.id) {
@@ -521,6 +510,34 @@ export function CategoriesTable({
       })
     }
   }
+
+  // use Table
+  const table = useTable({
+    features,
+    data,
+    columns,
+    state: {
+      sorting,
+      columnVisibility,
+      rowSelection,
+      columnFilters,
+      pagination,
+    },
+    getRowId: (row) => row.id.toString(),
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    onPaginationChange: setPagination,
+    meta: {
+      onOpen: ({ isOpen, item }: { isOpen: string; item: Category }) => {
+        openDialog(isOpen, item)
+      },
+
+      duplicateCategory: handleDuplicateCategory,
+    },
+  })
 
   return (
     <>
@@ -533,7 +550,7 @@ export function CategoriesTable({
             Filter by Status
           </Label>
 
-          <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
+          <Select value={statusFilter} onValueChange={handleFilterChange}>
             <SelectTrigger
               className="flex w-fit md:hidden"
               size="sm"
@@ -564,21 +581,18 @@ export function CategoriesTable({
             defaultValue={statusFilter}
             className="hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:bg-muted-foreground/30 **:data-[slot=badge]:px-1 md:flex"
           >
-            <TabsTrigger
-              value="all"
-              onClick={() => handleStatusFilterChange("all")}
-            >
+            <TabsTrigger value="all" onClick={() => handleFilterChange("all")}>
               All
             </TabsTrigger>
             <TabsTrigger
               value="active"
-              onClick={() => handleStatusFilterChange("active")}
+              onClick={() => handleFilterChange("active")}
             >
               Active ({data.filter((item) => item.is_active === true).length})
             </TabsTrigger>
             <TabsTrigger
               value="inactive"
-              onClick={() => handleStatusFilterChange("inactive")}
+              onClick={() => handleFilterChange("inactive")}
             >
               Inactive ({data.filter((item) => item.is_active === false).length}
               )
@@ -586,7 +600,7 @@ export function CategoriesTable({
 
             <TabsTrigger
               value="mainCategories"
-              onClick={() => handleStatusFilterChange("mainCategories")}
+              onClick={() => handleFilterChange("mainCategories")}
             >
               Main Categories (
               {data.filter((item) => item.parent_id === null).length})
@@ -638,7 +652,8 @@ export function CategoriesTable({
               variant="outline"
               size="sm"
               onClick={() =>
-                setActions({ isOpen: "create", item: null, items: data })
+                // setActions({ isOpen: "create", item: null, items: data })
+                openDialog("create")
               }
             >
               <PlusIcon />
@@ -791,28 +806,28 @@ export function CategoriesTable({
       </Tabs>
       {/* Sheets & Dialogs */}
       <DetailsCategorySheet
-        isOpen={actions.isOpen}
-        onOpenChange={resetActions}
-        item={actions.item}
+        isOpen={dialogState.activeDialog}
+        onOpenChange={handleDialogChange}
+        item={dialogState.data}
       />
       <CreateCategorySheet
-        isOpen={actions.isOpen}
-        onOpenChange={resetActions}
+        isOpen={dialogState.activeDialog}
+        onOpenChange={handleDialogChange}
         items={data.filter(
           (item) => item.parent_id === null && item.is_active === true
         )}
         onSuccess={handleCreateSuccess}
       />
       <DeleteCategoryDialog
-        isOpen={actions.isOpen}
-        onOpenChange={resetActions}
-        item={actions.item}
+        isOpen={dialogState.activeDialog}
+        onOpenChange={handleDialogChange}
+        item={dialogState.data}
         onSuccess={handleDeleteSuccess}
       />
       <UpdateCategorySheet
-        isOpen={actions.isOpen}
-        onOpenChange={resetActions}
-        item={actions.item}
+        isOpen={dialogState.activeDialog}
+        onOpenChange={handleDialogChange}
+        item={dialogState.data}
         items={data.filter(
           (item) => item.parent_id === null && item.is_active === true
         )}

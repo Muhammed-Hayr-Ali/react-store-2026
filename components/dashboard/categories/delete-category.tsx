@@ -61,7 +61,7 @@ export default function DeleteCategoryDialog({
 
   return (
     <CustomAlertDialog open={isOpen === "delete"} onOpenChange={onOpenChange}>
-      <CustomAlertDialogContent size="sm" className="min-w-1/4">
+      <CustomAlertDialogContent className="min-w-1/4">
         {/* <CustomAlertDialogHeader className="text-center sm:text-left">
           <CustomAlertDialogMedia className="mb-2 flex justify-center sm:justify-start">
             <div className="flex size-12 items-center justify-center rounded-full bg-destructive/10">
@@ -105,7 +105,7 @@ export default function DeleteCategoryDialog({
         <CustomAlertDialogFooter>
           <CustomAlertDialogCancel>Cancel</CustomAlertDialogCancel>
           <CustomAlertDialogAction variant="destructive" onClick={handleDelete}>
-            Yes, delete
+            {isDeleting ? <Spinner /> : " Yes, delete"}
           </CustomAlertDialogAction>
         </CustomAlertDialogFooter>
       </CustomAlertDialogContent>
