@@ -28,8 +28,13 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname:
-          "cdn.waplog.com",
+        hostname: "cdn.waplog.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.flaticon.com",
         port: "",
         pathname: "/**",
       },
