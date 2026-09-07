@@ -82,13 +82,12 @@ import {
   GripVertical,
   PlusIcon,
 } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import CreateCategorySheet from "./create-category"
 import DeleteCategoryDialog from "./delete-category"
 import DetailsCategorySheet from "./details-category"
 import UpdateCategorySheet from "./update-category"
-import { createCategory } from "@/lib/actions/categories"
+import { duplicateCategory } from "@/lib/actions/categories/duplicate-category"
 
 // New in v9: declare the features this table uses — anything you don't
 // register is tree-shaken out of the bundle.
@@ -315,7 +314,6 @@ export function CategoriesTable({
 }: {
   data: z.infer<typeof schema>[]
 }) {
-  const router = useRouter()
   const [data, setData] = React.useState(() => initialData)
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
@@ -374,30 +372,21 @@ export function CategoriesTable({
 
   // Handle Duplicate Category
   const handleDuplicateCategory = async (categoryToDuplicate: Category) => {
-    // 1. تجهيز البيانات الجديدة
-    const payload = {
-      name: `${categoryToDuplicate.name} (Copy)`,
-      name_ar: categoryToDuplicate.name_ar
-        ? `${categoryToDuplicate.name_ar} (نسخة)`
-        : null,
-      slug: `${categoryToDuplicate.slug}-copy-${Date.now()}`, // 💡 تحسين: إضافة timestamp لتجنب تكرار الـ slug تماماً إذا تم النسخ مرتين
-      description: categoryToDuplicate.description,
-      parent_id: categoryToDuplicate.parent_id,
-      is_active: categoryToDuplicate.is_active,
-      sort_order: categoryToDuplicate.sort_order,
-      image_url: categoryToDuplicate.image_url,
-      image_alt: categoryToDuplicate.image_alt,
-    }
-
-    // 2. استخدام toast.promise
     toast.promise(
       (async () => {
-        const result = await createCategory(payload)
+        // 1. استدعاء الأكشن المخصص للنسخ مباشرة (نمرر فقط الـ ID)
+        const result = await duplicateCategory(categoryToDuplicate.id)
 
+        // 2. التحقق من النتيجة ورمي خطأ إذا فشل
         if (!result.success) {
-          throw new Error(result.error || "Failed to duplicate category")
+          throw new Error(
+            result.error === "CATEGORY_NOT_FOUND"
+              ? "Category not found"
+              : "Failed to duplicate category"
+          )
         }
 
+        // 3. التحقق الصريح من وجود البيانات (Type Narrowing)
         if (!result.data) {
           throw new Error(
             "Category duplicated but no data was returned from server."
@@ -409,26 +398,15 @@ export function CategoriesTable({
       {
         loading: "Duplicating category...",
         success: (newlyCreatedCategory) => {
-          // 💡 خطوة التصحيح: تأكد من وصول البيانات عبر الكونسول
-          console.log(
-            "✅ Successfully duplicated and received:",
-            newlyCreatedCategory
-          )
-
-          // ✅ الحل: إضافة العنصر الجديد ثم ترتيب المصفوفة فوراً
+          // 4. إضافة التصنيف الجديد للقائمة وترتيبها فوراً حسب sort_order
           setData((prev) => {
             const updatedData = [...prev, newlyCreatedCategory]
             return updatedData.sort((a, b) => a.sort_order - b.sort_order)
           })
-
           return "Category duplicated successfully."
         },
-        error: (err) => {
-          console.error("❌ Duplication failed:", err)
-          return (
-            err.message || "Failed to duplicate category. Please try again."
-          )
-        },
+        error: (err) =>
+          err.message || "Failed to duplicate category. Please try again.",
       }
     )
   }

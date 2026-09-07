@@ -200,7 +200,7 @@ export default function CreateCategorySheet({
         {/* Header ثابت */}
         <CustomSheetHeader className="shrink-0 border-b px-4 py-4 sm:px-6">
           <CustomSheetTitle className="text-base font-semibold">
-            Add New Category
+            Add Category
           </CustomSheetTitle>
           <CustomSheetDescription className="mt-1 text-xs">
             Fill in the details below to add a new category to your store.
