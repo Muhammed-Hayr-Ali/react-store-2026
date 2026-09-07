@@ -630,7 +630,6 @@ export function CategoriesTable({
               variant="outline"
               size="sm"
               onClick={() =>
-                // setActions({ isOpen: "create", item: null, items: data })
                 openDialog("create")
               }
             >
