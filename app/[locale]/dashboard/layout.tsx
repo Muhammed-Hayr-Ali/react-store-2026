@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/components/app-sidebar"
+import { AppSidebar } from "@/components/dashboard/app-sidebar"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { getCurrentUser } from "@/lib/actions/utils/profile"
 import { getUserRole } from "@/lib/actions/utils/role-checker"
