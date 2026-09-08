@@ -7,6 +7,7 @@ import {
   CreditCard,
   LogOut,
   Sparkles,
+  User,
 } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -27,6 +28,8 @@ import {
 } from "@/components/ui/sidebar"
 import React from "react"
 import { LogoutAlertDialog } from "./logout-alert"
+import Link from "next/link"
+import { appRoutes } from "@/lib/config/app-routes"
 
 export function NavUser({
   user,
@@ -90,7 +93,9 @@ export function NavUser({
                 <div className="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
                   <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                    <AvatarFallback className="p-1.5">
+                      <User className="h-full w-full" />
+                    </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-start text-sm leading-tight">
                     <span className="truncate font-medium">{user.name}</span>
@@ -107,9 +112,11 @@ export function NavUser({
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem>
-                  <BadgeCheck />
-                  Account
+                <DropdownMenuItem asChild>
+                  <Link href={appRoutes.dashboard.account}>
+                    <BadgeCheck />
+                    Account
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <CreditCard />
@@ -121,7 +128,10 @@ export function NavUser({
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive" onClick={() => openDialog("logout")}>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => openDialog("logout")}
+              >
                 <LogOut />
                 Log out
               </DropdownMenuItem>

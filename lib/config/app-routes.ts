@@ -1,4 +1,3 @@
-
 export const appRoutes = {
   home: "/",
   auth: {
@@ -9,5 +8,6 @@ export const appRoutes = {
   },
   dashboard: {
     home: "/dashboard",
+    account: "/dashboard/account",
   },
 }
