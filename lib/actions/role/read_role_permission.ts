@@ -2,7 +2,7 @@
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { Role } from "./role-checker"
+import { Role } from "./types"
 
 // Read roles and permissions
 
