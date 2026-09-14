@@ -1,4 +1,3 @@
-import { getUserRole } from "@/lib/actions/role/role-checker"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getCurrentUser } from "@/lib/actions/utils/profile"
@@ -26,19 +25,9 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
-  const currentUser = await getCurrentUser()
-  const role = await getUserRole()
-  const allowedRoles = appConfig.allowedRoles
 
-  // redirect to login page if user is not logged in
-  if (!currentUser) {
-    redirect("/auth/login")
-  }
+ 
 
-  //
-  if (!allowedRoles.includes(role)) {
-    redirect("/")
-  }
 
   return (
     <SidebarInset className="">
