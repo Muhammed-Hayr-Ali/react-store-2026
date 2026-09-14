@@ -8,7 +8,9 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 // ✅ استيراد المخططات للتحقق من البيانات الداخلة والخارجة
 import { Category, updateCategorySchema, categorySchema } from "./types"
-import { getUserRole, hasPermission } from "../role/role-checker"
+import { hasRole } from "../role/role-checker"
+import { hasPermission } from "../role/permission-checker"
+
 
 export async function updateCategory(
   id: string,
@@ -38,23 +40,33 @@ export async function updateCategory(
   // 3. إنشاء عميل Supabase
   const supabase = await createServerClient()
 
-  // 4. التحقق من هوية المستخدم
-  const role = await getUserRole()
-  if (role !== "admin") {
+
+  
+
+
+
+  
+
+
+  const has_role = await hasRole("admin")
+  if (!has_role) {
     return {
       success: false,
       error: "UNAUTHORIZED_ACCESS",
     }
   }
 
-  // 5. التحقق من الصلاحية الدقيقة
-  const hasPerm = await hasPermission("update_category")
-  if (!hasPerm) {
+  const has_permission = await hasPermission("update_category")
+  if (!has_permission) {
     return {
       success: false,
       error: "PERMISSION_DENIED",
     }
   }
+
+
+
+
 
   // 6. محاولة التحديث في قاعدة البيانات
   const { data: updatedCategory, error } = await supabase

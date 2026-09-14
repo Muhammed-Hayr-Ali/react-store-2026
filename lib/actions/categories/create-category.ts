@@ -9,7 +9,9 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 // ✅ أضفنا categorySchema للتحقق من البيانات العائدة من قاعدة البيانات
 import { Category, createCategorySchema, categorySchema } from "./types"
-import { getUserRole, hasPermission } from "../role/role-checker"
+import { hasRole } from "../role/role-checker"
+import { hasPermission } from "../role/permission-checker"
+
 
 export async function createCategory(
   // ✅ استخدام unknown هنا هو الأفضل أمنياً، لأننا سنقوم بالتحقق منها فوراً
@@ -31,8 +33,8 @@ export async function createCategory(
   const supabase = await createServerClient()
 
   // 3. التحقق من هوية المستخدم
-  const role = await getUserRole()
-  if (role !== "admin") {
+  const has_role = await hasRole("admin")
+  if (!has_role) {
     return {
       success: false,
       error: "UNAUTHORIZED_ACCESS",
@@ -40,8 +42,8 @@ export async function createCategory(
   }
 
   // 4. التحقق من الصلاحية الدقيقة
-  const hasPerm = await hasPermission("create_category")
-  if (!hasPerm) {
+  const has_permission = await hasPermission("create_category")
+  if (!has_permission) {
     return {
       success: false,
       error: "PERMISSION_DENIED",

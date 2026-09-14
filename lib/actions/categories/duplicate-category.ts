@@ -7,7 +7,9 @@
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { Category } from "./types"
-import { getUserRole } from "../role/role-checker"
+import { hasRole } from "../role/role-checker"
+import { hasPermission } from "../role/permission-checker"
+
 
 /**
  * Duplicates an existing product category. Restricted to admins only.
@@ -20,14 +22,28 @@ export async function duplicateCategory(
   // 1. Create a Supabase client for server-side operations.
   const supabase = await createServerClient()
 
-  // 2. Verify the user has admin privileges.
-  const role = await getUserRole()
-  if (role !== "admin") {
+
+  
+
+
+  const has_role = await hasRole("admin")
+  if (!has_role) {
     return {
       success: false,
       error: "UNAUTHORIZED_ACCESS",
     }
   }
+
+  const has_permission = await hasPermission("duplicate_category")
+  if (!has_permission) {
+    return {
+      success: false,
+      error: "PERMISSION_DENIED",
+    }
+  }
+
+
+
 
   // 3. Fetch the original category data from the database.
   const { data: originalCategory, error: fetchError } = await supabase
