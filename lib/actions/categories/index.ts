@@ -1,0 +1,6 @@
+export * from "./types"
+export { getCategories } from "./get-categories"
+export { getCategoryBySlug } from "./get-category-by-slug"
+export { createCategory } from "./create-category"
+export { updateCategory } from "./update-category"
+export { deactivateCategory } from "./deactivate-category"
