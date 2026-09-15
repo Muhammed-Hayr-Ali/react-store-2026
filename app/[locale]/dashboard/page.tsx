@@ -1,6 +1,5 @@
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import { getCurrentUser } from "@/lib/actions/utils/profile"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,7 +10,6 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { redirect } from "next/navigation"
 
 export async function generateMetadata() {
   // const t = await getTranslations()
@@ -27,8 +25,6 @@ export async function generateMetadata() {
 export default async function Page() {
 
  
-
-
   return (
     <SidebarInset className="">
       <header className="flex h-14 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">

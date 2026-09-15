@@ -6,16 +6,19 @@ import { appConfig } from "@/lib/config/app_config"
 import { getLocale } from "next-intl/server"
 import { redirect } from "next/navigation"
 
+
+
 export default async function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+
+
+
   const locale = await getLocale()
 
-  
   const currentUser = await getCurrentUser()
-
 
   const result = await readRolesAndPermissions()
 
