@@ -11,42 +11,33 @@ export async function requestPasswordReset(
   email: string
 ): Promise<ApiResult<null>> {
   try {
-    console.log("🔵 [DEBUG] بدء طلب إعادة تعيين كلمة المرور للإيميل:", email)
-
-    // ✅ التغيير الجذري: استخدام Admin Client من البداية لتجاوز أي قيود RLS على جدول profiles
-    const supabaseAdmin = await createAdminClient()
-
-    console.log("🔵 [DEBUG] جاري البحث عن المستخدم في جدول profiles...")
-    
+    // initialize Supabase Admin client
+    const supabaseAdmin = createAdminClient()
+    // read the user's profile
     const { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
       .select("id, first_name, email")
       .eq("email", email)
       .single()
 
-    // التمييز بين "المستخدم غير موجود" و "خطأ حقيقي في قاعدة البيانات"
+    // check if the user exists
     if (profileError) {
       if (profileError.code === "PGRST116") {
-        console.log("🟡 [DEBUG] الإيميل غير موجود في جدول profiles. إرجاع نجاح وهمي.")
         return { success: true, data: null }
       }
-      console.error("🔴 [DEBUG] خطأ حقيقي في قراءة قاعدة البيانات:", profileError)
       throw new Error("DATABASE_READ_ERROR")
     }
 
+    // check if the user exists
     if (!profile) {
       return { success: true, data: null }
     }
 
-    console.log("🟢 [DEBUG] تم العثور على المستخدم. ID:", profile.id)
-
-    // توليد توكين آمن ووقت الانتهاء (15 دقيقة)
+    // generate a random token
     const token = crypto.randomUUID()
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000)
 
-    console.log("🟢 [DEBUG] جاري إدراج التوكين في قاعدة البيانات...")
-    
-    // إدراج التوكين (نستخدم نفس الـ Admin Client)
+    // insert the token into the database
     const { error: dbError } = await supabaseAdmin
       .from("password_reset_tokens")
       .insert({
@@ -55,23 +46,17 @@ export async function requestPasswordReset(
         expires_at: expiresAt.toISOString(),
       })
 
+    // check if the insertion was successful
     if (dbError) {
-      console.error("🔴 [DEBUG] فشل إدراج التوكين في قاعدة البيانات:", dbError)
       throw new Error("TOKEN_INSERT_FAILED")
     }
 
-    console.log("🟢 [DEBUG] تم إدراج التوكين بنجاح. جاري تجهيز الإيميل...")
-
-    // إنشاء رابط الاستعادة
-    const baseUrl =
-      process.env.NODE_ENV === "development"
-        ? "http://localhost:3000"
-        : "https://marketna.com"
-
+    // get the base URL
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+    // generate the reset URL
     const resetUrl = `${baseUrl}/auth/reset-password?token=${token}`
 
-    console.log("🟢 [DEBUG] جاري إرسال الإيميل إلى:", email)
-    
+    //  send the email
     await sendEmail({
       to: email,
       subject: "Password Reset Request - Marketna",
@@ -81,32 +66,17 @@ export async function requestPasswordReset(
       }),
     })
 
-    console.log("🟢 [DEBUG] تم إرسال الإيميل بنجاح!")
-
+    // return success
     return { success: true, data: null }
-    
   } catch (error) {
-    console.error("🔴 [CRITICAL ERROR] في requestPasswordReset:", error)
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : "FAILED_TO_SEND_RESET_EMAIL" 
+    //   handle errors
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "FAILED_TO_SEND_RESET_EMAIL",
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // 2. Function to execute the password reset (update the password)
 export async function confirmPasswordReset(
@@ -149,5 +119,3 @@ export async function confirmPasswordReset(
     return { success: false, error: "UNEXPECTED_ERROR" }
   }
 }
-
-

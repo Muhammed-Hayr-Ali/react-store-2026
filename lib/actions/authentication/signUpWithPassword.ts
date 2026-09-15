@@ -24,8 +24,6 @@ export async function signUpWithPassword(
   email: string,
   password: string
 ): Promise<ApiResult<null>> {
-  // initialize cookies
-  const cookieStore = await cookies()
 
   // 1. Create a Supabase client for server-side operations.
   const supabase = await createServerClient()

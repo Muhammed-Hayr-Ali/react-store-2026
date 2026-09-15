@@ -42,9 +42,19 @@ export default function DesktopNav({ user, className }: DesktopNavProps) {
           <UserMenu user={user} />
         </div>
       ) : (
-        <CustomButton size="sm" className="text-[10px] font-normal" asChild>
-          <Link href={appRoutes.auth.signup}>Get Started</Link>
-        </CustomButton>
+        <div className="flex items-center gap-3">
+          <CustomButton
+            size="sm"
+            variant="outline"
+            className="text-[10px] font-normal"
+            asChild
+          >
+            <Link href={appRoutes.auth.login}>Login</Link>
+          </CustomButton>
+          <CustomButton size="sm" className="text-[10px] font-normal" asChild>
+            <Link href={appRoutes.auth.signup}>Get Started</Link>
+          </CustomButton>
+        </div>
       )}
     </div>
   )

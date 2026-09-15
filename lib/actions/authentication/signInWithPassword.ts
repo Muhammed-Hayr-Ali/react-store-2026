@@ -6,7 +6,6 @@
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { cookies } from "next/headers"
 
 /**
  * Attempts to sign in a user using their email and password.
@@ -18,9 +17,6 @@ export async function signInWithPassword(
   email: string,
   password: string
 ): Promise<ApiResult<null>> {
-  // initialize cookies
-  const cookieStore = await cookies()
-
   // 1. Create a Supabase client for server-side authentication.
   const supabase = await createServerClient()
 

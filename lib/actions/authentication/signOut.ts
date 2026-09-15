@@ -5,6 +5,8 @@ import { ApiResult } from "@/lib/database/types/utils";
 
 
 export async function signOut(): Promise<ApiResult<null>> {
+ 
+ 
   // 1. Create a Supabase client for server-side authentication.
   const supabase = await createServerClient()
 

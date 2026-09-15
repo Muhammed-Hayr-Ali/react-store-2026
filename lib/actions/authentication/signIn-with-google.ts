@@ -2,12 +2,11 @@
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { cookies } from "next/headers"
+
 
 // 1. Change the return type to include the redirect URL
 export async function signInWithGoogle(): Promise<ApiResult<{ url: string }>> {
-  // initialize cookies
-  const cookieStore = await cookies()
+
   // 1. Create a Supabase client
   const supabase = await createServerClient()
 
