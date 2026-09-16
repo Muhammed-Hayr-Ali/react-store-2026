@@ -1,6 +1,5 @@
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import { getCategories } from "@/lib/actions/categories"
 
 export async function generateMetadata() {
   // const t = await getTranslations()
