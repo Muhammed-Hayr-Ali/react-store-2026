@@ -1,6 +1,5 @@
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import { getCategories } from "@/lib/actions/categories"
 import CreateProductForm from "@/components/dashboard/products/create/create-product-form"
 
 export async function generateMetadata() {
