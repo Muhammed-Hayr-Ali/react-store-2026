@@ -19,13 +19,8 @@ import { hasPermission } from "../role/permission-checker"
 export async function duplicateCategory(
   id: string
 ): Promise<ApiResult<Category | null>> {
-  // 1. Create a Supabase client for server-side operations.
-  const supabase = await createServerClient()
 
-
-  
-
-
+  // check if user has admin role
   const has_role = await hasRole("admin")
   if (!has_role) {
     return {
@@ -34,6 +29,7 @@ export async function duplicateCategory(
     }
   }
 
+  // check if user has duplicate_category permission
   const has_permission = await hasPermission("duplicate_category")
   if (!has_permission) {
     return {
@@ -42,10 +38,10 @@ export async function duplicateCategory(
     }
   }
 
+  // initialize Supabase client
+  const supabase = await createServerClient()
 
-
-
-  // 3. Fetch the original category data from the database.
+  // Fetch the original category data from the database.
   const { data: originalCategory, error: fetchError } = await supabase
     .from("categories")
     .select("*")
@@ -59,7 +55,7 @@ export async function duplicateCategory(
     }
   }
 
-  // 4. Prepare the duplicated data.
+  // Prepare the duplicated data.
   // We generate a short random suffix for the slug to prevent unique constraint
   // violations if the user clicks "duplicate" multiple times rapidly.
   const randomSuffix = Math.random().toString(36).substring(2, 6)
@@ -78,14 +74,14 @@ export async function duplicateCategory(
     image_alt: originalCategory.image_alt,
   }
 
-  // 5. Attempt to insert the new duplicated category into the database.
+  // Attempt to insert the new duplicated category into the database.
   const { data: newCategory, error: insertError } = await supabase
     .from("categories")
     .insert(duplicatedData)
     .select()
     .single()
 
-  // 6. Handle errors, specifically checking for unique constraint violations.
+  // Handle errors, specifically checking for unique constraint violations.
   if (insertError) {
     if (insertError.code === "23505") {
       // Unique violation
@@ -100,6 +96,6 @@ export async function duplicateCategory(
     }
   }
 
-  // 7. Return the newly created category.
+  // Return the newly created category.
   return { success: true, data: newCategory as Category }
 }

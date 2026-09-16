@@ -1,6 +1,6 @@
 export * from "./types"
 export { readCategories } from "./read"
-export { getCategoryBySlug } from "./get-category-by-slug"
+export { getCategoryBySlug } from "./get_by_slug"
 export { createCategory } from "./create"
 export { updateCategory } from "./update"
 export { deactivateCategory } from "./deactivate"
