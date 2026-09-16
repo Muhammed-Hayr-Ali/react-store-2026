@@ -1,11 +1,11 @@
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import { getCategories } from "@/lib/actions/categories"
 import {
   CategoriesEmptyState,
   CategoriesErrorState,
   CategoriesTable,
 } from "@/components/dashboard/categories"
+import { readCategories } from "@/lib/actions/categories"
 
 export async function generateMetadata() {
   // const t = await getTranslations()
@@ -21,7 +21,7 @@ export async function generateMetadata() {
 export default async function Page() {
 
   // 
-  const result = await getCategories({ activeOnly: false })
+  const result = await readCategories({ activeOnly: false })
 
 
 

@@ -1,20 +1,11 @@
 "use server"
 
-/**
- * @file Server Action for fetching a list of product categories.
- */
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { Category } from "./types"
 
-/**
- * Fetches a list of categories based on optional filters.
- * @param parentId Optional parent category ID to fetch subcategories.
- * @param activeOnly If true, only returns active categories (Default: true).
- * @returns An `ApiResult` containing an array of categories.
- */
-export async function getCategories({
+export async function readCategories({
   parentId,
   activeOnly = true,
 }: {

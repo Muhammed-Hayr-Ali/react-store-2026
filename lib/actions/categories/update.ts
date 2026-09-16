@@ -1,22 +1,17 @@
 "use server"
 
-/**
- * @file Server Action for updating an existing product category (Admin only).
- */
 import { z } from "zod"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-// ✅ استيراد المخططات للتحقق من البيانات الداخلة والخارجة
 import { Category, updateCategorySchema, categorySchema } from "./types"
 import { hasRole } from "../role/role-checker"
 import { hasPermission } from "../role/permission-checker"
 
-
 export async function updateCategory(
   id: string,
-  payload: unknown // ✅ استخدام unknown لفرض التحقق الأمني أولاً
+  payload: unknown
 ): Promise<ApiResult<Category | null>> {
-  // 1. التحقق الأمني الإلزامي من المعرف (ID)
+  // check if id is valid
   const idValidation = z.uuid({ error: "invalid_id_format" }).safeParse(id)
   if (!idValidation.success) {
     return {
@@ -25,7 +20,7 @@ export async function updateCategory(
     }
   }
 
-  // 2. التحقق الأمني الإلزامي من بيانات التحديث
+  // check if payload is valid
   const validation = updateCategorySchema.safeParse(payload)
   if (!validation.success) {
     return {
@@ -35,19 +30,13 @@ export async function updateCategory(
     }
   }
 
+  //  create safe data
   const safeData = validation.data
 
-  // 3. إنشاء عميل Supabase
+  // initialize Supabase client
   const supabase = await createServerClient()
 
-
-  
-
-
-
-  
-
-
+  // check if user has admin role
   const has_role = await hasRole("admin")
   if (!has_role) {
     return {
@@ -56,6 +45,7 @@ export async function updateCategory(
     }
   }
 
+  // check if user has update_category permission
   const has_permission = await hasPermission("update_category")
   if (!has_permission) {
     return {
@@ -64,11 +54,7 @@ export async function updateCategory(
     }
   }
 
-
-
-
-
-  // 6. محاولة التحديث في قاعدة البيانات
+  // update category
   const { data: updatedCategory, error } = await supabase
     .from("categories")
     .update(safeData)
@@ -76,9 +62,8 @@ export async function updateCategory(
     .select()
     .single()
 
-  // 7. معالجة أخطاء قاعدة البيانات بذكاء
+  // handle any unexpected errors
   if (error) {
-    // ✅ كود 23505: انتهاك قيد التفرد (Unique Violation)
     if (error.code === "23505") {
       return {
         success: false,
@@ -86,7 +71,7 @@ export async function updateCategory(
       }
     }
 
-    // ✅ كود PGRST116: الصف غير موجود (عند استخدام .single() ولم يجد تطابقاً)
+   //check if category not found
     if (error.code === "PGRST116") {
       return {
         success: false,
@@ -94,7 +79,7 @@ export async function updateCategory(
       }
     }
 
-    // ✅ أخطاء قاعدة البيانات الأخرى
+    // handle any other unexpected errors
     return {
       success: false,
       error: "UPDATE_CATEGORY_ERROR",
@@ -102,7 +87,7 @@ export async function updateCategory(
     }
   }
 
-  // 8. ✅ التحقق من صحة البيانات العائدة من قاعدة البيانات (Defense in Depth)
+  // handle database data mismatch
   const parsedData = categorySchema.safeParse(updatedCategory)
   if (!parsedData.success) {
     console.error("Database data mismatch on update:", parsedData.error)
@@ -112,7 +97,7 @@ export async function updateCategory(
     }
   }
 
-  // 9. النجاح
+  //success
   return {
     success: true,
     data: parsedData.data,

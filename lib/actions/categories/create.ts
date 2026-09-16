@@ -1,23 +1,18 @@
 "use server"
 
-/**
- * @file Server Action for creating a new product category (Admin only).
- */
-import { z } from "zod" // تأكد من استيراد z
-
+import { z } from "zod"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-// ✅ أضفنا categorySchema للتحقق من البيانات العائدة من قاعدة البيانات
 import { Category, createCategorySchema, categorySchema } from "./types"
 import { hasRole } from "../role/role-checker"
 import { hasPermission } from "../role/permission-checker"
 
-
 export async function createCategory(
-  // ✅ استخدام unknown هنا هو الأفضل أمنياً، لأننا سنقوم بالتحقق منها فوراً
   payload: unknown
 ): Promise<ApiResult<Category | null>> {
-  // 1. التحقق الأمني الإلزامي من البيانات الداخلة
+
+
+  // validation payload data
   const validation = createCategorySchema.safeParse(payload)
   if (!validation.success) {
     return {
@@ -27,12 +22,11 @@ export async function createCategory(
     }
   }
 
+  //  create safe data
   const safeData = validation.data
 
-  // 2. إنشاء عميل Supabase
-  const supabase = await createServerClient()
 
-  // 3. التحقق من هوية المستخدم
+  // check if user has admin role
   const has_role = await hasRole("admin")
   if (!has_role) {
     return {
@@ -41,7 +35,7 @@ export async function createCategory(
     }
   }
 
-  // 4. التحقق من الصلاحية الدقيقة
+  // check if user has create_category permission
   const has_permission = await hasPermission("create_category")
   if (!has_permission) {
     return {
@@ -50,17 +44,21 @@ export async function createCategory(
     }
   }
 
-  // 5. محاولة الإدراج في قاعدة البيانات
+
+
+  // initialize Supabase client
+  const supabase = await createServerClient()
+  
+  // insert data into database
   const { data, error } = await supabase
     .from("categories")
     .insert(safeData)
     .select()
     .single()
 
-  // 6. معالجة أخطاء قاعدة البيانات بذكاء
+  // handle errors
   if (error) {
-    // ✅ كود 23505 في PostgreSQL يعني انتهاك قيد التفرد (Unique Violation)
-    // هذا يحدث غالباً عند محاولة استخدام slug موجود مسبقاً
+    // check for unique constraint violation
     if (error.code === "23505") {
       return {
         success: false,
@@ -68,6 +66,7 @@ export async function createCategory(
       }
     }
 
+    // log error
     return {
       success: false,
       error: "CREATE_CATEGORY_ERROR",
@@ -77,17 +76,16 @@ export async function createCategory(
     }
   }
 
-  // 7. ✅ التحقق من صحة البيانات العائدة من قاعدة البيانات (Defense in Depth)
+  //  check if data is valid
   const parsedData = categorySchema.safeParse(data)
   if (!parsedData.success) {
-    console.error("Database data mismatch:", parsedData.error)
     return {
       success: false,
       error: "DATA_VALIDATION_ERROR",
     }
   }
 
-  // 8. النجاح
+  // success
   return {
     success: true,
     data: parsedData.data,

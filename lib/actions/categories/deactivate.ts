@@ -1,25 +1,12 @@
 "use server"
 
-/**
- * @file Server Action for deactivating (soft-deleting) a category (Admin only).
- */
-
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { hasRole } from "../role/role-checker"
 import { hasPermission } from "../role/permission-checker"
 
-/**
- * Soft-deletes a category by setting its is_active flag to false. Restricted to admins only.
- * @param id The ID of the category to deactivate.
- * @returns An `ApiResult` indicating success or failure.
- */
 export async function deactivateCategory(id: string): Promise<ApiResult<null>> {
-  // 1. Create a Supabase client for server-side operations.
-  const supabase = await createServerClient()
-
-
-
+  // check if user has admin role
   const has_role = await hasRole("admin")
   if (!has_role) {
     return {
@@ -28,6 +15,7 @@ export async function deactivateCategory(id: string): Promise<ApiResult<null>> {
     }
   }
 
+  // check if user has deactivate_category permission
   const has_permission = await hasPermission("deactivate_category")
   if (!has_permission) {
     return {
@@ -36,6 +24,8 @@ export async function deactivateCategory(id: string): Promise<ApiResult<null>> {
     }
   }
 
+  // initialize Supabase client
+  const supabase = await createServerClient()
 
   // 3. Attempt to update the is_active flag to false.
   const { error } = await supabase

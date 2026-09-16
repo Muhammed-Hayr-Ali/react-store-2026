@@ -40,7 +40,7 @@ import {
   CustomSheetTitle,
 } from "@/components/ui/custom-sheet"
 
-import { createCategory } from "@/lib/actions/categories/create-category"
+import { createCategory } from "@/lib/actions/categories/create"
 import Image from "next/image"
 
 // ============================================================================
