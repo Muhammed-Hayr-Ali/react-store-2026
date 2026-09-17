@@ -1,4 +1,4 @@
-import { createCategory } from "@/lib/actions/categories/create"
+import { createCategory } from "@/lib/actions/categories/mutations/create"
 import { NextResponse } from "next/server"
 
 // http://localhost:3000/api/categories/create

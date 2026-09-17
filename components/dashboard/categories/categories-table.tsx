@@ -87,7 +87,7 @@ import CreateCategorySheet from "./create-category"
 import DeleteCategoryDialog from "./delete-category"
 import DetailsCategorySheet from "./details-category"
 import UpdateCategorySheet from "./update-category"
-import { duplicateCategory } from "@/lib/actions/categories/duplicate"
+import { duplicateCategory } from "@/lib/actions/categories/other/duplicate"
 import { categorySchema } from "@/components/data-table copy"
 
 // New in v9: declare the features this table uses — anything you don't
@@ -105,14 +105,10 @@ const features = tableFeatures({
 
 export type Category = z.infer<typeof categorySchema>
 
-
-
 const columnHelper = createColumnHelper<
   typeof features,
   z.infer<typeof categorySchema>
 >()
-
-
 
 // Create a separate component for the drag handle
 function DragHandle({ id }: { id: string }) {

@@ -2,13 +2,11 @@
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { Category } from "./types"
+import { Category } from "../types"
 
-export async function getCategoryBySlug(
-  slug: string
+export async function getCategoryById(
+  id: string
 ): Promise<ApiResult<Category | null>> {
-
-
   // initialize Supabase client
   const supabase = await createServerClient()
 
@@ -16,7 +14,7 @@ export async function getCategoryBySlug(
   const { data, error } = await supabase
     .from("categories")
     .select("*")
-    .eq("slug", slug)
+    .eq("id", id)
     .single()
 
   // Handle "Not Found" gracefully (PostgREST code PGRST116).

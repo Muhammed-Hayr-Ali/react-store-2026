@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/custom-alert-dialog"
 import { Spinner } from "@/components/ui/spinner"
 import { Category } from "./categories-table"
-import { deleteCategory } from "@/lib/actions/categories/dalete"
+import { deleteCategory } from "@/lib/actions/categories/mutations/dalete"
 
 interface DeleteCategoryDialogProps {
   isOpen: string | null

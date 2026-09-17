@@ -2,10 +2,10 @@
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { hasRole } from "../role/role-checker"
-import { hasPermission } from "../role/permission-checker"
+import { hasRole } from "../../role/role-checker"
+import { hasPermission } from "../../role/permission-checker"
 
-export async function deleteCategory(id: string): Promise<ApiResult<null>> {
+export async function deactivateCategory(id: string): Promise<ApiResult<null>> {
   // check if user has admin role
   const has_role = await hasRole("admin")
   if (!has_role) {
@@ -15,8 +15,8 @@ export async function deleteCategory(id: string): Promise<ApiResult<null>> {
     }
   }
 
-  // check if user has create_category permission
-  const has_permission = await hasPermission("delete_category")
+  // check if user has deactivate_category permission
+  const has_permission = await hasPermission("deactivate_category")
   if (!has_permission) {
     return {
       success: false,
@@ -27,17 +27,19 @@ export async function deleteCategory(id: string): Promise<ApiResult<null>> {
   // initialize Supabase client
   const supabase = await createServerClient()
 
-  // Attempt to update the is_active flag to false.
-  const { error } = await supabase.from("categories").delete().eq("id", id)
+  // 3. Attempt to update the is_active flag to false.
+  const { error } = await supabase
+    .from("categories")
+    .update({ is_active: false })
+    .eq("id", id)
 
-  // Handle any unexpected errors.
+  // 4. Handle any unexpected errors.
   if (error) {
     return {
       success: false,
-      error: error.message || "DELETE_CATEGORY_ERROR",
+      error: error.message || "DEACTIVATE_CATEGORY_ERROR",
     }
   }
 
-  // success
   return { success: true, data: null }
 }

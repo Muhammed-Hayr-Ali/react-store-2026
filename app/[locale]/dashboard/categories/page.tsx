@@ -5,7 +5,7 @@ import {
   CategoriesErrorState,
   CategoriesTable,
 } from "@/components/dashboard/categories"
-import { readCategories } from "@/lib/actions/categories"
+import { getAllCategories } from "@/lib/actions/categories/queries/get-all"
 
 export async function generateMetadata() {
   // const t = await getTranslations()
@@ -21,7 +21,7 @@ export async function generateMetadata() {
 export default async function Page() {
 
   // 
-  const result = await readCategories({ activeOnly: false })
+  const result = await getAllCategories({ activeOnly: false })
 
 
 

@@ -1,11 +1,10 @@
 "use server"
 
-
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { Category } from "./types"
+import { Category } from "../types"
 
-export async function readCategories({
+export async function getAllCategories({
   parentId,
   activeOnly = true,
 }: {

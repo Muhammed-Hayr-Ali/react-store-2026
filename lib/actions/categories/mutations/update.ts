@@ -3,9 +3,9 @@
 import { z } from "zod"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { Category, updateCategorySchema, categorySchema } from "./types"
-import { hasRole } from "../role/role-checker"
-import { hasPermission } from "../role/permission-checker"
+import { Category, updateCategorySchema, categorySchema } from "../types"
+import { hasRole } from "../../role/role-checker"
+import { hasPermission } from "../../role/permission-checker"
 
 export async function updateCategory(
   id: string,
@@ -71,7 +71,7 @@ export async function updateCategory(
       }
     }
 
-   //check if category not found
+    //check if category not found
     if (error.code === "PGRST116") {
       return {
         success: false,

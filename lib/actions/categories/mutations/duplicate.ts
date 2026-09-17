@@ -6,10 +6,9 @@
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { Category } from "./types"
-import { hasRole } from "../role/role-checker"
-import { hasPermission } from "../role/permission-checker"
-
+import { Category } from "../types"
+import { hasRole } from "../../role/role-checker"
+import { hasPermission } from "../../role/permission-checker"
 
 /**
  * Duplicates an existing product category. Restricted to admins only.
@@ -19,7 +18,6 @@ import { hasPermission } from "../role/permission-checker"
 export async function duplicateCategory(
   id: string
 ): Promise<ApiResult<Category | null>> {
-
   // check if user has admin role
   const has_role = await hasRole("admin")
   if (!has_role) {

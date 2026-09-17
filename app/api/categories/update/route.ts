@@ -1,4 +1,4 @@
-import { updateCategory } from "@/lib/actions/categories/update" // تأكد من مسار الملف
+import { updateCategory } from "@/lib/actions/categories/mutations/update" // تأكد من مسار الملف
 import { NextRequest, NextResponse } from "next/server"
 
 // http://localhost:3000/api/categories/update?id=74627ca6-9467-4020-942a-1295d139836e

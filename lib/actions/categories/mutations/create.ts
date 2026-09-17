@@ -3,15 +3,13 @@
 import { z } from "zod"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { Category, createCategorySchema, categorySchema } from "./types"
-import { hasRole } from "../role/role-checker"
-import { hasPermission } from "../role/permission-checker"
+import { Category, createCategorySchema, categorySchema } from "../types"
+import { hasRole } from "../../role/role-checker"
+import { hasPermission } from "../../role/permission-checker"
 
 export async function createCategory(
   payload: unknown
 ): Promise<ApiResult<Category | null>> {
-
-
   // validation payload data
   const validation = createCategorySchema.safeParse(payload)
   if (!validation.success) {
@@ -24,7 +22,6 @@ export async function createCategory(
 
   //  create safe data
   const safeData = validation.data
-
 
   // check if user has admin role
   const has_role = await hasRole("admin")
@@ -44,11 +41,9 @@ export async function createCategory(
     }
   }
 
-
-
   // initialize Supabase client
   const supabase = await createServerClient()
-  
+
   // insert data into database
   const { data, error } = await supabase
     .from("categories")

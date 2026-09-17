@@ -42,7 +42,6 @@ export default function Layout({
         </div>
       </header>
 
-      {/* ✅ 2. استخدام overflow-y-auto بدلاً من overflow-auto، وإضافة px لمنع التمرير الأفقي */}
       <main className="flex flex-1 flex-col overflow-y-auto px-4 py-4 md:gap-6 md:px-6 md:py-6">
         {children}
       </main>
