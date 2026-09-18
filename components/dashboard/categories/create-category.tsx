@@ -113,8 +113,15 @@ export default function CreateCategorySheet({
     formState: { isSubmitting, errors },
   } = form
 
-  const imageUrl = useWatch({ name: "image_url" }) || ""
-  const isValidImage = imageUrl.startsWith("http")
+  // نمرر form.control صراحةً لتجنب خطأ السياق (Context Error)
+  const imageUrl =
+    useWatch({
+      control: form.control,
+      name: "image_url",
+      defaultValue: "",
+    }) || ""
+
+  const isValidImage = imageUrl?.startsWith("http") || false
 
   React.useEffect(() => {
     if (isOpen === "create") form.reset()

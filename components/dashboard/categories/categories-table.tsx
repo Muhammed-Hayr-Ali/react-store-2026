@@ -87,8 +87,8 @@ import CreateCategorySheet from "./create-category"
 import DeleteCategoryDialog from "./delete-category"
 import DetailsCategorySheet from "./details-category"
 import UpdateCategorySheet from "./update-category"
-import { categorySchema } from "@/components/data-table copy"
 import { duplicateCategory } from "@/lib/actions/categories/mutations/duplicate"
+import { categorySchema } from "@/lib/actions/categories"
 
 // New in v9: declare the features this table uses — anything you don't
 // register is tree-shaken out of the bundle.
