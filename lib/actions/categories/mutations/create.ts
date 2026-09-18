@@ -1,47 +1,87 @@
-// ✅ إزالة "use server" (مسموح فقط في ملفات الدوال)
-// ✅ استخدام Named Import لضمان استنتاج الأنواع
+"use server"
+
 import { z } from "zod"
+import { createServerClient } from "@/lib/database/supabase/server"
+import { ApiResult } from "@/lib/database/types/utils"
+import { Category, createCategorySchema, categorySchema } from "../types"
+import { hasRole } from "../../role/role-checker"
+import { hasPermission } from "../../role/permission-checker"
 
-// 1. المخطط الأساسي الذي يمثل قاعدة البيانات
-export const categorySchema = z.object({
-  id: z.string().uuid("invalid_id"),
-  parent_id: z.string().uuid("invalid_parent_id").nullable(),
-  name: z.string().min(1, "name_required"),
-  name_ar: z.string().nullable(),
-  slug: z
-    .string()
-    .min(1, "slug_required")
-    .regex(/^[a-z0-9-]+$/, "slug_invalid_format"),
-  description: z.string().nullable(),
-  image_url: z.string().url("image_link_invalid").nullable().or(z.literal("")),
-  image_alt: z.string().nullable(),
-  is_active: z.boolean(),
-  // ✅ استخدام z.coerce.number() لتحويل النصوص من النموذج إلى أرقام بأمان
-  sort_order: z.coerce
-    .number()
-    .int("sort_order_must_be_integer")
-    .min(0, "sort_order_must_be_positive"),
-  created_at: z.string(),
-  updated_at: z.string(),
-})
+export async function createCategory(
+  payload: unknown
+): Promise<ApiResult<Category | null>> {
+  // 1. التحقق من صحة البيانات المدخلة باستخدام مخطط الإنشاء
+  const validation = createCategorySchema.safeParse(payload)
+  if (!validation.success) {
+    return {
+      success: false,
+      error: "VALIDATION_ERROR",
+      details: z.flattenError(validation.error).fieldErrors,
+    }
+  }
 
-// استنتاج النوع الأساسي
-export type Category = z.infer<typeof categorySchema>
+  // إنشاء بيانات آمنة بعد التحقق
+  const safeData = validation.data
 
-// 2. مخطط عملية الإنشاء
-export const createCategorySchema = categorySchema.omit({
-  id: true,
-  created_at: true,
-  updated_at: true,
-})
-export type CreateCategoryInput = z.infer<typeof createCategorySchema>
+  // 2. تهيئة عميل Supabase
+  const supabase = await createServerClient()
 
-// 3. مخطط عملية التحديث
-export const updateCategorySchema = categorySchema
-  .omit({
-    id: true,
-    created_at: true,
-    updated_at: true,
-  })
-  .partial()
-export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>
+  // 3. التحقق من دور المستخدم (Admin)
+  const has_role = await hasRole("admin")
+  if (!has_role) {
+    return {
+      success: false,
+      error: "UNAUTHORIZED_ACCESS",
+    }
+  }
+
+  // 4. التحقق من صلاحية "إنشاء" فئة (تم التغيير من update_category إلى create_category)
+  const has_permission = await hasPermission("create_category")
+  if (!has_permission) {
+    return {
+      success: false,
+      error: "PERMISSION_DENIED",
+    }
+  }
+
+  // 5. إدراج الفئة الجديدة في قاعدة البيانات
+  const { data: newCategory, error } = await supabase
+    .from("categories")
+    .insert(safeData) // تم التغيير من update إلى insert
+    .select()
+    .single()
+
+  // 6. معالجة الأخطاء المحتملة من قاعدة البيانات
+  if (error) {
+    // كود 23505 يشير إلى انتهاك قيد التفرد (Unique Violation)، مثل تكرار الـ slug
+    if (error.code === "23505") {
+      return {
+        success: false,
+        error: "SLUG_ALREADY_EXISTS",
+      }
+    }
+
+    // معالجة أي أخطاء أخرى غير متوقعة
+    return {
+      success: false,
+      error: "CREATE_CATEGORY_ERROR",
+      details: { database: [error.message] },
+    }
+  }
+
+  // 7. التحقق من تطابق البيانات المرجعة من قاعدة البيانات مع المخطط الأساسي
+  const parsedData = categorySchema.safeParse(newCategory)
+  if (!parsedData.success) {
+    console.error("Database data mismatch on create:", parsedData.error)
+    return {
+      success: false,
+      error: "DATA_VALIDATION_ERROR",
+    }
+  }
+
+  // 8. نجاح العملية
+  return {
+    success: true,
+    data: parsedData.data,
+  }
+}
