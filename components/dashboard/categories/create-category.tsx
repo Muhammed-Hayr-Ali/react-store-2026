@@ -113,7 +113,6 @@ export default function CreateCategorySheet({
     formState: { isSubmitting, errors },
   } = form
 
-  // نمرر form.control صراحةً لتجنب خطأ السياق (Context Error)
   const imageUrl =
     useWatch({
       control: form.control,
