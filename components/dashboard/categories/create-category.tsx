@@ -2,8 +2,8 @@
 
 import * as React from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Controller, useForm } from "react-hook-form"
-import * as z from "zod"
+import { Controller, useForm, useWatch } from "react-hook-form"
+import { z } from "zod"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -17,7 +17,7 @@ import { CustomInput } from "@/components/ui/custom-input"
 import { Spinner } from "@/components/ui/spinner"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 
-// Standard Components for specific fields
+// Standard Components
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
@@ -40,54 +40,18 @@ import {
   CustomSheetTitle,
 } from "@/components/ui/custom-sheet"
 
-import { createCategory } from "@/lib/actions/categories/mutations/create"
 import Image from "next/image"
+import { createCategory, createCategorySchema } from "@/lib/actions/categories"
 
 // ============================================================================
-// 1. Define the validation schema using Zod
+// ✅ Form Schema: مخطط خاص بالنموذج فقط (منفصل عن مخطط قاعدة البيانات)
+// هذا يحل مشكلة "unknown" نهائياً لأننا نتحكم بالأنواع مباشرة هنا
 // ============================================================================
-const categorySchema = z.object({
-  name: z
-    .string()
-    .min(2, "Name must be at least 2 characters.")
-    .max(100, "Name must be at most 100 characters."),
-  name_ar: z
-    .string()
-    .max(100, "Arabic name must be at most 100 characters.")
-    .optional()
-    .or(z.literal("")),
-  slug: z
-    .string()
-    .min(2, "Slug must be at least 2 characters.")
-    .max(100, "Slug must be at most 100 characters.")
-    .regex(
-      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-      "Slug must be lowercase letters, numbers, and dashes only."
-    ),
-  description: z
-    .string()
-    .max(500, "Description must be at most 500 characters.")
-    .optional()
-    .or(z.literal("")),
-  parent_id: z.string().nullable(),
-  is_active: z.boolean(),
-  sort_order: z.number().min(0, "Sort order must be positive."),
-  image_url: z
-    .string()
-    .url("Must be a valid URL.")
-    .optional()
-    .or(z.literal("")),
-  image_alt: z
-    .string()
-    .max(200, "Alt text must be at most 200 characters.")
-    .optional()
-    .or(z.literal("")),
-})
 
-type FormValues = z.infer<typeof categorySchema>
+type FormValues = z.infer<typeof createCategorySchema>
 
 // ============================================================================
-// 2. Helper: Auto-generate slug
+// Helper: Auto-generate slug
 // ============================================================================
 function generateSlug(name: string): string {
   return slugify(name, {
@@ -99,7 +63,7 @@ function generateSlug(name: string): string {
 }
 
 // ============================================================================
-// 3. Main Component
+// Main Component
 // ============================================================================
 interface CreateCategorySheetProps {
   isOpen: string | null
@@ -131,7 +95,7 @@ export default function CreateCategorySheet({
   const side = getSide({ isMobile, locale })
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(categorySchema),
+    resolver: zodResolver(createCategorySchema),
     defaultValues: {
       name: "",
       name_ar: "",
@@ -149,9 +113,8 @@ export default function CreateCategorySheet({
     formState: { isSubmitting, errors },
   } = form
 
-  const { getValues } = form
-  const imageUrl = getValues("image_url")
-  const isValidImage = imageUrl && imageUrl.startsWith("http")
+  const imageUrl = useWatch({ name: "image_url" }) || ""
+  const isValidImage = imageUrl.startsWith("http")
 
   React.useEffect(() => {
     if (isOpen === "create") form.reset()
@@ -160,14 +123,14 @@ export default function CreateCategorySheet({
   async function onSubmit(data: FormValues) {
     const payload = {
       name: data.name,
-      name_ar: data.name_ar || null,
+      name_ar: data.name_ar === "" ? null : data.name_ar,
       slug: data.slug,
-      description: data.description || null,
-      parent_id: data.parent_id,
+      description: data.description === "" ? null : data.description,
+      parent_id: data.parent_id ?? null,
       is_active: data.is_active,
-      sort_order: data.sort_order,
-      image_url: data.image_url || null,
-      image_alt: data.image_alt || null,
+      sort_order: Number(data.sort_order),
+      image_url: data.image_url === "" ? null : data.image_url,
+      image_alt: data.image_alt === "" ? null : data.image_alt,
     }
 
     const result = await createCategory(payload)
@@ -179,25 +142,22 @@ export default function CreateCategorySheet({
       form.reset()
       router.refresh()
     } else {
-      toast.error(
-        result.error || "Failed to create category. Please try again."
-      )
+      const errorMsg =
+        result.error === "VALIDATION_ERROR"
+          ? "يرجى التحقق من صحة البيانات المدخلة."
+          : result.error || "Failed to create category. Please try again."
+      toast.error(errorMsg)
     }
   }
 
   return (
     <CustomSheet open={isOpen === "create"} onOpenChange={onOpenChange}>
-      {/* 
-        ✅ التصحيح هنا: 
-        1. استبدال h-dvh بـ h-full max-h-[100dvh] لتجنب مشاكل حساب الارتفاع في متصفحات الموبايل.
-        2. استبدال min-w-1/2 بـ w-full للموبايل، و min-w-[500px] للشاشات الأكبر لضمان مظهر مناسب.
-      */}
       <CustomSheetContent
         showCloseButton={false}
         side={side}
         className="flex h-full max-h-dvh w-full flex-col p-0 sm:min-w-125"
       >
-        {/* Header ثابت */}
+        {/* Header */}
         <CustomSheetHeader className="shrink-0 border-b px-4 py-4 sm:px-6">
           <CustomSheetTitle className="text-base font-semibold">
             Add Category
@@ -207,11 +167,7 @@ export default function CreateCategorySheet({
           </CustomSheetDescription>
         </CustomSheetHeader>
 
-        {/* 
-          ✅ منطقة السكرول: 
-          تم تقليل الحشو الجانبي في الموبايل (px-4) لمنع أي تمرير أفقي عرضي 
-          الذي قد يعطل التمرير العمودي في متصفحات الموبايل.
-        */}
+        {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6">
           <form
             id="create-category-form"
@@ -241,16 +197,18 @@ export default function CreateCategorySheet({
                         onChange={(e) => {
                           const newName = e.target.value
                           field.onChange(newName)
-                          if (!form.getFieldState("slug").isDirty)
+                          if (!form.getFieldState("slug").isDirty) {
                             form.setValue("slug", generateSlug(newName), {
                               shouldValidate: false,
                               shouldDirty: false,
                             })
-                          if (!form.getFieldState("image_alt").isDirty)
+                          }
+                          if (!form.getFieldState("image_alt").isDirty) {
                             form.setValue("image_alt", newName, {
                               shouldValidate: false,
                               shouldDirty: false,
                             })
+                          }
                         }}
                       />
                       {fieldState.invalid && (
@@ -268,6 +226,8 @@ export default function CreateCategorySheet({
                       <FieldLabel htmlFor="name_ar">Arabic Name</FieldLabel>
                       <CustomInput
                         {...field}
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
                         id="name_ar"
                         placeholder="مثال: إلكترونيات"
                         dir="rtl"
@@ -344,6 +304,8 @@ export default function CreateCategorySheet({
                     )}
                     <CustomInput
                       {...field}
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
                       id="image_url"
                       placeholder="https://example.com/image.jpg"
                       aria-invalid={fieldState.invalid}
@@ -377,6 +339,8 @@ export default function CreateCategorySheet({
                     </FieldLabel>
                     <CustomInput
                       {...field}
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
                       id="image_alt"
                       placeholder="e.g., Electronics category banner"
                       aria-invalid={fieldState.invalid}
@@ -404,6 +368,8 @@ export default function CreateCategorySheet({
                     </FieldLabel>
                     <Textarea
                       {...field}
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
                       id="description"
                       placeholder="Brief description for SEO and internal use..."
                       className="min-h-25 resize-none"
@@ -480,11 +446,12 @@ export default function CreateCategorySheet({
                       <FieldLabel htmlFor="sort_order">Sort Order</FieldLabel>
                       <CustomInput
                         {...field}
+                        value={field.value ?? 0}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
                         id="sort_order"
                         type="number"
                         min="0"
                         aria-invalid={fieldState.invalid}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
                       />
                       <p className="mt-1 text-xs text-muted-foreground">
                         Lower numbers appear first.
@@ -525,12 +492,16 @@ export default function CreateCategorySheet({
             </div>
 
             {errors.root && (
-              <FieldError errors={[{ message: errors.root.message }]} />
+              <FieldError
+                errors={[
+                  { message: errors.root.message || "An error occurred" },
+                ]}
+              />
             )}
           </form>
         </div>
 
-        {/* Footer ثابت */}
+        {/* Footer */}
         <CustomSheetFooter className="shrink-0 border-t bg-background px-4 py-4 sm:px-6">
           <CustomSheetClose asChild>
             <CustomButton

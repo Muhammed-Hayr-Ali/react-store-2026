@@ -1,88 +1,47 @@
-"use server"
-
+// ✅ إزالة "use server" (مسموح فقط في ملفات الدوال)
+// ✅ استخدام Named Import لضمان استنتاج الأنواع
 import { z } from "zod"
-import { createServerClient } from "@/lib/database/supabase/server"
-import { ApiResult } from "@/lib/database/types/utils"
-import { Category, createCategorySchema, categorySchema } from "../types"
-import { hasRole } from "../../role/role-checker"
-import { hasPermission } from "../../role/permission-checker"
 
-export async function createCategory(
-  payload: unknown
-): Promise<ApiResult<Category | null>> {
-  // validation payload data
-  const validation = createCategorySchema.safeParse(payload)
-  if (!validation.success) {
-    return {
-      success: false,
-      error: "VALIDATION_ERROR",
-      details: z.flattenError(validation.error).fieldErrors,
-    }
-  }
+// 1. المخطط الأساسي الذي يمثل قاعدة البيانات
+export const categorySchema = z.object({
+  id: z.string().uuid("invalid_id"),
+  parent_id: z.string().uuid("invalid_parent_id").nullable(),
+  name: z.string().min(1, "name_required"),
+  name_ar: z.string().nullable(),
+  slug: z
+    .string()
+    .min(1, "slug_required")
+    .regex(/^[a-z0-9-]+$/, "slug_invalid_format"),
+  description: z.string().nullable(),
+  image_url: z.string().url("image_link_invalid").nullable().or(z.literal("")),
+  image_alt: z.string().nullable(),
+  is_active: z.boolean(),
+  // ✅ استخدام z.coerce.number() لتحويل النصوص من النموذج إلى أرقام بأمان
+  sort_order: z.coerce
+    .number()
+    .int("sort_order_must_be_integer")
+    .min(0, "sort_order_must_be_positive"),
+  created_at: z.string(),
+  updated_at: z.string(),
+})
 
-  //  create safe data
-  const safeData = validation.data
+// استنتاج النوع الأساسي
+export type Category = z.infer<typeof categorySchema>
 
-  // check if user has admin role
-  const has_role = await hasRole("admin")
-  if (!has_role) {
-    return {
-      success: false,
-      error: "UNAUTHORIZED_ACCESS",
-    }
-  }
+// 2. مخطط عملية الإنشاء
+export const createCategorySchema = categorySchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+})
+export type CreateCategoryInput = z.infer<typeof createCategorySchema>
 
-  // check if user has create_category permission
-  const has_permission = await hasPermission("create_category")
-  if (!has_permission) {
-    return {
-      success: false,
-      error: "PERMISSION_DENIED",
-    }
-  }
-
-  // initialize Supabase client
-  const supabase = await createServerClient()
-
-  // insert data into database
-  const { data, error } = await supabase
-    .from("categories")
-    .insert(safeData)
-    .select()
-    .single()
-
-  // handle errors
-  if (error) {
-    // check for unique constraint violation
-    if (error.code === "23505") {
-      return {
-        success: false,
-        error: "SLUG_ALREADY_EXISTS",
-      }
-    }
-
-    // log error
-    return {
-      success: false,
-      error: "CREATE_CATEGORY_ERROR",
-      details: {
-        error: [error.message],
-      },
-    }
-  }
-
-  //  check if data is valid
-  const parsedData = categorySchema.safeParse(data)
-  if (!parsedData.success) {
-    return {
-      success: false,
-      error: "DATA_VALIDATION_ERROR",
-    }
-  }
-
-  // success
-  return {
-    success: true,
-    data: parsedData.data,
-  }
-}
+// 3. مخطط عملية التحديث
+export const updateCategorySchema = categorySchema
+  .omit({
+    id: true,
+    created_at: true,
+    updated_at: true,
+  })
+  .partial()
+export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>
