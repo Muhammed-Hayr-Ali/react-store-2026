@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { z } from "zod"
 import {
   closestCenter,
   DndContext,
@@ -38,7 +39,6 @@ import {
   type Row,
   type SortingState,
 } from "@tanstack/react-table"
-import { z } from "zod"
 
 import { Badge } from "@/components/ui/badge"
 import { CustomButton } from "@/components/ui/custom-button"
@@ -89,6 +89,8 @@ import DetailsCategorySheet from "./details-category"
 import UpdateCategorySheet from "./update-category"
 import { duplicateCategory } from "@/lib/actions/categories/mutations/duplicate"
 import { categorySchema } from "@/lib/actions/categories"
+import { CreateCategoryDialog } from "./components/create_category_dialog"
+import CreateCategory from "./forms/create-form"
 
 // New in v9: declare the features this table uses — anything you don't
 // register is tree-shaken out of the bundle.
@@ -771,14 +773,23 @@ export function CategoriesTable({
         onOpenChange={handleDialogChange}
         item={dialogState.data}
       />
-      <CreateCategorySheet
+      <CreateCategory
+        categories={data.filter(
+          (item) => item.parent_id === null && item.is_active === true  
+        )}
+        isOpen={dialogState.activeDialog}
+        onOpenChange={handleDialogChange}
+        onSuccess={handleCreateSuccess}
+      />
+
+      {/* <CreateCategorySheet
         isOpen={dialogState.activeDialog}
         onOpenChange={handleDialogChange}
         items={data.filter(
           (item) => item.parent_id === null && item.is_active === true
         )}
         onSuccess={handleCreateSuccess}
-      />
+      /> */}
       <DeleteCategoryDialog
         isOpen={dialogState.activeDialog}
         onOpenChange={handleDialogChange}

@@ -6,6 +6,8 @@ import {
   CategoriesTable,
 } from "@/components/dashboard/categories"
 import { getAllCategories } from "@/lib/actions/categories/queries/get-all"
+import { Category } from "@/lib/actions/categories"
+import CreateCategory from "@/components/dashboard/categories/forms/create-form"
 
 export async function generateMetadata() {
   // const t = await getTranslations()
@@ -20,17 +22,12 @@ export async function generateMetadata() {
 
 export default async function Page() {
   //
+  let categories = null
   const result = await getAllCategories({ activeOnly: false })
 
-  if (!result.success) {
-    return <CategoriesErrorState />
+  if (result.success && result.data) {
+    categories = result.data 
   }
 
-  const categories = result.data || []
-
-  if (categories.length === 0) {
-    return <CategoriesEmptyState />
-  }
-
-  return <CategoriesTable data={result.data ?? []} />
+  return <CreateCategory categories={categories} />
 }

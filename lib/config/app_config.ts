@@ -268,6 +268,16 @@ export const appConfig = {
             title: "Categories",
             url: "/dashboard/categories",
             icon: ChartColumnStacked,
+            items: [
+              {
+                title: "All Categories",
+                url: "/dashboard/categories",
+              },
+              {
+                title: "Add New Category",
+                url: "/dashboard/categories/create",
+              },
+            ],
           },
           {
             title: "Products",

@@ -39,7 +39,7 @@ export default function Layout({
           </Breadcrumb>
         </div>
       </header>
-      <div className="flex flex-1 flex-col gap-4 overflow-auto py-4 md:gap-6 md:py-6">
+      <div className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6">
         {children}
       </div>
     </SidebarInset>

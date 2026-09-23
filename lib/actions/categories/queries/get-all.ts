@@ -2,7 +2,7 @@
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { Category } from "../types"
+import { Category } from "@/lib/actions/categories"
 
 export async function getAllCategories({
   parentId,
@@ -10,7 +10,7 @@ export async function getAllCategories({
 }: {
   parentId?: string | null
   activeOnly?: boolean
-} = {}): Promise<ApiResult<Category[]>> {
+}): Promise<ApiResult<Category[]>> {
   // 1. Create a Supabase client for server-side operations.
   const supabase = await createServerClient()
 

@@ -1,0 +1,6 @@
+export * from "./types"
+export { getAllCategories } from "./queries/get-all"
+export { getCategoryBySlug } from "./queries/get_by_slug"
+export { createCategory } from "./mutations/create"
+export { updateCategory } from "./mutations/update"
+export { deactivateCategory } from "./mutations/deactivate"

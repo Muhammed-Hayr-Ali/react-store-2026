@@ -1,6 +1,6 @@
 type SuccessResult<T> = {
   success: true
-  data: T
+  data?: T
 }
 
 type ErrorResult = {
