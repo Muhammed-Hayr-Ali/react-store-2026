@@ -26,11 +26,11 @@ export default async function Page() {
     return <CategoriesErrorState />
   }
 
-  const categories = result.data || []
+  const categories = result.data
 
-  if (categories.length === 0) {
+  if (!categories || categories.length === 0) {
     return <CategoriesEmptyState />
   }
 
-  return <CategoriesTable data={result.data ?? []} />
+  return <CategoriesTable data={categories} />
 }
