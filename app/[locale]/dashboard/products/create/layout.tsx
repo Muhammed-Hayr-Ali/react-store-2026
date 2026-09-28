@@ -17,7 +17,7 @@ export default function Layout({
 }>) {
   return (
     // ✅ 1. إضافة flex-col و overflow-hidden لمنع أي تمرير خارجي
-    <SidebarInset className="flex h-dvh w-full flex-col overflow-hidden">
+    <SidebarInset className="flex h-dvh w-full flex-col">
       <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="-ms-1" />
@@ -42,7 +42,7 @@ export default function Layout({
         </div>
       </header>
 
-      <main className="flex flex-1 flex-col overflow-y-auto px-4 py-4 md:gap-6 md:px-6 md:py-6">
+      <main className="flex flex-1 flex-col  px-4 py-4 md:gap-6 md:px-6 md:py-6">
         {children}
       </main>
     </SidebarInset>
