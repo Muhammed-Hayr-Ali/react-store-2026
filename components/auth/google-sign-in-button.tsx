@@ -26,7 +26,7 @@ export function GoogleSignInButton({
 
     const result = await signInWithGoogle()
 
-    if (result.success) {
+    if (result.success && result.data) {
       window.location.href = result.data.url //
     } else {
       toast.error("Something went wrong during Google sign-in.")
