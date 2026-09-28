@@ -1,15 +1,15 @@
 import { getProductCompleteById } from "@/lib/actions/products/queries/get-complete-by-id"
+import { getReviewSummary, getProductReviewsList } from "@/lib/actions/reviews"
 import { NextResponse } from "next/server"
 
 export async function GET(
   request: Request,
-  context: { params: Promise<{ id: string }> | { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  // ✅ التصحيح: انتظار params لضمان التوافق مع Next.js 15 (و 14)
-  const params = await Promise.resolve(context.params)
-  const id = params.id
+  // ✅ الطريقة الصحيحة في Next.js 15 لاستخراج المعرفات
+  const { id } = await context.params
 
-  // ✅ حماية إضافية: التأكد من أن الـ ID ليس فارغاً أو كلمة "undefined"
+  // ✅ حماية إضافية
   if (!id || id === "undefined" || id === "null") {
     return NextResponse.json(
       {
@@ -21,12 +21,22 @@ export async function GET(
     )
   }
 
-  const result = await getProductCompleteById(id)
+  // ✅ جلب البيانات الثلاثة معاً لنرى الصورة الكاملة
+  const [productResult, summaryResult, reviewsResult] = await Promise.all([
+    getProductCompleteById(id),
+    getReviewSummary(id),
+    getProductReviewsList(id),
+  ])
 
-  if (!result.success) {
-    const status = result.error === "PRODUCT_NOT_FOUND" ? 404 : 500
-    return NextResponse.json(result, { status })
-  }
-
-  return NextResponse.json(result, { status: 200 })
+  // ✅ إرجاع كل شيء في كائن JSON واحد واضح
+  return NextResponse.json(
+    {
+      message: "Debug Data",
+      productId: id,
+      product: productResult,
+      reviewSummary: summaryResult,
+      reviewsList: reviewsResult, // <-- هنا سنرى بالضبط لماذا المصفوفة فارغة
+    },
+    { status: 200 }
+  )
 }

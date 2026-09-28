@@ -1,7 +1,13 @@
 "use client"
 
 import * as React from "react"
-import { CheckIcon, ShoppingCartIcon, AlertCircleIcon } from "lucide-react"
+import {
+  CheckIcon,
+  ShoppingCartIcon,
+  AlertCircleIcon,
+  MinusIcon,
+  PlusIcon,
+} from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { ProductWithRelations } from "@/lib/actions/products/types"
 import { CustomButton } from "@/components/ui/custom-button"
@@ -85,6 +91,9 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
     )
   }, [selectedAttributes, availableVariants])
 
+  // 4. حالة الكمية المختارة
+  const [quantity, setQuantity] = React.useState(1)
+
   // تحديد الصورة النشطة
   const defaultImageObj =
     product.product_images.find((img) => img.is_primary) ||
@@ -95,10 +104,11 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
     defaultImageObj ? defaultImageObj.url : ""
   )
 
-  // عند تغيير سمة، نحدث الصورة إذا كان هناك صورة مرتبطة بهذا المتغير
+  // ✅ عند تغيير سمة، نحدث الصورة ونعيد تعيين الكمية مباشرة (بدون useEffect)
   const handleAttributeSelect = (key: string, value: string) => {
     const newAttributes = { ...selectedAttributes, [key]: value }
     setSelectedAttributes(newAttributes)
+    setQuantity(1) // إعادة التعيين هنا مباشرة استجابةً لتفاعل المستخدم
 
     const matchingVariant = availableVariants.find(
       (v) => v.attributes && v.attributes[key] === value
@@ -110,6 +120,21 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
       )
       setActiveImage(variantImg ? variantImg.url : defaultImageObj?.url || "")
     }
+  }
+
+  // دوال التحكم بالكمية
+  const handleQuantityChange = (newQuantity: number) => {
+    if (newQuantity < 1) return
+    if (selectedVariant && newQuantity > selectedVariant.stock_quantity) return
+    setQuantity(newQuantity)
+  }
+
+  const incrementQuantity = () => {
+    handleQuantityChange(quantity + 1)
+  }
+
+  const decrementQuantity = () => {
+    handleQuantityChange(quantity - 1)
   }
 
   // حساب نسبة الخصم
@@ -126,6 +151,9 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
   const isOutOfStock = selectedVariant
     ? selectedVariant.stock_quantity === 0
     : true
+
+  // حساب السعر الإجمالي
+  const totalPrice = selectedVariant ? selectedVariant.price * quantity : 0
 
   return (
     <div className="mx-auto w-full max-w-6xl py-12 md:py-20">
@@ -165,7 +193,7 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
                     onClick={() => setActiveImage(img.url)}
                     className={`relative size-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
                       isSelected
-                        ? "border-primary ring-2 ring-primary/20"
+                        ? "border-primary"
                         : "border-transparent opacity-60 hover:border-muted-foreground/30 hover:opacity-100"
                     }`}
                     aria-label={`View image ${img.alt_text || product.name}`}
@@ -230,13 +258,11 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
             <div className="space-y-6">
               {Object.entries(attributeOptions).map(([key, values]) => {
                 const lowerKey = key.toLowerCase()
-                // نوعان فقط: لون = دائرة، الباقي = مربع
                 const isColor =
                   lowerKey.includes("color") || lowerKey.includes("لون")
 
                 return (
                   <div key={key} className="space-y-3">
-                    {/* عرض الاسم الأصلي للسمة (Capitalized) */}
                     <span className="text-sm font-semibold text-foreground capitalize">
                       {isColor
                         ? "Color"
@@ -265,7 +291,6 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
                             }`}
                             title={value}
                           >
-                            {/* 1. اللون = دائرة */}
                             {isColor && (
                               <div
                                 className={`flex size-8 items-center justify-center rounded-full border transition-all ${
@@ -281,7 +306,6 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
                               </div>
                             )}
 
-                            {/* 2. كل شيء آخر = مربع بحواف حادة + مثلث زاوية */}
                             {!isColor && (
                               <div
                                 className={`relative flex h-10 min-w-[3.5rem] items-center justify-center border px-3 text-sm font-bold transition-colors ${
@@ -293,7 +317,7 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
                                 {value}
                                 {isSelected && (
                                   <div
-                                    className="absolute -end-px -top-px size-2.5 bg-primary"
+                                    className="absolute -inset-e-px -top-px size-2.5 bg-primary rtl:rotate-y-180"
                                     style={{
                                       clipPath:
                                         "polygon(100% 0, 0 0, 100% 100%)",
@@ -311,7 +335,6 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
               })}
             </div>
           ) : (
-            // Fallback: إذا لم تكن هناك سمات، اعرض أسماء المتغيرات
             availableVariants.length > 0 && (
               <div className="space-y-3">
                 <span className="text-sm font-medium text-foreground">
@@ -326,7 +349,10 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
                         key={v.id}
                         type="button"
                         disabled={isDisabled}
-                        onClick={() => setSelectedAttributes({})}
+                        onClick={() => {
+                          setSelectedAttributes({})
+                          setQuantity(1)
+                        }}
                         className={`flex flex-col items-start border px-4 py-2.5 text-start text-xs transition-colors ${
                           isCurrent
                             ? "border-primary font-semibold text-primary"
@@ -358,6 +384,61 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
             </div>
           )}
 
+          {/* ✅ Quantity & Total Price (Unified Row) */}
+          {!isOutOfStock && selectedVariant && (
+            <div className="flex items-center justify-between gap-4 border-t border-border pt-4">
+              {/* محدد الكمية - Quantity Selector */}
+              <div
+                dir="ltr"
+                className="inline-flex items-center rounded-lg border border-border bg-muted/30 p-0.5"
+              >
+                <CustomButton
+                  variant="ghost"
+                  size="icon"
+                  onClick={decrementQuantity}
+                  disabled={quantity <= 1}
+                  aria-label="تقليل الكمية"
+                  className="size-8 rounded-md hover:bg-background disabled:opacity-40"
+                >
+                  <MinusIcon className="size-3.5" />
+                </CustomButton>
+
+                <input
+                  type="number"
+                  value={quantity}
+                  onChange={(e) =>
+                    handleQuantityChange(parseInt(e.target.value) || 1)
+                  }
+                  min={1}
+                  max={selectedVariant.stock_quantity}
+                  className="w-12 [appearance:textfield] bg-transparent text-center text-sm font-semibold tabular-nums focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  aria-label="الكمية"
+                />
+
+                <CustomButton
+                  variant="ghost"
+                  size="icon"
+                  onClick={incrementQuantity}
+                  disabled={quantity >= selectedVariant.stock_quantity}
+                  aria-label="زيادة الكمية"
+                  className="size-8 rounded-md hover:bg-background disabled:opacity-40"
+                >
+                  <PlusIcon className="size-3.5" />
+                </CustomButton>
+              </div>
+
+              {/* السعر الإجمالي - Total Price */}
+              <div className="text-end">
+                <span className="block text-xs font-medium text-muted-foreground">
+                  Total Price
+                </span>
+                <span className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+                  {formatPrice(totalPrice)}
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Add to Cart Button */}
           <div className="flex items-center gap-3 pt-2">
             <CustomButton
@@ -365,7 +446,11 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
               disabled={!selectedVariant || isOutOfStock}
             >
               <ShoppingCartIcon className="size-5" />
-              {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+              {isOutOfStock
+                ? "Out of Stock"
+                : quantity > 1
+                  ? `Add ${quantity} to Cart`
+                  : "Add to Cart"}
             </CustomButton>
           </div>
         </div>
