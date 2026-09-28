@@ -2,29 +2,90 @@
 
 import * as React from "react"
 import { CheckIcon, ShoppingCartIcon, AlertCircleIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { ProductWithRelations } from "@/lib/actions/products/types"
+import { CustomButton } from "@/components/ui/custom-button"
 
 interface ProductDetailsProps {
   product: ProductWithRelations
 }
 
-const formatPrice = (price: number) => {
-  return new Intl.NumberFormat("ar-SA", {
-    style: "currency",
-    currency: "SAR",
-    minimumFractionDigits: 0,
-  }).format(price)
+// دالة مساعدة لتنسيق السعر (تحويل السنت إلى رقم عشري بدون رمز عملة)
+const formatPrice = (priceInCents: number) => {
+  return (priceInCents / 100).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+}
+
+// خريطة ألوان احتياطية لأسماء الألوان
+const COLOR_MAP: Record<string, string> = {
+  red: "#ef4444",
+  أحمر: "#ef4444",
+  blue: "#3b82f6",
+  أزرق: "#3b82f6",
+  black: "#000000",
+  أسود: "#000000",
+  white: "#ffffff",
+  أبيض: "#ffffff",
+  green: "#22c55e",
+  أخضر: "#22c55e",
+  yellow: "#eab308",
+  أصفر: "#eab308",
+  orange: "#f97316",
+  برتقالي: "#f97316",
+}
+
+// دالة ذكية لتحويل قيمة اللون إلى كود HEX
+const getColorHex = (colorValue: string) => {
+  const trimmedValue = colorValue.trim()
+  if (trimmedValue.startsWith("#")) return trimmedValue
+  if (/^[0-9A-Fa-f]{6}$/.test(trimmedValue)) return `#${trimmedValue}`
+  const mappedColor = COLOR_MAP[trimmedValue.toLowerCase()]
+  if (mappedColor) return mappedColor
+  return trimmedValue
 }
 
 export default function ProductDetailsPage({ product }: ProductDetailsProps) {
   const availableVariants = product.product_variants.filter((v) => v.is_active)
-  const [selectedVariant, setSelectedVariant] = React.useState(
-    availableVariants[0] || null
-  )
 
-  // تحديد الصورة النشطة من مصفوفة الصور مباشرة
+  // 1. استخراج جميع السمات الفريدة المتاحة للمنتج
+  const attributeOptions = React.useMemo(() => {
+    const options: Record<string, string[]> = {}
+    availableVariants.forEach((v) => {
+      if (v.attributes) {
+        Object.entries(v.attributes).forEach(([key, value]) => {
+          if (!options[key]) options[key] = []
+          if (!options[key].includes(value)) {
+            options[key].push(value)
+          }
+        })
+      }
+    })
+    return options
+  }, [availableVariants])
+
+  // 2. حالة السمات المختارة حالياً
+  const [selectedAttributes, setSelectedAttributes] = React.useState<
+    Record<string, string>
+  >({})
+
+  // 3. اشتقاق المتغير المحدد بناءً على السمات المختارة
+  const selectedVariant = React.useMemo(() => {
+    if (Object.keys(selectedAttributes).length === 0) {
+      return availableVariants[0] || null
+    }
+    return (
+      availableVariants.find((v) => {
+        if (!v.attributes) return false
+        return Object.entries(selectedAttributes).every(
+          ([key, value]) => v.attributes[key] === value
+        )
+      }) || null
+    )
+  }, [selectedAttributes, availableVariants])
+
+  // تحديد الصورة النشطة
   const defaultImageObj =
     product.product_images.find((img) => img.is_primary) ||
     product.product_images[0] ||
@@ -34,20 +95,24 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
     defaultImageObj ? defaultImageObj.url : ""
   )
 
-  const handleVariantSelect = (variant: typeof selectedVariant) => {
-    setSelectedVariant(variant)
-    if (variant) {
+  // عند تغيير سمة، نحدث الصورة إذا كان هناك صورة مرتبطة بهذا المتغير
+  const handleAttributeSelect = (key: string, value: string) => {
+    const newAttributes = { ...selectedAttributes, [key]: value }
+    setSelectedAttributes(newAttributes)
+
+    const matchingVariant = availableVariants.find(
+      (v) => v.attributes && v.attributes[key] === value
+    )
+
+    if (matchingVariant) {
       const variantImg = product.product_images.find(
-        (img) => img.variant_id === variant.id
+        (img) => img.variant_id === matchingVariant.id
       )
-      if (variantImg) {
-        setActiveImage(variantImg.url)
-      } else {
-        setActiveImage(defaultImageObj ? defaultImageObj.url : "")
-      }
+      setActiveImage(variantImg ? variantImg.url : defaultImageObj?.url || "")
     }
   }
 
+  // حساب نسبة الخصم
   const discountPercentage =
     selectedVariant?.compare_at_price &&
     selectedVariant.compare_at_price > selectedVariant.price
@@ -65,7 +130,7 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
   return (
     <div className="mx-auto w-full max-w-6xl py-12 md:py-20">
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
-        {/* --- قسم معرض الصور --- */}
+        {/* --- Image Gallery Section --- */}
         <div className="space-y-4">
           <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted/20">
             {activeImage ? (
@@ -77,20 +142,20 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
             ) : (
               <div className="flex h-full w-full flex-col items-center justify-center text-sm text-muted-foreground">
                 <AlertCircleIcon className="mb-2 size-8 opacity-40" />
-                <span>لا توجد صورة متوفرة</span>
+                <span>No image available</span>
               </div>
             )}
 
-            {discountPercentage && (
-              <span className="text-destructive-foreground absolute end-4 top-4 rounded-full bg-destructive px-3 py-1 text-xs font-semibold">
-                خصم {discountPercentage}%
+            {!isOutOfStock && discountPercentage && (
+              <span className="text-destructive-foreground absolute end-4 top-4 rounded-full bg-destructive px-3 py-1 text-xs font-semibold shadow-sm">
+                {discountPercentage}% OFF
               </span>
             )}
           </div>
 
-          {/* الصور المصغرة */}
+          {/* Thumbnails */}
           {product.product_images.length > 1 && (
-            <div className="flex items-center gap-3 overflow-x-auto pb-2">
+            <div className="scrollbar-hide flex items-center gap-3 overflow-x-auto pb-2">
               {product.product_images.map((img) => {
                 const isSelected = activeImage === img.url
                 return (
@@ -98,12 +163,12 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
                     key={img.id}
                     type="button"
                     onClick={() => setActiveImage(img.url)}
-                    className={`relative size-16 shrink-0 overflow-hidden rounded-lg bg-muted/20 transition-all ${
+                    className={`relative size-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
                       isSelected
-                        ? "ring-2 ring-primary"
-                        : "opacity-60 hover:opacity-100"
+                        ? "border-primary ring-2 ring-primary/20"
+                        : "border-transparent opacity-60 hover:border-muted-foreground/30 hover:opacity-100"
                     }`}
-                    aria-label={`عرض صورة ${img.alt_text || product.name}`}
+                    aria-label={`View image ${img.alt_text || product.name}`}
                   >
                     <img
                       src={img.url}
@@ -117,16 +182,16 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
           )}
         </div>
 
-        {/* --- تفاصيل وخيارات المنتج --- */}
+        {/* --- Product Details & Options Section --- */}
         <div className="flex flex-col justify-center space-y-6">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
               {product.category && (
-                <span>{product.category.name_ar || product.category.name}</span>
+                <span className="font-medium">{product.category.name}</span>
               )}
               {product.category && product.brand && <span>•</span>}
               {product.brand && (
-                <span>{product.brand.name_ar || product.brand.name}</span>
+                <span className="font-medium">{product.brand.name}</span>
               )}
             </div>
 
@@ -134,95 +199,158 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
               {product.name}
             </h1>
 
-            <div className="flex items-baseline gap-3 pt-1">
-              <span className="text-3xl font-extrabold text-foreground">
-                {selectedVariant
-                  ? formatPrice(selectedVariant.price)
-                  : formatPrice(0)}
-              </span>
-              {selectedVariant?.compare_at_price &&
-                selectedVariant.compare_at_price > selectedVariant.price && (
-                  <span className="text-base text-muted-foreground line-through">
-                    {formatPrice(selectedVariant.compare_at_price)}
+            {/* منطقة السعر */}
+            <div className="flex min-h-[40px] items-baseline gap-3 pt-1">
+              {!isOutOfStock && selectedVariant ? (
+                <>
+                  <span className="text-3xl font-extrabold text-primary">
+                    {formatPrice(selectedVariant.price)}
                   </span>
-                )}
+                  {selectedVariant.compare_at_price &&
+                    selectedVariant.compare_at_price >
+                      selectedVariant.price && (
+                      <span className="text-base text-muted-foreground line-through decoration-destructive/50">
+                        {formatPrice(selectedVariant.compare_at_price)}
+                      </span>
+                    )}
+                </>
+              ) : (
+                <span className="flex items-center gap-2 text-xl font-bold text-destructive">
+                  <AlertCircleIcon className="size-5" />
+                  Out of Stock
+                </span>
+              )}
             </div>
           </div>
 
           <Separator />
 
-          {/* المتغيرات */}
-          {availableVariants.length > 0 && (
-            <div className="space-y-3">
-              <span className="text-sm font-medium text-foreground">
-                المواصفات المتاحة
-              </span>
-              <div className="flex flex-wrap gap-2.5 pt-4 ">
-                {availableVariants.map((v) => {
-                  const isCurrent = selectedVariant?.id === v.id
-                  const isDisabled = v.stock_quantity === 0
+          {/* --- Smart Attributes Selection --- */}
+          {Object.keys(attributeOptions).length > 0 ? (
+            <div className="space-y-6">
+              {Object.entries(attributeOptions).map(([key, values]) => {
+                const lowerKey = key.toLowerCase()
+                // نوعان فقط: لون = دائرة، الباقي = مربع
+                const isColor =
+                  lowerKey.includes("color") || lowerKey.includes("لون")
 
-                  return (
-                    <button
-                      key={v.id}
-                      type="button"
-                      disabled={isDisabled}
-                      onClick={() => handleVariantSelect(v)}
-                      className={`flex flex-col items-start rounded-lg px-4 py-2.5 text-start text-xs transition-colors ${
-                        isCurrent
-                          ? "bg-primary font-semibold text-primary-foreground"
-                          : isDisabled
-                            ? "cursor-not-allowed bg-muted/30 text-muted-foreground line-through opacity-40"
-                            : "bg-muted/40 text-foreground hover:bg-muted/70"
-                      }`}
-                    >
-                      <span>{v.name || v.sku}</span>
-                    </button>
-                  )
-                })}
-              </div>
+                return (
+                  <div key={key} className="space-y-3">
+                    {/* عرض الاسم الأصلي للسمة (Capitalized) */}
+                    <span className="text-sm font-semibold text-foreground capitalize">
+                      {isColor
+                        ? "Color"
+                        : key.charAt(0).toUpperCase() + key.slice(1)}
+                    </span>
+                    <div className="flex flex-wrap gap-3">
+                      {values.map((value) => {
+                        const isDisabled = !availableVariants.some(
+                          (v) =>
+                            v.attributes &&
+                            v.attributes[key] === value &&
+                            v.stock_quantity > 0
+                        )
+                        const isSelected = selectedAttributes[key] === value
+
+                        return (
+                          <button
+                            key={value}
+                            type="button"
+                            disabled={isDisabled}
+                            onClick={() => handleAttributeSelect(key, value)}
+                            className={`relative transition-all duration-200 ${
+                              isDisabled
+                                ? "cursor-not-allowed opacity-40"
+                                : "cursor-pointer"
+                            }`}
+                            title={value}
+                          >
+                            {/* 1. اللون = دائرة */}
+                            {isColor && (
+                              <div
+                                className={`flex size-8 items-center justify-center rounded-full border transition-all ${
+                                  isSelected
+                                    ? "border-primary ring-1 ring-primary"
+                                    : "border-muted-foreground/20 hover:border-primary/50"
+                                }`}
+                                style={{ backgroundColor: getColorHex(value) }}
+                              >
+                                {isSelected && (
+                                  <CheckIcon className="size-4 text-white" />
+                                )}
+                              </div>
+                            )}
+
+                            {/* 2. كل شيء آخر = مربع بحواف حادة + مثلث زاوية */}
+                            {!isColor && (
+                              <div
+                                className={`relative flex h-10 min-w-[3.5rem] items-center justify-center border px-3 text-sm font-bold transition-colors ${
+                                  isSelected
+                                    ? "border-primary text-primary"
+                                    : "border-muted-foreground/20 text-foreground hover:border-primary/50"
+                                } ${isDisabled ? "line-through opacity-40" : ""}`}
+                              >
+                                {value}
+                                {isSelected && (
+                                  <div
+                                    className="absolute -end-px -top-px size-2.5 bg-primary"
+                                    style={{
+                                      clipPath:
+                                        "polygon(100% 0, 0 0, 100% 100%)",
+                                    }}
+                                  />
+                                )}
+                              </div>
+                            )}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
+          ) : (
+            // Fallback: إذا لم تكن هناك سمات، اعرض أسماء المتغيرات
+            availableVariants.length > 0 && (
+              <div className="space-y-3">
+                <span className="text-sm font-medium text-foreground">
+                  Available Options
+                </span>
+                <div className="flex flex-wrap gap-2.5 pt-1">
+                  {availableVariants.map((v) => {
+                    const isCurrent = selectedVariant?.id === v.id
+                    const isDisabled = v.stock_quantity === 0
+                    return (
+                      <button
+                        key={v.id}
+                        type="button"
+                        disabled={isDisabled}
+                        onClick={() => setSelectedAttributes({})}
+                        className={`flex flex-col items-start border px-4 py-2.5 text-start text-xs transition-colors ${
+                          isCurrent
+                            ? "border-primary font-semibold text-primary"
+                            : isDisabled
+                              ? "cursor-not-allowed border-muted-foreground/20 text-muted-foreground line-through opacity-40"
+                              : "border-muted-foreground/20 text-foreground hover:border-primary/50"
+                        }`}
+                      >
+                        <span>{v.name || v.sku}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )
           )}
 
-          {/* سمات المتغير */}
-          {selectedVariant &&
-            Object.keys(selectedVariant.attributes || {}).length > 0 && (
-              <div className="flex flex-wrap gap-2 pt-1">
-                {Object.entries(selectedVariant.attributes).map(
-                  ([key, val]) => (
-                    <span
-                      key={key}
-                      className="rounded-md bg-muted/40 px-2.5 py-1 text-xs text-muted-foreground"
-                    >
-                      <span className="me-1">{key}:</span>
-                      <span className="font-medium text-foreground">{val}</span>
-                    </span>
-                  )
-                )}
-              </div>
-            )}
-
-          {/* حالة المخزون */}
-          <div className="flex items-center gap-2 text-xs">
-            {selectedVariant && !isOutOfStock ? (
-              <span className="flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-500">
-                <CheckIcon className="size-4" />
-                متوفر في المخزون ({selectedVariant.stock_quantity} قطعة)
-              </span>
-            ) : (
-              <span className="font-medium text-destructive">
-                غير متوفر حالياً
-              </span>
-            )}
-          </div>
-
           <Separator />
 
-          {/* وصف المنتج */}
+          {/* Product Description */}
           {product.description && (
             <div className="space-y-2">
               <h2 className="text-sm font-semibold text-foreground">
-                تفاصيل المنتج
+                Product Details
               </h2>
               <p className="text-sm leading-relaxed whitespace-pre-line text-muted-foreground">
                 {product.description}
@@ -230,16 +358,15 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
             </div>
           )}
 
-          {/* زر الشراء */}
-          <div className="flex items-center gap-3 pt-4">
-            <Button
-              size="lg"
-              className="flex-1 gap-2 text-sm font-semibold"
+          {/* Add to Cart Button */}
+          <div className="flex items-center gap-3 pt-2">
+            <CustomButton
+              className="w-full"
               disabled={!selectedVariant || isOutOfStock}
             >
-              <ShoppingCartIcon className="size-4" />
-              {isOutOfStock ? "نفذت الكمية" : "إضافة إلى السلة"}
-            </Button>
+              <ShoppingCartIcon className="size-5" />
+              {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+            </CustomButton>
           </div>
         </div>
       </div>
