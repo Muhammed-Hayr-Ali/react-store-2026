@@ -5,7 +5,7 @@ import { NextResponse } from "next/server"
 
 export async function GET() {
  
-  const result = await getAllCategories()
+  const result = await getAllCategories({activeOnly: true})
 
   if (!result.success) {
     return NextResponse.json(result, { status: 400 })
