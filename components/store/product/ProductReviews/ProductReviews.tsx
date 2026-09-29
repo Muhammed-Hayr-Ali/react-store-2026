@@ -7,25 +7,21 @@ import {
   User2Icon,
   PencilIcon,
   Trash2Icon,
-  Loader2Icon,
 } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
 import {
   ReviewDialogName,
   ReviewSummary,
   ReviewWithProfile,
 } from "@/lib/actions/reviews/types"
-import { updateReview } from "@/lib/actions/reviews"
 
 // مكونات shadcn القياسية
 import { Progress } from "@/components/ui/progress"
-import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { CustomButton } from "@/components/ui/custom-button"
-import { DeleteReviewDialog } from "./delete_review_dialog"
 import { ReviewDialog } from "./write_review_dialog"
+import { DeleteReviewDialog } from "./delete_review_dialog"
+
 
 interface ProductReviewsProps {
   summary: ReviewSummary
@@ -40,81 +36,26 @@ export default function ProductReviews({
   productId,
   currentUserId,
 }: ProductReviewsProps) {
-  const router = useRouter()
   const { averageRating, totalReviews, distribution } = summary
 
-  // حالات نموذج الإضافة
-
-  // حالات نموذج التعديل
-  const [editingId, setEditingId] = React.useState<string | null>(null)
-  const [editRating, setEditRating] = React.useState(0)
-  const [editComment, setEditComment] = React.useState("")
-  const [isUpdating, setIsUpdating] = React.useState(false)
-
+  // ✅ حالة موحدة لإدارة جميع الحوارات
   const [dialogState, setDialogState] = React.useState<{
     id: string | null
     openDialog: ReviewDialogName | null
-    onOpenChange?: (open: boolean) => void
   }>({
     id: null,
     openDialog: null,
-    onOpenChange: () => {},
   })
 
   const handleOnOpenChange = (open: boolean) => {
     if (!open) {
-      setDialogState({
-        id: null,
-        openDialog: null,
-        onOpenChange: () => {},
-      })
+      setDialogState({ id: null, openDialog: null })
     }
   }
 
   const getPercentage = (count: number) => {
     if (totalReviews === 0) return 0
     return Math.round((count / totalReviews) * 100)
-  }
-
-  // --- دوال التعديل ---
-  const handleStartEdit = (review: ReviewWithProfile) => {
-    setEditingId(review.id)
-    setEditRating(review.rating)
-    setEditComment(review.comment || "")
-  }
-
-  const handleCancelEdit = () => {
-    setEditingId(null)
-    setEditRating(0)
-    setEditComment("")
-  }
-
-  const handleUpdateSubmit = async (e: React.FormEvent, id: string) => {
-    e.preventDefault()
-    if (editRating === 0) {
-      toast.error("Please select a rating")
-      return
-    }
-
-    setIsUpdating(true)
-    try {
-      const result = await updateReview({
-        id,
-        rating: editRating,
-        comment: editComment,
-      })
-      if (result.success) {
-        toast.success("Review updated successfully!")
-        handleCancelEdit()
-        router.refresh()
-      } else {
-        toast.error(result.details?.database?.[0] || "Failed to update review.")
-      }
-    } catch {
-      toast.error("An unexpected error occurred.")
-    } finally {
-      setIsUpdating(false)
-    }
   }
 
   return (
@@ -143,6 +84,7 @@ export default function ProductReviews({
 
         <Separator />
 
+        {/* الملخص الإحصائي */}
         <div className="grid grid-cols-1 items-center gap-8 py-2 md:grid-cols-12">
           <div className="flex flex-col items-center justify-center text-center md:col-span-4 md:text-start">
             <div className="flex items-baseline gap-2">
@@ -205,8 +147,6 @@ export default function ProductReviews({
           ) : (
             reviews.map((review, idx) => {
               const isOwner = review.user_id === currentUserId
-              const isEditing = editingId === review.id
-
               const fullName =
                 [review.profile?.first_name, review.profile?.last_name]
                   .filter(Boolean)
@@ -264,106 +204,46 @@ export default function ProductReviews({
 
                     {/* الجزء الأيمن: التعليق وأزرار التحكم */}
                     <div className="flex flex-1 flex-col gap-2">
-                      {/* ✅ وضع العرض العادي */}
-                      {!isEditing ? (
-                        <>
-                          {review.comment?.trim() ? (
-                            <p className="text-sm leading-relaxed wrap-break-word text-foreground">
-                              {review.comment}
-                            </p>
-                          ) : (
-                            <p className="text-xs text-muted-foreground italic">
-                              (No review text provided)
-                            </p>
-                          )}
-
-                          {/* ✅ أزرار التحكم في أسفل التعليق ومحاذاة لليمين (فقط للمالك) */}
-                          {isOwner && (
-                            <div className="mt-1 flex items-center justify-end gap-2">
-                              <CustomButton
-                                type="button"
-                                size="icon-sm"
-                                variant="outline"
-                                onClick={() => handleStartEdit(review)}
-                              >
-                                <PencilIcon />
-                              </CustomButton>
-                              <CustomButton
-                                type="button"
-                                size="icon-sm"
-                                variant="outline"
-                                onClick={() =>
-                                  setDialogState({
-                                    id: review.id,
-                                    openDialog: "delete-review",
-                                  })
-                                }
-                              >
-                                <Trash2Icon />
-                              </CustomButton>
-                            </div>
-                          )}
-                        </>
+                      {review.comment?.trim() ? (
+                        <p className="text-sm leading-relaxed wrap-break-word text-foreground">
+                          {review.comment}
+                        </p>
                       ) : (
-                        /* ✅ وضع التعديل المدمج (Inline Edit) */
-                        <form
-                          onSubmit={(e) => handleUpdateSubmit(e, review.id)}
-                          className="space-y-3 rounded-lg border bg-muted/10 p-3"
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground">
-                              Update Rating:
-                            </span>
-                            <div dir="ltr" className="flex items-center">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                  key={star}
-                                  type="button"
-                                  onClick={() => setEditRating(star)}
-                                  className="p-0.5 transition-transform hover:scale-110"
-                                >
-                                  <StarIcon
-                                    className={`size-4 ${
-                                      star <= editRating
-                                        ? "fill-amber-400 text-amber-400"
-                                        : "text-muted-foreground/30"
-                                    }`}
-                                  />
-                                </button>
-                              ))}
-                            </div>
-                          </div>
+                        <p className="text-xs text-muted-foreground italic">
+                          (No review text provided)
+                        </p>
+                      )}
 
-                          <Textarea
-                            value={editComment}
-                            onChange={(e) => setEditComment(e.target.value)}
-                            maxLength={500}
-                            rows={3}
-                            placeholder="Update your thoughts..."
-                            className="resize-none text-sm"
-                          />
-
-                          <div className="flex items-center justify-end gap-2 pt-1">
-                            <CustomButton
-                              type="button"
-                              variant="outline"
-                              onClick={handleCancelEdit}
-                              disabled={isUpdating}
-                            >
-                              Cancel
-                            </CustomButton>
-                            <CustomButton type="submit" disabled={isUpdating}>
-                              {isUpdating ? (
-                                <>
-                                  <Loader2Icon className="mr-2 size-3 animate-spin" />{" "}
-                                  Saving...
-                                </>
-                              ) : (
-                                "Save Changes"
-                              )}
-                            </CustomButton>
-                          </div>
-                        </form>
+                      {/* ✅ أزرار التحكم (فقط للمالك) */}
+                      {isOwner && (
+                        <div className="mt-1 flex items-center justify-end gap-2">
+                          <CustomButton
+                            type="button"
+                            size="icon-sm"
+                            variant="outline"
+                            onClick={() =>
+                              setDialogState({
+                                id: review.id,
+                                openDialog: "edit-review",
+                              })
+                            }
+                          >
+                            <PencilIcon className="size-4" />
+                          </CustomButton>
+                          <CustomButton
+                            type="button"
+                            size="icon-sm"
+                            variant="outline"
+                            onClick={() =>
+                              setDialogState({
+                                id: review.id,
+                                openDialog: "delete-review",
+                              })
+                            }
+                          >
+                            <Trash2Icon className="size-4" />
+                          </CustomButton>
+                        </div>
                       )}
                     </div>
                   </article>
@@ -373,11 +253,15 @@ export default function ProductReviews({
           )}
         </div>
       </section>
+
+      {/* ✅ إدارة الحوارات في مكان واحد */}
       <ReviewDialog
         productId={productId}
         openDialog={dialogState.openDialog}
         onOpenChange={handleOnOpenChange}
+        review={reviews.find((r) => r.id === dialogState.id)} // ✅ تمرير بيانات التقييم للتعديل
       />
+
       <DeleteReviewDialog
         id={dialogState.id}
         openDialog={dialogState.openDialog}

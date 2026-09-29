@@ -31,33 +31,52 @@ import {
 } from "@/components/ui/input-group"
 import {
   createReview,
+  updateReview,
   createReviewSchema,
   ReviewDialogName,
 } from "@/lib/actions/reviews"
+import { ReviewWithProfile } from "@/lib/actions/reviews/types"
 
 interface ReviewDialogProps {
   productId: string
   openDialog: ReviewDialogName | null
-  onOpenChange(open: boolean): void
+  onOpenChange: (open: boolean) => void
+  review?: ReviewWithProfile // ✅ بيانات التقييم للتعديل (اختياري)
 }
 
 export function ReviewDialog({
   productId,
   openDialog,
   onOpenChange,
+  review,
 }: ReviewDialogProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [hoverRating, setHoverRating] = React.useState(0)
 
+  const isEditMode = openDialog === "edit-review"
+
   const form = useForm<z.infer<typeof createReviewSchema>>({
     resolver: zodResolver(createReviewSchema),
     defaultValues: {
-      product_id: productId,
-      rating: 0,
-      comment: "",
+      product_id: review?.product_id || productId,
+      rating: review?.rating || 0,
+      comment: review?.comment || "",
     },
   })
+
+  // ✅ إعادة تعيين النموذج عند الإغلاق
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      onOpenChange(false)
+      form.reset({
+        product_id: productId,
+        rating: 0,
+        comment: "",
+      })
+      setHoverRating(0)
+    }
+  }
 
   async function onSubmit(data: z.infer<typeof createReviewSchema>) {
     if (data.rating === 0) {
@@ -67,23 +86,34 @@ export function ReviewDialog({
 
     setIsSubmitting(true)
     try {
-      const result = await createReview(data)
+      let result
+      if (isEditMode && review) {
+        // ✅ مسار التعديل
+        result = await updateReview({
+          id: review.id,
+          rating: data.rating,
+          comment: data.comment,
+        })
+      } else {
+        // ✅ مسار الإنشاء
+        result = await createReview(data)
+      }
+
       if (result.success) {
-        toast.success("Thank you! Your review has been submitted.")
-        // ✅ إعادة التعيين عند النجاح أيضاً
-        form.reset({ product_id: productId, rating: 0, comment: "" })
-        setHoverRating(0)
-        onOpenChange(false)
+        toast.success(
+          isEditMode
+            ? "Review updated successfully!"
+            : "Thank you! Your review has been submitted."
+        )
+        handleOpenChange(false) // سيؤدي هذا إلى إعادة التعيين وإغلاق النافذة
         router.refresh()
       } else {
         if (result.error === "UNAUTHORIZED_ACCESS") {
           toast.error("Please log in to leave a review.")
-        } else if (result.error === "REVIEW_ALREADY_EXISTS") {
+        } else if (result.error === "REVIEW_ALREADY_EXISTS" && !isEditMode) {
           toast.error("You have already reviewed this product.")
         } else {
-          toast.error(
-            result.details?.database?.[0] || "Failed to submit review."
-          )
+          toast.error(result.details?.database?.[0] || "Operation failed.")
         }
       }
     } catch {
@@ -94,13 +124,19 @@ export function ReviewDialog({
   }
 
   return (
-    <Dialog open={openDialog === "create-review"} onOpenChange={onOpenChange}>
+    <Dialog
+      open={openDialog === "create-review" || openDialog === "edit-review"}
+      onOpenChange={handleOpenChange}
+    >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Write a Review</DialogTitle>
+          <DialogTitle>
+            {isEditMode ? "Edit Your Review" : "Write a Review"}
+          </DialogTitle>
           <DialogDescription>
-            Share your experience with this product. Your feedback helps other
-            customers make informed decisions.
+            {isEditMode
+              ? "Update your rating and comments for this product."
+              : "Share your experience with this product. Your feedback helps other customers make informed decisions."}
           </DialogDescription>
         </DialogHeader>
 
@@ -127,10 +163,10 @@ export function ReviewDialog({
                         type="button"
                         onClick={() => {
                           field.onChange(star)
-                          setHoverRating(star) // ✅ تحديث فوري عند النقر
+                          setHoverRating(star)
                         }}
                         onMouseEnter={() => setHoverRating(star)}
-                        onMouseLeave={() => setHoverRating(field.value)} // ✅ العودة للقيمة المحددة بدلاً من 0
+                        onMouseLeave={() => setHoverRating(field.value)}
                         className="rounded-sm p-1 transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                         aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
                       >
@@ -181,10 +217,10 @@ export function ReviewDialog({
           </FieldGroup>
         </form>
 
-        <DialogFooter className="gap-2">
+        <DialogFooter className="gap-2 sm:gap-0">
           <CustomButton
             variant="outline"
-            onClick={() => onOpenChange(false)}
+            onClick={() => handleOpenChange(false)}
             disabled={isSubmitting}
             type="button"
           >
@@ -198,8 +234,10 @@ export function ReviewDialog({
             {isSubmitting ? (
               <>
                 <Loader2Icon className="mr-2 size-4 animate-spin" />
-                Submitting...
+                {isEditMode ? "Saving..." : "Submitting..."}
               </>
+            ) : isEditMode ? (
+              "Save Changes"
             ) : (
               "Submit Review"
             )}
