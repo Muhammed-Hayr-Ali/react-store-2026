@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
-import { getProductCompleteById } from "@/lib/actions/products/queries/get-complete-by-id"
+import { getProductCompleteBySlug } from "@/lib/actions/products/queries/get-complete-by-slug" // ✅ الاستيراد الجديد
 import { getReviewSummary, getProductReviewsList } from "@/lib/actions/reviews"
 import ProductDetailsPage from "@/components/store/product/ProductDetailsPage/ProductDetailsPage"
-import ProductReviews from "@/components/store/product/ProductReviews"
+import ProductReviews from "@/components/store/product/ProductReviews/ProductReviews"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { appConfig } from "@/lib/config/app_config"
 import type {
@@ -12,18 +12,19 @@ import type {
 } from "@/lib/actions/reviews/types"
 import { getCurrentUser } from "@/lib/actions/utils/profile"
 
+
 interface ProductPageProps {
-  params: Promise<{ id: string; locale: string }>
+  params: Promise<{ slug: string; locale: string }>
 }
 
 export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
-  const { id } = await params
-  const result = await getProductCompleteById(id)
+  const { slug } = await params
+  const result = await getProductCompleteBySlug(slug)
 
   if (!result.success || !result.data) {
-    return { title: "منتج غير موجود" }
+    return { title: "Product Not Found" }
   }
 
   const primaryImage =
@@ -41,21 +42,25 @@ export async function generateMetadata({
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const { id } = await params
-
+  const { slug } = await params
   const user = await getCurrentUser()
 
-  // 1. جلب البيانات بشكل متوازي
-  const [productResult, summaryResult, reviewsResult] = await Promise.all([
-    getProductCompleteById(id),
-    getReviewSummary(id),
-    getProductReviewsList(id),
-  ])
+  // 1. جلب بيانات المنتج أولاً باستخدام الـ Slug
+  const productResult = await getProductCompleteBySlug(slug)
 
-  // 2. التحقق من وجود المنتج
+  // إذا لم يتم العثور على المنتج، عرض صفحة 404
   if (!productResult.success || !productResult.data) {
     notFound()
   }
+
+  // ✅ استخراج الـ ID من المنتج لاستخدامه في جلب التقييمات
+  const productId = productResult.data.id
+
+  // 2. جلب بيانات التقييمات بشكل متوازي باستخدام الـ ID
+  const [summaryResult, reviewsResult] = await Promise.all([
+    getReviewSummary(productId),
+    getProductReviewsList(productId),
+  ])
 
   // 3. تضييق النوع (Type Narrowing) لضمان عدم وجود undefined
   const defaultSummary: ReviewSummary = {
@@ -73,19 +78,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
     reviewsResult.success && reviewsResult.data ? reviewsResult.data : []
 
   return (
-    // ✅ التطابق التام مع الناف بار: نفس العرض ونفس الهوامش الجانبية
     <main className="mx-auto max-w-262.5 px-4 pt-24 pb-12 sm:px-6 md:pt-28 md:pb-20 lg:px-8">
       {/* قسم تفاصيل المنتج الرئيسي */}
       <ProductDetailsPage product={productResult.data} />
 
       {/* قسم التقييمات الجديد */}
       <div className="mt-16 border-t border-muted/50 pt-12">
-        {/* ✅ تمرير productId لحل خطأ TypeScript نهائياً */}
         <ProductReviews
           currentUserId={user?.id}
           summary={summary}
           reviews={reviews}
-          productId={id}
+          productId={productId} 
         />
       </div>
     </main>
