@@ -65,15 +65,14 @@ export function ReviewDialog({
     },
   })
 
-  // ✅ مزامنة بيانات النموذج عند تغيير حالة الحوار (بدون setState إضافي)
+  // ✅ ضمان مزامنة الـ productId الأساسي ودعم وضع التعديل
   React.useEffect(() => {
     if (openDialog === "edit-review" && review) {
       form.reset({
-        product_id: review.product_id,
+        product_id: review.product_id || productId,
         rating: review.rating,
         comment: review.comment || "",
       })
-      // ✅ تم إزالة setHoverRating من هنا لأن المنطق (hoverRating || field.value) يتعامل معها تلقائياً
     } else if (openDialog === "create-review") {
       form.reset({
         product_id: productId,
@@ -83,9 +82,8 @@ export function ReviewDialog({
     }
   }, [openDialog, review, productId, form])
 
-  // ✅ إعادة التعيين عند الإغلاق
   const handleOpenChange = (isOpen: boolean) => {
-    if (!isOpen) {
+    if (!isOpen && !isSubmitting) {
       onOpenChange(false)
       form.reset({
         product_id: productId,
@@ -112,7 +110,10 @@ export function ReviewDialog({
           comment: data.comment,
         })
       } else {
-        result = await createReview(data)
+        result = await createReview({
+          ...data,
+          product_id: productId, // ضمان إرسال معرّف المنتج الحالي دائماً
+        })
       }
 
       if (result.success) {
@@ -162,7 +163,7 @@ export function ReviewDialog({
           className="space-y-5"
         >
           <FieldGroup>
-            {/* حقل تقييم النجوم */}
+            {/* حقل تقييم النجوم مع تحسين A11y */}
             <Controller
               name="rating"
               control={form.control}
@@ -172,30 +173,38 @@ export function ReviewDialog({
                   <div
                     dir="ltr"
                     className="mt-1.5 flex items-center gap-0.5 rtl:flex-row-reverse"
+                    role="radiogroup"
+                    aria-label="Product rating"
                   >
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        onClick={() => {
-                          field.onChange(star)
-                          setHoverRating(star)
-                        }}
-                        onMouseEnter={() => setHoverRating(star)}
-                        onMouseLeave={() => setHoverRating(field.value)}
-                        className="rounded-sm p-1 transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                        aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
-                      >
-                        <StarIcon
-                          className={`size-7 transition-colors ${
-                            // ✅ المنطق الذكي: إذا كان hoverRating هو 0، يعتمد على field.value تلقائياً
-                            star <= (hoverRating || field.value)
-                              ? "fill-amber-400 text-amber-400"
-                              : "text-muted-foreground/25"
-                          }`}
-                        />
-                      </button>
-                    ))}
+                    {[1, 2, 3, 4, 5].map((star) => {
+                      const currentActiveRating = hoverRating || field.value
+                      const isSelected = star === field.value
+
+                      return (
+                        <button
+                          key={star}
+                          type="button"
+                          role="radio"
+                          aria-checked={isSelected}
+                          onClick={() => {
+                            field.onChange(star)
+                            setHoverRating(star)
+                          }}
+                          onMouseEnter={() => setHoverRating(star)}
+                          onMouseLeave={() => setHoverRating(field.value)}
+                          className="rounded-sm p-1 transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                          aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
+                        >
+                          <StarIcon
+                            className={`size-7 transition-colors ${
+                              star <= currentActiveRating
+                                ? "fill-amber-400 text-amber-400"
+                                : "text-muted-foreground/25"
+                            }`}
+                          />
+                        </button>
+                      )
+                    })}
                   </div>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />

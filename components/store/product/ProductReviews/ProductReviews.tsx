@@ -1,25 +1,25 @@
 "use client"
 
 import * as React from "react"
-import { StarIcon, UserIcon } from "lucide-react"
+import { UserIcon } from "lucide-react"
 import {
   ReviewDialogName,
-  ReviewSummary,
+  ReviewSummary as ReviewSummaryType,
   ReviewWithProfile,
 } from "@/lib/actions/reviews/types"
 
 // مكونات shadcn القياسية
-import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { CustomButton } from "@/components/ui/custom-button"
 
 // المكونات الفرعية
-import { ReviewItem } from "@/components/store/product/ProductReviews/ReviewItem"
-import { ReviewDialog } from "@/components/store/product/ProductReviews/ReviewDialog"
-import { DeleteReviewDialog } from "@/components/store/product/ProductReviews/DeleteReviewDialog"
+import { ReviewSummary } from "./ReviewSummary"
+import { ReviewItem } from "./ReviewItem"
+import { ReviewDialog } from "./ReviewDialog"
+import { DeleteReviewDialog } from "./DeleteReviewDialog"
 
 interface ProductReviewsProps {
-  summary: ReviewSummary
+  summary: ReviewSummaryType
   reviews: ReviewWithProfile[]
   productId: string
   currentUserId?: string
@@ -31,8 +31,6 @@ export default function ProductReviews({
   productId,
   currentUserId,
 }: ProductReviewsProps) {
-  const { averageRating, totalReviews, distribution } = summary
-
   // ✅ حالة موحدة لإدارة جميع الحوارات
   const [dialogState, setDialogState] = React.useState<{
     id: string | null
@@ -46,11 +44,6 @@ export default function ProductReviews({
     if (!open) {
       setDialogState({ id: null, openDialog: null })
     }
-  }
-
-  const getPercentage = (count: number) => {
-    if (totalReviews === 0) return 0
-    return Math.round((count / totalReviews) * 100)
   }
 
   return (
@@ -79,51 +72,8 @@ export default function ProductReviews({
 
         <Separator />
 
-        {/* الملخص الإحصائي */}
-        <div className="grid grid-cols-1 items-center gap-8 py-2 md:grid-cols-12">
-          <div className="flex flex-col items-center justify-center text-center md:col-span-4 md:text-start">
-            <div className="flex items-baseline gap-2">
-              <span className="text-5xl tracking-tight text-foreground tabular-nums">
-                {averageRating > 0 ? averageRating.toFixed(1) : "0.0"}
-              </span>
-              <span className="text-sm text-muted-foreground">/ 5</span>
-            </div>
-
-            <div className="mt-2 flex items-center gap-1 text-amber-400">
-              {[...Array(5)].map((_, i) => (
-                <StarIcon
-                  key={i}
-                  className={`size-4 ${
-                    i < Math.round(averageRating)
-                      ? "fill-current"
-                      : "text-muted-foreground/20"
-                  }`}
-                />
-              ))}
-            </div>
-
-            <p className="mt-2 text-xs text-muted-foreground">
-              {totalReviews.toLocaleString()}{" "}
-              {totalReviews === 1 ? "review" : "reviews"}
-            </p>
-          </div>
-
-          <div className="space-y-2 md:col-span-8">
-            {[5, 4, 3, 2, 1].map((star) => {
-              const count = distribution[star as keyof typeof distribution] || 0
-              const percentage = getPercentage(count)
-
-              return (
-                <div key={star} className="flex items-center gap-3 text-xs">
-                  <span className="flex w-4 items-center justify-between text-muted-foreground tabular-nums">
-                    {star}
-                  </span>
-                  <Progress value={percentage} className="h-1.5 flex-1" />
-                </div>
-              )
-            })}
-          </div>
-        </div>
+        {/* ✅ استخدام مكون الملخص الإحصائي المنفصل */}
+        <ReviewSummary summary={summary} />
 
         <Separator />
 
@@ -147,7 +97,7 @@ export default function ProductReviews({
                 <React.Fragment key={review.id}>
                   {idx > 0 && <Separator />}
 
-                  {/* ✅ استخدام المكون المنفصل */}
+                  {/* ✅ استخدام مكون عرض التقييم المنفصل */}
                   <ReviewItem
                     review={review}
                     isOwner={isOwner}
