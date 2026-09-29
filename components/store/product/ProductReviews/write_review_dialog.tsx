@@ -41,7 +41,7 @@ interface ReviewDialogProps {
   productId: string
   openDialog: ReviewDialogName | null
   onOpenChange: (open: boolean) => void
-  review?: ReviewWithProfile // ✅ بيانات التقييم للتعديل (اختياري)
+  review?: ReviewWithProfile
 }
 
 export function ReviewDialog({
@@ -59,13 +59,31 @@ export function ReviewDialog({
   const form = useForm<z.infer<typeof createReviewSchema>>({
     resolver: zodResolver(createReviewSchema),
     defaultValues: {
-      product_id: review?.product_id || productId,
-      rating: review?.rating || 0,
-      comment: review?.comment || "",
+      product_id: productId,
+      rating: 0,
+      comment: "",
     },
   })
 
-  // ✅ إعادة تعيين النموذج عند الإغلاق
+  // ✅ مزامنة بيانات النموذج عند تغيير حالة الحوار (بدون setState إضافي)
+  React.useEffect(() => {
+    if (openDialog === "edit-review" && review) {
+      form.reset({
+        product_id: review.product_id,
+        rating: review.rating,
+        comment: review.comment || "",
+      })
+      // ✅ تم إزالة setHoverRating من هنا لأن المنطق (hoverRating || field.value) يتعامل معها تلقائياً
+    } else if (openDialog === "create-review") {
+      form.reset({
+        product_id: productId,
+        rating: 0,
+        comment: "",
+      })
+    }
+  }, [openDialog, review, productId, form])
+
+  // ✅ إعادة التعيين عند الإغلاق
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
       onOpenChange(false)
@@ -88,14 +106,12 @@ export function ReviewDialog({
     try {
       let result
       if (isEditMode && review) {
-        // ✅ مسار التعديل
         result = await updateReview({
           id: review.id,
           rating: data.rating,
           comment: data.comment,
         })
       } else {
-        // ✅ مسار الإنشاء
         result = await createReview(data)
       }
 
@@ -105,7 +121,7 @@ export function ReviewDialog({
             ? "Review updated successfully!"
             : "Thank you! Your review has been submitted."
         )
-        handleOpenChange(false) // سيؤدي هذا إلى إعادة التعيين وإغلاق النافذة
+        handleOpenChange(false)
         router.refresh()
       } else {
         if (result.error === "UNAUTHORIZED_ACCESS") {
@@ -172,6 +188,7 @@ export function ReviewDialog({
                       >
                         <StarIcon
                           className={`size-7 transition-colors ${
+                            // ✅ المنطق الذكي: إذا كان hoverRating هو 0، يعتمد على field.value تلقائياً
                             star <= (hoverRating || field.value)
                               ? "fill-amber-400 text-amber-400"
                               : "text-muted-foreground/25"
@@ -217,7 +234,7 @@ export function ReviewDialog({
           </FieldGroup>
         </form>
 
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter>
           <CustomButton
             variant="outline"
             onClick={() => handleOpenChange(false)}
