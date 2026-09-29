@@ -61,7 +61,7 @@ export default function ProductReviews({
     onOpenChange: () => {},
   })
 
-  const handleOnOpenChange = (open: ReviewDialogName | null) => {
+  const handleOnOpenChange = (open: boolean) => {
     if (!open) {
       setDialogState({
         id: null,
@@ -376,12 +376,12 @@ export default function ProductReviews({
       <ReviewDialog
         productId={productId}
         openDialog={dialogState.openDialog}
-        setOpenDialog={handleOnOpenChange}
+        onOpenChange={handleOnOpenChange}
       />
       <DeleteReviewDialog
         id={dialogState.id}
-        isOpen={dialogState.openDialog}
-        setOpenDialog={handleOnOpenChange}
+        openDialog={dialogState.openDialog}
+        onOpenChange={handleOnOpenChange}
       />
     </>
   )

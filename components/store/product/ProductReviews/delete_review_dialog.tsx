@@ -19,14 +19,14 @@ import { useRouter } from "next/navigation"
 
 interface DeleteReviewDialogProps {
   id: string | null
-  isOpen: string | null
-  setOpenDialog: (name: ReviewDialogName | null) => void
+  openDialog: ReviewDialogName | null
+  onOpenChange: (open: boolean) => void
 }
 
 export function DeleteReviewDialog({
   id,
-  isOpen,
-  setOpenDialog,
+  openDialog,
+  onOpenChange,
 }: DeleteReviewDialogProps) {
   const router = useRouter()
 
@@ -44,14 +44,14 @@ export function DeleteReviewDialog({
     } catch {
       toast.error("An unexpected error occurred.")
     } finally {
-      setOpenDialog(null)
+      onOpenChange(false)
     }
   }
 
   return (
     <AlertDialog
-      open={isOpen === "deleteReview"}
-      onOpenChange={(val) => val === false && setOpenDialog(null)}
+      open={openDialog === "delete-review"}
+      onOpenChange={onOpenChange}
     >
       <AlertDialogContent>
         <AlertDialogHeader>

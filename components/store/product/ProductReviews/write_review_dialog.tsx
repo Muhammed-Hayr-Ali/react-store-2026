@@ -29,19 +29,22 @@ import {
   InputGroupText,
   InputGroupTextarea,
 } from "@/components/ui/input-group"
-import { createReview, createReviewSchema, ReviewDialogName } from "@/lib/actions/reviews"
-
+import {
+  createReview,
+  createReviewSchema,
+  ReviewDialogName,
+} from "@/lib/actions/reviews"
 
 interface ReviewDialogProps {
   productId: string
   openDialog: ReviewDialogName | null
-  setOpenDialog: (name: ReviewDialogName | null) => void
+  onOpenChange(open: boolean): void
 }
 
 export function ReviewDialog({
   productId,
   openDialog,
-  setOpenDialog,
+  onOpenChange,
 }: ReviewDialogProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = React.useState(false)
@@ -55,15 +58,6 @@ export function ReviewDialog({
       comment: "",
     },
   })
-
-  // ✅ الحل: إعادة التعيين عند إغلاق النافذة بدلاً من useEffect
-  const handleOpenChange = (isOpen: boolean) => {
-    if (!isOpen) {
-      setOpenDialog(null)
-      form.reset({ product_id: productId, rating: 0, comment: "" })
-      setHoverRating(0)
-    }
-  }
 
   async function onSubmit(data: z.infer<typeof createReviewSchema>) {
     if (data.rating === 0) {
@@ -79,7 +73,7 @@ export function ReviewDialog({
         // ✅ إعادة التعيين عند النجاح أيضاً
         form.reset({ product_id: productId, rating: 0, comment: "" })
         setHoverRating(0)
-        setOpenDialog(null)
+        onOpenChange(false)
         router.refresh()
       } else {
         if (result.error === "UNAUTHORIZED_ACCESS") {
@@ -100,10 +94,7 @@ export function ReviewDialog({
   }
 
   return (
-    <Dialog
-      open={openDialog === "create-review"}
-      onOpenChange={handleOpenChange}
-    >
+    <Dialog open={openDialog === "create-review"} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Write a Review</DialogTitle>
@@ -152,11 +143,6 @@ export function ReviewDialog({
                         />
                       </button>
                     ))}
-                    {field.value > 0 && (
-                      <span className="ml-2 text-sm font-medium text-foreground">
-                        {field.value} / 5
-                      </span>
-                    )}
                   </div>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
@@ -195,10 +181,10 @@ export function ReviewDialog({
           </FieldGroup>
         </form>
 
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter className="gap-2">
           <CustomButton
             variant="outline"
-            onClick={() => handleOpenChange(false)}
+            onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
             type="button"
           >
