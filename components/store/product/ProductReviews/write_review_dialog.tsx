@@ -29,18 +29,19 @@ import {
   InputGroupText,
   InputGroupTextarea,
 } from "@/components/ui/input-group"
-import { createReview, createReviewSchema } from "@/lib/actions/reviews"
+import { createReview, createReviewSchema, ReviewDialogName } from "@/lib/actions/reviews"
+
 
 interface ReviewDialogProps {
   productId: string
-  openDialog: string | null
-  onCancel: (open: boolean) => void
+  openDialog: ReviewDialogName | null
+  setOpenDialog: (name: ReviewDialogName | null) => void
 }
 
 export function ReviewDialog({
   productId,
   openDialog,
-  onCancel,
+  setOpenDialog,
 }: ReviewDialogProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = React.useState(false)
@@ -55,6 +56,15 @@ export function ReviewDialog({
     },
   })
 
+  // ✅ الحل: إعادة التعيين عند إغلاق النافذة بدلاً من useEffect
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      setOpenDialog(null)
+      form.reset({ product_id: productId, rating: 0, comment: "" })
+      setHoverRating(0)
+    }
+  }
+
   async function onSubmit(data: z.infer<typeof createReviewSchema>) {
     if (data.rating === 0) {
       toast.error("Please select a star rating")
@@ -66,8 +76,10 @@ export function ReviewDialog({
       const result = await createReview(data)
       if (result.success) {
         toast.success("Thank you! Your review has been submitted.")
-        form.reset()
-        onCancel(false)
+        // ✅ إعادة التعيين عند النجاح أيضاً
+        form.reset({ product_id: productId, rating: 0, comment: "" })
+        setHoverRating(0)
+        setOpenDialog(null)
         router.refresh()
       } else {
         if (result.error === "UNAUTHORIZED_ACCESS") {
@@ -88,20 +100,23 @@ export function ReviewDialog({
   }
 
   return (
-    <Dialog open={openDialog === "write"} onOpenChange={onCancel}>
-      <DialogContent className="sm:max-w-[425px]">
+    <Dialog
+      open={openDialog === "create-review"}
+      onOpenChange={handleOpenChange}
+    >
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Write a Review</DialogTitle>
           <DialogDescription>
-            Share your thoughts and rating for this product with other
-            customers.
+            Share your experience with this product. Your feedback helps other
+            customers make informed decisions.
           </DialogDescription>
         </DialogHeader>
 
         <form
           id="review-form"
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-5 py-2"
+          className="space-y-5"
         >
           <FieldGroup>
             {/* حقل تقييم النجوم */}
@@ -113,27 +128,35 @@ export function ReviewDialog({
                   <FieldLabel>Your Rating</FieldLabel>
                   <div
                     dir="ltr"
-                    className="mt-1.5 flex items-center gap-1.5 rtl:flex-row-reverse"
+                    className="mt-1.5 flex items-center gap-0.5 rtl:flex-row-reverse"
                   >
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         key={star}
                         type="button"
-                        onClick={() => field.onChange(star)}
+                        onClick={() => {
+                          field.onChange(star)
+                          setHoverRating(star) // ✅ تحديث فوري عند النقر
+                        }}
                         onMouseEnter={() => setHoverRating(star)}
-                        onMouseLeave={() => setHoverRating(0)}
-                        className="rounded-md p-1 transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                        aria-label={`Rate ${star} stars`}
+                        onMouseLeave={() => setHoverRating(field.value)} // ✅ العودة للقيمة المحددة بدلاً من 0
+                        className="rounded-sm p-1 transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                        aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
                       >
                         <StarIcon
                           className={`size-7 transition-colors ${
                             star <= (hoverRating || field.value)
                               ? "fill-amber-400 text-amber-400"
-                              : "text-muted-foreground/30"
+                              : "text-muted-foreground/25"
                           }`}
                         />
                       </button>
                     ))}
+                    {field.value > 0 && (
+                      <span className="ml-2 text-sm font-medium text-foreground">
+                        {field.value} / 5
+                      </span>
+                    )}
                   </div>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
@@ -148,18 +171,18 @@ export function ReviewDialog({
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Comment (Optional)</FieldLabel>
+                  <FieldLabel>Comment</FieldLabel>
                   <InputGroup>
                     <InputGroupTextarea
                       {...field}
                       placeholder="What did you like or dislike about this product?"
                       rows={5}
-                      className="min-h-28 resize-none text-sm"
+                      className="min-h-24 resize-none text-sm"
                       aria-invalid={fieldState.invalid}
                     />
                     <InputGroupAddon align="block-end">
                       <InputGroupText className="text-xs text-muted-foreground tabular-nums">
-                        {(field.value || "").length}/500
+                        {(field.value || "").length} / 500
                       </InputGroupText>
                     </InputGroupAddon>
                   </InputGroup>
@@ -175,7 +198,7 @@ export function ReviewDialog({
         <DialogFooter className="gap-2 sm:gap-0">
           <CustomButton
             variant="outline"
-            onClick={() => onCancel(false)}
+            onClick={() => handleOpenChange(false)}
             disabled={isSubmitting}
             type="button"
           >

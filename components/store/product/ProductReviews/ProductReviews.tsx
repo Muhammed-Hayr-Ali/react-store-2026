@@ -11,8 +11,12 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { ReviewSummary, ReviewWithProfile } from "@/lib/actions/reviews/types"
-import {  updateReview } from "@/lib/actions/reviews"
+import {
+  ReviewDialogName,
+  ReviewSummary,
+  ReviewWithProfile,
+} from "@/lib/actions/reviews/types"
+import { updateReview } from "@/lib/actions/reviews"
 
 // مكونات shadcn القياسية
 import { Progress } from "@/components/ui/progress"
@@ -49,19 +53,19 @@ export default function ProductReviews({
 
   const [dialogState, setDialogState] = React.useState<{
     id: string | null
-    isOpen: string | null
+    openDialog: ReviewDialogName | null
     onOpenChange?: (open: boolean) => void
   }>({
     id: null,
-    isOpen: null,
+    openDialog: null,
     onOpenChange: () => {},
   })
 
-  const handleOnOpenChange = (open: boolean) => {
+  const handleOnOpenChange = (open: ReviewDialogName | null) => {
     if (!open) {
       setDialogState({
         id: null,
-        isOpen: null,
+        openDialog: null,
         onOpenChange: () => {},
       })
     }
@@ -129,7 +133,9 @@ export default function ProductReviews({
 
           <CustomButton
             variant="outline"
-            onClick={() => setDialogState({ id: null, isOpen: "write" })}
+            onClick={() =>
+              setDialogState({ id: null, openDialog: "create-review" })
+            }
           >
             Write a Review
           </CustomButton>
@@ -289,7 +295,7 @@ export default function ProductReviews({
                                 onClick={() =>
                                   setDialogState({
                                     id: review.id,
-                                    isOpen: "deleteReview",
+                                    openDialog: "delete-review",
                                   })
                                 }
                               >
@@ -369,13 +375,13 @@ export default function ProductReviews({
       </section>
       <ReviewDialog
         productId={productId}
-        openDialog={dialogState.isOpen}
-        onCancel={handleOnOpenChange}
+        openDialog={dialogState.openDialog}
+        setOpenDialog={handleOnOpenChange}
       />
       <DeleteReviewDialog
         id={dialogState.id}
-        isOpen={dialogState.isOpen}
-        onOpenChange={handleOnOpenChange}
+        isOpen={dialogState.openDialog}
+        setOpenDialog={handleOnOpenChange}
       />
     </>
   )

@@ -13,20 +13,20 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { deleteReview } from "@/lib/actions/reviews"
+import { deleteReview, ReviewDialogName } from "@/lib/actions/reviews"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
 interface DeleteReviewDialogProps {
   id: string | null
   isOpen: string | null
-  onOpenChange: (open: boolean) => void
+  setOpenDialog: (name: ReviewDialogName | null) => void
 }
 
 export function DeleteReviewDialog({
   id,
   isOpen,
-  onOpenChange,
+  setOpenDialog,
 }: DeleteReviewDialogProps) {
   const router = useRouter()
 
@@ -44,12 +44,15 @@ export function DeleteReviewDialog({
     } catch {
       toast.error("An unexpected error occurred.")
     } finally {
-      onOpenChange(false)
+      setOpenDialog(null)
     }
   }
 
   return (
-    <AlertDialog open={isOpen === "deleteReview"} onOpenChange={onOpenChange}>
+    <AlertDialog
+      open={isOpen === "deleteReview"}
+      onOpenChange={(val) => val === false && setOpenDialog(null)}
+    >
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">

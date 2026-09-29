@@ -71,3 +71,11 @@ export const updateReviewSchema = z.object({
 })
 
 export type UpdateReviewInput = z.infer<typeof updateReviewSchema>
+
+
+export type ReviewDialogName = "create-review" | "edit-review" | "delete-review"
+
+
+
+
+
