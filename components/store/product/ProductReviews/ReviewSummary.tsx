@@ -21,11 +21,8 @@ export function ReviewSummary({ summary }: ReviewSummaryProps) {
       {/* Average Score */}
       <div className="flex flex-col items-center justify-center text-center md:col-span-4 md:items-start md:text-start">
         <div className="flex items-baseline gap-2">
-          <span className="text-5xl font-black tracking-tight text-foreground tabular-nums">
+          <span className="text-6xl text-foreground">
             {averageRating > 0 ? averageRating.toFixed(1) : "0.0"}
-          </span>
-          <span className="text-sm font-medium text-muted-foreground">
-            / 5.0
           </span>
         </div>
 
@@ -43,8 +40,8 @@ export function ReviewSummary({ summary }: ReviewSummaryProps) {
         </div>
 
         <p className="mt-1.5 text-xs font-medium text-muted-foreground">
-          Based on {totalReviews.toLocaleString()}{" "}
-          {totalReviews === 1 ? "verified review" : "verified reviews"}
+          {totalReviews.toLocaleString()}{" "}
+          {totalReviews === 1 ? "review" : "reviews"}
         </p>
       </div>
 
@@ -56,14 +53,14 @@ export function ReviewSummary({ summary }: ReviewSummaryProps) {
 
           return (
             <div key={star} className="flex items-center gap-3 text-xs">
-              <span className="flex w-9 items-center gap-1 font-medium text-muted-foreground tabular-nums">
+              <span className="flex items-center gap-1">
                 <span>{star}</span>
                 <StarIcon className="size-3 fill-amber-400 text-amber-400" />
               </span>
               <Progress value={percentage} className="h-2 flex-1" />
-              <span className="w-10 text-end font-mono text-[11px] text-muted-foreground tabular-nums">
+              {/* <span className="w-10 text-end font-mono text-[11px] text-muted-foreground tabular-nums">
                 {percentage}%
-              </span>
+              </span> */}
             </div>
           )
         })}
