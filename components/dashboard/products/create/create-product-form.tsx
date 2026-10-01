@@ -1102,7 +1102,7 @@ function VariantCard({
                   size="icon"
                   onClick={handleGenerateSku}
                   title="Generate SKU"
-                  className="absolute end-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
+                  className="absolute inset-e-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
                 >
                   <Wand2Icon className="size-3.5" />
                 </Button>
@@ -1479,7 +1479,7 @@ function VariantAttributesManager({
               addAttribute()
             }
           }}
-          className="h-8 min-w-[120px] flex-1 bg-background text-xs"
+          className="h-8 min-w-30 flex-1 bg-background text-xs"
         />
 
         <Button

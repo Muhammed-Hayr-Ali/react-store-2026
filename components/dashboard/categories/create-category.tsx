@@ -14,7 +14,6 @@ import {
   PackageIcon,
   ImageIcon,
   FolderTreeIcon,
-  SparklesIcon,
   CheckCircle2Icon,
   XIcon,
   Wand2Icon,
@@ -174,10 +173,7 @@ export default function CreateCategorySheet({
 
   return (
     <CustomSheet open={isOpen === "create"} onOpenChange={onOpenChange}>
-      <CustomSheetContent
-        showCloseButton={false}
-        side={side}
-      >
+      <CustomSheetContent showCloseButton={false} side={side}>
         {/* Header مشابه لترويسة شاشات لوحة التحكم */}
         <CustomSheetHeader className="shrink-0 border-b bg-card/50 px-6 py-4">
           <div className="flex items-center justify-between">
@@ -310,7 +306,7 @@ export default function CreateCategorySheet({
                           size="icon"
                           onClick={handleGenerateSlug}
                           title="Generate Slug"
-                          className="absolute end-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
+                          className="absolute inset-e-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
                         >
                           <Wand2Icon className="size-3.5" />
                         </Button>

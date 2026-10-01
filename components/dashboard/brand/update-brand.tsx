@@ -153,10 +153,7 @@ export default function UpdateBrandSheet({
 
   return (
     <CustomSheet open={isOpen === "update"} onOpenChange={onOpenChange}>
-      <CustomSheetContent
-        showCloseButton={false}
-        side={side}
-      >
+      <CustomSheetContent showCloseButton={false} side={side}>
         <CustomSheetHeader className="shrink-0 border-b bg-card/50 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
@@ -282,7 +279,7 @@ export default function UpdateBrandSheet({
                           size="icon"
                           onClick={handleGenerateSlug}
                           title="Generate Slug"
-                          className="absolute end-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
+                          className="absolute inset-e-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
                         >
                           <Wand2Icon className="size-3.5" />
                         </Button>
