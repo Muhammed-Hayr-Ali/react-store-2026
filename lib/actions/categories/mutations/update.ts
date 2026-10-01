@@ -11,8 +11,8 @@ export async function updateCategory(
   id: string,
   payload: unknown
 ): Promise<ApiResult<Category | null>> {
-  // check if id is valid
-  const idValidation = z.uuid({ error: "invalid_id_format" }).safeParse(id)
+  // 1. Validate ID format
+  const idValidation = z.string().uuid("INVALID_ID").safeParse(id)
   if (!idValidation.success) {
     return {
       success: false,
@@ -20,41 +20,42 @@ export async function updateCategory(
     }
   }
 
-  // check if payload is valid
+  // 2. Validate payload
   const validation = updateCategorySchema.safeParse(payload)
   if (!validation.success) {
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: z.flattenError(validation.error).fieldErrors,
+      details: validation.error.flatten().fieldErrors,
     }
   }
 
-  //  create safe data
   const safeData = validation.data
 
-  // initialize Supabase client
-  const supabase = await createServerClient()
+  // 3. Check authorization in parallel
+  const [isAdmin, canUpdate] = await Promise.all([
+    hasRole("admin"),
+    hasPermission("update_category"),
+  ])
 
-  // check if user has admin role
-  const has_role = await hasRole("admin")
-  if (!has_role) {
+  if (!isAdmin) {
     return {
       success: false,
       error: "UNAUTHORIZED_ACCESS",
     }
   }
 
-  // check if user has update_category permission
-  const has_permission = await hasPermission("update_category")
-  if (!has_permission) {
+  if (!canUpdate) {
     return {
       success: false,
       error: "PERMISSION_DENIED",
     }
   }
 
-  // update category
+  // 4. Initialize Supabase client
+  const supabase = await createServerClient()
+
+  // 5. Update database record
   const { data: updatedCategory, error } = await supabase
     .from("categories")
     .update(safeData)
@@ -62,7 +63,6 @@ export async function updateCategory(
     .select()
     .single()
 
-  // handle any unexpected errors
   if (error) {
     if (error.code === "23505") {
       return {
@@ -71,7 +71,6 @@ export async function updateCategory(
       }
     }
 
-    //check if category not found
     if (error.code === "PGRST116") {
       return {
         success: false,
@@ -79,7 +78,6 @@ export async function updateCategory(
       }
     }
 
-    // handle any other unexpected errors
     return {
       success: false,
       error: "UPDATE_CATEGORY_ERROR",
@@ -87,7 +85,7 @@ export async function updateCategory(
     }
   }
 
-  // handle database data mismatch
+  // 6. Schema verification on returned data
   const parsedData = categorySchema.safeParse(updatedCategory)
   if (!parsedData.success) {
     console.error("Database data mismatch on update:", parsedData.error)
@@ -97,7 +95,6 @@ export async function updateCategory(
     }
   }
 
-  //success
   return {
     success: true,
     data: parsedData.data,

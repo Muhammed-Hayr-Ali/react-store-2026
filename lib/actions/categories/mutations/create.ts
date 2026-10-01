@@ -10,7 +10,7 @@ import { hasPermission } from "../../role/permission-checker"
 export async function createCategory(
   payload: unknown
 ): Promise<ApiResult<Category | null>> {
-  // 1. التحقق من صحة البيانات المدخلة باستخدام مخطط الإنشاء
+  // 1. Validate payload
   const validation = createCategorySchema.safeParse(payload)
   if (!validation.success) {
     return {
@@ -20,40 +20,39 @@ export async function createCategory(
     }
   }
 
-  // إنشاء بيانات آمنة بعد التحقق
   const safeData = validation.data
 
-  // 2. تهيئة عميل Supabase
-  const supabase = await createServerClient()
+  // 2. Check authorization in parallel
+  const [isAdmin, canCreate] = await Promise.all([
+    hasRole("admin"),
+    hasPermission("create_category"),
+  ])
 
-  // 3. التحقق من دور المستخدم (Admin)
-  const has_role = await hasRole("admin")
-  if (!has_role) {
+  if (!isAdmin) {
     return {
       success: false,
       error: "UNAUTHORIZED_ACCESS",
     }
   }
 
-  // 4. التحقق من صلاحية "إنشاء" فئة (تم التغيير من update_category إلى create_category)
-  const has_permission = await hasPermission("create_category")
-  if (!has_permission) {
+  if (!canCreate) {
     return {
       success: false,
       error: "PERMISSION_DENIED",
     }
   }
 
-  // 5. إدراج الفئة الجديدة في قاعدة البيانات
+  // 3. Initialize Supabase client
+  const supabase = await createServerClient()
+
+  // 4. Insert into database
   const { data: newCategory, error } = await supabase
     .from("categories")
-    .insert(safeData) // تم التغيير من update إلى insert
+    .insert(safeData)
     .select()
     .single()
 
-  // 6. معالجة الأخطاء المحتملة من قاعدة البيانات
   if (error) {
-    // كود 23505 يشير إلى انتهاك قيد التفرد (Unique Violation)، مثل تكرار الـ slug
     if (error.code === "23505") {
       return {
         success: false,
@@ -61,7 +60,6 @@ export async function createCategory(
       }
     }
 
-    // معالجة أي أخطاء أخرى غير متوقعة
     return {
       success: false,
       error: "CREATE_CATEGORY_ERROR",
@@ -69,7 +67,7 @@ export async function createCategory(
     }
   }
 
-  // 7. التحقق من تطابق البيانات المرجعة من قاعدة البيانات مع المخطط الأساسي
+  // 5. Schema verification on returned data
   const parsedData = categorySchema.safeParse(newCategory)
   if (!parsedData.success) {
     console.error("Database data mismatch on create:", parsedData.error)
@@ -79,7 +77,6 @@ export async function createCategory(
     }
   }
 
-  // 8. نجاح العملية
   return {
     success: true,
     data: parsedData.data,

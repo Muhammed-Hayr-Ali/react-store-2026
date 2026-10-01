@@ -1,4 +1,4 @@
-import { deleteBrand } from "@/lib/actions/brands/mutations/dalete"
+import { deleteBrand } from "@/lib/actions/brands/mutations/delete"
 import { createCategory } from "@/lib/actions/categories/mutations/create"
 import { NextRequest, NextResponse } from "next/server"
 

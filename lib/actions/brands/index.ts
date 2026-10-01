@@ -1,6 +1,6 @@
 export * from "./types"
 export { createBrand } from "./mutations/create"
-export { deleteBrand } from "./mutations/dalete"
+export { deleteBrand } from "./mutations/delete"
 export { updateBrand } from "./mutations/update"
 export { getBrandBySlug } from "./queries/get_by_slug"
 export { getAllBrand } from "./queries/get-all"

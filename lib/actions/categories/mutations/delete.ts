@@ -1,43 +1,54 @@
 "use server"
 
+import { z } from "zod"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { hasRole } from "../../role/role-checker"
 import { hasPermission } from "../../role/permission-checker"
 
 export async function deleteCategory(id: string): Promise<ApiResult<null>> {
-  // check if user has admin role
-  const has_role = await hasRole("admin")
-  if (!has_role) {
+  // 1. Validate ID format (حماية من أخطاء الـ UUID في الاستعلام)
+  const idValidation = z.string().uuid("INVALID_ID").safeParse(id)
+  if (!idValidation.success) {
+    return {
+      success: false,
+      error: "INVALID_ID",
+    }
+  }
+
+  // 2. Check authorization in parallel
+  const [isAdmin, canDelete] = await Promise.all([
+    hasRole("admin"),
+    hasPermission("delete_category"),
+  ])
+
+  if (!isAdmin) {
     return {
       success: false,
       error: "UNAUTHORIZED_ACCESS",
     }
   }
 
-  // check if user has create_category permission
-  const has_permission = await hasPermission("delete_category")
-  if (!has_permission) {
+  if (!canDelete) {
     return {
       success: false,
       error: "PERMISSION_DENIED",
     }
   }
 
-  // initialize Supabase client
+  // 3. Initialize Supabase client
   const supabase = await createServerClient()
 
-  // Attempt to update the is_active flag to false.
+  // 4. Delete category record
   const { error } = await supabase.from("categories").delete().eq("id", id)
 
-  // Handle any unexpected errors.
   if (error) {
     return {
       success: false,
-      error: error.message || "DELETE_CATEGORY_ERROR",
+      error: "DELETE_CATEGORY_ERROR",
+      details: { database: [error.message] },
     }
   }
 
-  // success
-  return { success: true }
+  return { success: true, data: null }
 }

@@ -10,7 +10,7 @@ import { hasPermission } from "../../role/permission-checker"
 export async function createBrand(
   payload: unknown
 ): Promise<ApiResult<Brand | null>> {
-  // 1. التحقق من صحة البيانات المدخلة باستخدام مخطط الإنشاء
+  // 1. Validate payload using schema
   const validation = createBrandSchema.safeParse(payload)
   if (!validation.success) {
     return {
@@ -20,30 +20,32 @@ export async function createBrand(
     }
   }
 
-  // إنشاء بيانات آمنة بعد التحقق
   const safeData = validation.data
 
-  // 2. تهيئة عميل Supabase
-  const supabase = await createServerClient()
+  // 2. Check authorization in parallel
+  const [isAdmin, canCreate] = await Promise.all([
+    hasRole("admin"),
+    hasPermission("create_brand"),
+  ])
 
-  // 3. التحقق من دور المستخدم (Admin)
-  const has_role = await hasRole("admin")
-  if (!has_role) {
+  if (!isAdmin) {
     return {
       success: false,
       error: "UNAUTHORIZED_ACCESS",
     }
   }
 
-  const has_permission = await hasPermission("create_brand")
-  if (!has_permission) {
+  if (!canCreate) {
     return {
       success: false,
       error: "PERMISSION_DENIED",
     }
   }
 
-  // 5. إدراج الفئة الجديدة في قاعدة البيانات
+  // 3. Initialize Supabase client
+  const supabase = await createServerClient()
+
+  // 4. Insert brand into database
   const { data: newBrand, error } = await supabase
     .from("brands")
     .insert(safeData)
@@ -65,6 +67,7 @@ export async function createBrand(
     }
   }
 
+  // 5. Schema verification on returned data
   const parsedData = brandSchema.safeParse(newBrand)
   if (!parsedData.success) {
     console.error("Database data mismatch on create:", parsedData.error)
@@ -74,7 +77,6 @@ export async function createBrand(
     }
   }
 
-  // 8. نجاح العملية
   return {
     success: true,
     data: parsedData.data,
