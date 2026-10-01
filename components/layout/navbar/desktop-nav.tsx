@@ -23,6 +23,7 @@ import {
   CustomPopoverHeader,
   CustomPopoverTrigger,
 } from "@/components/ui/custom-popover"
+import { CurrencySelector } from "@/components/store/currency/CurrencySelector"
 
 interface DesktopNavProps {
   className?: string
@@ -31,27 +32,45 @@ interface DesktopNavProps {
 
 export default function DesktopNav({ user, className }: DesktopNavProps) {
   return (
-    <div className={cn("hidden md:block", className)}>
+    <div className={cn("hidden md:flex md:items-center md:gap-5", className)}>
+      {/* 1. مبدل العملة متاح دائماً للجميع */}
+      <CurrencySelector />
+
+      {/* 2. قسم الإجراءات والمستخدم */}
       {user ? (
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-6">
           {/* Search */}
-          <SearchIcon className="size-4" />
+          <button
+            type="button"
+            className="cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
+            aria-label="Search"
+          >
+            <SearchIcon className="size-4" />
+          </button>
+
           {/* Shopping Cart */}
-          <ShoppingCartIcon className="size-4" />
+          <Link
+            href="/cart"
+            className="relative cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
+            aria-label="Cart"
+          >
+            <ShoppingCartIcon className="size-4" />
+          </Link>
+
           {/* User Menu */}
           <UserMenu user={user} />
         </div>
       ) : (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <CustomButton
             size="sm"
             variant="outline"
-            className="text-[10px] font-normal"
+            className="text-[11px] font-medium"
             asChild
           >
             <Link href={appRoutes.auth.login}>Login</Link>
           </CustomButton>
-          <CustomButton size="sm" className="text-[10px] font-normal" asChild>
+          <CustomButton size="sm" className="text-[11px] font-medium" asChild>
             <Link href={appRoutes.auth.signup}>Get Started</Link>
           </CustomButton>
         </div>
@@ -66,17 +85,17 @@ function UserMenu({ user }: { user: CurrentUser }) {
   const handleLogout = async () => {
     const result = await signOut()
     if (result.success) {
-      router.refresh() // Refresh the page to update the UI after logout
+      router.refresh()
     }
   }
 
   return (
     <CustomPopover>
       <CustomPopoverTrigger>
-        <Avatar>
+        <Avatar className="size-8 cursor-pointer ring-1 ring-border transition-opacity hover:opacity-90">
           <AvatarImage src={user.profile_image} />
-          <AvatarFallback className="p-2">
-            <UserIcon />
+          <AvatarFallback className="p-1.5">
+            <UserIcon className="size-4" />
           </AvatarFallback>
         </Avatar>
       </CustomPopoverTrigger>

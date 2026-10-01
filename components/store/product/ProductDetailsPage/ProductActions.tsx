@@ -37,25 +37,27 @@ export function ProductActions({
             <CustomButton
               variant="ghost"
               size="icon"
-              onClick={() => onQuantityChange(quantity + 1)}
-              disabled={isOutOfStock || quantity >= maxStock}
-              className="size-7 rounded-md disabled:pointer-events-none disabled:opacity-40"
-              aria-label="Increase quantity"
-            >
-              <PlusIcon className="size-3.5" />
-            </CustomButton>
-            <span className="w-10 text-center text-xs font-semibold text-foreground tabular-nums">
-              {isOutOfStock ? 0 : quantity}
-            </span>
-            <CustomButton
-              variant="ghost"
-              size="icon"
               onClick={() => onQuantityChange(quantity - 1)}
               disabled={quantity <= 1 || isOutOfStock}
               className="size-7 rounded-md disabled:pointer-events-none disabled:opacity-40"
               aria-label="Decrease quantity"
             >
               <MinusIcon className="size-3.5" />
+            </CustomButton>
+
+            <span className="w-10 text-center text-xs font-semibold text-foreground tabular-nums">
+              {isOutOfStock ? 0 : quantity}
+            </span>
+
+            <CustomButton
+              variant="ghost"
+              size="icon"
+              onClick={() => onQuantityChange(quantity + 1)}
+              disabled={isOutOfStock || quantity >= maxStock}
+              className="size-7 rounded-md disabled:pointer-events-none disabled:opacity-40"
+              aria-label="Increase quantity"
+            >
+              <PlusIcon className="size-3.5" />
             </CustomButton>
           </div>
         </div>
@@ -64,8 +66,8 @@ export function ProductActions({
           <span className="block text-[11px] font-medium text-muted-foreground">
             Total Price
           </span>
-          <span className="text-lg font-medium text-foreground tabular-nums">
-            {formatPrice(isOutOfStock ? 0 : totalPrice)}
+          <span className="text-lg font-bold tracking-tight text-foreground tabular-nums">
+            ${formatPrice(isOutOfStock ? 0 : totalPrice)}
           </span>
         </div>
       </div>

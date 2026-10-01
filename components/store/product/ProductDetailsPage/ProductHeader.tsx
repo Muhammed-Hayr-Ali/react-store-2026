@@ -52,13 +52,13 @@ export function ProductHeader({
             </div>
           ) : (
             <>
-              <span className="text-2xl font-mediumtext-foreground sm:text-3xl">
-               {formatPrice(selectedVariant?.price ?? 0)}
+              <span className="text-2xl font-extrabold tracking-tight text-foreground tabular-nums sm:text-3xl">
+                ${formatPrice(selectedVariant?.price ?? 0)}
               </span>
               {selectedVariant?.compare_at_price &&
                 selectedVariant.compare_at_price > selectedVariant.price && (
-                  <span className="text-base text-muted-foreground line-through">
-                    {formatPrice(selectedVariant.compare_at_price)}
+                  <span className="text-base text-muted-foreground tabular-nums line-through">
+                    ${formatPrice(selectedVariant.compare_at_price)}
                   </span>
                 )}
             </>
