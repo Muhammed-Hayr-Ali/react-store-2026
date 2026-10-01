@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -40,14 +39,6 @@ import { Brand, updateBrand, updateBrandSchema } from "@/lib/actions/brands"
 
 type FormValues = z.infer<typeof updateBrandSchema>
 
-function generateSlug(name: string): string {
-  return slugify(name, {
-    lower: true,
-    strict: true,
-    replacement: "-",
-    trim: true,
-  })
-}
 
 interface UpdateBrandSheetProps {
   isOpen: string | null
@@ -113,12 +104,13 @@ export default function UpdateBrandSheet({
     }
   }, [isOpen, item, form])
 
-  const handleGenerateSlug = () => {
+  const handleGenerateAltText = () => {
     if (!nameValue.trim()) {
       toast.error("Please enter the brand name in English first")
       return
     }
-    setValue("slug", generateSlug(nameValue), {
+    const generatedAlt = `${nameValue.trim()} official logo`
+    setValue("logo_alt", generatedAlt, {
       shouldValidate: true,
       shouldDirty: true,
     })
@@ -250,40 +242,18 @@ export default function UpdateBrandSheet({
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <div className="flex items-center justify-between">
-                        <FieldLabel
-                          htmlFor="edit-brand-slug"
-                          className="text-xs"
-                        >
-                          URL Slug <span className="text-destructive">*</span>
-                        </FieldLabel>
-                        <button
-                          type="button"
-                          onClick={handleGenerateSlug}
-                          className="flex cursor-pointer items-center gap-1 text-[11px] font-medium text-primary hover:underline"
-                        >
-                          <Wand2Icon className="size-3" />
-                          <span>Generate</span>
-                        </button>
-                      </div>
-                      <div className="relative flex items-center">
-                        <Input
-                          {...field}
-                          id="edit-brand-slug"
-                          placeholder="apple"
-                          className="h-8 pe-8 font-mono text-xs"
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={handleGenerateSlug}
-                          title="Generate Slug"
-                          className="absolute inset-e-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
-                        >
-                          <Wand2Icon className="size-3.5" />
-                        </Button>
-                      </div>
+                      <FieldLabel
+                        htmlFor="edit-brand-slug"
+                        className="text-xs"
+                      >
+                        URL Slug <span className="text-destructive">*</span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="edit-brand-slug"
+                        placeholder="apple"
+                        className="h-8 font-mono text-xs"
+                      />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
                       )}
@@ -344,19 +314,31 @@ export default function UpdateBrandSheet({
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel
-                        htmlFor="edit-brand-logo-alt"
-                        className="text-xs"
-                      >
-                        Logo Alt Text
-                      </FieldLabel>
-                      <Input
-                        {...field}
-                        id="edit-brand-logo-alt"
-                        value={field.value ?? ""}
-                        placeholder="e.g., Apple official vector logo"
-                        className="h-8 text-xs"
-                      />
+                        <FieldLabel
+                          htmlFor="edit-brand-logo-alt"
+                          className="text-xs"
+                        >
+                          Logo Alt Text
+                        </FieldLabel>
+                      <div className="relative flex items-center">
+                        <Input
+                          {...field}
+                          id="edit-brand-logo-alt"
+                          value={field.value ?? ""}
+                          placeholder="e.g., Apple official vector logo"
+                          className="h-8 pe-8 text-xs"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={handleGenerateAltText}
+                          title="Generate Alt Text"
+                          className="absolute inset-e-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
+                        >
+                          <Wand2Icon className="size-3.5" />
+                        </Button>
+                      </div>
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
                       )}

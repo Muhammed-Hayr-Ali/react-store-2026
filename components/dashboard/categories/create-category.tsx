@@ -133,12 +133,16 @@ export default function CreateCategorySheet({
     }
   }, [isOpen, form])
 
-  const handleGenerateSlug = () => {
+  const handleGenerateAltText = () => {
     if (!nameValue.trim()) {
       toast.error("Please enter the English name first")
       return
     }
-    setValue("slug", generateSlug(nameValue), {
+    const generatedAlt = `${nameValue.trim()} category showcase banner`.slice(
+      0,
+      200
+    )
+    setValue("image_alt", generatedAlt, {
       shouldValidate: true,
       shouldDirty: true,
     })
@@ -240,11 +244,7 @@ export default function CreateCategorySheet({
                                 shouldValidate: true,
                               })
                             }
-                            if (!getFieldState("image_alt").isDirty) {
-                              setValue("image_alt", newName, {
-                                shouldValidate: false,
-                              })
-                            }
+                            // إزالة التعيين التلقائي لـ image_alt هنا
                           }}
                         />
                         {fieldState.invalid && (
@@ -283,37 +283,15 @@ export default function CreateCategorySheet({
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <div className="flex items-center justify-between">
-                        <FieldLabel htmlFor="cat-slug" className="text-xs">
-                          URL Slug <span className="text-destructive">*</span>
-                        </FieldLabel>
-                        <button
-                          type="button"
-                          onClick={handleGenerateSlug}
-                          className="flex cursor-pointer items-center gap-1 text-[11px] font-medium text-primary hover:underline"
-                        >
-                          <Wand2Icon className="size-3" />
-                          <span>Generate</span>
-                        </button>
-                      </div>
-                      <div className="relative flex items-center">
-                        <Input
-                          {...field}
-                          id="cat-slug"
-                          placeholder="electronics"
-                          className="h-8 pe-8 font-mono text-xs"
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={handleGenerateSlug}
-                          title="Generate Slug"
-                          className="absolute inset-e-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
-                        >
-                          <Wand2Icon className="size-3.5" />
-                        </Button>
-                      </div>
+                      <FieldLabel htmlFor="cat-slug" className="text-xs">
+                        URL Slug <span className="text-destructive">*</span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="cat-slug"
+                        placeholder="electronics"
+                        className="h-8 font-mono text-xs"
+                      />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
                       )}
@@ -375,21 +353,29 @@ export default function CreateCategorySheet({
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <div className="flex items-center justify-between">
                         <FieldLabel htmlFor="cat-image-alt" className="text-xs">
                           Image Alt Text
                         </FieldLabel>
-                        <span className="text-[10px] text-muted-foreground tabular-nums">
-                          {(field.value ?? "").length}/200
-                        </span>
+
+                      <div className="relative flex items-center">
+                        <Input
+                          {...field}
+                          id="cat-image-alt"
+                          value={field.value ?? ""}
+                          placeholder="e.g., Electronics department showcase banner"
+                          className="h-8 pe-8 text-xs"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={handleGenerateAltText}
+                          title="Generate Alt Text"
+                          className="absolute inset-e-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
+                        >
+                          <Wand2Icon className="size-3.5" />
+                        </Button>
                       </div>
-                      <Input
-                        {...field}
-                        id="cat-image-alt"
-                        value={field.value ?? ""}
-                        placeholder="e.g., Electronics department showcase"
-                        className="h-8 text-xs"
-                      />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
                       )}
