@@ -16,7 +16,7 @@ import {
   CustomAlertDialogTitle,
 } from "@/components/ui/custom-alert-dialog"
 import { Spinner } from "@/components/ui/spinner"
-import { deleteCategory } from "@/lib/actions/categories/mutations/dalete"
+import { deleteCategory } from "@/lib/actions/categories/mutations/delete"
 import { Category } from "@/lib/actions/categories"
 
 interface DeleteCategoryDialogProps {
