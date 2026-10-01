@@ -60,15 +60,15 @@ import {
 import { Category } from "@/lib/actions/categories"
 import { Brand } from "@/lib/actions/brands"
 
-// استيراد شيتات وحوارات التصنيفات
+// Category sheets & dialogs
 import CreateCategorySheet from "@/components/dashboard/categories/create-category"
 import UpdateCategorySheet from "@/components/dashboard/categories/update-category"
 import DeleteCategoryDialog from "@/components/dashboard/categories/delete-category"
+
+// Brand sheets & dialogs
 import CreateBrandSheet from "../../brand/create-brand"
 import UpdateBrandSheet from "../../brand/update-brand"
 import DeleteBrandDialog from "../../brand/delete-brand"
-
-// استيراد شيتات وحوارات العلامات التجارية
 
 type FormValues = CreateProductCompleteInput
 
@@ -94,27 +94,27 @@ const DEFAULT_IMAGE = {
 
 const PRESET_ATTRIBUTE_KEYS = [
   {
-    label: "Color (اللون)",
+    label: "Color",
     value: "color",
     placeholder: "e.g., Red or #FF0000",
   },
   {
-    label: "Weight (الوزن)",
+    label: "Weight",
     value: "weight",
     placeholder: "e.g., 250g or 1kg",
   },
   {
-    label: "Size (المقاس / الحجم)",
+    label: "Size",
     value: "size",
     placeholder: "e.g., Medium or 42",
   },
   {
-    label: "Flavor (النكهة)",
+    label: "Flavor",
     value: "flavor",
     placeholder: "e.g., Barbecue or Vanilla",
   },
   {
-    label: "Material (الخامة)",
+    label: "Material",
     value: "material",
     placeholder: "e.g., Cotton or Plastic",
   },
@@ -152,7 +152,7 @@ export default function CreateProductForm({
 }) {
   const router = useRouter()
 
-  // حالة إدارة التصنيفات والحوارات محلياً
+  // Local state for categories and dialogs
   const [categoriesList, setCategoriesList] = React.useState<Category[]>(
     initialCategories || []
   )
@@ -164,7 +164,7 @@ export default function CreateProductForm({
     data: null,
   })
 
-  // حالة إدارة العلامات التجارية والحوارات محلياً
+  // Local state for brands and dialogs
   const [brandsList, setBrandsList] = React.useState<Brand[]>(
     initialBrands || []
   )
@@ -224,23 +224,23 @@ export default function CreateProductForm({
   const selectedBrandId = useWatch({ control, name: "brand_id" })
   const selectedCategoryId = useWatch({ control, name: "category_id" })
 
-  // استخراج الكائن الكامل للتصنيف المختار حالياً
   const selectedCategoryObject = React.useMemo(() => {
     return categoriesList.find((cat) => cat.id === selectedCategoryId) || null
   }, [categoriesList, selectedCategoryId])
 
-  // استخراج الكائن الكامل للعلامة التجارية المختارة حالياً
   const selectedBrandObject = React.useMemo(() => {
     return brandsList.find((b) => b.id === selectedBrandId) || null
   }, [brandsList, selectedBrandId])
 
   const handleGenerateAllSeo = () => {
     if (!currentProductName.trim()) {
-      toast.error("يرجى إدخال اسم المنتج أولاً")
+      toast.error("Please enter a product name first")
       return
     }
 
-    const brandSuffix = selectedBrandObject ? ` | ${selectedBrandObject.name}` : ""
+    const brandSuffix = selectedBrandObject
+      ? ` | ${selectedBrandObject.name}`
+      : ""
     const generatedTitle = `${currentProductName.trim()}${brandSuffix}`.slice(
       0,
       70
@@ -253,11 +253,13 @@ export default function CreateProductForm({
         cleanDesc.length > 157 ? `${cleanDesc.slice(0, 157)}...` : cleanDesc
     } else {
       const categoryPart = selectedCategoryObject
-        ? ` ضمن قسم ${selectedCategoryObject.name}`
+        ? ` in ${selectedCategoryObject.name}`
         : ""
-      const brandPart = selectedBrandObject ? ` من ${selectedBrandObject.name}` : ""
+      const brandPart = selectedBrandObject
+        ? ` by ${selectedBrandObject.name}`
+        : ""
       generatedDescription =
-        `تسوق الآن ${currentProductName.trim()}${brandPart}${categoryPart}. جودة عالية وبأفضل الأسعار مع توصيل سريع وموثوق.`.slice(
+        `Shop ${currentProductName.trim()}${brandPart}${categoryPart}. High quality at the best prices with fast and reliable delivery.`.slice(
           0,
           160
         )
@@ -272,7 +274,7 @@ export default function CreateProductForm({
       shouldDirty: true,
     })
 
-    toast.success("تم توليد بيانات الـ SEO كاملة بنجاح")
+    toast.success("SEO details generated successfully!")
   }
 
   async function onSubmit(data: FormValues) {
@@ -321,7 +323,7 @@ export default function CreateProductForm({
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* شريط الإجراءات العلوي */}
+        {/* Top Header & Actions Bar */}
         <div className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
@@ -364,10 +366,10 @@ export default function CreateProductForm({
           </div>
         </div>
 
-        {/* تخطيط الصفحة: عمود رئيسي وعمود جانبي */}
+        {/* 2-Column Responsive Layout */}
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
-            {/* بطاقة 1: المعلومات الأساسية */}
+            {/* Card 1: Basic Information */}
             <div className="rounded-xl border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <PackageIcon className="size-4 text-primary" />
@@ -465,7 +467,7 @@ export default function CreateProductForm({
               </FieldGroup>
             </div>
 
-            {/* بطاقة 2: المتغيرات والأسعار */}
+            {/* Card 2: Variants & Pricing */}
             <div className="rounded-xl border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center justify-between border-b pb-3">
                 <div className="flex items-center gap-2">
@@ -511,7 +513,7 @@ export default function CreateProductForm({
               </div>
             </div>
 
-            {/* بطاقة 3: معرض الصور */}
+            {/* Card 3: Media Gallery */}
             <div className="rounded-xl border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center justify-between border-b pb-3">
                 <div className="flex items-center gap-2">
@@ -554,7 +556,7 @@ export default function CreateProductForm({
             </div>
           </div>
 
-          {/* العمود الجانبي */}
+          {/* Sidebar */}
           <div className="space-y-6">
             <div className="rounded-xl border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
@@ -605,7 +607,7 @@ export default function CreateProductForm({
               </div>
             </div>
 
-            {/* بطاقة التصنيف والعلامة التجارية مع أزرار الإضافة والتعديل والحذف المتكاملة */}
+            {/* Organization Card (Categories & Brands with Add/Edit/Delete actions) */}
             <div className="rounded-xl border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <TagIcon className="size-4 text-primary" />
@@ -615,16 +617,15 @@ export default function CreateProductForm({
               </div>
 
               <FieldGroup className="space-y-3.5">
-                {/* 1. حقل التصنيف مع أزرار الإدارة */}
+                {/* 1. Category Field */}
                 <Controller
                   name="category_id"
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel className="text-xs">
-                          Category <span className="text-destructive">*</span>
-                        </FieldLabel>
-                      
+                      <FieldLabel className="text-xs">
+                        Category <span className="text-destructive">*</span>
+                      </FieldLabel>
 
                       <div className="flex items-center gap-1.5">
                         <Select
@@ -708,16 +709,15 @@ export default function CreateProductForm({
                   )}
                 />
 
-                {/* 2. حقل العلامة التجارية مع أزرار الإدارة (إضافة، تعديل، حذف) */}
+                {/* 2. Brand Field */}
                 <Controller
                   name="brand_id"
                   control={control}
                   render={({ field }) => (
                     <Field>
-                        <FieldLabel className="text-xs">
-                          Brand (Optional)
-                        </FieldLabel>
-                       
+                      <FieldLabel className="text-xs">
+                        Brand (Optional)
+                      </FieldLabel>
 
                       <div className="flex items-center gap-1.5">
                         <Select
@@ -794,7 +794,7 @@ export default function CreateProductForm({
               </FieldGroup>
             </div>
 
-            {/* بطاقة SEO المحسنة */}
+            {/* SEO Details Card */}
             <div className="rounded-xl border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center justify-between border-b pb-3">
                 <div className="flex items-center gap-2">
@@ -895,8 +895,7 @@ export default function CreateProductForm({
         )}
       </form>
 
-      {/* --- حوارات وشيتات التصنيفات --- */}
-      {/* 1. شيت إنشاء تصنيف جديد */}
+      {/* --- Category Sheets & Dialogs --- */}
       <CreateCategorySheet
         isOpen={categoryModal.type === "create" ? "create" : null}
         onOpenChange={(open) => {
@@ -915,7 +914,6 @@ export default function CreateProductForm({
         }}
       />
 
-      {/* 2. شيت تعديل التصنيف المختار */}
       <UpdateCategorySheet
         isOpen={categoryModal.type === "update" ? "update" : null}
         onOpenChange={(open) => {
@@ -939,7 +937,6 @@ export default function CreateProductForm({
         }}
       />
 
-      {/* 3. حوار تأكيد حذف التصنيف المختار */}
       <DeleteCategoryDialog
         isOpen={categoryModal.type === "delete" ? "delete" : null}
         onOpenChange={(open) => {
@@ -959,8 +956,7 @@ export default function CreateProductForm({
         }}
       />
 
-      {/* --- حوارات وشيتات العلامات التجارية (Brands) --- */}
-      {/* 1. شيت إنشاء علامة تجارية جديدة */}
+      {/* --- Brand Sheets & Dialogs --- */}
       <CreateBrandSheet
         isOpen={brandModal.type === "create" ? "create" : null}
         onOpenChange={(open) => {
@@ -976,7 +972,6 @@ export default function CreateProductForm({
         }}
       />
 
-      {/* 2. شيت تعديل العلامة التجارية المختارة */}
       <UpdateBrandSheet
         isOpen={brandModal.type === "update" ? "update" : null}
         onOpenChange={(open) => {
@@ -994,7 +989,6 @@ export default function CreateProductForm({
         }}
       />
 
-      {/* 3. حوار تأكيد حذف العلامة التجارية المختارة */}
       <DeleteBrandDialog
         isOpen={brandModal.type === "delete" ? "delete" : null}
         onOpenChange={(open) => {
@@ -1454,7 +1448,7 @@ function VariantAttributesManager({
               value="custom"
               className="text-xs font-medium text-primary"
             >
-              + Custom (يدوي)...
+              + Custom...
             </SelectItem>
           </SelectContent>
         </Select>
