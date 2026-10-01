@@ -54,8 +54,7 @@ import {
   CustomSheetTitle,
 } from "@/components/ui/custom-sheet"
 
-import { Category } from "./categories-table"
-import { createCategory, createCategorySchema } from "@/lib/actions/categories"
+import { Category, createCategory, createCategorySchema } from "@/lib/actions/categories"
 
 type FormValues = z.infer<typeof createCategorySchema>
 
