@@ -60,7 +60,7 @@ export async function getAllCategories({
   }
 
   // 5. التحقق من مصفوفة البيانات عبر Zod
-  const parsedData = z.array(categorySchema).safeParse(data || [])
+  const parsedData = z.array(categorySchema).safeParse(data ?? [])
   if (!parsedData.success) {
     console.error(
       "Database data mismatch in getAllCategories:",

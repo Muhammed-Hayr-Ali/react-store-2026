@@ -7,7 +7,8 @@ import { AppLogo } from "@/components/ui/app-logo"
 
 export default function Navbar({ user }: { user: CurrentUser | null }) {
   return (
-    <nav className="fixed top-0 z-50 w-full bg-background/80 backdrop-blur-2xl">
+    <nav className="fixed top-0 z-50 w-full border-b border-border/60 bg-background/60 backdrop-blur-md transition-colors">
+      {" "}
       {/* توحيد الحاوية لتطابق صفحات المحتوى بدقة */}
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-14 items-center justify-between">

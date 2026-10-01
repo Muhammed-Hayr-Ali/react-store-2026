@@ -29,8 +29,6 @@ import {
 } from "@/components/ui/field"
 import {
   InputGroup,
-  InputGroupAddon,
-  InputGroupText,
   InputGroupTextarea,
 } from "@/components/ui/input-group"
 import { Switch } from "@/components/ui/switch"
@@ -194,11 +192,16 @@ export default function UpdateCategorySheet({
 
   return (
     <CustomSheet open={isOpen === "update"} onOpenChange={onOpenChange}>
-      <CustomSheetContent showCloseButton={false} side={side}>
-        <CustomSheetHeader className="shrink-0 border-b bg-card/50 px-6 py-4">
+      <CustomSheetContent
+        showCloseButton={false}
+        side={side}
+        className="flex h-full max-h-screen w-full flex-col p-0 sm:max-w-xl"
+      >
+        {/* Header - ثابت */}
+        <CustomSheetHeader className="shrink-0 border-b bg-card px-5 py-4 sm:px-6">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <CustomSheetTitle className="text-lg font-bold tracking-tight text-foreground">
+              <CustomSheetTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
                 Edit Category
               </CustomSheetTitle>
               <CustomSheetDescription className="text-xs text-muted-foreground">
@@ -217,14 +220,15 @@ export default function UpdateCategorySheet({
           </div>
         </CustomSheetHeader>
 
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        {/* Scrollable Form Body */}
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6">
           <form
             id="update-category-form"
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-5"
+            className="space-y-5 pb-8"
           >
             {/* Card 1: Basic Information */}
-            <div className="rounded-xl border bg-card p-5 shadow-xs">
+            <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <PackageIcon className="size-4 text-primary" />
                 <h2 className="text-sm font-semibold text-card-foreground">
@@ -256,7 +260,6 @@ export default function UpdateCategorySheet({
                                 shouldValidate: true,
                               })
                             }
-                            // عدم تعديل image_alt تلقائياً عند تغيير الاسم
                           }}
                         />
                         {fieldState.invalid && (
@@ -317,7 +320,7 @@ export default function UpdateCategorySheet({
             </div>
 
             {/* Card 2: Media & Description */}
-            <div className="rounded-xl border bg-card p-5 shadow-xs">
+            <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <ImageIcon className="size-4 text-primary" />
                 <h2 className="text-sm font-semibold text-card-foreground">
@@ -340,7 +343,7 @@ export default function UpdateCategorySheet({
                           <img
                             src={imageUrl}
                             alt="Category Banner Preview"
-                            className="object-cover object-center"
+                            className="h-full w-full object-cover object-center"
                             onError={(e) => {
                               e.currentTarget.style.display = "none"
                             }}
@@ -430,11 +433,7 @@ export default function UpdateCategorySheet({
                           rows={3}
                           className="resize-y text-xs"
                         />
-                        <InputGroupAddon align="block-end">
-                          <InputGroupText className="text-[10px] text-muted-foreground">
-                            {descriptionValue.length} characters
-                          </InputGroupText>
-                        </InputGroupAddon>
+                     
                       </InputGroup>
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -446,7 +445,7 @@ export default function UpdateCategorySheet({
             </div>
 
             {/* Card 3: Hierarchy & Status */}
-            <div className="rounded-xl border bg-card p-5 shadow-xs">
+            <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <FolderTreeIcon className="size-4 text-primary" />
                 <h2 className="text-sm font-semibold text-card-foreground">
@@ -573,13 +572,13 @@ export default function UpdateCategorySheet({
           </form>
         </div>
 
-        <CustomSheetFooter className="shrink-0 border-t bg-card/50 px-6 py-4">
+        {/* Footer - ثابت */}
+        <CustomSheetFooter className="shrink-0 border-t bg-card px-5 py-3 sm:px-6 sm:py-4">
           <div className="flex w-full items-center justify-end gap-2.5">
             <CustomSheetClose asChild>
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
                 disabled={isSubmitting}
                 className="cursor-pointer"
               >
@@ -589,7 +588,6 @@ export default function UpdateCategorySheet({
             <Button
               type="submit"
               form="update-category-form"
-              size="sm"
               disabled={isSubmitting}
               className="min-w-32 cursor-pointer shadow-xs"
             >

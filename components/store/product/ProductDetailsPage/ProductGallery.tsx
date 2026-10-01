@@ -1,0 +1,229 @@
+"use client"
+
+import * as React from "react"
+import {
+  AlertCircleIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ExpandIcon,
+  XIcon,
+} from "lucide-react"
+import { ProductImageItem } from "./utils"
+import { CustomButton } from "@/components/ui/custom-button"
+
+interface ProductGalleryProps {
+  activeImage: string
+  productName: string
+  productImages: ProductImageItem[]
+  isOutOfStock: boolean
+  discountPercentage: number | null
+  onThumbnailClick: (img: ProductImageItem) => void
+}
+
+export function ProductGallery({
+  activeImage,
+  productName,
+  productImages,
+  isOutOfStock,
+  discountPercentage,
+  onThumbnailClick,
+}: ProductGalleryProps) {
+  const [isOpen, setIsOpen] = React.useState(false)
+
+  const currentIndex = React.useMemo(() => {
+    const idx = productImages.findIndex((img) => img.url === activeImage)
+    return idx >= 0 ? idx : 0
+  }, [productImages, activeImage])
+
+  const handlePrev = (e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    const nextIdx =
+      (currentIndex - 1 + productImages.length) % productImages.length
+    onThumbnailClick(productImages[nextIdx])
+  }
+
+  const handleNext = (e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    const nextIdx = (currentIndex + 1) % productImages.length
+    onThumbnailClick(productImages[nextIdx])
+  }
+
+  React.useEffect(() => {
+    if (!isOpen) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false)
+      if (e.key === "ArrowLeft") handlePrev()
+      if (e.key === "ArrowRight") handleNext()
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [isOpen, currentIndex, productImages])
+
+  return (
+    <>
+      <div className="space-y-4 lg:col-span-6">
+        {/* الصورة الرئيسية المعروضة في الصفحة */}
+        <div
+          onClick={() => activeImage && setIsOpen(true)}
+          className={`group relative aspect-square w-full overflow-hidden rounded-2xl border border-border/60 bg-muted/20 shadow-xs transition-all duration-300 hover:shadow-md ${
+            activeImage ? "cursor-zoom-in" : ""
+          }`}
+        >
+          {activeImage ? (
+            <>
+              <img
+                src={activeImage}
+                alt={productName}
+                className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 backdrop-blur-[2px] transition-all duration-300 group-hover:opacity-100">
+                <span className="inline-flex translate-y-2 items-center gap-1.5 rounded-full bg-background/90 px-3.5 py-1.5 text-xs font-semibold text-foreground shadow-lg backdrop-blur-md transition-transform duration-300 group-hover:translate-y-0">
+                  <ExpandIcon className="size-3.5 text-primary" />
+                  View Fullscreen
+                </span>
+              </div>
+            </>
+          ) : (
+            <div className="flex size-full flex-col items-center justify-center text-sm text-muted-foreground">
+              <AlertCircleIcon className="mb-2 size-8 opacity-40" />
+              <span>No image available</span>
+            </div>
+          )}
+
+          {!isOutOfStock && discountPercentage && (
+            <span className="text-destructive-foreground absolute start-4 top-4 animate-in rounded-full bg-destructive px-3 py-1 text-xs font-bold tracking-wide shadow-md duration-300 zoom-in-90 fade-in">
+              {discountPercentage}% OFF
+            </span>
+          )}
+        </div>
+
+        {/* شريط الصور المصغرة مع إخفاء شريط التمرير بالكامل وتمرير سلس */}
+        {productImages.length > 1 && (
+          <div className="flex touch-pan-x [scrollbar-width:none] items-center gap-3 overflow-x-auto scroll-smooth py-1 [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            {productImages.map((img) => {
+              const isSelected = activeImage === img.url
+              return (
+                <button
+                  key={img.id}
+                  type="button"
+                  onClick={() => onThumbnailClick(img)}
+                  className={`group relative size-18 shrink-0 cursor-pointer overflow-hidden rounded-xl border bg-background transition-all duration-200 ${
+                    isSelected
+                      ? "scale-100 border-primary shadow-sm ring-2 ring-primary/30"
+                      : "border-border/70 opacity-60 hover:scale-95 hover:border-foreground/40 hover:opacity-100"
+                  }`}
+                  aria-label="Select product image"
+                >
+                  <img
+                    src={img.url}
+                    alt={img.alt_text || productName}
+                    className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* نافذة التكبير بملء الشاشة مع خلفية سينمائية */}
+      {isOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 z-50 flex animate-in flex-col items-center justify-between bg-black/90 p-4 backdrop-blur-md duration-200 fade-in sm:p-6"
+        >
+          {/* شريط الإغلاق العلوي */}
+          <div className="flex w-full max-w-5xl items-center justify-between text-white">
+            <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium tracking-widest text-white/80 backdrop-blur-md">
+              {currentIndex + 1} / {productImages.length}
+            </span>
+            <CustomButton
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsOpen(false)}
+              className="size-9 rounded-full bg-white/10 text-white transition-transform hover:scale-105 hover:bg-white/25 active:scale-95"
+              aria-label="Close fullscreen gallery"
+            >
+              <XIcon className="size-5" />
+            </CustomButton>
+          </div>
+
+          {/* الصورة المكبرة مع أزرار التنقل */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative flex max-h-[75vh] w-full max-w-5xl flex-1 items-center justify-center p-2"
+          >
+            {productImages.length > 1 && (
+              <CustomButton
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={handlePrev}
+                className="absolute start-2 z-10 size-11 rounded-full bg-white/15 text-white backdrop-blur-md transition-all hover:scale-110 hover:bg-white/30 active:scale-95 sm:start-4"
+                aria-label="Previous image"
+              >
+                <ChevronLeftIcon className="size-6" />
+              </CustomButton>
+            )}
+
+            <div className="relative flex max-h-full max-w-full items-center justify-center">
+              <img
+                src={activeImage}
+                alt={productName}
+                className="max-h-[72vh] max-w-full rounded-xl object-contain shadow-2xl transition-all duration-300"
+              />
+            </div>
+
+            {productImages.length > 1 && (
+              <CustomButton
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={handleNext}
+                className="absolute end-2 z-10 size-11 rounded-full bg-white/15 text-white backdrop-blur-md transition-all hover:scale-110 hover:bg-white/30 active:scale-95 sm:end-4"
+                aria-label="Next image"
+              >
+                <ChevronRightIcon className="size-6" />
+              </CustomButton>
+            )}
+          </div>
+
+          {/* شريط المصغرات السفلي داخل النافذة المنبثقة */}
+          {productImages.length > 1 && (
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="flex max-w-full [scrollbar-width:none] items-center gap-2 overflow-x-auto scroll-smooth rounded-2xl bg-white/10 p-2 backdrop-blur-md [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            >
+              {productImages.map((img) => {
+                const isSelected = activeImage === img.url
+                return (
+                  <button
+                    key={img.id}
+                    type="button"
+                    onClick={() => onThumbnailClick(img)}
+                    className={`relative size-14 shrink-0 cursor-pointer overflow-hidden rounded-xl border transition-all duration-200 ${
+                      isSelected
+                        ? "scale-105 border-primary shadow-md ring-2 ring-primary/50"
+                        : "border-white/20 opacity-40 hover:scale-95 hover:opacity-100"
+                    }`}
+                  >
+                    <img
+                      src={img.url}
+                      alt={img.alt_text || productName}
+                      className="size-full object-cover"
+                    />
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  )
+}

@@ -2,7 +2,7 @@
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import type { ProductWithRelations } from "../types" // تأكد من مسار الأنواع الصحيح
+import type { ProductWithRelations } from "../types"
 
 export async function getProductCompleteBySlug(
   slug: string
@@ -22,7 +22,7 @@ export async function getProductCompleteBySlug(
     .select(
       `
       *,
-      category:categories!products_category_id_fkey (id, name, slug, name_ar),
+      category:categories!products_category_id_fkey (id, name, slug, name_ar, parent_id),
       brand:brands!products_brand_id_fkey (id, name, slug, name_ar, logo_url),
       product_variants (
         id, sku, name, price, is_active, attributes, sort_order, 

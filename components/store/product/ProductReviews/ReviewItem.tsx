@@ -1,5 +1,7 @@
+
 "use client"
 
+import { useFormatter } from "next-intl"
 import { StarIcon, User2Icon, PencilIcon, Trash2Icon } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { CustomButton } from "@/components/ui/custom-button"
@@ -18,10 +20,19 @@ export function ReviewItem({
   onEdit,
   onDelete,
 }: ReviewItemProps) {
+  const format = useFormatter()
+
   const fullName =
     [review.profile?.first_name, review.profile?.last_name]
       .filter(Boolean)
       .join(" ") || "Verified Customer"
+
+  // تنسيق التاريخ بناءً على لغة المسار المحددة في next-intl
+  const formattedDate = format.dateTime(new Date(review.created_at), {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  })
 
   return (
     <article className="flex flex-col gap-4 py-2 sm:flex-row sm:items-start sm:gap-6">
@@ -52,12 +63,12 @@ export function ReviewItem({
               />
             ))}
           </div>
-          <time className="text-xs text-muted-foreground tabular-nums">
-            {new Date(review.created_at).toLocaleDateString(undefined, {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })}
+          <time
+            dateTime={review.created_at}
+            suppressHydrationWarning
+            className="text-xs text-muted-foreground tabular-nums"
+          >
+            {formattedDate}
           </time>
         </div>
       </div>
@@ -101,3 +112,4 @@ export function ReviewItem({
     </article>
   )
 }
+

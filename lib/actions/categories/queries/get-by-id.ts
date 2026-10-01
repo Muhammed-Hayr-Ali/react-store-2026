@@ -24,7 +24,7 @@ export async function getCategoryById(
   const { data, error } = await supabase
     .from("categories")
     .select("*")
-    .eq("id", id)
+    .eq("id", idValidation.data)
     .single()
 
   // 4. معالجة حالة عدم الوجود بسلاسة
@@ -38,6 +38,10 @@ export async function getCategoryById(
       error: "FETCH_CATEGORY_BY_ID_ERROR",
       details: { database: [error.message] },
     }
+  }
+
+  if (!data) {
+    return { success: true, data: null }
   }
 
   // 5. التحقق من مطابقة البيانات مع المخطط

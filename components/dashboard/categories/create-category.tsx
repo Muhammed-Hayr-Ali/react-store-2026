@@ -181,11 +181,16 @@ export default function CreateCategorySheet({
 
   return (
     <CustomSheet open={isOpen === "create"} onOpenChange={onOpenChange}>
-      <CustomSheetContent showCloseButton={false} side={side}>
-        <CustomSheetHeader className="shrink-0 border-b bg-card/50 px-6 py-4">
+      <CustomSheetContent
+        showCloseButton={false}
+        side={side}
+        className="flex h-full max-h-screen w-full flex-col p-0 sm:max-w-xl"
+      >
+        {/* Header - ثابت لا ينكمش */}
+        <CustomSheetHeader className="shrink-0 border-b bg-card px-5 py-4 sm:px-6">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <CustomSheetTitle className="text-lg font-bold tracking-tight text-foreground">
+              <CustomSheetTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
                 Add Category
               </CustomSheetTitle>
               <CustomSheetDescription className="text-xs text-muted-foreground">
@@ -204,14 +209,15 @@ export default function CreateCategorySheet({
           </div>
         </CustomSheetHeader>
 
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        {/* Scrollable Form Body - flex-1 min-h-0 لضمان عمل السكرول داخل الجوال */}
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6">
           <form
             id="create-category-form"
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-5"
+            className="space-y-5 pb-8"
           >
             {/* Card 1: Basic Information */}
-            <div className="rounded-xl border bg-card p-5 shadow-xs">
+            <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <PackageIcon className="size-4 text-primary" />
                 <h2 className="text-sm font-semibold text-card-foreground">
@@ -243,7 +249,6 @@ export default function CreateCategorySheet({
                                 shouldValidate: true,
                               })
                             }
-                            // إزالة التعيين التلقائي لـ image_alt هنا
                           }}
                         />
                         {fieldState.invalid && (
@@ -301,7 +306,7 @@ export default function CreateCategorySheet({
             </div>
 
             {/* Card 2: Media & Description */}
-            <div className="rounded-xl border bg-card p-5 shadow-xs">
+            <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <ImageIcon className="size-4 text-primary" />
                 <h2 className="text-sm font-semibold text-card-foreground">
@@ -324,7 +329,7 @@ export default function CreateCategorySheet({
                           <img
                             src={imageUrl}
                             alt="Category Banner Preview"
-                            className="object-cover object-center"
+                            className="h-full w-full object-cover object-center"
                             onError={(e) => {
                               e.currentTarget.style.display = "none"
                             }}
@@ -411,11 +416,7 @@ export default function CreateCategorySheet({
                           rows={3}
                           className="resize-y text-xs"
                         />
-                        <InputGroupAddon align="block-end">
-                          <InputGroupText className="text-[10px] text-muted-foreground">
-                            {descriptionValue.length} characters
-                          </InputGroupText>
-                        </InputGroupAddon>
+                    
                       </InputGroup>
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -427,7 +428,7 @@ export default function CreateCategorySheet({
             </div>
 
             {/* Card 3: Hierarchy & Status */}
-            <div className="rounded-xl border bg-card p-5 shadow-xs">
+            <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <FolderTreeIcon className="size-4 text-primary" />
                 <h2 className="text-sm font-semibold text-card-foreground">
@@ -548,13 +549,13 @@ export default function CreateCategorySheet({
           </form>
         </div>
 
-        <CustomSheetFooter className="shrink-0 border-t bg-card/50 px-6 py-4">
+        {/* Footer - ثابت أسفل الشاشة دائماً */}
+        <CustomSheetFooter className="shrink-0 border-t bg-card px-5 py-3 sm:px-6 sm:py-4">
           <div className="flex w-full items-center justify-end gap-2.5">
             <CustomSheetClose asChild>
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
                 disabled={isSubmitting}
                 className="cursor-pointer"
               >
@@ -564,7 +565,6 @@ export default function CreateCategorySheet({
             <Button
               type="submit"
               form="create-category-form"
-              size="sm"
               disabled={isSubmitting}
               className="min-w-32 cursor-pointer shadow-xs"
             >

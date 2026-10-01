@@ -14,6 +14,7 @@ export async function getCategoryBySlug(
     .trim()
     .min(1, "SLUG_REQUIRED")
     .safeParse(slug)
+
   if (!slugValidation.success) {
     return {
       success: false,
@@ -42,6 +43,10 @@ export async function getCategoryBySlug(
       error: "FETCH_CATEGORY_BY_SLUG_ERROR",
       details: { database: [error.message] },
     }
+  }
+
+  if (!data) {
+    return { success: true, data: null }
   }
 
   // 5. التحقق من البيانات المرجعة

@@ -147,11 +147,16 @@ export default function CreateBrandSheet({
 
   return (
     <CustomSheet open={isOpen === "create"} onOpenChange={onOpenChange}>
-      <CustomSheetContent showCloseButton={false} side={side}>
-        <CustomSheetHeader className="shrink-0 border-b bg-card/50 px-6 py-4">
+      <CustomSheetContent
+        showCloseButton={false}
+        side={side}
+        className="flex h-full max-h-screen w-full flex-col p-0 sm:max-w-xl"
+      >
+        {/* Header - ثابت */}
+        <CustomSheetHeader className="shrink-0 border-b bg-card px-5 py-4 sm:px-6">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <CustomSheetTitle className="text-lg font-bold tracking-tight text-foreground">
+              <CustomSheetTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
                 Add Brand
               </CustomSheetTitle>
               <CustomSheetDescription className="text-xs text-muted-foreground">
@@ -170,14 +175,15 @@ export default function CreateBrandSheet({
           </div>
         </CustomSheetHeader>
 
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        {/* Scrollable Form Body */}
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6">
           <form
             id="create-brand-form"
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-5"
+            className="space-y-5 pb-8"
           >
             {/* Card 1: Basic Information */}
-            <div className="rounded-xl border bg-card p-5 shadow-xs">
+            <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <TagIcon className="size-4 text-primary" />
                 <h2 className="text-sm font-semibold text-card-foreground">
@@ -209,7 +215,6 @@ export default function CreateBrandSheet({
                                 shouldValidate: true,
                               })
                             }
-                            // تم منع التعيين التلقائي لـ logo_alt ليبقى إما يدوياً أو عبر الزر
                           }}
                         />
                         {fieldState.invalid && (
@@ -267,7 +272,7 @@ export default function CreateBrandSheet({
             </div>
 
             {/* Card 2: Brand Logo & Media */}
-            <div className="rounded-xl border bg-card p-5 shadow-xs">
+            <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <ImageIcon className="size-4 text-primary" />
                 <h2 className="text-sm font-semibold text-card-foreground">
@@ -286,11 +291,11 @@ export default function CreateBrandSheet({
                       </FieldLabel>
 
                       {isValidImage && (
-                        <div className="relative mb-2 flex size-24 items-center justify-center overflow-hidden rounded-lg border bg-muted/20 p-2">
+                        <div className="relative mb-2 aspect-video w-full overflow-hidden rounded-lg border bg-muted/20 p-4">
                           <img
                             src={logoUrl}
                             alt="Brand Logo Preview"
-                            className="object-contain p-1"
+                            className="size-full object-contain object-center"
                             onError={(e) => {
                               e.currentTarget.style.display = "none"
                             }}
@@ -317,9 +322,9 @@ export default function CreateBrandSheet({
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="brand-logo-alt" className="text-xs">
-                          Logo Alt Text
-                        </FieldLabel>
+                      <FieldLabel htmlFor="brand-logo-alt" className="text-xs">
+                        Logo Alt Text
+                      </FieldLabel>
                       <div className="relative flex items-center">
                         <Input
                           {...field}
@@ -361,13 +366,13 @@ export default function CreateBrandSheet({
           </form>
         </div>
 
-        <CustomSheetFooter className="shrink-0 border-t bg-card/50 px-6 py-4">
+        {/* Footer - ثابت */}
+        <CustomSheetFooter className="shrink-0 border-t bg-card px-5 py-3 sm:px-6 sm:py-4">
           <div className="flex w-full items-center justify-end gap-2.5">
             <CustomSheetClose asChild>
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
                 disabled={isSubmitting}
                 className="cursor-pointer"
               >
@@ -377,7 +382,6 @@ export default function CreateBrandSheet({
             <Button
               type="submit"
               form="create-brand-form"
-              size="sm"
               disabled={isSubmitting}
               className="min-w-32 cursor-pointer shadow-xs"
             >

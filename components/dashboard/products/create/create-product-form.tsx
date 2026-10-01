@@ -39,8 +39,6 @@ import {
 } from "@/components/ui/field"
 import {
   InputGroup,
-  InputGroupAddon,
-  InputGroupText,
   InputGroupTextarea,
 } from "@/components/ui/input-group"
 import { Switch } from "@/components/ui/switch"
@@ -339,7 +337,6 @@ export default function CreateProductForm({
             <Button
               type="button"
               variant="outline"
-              size="sm"
               disabled={isSubmitting}
               onClick={() => form.reset()}
             >
@@ -347,7 +344,6 @@ export default function CreateProductForm({
             </Button>
             <Button
               type="submit"
-              size="sm"
               disabled={isSubmitting}
               className="min-w-32 cursor-pointer shadow-xs"
             >
@@ -437,9 +433,14 @@ export default function CreateProductForm({
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="product-description">
-                        Description
-                      </FieldLabel>
+                      <div className="flex items-center justify-between">
+                        <FieldLabel htmlFor="product-description">
+                          Description
+                        </FieldLabel>
+                        <span className="text-[10px] text-muted-foreground tabular-nums">
+                          {descriptionValue.length}/500
+                        </span>
+                      </div>
                       <InputGroup className="bg-background">
                         <InputGroupTextarea
                           {...field}
@@ -452,11 +453,6 @@ export default function CreateProductForm({
                           rows={4}
                           className="resize-y text-sm"
                         />
-                        <InputGroupAddon align="block-end">
-                          <InputGroupText className="text-[11px] text-muted-foreground">
-                            {descriptionValue.length} characters
-                          </InputGroupText>
-                        </InputGroupAddon>
                       </InputGroup>
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -1298,19 +1294,9 @@ function ImageCard({
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <div className="flex items-center justify-between">
-                  <FieldLabel className="text-xs">
-                    Alt Text (accessibility)
-                  </FieldLabel>
-                  <button
-                    type="button"
-                    onClick={handleGenerateImageAlt}
-                    className="flex cursor-pointer items-center gap-1 text-[11px] font-medium text-primary hover:underline"
-                  >
-                    <Wand2Icon className="size-3" />
-                    <span>Generate</span>
-                  </button>
-                </div>
+                <FieldLabel className="text-xs">
+                  Alt Text (accessibility)
+                </FieldLabel>
                 <div className="relative flex items-center">
                   <Input
                     {...field}
