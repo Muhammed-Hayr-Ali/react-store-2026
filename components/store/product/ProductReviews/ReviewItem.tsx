@@ -1,11 +1,17 @@
-
 "use client"
 
 import { useFormatter } from "next-intl"
-import { StarIcon, User2Icon, PencilIcon, Trash2Icon } from "lucide-react"
+import {
+  StarIcon,
+  User2Icon,
+  PencilIcon,
+  Trash2Icon,
+  FlagIcon,
+} from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { CustomButton } from "@/components/ui/custom-button"
 import { ReviewWithProfile } from "@/lib/actions/reviews/types"
+import { ReportDialog } from "@/components/common/report/ReportDialog"
 
 interface ReviewItemProps {
   review: ReviewWithProfile
@@ -35,7 +41,7 @@ export function ReviewItem({
   })
 
   return (
-    <article className="flex flex-col gap-4 py-2 sm:flex-row sm:items-start sm:gap-6">
+    <article className="group flex flex-col gap-4 py-2 sm:flex-row sm:items-start sm:gap-6">
       {/* الجزء الأيسر: الصورة، الاسم، التاريخ، والنجوم */}
       <div className="flex shrink-0 flex-col items-start justify-start gap-2 sm:w-52">
         <div className="flex items-center gap-2">
@@ -73,8 +79,8 @@ export function ReviewItem({
         </div>
       </div>
 
-      {/* الجزء الأيمن: التعليق وأزرار التحكم */}
-      <div className="flex flex-1 flex-col gap-2">
+      {/* الجزء الأيمن: التعليق وأزرار الإجراءات */}
+      <div className="flex flex-1 flex-col justify-between gap-3">
         {review.comment?.trim() ? (
           <p className="text-sm leading-relaxed wrap-break-word text-foreground">
             {review.comment}
@@ -85,31 +91,47 @@ export function ReviewItem({
           </p>
         )}
 
-        {/* أزرار التحكم (فقط للمالك) */}
-        {isOwner && (
-          <div className="mt-1 flex items-center justify-end gap-2">
-            <CustomButton
-              type="button"
-              size="icon-sm"
-              variant="outline"
-              onClick={onEdit}
-              aria-label="Edit review"
+        {/* أزرار الإجراءات (تعديل/حذف للمالك، أو إبلاغ للآخرين) */}
+        <div className="mt-1 flex items-center justify-end">
+          {isOwner ? (
+            <div className="flex items-center gap-2">
+              <CustomButton
+                type="button"
+                size="icon-sm"
+                variant="outline"
+                onClick={onEdit}
+                aria-label="Edit review"
+              >
+                <PencilIcon className="size-4" />
+              </CustomButton>
+              <CustomButton
+                type="button"
+                size="icon-sm"
+                variant="outline"
+                onClick={onDelete}
+                aria-label="Delete review"
+              >
+                <Trash2Icon className="size-4" />
+              </CustomButton>
+            </div>
+          ) : (
+            <ReportDialog
+              targetType="review"
+              targetId={review.id}
+              title="Report Review"
             >
-              <PencilIcon className="size-4" />
-            </CustomButton>
-            <CustomButton
-              type="button"
-              size="icon-sm"
-              variant="outline"
-              onClick={onDelete}
-              aria-label="Delete review"
-            >
-              <Trash2Icon className="size-4" />
-            </CustomButton>
-          </div>
-        )}
+              <button
+                type="button"
+                className="inline-flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-destructive focus-visible:outline-hidden"
+                aria-label="Report review"
+              >
+                <FlagIcon className="size-3.5" />
+                <span>Report</span>
+              </button>
+            </ReportDialog>
+          )}
+        </div>
       </div>
     </article>
   )
 }
-
