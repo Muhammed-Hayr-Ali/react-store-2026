@@ -548,6 +548,7 @@ export default function CreateProductForm({
                     key={field.id}
                     index={index}
                     control={control}
+                    setValue={setValue}
                     totalImages={imageFields.length}
                     onRemove={() => removeImage(index)}
                   />
@@ -1071,9 +1072,9 @@ function VariantCard({
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-                <FieldLabel className="text-xs">
-                  SKU Code <span className="text-destructive">*</span>
-                </FieldLabel>
+              <FieldLabel className="text-xs">
+                SKU Code <span className="text-destructive">*</span>
+              </FieldLabel>
               <div className="relative flex items-center">
                 <Input
                   {...field}
@@ -1203,13 +1204,45 @@ function VariantCard({
 interface ImageCardProps {
   index: number
   control: Control<FormValues>
+  setValue: UseFormSetValue<FormValues>
   totalImages: number
   onRemove: () => void
 }
 
-function ImageCard({ index, control, totalImages, onRemove }: ImageCardProps) {
+function ImageCard({
+  index,
+  control,
+  setValue,
+  totalImages,
+  onRemove,
+}: ImageCardProps) {
   const currentUrl = useWatch({ control, name: `images.${index}.url` })
   const variants = useWatch({ control, name: "variants" }) || []
+  const productName = useWatch({ control, name: "name" }) || ""
+  const selectedVariantSku = useWatch({
+    control,
+    name: `images.${index}.variant_sku`,
+  })
+
+  const handleGenerateImageAlt = () => {
+    if (!productName.trim()) {
+      toast.error("Please enter the product name first")
+      return
+    }
+
+    const matchedVariant = variants.find(
+      (v) => v?.sku && v.sku.trim() === selectedVariantSku
+    )
+    const variantSuffix = matchedVariant?.name
+      ? ` - ${matchedVariant.name}`
+      : ""
+    const generatedAlt = `${productName.trim()}${variantSuffix} photo showcase ${index + 1}`
+
+    setValue(`images.${index}.alt_text`, generatedAlt, {
+      shouldValidate: true,
+      shouldDirty: true,
+    })
+  }
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border bg-muted/10 p-4 sm:flex-row">
@@ -1265,12 +1298,37 @@ function ImageCard({ index, control, totalImages, onRemove }: ImageCardProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <Input
-                  {...field}
-                  value={field.value ?? ""}
-                  placeholder="Alt Text (accessibility)"
-                  className="h-8 text-xs"
-                />
+                <div className="flex items-center justify-between">
+                  <FieldLabel className="text-xs">
+                    Alt Text (accessibility)
+                  </FieldLabel>
+                  <button
+                    type="button"
+                    onClick={handleGenerateImageAlt}
+                    className="flex cursor-pointer items-center gap-1 text-[11px] font-medium text-primary hover:underline"
+                  >
+                    <Wand2Icon className="size-3" />
+                    <span>Generate</span>
+                  </button>
+                </div>
+                <div className="relative flex items-center">
+                  <Input
+                    {...field}
+                    value={field.value ?? ""}
+                    placeholder="Alt Text (accessibility)"
+                    className="h-8 pe-8 text-xs"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleGenerateImageAlt}
+                    title="Generate Alt Text"
+                    className="absolute inset-e-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
+                  >
+                    <Wand2Icon className="size-3.5" />
+                  </Button>
+                </div>
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}
@@ -1282,41 +1340,49 @@ function ImageCard({ index, control, totalImages, onRemove }: ImageCardProps) {
             name={`images.${index}.variant_sku`}
             control={control}
             render={({ field }) => (
-              <Select
-                onValueChange={(val) =>
-                  field.onChange(val === "none" ? "" : val)
-                }
-                value={field.value || "none"}
-              >
-                <SelectTrigger className="h-8 text-xs">
-                  <SelectValue placeholder="Link to variant" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">All Variants (General)</SelectItem>
-                  {variants.map((v, i) => {
-                    const currentSku = v?.sku?.trim()
-                    const currentName = v?.name?.trim()
+              <Field>
+                <FieldLabel className="text-xs">Link to Variant</FieldLabel>
+                <Select
+                  onValueChange={(val) =>
+                    field.onChange(val === "none" ? "" : val)
+                  }
+                  value={field.value || "none"}
+                >
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Link to variant" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">All Variants (General)</SelectItem>
+                    {variants.map((v, i) => {
+                      const currentSku = v?.sku?.trim()
+                      const currentName = v?.name?.trim()
 
-                    const attrSummary = v?.attributes
-                      ? Object.values(v.attributes).filter(Boolean).join(" / ")
-                      : ""
+                      const attrSummary = v?.attributes
+                        ? Object.values(v.attributes)
+                            .filter(Boolean)
+                            .join(" / ")
+                        : ""
 
-                    const displayLabel = currentName
-                      ? `${currentName}${currentSku ? ` (${currentSku})` : ""}`
-                      : attrSummary
-                        ? `${attrSummary}${currentSku ? ` (${currentSku})` : ""}`
-                        : currentSku
-                          ? `SKU: ${currentSku}`
-                          : `Variant #${i + 1}`
+                      const displayLabel = currentName
+                        ? `${currentName}${currentSku ? ` (${currentSku})` : ""}`
+                        : attrSummary
+                          ? `${attrSummary}${currentSku ? ` (${currentSku})` : ""}`
+                          : currentSku
+                            ? `SKU: ${currentSku}`
+                            : `Variant #${i + 1}`
 
-                    return (
-                      <SelectItem key={i} value={currentSku || `variant-${i}`}>
-                        {displayLabel}
-                      </SelectItem>
-                    )
-                  })}
-                </SelectContent>
-              </Select>
+                      return (
+                        <SelectItem
+                          key={i}
+                          value={currentSku || `variant-${i}`}
+                        >
+                          {displayLabel}
+                        </SelectItem>
+                      )
+                    })}
+                  </SelectContent>
+                </Select>
+              </Field>
             )}
           />
         </div>
