@@ -1,34 +1,61 @@
 "use server"
 
+import { z } from "zod"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { Category } from "../types"
+import { Category, categorySchema } from "../types"
 
 export async function getCategoryBySlug(
   slug: string
 ): Promise<ApiResult<Category | null>> {
-  // initialize Supabase client
+  // 1. التحقق من نص الـ slug
+  const slugValidation = z
+    .string()
+    .trim()
+    .min(1, "SLUG_REQUIRED")
+    .safeParse(slug)
+  if (!slugValidation.success) {
+    return {
+      success: false,
+      error: "INVALID_SLUG",
+    }
+  }
+
+  // 2. تهيئة عميل Supabase
   const supabase = await createServerClient()
 
-  // Attempt to fetch the category by slug.
+  // 3. جلب التصنيف بالـ slug
   const { data, error } = await supabase
     .from("categories")
     .select("*")
-    .eq("slug", slug)
+    .eq("slug", slugValidation.data)
     .single()
 
-  // Handle "Not Found" gracefully (PostgREST code PGRST116).
+  // 4. معالجة حالة عدم الوجود
   if (error && error.code === "PGRST116") {
     return { success: true, data: null }
   }
 
-  // Handle other unexpected errors.
   if (error) {
     return {
       success: false,
-      error: error.message || "FETCH_CATEGORY_BY_SLUG_ERROR",
+      error: "FETCH_CATEGORY_BY_SLUG_ERROR",
+      details: { database: [error.message] },
     }
   }
 
-  return { success: true, data: data as Category }
+  // 5. التحقق من البيانات المرجعة
+  const parsedData = categorySchema.safeParse(data)
+  if (!parsedData.success) {
+    console.error(
+      "Database data mismatch in getCategoryBySlug:",
+      parsedData.error
+    )
+    return {
+      success: false,
+      error: "DATA_VALIDATION_ERROR",
+    }
+  }
+
+  return { success: true, data: parsedData.data }
 }

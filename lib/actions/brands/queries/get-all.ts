@@ -1,14 +1,15 @@
 "use server"
 
+import { z } from "zod"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { Brand } from "../types"
+import { Brand, brandSchema } from "../types"
 
 export async function getAllBrand(): Promise<ApiResult<Brand[]>> {
-  // 1. Create a Supabase client for server-side operations.
+  // 1. Initialize Supabase client
   const supabase = await createServerClient()
 
-  // 2. Build the base query with default ordering.
+  // 2. Query brands sorted by name
   const { data, error } = await supabase
     .from("brands")
     .select("*")
@@ -17,9 +18,20 @@ export async function getAllBrand(): Promise<ApiResult<Brand[]>> {
   if (error) {
     return {
       success: false,
-      error: error.message || "FETCH_BRANDS_ERROR",
+      error: "FETCH_BRANDS_ERROR",
+      details: { database: [error.message] },
     }
   }
 
-  return { success: true, data: data as Brand[] }
+  // 3. Schema verification on list of records
+  const parsedData = z.array(brandSchema).safeParse(data || [])
+  if (!parsedData.success) {
+    console.error("Database data mismatch in getAllBrand:", parsedData.error)
+    return {
+      success: false,
+      error: "DATA_VALIDATION_ERROR",
+    }
+  }
+
+  return { success: true, data: parsedData.data }
 }

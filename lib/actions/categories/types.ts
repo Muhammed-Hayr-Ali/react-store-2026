@@ -4,14 +4,22 @@ export const categorySchema = z.object({
   id: z.uuid("INVALID_ID"),
   parent_id: z.uuid("INVALID_PARENT_ID").nullable(),
   name: z.string().min(1, "NAME_REQUIRED").max(100, "NAME_TOO_LONG"),
-  name_ar: z.string().nullable(),
+  name_ar: z.string().max(100, "NAME_TOO_LONG").nullable().or(z.literal("")),
   slug: z
     .string()
     .min(1, "SLUG_REQUIRED")
     .regex(/^[a-z0-9-]+$/, "slug_invalid_format"),
-  description: z.string().nullable(),
+  description: z
+    .string()
+    .max(500, "DESCRIPTION_TOO_LONG")
+    .nullable()
+    .or(z.literal("")),
   image_url: z.url("INVALID_URL").nullable().or(z.literal("")),
-  image_alt: z.string().nullable(),
+  image_alt: z
+    .string()
+    .max(200, "ALT_TEXT_TOO_LONG")
+    .nullable()
+    .or(z.literal("")),
   is_active: z.boolean(),
   sort_order: z
     .number()
@@ -28,6 +36,7 @@ export const createCategorySchema = categorySchema.omit({
   created_at: true,
   updated_at: true,
 })
+
 export type CreateCategoryInput = z.infer<typeof createCategorySchema>
 
 export const updateCategorySchema = categorySchema
@@ -37,4 +46,5 @@ export const updateCategorySchema = categorySchema
     updated_at: true,
   })
   .partial()
+
 export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>

@@ -1,32 +1,54 @@
 "use server"
 
+import { z } from "zod"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { Brand } from "../types"
+import { Brand, brandSchema } from "../types"
 
-export async function getBrandById(id: string): Promise<ApiResult<Brand | null>> {
-  // initialize Supabase client
+export async function getBrandById(
+  id: string
+): Promise<ApiResult<Brand | null>> {
+  // 1. Validate ID format
+  const idValidation = z.string().uuid("INVALID_ID").safeParse(id)
+  if (!idValidation.success) {
+    return {
+      success: false,
+      error: "INVALID_ID",
+    }
+  }
+
+  // 2. Initialize Supabase client
   const supabase = await createServerClient()
 
-  // Attempt to fetch the category by slug.
+  // 3. Fetch record by ID
   const { data, error } = await supabase
     .from("brands")
     .select("*")
     .eq("id", id)
     .single()
 
-  // Handle "Not Found" gracefully (PostgREST code PGRST116).
+  // 4. Handle "Not Found" gracefully (PostgREST code PGRST116)
   if (error && error.code === "PGRST116") {
     return { success: true, data: null }
   }
 
-  // Handle other unexpected errors.
   if (error) {
     return {
       success: false,
-      error: error.message || "FETCH_BRAND_BY_SLUG_ERROR",
+      error: "FETCH_BRAND_BY_ID_ERROR",
+      details: { database: [error.message] },
     }
   }
 
-  return { success: true, data: data as Brand }
+  // 5. Schema verification on returned data
+  const parsedData = brandSchema.safeParse(data)
+  if (!parsedData.success) {
+    console.error("Database data mismatch in getBrandById:", parsedData.error)
+    return {
+      success: false,
+      error: "DATA_VALIDATION_ERROR",
+    }
+  }
+
+  return { success: true, data: parsedData.data }
 }

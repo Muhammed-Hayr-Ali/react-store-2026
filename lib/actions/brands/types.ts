@@ -1,23 +1,19 @@
-
-
-
-
-
-
-
-
-import * as z from "zod"
+import { z } from "zod"
 
 export const brandSchema = z.object({
   id: z.uuid("INVALID_ID"),
   name: z.string().min(1, "NAME_REQUIRED").max(100, "NAME_TOO_LONG"),
-  name_ar: z.string().nullable(),
+  name_ar: z.string().max(100, "NAME_TOO_LONG").nullable().or(z.literal("")),
   slug: z
     .string()
     .min(1, "SLUG_REQUIRED")
     .regex(/^[a-z0-9-]+$/, "slug_invalid_format"),
   logo_url: z.url("INVALID_URL").nullable().or(z.literal("")),
-  logo_alt: z.string().nullable(),
+  logo_alt: z
+    .string()
+    .max(200, "ALT_TEXT_TOO_LONG")
+    .nullable()
+    .or(z.literal("")),
   created_at: z.string(),
   updated_at: z.string(),
 })
