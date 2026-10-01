@@ -25,19 +25,37 @@ export const productSchema = z.object({
 
 export type Product = z.infer<typeof productSchema>
 
-// مخطط المتغير (Variant)
-export const variantSchema = z.object({
-  sku: z.string().min(1, "sku_required"),
-  name: z.string().optional().or(z.literal("")),
-  attributes: z.record(z.string(), z.string()).optional(),
-  price: z.number().min(0, "price_must_be_positive"),
-  compare_at_price: z.number().min(0).nullable().optional(),
-  stock_quantity: z.number().int().min(0, "stock_must_be_positive"),
-  track_inventory: z.boolean(),
-  low_stock_threshold: z.number().int().min(0),
-  is_active: z.boolean(),
-  sort_order: z.number().int().min(0),
-})
+// مخطط المتغير (Variant) مع شرط المقارنة اللحظي
+export const variantSchema = z
+  .object({
+    sku: z.string().min(1, "sku_required"),
+    name: z.string().optional().or(z.literal("")),
+    attributes: z.record(z.string(), z.string()).optional(),
+    price: z.number().min(0, "price_must_be_positive"),
+    compare_at_price: z.number().min(0).nullable().optional(),
+    stock_quantity: z.number().int().min(0, "stock_must_be_positive"),
+    track_inventory: z.boolean(),
+    low_stock_threshold: z.number().int().min(0),
+    is_active: z.boolean(),
+    sort_order: z.number().int().min(0),
+  })
+  .refine(
+    (data) => {
+      // إذا كان السعر قبل الخصم موجوداً وله قيمة رقمية
+      if (
+        data.compare_at_price !== null &&
+        data.compare_at_price !== undefined &&
+        !isNaN(data.compare_at_price)
+      ) {
+        return data.compare_at_price > data.price
+      }
+      return true
+    },
+    {
+      message: "Compare-at price must be greater than original price.",
+      path: ["compare_at_price"], // ربط الخطأ مباشرة بحقل compare_at_price
+    }
+  )
 
 export type VariantInput = z.infer<typeof variantSchema>
 

@@ -2,11 +2,31 @@
 
 import * as React from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Controller, useForm, useFieldArray } from "react-hook-form"
+import {
+  Controller,
+  useForm,
+  useFieldArray,
+  Control,
+  useWatch,
+  UseFormSetValue,
+} from "react-hook-form"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import slugify from "slugify"
-import { PlusIcon, Trash2Icon, XIcon } from "lucide-react"
+import {
+  PlusIcon,
+  Trash2Icon,
+  XIcon,
+  PackageIcon,
+  LayersIcon,
+  ImageIcon,
+  SparklesIcon,
+  GlobeIcon,
+  TagIcon,
+  CheckCircle2Icon,
+  Wand2Icon,
+  PencilIcon,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,7 +44,6 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group"
 import { Switch } from "@/components/ui/switch"
-import { Separator } from "@/components/ui/separator"
 import {
   Select,
   SelectContent,
@@ -41,7 +60,65 @@ import {
 import { Category } from "@/lib/actions/categories"
 import { Brand } from "@/lib/actions/brands"
 
+// استيراد شيتات وحوارات التصنيفات
+import CreateCategorySheet from "@/components/dashboard/categories/create-category"
+import UpdateCategorySheet from "@/components/dashboard/categories/update-category"
+import DeleteCategoryDialog from "@/components/dashboard/categories/delete-category"
+import CreateBrandSheet from "../../brand/create-brand"
+import UpdateBrandSheet from "../../brand/update-brand"
+import DeleteBrandDialog from "../../brand/delete-brand"
+
+// استيراد شيتات وحوارات العلامات التجارية
+
 type FormValues = CreateProductCompleteInput
+
+const DEFAULT_VARIANT = {
+  sku: "",
+  name: "",
+  attributes: {},
+  price: 0,
+  compare_at_price: null,
+  stock_quantity: 0,
+  track_inventory: true,
+  low_stock_threshold: 5,
+  is_active: true,
+  sort_order: 1,
+}
+
+const DEFAULT_IMAGE = {
+  url: "",
+  alt_text: "",
+  is_primary: true,
+  variant_sku: "",
+}
+
+const PRESET_ATTRIBUTE_KEYS = [
+  {
+    label: "Color (اللون)",
+    value: "color",
+    placeholder: "e.g., Red or #FF0000",
+  },
+  {
+    label: "Weight (الوزن)",
+    value: "weight",
+    placeholder: "e.g., 250g or 1kg",
+  },
+  {
+    label: "Size (المقاس / الحجم)",
+    value: "size",
+    placeholder: "e.g., Medium or 42",
+  },
+  {
+    label: "Flavor (النكهة)",
+    value: "flavor",
+    placeholder: "e.g., Barbecue or Vanilla",
+  },
+  {
+    label: "Material (الخامة)",
+    value: "material",
+    placeholder: "e.g., Cotton or Plastic",
+  },
+]
 
 function generateSlug(name: string): string {
   return slugify(name, {
@@ -52,96 +129,56 @@ function generateSlug(name: string): string {
   })
 }
 
-function VariantAttributesManager({
-  attributes,
-  onChange,
-}: {
-  attributes: Record<string, string>
-  onChange: (attrs: Record<string, string>) => void
-}) {
-  const [attrKey, setAttrKey] = React.useState("")
-  const [attrVal, setAttrVal] = React.useState("")
+function generateRandomSku(productName?: string, variantName?: string): string {
+  const cleanWord = (text?: string) =>
+    (text || "")
+      .replace(/[^a-zA-Z0-9]/g, "")
+      .slice(0, 4)
+      .toUpperCase()
 
-  const addAttribute = () => {
-    if (!attrKey.trim() || !attrVal.trim()) return
-    onChange({
-      ...attributes,
-      [attrKey.trim().toLowerCase()]: attrVal.trim(),
-    })
-    setAttrKey("")
-    setAttrVal("")
-  }
+  const pPart = cleanWord(productName) || "PRD"
+  const vPart = cleanWord(variantName)
+  const rand = Math.random().toString(36).substring(2, 6).toUpperCase()
 
-  const removeAttribute = (key: string) => {
-    const next = { ...attributes }
-    delete next[key]
-    onChange(next)
-  }
-
-  return (
-    <div className="space-y-2">
-      <FieldLabel className="text-xs font-medium text-muted-foreground">
-        خصائص المتغير (مثل: color, size)
-      </FieldLabel>
-      <div className="flex flex-wrap gap-2">
-        {Object.entries(attributes || {}).map(([key, value]) => (
-          <span
-            key={key}
-            className="inline-flex items-center gap-1 rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
-          >
-            <span>{key}:</span>
-            <span className="font-semibold">{value}</span>
-            <button
-              type="button"
-              onClick={() => removeAttribute(key)}
-              className="ms-1 text-muted-foreground hover:text-foreground"
-            >
-              <XIcon className="size-3" />
-            </button>
-          </span>
-        ))}
-      </div>
-
-      <div className="flex items-center gap-2">
-        <Input
-          placeholder="الخاصية (مثال: color)"
-          value={attrKey}
-          onChange={(e) => setAttrKey(e.target.value)}
-          className="h-8 text-xs"
-        />
-        <Input
-          placeholder="القيمة (مثال: red)"
-          value={attrVal}
-          onChange={(e) => setAttrVal(e.target.value)}
-          className="h-8 text-xs"
-        />
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          onClick={addAttribute}
-          className="h-8 px-3 text-xs"
-        >
-          إضافة
-        </Button>
-      </div>
-    </div>
-  )
-}
-
-interface CreateProductFormProps {
-  categories: Category[] | null
-  brands: Brand[] | null
+  return vPart ? `${pPart}-${vPart}-${rand}` : `${pPart}-${rand}`
 }
 
 export default function CreateProductForm({
-  categories,
-  brands,
-}: CreateProductFormProps) {
+  categories: initialCategories,
+  brands: initialBrands,
+}: {
+  categories: Category[] | null
+  brands: Brand[] | null
+}) {
   const router = useRouter()
+
+  // حالة إدارة التصنيفات والحوارات محلياً
+  const [categoriesList, setCategoriesList] = React.useState<Category[]>(
+    initialCategories || []
+  )
+  const [categoryModal, setCategoryModal] = React.useState<{
+    type: "create" | "update" | "delete" | null
+    data: Category | null
+  }>({
+    type: null,
+    data: null,
+  })
+
+  // حالة إدارة العلامات التجارية والحوارات محلياً
+  const [brandsList, setBrandsList] = React.useState<Brand[]>(
+    initialBrands || []
+  )
+  const [brandModal, setBrandModal] = React.useState<{
+    type: "create" | "update" | "delete" | null
+    data: Brand | null
+  }>({
+    type: null,
+    data: null,
+  })
 
   const form = useForm<FormValues>({
     resolver: zodResolver(createProductCompleteSchema),
+    mode: "onChange",
     defaultValues: {
       name: "",
       slug: "",
@@ -152,35 +189,14 @@ export default function CreateProductForm({
       meta_description: null,
       is_active: true,
       is_featured: false,
-      variants: [
-        {
-          sku: "",
-          name: "",
-          attributes: {},
-          price: 0,
-          compare_at_price: null,
-          stock_quantity: 0,
-          track_inventory: true,
-          low_stock_threshold: 5,
-          is_active: true,
-          sort_order: 1,
-        },
-      ],
-      images: [
-        {
-          url: "",
-          alt_text: "",
-          is_primary: true,
-          variant_sku: "",
-        },
-      ],
+      variants: [DEFAULT_VARIANT],
+      images: [DEFAULT_IMAGE],
     },
   })
 
   const {
     formState: { isSubmitting, errors },
     control,
-    watch,
     setValue,
     getFieldState,
   } = form
@@ -203,32 +219,76 @@ export default function CreateProductForm({
     name: "images",
   })
 
-  const nameValue = watch("name")
-  React.useEffect(() => {
-    const slugState = getFieldState("slug")
-    if (nameValue && !slugState.isDirty) {
-      setValue("slug", generateSlug(nameValue), {
-        shouldValidate: true,
-      })
-    }
-  }, [nameValue, setValue, getFieldState])
+  const descriptionValue = useWatch({ control, name: "description" }) || ""
+  const currentProductName = useWatch({ control, name: "name" }) || ""
+  const selectedBrandId = useWatch({ control, name: "brand_id" })
+  const selectedCategoryId = useWatch({ control, name: "category_id" })
 
-  const descriptionValue = watch("description") || ""
+  // استخراج الكائن الكامل للتصنيف المختار حالياً
+  const selectedCategoryObject = React.useMemo(() => {
+    return categoriesList.find((cat) => cat.id === selectedCategoryId) || null
+  }, [categoriesList, selectedCategoryId])
+
+  // استخراج الكائن الكامل للعلامة التجارية المختارة حالياً
+  const selectedBrandObject = React.useMemo(() => {
+    return brandsList.find((b) => b.id === selectedBrandId) || null
+  }, [brandsList, selectedBrandId])
+
+  const handleGenerateAllSeo = () => {
+    if (!currentProductName.trim()) {
+      toast.error("يرجى إدخال اسم المنتج أولاً")
+      return
+    }
+
+    const brandSuffix = selectedBrandObject ? ` | ${selectedBrandObject.name}` : ""
+    const generatedTitle = `${currentProductName.trim()}${brandSuffix}`.slice(
+      0,
+      70
+    )
+
+    let generatedDescription = ""
+    if (descriptionValue.trim()) {
+      const cleanDesc = descriptionValue.replace(/\s+/g, " ").trim()
+      generatedDescription =
+        cleanDesc.length > 157 ? `${cleanDesc.slice(0, 157)}...` : cleanDesc
+    } else {
+      const categoryPart = selectedCategoryObject
+        ? ` ضمن قسم ${selectedCategoryObject.name}`
+        : ""
+      const brandPart = selectedBrandObject ? ` من ${selectedBrandObject.name}` : ""
+      generatedDescription =
+        `تسوق الآن ${currentProductName.trim()}${brandPart}${categoryPart}. جودة عالية وبأفضل الأسعار مع توصيل سريع وموثوق.`.slice(
+          0,
+          160
+        )
+    }
+
+    setValue("meta_title", generatedTitle, {
+      shouldValidate: true,
+      shouldDirty: true,
+    })
+    setValue("meta_description", generatedDescription, {
+      shouldValidate: true,
+      shouldDirty: true,
+    })
+
+    toast.success("تم توليد بيانات الـ SEO كاملة بنجاح")
+  }
 
   async function onSubmit(data: FormValues) {
     const payload: CreateProductCompleteInput = {
       ...data,
-      brand_id: data.brand_id ? data.brand_id : null,
-      description: data.description ? data.description : null,
-      meta_title: data.meta_title ? data.meta_title : null,
-      meta_description: data.meta_description ? data.meta_description : null,
+      brand_id: data.brand_id || null,
+      description: data.description || null,
+      meta_title: data.meta_title || null,
+      meta_description: data.meta_description || null,
       variants: data.variants.map((v, idx) => ({
         ...v,
         name: v.name || "",
         attributes: v.attributes || {},
         sort_order: idx + 1,
         compare_at_price:
-          v.compare_at_price !== undefined && v.compare_at_price !== null
+          v.compare_at_price !== null && v.compare_at_price !== undefined
             ? Number(v.compare_at_price)
             : null,
       })),
@@ -242,490 +302,104 @@ export default function CreateProductForm({
     const result = await createProduct(payload)
 
     if (result.success) {
-      toast.success("تم إنشاء المنتج بنجاح!")
+      toast.success("Product created successfully!")
       router.refresh()
     } else {
       console.error("Creation Error:", result)
       const errorMsg =
         result.error === "VALIDATION_ERROR"
-          ? "يرجى التحقق من صحة البيانات المدخلة."
+          ? "Please check the form for invalid inputs."
           : result.error === "SLUG_ALREADY_EXISTS"
-            ? "الرابط (Slug) مستخدم بالفعل."
-            : result.error || "فشل في إنشاء المنتج."
+            ? "The URL slug is already taken."
+            : result.error === "SKU_ALREADY_EXISTS"
+              ? "One or more SKUs are already in use."
+              : result.error || "Failed to create product."
       toast.error(errorMsg)
     }
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl py-6">
-      <div className="mb-6 space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight">إضافة منتج جديد</h1>
-        <p className="text-sm text-muted-foreground">
-          أدخل تفاصيل المنتج، المتغيرات، والصور لإضافته مباشرة إلى المتجر.
-        </p>
-      </div>
+    <div className="mx-auto w-full max-w-6xl px-4 py-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* شريط الإجراءات العلوي */}
+        <div className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              Create Product
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Configure product details, variants, media, and inventory
+              settings.
+            </p>
+          </div>
 
-      <form
-        id="create-product-page-form"
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8"
-      >
-        {/* القسم 1: المعلومات الأساسية */}
-        <div className="space-y-4">
-          <h2 className="flex items-center gap-2 text-base font-semibold">
-            <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs text-primary">
-              1
-            </span>
-            المعلومات الأساسية
-          </h2>
-
-          <FieldGroup>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <Controller
-                name="name"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="product-name">اسم المنتج *</FieldLabel>
-                    <Input
-                      {...field}
-                      id="product-name"
-                      placeholder="مثال: قميص قطني فاخر"
-                      aria-invalid={fieldState.invalid}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-
-              <Controller
-                name="slug"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="product-slug">
-                      الرابط (Slug) *
-                    </FieldLabel>
-                    <Input
-                      {...field}
-                      id="product-slug"
-                      placeholder="cotton-shirt"
-                      aria-invalid={fieldState.invalid}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <Controller
-                name="category_id"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>التصنيف *</FieldLabel>
-                    <Select
-                      onValueChange={(val) =>
-                        field.onChange(val === "none" ? "" : val)
-                      }
-                      value={field.value || "none"}
-                    >
-                      <SelectTrigger aria-invalid={fieldState.invalid}>
-                        <SelectValue placeholder="اختر تصنيفاً" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">-- اختر تصنيفاً --</SelectItem>
-                        {categories?.map((cat) => (
-                          <SelectItem key={cat.id} value={cat.id}>
-                            {cat.name}
-                            {cat.name_ar && (
-                              <span className="ms-1 text-muted-foreground">
-                                - {cat.name_ar}
-                              </span>
-                            )}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-
-              <Controller
-                name="brand_id"
-                control={control}
-                render={({ field }) => (
-                  <Field>
-                    <FieldLabel>العلامة التجارية (اختياري)</FieldLabel>
-                    <Select
-                      onValueChange={(val) =>
-                        field.onChange(val === "none" ? null : val)
-                      }
-                      value={field.value ?? "none"}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="اختر علامة تجارية" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">
-                          -- بدون علامة تجارية --
-                        </SelectItem>
-                        {brands?.map((brand) => (
-                          <SelectItem key={brand.id} value={brand.id}>
-                            {brand.name}
-                            {brand.name_ar && (
-                              <span className="ms-1 text-muted-foreground">
-                                - {brand.name_ar}
-                              </span>
-                            )}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </Field>
-                )}
-              />
-            </div>
-
-            <Controller
-              name="description"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="product-description">
-                    وصف المنتج
-                  </FieldLabel>
-                  <InputGroup>
-                    <InputGroupTextarea
-                      {...field}
-                      id="product-description"
-                      value={field.value ?? ""}
-                      onChange={(e) =>
-                        field.onChange(e.target.value ? e.target.value : null)
-                      }
-                      placeholder="اكتب وصفاً تفصيلياً للمنتج ومميزاته..."
-                      rows={3}
-                      className="min-h-20 resize-none"
-                      aria-invalid={fieldState.invalid}
-                    />
-                    <InputGroupAddon align="block-end">
-                      <InputGroupText>
-                        {descriptionValue.length} أحرف
-                      </InputGroupText>
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
+          <div className="flex items-center gap-2.5">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isSubmitting}
+              onClick={() => form.reset()}
+            >
+              Discard Changes
+            </Button>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={isSubmitting}
+              className="min-w-32 cursor-pointer shadow-xs"
+            >
+              {isSubmitting ? (
+                <>
+                  <Spinner className="mr-2 size-4" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2Icon className="mr-1.5 size-4" />
+                  Save Product
+                </>
               )}
-            />
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <Controller
-                name="meta_title"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="meta-title">
-                      عنوان سيو (Meta Title)
-                    </FieldLabel>
-                    <Input
-                      {...field}
-                      id="meta-title"
-                      value={field.value ?? ""}
-                      placeholder="عنوان جذاب لمحركات البحث"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-
-              <Controller
-                name="meta_description"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="meta-description">
-                      وصف سيو (Meta Description)
-                    </FieldLabel>
-                    <Input
-                      {...field}
-                      id="meta-description"
-                      value={field.value ?? ""}
-                      placeholder="وصف مختصر للظهور في محركات البحث"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-            </div>
-          </FieldGroup>
-        </div>
-
-        <Separator />
-
-        {/* القسم 2: المتغيرات */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-base font-semibold">
-              <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs text-primary">
-                2
-              </span>
-              متغيرات المنتج ({variantFields.length})
-            </h2>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                appendVariant({
-                  sku: "",
-                  name: "",
-                  attributes: {},
-                  price: 0,
-                  compare_at_price: null,
-                  stock_quantity: 0,
-                  track_inventory: true,
-                  low_stock_threshold: 5,
-                  is_active: true,
-                  sort_order: variantFields.length + 1,
-                })
-              }
-              className="gap-2"
-            >
-              <PlusIcon className="size-4" />
-              إضافة متغير
             </Button>
           </div>
-
-          {variantFields.map((field, index) => (
-            <div
-              key={field.id}
-              className="space-y-4 rounded-lg bg-muted/20 p-4"
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold">متغير #{index + 1}</h3>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="size-8 text-destructive hover:bg-destructive/10"
-                  onClick={() => removeVariant(index)}
-                  disabled={variantFields.length === 1}
-                >
-                  <Trash2Icon className="size-4" />
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <Controller
-                  name={`variants.${index}.sku`}
-                  control={control}
-                  render={({ field: f, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>رمز التخزين SKU *</FieldLabel>
-                      <Input {...f} placeholder="مثال: DEMO-RED-L" />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-
-                <Controller
-                  name={`variants.${index}.name`}
-                  control={control}
-                  render={({ field: f, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>اسم المتغير (اختياري)</FieldLabel>
-                      <Input
-                        {...f}
-                        value={f.value ?? ""}
-                        placeholder="مثال: أحمر - كبير"
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                <Controller
-                  name={`variants.${index}.price`}
-                  control={control}
-                  render={({ field: f, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>السعر *</FieldLabel>
-                      <Input
-                        {...f}
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        onChange={(e) => f.onChange(Number(e.target.value))}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-
-                <Controller
-                  name={`variants.${index}.compare_at_price`}
-                  control={control}
-                  render={({ field: f, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>السعر قبل الخصم</FieldLabel>
-                      <Input
-                        {...f}
-                        value={f.value ?? ""}
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        placeholder="اختياري"
-                        onChange={(e) =>
-                          f.onChange(
-                            e.target.value === ""
-                              ? null
-                              : Number(e.target.value)
-                          )
-                        }
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-
-                <Controller
-                  name={`variants.${index}.stock_quantity`}
-                  control={control}
-                  render={({ field: f, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>المخزون المتوفر *</FieldLabel>
-                      <Input
-                        {...f}
-                        type="number"
-                        min="0"
-                        onChange={(e) => f.onChange(Number(e.target.value))}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-              </div>
-
-              <Controller
-                name={`variants.${index}.attributes`}
-                control={control}
-                render={({ field: f }) => (
-                  <VariantAttributesManager
-                    attributes={f.value || {}}
-                    onChange={f.onChange}
-                  />
-                )}
-              />
-            </div>
-          ))}
         </div>
 
-        <Separator />
-
-        {/* القسم 3: الصور */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-base font-semibold">
-              <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs text-primary">
-                3
-              </span>
-              معرض الصور ({imageFields.length})
-            </h2>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                appendImage({
-                  url: "",
-                  alt_text: "",
-                  is_primary: false,
-                  variant_sku: "",
-                })
-              }
-              className="gap-2"
-            >
-              <PlusIcon className="size-4" />
-              إضافة صورة
-            </Button>
-          </div>
-
-          {imageFields.map((field, index) => (
-            <div
-              key={field.id}
-              className="space-y-4 rounded-lg bg-muted/20 p-4"
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold">صورة #{index + 1}</h3>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="size-8 text-destructive hover:bg-destructive/10"
-                  onClick={() => removeImage(index)}
-                  disabled={imageFields.length === 1}
-                >
-                  <Trash2Icon className="size-4" />
-                </Button>
+        {/* تخطيط الصفحة: عمود رئيسي وعمود جانبي */}
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+          <div className="space-y-6 lg:col-span-2">
+            {/* بطاقة 1: المعلومات الأساسية */}
+            <div className="rounded-xl border bg-card p-5 shadow-xs">
+              <div className="mb-4 flex items-center gap-2 border-b pb-3">
+                <PackageIcon className="size-4 text-primary" />
+                <h2 className="font-semibold text-card-foreground">
+                  Basic Information
+                </h2>
               </div>
 
-              <div className="grid grid-cols-1 gap-3">
-                <Controller
-                  name={`images.${index}.url`}
-                  control={control}
-                  render={({ field: f, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>رابط الصورة *</FieldLabel>
-                      <Input
-                        {...f}
-                        value={f.value ?? ""}
-                        placeholder="https://example.com/photo.jpg"
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <FieldGroup className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Controller
-                    name={`images.${index}.alt_text`}
+                    name="name"
                     control={control}
-                    render={({ field: f, fieldState }) => (
+                    render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>النص البديل</FieldLabel>
+                        <FieldLabel htmlFor="product-name">
+                          Product Name{" "}
+                          <span className="text-destructive">*</span>
+                        </FieldLabel>
                         <Input
-                          {...f}
-                          value={f.value ?? ""}
-                          placeholder="وصف محتوى الصورة"
+                          {...field}
+                          id="product-name"
+                          placeholder="e.g., Premium Oxford Cotton Shirt"
+                          onChange={(e) => {
+                            field.onChange(e)
+                            const slugState = getFieldState("slug")
+                            if (!slugState.isDirty) {
+                              setValue("slug", generateSlug(e.target.value), {
+                                shouldValidate: true,
+                              })
+                            }
+                          }}
                         />
                         {fieldState.invalid && (
                           <FieldError errors={[fieldState.error]} />
@@ -735,39 +409,19 @@ export default function CreateProductForm({
                   />
 
                   <Controller
-                    name={`images.${index}.variant_sku`}
+                    name="slug"
                     control={control}
-                    render={({ field: f, fieldState }) => (
+                    render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>ربط بمتغير (SKU)</FieldLabel>
-                        <Select
-                          onValueChange={(val) =>
-                            f.onChange(val === "none" ? "" : val)
-                          }
-                          value={f.value || "none"}
-                        >
-                          <SelectTrigger aria-invalid={fieldState.invalid}>
-                            <SelectValue placeholder="صورة عامة" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">
-                              صورة عامة للمنتج (غير مرتبطة بمتغير)
-                            </SelectItem>
-                            {variantFields.map((v, i) => {
-                              const currentSku = watch(`variants.${i}.sku`)
-                              return (
-                                <SelectItem
-                                  key={v.id}
-                                  value={currentSku || `variant-${i}`}
-                                >
-                                  {currentSku
-                                    ? `المتغير: ${currentSku}`
-                                    : `متغير ${i + 1}`}
-                                </SelectItem>
-                              )
-                            })}
-                          </SelectContent>
-                        </Select>
+                        <FieldLabel htmlFor="product-slug">
+                          URL Slug <span className="text-destructive">*</span>
+                        </FieldLabel>
+                        <Input
+                          {...field}
+                          id="product-slug"
+                          placeholder="premium-oxford-cotton-shirt"
+                          className="font-mono text-xs"
+                        />
                         {fieldState.invalid && (
                           <FieldError errors={[fieldState.error]} />
                         )}
@@ -777,101 +431,1068 @@ export default function CreateProductForm({
                 </div>
 
                 <Controller
-                  name={`images.${index}.is_primary`}
+                  name="description"
                   control={control}
-                  render={({ field: f }) => (
-                    <Field className="flex items-center gap-2 pt-1">
-                      <Switch
-                        checked={f.value}
-                        onCheckedChange={f.onChange}
-                        id={`primary-${index}`}
-                      />
-                      <label
-                        htmlFor={`primary-${index}`}
-                        className="cursor-pointer text-sm font-medium"
-                      >
-                        صورة غلاف رئيسية
-                      </label>
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="product-description">
+                        Description
+                      </FieldLabel>
+                      <InputGroup className="bg-background">
+                        <InputGroupTextarea
+                          {...field}
+                          id="product-description"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(e.target.value || null)
+                          }
+                          placeholder="Provide a detailed description of the product features..."
+                          rows={4}
+                          className="resize-y text-sm"
+                        />
+                        <InputGroupAddon align="block-end">
+                          <InputGroupText className="text-[11px] text-muted-foreground">
+                            {descriptionValue.length} characters
+                          </InputGroupText>
+                        </InputGroupAddon>
+                      </InputGroup>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
                     </Field>
+                  )}
+                />
+              </FieldGroup>
+            </div>
+
+            {/* بطاقة 2: المتغيرات والأسعار */}
+            <div className="rounded-xl border bg-card p-5 shadow-xs">
+              <div className="mb-4 flex items-center justify-between border-b pb-3">
+                <div className="flex items-center gap-2">
+                  <LayersIcon className="size-4 text-primary" />
+                  <div>
+                    <h2 className="font-semibold text-card-foreground">
+                      Variants & Pricing
+                    </h2>
+                    <p className="text-xs text-muted-foreground">
+                      Manage prices, SKUs, and stock quantities
+                    </p>
+                  </div>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    appendVariant({
+                      ...DEFAULT_VARIANT,
+                      sort_order: variantFields.length + 1,
+                    })
+                  }
+                  className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
+                >
+                  <PlusIcon className="size-3.5" />
+                  Add Variant
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                {variantFields.map((field, index) => (
+                  <VariantCard
+                    key={field.id}
+                    index={index}
+                    control={control}
+                    setValue={setValue}
+                    totalVariants={variantFields.length}
+                    onRemove={() => removeVariant(index)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* بطاقة 3: معرض الصور */}
+            <div className="rounded-xl border bg-card p-5 shadow-xs">
+              <div className="mb-4 flex items-center justify-between border-b pb-3">
+                <div className="flex items-center gap-2">
+                  <ImageIcon className="size-4 text-primary" />
+                  <div>
+                    <h2 className="font-semibold text-card-foreground">
+                      Media Gallery
+                    </h2>
+                    <p className="text-xs text-muted-foreground">
+                      Link images to variants or set primary image
+                    </p>
+                  </div>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    appendImage({ ...DEFAULT_IMAGE, is_primary: false })
+                  }
+                  className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
+                >
+                  <PlusIcon className="size-3.5" />
+                  Add Image
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                {imageFields.map((field, index) => (
+                  <ImageCard
+                    key={field.id}
+                    index={index}
+                    control={control}
+                    totalImages={imageFields.length}
+                    onRemove={() => removeImage(index)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* العمود الجانبي */}
+          <div className="space-y-6">
+            <div className="rounded-xl border bg-card p-5 shadow-xs">
+              <div className="mb-4 flex items-center gap-2 border-b pb-3">
+                <SparklesIcon className="size-4 text-primary" />
+                <h2 className="font-semibold text-card-foreground">
+                  Product Status
+                </h2>
+              </div>
+
+              <div className="space-y-4">
+                <Controller
+                  name="is_active"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="flex items-center justify-between rounded-lg border bg-muted/15 p-3">
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-semibold">Active</span>
+                        <p className="text-[11px] text-muted-foreground">
+                          Visible and available for purchase
+                        </p>
+                      </div>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </div>
+                  )}
+                />
+
+                <Controller
+                  name="is_featured"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="flex items-center justify-between rounded-lg border bg-muted/15 p-3">
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-semibold">Featured</span>
+                        <p className="text-[11px] text-muted-foreground">
+                          Showcase in store highlights
+                        </p>
+                      </div>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </div>
                   )}
                 />
               </div>
             </div>
-          ))}
-        </div>
 
-        <Separator />
+            {/* بطاقة التصنيف والعلامة التجارية مع أزرار الإضافة والتعديل والحذف المتكاملة */}
+            <div className="rounded-xl border bg-card p-5 shadow-xs">
+              <div className="mb-4 flex items-center gap-2 border-b pb-3">
+                <TagIcon className="size-4 text-primary" />
+                <h2 className="font-semibold text-card-foreground">
+                  Organization
+                </h2>
+              </div>
 
-        {/* القسم 4: حالة العرض */}
-        <div className="space-y-4">
-          <h2 className="flex items-center gap-2 text-base font-semibold">
-            <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs text-primary">
-              4
-            </span>
-            حالة العرض
-          </h2>
+              <FieldGroup className="space-y-3.5">
+                {/* 1. حقل التصنيف مع أزرار الإدارة */}
+                <Controller
+                  name="category_id"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel className="text-xs">
+                          Category <span className="text-destructive">*</span>
+                        </FieldLabel>
+                      
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <Controller
-              name="is_active"
-              control={control}
-              render={({ field }) => (
-                <Field className="flex flex-row items-center justify-between rounded-lg bg-muted/20 p-4">
-                  <div className="space-y-0.5">
-                    <FieldLabel>منتج نشط</FieldLabel>
-                    <p className="text-xs text-muted-foreground">
-                      المنتج ظاهر ومتاح للشراء في المتجر
-                    </p>
-                  </div>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </Field>
-              )}
-            />
+                      <div className="flex items-center gap-1.5">
+                        <Select
+                          onValueChange={(val) =>
+                            field.onChange(val === "none" ? "" : val)
+                          }
+                          value={field.value || "none"}
+                        >
+                          <SelectTrigger
+                            aria-invalid={fieldState.invalid}
+                            className="h-8 flex-1 text-xs"
+                          >
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">
+                              -- Select category --
+                            </SelectItem>
+                            {categoriesList.map((cat) => (
+                              <SelectItem key={cat.id} value={cat.id}>
+                                {cat.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
 
-            <Controller
-              name="is_featured"
-              control={control}
-              render={({ field }) => (
-                <Field className="flex flex-row items-center justify-between rounded-lg bg-muted/20 p-4">
-                  <div className="space-y-0.5">
-                    <FieldLabel>منتج مميز</FieldLabel>
-                    <p className="text-xs text-muted-foreground">
-                      عرض المنتج في واجهة المتجر الرئيسية
-                    </p>
-                  </div>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </Field>
-              )}
-            />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() =>
+                            setCategoryModal({ type: "create", data: null })
+                          }
+                          title="Create Category"
+                          className="size-8 shrink-0 cursor-pointer"
+                        >
+                          <PlusIcon className="size-3.5" />
+                        </Button>
+
+                        {selectedCategoryObject && (
+                          <>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              onClick={() =>
+                                setCategoryModal({
+                                  type: "update",
+                                  data: selectedCategoryObject,
+                                })
+                              }
+                              title="Edit selected category"
+                              className="size-8 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
+                            >
+                              <PencilIcon className="size-3.5" />
+                            </Button>
+
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              onClick={() =>
+                                setCategoryModal({
+                                  type: "delete",
+                                  data: selectedCategoryObject,
+                                })
+                              }
+                              title="Delete selected category"
+                              className="size-8 shrink-0 cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            >
+                              <Trash2Icon className="size-3.5" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
+                {/* 2. حقل العلامة التجارية مع أزرار الإدارة (إضافة، تعديل، حذف) */}
+                <Controller
+                  name="brand_id"
+                  control={control}
+                  render={({ field }) => (
+                    <Field>
+                        <FieldLabel className="text-xs">
+                          Brand (Optional)
+                        </FieldLabel>
+                       
+
+                      <div className="flex items-center gap-1.5">
+                        <Select
+                          onValueChange={(val) =>
+                            field.onChange(val === "none" ? null : val)
+                          }
+                          value={field.value ?? "none"}
+                        >
+                          <SelectTrigger className="h-8 flex-1 text-xs">
+                            <SelectValue placeholder="Select a brand" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">-- No brand --</SelectItem>
+                            {brandsList.map((brand) => (
+                              <SelectItem key={brand.id} value={brand.id}>
+                                {brand.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() =>
+                            setBrandModal({ type: "create", data: null })
+                          }
+                          title="Create Brand"
+                          className="size-8 shrink-0 cursor-pointer"
+                        >
+                          <PlusIcon className="size-3.5" />
+                        </Button>
+
+                        {selectedBrandObject && (
+                          <>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              onClick={() =>
+                                setBrandModal({
+                                  type: "update",
+                                  data: selectedBrandObject,
+                                })
+                              }
+                              title="Edit selected brand"
+                              className="size-8 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
+                            >
+                              <PencilIcon className="size-3.5" />
+                            </Button>
+
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              onClick={() =>
+                                setBrandModal({
+                                  type: "delete",
+                                  data: selectedBrandObject,
+                                })
+                              }
+                              title="Delete selected brand"
+                              className="size-8 shrink-0 cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            >
+                              <Trash2Icon className="size-3.5" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </Field>
+                  )}
+                />
+              </FieldGroup>
+            </div>
+
+            {/* بطاقة SEO المحسنة */}
+            <div className="rounded-xl border bg-card p-5 shadow-xs">
+              <div className="mb-4 flex items-center justify-between border-b pb-3">
+                <div className="flex items-center gap-2">
+                  <GlobeIcon className="size-4 text-primary" />
+                  <h2 className="font-semibold text-card-foreground">
+                    SEO Details
+                  </h2>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGenerateAllSeo}
+                  className="h-7 cursor-pointer gap-1.5 px-2.5 text-[11px] font-medium text-primary hover:text-primary"
+                >
+                  <Wand2Icon className="size-3" />
+                  Generate SEO
+                </Button>
+              </div>
+
+              <FieldGroup className="space-y-3.5">
+                <Controller
+                  name="meta_title"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <div className="flex items-center justify-between">
+                        <FieldLabel htmlFor="meta-title" className="text-xs">
+                          Meta Title
+                        </FieldLabel>
+                        <span className="text-[10px] text-muted-foreground tabular-nums">
+                          {(field.value ?? "").length}/70
+                        </span>
+                      </div>
+                      <Input
+                        {...field}
+                        id="meta-title"
+                        value={field.value ?? ""}
+                        placeholder="Page title in search results"
+                        className="h-8 text-xs"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  name="meta_description"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <div className="flex items-center justify-between">
+                        <FieldLabel
+                          htmlFor="meta-description"
+                          className="text-xs"
+                        >
+                          Meta Description
+                        </FieldLabel>
+                        <span className="text-[10px] text-muted-foreground tabular-nums">
+                          {(field.value ?? "").length}/160
+                        </span>
+                      </div>
+                      <InputGroup className="bg-background">
+                        <InputGroupTextarea
+                          {...field}
+                          id="meta-description"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(e.target.value || null)
+                          }
+                          placeholder="Brief summary for search engines..."
+                          rows={3}
+                          className="resize-y text-xs"
+                        />
+                      </InputGroup>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </FieldGroup>
+            </div>
           </div>
         </div>
 
         {errors.root && (
           <FieldError
-            errors={[{ message: errors.root.message || "حدث خطأ غير متوقع" }]}
+            errors={[
+              {
+                message: errors.root.message || "An unexpected error occurred",
+              },
+            ]}
+          />
+        )}
+      </form>
+
+      {/* --- حوارات وشيتات التصنيفات --- */}
+      {/* 1. شيت إنشاء تصنيف جديد */}
+      <CreateCategorySheet
+        isOpen={categoryModal.type === "create" ? "create" : null}
+        onOpenChange={(open) => {
+          if (!open) setCategoryModal({ type: null, data: null })
+        }}
+        items={categoriesList.filter(
+          (item) => item.parent_id === null && item.is_active === true
+        )}
+        onSuccess={(newCategory) => {
+          setCategoriesList((prev) => [newCategory, ...prev])
+          setValue("category_id", newCategory.id, {
+            shouldValidate: true,
+            shouldDirty: true,
+          })
+          setCategoryModal({ type: null, data: null })
+        }}
+      />
+
+      {/* 2. شيت تعديل التصنيف المختار */}
+      <UpdateCategorySheet
+        isOpen={categoryModal.type === "update" ? "update" : null}
+        onOpenChange={(open) => {
+          if (!open) setCategoryModal({ type: null, data: null })
+        }}
+        item={categoryModal.data}
+        items={categoriesList.filter(
+          (item) =>
+            item.parent_id === null &&
+            item.is_active === true &&
+            item.id !== categoryModal.data?.id
+        )}
+        onSuccess={(updatedCategory) => {
+          setCategoriesList((prev) =>
+            prev.map((item) =>
+              item.id === updatedCategory.id ? updatedCategory : item
+            )
+          )
+          setCategoryModal({ type: null, data: null })
+          toast.success("Category updated successfully!")
+        }}
+      />
+
+      {/* 3. حوار تأكيد حذف التصنيف المختار */}
+      <DeleteCategoryDialog
+        isOpen={categoryModal.type === "delete" ? "delete" : null}
+        onOpenChange={(open) => {
+          if (!open) setCategoryModal({ type: null, data: null })
+        }}
+        item={categoryModal.data}
+        onSuccess={(deletedId) => {
+          setCategoriesList((prev) => prev.filter((c) => c.id !== deletedId))
+          if (form.getValues("category_id") === deletedId) {
+            setValue("category_id", "", {
+              shouldValidate: true,
+              shouldDirty: true,
+            })
+          }
+          setCategoryModal({ type: null, data: null })
+          toast.success("Category deleted successfully!")
+        }}
+      />
+
+      {/* --- حوارات وشيتات العلامات التجارية (Brands) --- */}
+      {/* 1. شيت إنشاء علامة تجارية جديدة */}
+      <CreateBrandSheet
+        isOpen={brandModal.type === "create" ? "create" : null}
+        onOpenChange={(open) => {
+          if (!open) setBrandModal({ type: null, data: null })
+        }}
+        onSuccess={(newBrand) => {
+          setBrandsList((prev) => [newBrand, ...prev])
+          setValue("brand_id", newBrand.id, {
+            shouldValidate: true,
+            shouldDirty: true,
+          })
+          setBrandModal({ type: null, data: null })
+        }}
+      />
+
+      {/* 2. شيت تعديل العلامة التجارية المختارة */}
+      <UpdateBrandSheet
+        isOpen={brandModal.type === "update" ? "update" : null}
+        onOpenChange={(open) => {
+          if (!open) setBrandModal({ type: null, data: null })
+        }}
+        item={brandModal.data}
+        onSuccess={(updatedBrand) => {
+          setBrandsList((prev) =>
+            prev.map((item) =>
+              item.id === updatedBrand.id ? updatedBrand : item
+            )
+          )
+          setBrandModal({ type: null, data: null })
+          toast.success("Brand updated successfully!")
+        }}
+      />
+
+      {/* 3. حوار تأكيد حذف العلامة التجارية المختارة */}
+      <DeleteBrandDialog
+        isOpen={brandModal.type === "delete" ? "delete" : null}
+        onOpenChange={(open) => {
+          if (!open) setBrandModal({ type: null, data: null })
+        }}
+        item={brandModal.data}
+        onSuccess={(deletedId) => {
+          setBrandsList((prev) => prev.filter((b) => b.id !== deletedId))
+          if (form.getValues("brand_id") === deletedId) {
+            setValue("brand_id", null, {
+              shouldValidate: true,
+              shouldDirty: true,
+            })
+          }
+          setBrandModal({ type: null, data: null })
+          toast.success("Brand deleted successfully!")
+        }}
+      />
+    </div>
+  )
+}
+
+// ============================================================================
+// Subcomponents
+// ============================================================================
+
+interface VariantCardProps {
+  index: number
+  control: Control<FormValues>
+  setValue: UseFormSetValue<FormValues>
+  totalVariants: number
+  onRemove: () => void
+}
+
+function VariantCard({
+  index,
+  control,
+  setValue,
+  totalVariants,
+  onRemove,
+}: VariantCardProps) {
+  const variantName = useWatch({ control, name: `variants.${index}.name` })
+  const productName = useWatch({ control, name: "name" })
+
+  const handleGenerateSku = () => {
+    const newSku = generateRandomSku(productName, variantName)
+    setValue(`variants.${index}.sku`, newSku, {
+      shouldValidate: true,
+      shouldDirty: true,
+    })
+  }
+
+  return (
+    <div className="relative rounded-lg border bg-muted/10 p-4 transition-all hover:border-muted-foreground/30">
+      <div className="mb-3 flex items-center justify-between border-b border-border/60 pb-2">
+        <div className="flex items-center gap-2">
+          <span className="flex size-5 items-center justify-center rounded-full bg-primary/10 text-[11px] font-bold text-primary">
+            {index + 1}
+          </span>
+          <span className="text-xs font-semibold">
+            {variantName || `Variant #${index + 1}`}
+          </span>
+        </div>
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="size-7 cursor-pointer text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+          onClick={onRemove}
+          disabled={totalVariants === 1}
+        >
+          <Trash2Icon className="size-3.5" />
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <Controller
+          name={`variants.${index}.sku`}
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <div className="flex items-center justify-between">
+                <FieldLabel className="text-xs">
+                  SKU Code <span className="text-destructive">*</span>
+                </FieldLabel>
+                <button
+                  type="button"
+                  onClick={handleGenerateSku}
+                  className="flex cursor-pointer items-center gap-1 text-[11px] font-medium text-primary hover:underline"
+                >
+                  <Wand2Icon className="size-3" />
+                  <span>Generate</span>
+                </button>
+              </div>
+              <div className="relative flex items-center">
+                <Input
+                  {...field}
+                  placeholder="e.g., SHIRT-WHT-MD"
+                  className="h-8 pe-8 text-xs uppercase"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleGenerateSku}
+                  title="Generate SKU"
+                  className="absolute end-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
+                >
+                  <Wand2Icon className="size-3.5" />
+                </Button>
+              </div>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+
+        <Controller
+          name={`variants.${index}.name`}
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel className="text-xs">
+                Variant Name (Optional)
+              </FieldLabel>
+              <Input
+                {...field}
+                value={field.value ?? ""}
+                placeholder="e.g., White / Medium"
+                className="h-8 text-xs"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+      </div>
+
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <Controller
+          name={`variants.${index}.price`}
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel className="text-xs">
+                Price <span className="text-destructive">*</span>
+              </FieldLabel>
+              <Input
+                {...field}
+                type="number"
+                step="0.01"
+                min="0"
+                className="h-8 text-xs"
+                onChange={(e) => field.onChange(Number(e.target.value))}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+
+        <Controller
+          name={`variants.${index}.compare_at_price`}
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel className="text-xs">Compare-at Price</FieldLabel>
+              <Input
+                {...field}
+                value={field.value ?? ""}
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="Optional"
+                className="h-8 text-xs"
+                onChange={(e) =>
+                  field.onChange(
+                    e.target.value === "" ? null : Number(e.target.value)
+                  )
+                }
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+
+        <Controller
+          name={`variants.${index}.stock_quantity`}
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel className="text-xs">
+                Stock Quantity <span className="text-destructive">*</span>
+              </FieldLabel>
+              <Input
+                {...field}
+                type="number"
+                min="0"
+                className="h-8 text-xs"
+                onChange={(e) => field.onChange(Number(e.target.value))}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+      </div>
+
+      <div className="mt-3 pt-1">
+        <Controller
+          name={`variants.${index}.attributes`}
+          control={control}
+          render={({ field }) => (
+            <VariantAttributesManager
+              attributes={field.value || {}}
+              onChange={field.onChange}
+            />
+          )}
+        />
+      </div>
+    </div>
+  )
+}
+
+interface ImageCardProps {
+  index: number
+  control: Control<FormValues>
+  totalImages: number
+  onRemove: () => void
+}
+
+function ImageCard({ index, control, totalImages, onRemove }: ImageCardProps) {
+  const currentUrl = useWatch({ control, name: `images.${index}.url` })
+  const variants = useWatch({ control, name: "variants" }) || []
+
+  return (
+    <div className="flex flex-col gap-4 rounded-lg border bg-muted/10 p-4 sm:flex-row">
+      <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-background text-muted-foreground">
+        {currentUrl ? (
+          <img
+            src={currentUrl}
+            alt="Preview"
+            className="size-full object-cover"
+            onError={(e) => {
+              e.currentTarget.style.display = "none"
+            }}
+          />
+        ) : (
+          <ImageIcon className="size-6 stroke-[1.5]" />
+        )}
+      </div>
+
+      <div className="flex-1 space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold">Image #{index + 1}</span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="size-7 cursor-pointer text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+            onClick={onRemove}
+            disabled={totalImages === 1}
+          >
+            <Trash2Icon className="size-3.5" />
+          </Button>
+        </div>
+
+        <Controller
+          name={`images.${index}.url`}
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <Input
+                {...field}
+                value={field.value ?? ""}
+                placeholder="https://example.com/images/product.jpg"
+                className="h-8 text-xs"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+          <Controller
+            name={`images.${index}.alt_text`}
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <Input
+                  {...field}
+                  value={field.value ?? ""}
+                  placeholder="Alt Text (accessibility)"
+                  className="h-8 text-xs"
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            name={`images.${index}.variant_sku`}
+            control={control}
+            render={({ field }) => (
+              <Select
+                onValueChange={(val) =>
+                  field.onChange(val === "none" ? "" : val)
+                }
+                value={field.value || "none"}
+              >
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue placeholder="Link to variant" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">All Variants (General)</SelectItem>
+                  {variants.map((v, i) => {
+                    const currentSku = v?.sku?.trim()
+                    const currentName = v?.name?.trim()
+
+                    const attrSummary = v?.attributes
+                      ? Object.values(v.attributes).filter(Boolean).join(" / ")
+                      : ""
+
+                    const displayLabel = currentName
+                      ? `${currentName}${currentSku ? ` (${currentSku})` : ""}`
+                      : attrSummary
+                        ? `${attrSummary}${currentSku ? ` (${currentSku})` : ""}`
+                        : currentSku
+                          ? `SKU: ${currentSku}`
+                          : `Variant #${i + 1}`
+
+                    return (
+                      <SelectItem key={i} value={currentSku || `variant-${i}`}>
+                        {displayLabel}
+                      </SelectItem>
+                    )
+                  })}
+                </SelectContent>
+              </Select>
+            )}
+          />
+        </div>
+
+        <Controller
+          name={`images.${index}.is_primary`}
+          control={control}
+          render={({ field }) => (
+            <div className="flex items-center gap-2 pt-1">
+              <Switch
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                id={`primary-${index}`}
+              />
+              <label
+                htmlFor={`primary-${index}`}
+                className="cursor-pointer text-xs font-medium text-foreground"
+              >
+                Set as primary product thumbnail
+              </label>
+            </div>
+          )}
+        />
+      </div>
+    </div>
+  )
+}
+
+function VariantAttributesManager({
+  attributes,
+  onChange,
+}: {
+  attributes: Record<string, string>
+  onChange: (attrs: Record<string, string>) => void
+}) {
+  const [selectedKeyType, setSelectedKeyType] = React.useState<string>("color")
+  const [customKey, setCustomKey] = React.useState("")
+  const [attrVal, setAttrVal] = React.useState("")
+
+  const isCustom = selectedKeyType === "custom"
+  const currentPreset = PRESET_ATTRIBUTE_KEYS.find(
+    (item) => item.value === selectedKeyType
+  )
+
+  const addAttribute = () => {
+    const finalKey = isCustom ? customKey.trim().toLowerCase() : selectedKeyType
+    const finalVal = attrVal.trim()
+
+    if (!finalKey || !finalVal) return
+
+    onChange({
+      ...attributes,
+      [finalKey]: finalVal,
+    })
+
+    setAttrVal("")
+    if (isCustom) setCustomKey("")
+  }
+
+  const removeAttribute = (key: string) => {
+    const next = { ...attributes }
+    delete next[key]
+    onChange(next)
+  }
+
+  return (
+    <div className="space-y-2.5 rounded-lg border bg-muted/15 p-3">
+      <div className="flex items-center justify-between">
+        <FieldLabel className="text-xs font-semibold text-foreground">
+          Variant Attributes (e.g., Color, Size, Weight)
+        </FieldLabel>
+        <span className="text-[11px] text-muted-foreground">
+          {Object.keys(attributes || {}).length} added
+        </span>
+      </div>
+
+      {Object.keys(attributes || {}).length > 0 && (
+        <div className="flex flex-wrap gap-1.5 pt-0.5">
+          {Object.entries(attributes).map(([key, value]) => (
+            <span
+              key={key}
+              className="inline-flex items-center gap-1.5 rounded-md border bg-background px-2.5 py-1 text-xs font-medium shadow-xs transition-colors hover:border-muted-foreground/30"
+            >
+              <span className="text-muted-foreground uppercase">{key}:</span>
+              <span className="font-semibold text-foreground">{value}</span>
+              <button
+                type="button"
+                onClick={() => removeAttribute(key)}
+                className="ml-0.5 cursor-pointer rounded p-0.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+              >
+                <XIcon className="size-3" />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center gap-2 pt-1">
+        <Select
+          value={selectedKeyType}
+          onValueChange={(val) => {
+            setSelectedKeyType(val)
+          }}
+        >
+          <SelectTrigger className="h-8 w-36 bg-background text-xs">
+            <SelectValue placeholder="Select attribute" />
+          </SelectTrigger>
+          <SelectContent>
+            {PRESET_ATTRIBUTE_KEYS.map((item) => (
+              <SelectItem
+                key={item.value}
+                value={item.value}
+                className="text-xs"
+              >
+                {item.label}
+              </SelectItem>
+            ))}
+            <SelectItem
+              value="custom"
+              className="text-xs font-medium text-primary"
+            >
+              + Custom (يدوي)...
+            </SelectItem>
+          </SelectContent>
+        </Select>
+
+        {isCustom && (
+          <Input
+            placeholder="Attribute name..."
+            value={customKey}
+            onChange={(e) => setCustomKey(e.target.value)}
+            className="h-8 w-32 bg-background text-xs"
+            autoFocus
           />
         )}
 
-        <div className="flex justify-end gap-3 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={isSubmitting}
-            onClick={() => form.reset()}
-          >
-            إعادة تعيين
-          </Button>
-          <Button type="submit" disabled={isSubmitting} className="min-w-32">
-            {isSubmitting ? <Spinner className="me-2" /> : "إنشاء المنتج"}
-          </Button>
-        </div>
-      </form>
+        <Input
+          placeholder={currentPreset ? currentPreset.placeholder : "Value..."}
+          value={attrVal}
+          onChange={(e) => setAttrVal(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault()
+              addAttribute()
+            }
+          }}
+          className="h-8 min-w-[120px] flex-1 bg-background text-xs"
+        />
+
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={addAttribute}
+          className="h-8 shrink-0 cursor-pointer px-3 text-xs"
+        >
+          <PlusIcon className="mr-1 size-3.5" />
+          Add
+        </Button>
+      </div>
     </div>
   )
 }

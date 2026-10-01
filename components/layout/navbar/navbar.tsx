@@ -8,21 +8,22 @@ import { AppLogo } from "@/components/ui/app-logo"
 export default function Navbar({ user }: { user: CurrentUser | null }) {
   return (
     <nav className="fixed top-0 z-50 w-full bg-background/80 backdrop-blur-2xl">
-      <div className="mx-auto max-w-262.5 px-4 sm:px-6 lg:px-8">
-        <div className="flex h-12 items-center justify-between">
-          {/* الجزء الأيسر: الشعار */}
-          <div className="flex flex-1 items-center justify-start md:items-stretch">
+      {/* توحيد الحاوية لتطابق صفحات المحتوى بدقة */}
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-14 items-center justify-between">
+          {/* Logo */}
+          <div className="flex flex-1 items-center justify-start">
             <Link href="/" className="flex items-center">
               <AppLogo className="size-6" />
             </Link>
           </div>
-          {/* الجزء الأوسط: روابط الديسكتوب */}
+
+          {/* Center Links */}
           <MainNavbarMenu />
-          {/* الجزء الأيمن: أيقونة سلة التسوق */}
-          <div className="flex flex-1 items-center justify-end gap-6 md:gap-8">
-            {/* Desktop Navigation */}
+
+          {/* Right Actions */}
+          <div className="flex flex-1 items-center justify-end gap-4 md:gap-6">
             <DesktopNav user={user} />
-            {/* Mobile Navigation */}
             <MobileNav user={user} />
           </div>
         </div>

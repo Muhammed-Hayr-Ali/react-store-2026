@@ -10,14 +10,14 @@ import { appConfig } from "@/lib/config/app_config"
 import { ThemeToggle } from "@/components/layout/footer/theme-toggle"
 import { toast } from "sonner"
 import { CustomInput } from "@/components/ui/custom-input"
-/**
- * 🦶 Footer Component
- * يعرض معلومات الموقع، روابط سريعة، ونشرة بريدية
- */
+
+
+
 const Footer = () => {
   return (
     <footer className="w-full border-t bg-background text-sm text-muted-foreground">
-      <div className="mx-auto max-w-262.5 px-4 py-8 sm:px-6 lg:px-8">
+
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         {/* ===== Main Footer Grid ===== */}
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
           {/* ===== Brand Section ===== */}
@@ -113,7 +113,6 @@ function FooterSection({
     </div>
   )
 }
-
 
 function NewsletterSection() {
   const [email, setEmail] = useState("")

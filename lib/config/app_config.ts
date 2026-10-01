@@ -264,11 +264,7 @@ export const appConfig = {
           },
         ],
         navMain: [
-          {
-            title: "Categories",
-            url: "/dashboard/categories",
-            icon: ChartColumnStacked,
-          },
+       
           {
             title: "Products",
             url: "#",

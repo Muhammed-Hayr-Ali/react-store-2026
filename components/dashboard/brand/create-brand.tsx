@@ -9,18 +9,14 @@ import { toast } from "sonner"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useLocale } from "next-intl"
 import slugify from "slugify"
-import Image from "next/image"
 import {
-  PackageIcon,
+  TagIcon,
   ImageIcon,
-  FolderTreeIcon,
-  SparklesIcon,
   CheckCircle2Icon,
   XIcon,
   Wand2Icon,
 } from "lucide-react"
 
-// Core UI Components (Identical to Product Form)
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
@@ -31,20 +27,6 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupText,
-  InputGroupTextarea,
-} from "@/components/ui/input-group"
-import { Switch } from "@/components/ui/switch"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
   CustomSheet,
   CustomSheetClose,
   CustomSheetContent,
@@ -53,11 +35,9 @@ import {
   CustomSheetHeader,
   CustomSheetTitle,
 } from "@/components/ui/custom-sheet"
+import { Brand, createBrand, createBrandSchema } from "@/lib/actions/brands"
 
-import { Category } from "./categories-table"
-import { createCategory, createCategorySchema } from "@/lib/actions/categories"
-
-type FormValues = z.infer<typeof createCategorySchema>
+type FormValues = z.infer<typeof createBrandSchema>
 
 function generateSlug(name: string): string {
   return slugify(name, {
@@ -68,11 +48,10 @@ function generateSlug(name: string): string {
   })
 }
 
-interface CreateCategorySheetProps {
+interface CreateBrandSheetProps {
   isOpen: string | null
   onOpenChange: (open: boolean) => void
-  items: Category[] | null
-  onSuccess: (newCategory: Category) => void
+  onSuccess: (newBrand: Brand) => void
 }
 
 export function getSide({
@@ -86,30 +65,25 @@ export function getSide({
   return isMobile ? "bottom" : dir
 }
 
-export default function CreateCategorySheet({
+export default function CreateBrandSheet({
   isOpen,
   onOpenChange,
-  items,
   onSuccess,
-}: CreateCategorySheetProps) {
+}: CreateBrandSheetProps) {
   const router = useRouter()
   const isMobile = useIsMobile()
   const locale = useLocale()
   const side = getSide({ isMobile, locale })
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(createCategorySchema),
+    resolver: zodResolver(createBrandSchema),
     mode: "onChange",
     defaultValues: {
       name: "",
       name_ar: "",
       slug: "",
-      description: "",
-      parent_id: null,
-      is_active: true,
-      sort_order: 0,
-      image_url: "",
-      image_alt: "",
+      logo_url: "",
+      logo_alt: "",
     },
   })
 
@@ -120,11 +94,10 @@ export default function CreateCategorySheet({
     getFieldState,
   } = form
 
-  const imageUrl = useWatch({ control, name: "image_url" }) || ""
+  const logoUrl = useWatch({ control, name: "logo_url" }) || ""
   const nameValue = useWatch({ control, name: "name" }) || ""
-  const descriptionValue = useWatch({ control, name: "description" }) || ""
   const isValidImage =
-    imageUrl.startsWith("http://") || imageUrl.startsWith("https://")
+    logoUrl.startsWith("http://") || logoUrl.startsWith("https://")
 
   React.useEffect(() => {
     if (isOpen === "create") {
@@ -134,7 +107,7 @@ export default function CreateCategorySheet({
 
   const handleGenerateSlug = () => {
     if (!nameValue.trim()) {
-      toast.error("يرجى إدخال الاسم بالإنجليزية أولاً")
+      toast.error("يرجى إدخال اسم العلامة التجارية بالإنجليزية أولاً")
       return
     }
     setValue("slug", generateSlug(nameValue), {
@@ -148,19 +121,15 @@ export default function CreateCategorySheet({
       name: data.name,
       name_ar: data.name_ar === "" ? null : data.name_ar,
       slug: data.slug,
-      description: data.description === "" ? null : data.description,
-      parent_id: data.parent_id ?? null,
-      is_active: data.is_active,
-      sort_order: Number(data.sort_order),
-      image_url: data.image_url === "" ? null : data.image_url,
-      image_alt: data.image_alt === "" ? null : data.image_alt,
+      logo_url: data.logo_url === "" ? null : data.logo_url,
+      logo_alt: data.logo_alt === "" ? null : data.logo_alt,
     }
 
-    const result = await createCategory(payload)
+    const result = await createBrand(payload)
 
     if (result.success) {
       if (result.data) onSuccess(result.data)
-      toast.success("Category created successfully!")
+      toast.success("Brand created successfully!")
       onOpenChange(false)
       form.reset()
       router.refresh()
@@ -168,7 +137,9 @@ export default function CreateCategorySheet({
       const errorMsg =
         result.error === "VALIDATION_ERROR"
           ? "يرجى التحقق من صحة البيانات المدخلة."
-          : result.error || "Failed to create category. Please try again."
+          : result.error === "SLUG_ALREADY_EXISTS"
+            ? "الاسم المستعار (Slug) مستخدم بالفعل."
+            : result.error || "Failed to create brand. Please try again."
       toast.error(errorMsg)
     }
   }
@@ -179,15 +150,14 @@ export default function CreateCategorySheet({
         showCloseButton={false}
         side={side}
       >
-        {/* Header مشابه لترويسة شاشات لوحة التحكم */}
         <CustomSheetHeader className="shrink-0 border-b bg-card/50 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <CustomSheetTitle className="text-lg font-bold tracking-tight text-foreground">
-                Add Category
+                Add Brand
               </CustomSheetTitle>
               <CustomSheetDescription className="text-xs text-muted-foreground">
-                Configure category details, parent hierarchy, media, and status.
+                Create a new brand to associate with your store products.
               </CustomSheetDescription>
             </div>
             <CustomSheetClose asChild>
@@ -202,17 +172,16 @@ export default function CreateCategorySheet({
           </div>
         </CustomSheetHeader>
 
-        {/* جسم النموذج المقسم لبطاقات بنفس أسلوب شاشة المنتج */}
         <div className="flex-1 overflow-y-auto px-6 py-6">
           <form
-            id="create-category-form"
+            id="create-brand-form"
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-5"
           >
             {/* بطاقة 1: Basic Information */}
             <div className="rounded-xl border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
-                <PackageIcon className="size-4 text-primary" />
+                <TagIcon className="size-4 text-primary" />
                 <h2 className="text-sm font-semibold text-card-foreground">
                   Basic Information
                 </h2>
@@ -225,14 +194,14 @@ export default function CreateCategorySheet({
                     control={control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="cat-name" className="text-xs">
-                          English Name{" "}
+                        <FieldLabel htmlFor="brand-name" className="text-xs">
+                          Brand Name (EN){" "}
                           <span className="text-destructive">*</span>
                         </FieldLabel>
                         <Input
                           {...field}
-                          id="cat-name"
-                          placeholder="e.g., Electronics"
+                          id="brand-name"
+                          placeholder="e.g., Apple, Nike"
                           className="h-8 text-xs"
                           onChange={(e) => {
                             const newName = e.target.value
@@ -242,8 +211,8 @@ export default function CreateCategorySheet({
                                 shouldValidate: true,
                               })
                             }
-                            if (!getFieldState("image_alt").isDirty) {
-                              setValue("image_alt", newName, {
+                            if (!getFieldState("logo_alt").isDirty) {
+                              setValue("logo_alt", `${newName} Logo`, {
                                 shouldValidate: false,
                               })
                             }
@@ -261,14 +230,14 @@ export default function CreateCategorySheet({
                     control={control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="cat-name-ar" className="text-xs">
-                          Arabic Name
+                        <FieldLabel htmlFor="brand-name-ar" className="text-xs">
+                          Brand Name (AR)
                         </FieldLabel>
                         <Input
                           {...field}
-                          id="cat-name-ar"
+                          id="brand-name-ar"
                           value={field.value ?? ""}
-                          placeholder="مثال: إلكترونيات"
+                          placeholder="مثال: أبل، نايكي"
                           dir="rtl"
                           className="h-8 text-xs"
                         />
@@ -286,7 +255,7 @@ export default function CreateCategorySheet({
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
                       <div className="flex items-center justify-between">
-                        <FieldLabel htmlFor="cat-slug" className="text-xs">
+                        <FieldLabel htmlFor="brand-slug" className="text-xs">
                           URL Slug <span className="text-destructive">*</span>
                         </FieldLabel>
                         <button
@@ -301,8 +270,8 @@ export default function CreateCategorySheet({
                       <div className="relative flex items-center">
                         <Input
                           {...field}
-                          id="cat-slug"
-                          placeholder="electronics"
+                          id="brand-slug"
+                          placeholder="apple"
                           className="h-8 pe-8 font-mono text-xs"
                         />
                         <Button
@@ -325,32 +294,31 @@ export default function CreateCategorySheet({
               </FieldGroup>
             </div>
 
-            {/* بطاقة 2: Media & Description */}
+            {/* بطاقة 2: Brand Logo & Media */}
             <div className="rounded-xl border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <ImageIcon className="size-4 text-primary" />
                 <h2 className="text-sm font-semibold text-card-foreground">
-                  Media & Description
+                  Logo & Visuals
                 </h2>
               </div>
 
               <FieldGroup className="space-y-4">
                 <Controller
-                  name="image_url"
+                  name="logo_url"
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="cat-image" className="text-xs">
-                        Category Banner / Icon URL
+                      <FieldLabel htmlFor="brand-logo" className="text-xs">
+                        Logo URL
                       </FieldLabel>
 
                       {isValidImage && (
-                        <div className="relative mb-2 aspect-video w-full overflow-hidden rounded-lg border bg-muted/20">
-                          <Image
-                            fill
-                            src={imageUrl}
-                            alt="Category Banner Preview"
-                            className="object-cover object-center"
+                        <div className="relative mb-2 flex size-24 items-center justify-center overflow-hidden rounded-lg border bg-muted/20 p-2">
+                          <img
+                            src={logoUrl}
+                            alt="Brand Logo Preview"
+                            className="object-contain p-1"
                             onError={(e) => {
                               e.currentTarget.style.display = "none"
                             }}
@@ -360,9 +328,9 @@ export default function CreateCategorySheet({
 
                       <Input
                         {...field}
-                        id="cat-image"
+                        id="brand-logo"
                         value={field.value ?? ""}
-                        placeholder="https://example.com/category-banner.jpg"
+                        placeholder="https://example.com/brand-logo.png"
                         className="h-8 text-xs"
                       />
                       {fieldState.invalid && (
@@ -373,181 +341,24 @@ export default function CreateCategorySheet({
                 />
 
                 <Controller
-                  name="image_alt"
+                  name="logo_alt"
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <div className="flex items-center justify-between">
-                        <FieldLabel htmlFor="cat-image-alt" className="text-xs">
-                          Image Alt Text
-                        </FieldLabel>
-                        <span className="text-[10px] text-muted-foreground tabular-nums">
-                          {(field.value ?? "").length}/200
-                        </span>
-                      </div>
+                      <FieldLabel htmlFor="brand-logo-alt" className="text-xs">
+                        Logo Alt Text
+                      </FieldLabel>
                       <Input
                         {...field}
-                        id="cat-image-alt"
+                        id="brand-logo-alt"
                         value={field.value ?? ""}
-                        placeholder="e.g., Electronics department showcase"
+                        placeholder="e.g., Apple official vector logo"
                         className="h-8 text-xs"
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
                       )}
                     </Field>
-                  )}
-                />
-
-                <Controller
-                  name="description"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <div className="flex items-center justify-between">
-                        <FieldLabel
-                          htmlFor="cat-description"
-                          className="text-xs"
-                        >
-                          Description
-                        </FieldLabel>
-                        <span className="text-[10px] text-muted-foreground tabular-nums">
-                          {descriptionValue.length}/500
-                        </span>
-                      </div>
-                      <InputGroup className="bg-background">
-                        <InputGroupTextarea
-                          {...field}
-                          id="cat-description"
-                          value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value ? e.target.value : null
-                            )
-                          }
-                          placeholder="Brief description for SEO and catalog navigation..."
-                          rows={3}
-                          className="resize-y text-xs"
-                        />
-                        <InputGroupAddon align="block-end">
-                          <InputGroupText className="text-[10px] text-muted-foreground">
-                            {descriptionValue.length} characters
-                          </InputGroupText>
-                        </InputGroupAddon>
-                      </InputGroup>
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-              </FieldGroup>
-            </div>
-
-            {/* بطاقة 3: Hierarchy & Status */}
-            <div className="rounded-xl border bg-card p-5 shadow-xs">
-              <div className="mb-4 flex items-center gap-2 border-b pb-3">
-                <FolderTreeIcon className="size-4 text-primary" />
-                <h2 className="text-sm font-semibold text-card-foreground">
-                  Organization & Status
-                </h2>
-              </div>
-
-              <FieldGroup className="space-y-4">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <Controller
-                    name="parent_id"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="cat-parent" className="text-xs">
-                          Parent Category
-                        </FieldLabel>
-                        <Select
-                          onValueChange={(value) =>
-                            field.onChange(value === "none" ? null : value)
-                          }
-                          value={field.value || "none"}
-                        >
-                          <SelectTrigger
-                            id="cat-parent"
-                            className="h-8 text-xs"
-                          >
-                            <SelectValue placeholder="Select a parent category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none" className="text-xs">
-                              None (Root Category)
-                            </SelectItem>
-                            {items?.map((item) => (
-                              <SelectItem
-                                key={item.id}
-                                value={item.id}
-                                className="text-xs"
-                              >
-                                {item.name}
-                                {item.name_ar && (
-                                  <span className="ms-1.5 text-muted-foreground">
-                                    ({item.name_ar})
-                                  </span>
-                                )}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
-
-                  <Controller
-                    name="sort_order"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="cat-sort" className="text-xs">
-                          Sort Order
-                        </FieldLabel>
-                        <Input
-                          {...field}
-                          id="cat-sort"
-                          type="number"
-                          min="0"
-                          value={field.value ?? 0}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
-                          className="h-8 text-xs"
-                        />
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
-                </div>
-
-                <Controller
-                  name="is_active"
-                  control={control}
-                  render={({ field }) => (
-                    <div className="flex items-center justify-between rounded-lg border bg-muted/15 p-3">
-                      <div className="space-y-0.5">
-                        <span className="text-xs font-semibold">
-                          Active Status
-                        </span>
-                        <p className="text-[11px] text-muted-foreground">
-                          Category and its products will be visible to shoppers.
-                        </p>
-                      </div>
-                      <Switch
-                        id="cat-status"
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </div>
                   )}
                 />
               </FieldGroup>
@@ -566,7 +377,6 @@ export default function CreateCategorySheet({
           </form>
         </div>
 
-        {/* Footer متناسق بنفس أزرار الحفظ والإلغاء */}
         <CustomSheetFooter className="shrink-0 border-t bg-card/50 px-6 py-4">
           <div className="flex w-full items-center justify-end gap-2.5">
             <CustomSheetClose asChild>
@@ -582,7 +392,7 @@ export default function CreateCategorySheet({
             </CustomSheetClose>
             <Button
               type="submit"
-              form="create-category-form"
+              form="create-brand-form"
               size="sm"
               disabled={isSubmitting}
               className="min-w-32 cursor-pointer shadow-xs"
@@ -595,7 +405,7 @@ export default function CreateCategorySheet({
               ) : (
                 <>
                   <CheckCircle2Icon className="mr-1.5 size-4" />
-                  Save Category
+                  Save Brand
                 </>
               )}
             </Button>

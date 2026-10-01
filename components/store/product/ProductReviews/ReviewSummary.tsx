@@ -17,14 +17,16 @@ export function ReviewSummary({ summary }: ReviewSummaryProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 items-center gap-8 py-2 md:grid-cols-12">
-      {/* الجزء الأيسر: المتوسط والنجوم */}
-      <div className="flex flex-col items-center justify-center text-center md:col-span-4 md:text-start">
+    <div className="grid grid-cols-1 items-center gap-8 rounded-2xl border border-border/60 bg-card p-6 md:grid-cols-12 md:gap-12">
+      {/* Average Score */}
+      <div className="flex flex-col items-center justify-center text-center md:col-span-4 md:items-start md:text-start">
         <div className="flex items-baseline gap-2">
-          <span className="text-5xl tracking-tight text-foreground tabular-nums">
+          <span className="text-5xl font-black tracking-tight text-foreground tabular-nums">
             {averageRating > 0 ? averageRating.toFixed(1) : "0.0"}
           </span>
-          <span className="text-sm text-muted-foreground">/ 5</span>
+          <span className="text-sm font-medium text-muted-foreground">
+            / 5.0
+          </span>
         </div>
 
         <div className="mt-2 flex items-center gap-1 text-amber-400">
@@ -40,13 +42,13 @@ export function ReviewSummary({ summary }: ReviewSummaryProps) {
           ))}
         </div>
 
-        <p className="mt-2 text-xs text-muted-foreground">
-          {totalReviews.toLocaleString()}{" "}
-          {totalReviews === 1 ? "review" : "reviews"}
+        <p className="mt-1.5 text-xs font-medium text-muted-foreground">
+          Based on {totalReviews.toLocaleString()}{" "}
+          {totalReviews === 1 ? "verified review" : "verified reviews"}
         </p>
       </div>
 
-      {/* الجزء الأيمن: أشرطة التقدم مع تحسين الملصقات */}
+      {/* Progress Bars */}
       <div className="space-y-2 md:col-span-8">
         {[5, 4, 3, 2, 1].map((star) => {
           const count = distribution[star as keyof typeof distribution] || 0
@@ -54,12 +56,12 @@ export function ReviewSummary({ summary }: ReviewSummaryProps) {
 
           return (
             <div key={star} className="flex items-center gap-3 text-xs">
-              <span className="flex w-8 items-center gap-1 text-muted-foreground tabular-nums">
+              <span className="flex w-9 items-center gap-1 font-medium text-muted-foreground tabular-nums">
                 <span>{star}</span>
                 <StarIcon className="size-3 fill-amber-400 text-amber-400" />
               </span>
-              <Progress value={percentage} className="h-1.5 flex-1" />
-              <span className="w-9 text-end text-muted-foreground tabular-nums">
+              <Progress value={percentage} className="h-2 flex-1" />
+              <span className="w-10 text-end font-mono text-[11px] text-muted-foreground tabular-nums">
                 {percentage}%
               </span>
             </div>

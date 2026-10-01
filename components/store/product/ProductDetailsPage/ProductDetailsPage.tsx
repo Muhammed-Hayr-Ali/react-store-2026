@@ -7,6 +7,9 @@ import {
   AlertCircleIcon,
   MinusIcon,
   PlusIcon,
+  ShieldCheckIcon,
+  TruckIcon,
+  RotateCcwIcon,
 } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { ProductWithRelations } from "@/lib/actions/products/types"
@@ -16,7 +19,11 @@ interface ProductDetailsProps {
   product: ProductWithRelations
 }
 
-// دالة مساعدة لتنسيق السعر (تحويل السنت إلى رقم عشري بدون رمز عملة)
+type ProductVariantItem = ProductWithRelations["product_variants"][number]
+type ProductImageItem = ProductWithRelations["product_images"][number] & {
+  variant_sku?: string | null
+}
+
 const formatPrice = (priceInCents: number) => {
   return (priceInCents / 100).toLocaleString("en-US", {
     minimumFractionDigits: 2,
@@ -24,14 +31,13 @@ const formatPrice = (priceInCents: number) => {
   })
 }
 
-// خريطة ألوان احتياطية لأسماء الألوان
 const COLOR_MAP: Record<string, string> = {
   red: "#ef4444",
   أحمر: "#ef4444",
   blue: "#3b82f6",
   أزرق: "#3b82f6",
-  black: "#000000",
-  أسود: "#000000",
+  black: "#171717",
+  أسود: "#171717",
   white: "#ffffff",
   أبيض: "#ffffff",
   green: "#22c55e",
@@ -40,22 +46,73 @@ const COLOR_MAP: Record<string, string> = {
   أصفر: "#eab308",
   orange: "#f97316",
   برتقالي: "#f97316",
+  gray: "#737373",
+  رمادي: "#737373",
 }
 
-// دالة ذكية لتحويل قيمة اللون إلى كود HEX
 const getColorHex = (colorValue: string) => {
-  const trimmedValue = colorValue.trim()
-  if (trimmedValue.startsWith("#")) return trimmedValue
-  if (/^[0-9A-Fa-f]{6}$/.test(trimmedValue)) return `#${trimmedValue}`
-  const mappedColor = COLOR_MAP[trimmedValue.toLowerCase()]
-  if (mappedColor) return mappedColor
-  return trimmedValue
+  const trimmed = colorValue.trim()
+  if (trimmed.startsWith("#")) return trimmed
+  if (/^[0-9A-Fa-f]{3,8}$/.test(trimmed)) return `#${trimmed}`
+  const mapped = COLOR_MAP[trimmed.toLowerCase()]
+  return mapped || trimmed
+}
+
+function resolveVariantImage(
+  variant: ProductVariantItem | null,
+  allVariants: ProductVariantItem[],
+  allImages: ProductImageItem[]
+): string {
+  if (!variant || allImages.length === 0) return ""
+
+  // 1. مطابقة مباشرة عبر variant_id
+  const directMatch = allImages.find((img) => img.variant_id === variant.id)
+  if (directMatch?.url) return directMatch.url
+
+  // 2. مطابقة عبر variant_sku
+  const skuMatch = allImages.find(
+    (img) =>
+      img.variant_sku &&
+      variant.sku &&
+      img.variant_sku.trim().toLowerCase() === variant.sku.trim().toLowerCase()
+  )
+  if (skuMatch?.url) return skuMatch.url
+
+  // 3. Fallback ذكي للون
+  const currentColor =
+    variant.attributes?.color ||
+    variant.attributes?.colour ||
+    variant.attributes?.["اللون"]
+
+  if (currentColor) {
+    const siblingWithSameColor = allVariants.find(
+      (v) =>
+        v.id !== variant.id &&
+        (v.attributes?.color === currentColor ||
+          v.attributes?.colour === currentColor ||
+          v.attributes?.["اللون"] === currentColor) &&
+        allImages.some((img) => img.variant_id === v.id)
+    )
+
+    if (siblingWithSameColor) {
+      const siblingImage = allImages.find(
+        (img) => img.variant_id === siblingWithSameColor.id
+      )
+      if (siblingImage?.url) return siblingImage.url
+    }
+  }
+
+  // 4. استخدام الصورة الأساسية للمنتج أو أول صورة متاحة
+  const primaryImg = allImages.find((img) => img.is_primary)
+  return primaryImg?.url || allImages[0]?.url || ""
 }
 
 export default function ProductDetailsPage({ product }: ProductDetailsProps) {
-  const availableVariants = product.product_variants.filter((v) => v.is_active)
+  const availableVariants = React.useMemo(
+    () => product.product_variants.filter((v) => v.is_active),
+    [product.product_variants]
+  )
 
-  // 1. استخراج جميع السمات الفريدة المتاحة للمنتج
   const attributeOptions = React.useMemo(() => {
     const options: Record<string, string[]> = {}
     availableVariants.forEach((v) => {
@@ -71,73 +128,97 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
     return options
   }, [availableVariants])
 
-  // 2. حالة السمات المختارة حالياً
-  const [selectedAttributes, setSelectedAttributes] = React.useState<
-    Record<string, string>
-  >({})
-
-  // 3. اشتقاق المتغير المحدد بناءً على السمات المختارة
-  const selectedVariant = React.useMemo(() => {
-    if (Object.keys(selectedAttributes).length === 0) {
-      return availableVariants[0] || null
-    }
-    return (
-      availableVariants.find((v) => {
-        if (!v.attributes) return false
-        return Object.entries(selectedAttributes).every(
-          ([key, value]) => v.attributes[key] === value
-        )
-      }) || null
-    )
-  }, [selectedAttributes, availableVariants])
-
-  // 4. حالة الكمية المختارة
-  const [quantity, setQuantity] = React.useState(1)
-
-  // تحديد الصورة النشطة
-  const defaultImageObj =
-    product.product_images.find((img) => img.is_primary) ||
-    product.product_images[0] ||
-    null
-
-  const [activeImage, setActiveImage] = React.useState<string>(
-    defaultImageObj ? defaultImageObj.url : ""
+  const [selectedVariantId, setSelectedVariantId] = React.useState<string>(
+    () => availableVariants[0]?.id || ""
   )
 
-  // ✅ عند تغيير سمة، نحدث الصورة ونعيد تعيين الكمية مباشرة (بدون useEffect)
-  const handleAttributeSelect = (key: string, value: string) => {
-    const newAttributes = { ...selectedAttributes, [key]: value }
-    setSelectedAttributes(newAttributes)
-    setQuantity(1) // إعادة التعيين هنا مباشرة استجابةً لتفاعل المستخدم
+  const [selectedAttributes, setSelectedAttributes] = React.useState<
+    Record<string, string>
+  >(() => availableVariants[0]?.attributes || {})
 
-    const matchingVariant = availableVariants.find(
-      (v) => v.attributes && v.attributes[key] === value
+  const selectedVariant = React.useMemo(() => {
+    return (
+      availableVariants.find((v) => v.id === selectedVariantId) ||
+      availableVariants[0] ||
+      null
+    )
+  }, [selectedVariantId, availableVariants])
+
+  const [quantity, setQuantity] = React.useState(1)
+
+  const productImages = product.product_images as ProductImageItem[]
+
+  // ✅ صورة اختارها العميل يدوياً من شريط المصغرات (إن وجدت)
+  const [userSelectedImage, setUserSelectedImage] = React.useState<
+    string | null
+  >(null)
+
+  // ✅ حساب الصورة النشطة كقيمة مشتقة بدون أي useEffect أو تحذيرات
+  const activeImage = React.useMemo(() => {
+    if (userSelectedImage) return userSelectedImage
+    return resolveVariantImage(
+      selectedVariant,
+      availableVariants,
+      productImages
+    )
+  }, [userSelectedImage, selectedVariant, availableVariants, productImages])
+
+  const handleAttributeSelect = (key: string, value: string) => {
+    const candidateAttrs = { ...selectedAttributes, [key]: value }
+
+    let matching = availableVariants.find(
+      (v) =>
+        v.attributes &&
+        Object.entries(candidateAttrs).every(
+          ([k, val]) => v.attributes[k] === val
+        )
     )
 
-    if (matchingVariant) {
-      const variantImg = product.product_images.find(
-        (img) => img.variant_id === matchingVariant.id
+    if (!matching) {
+      matching = availableVariants.find(
+        (v) => v.attributes && v.attributes[key] === value
       )
-      setActiveImage(variantImg ? variantImg.url : defaultImageObj?.url || "")
+    }
+
+    if (matching) {
+      setSelectedVariantId(matching.id)
+      setSelectedAttributes(matching.attributes || candidateAttrs)
+    } else {
+      setSelectedAttributes(candidateAttrs)
+    }
+
+    // إعادة ضبط الكمية والصورة المختارة يدوياً لتتبع المتغير الجديد تلقائياً
+    setUserSelectedImage(null)
+    setQuantity(1)
+  }
+
+  const handleThumbnailClick = (img: ProductImageItem) => {
+    setUserSelectedImage(img.url)
+    if (img.variant_id) {
+      const targetVariant = availableVariants.find(
+        (v) => v.id === img.variant_id
+      )
+      if (targetVariant) {
+        setSelectedVariantId(targetVariant.id)
+        if (targetVariant.attributes) {
+          setSelectedAttributes(targetVariant.attributes)
+        }
+      }
     }
   }
 
-  // دوال التحكم بالكمية
-  const handleQuantityChange = (newQuantity: number) => {
-    if (newQuantity < 1) return
-    if (selectedVariant && newQuantity > selectedVariant.stock_quantity) return
-    setQuantity(newQuantity)
+  const handleQuantityChange = (newQty: number) => {
+    if (newQty < 1) return
+    if (selectedVariant && newQty > selectedVariant.stock_quantity) return
+    setQuantity(newQty)
   }
 
-  const incrementQuantity = () => {
-    handleQuantityChange(quantity + 1)
-  }
+  const isOutOfStock = !selectedVariant || selectedVariant.stock_quantity === 0
+  const isLowStock =
+    selectedVariant &&
+    selectedVariant.stock_quantity > 0 &&
+    selectedVariant.stock_quantity <= (selectedVariant.low_stock_threshold || 5)
 
-  const decrementQuantity = () => {
-    handleQuantityChange(quantity - 1)
-  }
-
-  // حساب نسبة الخصم
   const discountPercentage =
     selectedVariant?.compare_at_price &&
     selectedVariant.compare_at_price > selectedVariant.price
@@ -148,313 +229,341 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
         )
       : null
 
-  const isOutOfStock = selectedVariant
-    ? selectedVariant.stock_quantity === 0
-    : true
-
-  // حساب السعر الإجمالي
   const totalPrice = selectedVariant ? selectedVariant.price * quantity : 0
 
   return (
-    <div className="mx-auto w-full max-w-6xl py-12 md:py-20">
-      <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
-        {/* --- Image Gallery Section --- */}
-        <div className="space-y-4">
-          <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted/20">
-            {activeImage ? (
-              <img
-                src={activeImage}
-                alt={product.name}
-                className="h-full w-full object-cover transition-opacity duration-300"
-              />
-            ) : (
-              <div className="flex h-full w-full flex-col items-center justify-center text-sm text-muted-foreground">
-                <AlertCircleIcon className="mb-2 size-8 opacity-40" />
-                <span>No image available</span>
-              </div>
-            )}
-
-            {!isOutOfStock && discountPercentage && (
-              <span className="text-destructive-foreground absolute end-4 top-4 rounded-full bg-destructive px-3 py-1 text-xs font-semibold shadow-sm">
-                {discountPercentage}% OFF
-              </span>
-            )}
-          </div>
-
-          {/* Thumbnails */}
-          {product.product_images.length > 1 && (
-            <div className="scrollbar-hide flex items-center gap-3 overflow-x-auto pb-2">
-              {product.product_images.map((img) => {
-                const isSelected = activeImage === img.url
-                return (
-                  <button
-                    key={img.id}
-                    type="button"
-                    onClick={() => setActiveImage(img.url)}
-                    className={`relative size-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
-                      isSelected
-                        ? "border-primary"
-                        : "border-transparent opacity-60 hover:border-muted-foreground/30 hover:opacity-100"
-                    }`}
-                    aria-label={`View image ${img.alt_text || product.name}`}
-                  >
-                    <img
-                      src={img.url}
-                      alt={img.alt_text || product.name}
-                      className="h-full w-full object-cover"
-                    />
-                  </button>
-                )
-              })}
+    <section className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-14">
+      {/* المعرض المرئي */}
+      <div className="space-y-4 lg:col-span-6">
+        <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-border/60 bg-muted/20">
+          {activeImage ? (
+            <img
+              src={activeImage}
+              alt={product.name}
+              className="size-full object-cover transition-all duration-300"
+            />
+          ) : (
+            <div className="flex size-full flex-col items-center justify-center text-sm text-muted-foreground">
+              <AlertCircleIcon className="mb-2 size-8 opacity-40" />
+              <span>No image available</span>
             </div>
+          )}
+
+          {!isOutOfStock && discountPercentage && (
+            <span className="text-destructive-foreground absolute start-4 top-4 rounded-full bg-destructive px-3 py-1 text-xs font-semibold shadow-xs">
+              {discountPercentage}% OFF
+            </span>
           )}
         </div>
 
-        {/* --- Product Details & Options Section --- */}
-        <div className="flex flex-col justify-center space-y-6">
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-              {product.category && (
-                <span className="font-medium">{product.category.name}</span>
-              )}
-              {product.category && product.brand && <span>•</span>}
-              {product.brand && (
-                <span className="font-medium">{product.brand.name}</span>
-              )}
-            </div>
+        {/* الصور المصغرة */}
+        {productImages.length > 1 && (
+          <div className="flex items-center gap-3 overflow-x-auto pb-1">
+            {productImages.map((img) => {
+              const isSelected = activeImage === img.url
+              return (
+                <button
+                  key={img.id}
+                  type="button"
+                  onClick={() => handleThumbnailClick(img)}
+                  className={`relative size-18 shrink-0 overflow-hidden rounded-xl border bg-background transition-all ${
+                    isSelected
+                      ? "border-primary ring-2 ring-primary/30"
+                      : "border-border/70 opacity-60 hover:border-foreground/30 hover:opacity-100"
+                  }`}
+                  aria-label="Select product image"
+                >
+                  <img
+                    src={img.url}
+                    alt={img.alt_text || product.name}
+                    className="size-full object-cover"
+                  />
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </div>
 
-            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              {product.name}
-            </h1>
+      {/* تفاصيل المنتج وخيارات الشراء */}
+      <div className="space-y-6 lg:col-span-6">
+        <div className="space-y-2.5">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground">
+            {product.category && (
+              <span className="rounded-md bg-muted px-2 py-0.5 text-foreground">
+                {product.category.name}
+              </span>
+            )}
+            {product.brand && (
+              <>
+                <span>•</span>
+                <span>{product.brand.name}</span>
+              </>
+            )}
+          </div>
 
-            {/* منطقة السعر */}
-            <div className="flex min-h-[40px] items-baseline gap-3 pt-1">
-              {!isOutOfStock && selectedVariant ? (
-                <>
-                  <span className="text-3xl font-extrabold text-primary">
-                    {formatPrice(selectedVariant.price)}
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            {product.name}
+          </h1>
+
+          {/* منطقة السعر والحالة */}
+          <div className="flex h-11 items-center justify-between">
+            <div className="flex items-center gap-3">
+              {isOutOfStock ? (
+                <div className="flex items-center gap-2 text-destructive">
+                  <AlertCircleIcon className="size-6 shrink-0" />
+                  <span className="text-2xl leading-none font-extrabold tracking-tight sm:text-3xl">
+                    Out of Stock
                   </span>
-                  {selectedVariant.compare_at_price &&
+                </div>
+              ) : (
+                <>
+                  <span className="text-2xl leading-none font-extrabold tracking-tight text-foreground tabular-nums sm:text-3xl">
+                    ${formatPrice(selectedVariant?.price ?? 0)}
+                  </span>
+                  {selectedVariant?.compare_at_price &&
                     selectedVariant.compare_at_price >
                       selectedVariant.price && (
-                      <span className="text-base text-muted-foreground line-through decoration-destructive/50">
-                        {formatPrice(selectedVariant.compare_at_price)}
+                      <span className="text-base leading-none text-muted-foreground tabular-nums line-through">
+                        ${formatPrice(selectedVariant.compare_at_price)}
                       </span>
                     )}
                 </>
-              ) : (
-                <span className="flex items-center gap-2 text-xl font-bold text-destructive">
-                  <AlertCircleIcon className="size-5" />
-                  Out of Stock
-                </span>
               )}
             </div>
+
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
+                isOutOfStock
+                  ? "bg-destructive/10 text-destructive"
+                  : isLowStock
+                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                    : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+              }`}
+            >
+              <span
+                className={`size-1.5 rounded-full ${
+                  isOutOfStock
+                    ? "bg-destructive"
+                    : isLowStock
+                      ? "bg-amber-500"
+                      : "bg-emerald-500"
+                }`}
+              />
+              {isOutOfStock
+                ? "Unavailable"
+                : isLowStock
+                  ? `Only ${selectedVariant?.stock_quantity} left`
+                  : "In Stock"}
+            </span>
           </div>
+        </div>
 
-          <Separator />
+        <Separator />
 
-          {/* --- Smart Attributes Selection --- */}
-          {Object.keys(attributeOptions).length > 0 ? (
-            <div className="space-y-6">
-              {Object.entries(attributeOptions).map(([key, values]) => {
-                const lowerKey = key.toLowerCase()
-                const isColor =
-                  lowerKey.includes("color") || lowerKey.includes("لون")
+        {/* خيارات المتغيرات */}
+        {Object.keys(attributeOptions).length > 0 ? (
+          <div className="space-y-5">
+            {Object.entries(attributeOptions).map(([key, values]) => {
+              const lowerKey = key.toLowerCase()
+              const isColor =
+                lowerKey.includes("color") || lowerKey.includes("لون")
 
-                return (
-                  <div key={key} className="space-y-3">
-                    <span className="text-sm font-semibold text-foreground capitalize">
-                      {isColor
-                        ? "Color"
-                        : key.charAt(0).toUpperCase() + key.slice(1)}
+              return (
+                <div key={key} className="space-y-2.5">
+                  <div className="text-xs">
+                    <span className="font-semibold text-foreground capitalize">
+                      {isColor ? "Color" : key}
                     </span>
-                    <div className="flex flex-wrap gap-3">
-                      {values.map((value) => {
-                        const isDisabled = !availableVariants.some(
-                          (v) =>
-                            v.attributes &&
-                            v.attributes[key] === value &&
-                            v.stock_quantity > 0
-                        )
-                        const isSelected = selectedAttributes[key] === value
+                  </div>
 
+                  <div className="flex flex-wrap gap-2.5">
+                    {values.map((value) => {
+                      const isSelected = selectedAttributes[key] === value
+
+                      if (isColor) {
                         return (
                           <button
                             key={value}
                             type="button"
-                            disabled={isDisabled}
                             onClick={() => handleAttributeSelect(key, value)}
-                            className={`relative transition-all duration-200 ${
-                              isDisabled
-                                ? "cursor-not-allowed opacity-40"
-                                : "cursor-pointer"
-                            }`}
+                            className={`group relative flex size-9 items-center justify-center rounded-full border transition-all ${
+                              isSelected
+                                ? "border-primary"
+                                : "border-border/60 hover:scale-105"
+                            } cursor-pointer`}
                             title={value}
+                            aria-label={`Select color ${value}`}
                           >
-                            {isColor && (
-                              <div
-                                className={`flex size-8 items-center justify-center rounded-full border transition-all ${
-                                  isSelected
-                                    ? "border-primary ring-1 ring-primary"
-                                    : "border-muted-foreground/20 hover:border-primary/50"
-                                }`}
-                                style={{ backgroundColor: getColorHex(value) }}
-                              >
-                                {isSelected && (
-                                  <CheckIcon className="size-4 text-white" />
-                                )}
-                              </div>
-                            )}
-
-                            {!isColor && (
-                              <div
-                                className={`relative flex h-10 min-w-[3.5rem] items-center justify-center border px-3 text-sm font-bold transition-colors ${
-                                  isSelected
-                                    ? "border-primary text-primary"
-                                    : "border-muted-foreground/20 text-foreground hover:border-primary/50"
-                                } ${isDisabled ? "line-through opacity-40" : ""}`}
-                              >
-                                {value}
-                                {isSelected && (
-                                  <div
-                                    className="absolute -inset-e-px -top-px size-2.5 bg-primary rtl:rotate-y-180"
-                                    style={{
-                                      clipPath:
-                                        "polygon(100% 0, 0 0, 100% 100%)",
-                                    }}
-                                  />
-                                )}
-                              </div>
+                            <span
+                              className="size-7 rounded-full shadow-inner"
+                              style={{ backgroundColor: getColorHex(value) }}
+                            />
+                            {isSelected && (
+                              <CheckIcon
+                                className={`size-3.5 ${
+                                  getColorHex(value).toLowerCase() === "#ffffff"
+                                    ? "text-black"
+                                    : "text-white"
+                                } absolute`}
+                              />
                             )}
                           </button>
                         )
-                      })}
-                    </div>
+                      }
+
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => handleAttributeSelect(key, value)}
+                          className={`flex h-9 min-w-12 items-center justify-center rounded-lg border px-3 text-xs font-medium transition-all ${
+                            isSelected
+                              ? "border-primary bg-primary text-primary-foreground shadow-xs"
+                              : "border-border bg-card text-foreground hover:bg-muted"
+                          } cursor-pointer`}
+                        >
+                          {value}
+                        </button>
+                      )
+                    })}
                   </div>
-                )
-              })}
-            </div>
-          ) : (
-            availableVariants.length > 0 && (
-              <div className="space-y-3">
-                <span className="text-sm font-medium text-foreground">
-                  Available Options
-                </span>
-                <div className="flex flex-wrap gap-2.5 pt-1">
-                  {availableVariants.map((v) => {
-                    const isCurrent = selectedVariant?.id === v.id
-                    const isDisabled = v.stock_quantity === 0
-                    return (
-                      <button
-                        key={v.id}
-                        type="button"
-                        disabled={isDisabled}
-                        onClick={() => {
-                          setSelectedAttributes({})
-                          setQuantity(1)
-                        }}
-                        className={`flex flex-col items-start border px-4 py-2.5 text-start text-xs transition-colors ${
-                          isCurrent
-                            ? "border-primary font-semibold text-primary"
-                            : isDisabled
-                              ? "cursor-not-allowed border-muted-foreground/20 text-muted-foreground line-through opacity-40"
-                              : "border-muted-foreground/20 text-foreground hover:border-primary/50"
-                        }`}
-                      >
-                        <span>{v.name || v.sku}</span>
-                      </button>
-                    )
-                  })}
                 </div>
+              )
+            })}
+          </div>
+        ) : (
+          availableVariants.length > 0 && (
+            <div className="space-y-2.5">
+              <span className="text-xs font-semibold text-foreground">
+                Options
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {availableVariants.map((v) => {
+                  const isCurrent = selectedVariant?.id === v.id
+                  return (
+                    <button
+                      key={v.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedVariantId(v.id)
+                        setSelectedAttributes(v.attributes || {})
+                        setUserSelectedImage(null)
+                        setQuantity(1)
+                      }}
+                      className={`rounded-lg border px-3.5 py-2 text-xs font-medium transition-all ${
+                        isCurrent
+                          ? "border-primary bg-primary text-primary-foreground shadow-xs"
+                          : "border-border bg-card text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      {v.name || v.sku}
+                    </button>
+                  )
+                })}
               </div>
-            )
-          )}
-
-          <Separator />
-
-          {/* Product Description */}
-          {product.description && (
-            <div className="space-y-2">
-              <h2 className="text-sm font-semibold text-foreground">
-                Product Details
-              </h2>
-              <p className="text-sm leading-relaxed whitespace-pre-line text-muted-foreground">
-                {product.description}
-              </p>
             </div>
-          )}
+          )
+        )}
 
-          {/* ✅ Quantity & Total Price (Unified Row) */}
-          {!isOutOfStock && selectedVariant && (
-            <div className="flex items-center justify-between gap-4 border-t border-border pt-4">
-              {/* محدد الكمية - Quantity Selector */}
-              <div
-                dir="ltr"
-                className="inline-flex items-center rounded-lg border border-border bg-muted/30 p-0.5"
-              >
+        <Separator />
+
+        {/* عناصر الكمية والإضافة للسلة */}
+        <div className="space-y-4">
+          <div
+            className={`flex items-center justify-between rounded-xl border border-border/70 bg-muted/15 p-3 transition-opacity ${
+              isOutOfStock ? "opacity-50" : "opacity-100"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-muted-foreground">
+                Quantity:
+              </span>
+              <div className="inline-flex items-center rounded-lg border bg-background p-0.5 shadow-xs">
                 <CustomButton
                   variant="ghost"
                   size="icon"
-                  onClick={decrementQuantity}
-                  disabled={quantity <= 1}
-                  aria-label="تقليل الكمية"
-                  className="size-8 rounded-md hover:bg-background disabled:opacity-40"
+                  onClick={() => handleQuantityChange(quantity - 1)}
+                  disabled={quantity <= 1 || isOutOfStock}
+                  className="size-7 rounded-md disabled:pointer-events-none disabled:opacity-40"
+                  aria-label="Decrease quantity"
                 >
                   <MinusIcon className="size-3.5" />
                 </CustomButton>
 
-                <input
-                  type="number"
-                  value={quantity}
-                  onChange={(e) =>
-                    handleQuantityChange(parseInt(e.target.value) || 1)
-                  }
-                  min={1}
-                  max={selectedVariant.stock_quantity}
-                  className="w-12 [appearance:textfield] bg-transparent text-center text-sm font-semibold tabular-nums focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                  aria-label="الكمية"
-                />
+                <span className="w-10 text-center text-xs font-semibold text-foreground tabular-nums">
+                  {isOutOfStock ? 0 : quantity}
+                </span>
 
                 <CustomButton
                   variant="ghost"
                   size="icon"
-                  onClick={incrementQuantity}
-                  disabled={quantity >= selectedVariant.stock_quantity}
-                  aria-label="زيادة الكمية"
-                  className="size-8 rounded-md hover:bg-background disabled:opacity-40"
+                  onClick={() => handleQuantityChange(quantity + 1)}
+                  disabled={
+                    isOutOfStock ||
+                    (selectedVariant
+                      ? quantity >= selectedVariant.stock_quantity
+                      : true)
+                  }
+                  className="size-7 rounded-md disabled:pointer-events-none disabled:opacity-40"
+                  aria-label="Increase quantity"
                 >
                   <PlusIcon className="size-3.5" />
                 </CustomButton>
               </div>
-
-              {/* السعر الإجمالي - Total Price */}
-              <div className="text-end">
-                <span className="block text-xs font-medium text-muted-foreground">
-                  Total Price
-                </span>
-                <span className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-                  {formatPrice(totalPrice)}
-                </span>
-              </div>
             </div>
-          )}
 
-          {/* Add to Cart Button */}
-          <div className="flex items-center gap-3 pt-2">
-            <CustomButton
-              className="w-full"
-              disabled={!selectedVariant || isOutOfStock}
-            >
-              <ShoppingCartIcon className="size-5" />
-              {isOutOfStock
-                ? "Out of Stock"
-                : quantity > 1
-                  ? `Add ${quantity} to Cart`
-                  : "Add to Cart"}
-            </CustomButton>
+            <div className="text-end">
+              <span className="block text-[11px] font-medium text-muted-foreground">
+                Total Price
+              </span>
+              <span className="text-lg font-bold tracking-tight text-foreground tabular-nums">
+                ${formatPrice(isOutOfStock ? 0 : totalPrice)}
+              </span>
+            </div>
+          </div>
+
+          <CustomButton
+            className="h-11 w-full text-sm font-semibold shadow-xs"
+            disabled={isOutOfStock}
+          >
+            <ShoppingCartIcon className="me-2 size-4" />
+            {isOutOfStock
+              ? "Out of Stock"
+              : quantity > 1
+                ? `Add ${quantity} to Cart`
+                : "Add to Cart"}
+          </CustomButton>
+        </div>
+
+        {/* شارات الميزات */}
+        <div className="grid grid-cols-3 gap-2 border-t border-border/60 pt-4 text-center text-[11px] text-muted-foreground">
+          <div className="flex flex-col items-center gap-1">
+            <TruckIcon className="size-4 text-foreground/70" />
+            <span>Fast Dispatch</span>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <RotateCcwIcon className="size-4 text-foreground/70" />
+            <span>Easy Returns</span>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <ShieldCheckIcon className="size-4 text-foreground/70" />
+            <span>Secure Checkout</span>
           </div>
         </div>
+
+        {/* وصف المنتج */}
+        {product.description && (
+          <div className="space-y-2 border-t border-border/60 pt-4">
+            <h3 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+              Overview
+            </h3>
+            <p className="text-sm leading-relaxed whitespace-pre-line text-foreground/90">
+              {product.description}
+            </p>
+          </div>
+        )}
       </div>
-    </div>
+    </section>
   )
 }

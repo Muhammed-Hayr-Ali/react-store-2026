@@ -14,9 +14,13 @@ import { hasPermission } from "../../role/permission-checker"
 export async function createProduct(
   data: CreateProductCompleteInput
 ): Promise<ApiResult<Product | null>> {
-  // 1. التحقق من صحة البيانات
+  // 1. التحقق من صحة البيانات عبر Zod
   const validation = createProductCompleteSchema.safeParse(data)
   if (!validation.success) {
+    console.error(
+      "❌ [CreateProduct] Validation Error:",
+      validation.error.flatten().fieldErrors
+    )
     return {
       success: false,
       error: "VALIDATION_ERROR",
@@ -24,25 +28,32 @@ export async function createProduct(
     }
   }
 
-  // 2. التحقق من الصلاحيات
-  if (!(await hasRole("admin")) || !(await hasPermission("create_product"))) {
+  // 2. التحقق من الصلاحيات بالتوازي
+  const [isAdmin, canCreate] = await Promise.all([
+    hasRole("admin"),
+    hasPermission("create_product"),
+  ])
+
+  if (!isAdmin || !canCreate) {
+    console.error(
+      "❌ [CreateProduct] Unauthorized Access: User lacks admin role or create_product permission"
+    )
     return { success: false, error: "UNAUTHORIZED_ACCESS" }
   }
 
   const supabase = await createServerClient()
-
-  // 3. استبعاد variants و images من بيانات المنتج الأساسي
   const { variants, images, ...productOnlyData } = validation.data
 
   const cleanProductData = {
     ...productOnlyData,
+    slug: productOnlyData.slug.trim().toLowerCase(),
     brand_id: productOnlyData.brand_id || null,
     description: productOnlyData.description || null,
     meta_title: productOnlyData.meta_title || null,
     meta_description: productOnlyData.meta_description || null,
   }
 
-  // 4. إنشاء المنتج الأساسي
+  // 3. إنشاء المنتج الأساسي
   const { data: newProduct, error: productError } = await supabase
     .from("products")
     .insert(cleanProductData)
@@ -50,19 +61,42 @@ export async function createProduct(
     .single()
 
   if (productError) {
-    if (productError.code === "23505")
+    console.error("❌ [CreateProduct] Product Insert Error:", {
+      message: productError.message,
+      code: productError.code,
+      details: productError.details,
+      hint: productError.hint,
+      cleanProductData,
+    })
+
+    if (productError.code === "23505") {
       return { success: false, error: "SLUG_ALREADY_EXISTS" }
+    }
     return {
       success: false,
-      error: productError.message || "CREATE_PRODUCT_ERROR",
+      error: "CREATE_PRODUCT_ERROR",
       details: { database: [productError.message] },
     }
   }
 
   const productId = newProduct.id
+
+  const rollbackAll = async () => {
+    console.warn(
+      `⚠️ [CreateProduct] Rolling back product creation (ID: ${productId})...`
+    )
+    const { error: deleteError } = await supabase
+      .from("products")
+      .delete()
+      .eq("id", productId)
+    if (deleteError) {
+      console.error("❌ [CreateProduct] Rollback failed:", deleteError)
+    }
+  }
+
   let createdVariants: CreatedVariant[] = []
 
-  // 5. إنشاء المتغيرات
+  // 4. إنشاء المتغيرات
   if (variants.length > 0) {
     const variantsPayload = variants.map((v, idx) => ({
       product_id: productId,
@@ -72,8 +106,10 @@ export async function createProduct(
         v.attributes && Object.keys(v.attributes).length > 0
           ? v.attributes
           : {},
-      price: Number(v.price),
-      compare_at_price: v.compare_at_price ? Number(v.compare_at_price) : null,
+      price: Math.round(Number(v.price) * 100),
+      compare_at_price: v.compare_at_price
+        ? Math.round(Number(v.compare_at_price) * 100)
+        : null,
       stock_quantity: Number(v.stock_quantity),
       track_inventory: Boolean(v.track_inventory),
       low_stock_threshold: Number(v.low_stock_threshold),
@@ -87,36 +123,39 @@ export async function createProduct(
       .select("id, sku")
 
     if (variantsError) {
-      console.error("Variants Insert Error:", variantsError)
+      console.error("❌ [CreateProduct] Variants Insert Error:", {
+        message: variantsError.message,
+        code: variantsError.code,
+        details: variantsError.details,
+        hint: variantsError.hint,
+        variantsPayload,
+      })
 
-      // في حال فشل إنشاء المتغيرات، نحذف المنتج الأساسي لتجنب بقاء بيانات معلقة (Rollback يدوي)
-      await supabase.from("products").delete().eq("id", productId)
+      await rollbackAll()
 
       if (variantsError.code === "23505") {
-        return {
-          success: false,
-          error: "رمز التخزين (SKU) مستخدم بالفعل لمتغير آخر.",
-          details: { database: [variantsError.message] },
-        }
+        return { success: false, error: "SKU_ALREADY_EXISTS" }
       }
 
       return {
         success: false,
-        error: `فشل في إنشاء المتغيرات: ${variantsError.message}`,
+        error: "CREATE_VARIANTS_ERROR",
         details: { database: [variantsError.message] },
       }
     }
+
     createdVariants = (variantsData || []) as CreatedVariant[]
   }
 
-  // 6. إنشاء الصور وربطها بالمتغيرات عبر SKU
+  // 5. إنشاء الصور
   if (images.length > 0) {
     const imagesPayload = images.map((img) => {
       let targetVariantId: string | null = null
 
-      if (img.variant_sku) {
+      if (img.variant_sku?.trim()) {
+        const cleanSku = img.variant_sku.trim().toLowerCase()
         const matchedVariant = createdVariants.find(
-          (v: CreatedVariant) => v.sku === img.variant_sku
+          (v) => v.sku.trim().toLowerCase() === cleanSku
         )
         if (matchedVariant) targetVariantId = matchedVariant.id
       }
@@ -136,14 +175,26 @@ export async function createProduct(
       .insert(imagesPayload)
 
     if (imagesError) {
-      console.error("Images Insert Error:", imagesError)
+      console.error("❌ [CreateProduct] Images Insert Error:", {
+        message: imagesError.message,
+        code: imagesError.code,
+        details: imagesError.details,
+        hint: imagesError.hint,
+        imagesPayload,
+      })
+
+      await rollbackAll()
+
       return {
         success: false,
-        error: `فشل في حفظ الصور: ${imagesError.message}`,
+        error: "CREATE_IMAGES_ERROR",
         details: { database: [imagesError.message] },
       }
     }
   }
 
+  console.log(
+    `✅ [CreateProduct] Successfully created product: ${newProduct.name} (${newProduct.id})`
+  )
   return { success: true, data: newProduct as Product }
 }
