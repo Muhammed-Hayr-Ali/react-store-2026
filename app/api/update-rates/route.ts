@@ -1,130 +1,90 @@
-// app/api/cron/update-rates/route.ts
+import { NextResponse } from "next/server"
+import { createAdminClient } from "@/lib/database/supabase/admin"
 
-import { createAdminClient } from "@/lib/database/supabase/admin";
-import { CurrencyCode } from "@/lib/database/types/enums";
-import { NextResponse } from "next/server";
-import { checkRateLimit, rateLimitHeaders } from "@/lib/security/rate-limiter";
-import { logSecurityEvent } from "@/lib/security/audit-logger";
+export const dynamic = "force-dynamic"
 
-// Force dynamic rendering - Required for API routes
-export const dynamic = "force-dynamic";
-
-// تعريف نوع البيانات للاستجابة من API
 interface ExchangeRateResponse {
-  result: string;
-  base_code: string;
-  conversion_rates: {
-    [key: string]: number;
-  };
+  result: string
+  base_code: string
+  conversion_rates: Record<string, number>
 }
 
-async function verifyCronSecret(request: Request): Promise<boolean> {
-  const cronSecret = process.env.CRON_SECRET;
-  if (
-    !cronSecret ||
-    cronSecret === "marketna_cron_secret_2026_change_this_in_production"
-  ) {
-    return false;
-  }
-
-  const authHeader = request.headers.get("authorization");
-  return authHeader === `Bearer ${cronSecret}`;
-}
+// قائمة العملات المطلوبة
+const TARGET_CURRENCIES = ["SYP", "SAR", "EGP", "TRY", "EUR", "AED"]
 
 export async function GET(request: Request) {
   try {
-    const rateLimit = checkRateLimit(request.headers, {
-      maxRequests: 10,
-      windowMs: 60 * 60 * 1000,
-    });
+    // 1. التحقق من مفتاح الحماية لـ Cron Job
+    const cronSecret = process.env.CRON_SECRET
+    if (cronSecret) {
+      const authHeader = request.headers.get("authorization")
+      if (authHeader !== `Bearer ${cronSecret}`) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      }
+    }
 
-    if (!rateLimit.success) {
-      logSecurityEvent("RATE_LIMIT_EXCEEDED", request.headers, {
-        endpoint: "/api/cron/update-rates",
-      });
+    // 2. جلب أحدث أسعار الصرف مقابل الدولار
+    const apiKey = process.env.EXCHANGERATE_API_KEY
+    if (!apiKey) {
       return NextResponse.json(
-        { error: "Too Many Requests" },
-        { status: 429, headers: rateLimitHeaders(rateLimit) },
-      );
+        { error: "API key is missing in environment variables" },
+        { status: 500 }
+      )
     }
 
-    if (!(await verifyCronSecret(request))) {
-      logSecurityEvent("UNAUTHORIZED_ACCESS", request.headers, {
-        endpoint: "/api/cron/update-rates",
-      });
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    console.log("💱 Fetching latest exchange rates...");
-    const apiKey = process.env.EXCHANGERATE_API_KEY;
     const response = await fetch(
       `https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`,
-    );
+      { next: { revalidate: 0 } }
+    )
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch exchange rates: ${response.statusText}`);
+      throw new Error(`Failed to fetch exchange rates: ${response.statusText}`)
     }
 
-    const data: ExchangeRateResponse = await response.json();
+    const data: ExchangeRateResponse = await response.json()
 
-    if (data.result !== "success") {
-      throw new Error("Exchange rate API did not return success.");
+    if (data.result !== "success" || !data.conversion_rates) {
+      throw new Error("Exchange rate API response was unsuccessful")
     }
 
-    const ratesToUpsert = ["SYP", "SAR", "EGP", "TRY", "EUR", "AED"]
-      .filter((code) => data.conversion_rates[code])
-      .map((code) => ({
-        currency_code: code as CurrencyCode,
-        rate_from_usd: data.conversion_rates[code],
-      }));
+    // 3. فلترة وتحضير العملات للتخزين
+    const ratesToUpsert = TARGET_CURRENCIES.filter(
+      (code) => data.conversion_rates[code] !== undefined
+    ).map((code) => ({
+      currency_code: code,
+      rate_from_usd: data.conversion_rates[code],
+      updated_at: new Date().toISOString(),
+    }))
 
     if (ratesToUpsert.length === 0) {
-      throw new Error("No target currencies found in API response.");
+      throw new Error("No target currencies found in response")
     }
 
-    // 5. الاتصال بـ Supabase وتحديث قاعدة البيانات
-    const supabaseAdmin = createAdminClient();
+    // 4. تحديث البيانات في Supabase
+    const supabaseAdmin = createAdminClient()
 
-    console.log(`📊 Updating ${ratesToUpsert.length} exchange rates...`);
     const { error: upsertError } = await supabaseAdmin
       .from("exchange_rates")
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .upsert(ratesToUpsert as any, { onConflict: "currency_code" });
+      .upsert(ratesToUpsert, { onConflict: "currency_code" })
 
     if (upsertError) {
-      console.error("❌ Database upsert failed:", upsertError);
-      throw upsertError;
+      console.error("Database upsert error:", upsertError)
+      throw upsertError
     }
 
-    console.log(
-      `✅ Successfully updated ${ratesToUpsert.length} exchange rates.`,
-    );
-
-    // 6. إرجاع استجابة نجاح
     return NextResponse.json({
       success: true,
-      message: `Successfully updated ${ratesToUpsert.length} rates.`,
+      message: `Successfully updated ${ratesToUpsert.length} rates`,
       currencies: ratesToUpsert.map((r) => r.currency_code),
-      timestamp: new Date().toISOString(),
-    });
+      updatedAt: new Date().toISOString(),
+    })
   } catch (error: unknown) {
-    console.error("❌ Cron job error:", error);
-
-    if (error instanceof Error) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: error.message,
-        },
-        { status: 500 },
-      );
-    }
-
+    const message =
+      error instanceof Error ? error.message : "Internal Server Error"
+    console.error("Cron update-rates error:", error)
     return NextResponse.json(
-      {
-        success: false,
-        error: "Unknown error occurred",
-      },
-      { status: 500 },
-    );
+      { success: false, error: message },
+      { status: 500 }
+    )
   }
 }
