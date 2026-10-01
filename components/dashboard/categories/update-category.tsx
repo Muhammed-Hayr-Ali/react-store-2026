@@ -29,7 +29,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { Category } from "./categories-table"
 import {
   CustomSheet,
   CustomSheetClose,
@@ -40,7 +39,7 @@ import {
   CustomSheetTitle,
 } from "@/components/ui/custom-sheet"
 
-import { updateCategory } from "@/lib/actions/categories"
+import { Category, updateCategory } from "@/lib/actions/categories"
 import Image from "next/image"
 
 // ============================================================================
