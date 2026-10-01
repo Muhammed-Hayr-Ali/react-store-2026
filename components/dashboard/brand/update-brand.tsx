@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -36,7 +37,6 @@ import {
   CustomSheetTitle,
 } from "@/components/ui/custom-sheet"
 import { Brand, updateBrand, updateBrandSchema } from "@/lib/actions/brands"
-
 
 type FormValues = z.infer<typeof updateBrandSchema>
 
@@ -115,7 +115,7 @@ export default function UpdateBrandSheet({
 
   const handleGenerateSlug = () => {
     if (!nameValue.trim()) {
-      toast.error("يرجى إدخال اسم العلامة التجارية بالإنجليزية أولاً")
+      toast.error("Please enter the brand name in English first")
       return
     }
     setValue("slug", generateSlug(nameValue), {
@@ -182,7 +182,7 @@ export default function UpdateBrandSheet({
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-5"
           >
-            {/* بطاقة 1: Basic Information */}
+            {/* Card 1: Basic Information */}
             <div className="rounded-xl border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <TagIcon className="size-4 text-primary" />
@@ -233,7 +233,7 @@ export default function UpdateBrandSheet({
                           {...field}
                           id="edit-brand-name-ar"
                           value={field.value ?? ""}
-                          placeholder="مثال: أبل، نايكي"
+                          placeholder="e.g., أبل، نايكي"
                           dir="rtl"
                           className="h-8 text-xs"
                         />
@@ -293,7 +293,7 @@ export default function UpdateBrandSheet({
               </FieldGroup>
             </div>
 
-            {/* بطاقة 2: Brand Logo & Media */}
+            {/* Card 2: Brand Logo & Media */}
             <div className="rounded-xl border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <ImageIcon className="size-4 text-primary" />

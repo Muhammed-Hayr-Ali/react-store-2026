@@ -19,7 +19,6 @@ import {
   Wand2Icon,
 } from "lucide-react"
 
-// Core UI Components (Identical to Product Form)
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
@@ -53,7 +52,11 @@ import {
   CustomSheetTitle,
 } from "@/components/ui/custom-sheet"
 
-import { Category, createCategory, createCategorySchema } from "@/lib/actions/categories"
+import {
+  Category,
+  createCategory,
+  createCategorySchema,
+} from "@/lib/actions/categories"
 
 type FormValues = z.infer<typeof createCategorySchema>
 
@@ -132,7 +135,7 @@ export default function CreateCategorySheet({
 
   const handleGenerateSlug = () => {
     if (!nameValue.trim()) {
-      toast.error("يرجى إدخال الاسم بالإنجليزية أولاً")
+      toast.error("Please enter the English name first")
       return
     }
     setValue("slug", generateSlug(nameValue), {
@@ -165,8 +168,10 @@ export default function CreateCategorySheet({
     } else {
       const errorMsg =
         result.error === "VALIDATION_ERROR"
-          ? "يرجى التحقق من صحة البيانات المدخلة."
-          : result.error || "Failed to create category. Please try again."
+          ? "Please check the entered data."
+          : result.error === "SLUG_ALREADY_EXISTS"
+            ? "Slug is already in use."
+            : result.error || "Failed to create category. Please try again."
       toast.error(errorMsg)
     }
   }
@@ -174,7 +179,6 @@ export default function CreateCategorySheet({
   return (
     <CustomSheet open={isOpen === "create"} onOpenChange={onOpenChange}>
       <CustomSheetContent showCloseButton={false} side={side}>
-        {/* Header مشابه لترويسة شاشات لوحة التحكم */}
         <CustomSheetHeader className="shrink-0 border-b bg-card/50 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
@@ -197,14 +201,13 @@ export default function CreateCategorySheet({
           </div>
         </CustomSheetHeader>
 
-        {/* جسم النموذج المقسم لبطاقات بنفس أسلوب شاشة المنتج */}
         <div className="flex-1 overflow-y-auto px-6 py-6">
           <form
             id="create-category-form"
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-5"
           >
-            {/* بطاقة 1: Basic Information */}
+            {/* Card 1: Basic Information */}
             <div className="rounded-xl border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <PackageIcon className="size-4 text-primary" />
@@ -221,7 +224,7 @@ export default function CreateCategorySheet({
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor="cat-name" className="text-xs">
-                          English Name{" "}
+                          Category Name (EN){" "}
                           <span className="text-destructive">*</span>
                         </FieldLabel>
                         <Input
@@ -257,13 +260,13 @@ export default function CreateCategorySheet({
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor="cat-name-ar" className="text-xs">
-                          Arabic Name
+                          Category Name (AR)
                         </FieldLabel>
                         <Input
                           {...field}
                           id="cat-name-ar"
                           value={field.value ?? ""}
-                          placeholder="مثال: إلكترونيات"
+                          placeholder="e.g., إلكترونيات"
                           dir="rtl"
                           className="h-8 text-xs"
                         />
@@ -320,7 +323,7 @@ export default function CreateCategorySheet({
               </FieldGroup>
             </div>
 
-            {/* بطاقة 2: Media & Description */}
+            {/* Card 2: Media & Description */}
             <div className="rounded-xl border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <ImageIcon className="size-4 text-primary" />
@@ -439,7 +442,7 @@ export default function CreateCategorySheet({
               </FieldGroup>
             </div>
 
-            {/* بطاقة 3: Hierarchy & Status */}
+            {/* Card 3: Hierarchy & Status */}
             <div className="rounded-xl border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <FolderTreeIcon className="size-4 text-primary" />
@@ -561,7 +564,6 @@ export default function CreateCategorySheet({
           </form>
         </div>
 
-        {/* Footer متناسق بنفس أزرار الحفظ والإلغاء */}
         <CustomSheetFooter className="shrink-0 border-t bg-card/50 px-6 py-4">
           <div className="flex w-full items-center justify-end gap-2.5">
             <CustomSheetClose asChild>

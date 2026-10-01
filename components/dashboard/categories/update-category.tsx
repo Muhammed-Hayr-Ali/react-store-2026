@@ -2,25 +2,39 @@
 
 import * as React from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Controller, useForm } from "react-hook-form"
-import * as z from "zod"
+import { Controller, useForm, useWatch } from "react-hook-form"
+import { z } from "zod"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useLocale } from "next-intl"
 import slugify from "slugify"
-import { SparklesIcon, LinkIcon } from "lucide-react"
+import Image from "next/image"
+import {
+  PackageIcon,
+  ImageIcon,
+  FolderTreeIcon,
+  CheckCircle2Icon,
+  XIcon,
+  Wand2Icon,
+} from "lucide-react"
 
-// Custom UI Components
-import { CustomButton } from "@/components/ui/custom-button"
-import { CustomInput } from "@/components/ui/custom-input"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
-
-// Standard Components for specific fields
-import { Textarea } from "@/components/ui/textarea"
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupText,
+  InputGroupTextarea,
+} from "@/components/ui/input-group"
 import { Switch } from "@/components/ui/switch"
-import { Separator } from "@/components/ui/separator"
 import {
   Select,
   SelectContent,
@@ -28,7 +42,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-
 import {
   CustomSheet,
   CustomSheetClose,
@@ -39,55 +52,14 @@ import {
   CustomSheetTitle,
 } from "@/components/ui/custom-sheet"
 
-import { Category, updateCategory } from "@/lib/actions/categories"
-import Image from "next/image"
+import {
+  Category,
+  updateCategory,
+  updateCategorySchema,
+} from "@/lib/actions/categories"
 
-// ============================================================================
-// 1. Define the validation schema using Zod
-// ============================================================================
-const categorySchema = z.object({
-  name: z
-    .string()
-    .min(2, "Name must be at least 2 characters.")
-    .max(100, "Name must be at most 100 characters."),
-  name_ar: z
-    .string()
-    .max(100, "Arabic name must be at most 100 characters.")
-    .optional()
-    .or(z.literal("")),
-  slug: z
-    .string()
-    .min(2, "Slug must be at least 2 characters.")
-    .max(100, "Slug must be at most 100 characters.")
-    .regex(
-      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-      "Slug must be lowercase letters, numbers, and dashes only."
-    ),
-  description: z
-    .string()
-    .max(500, "Description must be at most 500 characters.")
-    .optional()
-    .or(z.literal("")),
-  parent_id: z.string().nullable(),
-  is_active: z.boolean(),
-  sort_order: z.number().min(0, "Sort order must be positive."),
-  image_url: z
-    .string()
-    .url("Must be a valid URL.")
-    .optional()
-    .or(z.literal("")),
-  image_alt: z
-    .string()
-    .max(200, "Alt text must be at most 200 characters.")
-    .optional()
-    .or(z.literal("")),
-})
+type FormValues = z.infer<typeof updateCategorySchema>
 
-type FormValues = z.infer<typeof categorySchema>
-
-// ============================================================================
-// 2. Helper: Auto-generate slug
-// ============================================================================
 function generateSlug(name: string): string {
   return slugify(name, {
     lower: true,
@@ -97,9 +69,6 @@ function generateSlug(name: string): string {
   })
 }
 
-// ============================================================================
-// 3. Main Component
-// ============================================================================
 interface UpdateCategorySheetProps {
   isOpen: string | null
   onOpenChange: (open: boolean) => void
@@ -132,7 +101,8 @@ export default function UpdateCategorySheet({
   const side = getSide({ isMobile, locale })
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(categorySchema),
+    resolver: zodResolver(updateCategorySchema),
+    mode: "onChange",
     defaultValues: {
       name: "",
       name_ar: "",
@@ -148,14 +118,16 @@ export default function UpdateCategorySheet({
 
   const {
     formState: { isSubmitting, errors },
+    control,
+    setValue,
   } = form
 
-  const { getValues } = form
-  // مراقبة رابط الصورة للمعاينة
-  const imageUrl = getValues("image_url")
-  const isValidImage = imageUrl && imageUrl.startsWith("http")
+  const imageUrl = useWatch({ control, name: "image_url" }) || ""
+  const nameValue = useWatch({ control, name: "name" }) || ""
+  const descriptionValue = useWatch({ control, name: "description" }) || ""
+  const isValidImage =
+    imageUrl.startsWith("http://") || imageUrl.startsWith("https://")
 
-  // تعبئة النموذج ببيانات العنصر عند الفتح
   React.useEffect(() => {
     if (isOpen === "update" && item) {
       form.reset({
@@ -172,6 +144,17 @@ export default function UpdateCategorySheet({
     }
   }, [isOpen, item, form])
 
+  const handleGenerateSlug = () => {
+    if (!nameValue.trim()) {
+      toast.error("Please enter the English name first")
+      return
+    }
+    setValue("slug", generateSlug(nameValue), {
+      shouldValidate: true,
+      shouldDirty: true,
+    })
+  }
+
   async function onSubmit(data: FormValues) {
     if (!item) {
       toast.error("No category selected for update.")
@@ -180,14 +163,14 @@ export default function UpdateCategorySheet({
 
     const payload = {
       name: data.name,
-      name_ar: data.name_ar || null,
+      name_ar: data.name_ar === "" ? null : data.name_ar,
       slug: data.slug,
-      description: data.description || null,
+      description: data.description === "" ? null : data.description,
       parent_id: data.parent_id,
       is_active: data.is_active,
-      sort_order: data.sort_order,
-      image_url: data.image_url || null,
-      image_alt: data.image_alt || null,
+      sort_order: Number(data.sort_order),
+      image_url: data.image_url === "" ? null : data.image_url,
+      image_alt: data.image_alt === "" ? null : data.image_alt,
     }
 
     const result = await updateCategory(item.id, payload)
@@ -207,376 +190,423 @@ export default function UpdateCategorySheet({
 
   return (
     <CustomSheet open={isOpen === "update"} onOpenChange={onOpenChange}>
-      {/* 
-        ✅ التصحيح هنا: 
-        1. استبدال h-dvh بـ h-full max-h-[100dvh] لتجنب مشاكل حساب الارتفاع في متصفحات الجوال.
-        2. استبدال min-w-1/2 بـ w-full للجوال، و min-w للشاشات الأكبر.
-      */}
-      <CustomSheetContent
-        showCloseButton={false}
-        side={side}
-        className="flex h-full max-h-dvh w-full flex-col p-0 sm:min-w-125 md:min-w-150"
-      >
-        {/* Header ثابت مع تقليل الحشو في الجوال */}
-        <CustomSheetHeader className="shrink-0 border-b px-4 py-4 sm:px-6">
-          <CustomSheetTitle className="text-base font-semibold">
-            Update Category
-          </CustomSheetTitle>
-          <CustomSheetDescription className="mt-1 text-xs">
-            Modify the details of this existing category.
-          </CustomSheetDescription>
+      <CustomSheetContent showCloseButton={false} side={side}>
+        <CustomSheetHeader className="shrink-0 border-b bg-card/50 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <CustomSheetTitle className="text-lg font-bold tracking-tight text-foreground">
+                Edit Category
+              </CustomSheetTitle>
+              <CustomSheetDescription className="text-xs text-muted-foreground">
+                Modify category hierarchy, details, media, and status.
+              </CustomSheetDescription>
+            </div>
+            <CustomSheetClose asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8 text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <XIcon className="size-4" />
+              </Button>
+            </CustomSheetClose>
+          </div>
         </CustomSheetHeader>
 
-        {/* 
-          ✅ منطقة الفورم: 
-          تقليل الحشو الجانبي في الجوال (px-4) لمنع أي تمرير أفقي عرضي 
-          الذي قد يعطل التمرير العمودي في متصفحات الجوال.
-        */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6">
+        <div className="flex-1 overflow-y-auto px-6 py-6">
           <form
             id="update-category-form"
             onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-6"
+            className="space-y-5"
           >
-            {/* Section 1: Basic Information */}
-            <div className="space-y-4">
-              <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs text-primary">
-                  1
-                </span>
-                Basic Information
-              </h3>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <Controller
-                  name="name"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="name">English Name *</FieldLabel>
-                      <CustomInput
-                        {...field}
-                        id="name"
-                        placeholder="e.g., Electronics"
-                        aria-invalid={fieldState.invalid}
-                        onChange={(e) => {
-                          const newName = e.target.value
-                          field.onChange(newName)
-                          if (!form.getFieldState("slug").isDirty) {
-                            form.setValue("slug", generateSlug(newName), {
-                              shouldValidate: false,
-                              shouldDirty: false,
-                            })
-                          }
-                          if (!form.getFieldState("image_alt").isDirty) {
-                            form.setValue("image_alt", newName, {
-                              shouldValidate: false,
-                              shouldDirty: false,
-                            })
-                          }
-                        }}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-
-                <Controller
-                  name="name_ar"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="name_ar">Arabic Name</FieldLabel>
-                      <CustomInput
-                        {...field}
-                        id="name_ar"
-                        placeholder="مثال: إلكترونيات"
-                        dir="rtl"
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
+            {/* Card 1: Basic Information */}
+            <div className="rounded-xl border bg-card p-5 shadow-xs">
+              <div className="mb-4 flex items-center gap-2 border-b pb-3">
+                <PackageIcon className="size-4 text-primary" />
+                <h2 className="text-sm font-semibold text-card-foreground">
+                  Basic Information
+                </h2>
               </div>
 
-              <Controller
-                name="slug"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel
-                      htmlFor="slug"
-                      className="flex items-center gap-1.5"
-                    >
-                      Slug *{" "}
-                      <SparklesIcon className="size-3.5 text-amber-500" />
-                    </FieldLabel>
-                    <CustomInput
-                      {...field}
-                      id="slug"
-                      placeholder="electronics"
-                      className="font-mono text-sm"
-                      aria-invalid={fieldState.invalid}
-                    />
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Auto-generated from English name. URL-friendly.
-                    </p>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-            </div>
-
-            <Separator />
-
-            {/* Section 2: Media & SEO */}
-            <div className="space-y-4">
-              <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs text-primary">
-                  2
-                </span>
-                Media & SEO
-              </h3>
-
-              <Controller
-                name="image_url"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="image_url">Image URL</FieldLabel>
-                    {isValidImage && (
-                      <div className="mb-2 aspect-video w-full overflow-hidden rounded-lg border bg-muted">
-                        <Image
-                          width={400}
-                          height={225}
-                          src={imageUrl}
-                          alt="Preview"
-                          className="h-full w-full object-cover object-center"
-                          onError={(e) =>
-                            (e.currentTarget.style.display = "none")
-                          }
+              <FieldGroup className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Controller
+                    name="name"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor="edit-cat-name" className="text-xs">
+                          Category Name (EN){" "}
+                          <span className="text-destructive">*</span>
+                        </FieldLabel>
+                        <Input
+                          {...field}
+                          id="edit-cat-name"
+                          placeholder="e.g., Electronics"
+                          className="h-8 text-xs"
                         />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+
+                  <Controller
+                    name="name_ar"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel
+                          htmlFor="edit-cat-name-ar"
+                          className="text-xs"
+                        >
+                          Category Name (AR)
+                        </FieldLabel>
+                        <Input
+                          {...field}
+                          id="edit-cat-name-ar"
+                          value={field.value ?? ""}
+                          placeholder="e.g., إلكترونيات"
+                          dir="rtl"
+                          className="h-8 text-xs"
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                </div>
+
+                <Controller
+                  name="slug"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <div className="flex items-center justify-between">
+                        <FieldLabel htmlFor="edit-cat-slug" className="text-xs">
+                          URL Slug <span className="text-destructive">*</span>
+                        </FieldLabel>
+                        <button
+                          type="button"
+                          onClick={handleGenerateSlug}
+                          className="flex cursor-pointer items-center gap-1 text-[11px] font-medium text-primary hover:underline"
+                        >
+                          <Wand2Icon className="size-3" />
+                          <span>Generate</span>
+                        </button>
                       </div>
-                    )}
-
-                    <CustomInput
-                      {...field}
-                      id="image_url"
-                      placeholder="https://example.com/image.jpg"
-                      aria-invalid={fieldState.invalid}
-                      prefixIcon={
-                        <LinkIcon className="size-4 text-muted-foreground" />
-                      }
-                    />
-
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-
-              <Controller
-                name="image_alt"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel
-                      htmlFor="image_alt"
-                      className="flex items-center justify-between"
-                    >
-                      <span className="flex items-center gap-1.5">
-                        Image Alt Text{" "}
-                        <SparklesIcon className="size-3.5 text-amber-500" />
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {field.value?.length || 0}/200
-                      </span>
-                    </FieldLabel>
-                    <CustomInput
-                      {...field}
-                      id="image_alt"
-                      placeholder="e.g., Electronics category banner"
-                      aria-invalid={fieldState.invalid}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-
-              <Controller
-                name="description"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel
-                      htmlFor="description"
-                      className="flex items-center justify-between"
-                    >
-                      <span>Description</span>
-                      <span className="text-xs text-muted-foreground">
-                        {field.value?.length || 0}/500
-                      </span>
-                    </FieldLabel>
-                    <Textarea
-                      {...field}
-                      id="description"
-                      placeholder="Brief description for SEO and internal use..."
-                      className="min-h-25 resize-none"
-                      aria-invalid={fieldState.invalid}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
+                      <div className="relative flex items-center">
+                        <Input
+                          {...field}
+                          id="edit-cat-slug"
+                          placeholder="electronics"
+                          className="h-8 pe-8 font-mono text-xs"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={handleGenerateSlug}
+                          title="Generate Slug"
+                          className="absolute inset-e-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
+                        >
+                          <Wand2Icon className="size-3.5" />
+                        </Button>
+                      </div>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </FieldGroup>
             </div>
 
-            <Separator />
-
-            {/* Section 3: Display Settings */}
-            <div className="space-y-4">
-              <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs text-primary">
-                  3
-                </span>
-                Display Settings
-              </h3>
-
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <Controller
-                  name="parent_id"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="parent_id">
-                        Parent Category
-                      </FieldLabel>
-                      <Select
-                        onValueChange={(value) =>
-                          field.onChange(value === "none" ? null : value)
-                        }
-                        value={field.value || "none"}
-                      >
-                        <SelectTrigger
-                          id="parent_id"
-                          aria-invalid={fieldState.invalid}
-                        >
-                          <SelectValue placeholder="Select a parent category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">
-                            None (Main Category)
-                          </SelectItem>
-                          {items?.map(
-                            (cat) =>
-                              cat.id !== item?.id && (
-                                <SelectItem key={cat.id} value={cat.id}>
-                                  {cat.name}
-                                  {cat.name_ar && (
-                                    <span className="ms-1 text-muted-foreground">
-                                      - {cat.name_ar}
-                                    </span>
-                                  )}
-                                </SelectItem>
-                              )
-                          )}
-                        </SelectContent>
-                      </Select>
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-
-                <Controller
-                  name="sort_order"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="sort_order">Sort Order</FieldLabel>
-                      <CustomInput
-                        {...field}
-                        id="sort_order"
-                        type="number"
-                        min="0"
-                        aria-invalid={fieldState.invalid}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      />
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Lower numbers appear first.
-                      </p>
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
+            {/* Card 2: Media & Description */}
+            <div className="rounded-xl border bg-card p-5 shadow-xs">
+              <div className="mb-4 flex items-center gap-2 border-b pb-3">
+                <ImageIcon className="size-4 text-primary" />
+                <h2 className="text-sm font-semibold text-card-foreground">
+                  Media & Description
+                </h2>
               </div>
 
-              <Controller
-                name="is_active"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field
-                    data-invalid={fieldState.invalid}
-                    className="flex flex-row items-center justify-between rounded-lg border bg-muted/20 p-4"
-                  >
-                    <div className="space-y-0.5">
-                      <FieldLabel htmlFor="is_active" className="text-base">
-                        Active Status
+              <FieldGroup className="space-y-4">
+                <Controller
+                  name="image_url"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="edit-cat-image" className="text-xs">
+                        Category Banner / Icon URL
                       </FieldLabel>
-                      <p className="text-xs text-muted-foreground">
-                        Category will be visible to customers immediately.
-                      </p>
+
+                      {isValidImage && (
+                        <div className="relative mb-2 aspect-video w-full overflow-hidden rounded-lg border bg-muted/20">
+                          <Image
+                            fill
+                            src={imageUrl}
+                            alt="Category Banner Preview"
+                            className="object-cover object-center"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none"
+                            }}
+                          />
+                        </div>
+                      )}
+
+                      <Input
+                        {...field}
+                        id="edit-cat-image"
+                        value={field.value ?? ""}
+                        placeholder="https://example.com/category-banner.jpg"
+                        className="h-8 text-xs"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  name="image_alt"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <div className="flex items-center justify-between">
+                        <FieldLabel
+                          htmlFor="edit-cat-image-alt"
+                          className="text-xs"
+                        >
+                          Image Alt Text
+                        </FieldLabel>
+                        <span className="text-[10px] text-muted-foreground tabular-nums">
+                          {(field.value ?? "").length}/200
+                        </span>
+                      </div>
+                      <Input
+                        {...field}
+                        id="edit-cat-image-alt"
+                        value={field.value ?? ""}
+                        placeholder="e.g., Electronics department showcase"
+                        className="h-8 text-xs"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  name="description"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <div className="flex items-center justify-between">
+                        <FieldLabel
+                          htmlFor="edit-cat-description"
+                          className="text-xs"
+                        >
+                          Description
+                        </FieldLabel>
+                        <span className="text-[10px] text-muted-foreground tabular-nums">
+                          {descriptionValue.length}/500
+                        </span>
+                      </div>
+                      <InputGroup className="bg-background">
+                        <InputGroupTextarea
+                          {...field}
+                          id="edit-cat-description"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value ? e.target.value : null
+                            )
+                          }
+                          placeholder="Brief description for SEO and catalog navigation..."
+                          rows={3}
+                          className="resize-y text-xs"
+                        />
+                        <InputGroupAddon align="block-end">
+                          <InputGroupText className="text-[10px] text-muted-foreground">
+                            {descriptionValue.length} characters
+                          </InputGroupText>
+                        </InputGroupAddon>
+                      </InputGroup>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </FieldGroup>
+            </div>
+
+            {/* Card 3: Hierarchy & Status */}
+            <div className="rounded-xl border bg-card p-5 shadow-xs">
+              <div className="mb-4 flex items-center gap-2 border-b pb-3">
+                <FolderTreeIcon className="size-4 text-primary" />
+                <h2 className="text-sm font-semibold text-card-foreground">
+                  Organization & Status
+                </h2>
+              </div>
+
+              <FieldGroup className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Controller
+                    name="parent_id"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel
+                          htmlFor="edit-cat-parent"
+                          className="text-xs"
+                        >
+                          Parent Category
+                        </FieldLabel>
+                        <Select
+                          onValueChange={(value) =>
+                            field.onChange(value === "none" ? null : value)
+                          }
+                          value={field.value || "none"}
+                        >
+                          <SelectTrigger
+                            id="edit-cat-parent"
+                            className="h-8 text-xs"
+                          >
+                            <SelectValue placeholder="Select a parent category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none" className="text-xs">
+                              None (Root Category)
+                            </SelectItem>
+                            {items?.map(
+                              (cat) =>
+                                cat.id !== item?.id && (
+                                  <SelectItem
+                                    key={cat.id}
+                                    value={cat.id}
+                                    className="text-xs"
+                                  >
+                                    {cat.name}
+                                    {cat.name_ar && (
+                                      <span className="ms-1.5 text-muted-foreground">
+                                        ({cat.name_ar})
+                                      </span>
+                                    )}
+                                  </SelectItem>
+                                )
+                            )}
+                          </SelectContent>
+                        </Select>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+
+                  <Controller
+                    name="sort_order"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor="edit-cat-sort" className="text-xs">
+                          Sort Order
+                        </FieldLabel>
+                        <Input
+                          {...field}
+                          id="edit-cat-sort"
+                          type="number"
+                          min="0"
+                          value={field.value ?? 0}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                          className="h-8 text-xs"
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                </div>
+
+                <Controller
+                  name="is_active"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="flex items-center justify-between rounded-lg border bg-muted/15 p-3">
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-semibold">
+                          Active Status
+                        </span>
+                        <p className="text-[11px] text-muted-foreground">
+                          Category and its products will be visible to shoppers.
+                        </p>
+                      </div>
+                      <Switch
+                        id="edit-cat-status"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
                     </div>
-                    <Switch
-                      id="is_active"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      aria-invalid={fieldState.invalid}
-                    />
-                  </Field>
-                )}
-              />
+                  )}
+                />
+              </FieldGroup>
             </div>
 
             {errors.root && (
-              <FieldError errors={[{ message: errors.root.message }]} />
+              <FieldError
+                errors={[
+                  {
+                    message:
+                      errors.root.message || "An unexpected error occurred",
+                  },
+                ]}
+              />
             )}
           </form>
         </div>
 
-        {/* Footer ثابت مع تقليل الحشو في الجوال */}
-        <CustomSheetFooter className="shrink-0 border-t bg-background px-4 py-4 sm:px-6">
-          <CustomSheetClose asChild>
-            <CustomButton
-              type="button"
-              variant="outline"
+        <CustomSheetFooter className="shrink-0 border-t bg-card/50 px-6 py-4">
+          <div className="flex w-full items-center justify-end gap-2.5">
+            <CustomSheetClose asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isSubmitting}
+                className="cursor-pointer"
+              >
+                Discard
+              </Button>
+            </CustomSheetClose>
+            <Button
+              type="submit"
+              form="update-category-form"
+              size="sm"
               disabled={isSubmitting}
-              className="tracking-wide uppercase"
+              className="min-w-32 cursor-pointer shadow-xs"
             >
-              Cancel
-            </CustomButton>
-          </CustomSheetClose>
-          <CustomButton
-            type="submit"
-            form="update-category-form"
-            disabled={isSubmitting}
-            className="min-w-35 tracking-wide uppercase"
-          >
-            {isSubmitting ? <Spinner className="me-2" /> : "Update Category"}
-          </CustomButton>
+              {isSubmitting ? (
+                <>
+                  <Spinner className="mr-2 size-4" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2Icon className="mr-1.5 size-4" />
+                  Save Changes
+                </>
+              )}
+            </Button>
+          </div>
         </CustomSheetFooter>
       </CustomSheetContent>
     </CustomSheet>

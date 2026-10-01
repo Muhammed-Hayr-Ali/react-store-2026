@@ -107,7 +107,7 @@ export default function CreateBrandSheet({
 
   const handleGenerateSlug = () => {
     if (!nameValue.trim()) {
-      toast.error("يرجى إدخال اسم العلامة التجارية بالإنجليزية أولاً")
+      toast.error("Please enter the brand name in English first")
       return
     }
     setValue("slug", generateSlug(nameValue), {
@@ -136,9 +136,9 @@ export default function CreateBrandSheet({
     } else {
       const errorMsg =
         result.error === "VALIDATION_ERROR"
-          ? "يرجى التحقق من صحة البيانات المدخلة."
+          ? "Please check the entered data."
           : result.error === "SLUG_ALREADY_EXISTS"
-            ? "الاسم المستعار (Slug) مستخدم بالفعل."
+            ? "Slug is already in use."
             : result.error || "Failed to create brand. Please try again."
       toast.error(errorMsg)
     }
@@ -175,7 +175,7 @@ export default function CreateBrandSheet({
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-5"
           >
-            {/* بطاقة 1: Basic Information */}
+            {/* Card 1: Basic Information */}
             <div className="rounded-xl border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <TagIcon className="size-4 text-primary" />
@@ -234,7 +234,7 @@ export default function CreateBrandSheet({
                           {...field}
                           id="brand-name-ar"
                           value={field.value ?? ""}
-                          placeholder="مثال: أبل، نايكي"
+                          placeholder="e.g., Apple, Nike"
                           dir="rtl"
                           className="h-8 text-xs"
                         />
@@ -291,7 +291,7 @@ export default function CreateBrandSheet({
               </FieldGroup>
             </div>
 
-            {/* بطاقة 2: Brand Logo & Media */}
+            {/* Card 2: Brand Logo & Media */}
             <div className="rounded-xl border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <ImageIcon className="size-4 text-primary" />

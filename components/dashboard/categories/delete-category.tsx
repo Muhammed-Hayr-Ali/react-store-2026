@@ -52,7 +52,7 @@ export default function DeleteCategoryDialog({
         )
       }
     } catch (error) {
-      console.error("Delete error:", error)
+      console.error("Delete category error:", error)
       toast.error("An unexpected error occurred while deleting.")
     } finally {
       setIsDeleting(false)
@@ -62,50 +62,30 @@ export default function DeleteCategoryDialog({
   return (
     <CustomAlertDialog open={isOpen === "delete"} onOpenChange={onOpenChange}>
       <CustomAlertDialogContent className="min-w-1/4">
-        {/* <CustomAlertDialogHeader className="text-center sm:text-left">
-          <CustomAlertDialogMedia className="mb-2 flex justify-center sm:justify-start">
-            <div className="flex size-12 items-center justify-center rounded-full bg-destructive/10">
-              <Trash2Icon className="size-6 text-destructive" />
-            </div>
-          </CustomAlertDialogMedia>
-
-          <CustomAlertDialogTitle className="text-base">
-            Delete Category
-          </CustomAlertDialogTitle>
-
-          <CustomAlertDialogDescription className="text-sm">
-            Are you sure you want to delete the category{" "}
-            <span className="font-semibold break-words text-foreground">
-              &quot;{item.name}&quot;
-            </span>
-            ?
-            <br />
-            <span className="mt-2 block text-xs text-muted-foreground">
-              This action cannot be undone. This will permanently remove the
-              category and its associated data from our servers.
-            </span>
-          </CustomAlertDialogDescription>
-        </CustomAlertDialogHeader> */}
-
         <CustomAlertDialogHeader>
           <CustomAlertDialogMedia>
-            <Trash2Icon />
+            <Trash2Icon className="text-destructive" />
           </CustomAlertDialogMedia>
           <CustomAlertDialogTitle>Delete Category</CustomAlertDialogTitle>
           <CustomAlertDialogDescription>
             Are you sure you want to delete the category{" "}
             <span className="font-semibold wrap-break-word text-foreground">
               &quot;{item.name}&quot;
-            </span>{" "}
-            ?
+            </span>
+            ? This action cannot be undone.
           </CustomAlertDialogDescription>
         </CustomAlertDialogHeader>
 
-        {/* 3. تحسين الأزرار: تعطيل الكل أثناء التحميل، وإظهار حالة التحميل بوضوح */}
         <CustomAlertDialogFooter>
-          <CustomAlertDialogCancel>Cancel</CustomAlertDialogCancel>
-          <CustomAlertDialogAction variant="destructive" onClick={handleDelete}>
-            {isDeleting ? <Spinner /> : " Yes, delete"}
+          <CustomAlertDialogCancel disabled={isDeleting}>
+            Cancel
+          </CustomAlertDialogCancel>
+          <CustomAlertDialogAction
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={isDeleting}
+          >
+            {isDeleting ? <Spinner className="size-4" /> : "Yes, delete"}
           </CustomAlertDialogAction>
         </CustomAlertDialogFooter>
       </CustomAlertDialogContent>

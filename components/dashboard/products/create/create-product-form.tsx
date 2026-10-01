@@ -1071,19 +1071,9 @@ function VariantCard({
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <div className="flex items-center justify-between">
                 <FieldLabel className="text-xs">
                   SKU Code <span className="text-destructive">*</span>
                 </FieldLabel>
-                <button
-                  type="button"
-                  onClick={handleGenerateSku}
-                  className="flex cursor-pointer items-center gap-1 text-[11px] font-medium text-primary hover:underline"
-                >
-                  <Wand2Icon className="size-3" />
-                  <span>Generate</span>
-                </button>
-              </div>
               <div className="relative flex items-center">
                 <Input
                   {...field}
