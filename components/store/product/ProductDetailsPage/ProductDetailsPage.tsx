@@ -14,11 +14,19 @@ import { ProductVariantSelector } from "./ProductVariantSelector"
 import { ProductActions } from "./ProductActions"
 import { ProductTrustBadges } from "./ProductTrustBadges"
 
+import type { CurrencyCode } from "@/lib/actions/currency/types"
+
 interface ProductDetailsProps {
   product: ProductWithRelations
+  currency: CurrencyCode // ✅ إضافة جديدة
+  exchangeRate: number // ✅ إضافة جديدة
 }
 
-export default function ProductDetailsPage({ product }: ProductDetailsProps) {
+export default function ProductDetailsPage({
+  product,
+  currency,
+  exchangeRate,
+}: ProductDetailsProps) {
   const availableVariants = React.useMemo(
     () => product.product_variants.filter((v) => v.is_active),
     [product.product_variants]
@@ -143,7 +151,10 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
         )
       : null
 
-  const totalPrice = selectedVariant ? selectedVariant.price * quantity : 0
+  // ✅ السعر الإجمالي بالسنت (ليتم تمريره لدالة التنسيق)
+  const totalPriceInCents = selectedVariant
+    ? selectedVariant.price * quantity
+    : 0
 
   return (
     <section className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-14">
@@ -166,6 +177,8 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
           selectedVariant={selectedVariant}
           isOutOfStock={isOutOfStock}
           isLowStock={isLowStock}
+          currency={currency} // ✅ تمرير العملة
+          exchangeRate={exchangeRate} // ✅ تمرير سعر الصرف
         />
 
         <Separator />
@@ -183,7 +196,9 @@ export default function ProductDetailsPage({ product }: ProductDetailsProps) {
 
         <ProductActions
           quantity={quantity}
-          totalPrice={totalPrice}
+          totalPriceInCents={totalPriceInCents} // ✅ تمرير السعر بالسنت
+          currency={currency} // ✅ تمرير العملة
+          exchangeRate={exchangeRate} // ✅ تمرير سعر الصرف
           isOutOfStock={isOutOfStock}
           maxStock={selectedVariant?.stock_quantity ?? 0}
           onQuantityChange={handleQuantityChange}

@@ -2,7 +2,10 @@
 
 import * as React from "react"
 import { AlertCircleIcon } from "lucide-react"
-import { formatPrice, ProductVariantItem } from "./utils"
+import { ProductVariantItem } from "./utils"
+import { formatPrice as formatCurrencyPrice } from "@/lib/actions/currency/utils"
+// ✅ استيراد دالة تنسيق السعر الجديدة ونوع العملة
+import type { CurrencyCode } from "@/lib/actions/currency/types"
 
 interface ProductHeaderProps {
   productName: string
@@ -11,6 +14,8 @@ interface ProductHeaderProps {
   selectedVariant: ProductVariantItem | null
   isOutOfStock: boolean
   isLowStock: boolean
+  currency: CurrencyCode // ✅ إضافة جديدة
+  exchangeRate: number // ✅ إضافة جديدة
 }
 
 export function ProductHeader({
@@ -20,7 +25,24 @@ export function ProductHeader({
   selectedVariant,
   isOutOfStock,
   isLowStock,
+  currency,
+  exchangeRate,
 }: ProductHeaderProps) {
+  // ✅ حساب الأسعار المنسقة بالعملة المختارة
+  const currentPrice = selectedVariant
+    ? formatCurrencyPrice(selectedVariant.price, currency, exchangeRate)
+    : formatCurrencyPrice(0, currency, exchangeRate)
+
+  const comparePrice =
+    selectedVariant?.compare_at_price &&
+    selectedVariant.compare_at_price > selectedVariant.price
+      ? formatCurrencyPrice(
+          selectedVariant.compare_at_price,
+          currency,
+          exchangeRate
+        )
+      : null
+
   return (
     <div className="space-y-2.5">
       <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground">
@@ -52,15 +74,17 @@ export function ProductHeader({
             </div>
           ) : (
             <>
+              {/* ✅ عرض السعر الحالي بالعملة المختارة (بدون علامة $ ثابتة) */}
               <span className="text-2xl font-extrabold tracking-tight text-foreground tabular-nums sm:text-3xl">
-                ${formatPrice(selectedVariant?.price ?? 0)}
+                {currentPrice}
               </span>
-              {selectedVariant?.compare_at_price &&
-                selectedVariant.compare_at_price > selectedVariant.price && (
-                  <span className="text-base text-muted-foreground tabular-nums line-through">
-                    ${formatPrice(selectedVariant.compare_at_price)}
-                  </span>
-                )}
+
+              {/* ✅ عرض سعر المقارنة (إن وجد) بالعملة المختارة */}
+              {comparePrice && (
+                <span className="text-base text-muted-foreground tabular-nums line-through decoration-destructive/50">
+                  {comparePrice}
+                </span>
+              )}
             </>
           )}
         </div>

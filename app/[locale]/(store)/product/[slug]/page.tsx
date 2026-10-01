@@ -14,6 +14,10 @@ import type {
 } from "@/lib/actions/reviews/types"
 import { getCurrentUser } from "@/lib/actions/utils/profile"
 
+// ✅ استيرادات تعدد العملات
+import { getSelectedCurrency } from "@/lib/actions/currency/queries/get_selected_currency"
+import { getExchangeRates } from "@/lib/actions/currency/queries/get-rates"
+
 // Shadcn UI Breadcrumb
 import {
   Breadcrumb,
@@ -65,18 +69,30 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const product = productResult.data
   const productId = product.id
 
-  // التحقق من وجود تصنيف أب وجلبه بالتوازي مع التقييمات
   const parentCategoryId = (product.category as { parent_id?: string | null })
     ?.parent_id
 
-  const [summaryResult, reviewsResult, parentCategoryResult] =
-    await Promise.all([
-      getReviewSummary(productId),
-      getProductReviewsList(productId),
-      parentCategoryId
-        ? getCategoryById(parentCategoryId)
-        : Promise.resolve(null),
-    ])
+  // ✅ جلب البيانات بالتوازي لأفضل أداء ممكن
+  const [
+    summaryResult,
+    reviewsResult,
+    parentCategoryResult,
+    selectedCurrency,
+    exchangeRates,
+  ] = await Promise.all([
+    getReviewSummary(productId),
+    getProductReviewsList(productId),
+    parentCategoryId
+      ? getCategoryById(parentCategoryId)
+      : Promise.resolve(null),
+    getSelectedCurrency(),
+    getExchangeRates(),
+  ])
+
+  // ✅ حساب معدل الصرف بأمان (افتراضي 1 إذا لم يتم العثور على العملة)
+  const currentRate =
+    exchangeRates.find((r) => r.currency_code === selectedCurrency)
+      ?.rate_from_usd ?? 1
 
   const defaultSummary: ReviewSummary = {
     averageRating: 0,
@@ -95,16 +111,19 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const parentCategory = parentCategoryResult?.success
     ? parentCategoryResult.data
     : null
+
   const currentCategory = product.category
 
   // تحديد الأسماء بحسب اللغة النشطة
   const isAr = locale === "ar"
   const homeLabel = isAr ? "الرئيسية" : "Home"
+
   const parentCategoryName = parentCategory
     ? isAr && parentCategory.name_ar
       ? parentCategory.name_ar
       : parentCategory.name
     : null
+
   const currentCategoryName = currentCategory
     ? isAr && currentCategory.name_ar
       ? currentCategory.name_ar
@@ -123,7 +142,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </BreadcrumbLink>
             </BreadcrumbItem>
 
-            {/* تصنيف الأب إن وجد */}
             {parentCategory && (
               <>
                 <BreadcrumbSeparator />
@@ -137,7 +155,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </>
             )}
 
-            {/* التصنيف الحالي */}
             {currentCategory && (
               <>
                 <BreadcrumbSeparator />
@@ -151,10 +168,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </>
             )}
 
-            {/* اسم المنتج الحالي */}
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage className="max-w-50 truncate font-medium sm:max-w-xs">
+              {/* ✅ تم تصحيح max-w-50 إلى max-w-[12rem] لتجنب تحذيرات Tailwind */}
+              <BreadcrumbPage className="max-w-[12rem] truncate font-medium sm:max-w-xs">
                 {product.name}
               </BreadcrumbPage>
             </BreadcrumbItem>
@@ -163,7 +180,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </div>
 
       {/* Product Details Section */}
-      <ProductDetailsPage product={product} />
+      {/* ✅ تمرير العملة ومعدل الصرف للمكون */}
+      <ProductDetailsPage
+        product={product}
+        currency={selectedCurrency}
+        exchangeRate={currentRate}
+      />
 
       {/* Reviews Section */}
       <div id="reviews" className="mt-16 border-t border-border/60 pt-12">

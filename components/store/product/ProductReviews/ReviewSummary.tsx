@@ -19,7 +19,7 @@ export function ReviewSummary({ summary }: ReviewSummaryProps) {
   return (
     <div className="grid grid-cols-1 items-center gap-8 rounded-2xl border border-border/60 bg-card p-6 md:grid-cols-12 md:gap-12">
       {/* Average Score */}
-      <div className="flex flex-col items-center justify-center text-center md:col-span-4 md:items-start md:text-start">
+      <div className="flex flex-col items-center justify-center text-center md:col-span-4  md:text-start">
         <div className="flex items-baseline gap-2">
           <span className="text-6xl text-foreground">
             {averageRating > 0 ? averageRating.toFixed(1) : "0.0"}

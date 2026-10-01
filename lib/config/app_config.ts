@@ -19,7 +19,6 @@ import {
   Moon,
   Package,
   ShieldCheck,
-  ShoppingCart,
   Store,
   Sun,
   SunMoon,

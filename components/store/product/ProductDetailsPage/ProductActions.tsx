@@ -3,11 +3,16 @@
 import * as React from "react"
 import { MinusIcon, PlusIcon, ShoppingCartIcon } from "lucide-react"
 import { CustomButton } from "@/components/ui/custom-button"
-import { formatPrice } from "./utils"
+
+// ✅ استيراد دالة تنسيق السعر الجديدة ونوع العملة
+import { formatPrice as formatCurrencyPrice } from "@/lib/actions/currency/utils"
+import type { CurrencyCode } from "@/lib/actions/currency/types"
 
 interface ProductActionsProps {
   quantity: number
-  totalPrice: number
+  totalPriceInCents: number // ✅ تم تغيير الاسم من totalPrice
+  currency: CurrencyCode // ✅ إضافة جديدة
+  exchangeRate: number // ✅ إضافة جديدة
   isOutOfStock: boolean
   maxStock: number
   onQuantityChange: (qty: number) => void
@@ -16,12 +21,21 @@ interface ProductActionsProps {
 
 export function ProductActions({
   quantity,
-  totalPrice,
+  totalPriceInCents,
+  currency,
+  exchangeRate,
   isOutOfStock,
   maxStock,
   onQuantityChange,
   onAddToCart,
 }: ProductActionsProps) {
+  // ✅ حساب السعر الإجمالي بالعملة المختارة
+  const formattedTotalPrice = formatCurrencyPrice(
+    isOutOfStock ? 0 : totalPriceInCents,
+    currency,
+    exchangeRate
+  )
+
   return (
     <div className="space-y-4">
       <div
@@ -66,8 +80,9 @@ export function ProductActions({
           <span className="block text-[11px] font-medium text-muted-foreground">
             Total Price
           </span>
+          {/* ✅ عرض السعر الإجمالي بالعملة المختارة (بدون علامة $ ثابتة) */}
           <span className="text-lg font-bold tracking-tight text-foreground tabular-nums">
-            ${formatPrice(isOutOfStock ? 0 : totalPrice)}
+            {formattedTotalPrice}
           </span>
         </div>
       </div>
