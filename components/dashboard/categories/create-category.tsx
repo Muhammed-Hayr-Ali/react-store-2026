@@ -9,7 +9,6 @@ import { toast } from "sonner"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useLocale } from "next-intl"
 import slugify from "slugify"
-import Image from "next/image"
 import {
   PackageIcon,
   ImageIcon,
@@ -322,8 +321,7 @@ export default function CreateCategorySheet({
 
                       {isValidImage && (
                         <div className="relative mb-2 aspect-video w-full overflow-hidden rounded-lg border bg-muted/20">
-                          <Image
-                            fill
+                          <img
                             src={imageUrl}
                             alt="Category Banner Preview"
                             className="object-cover object-center"
@@ -353,9 +351,9 @@ export default function CreateCategorySheet({
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="cat-image-alt" className="text-xs">
-                          Image Alt Text
-                        </FieldLabel>
+                      <FieldLabel htmlFor="cat-image-alt" className="text-xs">
+                        Image Alt Text
+                      </FieldLabel>
 
                       <div className="relative flex items-center">
                         <Input

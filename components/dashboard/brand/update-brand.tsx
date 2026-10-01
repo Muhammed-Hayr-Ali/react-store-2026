@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useLocale } from "next-intl"
-import slugify from "slugify"
 import {
   TagIcon,
   ImageIcon,
