@@ -24,14 +24,13 @@ import {
   CustomPopoverTrigger,
 } from "@/components/ui/custom-popover"
 
-// ✅ استيراد مكون تبديل العملة ونوع البيانات
 import { CurrencySwitcher } from "@/components/store/currency/CurrencySwitcher"
 import type { CurrencyCode } from "@/lib/actions/currency/types"
 
 interface DesktopNavProps {
   className?: string
   user: CurrentUser | null
-  currentCurrency: CurrencyCode // ✅ إضافة جديدة لاستقبال العملة الحالية
+  currentCurrency: CurrencyCode
 }
 
 export default function DesktopNav({
@@ -41,7 +40,7 @@ export default function DesktopNav({
 }: DesktopNavProps) {
   return (
     <div className={cn("hidden items-center gap-4 md:flex", className)}>
-      {/* Search */}
+      {/* البحث */}
       <CustomButton
         variant="ghost"
         size="icon-sm"
@@ -50,27 +49,26 @@ export default function DesktopNav({
         <SearchIcon className="size-4" />
       </CustomButton>
 
-      {/* Shopping Cart */}
+      {/* سلة التسوق */}
       <CustomButton
         variant="ghost"
         size="icon-sm"
         className="relative text-muted-foreground hover:text-foreground"
       >
         <ShoppingCartIcon className="size-4" />
-        {/* يمكن إضافة شارة (Badge) لعدد العناصر هنا لاحقاً */}
       </CustomButton>
 
-      {/* ✅ Currency Switcher */}
+      {/* مبدل العملة */}
       <CurrencySwitcher currentCurrency={currentCurrency} />
 
-      {/* User Menu or Auth Buttons */}
+      {/* قائمة المستخدم أو أزرار تسجيل الدخول */}
       {user ? (
         <>
           <Separator orientation="vertical" className="mx-1 h-6" />
           <UserMenu user={user} />
         </>
       ) : (
-        <div className="ml-1 flex items-center gap-2 border-l border-border/50 pl-4">
+        <div className="ml-1 flex items-center gap-2 border-l border-border/50 pl-4 rtl:mr-1 rtl:ml-0 rtl:border-r rtl:border-l-0 rtl:pr-4 rtl:pl-0">
           <CustomButton
             size="sm"
             variant="outline"
@@ -94,7 +92,7 @@ function UserMenu({ user }: { user: CurrentUser }) {
   const handleLogout = async () => {
     const result = await signOut()
     if (result.success) {
-      router.refresh() // تحديث الصفحة بعد تسجيل الخروج
+      router.refresh()
     }
   }
 
@@ -108,8 +106,13 @@ function UserMenu({ user }: { user: CurrentUser }) {
           </AvatarFallback>
         </Avatar>
       </CustomPopoverTrigger>
-      <CustomPopoverContent align="end" className=" gap-0 rounded-md p-0">
-        <CustomPopoverHeader className="px-4 py-3">
+
+      {/* يتمدد تلقائياً حسب طول الاسم والبريد بحد أدنى 250px وأقصى 360px */}
+      <CustomPopoverContent
+        align="end"
+        className="w-max max-w-[360px] min-w-[250px] gap-0 rounded-md p-0 shadow-lg"
+      >
+        <CustomPopoverHeader className="px-3 py-2.5">
           <UserProfile user={user} />
         </CustomPopoverHeader>
 
@@ -124,7 +127,7 @@ function UserMenu({ user }: { user: CurrentUser }) {
               asChild
             >
               <Link href={item.href}>
-                <item.icon className="mr-2 size-3.5" />
+                <item.icon className="mr-2 size-3.5 rtl:mr-0 rtl:ml-2" />
                 {item.label}
               </Link>
             </CustomButton>
@@ -142,7 +145,7 @@ function UserMenu({ user }: { user: CurrentUser }) {
               asChild
             >
               <Link href={item.href}>
-                <item.icon className="mr-2 size-3.5" />
+                <item.icon className="mr-2 size-3.5 rtl:mr-0 rtl:ml-2" />
                 {item.label}
               </Link>
             </CustomButton>
@@ -157,7 +160,7 @@ function UserMenu({ user }: { user: CurrentUser }) {
             className="h-8 w-full justify-start text-xs font-normal text-destructive hover:bg-destructive/10 hover:text-destructive"
             onClick={handleLogout}
           >
-            <LogOutIcon className="mr-2 size-3.5" />
+            <LogOutIcon className="mr-2 size-3.5 rtl:mr-0 rtl:ml-2" />
             Logout
           </CustomButton>
         </div>

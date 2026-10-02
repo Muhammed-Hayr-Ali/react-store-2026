@@ -1,18 +1,13 @@
 "use server"
 
+import { cookies } from "next/headers"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 
-
-// 1. Change the return type to include the redirect URL
 export async function signInWithGoogle(): Promise<ApiResult<{ url: string }>> {
-
-  // 1. Create a Supabase client
   const supabase = await createServerClient()
-
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
 
-  // 2. Extract both data and error
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
@@ -24,7 +19,6 @@ export async function signInWithGoogle(): Promise<ApiResult<{ url: string }>> {
     },
   })
 
-  // 3. Check for an error or a missing URL
   if (error || !data?.url) {
     console.error("Supabase Google Sign-In Error:", error?.message)
     return {
@@ -33,6 +27,7 @@ export async function signInWithGoogle(): Promise<ApiResult<{ url: string }>> {
     }
   }
 
+  const cookieStore = await cookies()
   cookieStore.set("login_method", "google")
 
   return {

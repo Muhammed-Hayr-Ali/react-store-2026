@@ -4,6 +4,7 @@
  * @file Server Action for handling user sign-in with email and password.
  */
 
+import { cookies } from "next/headers"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 
@@ -35,8 +36,9 @@ export async function signInWithPassword(
   }
 
   // 4. If successful, set the cookie to indicate the user is authenticated.
+  const cookieStore = await cookies()
   cookieStore.set("login_method", "email")
 
-  // 4. On success, return a success result.
+  // 5. On success, return a success result.
   return { success: true, data: null }
 }

@@ -3,29 +3,35 @@
 import * as React from "react"
 import Link from "next/link"
 import { useLocale } from "next-intl"
-import { ShoppingBagIcon } from "lucide-react"
+import { ImageIcon, ShoppingBagIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
   LatestProductItem,
   CategoryProductItem,
+  BrandProductItem,
 } from "@/lib/actions/products/types"
 import { formatPrice as formatCurrencyPrice } from "@/lib/actions/currency/utils"
 import type { CurrencyCode } from "@/lib/actions/currency/types"
 import { getSiteAssetUrl } from "@/lib/database/supabase/storage"
+import { cn } from "@/lib/utils"
 
 interface ProductCardProps {
-  product: LatestProductItem | CategoryProductItem
+  product: LatestProductItem | CategoryProductItem | BrandProductItem
   currency: CurrencyCode
   exchangeRate: number
+  viewMode?: "grid" | "list"
 }
 
 export function ProductCard({
   product,
   currency,
   exchangeRate,
+  viewMode = "grid",
 }: ProductCardProps) {
   const locale = useLocale()
+  // حالة تتبع فشل تحميل الصورة
+  const [imageError, setImageError] = React.useState(false)
 
   const formattedPrice = formatCurrencyPrice(
     product.min_price,
@@ -37,28 +43,43 @@ export function ProductCard({
     ? getSiteAssetUrl(product.primary_image_url)
     : null
 
+  const isList = viewMode === "list"
+
   return (
-    <div className="group relative mx-auto flex w-full max-w-[155px] flex-col overflow-hidden rounded-lg border border-border/50 bg-card transition-all duration-300 hover:shadow-sm sm:max-w-[175px]">
+    <div
+      className={cn(
+        "group relative flex w-full overflow-hidden rounded-lg border border-border/50 bg-card transition-all duration-300 hover:shadow-xs",
+        isList ? "flex-row items-center gap-3 p-2 sm:gap-4" : "flex-col"
+      )}
+    >
       {/* رابط صورة المنتج */}
       <Link
         href={`/${locale}/product/${product.slug}`}
-        className="relative aspect-square w-full overflow-hidden bg-muted/30"
+        className={cn(
+          "relative shrink-0 overflow-hidden bg-muted/30",
+          isList
+            ? "aspect-square size-20 rounded-md sm:size-24"
+            : "aspect-square w-full"
+        )}
       >
-        {imageUrl ? (
+        {imageUrl && !imageError ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={imageUrl}
             alt={product.name}
             loading="lazy"
+            onError={() => setImageError(true)}
             className="size-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
-          <div className="flex size-full items-center justify-center text-[11px] text-muted-foreground">
-            No image
+          <div className="flex size-full flex-col items-center justify-center gap-1 bg-muted/40 text-muted-foreground/60 transition-colors group-hover:bg-muted/60">
+            <ImageIcon
+              className={cn("stroke-[1.5]", isList ? "size-6" : "size-8")}
+            />
           </div>
         )}
 
-        {product.brand_name && (
+        {product.brand_name && !isList && (
           <span className="absolute start-1.5 top-1.5 z-10 rounded bg-background/85 px-1.5 py-0.5 text-[9px] font-medium text-foreground backdrop-blur-xs">
             {product.brand_name}
           </span>
@@ -66,8 +87,13 @@ export function ProductCard({
       </Link>
 
       {/* تفاصيل المنتج والسعر */}
-      <div className="flex flex-1 flex-col justify-between p-2 sm:p-2.5">
-        <div className="space-y-0.5">
+      <div
+        className={cn(
+          "flex flex-1 justify-between",
+          isList ? "flex-row items-center gap-2" : "flex-col p-2 sm:p-2.5"
+        )}
+      >
+        <div className="min-w-0 flex-1 space-y-0.5">
           {product.category_name && (
             <span className="block truncate text-[10px] text-muted-foreground">
               {product.category_name}
@@ -82,7 +108,14 @@ export function ProductCard({
           </Link>
         </div>
 
-        <div className="mt-1.5 flex items-center justify-between gap-1.5 border-t border-border/30 pt-1.5">
+        <div
+          className={cn(
+            "flex items-center justify-between gap-1.5",
+            isList
+              ? "shrink-0 gap-3 border-none p-0"
+              : "mt-1.5 border-t border-border/30 pt-1.5"
+          )}
+        >
           <span className="text-xs font-bold text-foreground tabular-nums sm:text-sm">
             {formattedPrice}
           </span>

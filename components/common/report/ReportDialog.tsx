@@ -165,14 +165,12 @@ export function ReportDialog({
               <CustomButton
                 type="button"
                 variant="outline"
-                size="sm"
                 onClick={() => setOpen(false)}
               >
                 Cancel
               </CustomButton>
               <CustomButton
                 type="submit"
-                size="sm"
                 variant="destructive"
                 disabled={loading}
               >

@@ -1,3 +1,5 @@
+import { cookies } from "next/headers"
+
 import FeaturedHeroSlider from "@/components/store/home/featured-hero-slider"
 import CategoriesScroll from "@/components/store/home/categories-scroll"
 
@@ -51,8 +53,13 @@ export default async function Page() {
     exchangeRates.find((r) => r.currency_code === selectedCurrency)
       ?.rate_from_usd ?? 1
 
+  const cookieStore = await cookies()
+  const viewModeCookie = cookieStore.get("product_view_mode")?.value
+  const initialViewMode = (viewModeCookie === "list" ? "list" : "grid") as
+    "grid" | "list"
+
   return (
-    <div className="flex w-full flex-col">
+    <div className="flex w-full flex-col pt-4">
       {/* تمرير العملة وسعر الصرف للسلايدر */}
       {slides.length > 0 && (
         <section aria-label="Featured Products" className="w-full">
@@ -78,6 +85,7 @@ export default async function Page() {
           products={latestProducts}
           currency={selectedCurrency}
           exchangeRate={currentRate}
+          initialViewMode={initialViewMode}
         />
       )}
     </div>

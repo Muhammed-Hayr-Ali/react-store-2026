@@ -25,7 +25,7 @@ export default async function Navbar({ user }: { user: CurrentUser | null }) {
           </div>
 
           {/* Center Links */}
-          <MainNavbarMenu />
+          {/* <MainNavbarMenu /> */}
 
           {/* Right Actions */}
           <div className="flex flex-1 items-center justify-end gap-4 md:gap-6">

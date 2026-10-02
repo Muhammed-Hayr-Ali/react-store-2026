@@ -57,6 +57,16 @@ export default function CategoriesScroll({
 
   if (!categories || categories.length === 0) return null
 
+  // تحديد نسبة الشفافية عند الأطراف بناءً على إمكانية التمرير
+  // إذا كان يمكن التمرير يتم التلاشي تدريجياً، وإذا وصلنا للبداية أو النهاية يختفي التلاشي
+  const startStop = (isRtl ? canScrollPrev : canScrollPrev)
+    ? "transparent 0%, black 48px"
+    : "black 0%"
+  const endStop = (isRtl ? canScrollNext : canScrollNext)
+    ? "black calc(100% - 48px), transparent 100%"
+    : "black 100%"
+  const maskStyle = `linear-gradient(to right, ${startStop}, ${endStop})`
+
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-3 sm:px-6 lg:px-8">
       {/* الترويسة وأزرار التمرير السريعة */}
@@ -97,9 +107,16 @@ export default function CategoriesScroll({
         </div>
       </div>
 
-      {/* مسار السحب والتمرير */}
-      <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex gap-2 sm:gap-3">
+      {/* مسار السحب مع تطبيق التلاشي التلقائي عند الحواف */}
+      <div
+        className="overflow-hidden transition-all duration-300"
+        ref={emblaRef}
+        style={{
+          maskImage: maskStyle,
+          WebkitMaskImage: maskStyle,
+        }}
+      >
+        <div className="flex gap-2 py-1 sm:gap-3">
           {categories.map((category) => {
             const displayName =
               isRtl && category.name_ar ? category.name_ar : category.name
@@ -109,7 +126,7 @@ export default function CategoriesScroll({
             return (
               <Link
                 key={category.id}
-                href={`/category/${category.slug}`}
+                href={`/${locale}/category/${category.slug}`}
                 className="group flex shrink-0 items-center gap-2.5 rounded-xl bg-muted/50 px-3.5 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none sm:px-4 sm:py-2.5 sm:text-sm"
               >
                 {/* أيقونة أو صورة التصنيف */}

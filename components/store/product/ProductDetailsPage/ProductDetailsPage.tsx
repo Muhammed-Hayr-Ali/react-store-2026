@@ -8,13 +8,13 @@ import {
   ProductVariantItem,
   resolveVariantImage,
 } from "./utils"
-import { ProductGallery } from "./ProductGallery"
 import { ProductHeader } from "./ProductHeader"
 import { ProductVariantSelector } from "./ProductVariantSelector"
 import { ProductActions } from "./ProductActions"
 import { ProductTrustBadges } from "./ProductTrustBadges"
 
 import type { CurrencyCode } from "@/lib/actions/currency/types"
+import { ProductGallery } from "./ProductGallery"
 
 interface ProductDetailsProps {
   product: ProductWithRelations

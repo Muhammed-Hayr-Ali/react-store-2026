@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useLocale } from "next-intl"
 import useEmblaCarousel from "embla-carousel-react"
 import Autoplay from "embla-carousel-autoplay"
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
+import { ChevronLeftIcon, ChevronRightIcon, ImageIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { FeaturedProductSlide } from "@/lib/actions/products/types"
@@ -15,6 +15,41 @@ interface FeaturedHeroSliderProps {
   slides: FeaturedProductSlide[]
   currency: CurrencyCode
   exchangeRate: number
+}
+
+function SlideItem({
+  slide,
+  locale,
+}: {
+  slide: FeaturedProductSlide
+  locale: string
+}) {
+  const [imageError, setImageError] = React.useState(false)
+
+  return (
+    <div className="relative min-w-0 flex-[0_0_100%] transition-opacity duration-300">
+      <Link
+        href={`/${locale}/product/${slide.slug}`}
+        className="relative block h-56 w-full overflow-hidden bg-muted/40 sm:h-72 md:h-84 lg:h-96"
+      >
+        {slide.primary_image_url && !imageError ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={slide.primary_image_url}
+            alt={slide.name}
+            loading="lazy"
+            onError={() => setImageError(true)}
+            className="size-full border-0 object-cover object-center transition-transform duration-500 group-hover:scale-[1.01]"
+          />
+        ) : (
+          <div className="flex size-full flex-col items-center justify-center gap-2 bg-muted/50 text-muted-foreground/60">
+            <ImageIcon className="size-10 stroke-[1.5] sm:size-12" />
+            <span className="text-xs font-medium">{slide.name}</span>
+          </div>
+        )}
+      </Link>
+    </div>
+  )
 }
 
 export default function FeaturedHeroSlider({
@@ -98,27 +133,7 @@ export default function FeaturedHeroSlider({
       >
         <div className="flex touch-pan-y">
           {slides.map((slide) => (
-            <div
-              key={slide.id}
-              className="relative min-w-0 flex-[0_0_100%] transition-opacity duration-300"
-            >
-              <Link
-                href={`/${locale}/product/${slide.slug}`}
-                className="relative block h-56 w-full overflow-hidden sm:h-72 md:h-84 lg:h-96"
-              >
-                {slide.primary_image_url ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={slide.primary_image_url}
-                    alt={slide.name}
-                    loading="lazy"
-                    className="size-full border-0 object-cover object-center transition-transform duration-500 group-hover:scale-[1.01]"
-                  />
-                ) : (
-                  <div className="size-full bg-muted" />
-                )}
-              </Link>
-            </div>
+            <SlideItem key={slide.id} slide={slide} locale={locale} />
           ))}
         </div>
 

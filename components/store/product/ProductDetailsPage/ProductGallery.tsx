@@ -6,6 +6,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ExpandIcon,
+  ImageIcon,
   XIcon,
 } from "lucide-react"
 import { ProductImageItem } from "./utils"
@@ -29,6 +30,16 @@ export function ProductGallery({
   onThumbnailClick,
 }: ProductGalleryProps) {
   const [isOpen, setIsOpen] = React.useState(false)
+  // تتبع روابط الصور التي فشل تحميلها
+  const [failedImages, setFailedImages] = React.useState<
+    Record<string, boolean>
+  >({})
+
+  const markImageAsFailed = (url: string) => {
+    setFailedImages((prev) => ({ ...prev, [url]: true }))
+  }
+
+  const isMainImageFailed = Boolean(failedImages[activeImage])
 
   const currentIndex = React.useMemo(() => {
     const idx = productImages.findIndex((img) => img.url === activeImage)
@@ -66,16 +77,18 @@ export function ProductGallery({
       <div className="space-y-4 lg:col-span-6">
         {/* الصورة الرئيسية المعروضة في الصفحة */}
         <div
-          onClick={() => activeImage && setIsOpen(true)}
+          onClick={() => activeImage && !isMainImageFailed && setIsOpen(true)}
           className={`group relative aspect-square w-full overflow-hidden rounded-2xl border border-border/60 bg-muted/20 shadow-xs transition-all duration-300 hover:shadow-md ${
-            activeImage ? "cursor-zoom-in" : ""
+            activeImage && !isMainImageFailed ? "cursor-zoom-in" : ""
           }`}
         >
-          {activeImage ? (
+          {activeImage && !isMainImageFailed ? (
             <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={activeImage}
                 alt={productName}
+                onError={() => markImageAsFailed(activeImage)}
                 className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
               />
               <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 backdrop-blur-[2px] transition-all duration-300 group-hover:opacity-100">
@@ -99,11 +112,13 @@ export function ProductGallery({
           )}
         </div>
 
-        {/* شريط الصور المصغرة مع إخفاء شريط التمرير بالكامل وتمرير سلس */}
+        {/* شريط الصور المصغرة */}
         {productImages.length > 1 && (
           <div className="flex touch-pan-x [scrollbar-width:none] items-center gap-3 overflow-x-auto scroll-smooth py-1 [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {productImages.map((img) => {
               const isSelected = activeImage === img.url
+              const isFailed = Boolean(failedImages[img.url])
+
               return (
                 <button
                   key={img.id}
@@ -116,11 +131,19 @@ export function ProductGallery({
                   }`}
                   aria-label="Select product image"
                 >
-                  <img
-                    src={img.url}
-                    alt={img.alt_text || productName}
-                    className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
+                  {!isFailed ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={img.url}
+                      alt={img.alt_text || productName}
+                      onError={() => markImageAsFailed(img.url)}
+                      className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex size-full items-center justify-center bg-muted/40 text-muted-foreground">
+                      <ImageIcon className="size-5" />
+                    </div>
+                  )}
                 </button>
               )
             })}
@@ -128,7 +151,7 @@ export function ProductGallery({
         )}
       </div>
 
-      {/* نافذة التكبير بملء الشاشة مع خلفية سينمائية */}
+      {/* نافذة التكبير بملء الشاشة */}
       {isOpen && (
         <div
           role="dialog"
@@ -167,16 +190,25 @@ export function ProductGallery({
                 className="absolute start-2 z-10 size-11 rounded-full bg-white/15 text-white backdrop-blur-md transition-all hover:scale-110 hover:bg-white/30 active:scale-95 sm:start-4"
                 aria-label="Previous image"
               >
-                <ChevronLeftIcon className="size-6" />
+                <ChevronLeftIcon className="size-6 rtl:rotate-180" />
               </CustomButton>
             )}
 
             <div className="relative flex max-h-full max-w-full items-center justify-center">
-              <img
-                src={activeImage}
-                alt={productName}
-                className="max-h-[72vh] max-w-full rounded-xl object-contain shadow-2xl transition-all duration-300"
-              />
+              {!isMainImageFailed ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={activeImage}
+                  alt={productName}
+                  onError={() => markImageAsFailed(activeImage)}
+                  className="max-h-[72vh] max-w-full rounded-xl object-contain shadow-2xl transition-all duration-300"
+                />
+              ) : (
+                <div className="flex size-64 flex-col items-center justify-center text-white/70">
+                  <ImageIcon className="size-16 stroke-[1.5]" />
+                  <span className="mt-2 text-sm">Image unavailable</span>
+                </div>
+              )}
             </div>
 
             {productImages.length > 1 && (
@@ -188,7 +220,7 @@ export function ProductGallery({
                 className="absolute end-2 z-10 size-11 rounded-full bg-white/15 text-white backdrop-blur-md transition-all hover:scale-110 hover:bg-white/30 active:scale-95 sm:end-4"
                 aria-label="Next image"
               >
-                <ChevronRightIcon className="size-6" />
+                <ChevronRightIcon className="size-6 rtl:rotate-180" />
               </CustomButton>
             )}
           </div>
@@ -201,6 +233,8 @@ export function ProductGallery({
             >
               {productImages.map((img) => {
                 const isSelected = activeImage === img.url
+                const isFailed = Boolean(failedImages[img.url])
+
                 return (
                   <button
                     key={img.id}
@@ -212,11 +246,19 @@ export function ProductGallery({
                         : "border-white/20 opacity-40 hover:scale-95 hover:opacity-100"
                     }`}
                   >
-                    <img
-                      src={img.url}
-                      alt={img.alt_text || productName}
-                      className="size-full object-cover"
-                    />
+                    {!isFailed ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={img.url}
+                        alt={img.alt_text || productName}
+                        onError={() => markImageAsFailed(img.url)}
+                        className="size-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex size-full items-center justify-center bg-white/10 text-white/60">
+                        <ImageIcon className="size-4" />
+                      </div>
+                    )}
                   </button>
                 )
               })}

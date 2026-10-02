@@ -131,7 +131,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     : null
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 pt-2 pb-8 sm:px-6 sm:pt-4 sm:pb-12 lg:px-8">
+    <div className="mx-auto w-full max-w-6xl px-4 pt-4 pb-8 sm:px-6 sm:pt-4 sm:pb-12 lg:px-8">
       {/* روابط التنقل السريع Breadcrumb Navigation */}
       <div className="mb-4 sm:mb-6">
         <Breadcrumb>
