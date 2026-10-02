@@ -57,8 +57,6 @@ export default function CategoriesScroll({
 
   if (!categories || categories.length === 0) return null
 
-  // تحديد نسبة الشفافية عند الأطراف بناءً على إمكانية التمرير
-  // إذا كان يمكن التمرير يتم التلاشي تدريجياً، وإذا وصلنا للبداية أو النهاية يختفي التلاشي
   const startStop = (isRtl ? canScrollPrev : canScrollPrev)
     ? "transparent 0%, black 48px"
     : "black 0%"
@@ -137,7 +135,7 @@ export default function CategoriesScroll({
                       src={imageUrl}
                       alt={category.image_alt || displayName}
                       loading="lazy"
-                      className="size-full rounded-lg object-contain p-1"
+                      className="size-full rounded-lg object-contain p-1 transition-all duration-200 dark:brightness-0 dark:invert"
                     />
                   ) : (
                     <LayoutGridIcon className="size-3.5 sm:size-4" />

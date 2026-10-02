@@ -78,9 +78,10 @@ export function FlashSaleSection({
     <section className="mx-auto w-full max-w-6xl px-4 py-2 sm:px-6 sm:py-2.5 lg:px-8">
       {/* إطار مضغوط وأنيق */}
       <div className="rounded-xl border border-destructive/20 bg-linear-to-b from-destructive/5 to-transparent p-2.5 sm:p-3.5">
-        {/* الترويسة المدمجة */}
-        <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+        {/* ترويسة القسم على سطرين */}
+        <div className="mb-2.5 space-y-2">
+          {/* السطر الأول: العنوان وزر عرض الكل مع أزرار التمرير */}
+          <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5">
               <span className="text-destructive-foreground flex size-6 items-center justify-center rounded-md bg-destructive shadow-xs sm:size-7">
                 <ZapIcon className="size-3.5 fill-current" />
@@ -90,64 +91,63 @@ export function FlashSaleSection({
               </h2>
             </div>
 
-            {/* العداد التنازلي المدمج */}
-            <div className="flex items-center">
-              <CountdownTimer
-                targetDate={sale.ends_at}
-                onExpire={() => setIsVisible(false)}
-                labels={{
-                  days: isRtl ? "ي" : "d",
-                  hours: isRtl ? "س" : "h",
-                  minutes: isRtl ? "د" : "m",
-                  seconds: isRtl ? "ث" : "s",
-                }}
-              />
+            <div className="flex items-center gap-2">
+              <Button
+                asChild
+                variant="link"
+                size="sm"
+                className="h-auto p-0 text-[11px] font-semibold text-destructive hover:underline"
+              >
+                <Link href={`/${locale}/deals/${sale.slug}`}>
+                  {isRtl ? "عرض الكل" : "View All"}
+                </Link>
+              </Button>
+
+              <div className="flex items-center gap-0.5">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={scrollPrev}
+                  disabled={!canScrollPrev}
+                  className="size-6.5 rounded-full text-muted-foreground hover:bg-muted disabled:opacity-20 sm:size-7"
+                  aria-label="Previous flash products"
+                >
+                  {isRtl ? (
+                    <ChevronRightIcon className="size-3.5" />
+                  ) : (
+                    <ChevronLeftIcon className="size-3.5" />
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={scrollNext}
+                  disabled={!canScrollNext}
+                  className="size-6.5 rounded-full text-muted-foreground hover:bg-muted disabled:opacity-20 sm:size-7"
+                  aria-label="Next flash products"
+                >
+                  {isRtl ? (
+                    <ChevronLeftIcon className="size-3.5" />
+                  ) : (
+                    <ChevronRightIcon className="size-3.5" />
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
 
-          {/* أزرار التمرير وزر العرض */}
-          <div className="flex items-center gap-1.5">
-            <Button
-              asChild
-              variant="link"
-              size="sm"
-              className="h-auto p-0 text-[11px] font-semibold text-destructive hover:underline"
-            >
-              <Link href={`/${locale}/deals/${sale.slug}`}>
-                {isRtl ? "عرض الكل" : "View All"}
-              </Link>
-            </Button>
-
-            <div className="flex items-center gap-0.5">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={scrollPrev}
-                disabled={!canScrollPrev}
-                className="size-6.5 rounded-full text-muted-foreground hover:bg-muted disabled:opacity-20 sm:size-7"
-                aria-label="Previous flash products"
-              >
-                {isRtl ? (
-                  <ChevronRightIcon className="size-3.5" />
-                ) : (
-                  <ChevronLeftIcon className="size-3.5" />
-                )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={scrollNext}
-                disabled={!canScrollNext}
-                className="size-6.5 rounded-full text-muted-foreground hover:bg-muted disabled:opacity-20 sm:size-7"
-                aria-label="Next flash products"
-              >
-                {isRtl ? (
-                  <ChevronLeftIcon className="size-3.5" />
-                ) : (
-                  <ChevronRightIcon className="size-3.5" />
-                )}
-              </Button>
-            </div>
+          {/* السطر الثاني: عداد الوقت التنازلي */}
+          <div className="flex items-center pt-0.5">
+            <CountdownTimer
+              targetDate={sale.ends_at}
+              onExpire={() => setIsVisible(false)}
+              labels={{
+                days: isRtl ? "ي" : "d",
+                hours: isRtl ? "س" : "h",
+                minutes: isRtl ? "د" : "m",
+                seconds: isRtl ? "ث" : "s",
+              }}
+            />
           </div>
         </div>
 
