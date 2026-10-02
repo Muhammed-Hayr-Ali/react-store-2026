@@ -2,17 +2,19 @@ import { cookies } from "next/headers"
 
 import FeaturedHeroSlider from "@/components/store/home/featured-hero-slider"
 import CategoriesScroll from "@/components/store/home/categories-scroll"
+import { FlashSaleSection } from "@/components/store/flash-sale/flash-sale-section"
+import ProductsGrid from "@/components/store/home/products-grid"
 
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getFeaturedProductSlides } from "@/lib/actions/products/queries/get-featured-slides"
 import { getRootCategories } from "@/lib/actions/categories/queries/get-root-categories"
 import { getLatestProducts } from "@/lib/actions/products/queries/get-latest-products"
+import { getActiveFlashSale } from "@/lib/actions/flash-sales/queries/get_active_flash_sale"
 
 // استيراد أدوات جلب العملة وأسعار الصرف
 import { getSelectedCurrency } from "@/lib/actions/currency/queries/get_selected_currency"
 import { getExchangeRates } from "@/lib/actions/currency/queries/get-rates"
-import ProductsGrid from "@/components/store/home/products-grid"
 
 export async function generateMetadata() {
   return createMetadata({
@@ -29,12 +31,14 @@ export default async function Page() {
     featuredResult,
     categoriesResult,
     latestResult,
+    activeFlashSale,
     selectedCurrency,
     exchangeRates,
   ] = await Promise.all([
     getFeaturedProductSlides({ limit: 5 }),
     getRootCategories({ activeOnly: true }),
     getLatestProducts({ limit: 20, activeOnly: true }),
+    getActiveFlashSale(),
     getSelectedCurrency(),
     getExchangeRates(),
   ])
@@ -76,6 +80,15 @@ export default async function Page() {
         <section aria-label="Product Categories" className="w-full">
           <CategoriesScroll categories={categories} />
         </section>
+      )}
+
+      {/* قسم البيع السريع (يظهر تلقائياً فقط إذا كان هناك عرض سارٍ) */}
+      {activeFlashSale && activeFlashSale.products.length > 0 && (
+        <FlashSaleSection
+          sale={activeFlashSale}
+          currency={selectedCurrency}
+          exchangeRate={currentRate}
+        />
       )}
 
       {/* شبكة أحدث المنتجات */}

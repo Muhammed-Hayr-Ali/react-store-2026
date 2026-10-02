@@ -269,6 +269,12 @@ export const appConfig = {
             icon: Package,
             isActive: false,
           },
+          {
+            title: "Flash Sales",
+            url: "/dashboard/flash-sales",
+            icon: Package,
+            isActive: false,
+          },
         ],
       },
 
