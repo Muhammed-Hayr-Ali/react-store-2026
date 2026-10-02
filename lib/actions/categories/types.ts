@@ -14,7 +14,8 @@ export const categorySchema = z.object({
     .max(500, "DESCRIPTION_TOO_LONG")
     .nullable()
     .or(z.literal("")),
-  image_url: z.url("INVALID_URL").nullable().or(z.literal("")),
+  // تم التعديل هنا: يقبل أي نص (مسار نسبي أو رابط كامل) أو قيمة فارغة/null
+  image_url: z.string().nullable().or(z.literal("")),
   image_alt: z
     .string()
     .max(200, "ALT_TEXT_TOO_LONG")

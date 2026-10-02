@@ -14,13 +14,19 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { FeaturedProductSlide } from "@/lib/actions/products/types"
+import { formatPrice as formatCurrencyPrice } from "@/lib/actions/currency/utils"
+import type { CurrencyCode } from "@/lib/actions/currency/types"
 
 interface FeaturedHeroSliderProps {
   slides: FeaturedProductSlide[]
+  currency: CurrencyCode
+  exchangeRate: number
 }
 
 export default function FeaturedHeroSlider({
   slides,
+  currency,
+  exchangeRate,
 }: FeaturedHeroSliderProps) {
   const locale = useLocale()
   const isRtl = locale === "ar"
@@ -36,7 +42,6 @@ export default function FeaturedHeroSlider({
     []
   )
 
-  // تفعيل اتجاه RTL لعكس الحركة والتمرير مع اللغة العربية
   const [emblaRef, emblaApi] = useEmblaCarousel(
     {
       loop: true,
@@ -95,21 +100,24 @@ export default function FeaturedHeroSlider({
 
   return (
     <div className="relative mx-auto w-full max-w-7xl px-3 py-2 sm:px-6 sm:py-3">
-      {/* الحاوية: خلفية muted موحدة بدون حدود أو تدرجات */}
       <div
         className="group relative overflow-hidden rounded-2xl bg-muted/50 sm:rounded-3xl"
         ref={emblaRef}
       >
         <div className="flex touch-pan-y">
           {slides.map((slide) => {
-            const formattedPrice = (slide.min_price / 100).toFixed(2)
+            // تنسيق السعر بالعملة المختارة ومعدل الصرف الممرر
+            const formattedPrice = formatCurrencyPrice(
+              slide.min_price,
+              currency,
+              exchangeRate
+            )
 
             return (
               <div
                 key={slide.id}
                 className="min-w-0 flex-[0_0_100%] transition-opacity duration-300"
               >
-                {/* الحفاظ على الترتيب الأفقي المستطيل في كافة الشاشات */}
                 <div className="flex h-36 items-center justify-between gap-3 px-4 py-3 sm:h-56 sm:gap-8 sm:px-8 sm:py-6 md:h-64 md:px-10">
                   {/* قسم النصوص والمعلومات */}
                   <div className="flex flex-1 flex-col items-start justify-center space-y-1 sm:space-y-2">
@@ -124,7 +132,7 @@ export default function FeaturedHeroSlider({
                     </h2>
 
                     <div className="text-sm font-extrabold text-primary tabular-nums sm:text-xl md:text-2xl">
-                      ${formattedPrice}
+                      {formattedPrice}
                     </div>
 
                     <div className="pt-0.5 sm:pt-1">
@@ -133,7 +141,7 @@ export default function FeaturedHeroSlider({
                         size="sm"
                         className="h-7 rounded-full px-3 text-[11px] font-medium shadow-none sm:h-8 sm:px-4 sm:text-xs"
                       >
-                        <Link href={`/product/${slide.slug}`}>
+                        <Link href={`/${locale}/product/${slide.slug}`}>
                           {isRtl ? "تسوق الآن" : "Shop Now"}
                           {isRtl ? (
                             <ArrowLeftIcon className="me-1 size-3 sm:size-3.5" />
@@ -145,7 +153,7 @@ export default function FeaturedHeroSlider({
                     </div>
                   </div>
 
-                  {/* قسم الصورة بدون أي ظلال خلفية */}
+                  {/* قسم الصورة */}
                   <div className="flex h-full w-28 shrink-0 items-center justify-center sm:w-48 md:w-60">
                     {slide.primary_image_url ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
@@ -167,7 +175,7 @@ export default function FeaturedHeroSlider({
           })}
         </div>
 
-        {/* أزرار التنقل الجانبية مع عكس الأيقونات تلقائياً حسب اتجاه اللغة */}
+        {/* أزرار التنقل الجانبية */}
         {slides.length > 1 && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-between p-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 sm:p-2.5">
             <Button

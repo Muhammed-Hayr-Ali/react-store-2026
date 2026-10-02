@@ -6,7 +6,12 @@ import { appConfig } from "@/lib/config/app_config"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Check } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { CustomAccordion, CustomAccordionContent, CustomAccordionItem, CustomAccordionTrigger } from "@/components/ui/custom-accordion"
+import {
+  CustomAccordion,
+  CustomAccordionContent,
+  CustomAccordionItem,
+  CustomAccordionTrigger,
+} from "@/components/ui/custom-accordion"
 
 export function ThemeAccordion() {
   const { theme, setTheme } = useTheme()
@@ -22,18 +27,26 @@ export function ThemeAccordion() {
     return () => cancelAnimationFrame(frame)
   }, [])
 
+  const currentThemeLabel =
+    appConfig.menu.preferences.appearance.options.find(
+      (opt) => opt.value === theme
+    )?.key || theme
+
   if (!mounted) {
     return (
       <CustomAccordion type="single" collapsible>
         <CustomAccordionItem value="item-2">
-          <CustomAccordionTrigger>
-            <div className="flex items-center gap-1 rtl:flex-row-reverse">
-              <appConfig.menu.preferences.appearance.icon className="size-5" />{" "}
-              <p>{appConfig.menu.preferences.appearance.name}</p>
-            </div>
+          <CustomAccordionTrigger
+            className={cn(
+              buttonVariants({ variant: "ghost" }),
+              "flex h-10 items-center justify-start font-normal aria-expanded:bg-transparent"
+            )}
+          >
+            <appConfig.menu.preferences.appearance.icon className="mr-2 size-4 rtl:mr-0 rtl:ml-2" />
+            <span>{appConfig.menu.preferences.appearance.name}</span>
           </CustomAccordionTrigger>
 
-          <CustomAccordionContent className="flex flex-col">
+          <CustomAccordionContent className="flex flex-col px-2">
             {appConfig.menu.preferences.appearance.options.map((item) => (
               <Button
                 key={item.key}
@@ -60,9 +73,14 @@ export function ThemeAccordion() {
           )}
         >
           <appConfig.menu.preferences.appearance.icon className="mr-2 size-4 rtl:mr-0 rtl:ml-2" />
-          {appConfig.menu.preferences.appearance.name}
+          <span>{appConfig.menu.preferences.appearance.name}</span>
+          {currentThemeLabel && (
+            <span className="ms-2 text-xs font-semibold text-muted-foreground uppercase">
+              ({currentThemeLabel})
+            </span>
+          )}
         </CustomAccordionTrigger>
-        <CustomAccordionContent className="flex flex-col">
+        <CustomAccordionContent className="flex flex-col px-2">
           {appConfig.menu.preferences.appearance.options.map((item) => (
             <Button
               key={item.key}

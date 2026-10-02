@@ -6,6 +6,10 @@ import { createMetadata } from "@/lib/config/metadata_generator"
 import { getFeaturedProductSlides } from "@/lib/actions/products/queries/get-featured-slides"
 import { getRootCategories } from "@/lib/actions/categories/queries/get-root-categories"
 
+// استيراد أدوات جلب العملة وأسعار الصرف
+import { getSelectedCurrency } from "@/lib/actions/currency/queries/get_selected_currency"
+import { getExchangeRates } from "@/lib/actions/currency/queries/get-rates"
+
 export async function generateMetadata() {
   return createMetadata({
     siteName: appConfig.name,
@@ -16,11 +20,14 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
-  // 1. جلب بيانات السلايدر والتصنيفات بالتوازي لتحسين سرعة الاستجابة
-  const [featuredResult, categoriesResult] = await Promise.all([
-    getFeaturedProductSlides({ limit: 5 }),
-    getRootCategories({ activeOnly: true }),
-  ])
+  // جلب كافة البيانات في السيرفر بالتوازي لتحقيق أعلى سرعة تحميل
+  const [featuredResult, categoriesResult, selectedCurrency, exchangeRates] =
+    await Promise.all([
+      getFeaturedProductSlides({ limit: 5 }),
+      getRootCategories({ activeOnly: true }),
+      getSelectedCurrency(),
+      getExchangeRates(),
+    ])
 
   const slides =
     featuredResult.success && featuredResult.data ? featuredResult.data : []
@@ -29,12 +36,21 @@ export default async function Page() {
       ? categoriesResult.data
       : []
 
+  // حساب سعر الصرف المقابل للعملة الحالية
+  const currentRate =
+    exchangeRates.find((r) => r.currency_code === selectedCurrency)
+      ?.rate_from_usd ?? 1
+
   return (
     <div className="flex w-full flex-col">
-      {/* سلايد شو المنتجات المتميزة */}
+      {/* تمرير العملة وسعر الصرف للسلايدر */}
       {slides.length > 0 && (
         <section aria-label="Featured Products" className="w-full">
-          <FeaturedHeroSlider slides={slides} />
+          <FeaturedHeroSlider
+            slides={slides}
+            currency={selectedCurrency}
+            exchangeRate={currentRate}
+          />
         </section>
       )}
 
@@ -45,7 +61,7 @@ export default async function Page() {
         </section>
       )}
 
-      {/* باقي محتوى المتجر */}
+      {/* باقي أقسام المتجر */}
       <StorePage />
     </div>
   )

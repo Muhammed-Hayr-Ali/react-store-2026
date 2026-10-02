@@ -1,18 +1,27 @@
 "use client"
 
 import { Button, buttonVariants } from "@/components/ui/button"
-import { CustomAccordion, CustomAccordionContent, CustomAccordionItem, CustomAccordionTrigger } from "@/components/ui/custom-accordion"
+import {
+  CustomAccordion,
+  CustomAccordionContent,
+  CustomAccordionItem,
+  CustomAccordionTrigger,
+} from "@/components/ui/custom-accordion"
 import { appConfig } from "@/lib/config/app_config"
 import { cn } from "@/lib/utils"
 import { Check } from "lucide-react"
 import { useLocale } from "next-intl"
 import { usePathname, useRouter } from "next/navigation"
+
 export function LanguageAccordion() {
   const router = useRouter()
   const pathname = usePathname()
   const currentLocale = useLocale()
 
-  // handle Locale Change nurmale function
+  const currentOption = appConfig.menu.preferences.language.options.find(
+    (opt) => opt.value === currentLocale || opt.key === currentLocale
+  )
+
   const handleLocaleChange = (locale: string) => {
     router.replace(`/${locale}${pathname}`)
   }
@@ -27,7 +36,10 @@ export function LanguageAccordion() {
           )}
         >
           <appConfig.menu.preferences.language.icon className="mr-2 size-4 rtl:mr-0 rtl:ml-2" />
-          {appConfig.menu.preferences.language.name}
+          <span>{appConfig.menu.preferences.language.name}</span>
+          <span className="ms-2 text-xs font-semibold text-muted-foreground uppercase">
+            ({currentOption?.key || currentLocale})
+          </span>
         </CustomAccordionTrigger>
         <CustomAccordionContent className="flex flex-col px-2">
           {appConfig.menu.preferences.language.options.map((item) => (

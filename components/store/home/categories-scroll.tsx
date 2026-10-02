@@ -8,6 +8,7 @@ import { ChevronLeftIcon, ChevronRightIcon, LayoutGridIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Category } from "@/lib/actions/categories/types"
+import { getSiteAssetUrl } from "@/lib/database/supabase/storage"
 
 interface CategoriesScrollProps {
   categories: Category[]
@@ -103,6 +104,9 @@ export default function CategoriesScroll({
             const displayName =
               isRtl && category.name_ar ? category.name_ar : category.name
 
+            // استخراج الرابط الصحيح سواء كان مساراً نسبياً أو رابطاً مطلقاً
+            const imageUrl = getSiteAssetUrl(category.image_url)
+
             return (
               <Link
                 key={category.id}
@@ -111,13 +115,13 @@ export default function CategoriesScroll({
               >
                 {/* أيقونة أو صورة التصنيف */}
                 <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-background text-muted-foreground transition-transform duration-200 group-hover:scale-105 sm:size-8">
-                  {category.image_url ? (
+                  {imageUrl ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
-                      src={category.image_url}
+                      src={imageUrl}
                       alt={category.image_alt || displayName}
                       loading="lazy"
-                      className="size-full rounded-lg object-cover"
+                      className="size-full rounded-lg object-contain p-1"
                     />
                   ) : (
                     <LayoutGridIcon className="size-3.5 sm:size-4" />

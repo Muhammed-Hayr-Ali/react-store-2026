@@ -1,6 +1,9 @@
 "use client"
 
 import React, { useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+
 import MenuButton from "../../ui/menu_button"
 import {
   MobileMenu,
@@ -9,48 +12,60 @@ import {
   MobileMenuHeader,
 } from "@/components/ui/mobile-menu"
 import { Separator } from "@/components/ui/separator"
+import { CustomButton } from "@/components/ui/custom-button"
+
 import { signOut } from "@/lib/actions/authentication/signOut"
 import { CurrentUser } from "@/lib/actions/utils/profile"
+import { CurrencyCode } from "@/lib/actions/currency/types"
 import { appRoutes } from "@/lib/config/app-routes"
 import { appConfig } from "@/lib/config/app_config"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { ThemeAccordion } from "./theme-accordion"
-import { LanguageAccordion } from "./language-accordion"
+
 import UserProfile from "./user-profile"
-import { CustomButton } from "@/components/ui/custom-button"
+import { LanguageAccordion } from "./language-accordion"
+import { ThemeAccordion } from "./theme-accordion"
+import { CurrencyAccordion } from "@/components/store/home/currency-accordion"
+
+interface MobileNavProps {
+  user: CurrentUser | null
+  currentCurrency: CurrencyCode
+}
 
 interface MobileRightMenuProps {
   user: CurrentUser | null
+  currentCurrency: CurrencyCode
   isOpen: boolean
   setIsOpen: (open: boolean) => void
 }
 
-export function MobileNav({ user }: { user: CurrentUser | null }) {
+export function MobileNav({ user, currentCurrency }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
     <>
-    
       <MenuButton
         className="flex md:hidden"
         isOpen={isOpen}
         onClick={() => setIsOpen(!isOpen)}
       />
-      <MobileRightMenu user={user} isOpen={isOpen} setIsOpen={setIsOpen} />
+      <MobileRightMenu
+        user={user}
+        currentCurrency={currentCurrency}
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+      />
     </>
   )
 }
 
 export default function MobileRightMenu({
   user,
+  currentCurrency,
   isOpen,
   setIsOpen,
 }: MobileRightMenuProps) {
   const router = useRouter()
-  // handle Locale Change nurmale function
 
-  // Menu Items
+  // تحديد الروابط بناءً على حالة تسجيل الدخول
   const navLinks = user
     ? appConfig.menu.userMenu.items
     : appConfig.menu.gestMenu.items
@@ -63,27 +78,24 @@ export default function MobileRightMenu({
     setIsOpen(false)
     try {
       await signOut()
-
       router.replace(appRoutes.home)
     } catch (error) {
       console.error("Error signing out:", error)
-    } finally {
     }
   }
 
   return (
     <MobileMenu isOpen={isOpen} onOpenChange={setIsOpen}>
-      {/* Mobile Menu Header */}
-
+      {/* رأس القائمة الجانبية (بيانات المستخدم إن وجد) */}
       {user && (
         <MobileMenuHeader>
           <UserProfile user={user} />
         </MobileMenuHeader>
       )}
 
-      {/* Mobile Menu Body */}
+      {/* محتوى القائمة الجانبية */}
       <MobileMenuBody className="px-2">
-        {/* User Or Guest Menu */}
+        {/* قائمة المستخدم أو الزائر */}
         <div className="flex flex-col">
           {navLinks.map((link) => (
             <CustomButton
@@ -99,7 +111,10 @@ export default function MobileRightMenu({
             </CustomButton>
           ))}
         </div>
+
         <Separator />
+
+        {/* قائمة التسوق للمستخدم المسجل */}
         {user && (
           <div className="flex flex-col">
             {appConfig.menu.shoppingMenu.items.map((link) => (
@@ -118,7 +133,8 @@ export default function MobileRightMenu({
             <Separator />
           </div>
         )}
-        {/* Support Links Menu */}
+
+        {/* روابط الدعم والمساعدة */}
         <div className="flex flex-col">
           {appConfig.menu.supportLinksMenu.items.map((link) => (
             <CustomButton
@@ -132,22 +148,23 @@ export default function MobileRightMenu({
                 {link.label}
               </Link>
             </CustomButton>
-            // <Button key={item.key} variant="ghost" className="p-0" asChild>
-            //   <Link href={item.href} onClick={handleOnClick}>
-            //     <div className="flex w-full items-center space-x-1 text-start font-normal">
-            //       <item.icon className="mr-2 size-4 rtl:mr-0 rtl:ml-2" />
-            //       {item.label}
-            //     </div>
-            //   </Link>
-            // </Button>
           ))}
         </div>
+
         <Separator />
-        {/* preferences Menu */}
+
+        {/* قائمة التفضيلات (اللغة، العملة، المظهر) */}
         <LanguageAccordion />
-        <Separator className="my-px"/>
+        <Separator className="my-px" />
+        <CurrencyAccordion
+          currentCurrency={currentCurrency}
+          onSelect={() => setIsOpen(false)}
+        />
+        <Separator className="my-px" />
         <ThemeAccordion />
       </MobileMenuBody>
+
+      {/* أسفل القائمة الجانبية (تسجيل الخروج أو أزرار الدخول) */}
       <MobileMenuFooter>
         <div className="flex flex-col">
           {user ? (

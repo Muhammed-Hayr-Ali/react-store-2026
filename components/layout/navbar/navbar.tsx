@@ -31,9 +31,8 @@ export default async function Navbar({ user }: { user: CurrentUser | null }) {
           <div className="flex flex-1 items-center justify-end gap-4 md:gap-6">
             {/* ✅ 3. تمرير العملة إلى مكون الديسكتوب */}
             <DesktopNav user={user} currentCurrency={currentCurrency} />
-
             {/* ✅ 4. تمرير العملة إلى مكون الجوال أيضاً */}
-            <MobileNav user={user}  />
+            <MobileNav user={user} currentCurrency={currentCurrency} />{" "}
           </div>
         </div>
       </div>
