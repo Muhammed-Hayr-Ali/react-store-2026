@@ -2,9 +2,15 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useLocale } from "next-intl"
 import useEmblaCarousel from "embla-carousel-react"
 import Autoplay from "embla-carousel-autoplay"
-import { ChevronLeftIcon, ChevronRightIcon, ArrowRightIcon } from "lucide-react"
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ArrowRightIcon,
+  ArrowLeftIcon,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { FeaturedProductSlide } from "@/lib/actions/products/types"
@@ -16,6 +22,9 @@ interface FeaturedHeroSliderProps {
 export default function FeaturedHeroSlider({
   slides,
 }: FeaturedHeroSliderProps) {
+  const locale = useLocale()
+  const isRtl = locale === "ar"
+
   const plugins = React.useMemo(
     () => [
       Autoplay({
@@ -27,8 +36,13 @@ export default function FeaturedHeroSlider({
     []
   )
 
+  // تفعيل اتجاه RTL لعكس الحركة والتمرير مع اللغة العربية
   const [emblaRef, emblaApi] = useEmblaCarousel(
-    { loop: true, align: "start" },
+    {
+      loop: true,
+      align: "start",
+      direction: isRtl ? "rtl" : "ltr",
+    },
     plugins
   )
 
@@ -81,7 +95,7 @@ export default function FeaturedHeroSlider({
 
   return (
     <div className="relative mx-auto w-full max-w-7xl px-3 py-2 sm:px-6 sm:py-3">
-      {/* الحاوية: لون خلفية موحد ثابت bg-muted/50 وبدون حدود أو تدرجات */}
+      {/* الحاوية: خلفية muted موحدة بدون حدود أو تدرجات */}
       <div
         className="group relative overflow-hidden rounded-2xl bg-muted/50 sm:rounded-3xl"
         ref={emblaRef}
@@ -95,7 +109,7 @@ export default function FeaturedHeroSlider({
                 key={slide.id}
                 className="min-w-0 flex-[0_0_100%] transition-opacity duration-300"
               >
-                {/* الحفاظ على الترتيب المستطيل الأفقي مع ضبط الأبعاد للشاشات الصغيرة والكبيرة */}
+                {/* الحفاظ على الترتيب الأفقي المستطيل في كافة الشاشات */}
                 <div className="flex h-36 items-center justify-between gap-3 px-4 py-3 sm:h-56 sm:gap-8 sm:px-8 sm:py-6 md:h-64 md:px-10">
                   {/* قسم النصوص والمعلومات */}
                   <div className="flex flex-1 flex-col items-start justify-center space-y-1 sm:space-y-2">
@@ -120,14 +134,18 @@ export default function FeaturedHeroSlider({
                         className="h-7 rounded-full px-3 text-[11px] font-medium shadow-none sm:h-8 sm:px-4 sm:text-xs"
                       >
                         <Link href={`/product/${slide.slug}`}>
-                          Shop Now
-                          <ArrowRightIcon className="ms-1 size-3 sm:size-3.5" />
+                          {isRtl ? "تسوق الآن" : "Shop Now"}
+                          {isRtl ? (
+                            <ArrowLeftIcon className="me-1 size-3 sm:size-3.5" />
+                          ) : (
+                            <ArrowRightIcon className="ms-1 size-3 sm:size-3.5" />
+                          )}
                         </Link>
                       </Button>
                     </div>
                   </div>
 
-                  {/* قسم الصورة: تم إزالة الظلال بالكامل */}
+                  {/* قسم الصورة بدون أي ظلال خلفية */}
                   <div className="flex h-full w-28 shrink-0 items-center justify-center sm:w-48 md:w-60">
                     {slide.primary_image_url ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
@@ -139,7 +157,7 @@ export default function FeaturedHeroSlider({
                       />
                     ) : (
                       <div className="flex size-16 items-center justify-center rounded-xl bg-background text-[10px] text-muted-foreground sm:size-24 sm:text-xs">
-                        No Image
+                        {isRtl ? "لا توجد صورة" : "No Image"}
                       </div>
                     )}
                   </div>
@@ -149,7 +167,7 @@ export default function FeaturedHeroSlider({
           })}
         </div>
 
-        {/* أزرار التنقل الجانبية */}
+        {/* أزرار التنقل الجانبية مع عكس الأيقونات تلقائياً حسب اتجاه اللغة */}
         {slides.length > 1 && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-between p-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 sm:p-2.5">
             <Button
@@ -157,9 +175,13 @@ export default function FeaturedHeroSlider({
               size="icon"
               onClick={scrollPrev}
               className="pointer-events-auto size-7 rounded-full bg-background/80 shadow-xs backdrop-blur-xs hover:bg-background sm:size-8"
-              aria-label="Previous Slide"
+              aria-label={isRtl ? "الشريحة السابقة" : "Previous Slide"}
             >
-              <ChevronLeftIcon className="size-3.5 sm:size-4" />
+              {isRtl ? (
+                <ChevronRightIcon className="size-3.5 sm:size-4" />
+              ) : (
+                <ChevronLeftIcon className="size-3.5 sm:size-4" />
+              )}
             </Button>
 
             <Button
@@ -167,9 +189,13 @@ export default function FeaturedHeroSlider({
               size="icon"
               onClick={scrollNext}
               className="pointer-events-auto size-7 rounded-full bg-background/80 shadow-xs backdrop-blur-xs hover:bg-background sm:size-8"
-              aria-label="Next Slide"
+              aria-label={isRtl ? "الشريحة التالية" : "Next Slide"}
             >
-              <ChevronRightIcon className="size-3.5 sm:size-4" />
+              {isRtl ? (
+                <ChevronLeftIcon className="size-3.5 sm:size-4" />
+              ) : (
+                <ChevronRightIcon className="size-3.5 sm:size-4" />
+              )}
             </Button>
           </div>
         )}

@@ -1,8 +1,10 @@
 import StorePage from "@/components/store/home/StorePage"
 import FeaturedHeroSlider from "@/components/store/home/featured-hero-slider"
+import CategoriesScroll from "@/components/store/home/categories-scroll"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getFeaturedProductSlides } from "@/lib/actions/products/queries/get-featured-slides"
+import { getRootCategories } from "@/lib/actions/categories/queries/get-root-categories"
 
 export async function generateMetadata() {
   return createMetadata({
@@ -14,9 +16,18 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
-  // جلب بيانات السلايدر في جانب الخادم
-  const result = await getFeaturedProductSlides({ limit: 5 })
-  const slides = result.success && result.data ? result.data : []
+  // 1. جلب بيانات السلايدر والتصنيفات بالتوازي لتحسين سرعة الاستجابة
+  const [featuredResult, categoriesResult] = await Promise.all([
+    getFeaturedProductSlides({ limit: 5 }),
+    getRootCategories({ activeOnly: true }),
+  ])
+
+  const slides =
+    featuredResult.success && featuredResult.data ? featuredResult.data : []
+  const categories =
+    categoriesResult.success && categoriesResult.data
+      ? categoriesResult.data
+      : []
 
   return (
     <div className="flex w-full flex-col">
@@ -27,7 +38,14 @@ export default async function Page() {
         </section>
       )}
 
-      {/* باقي أقسام المتجر */}
+      {/* شريط تمرير التصنيفات */}
+      {categories.length > 0 && (
+        <section aria-label="Product Categories" className="w-full">
+          <CategoriesScroll categories={categories} />
+        </section>
+      )}
+
+      {/* باقي محتوى المتجر */}
       <StorePage />
     </div>
   )
