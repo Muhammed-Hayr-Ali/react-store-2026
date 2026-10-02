@@ -1,29 +1,27 @@
 "use client"
 
-import React from "react"
+import * as React from "react"
 import { useTheme } from "next-themes"
-import { appConfig } from "@/lib/config/app_config"
+import { CheckIcon } from "lucide-react"
+
 import { Button, buttonVariants } from "@/components/ui/button"
-import { Check } from "lucide-react"
-import { cn } from "@/lib/utils"
 import {
   CustomAccordion,
   CustomAccordionContent,
   CustomAccordionItem,
   CustomAccordionTrigger,
 } from "@/components/ui/custom-accordion"
+import { appConfig } from "@/lib/config/app_config"
+import { cn } from "@/lib/utils"
 
 export function ThemeAccordion() {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = React.useState(false)
 
-  const handleThemeChange = (value: string) => setTheme(value)
-
   React.useEffect(() => {
     const frame = requestAnimationFrame(() => {
       setMounted(true)
     })
-
     return () => cancelAnimationFrame(frame)
   }, [])
 
@@ -35,26 +33,28 @@ export function ThemeAccordion() {
   if (!mounted) {
     return (
       <CustomAccordion type="single" collapsible>
-        <CustomAccordionItem value="item-2">
+        <CustomAccordionItem value="item-theme">
           <CustomAccordionTrigger
             className={cn(
               buttonVariants({ variant: "ghost" }),
-              "flex h-10 items-center justify-start font-normal aria-expanded:bg-transparent"
+              "flex h-10 w-full items-center justify-between font-normal aria-expanded:bg-transparent"
             )}
           >
-            <appConfig.menu.preferences.appearance.icon className="mr-2 size-4 rtl:mr-0 rtl:ml-2" />
-            <span>{appConfig.menu.preferences.appearance.name}</span>
+            <div className="flex items-center gap-2">
+              <appConfig.menu.preferences.appearance.icon className="size-4 text-muted-foreground" />
+              <span>{appConfig.menu.preferences.appearance.name}</span>
+            </div>
           </CustomAccordionTrigger>
-
-          <CustomAccordionContent className="flex flex-col px-2">
+          <CustomAccordionContent className="flex flex-col gap-0.5 px-1 pt-1">
             {appConfig.menu.preferences.appearance.options.map((item) => (
               <Button
                 key={item.key}
                 variant="ghost"
                 disabled
-                className="flex items-center justify-start"
+                className="flex h-9 w-full items-center justify-start gap-2 rounded-lg text-xs font-normal"
               >
-                {item.label}
+                <span className="size-3.5" />
+                <span>{item.label}</span>
               </Button>
             ))}
           </CustomAccordionContent>
@@ -65,39 +65,46 @@ export function ThemeAccordion() {
 
   return (
     <CustomAccordion type="single" collapsible>
-      <CustomAccordionItem value="item-2">
+      <CustomAccordionItem value="item-theme">
         <CustomAccordionTrigger
           className={cn(
             buttonVariants({ variant: "ghost" }),
-            "flex h-10 items-center justify-start font-normal aria-expanded:bg-transparent"
+            "flex h-10 w-full items-center justify-between font-normal aria-expanded:bg-transparent"
           )}
         >
-          <appConfig.menu.preferences.appearance.icon className="mr-2 size-4 rtl:mr-0 rtl:ml-2" />
-          <span>{appConfig.menu.preferences.appearance.name}</span>
+          <div className="flex items-center gap-2">
+            <appConfig.menu.preferences.appearance.icon className="size-4 text-muted-foreground" />
+            <span>{appConfig.menu.preferences.appearance.name}</span>
+          </div>
           {currentThemeLabel && (
-            <span className="ms-2 text-xs font-semibold text-muted-foreground uppercase">
+            <span className="text-xs font-semibold text-muted-foreground uppercase">
               ({currentThemeLabel})
             </span>
           )}
         </CustomAccordionTrigger>
-        <CustomAccordionContent className="flex flex-col px-2">
-          {appConfig.menu.preferences.appearance.options.map((item) => (
-            <Button
-              key={item.key}
-              variant="ghost"
-              onClick={() => handleThemeChange(item.value)}
-              className={cn("flex items-center justify-start", {
-                "font-normal text-muted-foreground": item.value !== theme,
-              })}
-            >
-              {item.value === theme ? (
-                <Check className="size-3" />
-              ) : (
-                <div className="size-3" />
-              )}
-              {item.label}
-            </Button>
-          ))}
+
+        <CustomAccordionContent className="flex flex-col gap-0.5 px-1 pt-1">
+          {appConfig.menu.preferences.appearance.options.map((item) => {
+            const isSelected = item.value === theme
+            return (
+              <Button
+                key={item.key}
+                variant="ghost"
+                onClick={() => setTheme(item.value)}
+                className={cn(
+                  "flex h-9 w-full items-center justify-start gap-2 rounded-lg text-xs font-normal",
+                  !isSelected && "text-muted-foreground"
+                )}
+              >
+                {isSelected ? (
+                  <CheckIcon className="size-3.5 text-primary" />
+                ) : (
+                  <span className="size-3.5" />
+                )}
+                <span>{item.label}</span>
+              </Button>
+            )
+          })}
         </CustomAccordionContent>
       </CustomAccordionItem>
     </CustomAccordion>

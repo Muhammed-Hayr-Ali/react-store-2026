@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { CheckIcon, ChevronDownIcon, Loader2Icon } from "lucide-react"
+
 import { setUserCurrency } from "@/lib/actions/currency/mutations/set-currency"
 import {
   CustomPopover,
@@ -17,31 +18,36 @@ import { cn } from "@/lib/utils"
 
 interface CurrencySwitcherProps {
   currentCurrency: CurrencyCode
+  className?: string
 }
 
-export function CurrencySwitcher({ currentCurrency }: CurrencySwitcherProps) {
+export function CurrencySwitcher({
+  currentCurrency,
+  className,
+}: CurrencySwitcherProps) {
   const router = useRouter()
   const [open, setOpen] = React.useState(false)
-  const [isPending, setIsPending] = React.useState(false)
+  const [isPending, startTransition] = React.useTransition()
 
   const activeCurrency =
     SUPPORTED_CURRENCIES.find((c) => c.code === currentCurrency) ||
     SUPPORTED_CURRENCIES[0]
 
-  const handleCurrencyChange = async (newCurrency: string) => {
-    if (newCurrency === currentCurrency) {
+  const handleCurrencyChange = (newCurrency: CurrencyCode) => {
+    if (newCurrency === currentCurrency || isPending) {
       setOpen(false)
       return
     }
 
-    try {
-      setIsPending(true)
-      await setUserCurrency(newCurrency)
-      setOpen(false)
-      router.refresh()
-    } finally {
-      setIsPending(false)
-    }
+    startTransition(async () => {
+      try {
+        await setUserCurrency(newCurrency)
+        setOpen(false)
+        router.refresh()
+      } catch (error) {
+        console.error("Failed to update currency:", error)
+      }
+    })
   }
 
   return (
@@ -51,29 +57,24 @@ export function CurrencySwitcher({ currentCurrency }: CurrencySwitcherProps) {
           type="button"
           disabled={isPending}
           className={cn(
-            "group inline-flex h-8 cursor-pointer items-center justify-between gap-1.5 rounded-lg border border-border/70 bg-background/60 px-2.5 text-xs font-medium text-foreground backdrop-blur-xs transition-all",
-            "hover:border-border hover:bg-muted/50 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-hidden",
-            "disabled:pointer-events-none disabled:opacity-50",
-            open && "border-border bg-muted/50"
+            "flex h-8 cursor-pointer items-center gap-1.5 rounded-md px-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none",
+            open && "bg-muted text-foreground",
+            className
           )}
           aria-label="Change currency"
         >
           {isPending ? (
-            <Loader2Icon className="size-3.5 animate-spin text-muted-foreground" />
+            <Loader2Icon className="size-3.5 animate-spin" />
           ) : (
-            <span className="font-semibold text-foreground tabular-nums">
+            <span className="font-semibold text-foreground">
               {activeCurrency.code}
             </span>
           )}
 
-          <span className="text-[11px] text-muted-foreground">
-            {activeCurrency.symbol || "$"}
-          </span>
-
           <ChevronDownIcon
             className={cn(
-              "size-3 text-muted-foreground/70 transition-transform duration-200 group-hover:text-foreground",
-              open && "rotate-180 text-foreground"
+              "size-3 transition-transform duration-200",
+              open && "rotate-180"
             )}
           />
         </button>
@@ -81,7 +82,7 @@ export function CurrencySwitcher({ currentCurrency }: CurrencySwitcherProps) {
 
       <CustomPopoverContent
         align="end"
-        className="w-48 overflow-hidden rounded-xl border border-border/80 bg-popover/95 p-0.5 backdrop-blur-md"
+        className="w-36 rounded-lg border bg-popover p-1 shadow-md"
       >
         <div className="flex flex-col gap-0.5">
           {SUPPORTED_CURRENCIES.map((currency) => {
@@ -91,26 +92,22 @@ export function CurrencySwitcher({ currentCurrency }: CurrencySwitcherProps) {
               <button
                 key={currency.code}
                 type="button"
-                onClick={() => handleCurrencyChange(currency.code)}
+                onClick={() =>
+                  handleCurrencyChange(currency.code as CurrencyCode)
+                }
                 className={cn(
-                  "flex w-full cursor-pointer items-center justify-between rounded-lg px-2.5 py-1.5 text-xs transition-colors",
+                  "flex w-full cursor-pointer items-center justify-between rounded-md px-2 py-1.5 text-xs transition-colors",
                   isSelected
-                    ? "bg-primary/10 font-semibold text-primary"
-                    : "text-foreground hover:bg-muted/70 hover:text-foreground"
+                    ? "bg-accent font-semibold text-accent-foreground"
+                    : "text-foreground hover:bg-muted"
                 )}
               >
-                <div className="flex items-center gap-2">
-                  <span className="w-8 font-bold">{currency.code}</span>
+                <span>{currency.code}</span>
+                <div className="flex items-center gap-1.5">
                   <span className="text-[11px] text-muted-foreground">
                     {currency.symbol}
                   </span>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                 
-                  {isSelected && (
-                    <CheckIcon className="size-3.5 text-primary" />
-                  )}
+                  {isSelected ? <CheckIcon className="size-3 text-primary"/> : <div className="size-3"/> }
                 </div>
               </button>
             )

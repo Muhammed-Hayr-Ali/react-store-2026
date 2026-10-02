@@ -1,10 +1,12 @@
 "use client"
 
+import * as React from "react"
+import { BellIcon, UserIcon } from "lucide-react"
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { CustomButton } from "@/components/ui/custom-button"
 import { CurrentUser } from "@/lib/actions/utils/profile"
 import { cn } from "@/lib/utils"
-import { User } from "lucide-react"
 
 interface UserProfileProps {
   className?: string
@@ -22,23 +24,26 @@ export default function UserProfile({ user, className }: UserProfileProps) {
   return (
     <div
       className={cn(
-        "flex w-full items-center justify-between gap-3 p-1",
+        "flex w-full items-center justify-between gap-3",
         className
       )}
     >
-      <div className="flex items-center gap-3">
-        {/* أفاتار بحجم متناسق لا يضغط النصوص */}
-        <Avatar className="size-10 shrink-0">
-          <AvatarImage src={user.profile_image} alt={displayName} />
+      <div className="flex min-w-0 items-center gap-3">
+        {/* أفاتار بحجم متناسق */}
+        <Avatar className="shrink-0 size-14">
+          <AvatarImage
+            src={user.profile_image || undefined}
+            alt={displayName}
+          />
           <AvatarFallback className="p-2">
-            <User className="size-full text-muted-foreground" />
+            <UserIcon className="size-full text-muted-foreground" />
           </AvatarFallback>
         </Avatar>
 
-        {/* الحاوية النصية تمتد تلقائياً بحسب طول النص */}
-        <div className="flex flex-col items-start justify-center">
+        {/* الحاوية النصية للمستخدم */}
+        <div className="flex min-w-0 flex-col items-start justify-center">
           <p
-            className="max-w-[240px] truncate text-sm font-semibold whitespace-nowrap text-foreground"
+            className="w-full truncate text-xs font-semibold text-foreground"
             title={displayName}
           >
             {displayName}
@@ -46,7 +51,7 @@ export default function UserProfile({ user, className }: UserProfileProps) {
 
           {user.email && (
             <p
-              className="max-w-[240px] truncate text-xs whitespace-nowrap text-muted-foreground"
+              className="w-full truncate text-[11px] text-muted-foreground"
               title={user.email}
             >
               {user.email}
@@ -54,7 +59,7 @@ export default function UserProfile({ user, className }: UserProfileProps) {
           )}
 
           {user.role === "admin" && (
-            <span className="mt-0.5 inline-flex items-center rounded-sm bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+            <span className="mt-1 inline-flex items-center rounded bg-primary/10 px-1.5 py-0.5 text-[9px] font-semibold text-primary">
               Admin
             </span>
           )}
@@ -71,20 +76,16 @@ export default function UserProfile({ user, className }: UserProfileProps) {
 function NotificationButton() {
   return (
     <div className="relative">
-      <div className="absolute top-0 right-0 z-50 size-2 rounded-full bg-green-500 rtl:right-auto rtl:left-0 dark:bg-green-400" />
+      {/* نقطة الإشعار باستخدام أبعاد الاتجاه الحديثة inset-e */}
+      <span className="absolute -inset-e-0.5 -top-0.5 z-10 size-2 rounded-full bg-emerald-500 ring-2 ring-background" />
       <CustomButton
+        type="button"
         variant="secondary"
         size="icon"
-        className="size-8 p-1.5"
-        asChild
+        className="size-8 rounded-lg text-muted-foreground hover:text-foreground"
+        aria-label="Notifications"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 256 256"
-          className="size-4 fill-foreground"
-        >
-          <path d="M168,224a8,8,0,0,1-8,8H96a8,8,0,1,1,0-16h64A8,8,0,0,1,168,224Zm53.85-32A15.8,15.8,0,0,1,208,200H48a16,16,0,0,1-13.8-24.06C39.75,166.38,48,139.34,48,104a80,80,0,1,1,160,0c0,35.33,8.26,62.38,13.81,71.94A15.89,15.89,0,0,1,221.84,192ZM208,184c-7.73-13.27-16-43.95-16-80a64,64,0,1,0-128,0c0,36.06-8.28,66.74-16,80Z"></path>
-        </svg>
+        <BellIcon className="size-4" />
       </CustomButton>
     </div>
   )

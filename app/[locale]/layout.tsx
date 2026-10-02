@@ -11,6 +11,7 @@ import { Metadata, Viewport } from "next"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
 import { DirectionProvider } from "@/components/ui/direction"
+import { ScrollToTop } from "@/components/common/scroll-to-top"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 
@@ -63,7 +64,8 @@ export default async function RootLayout({ children, params }: Props) {
           <ThemeProvider>
             <NextIntlClientProvider>
               <TooltipProvider>
-                <main>{children}</main>
+                <ScrollToTop />
+                {children}
               </TooltipProvider>
             </NextIntlClientProvider>
           </ThemeProvider>
