@@ -37,10 +37,7 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
-import {
-  InputGroup,
-  InputGroupTextarea,
-} from "@/components/ui/input-group"
+import { InputGroup, InputGroupTextarea } from "@/components/ui/input-group"
 import { Switch } from "@/components/ui/switch"
 import {
   Select,
@@ -150,7 +147,6 @@ export default function CreateProductForm({
 }) {
   const router = useRouter()
 
-  // Local state for categories and dialogs
   const [categoriesList, setCategoriesList] = React.useState<Category[]>(
     initialCategories || []
   )
@@ -162,7 +158,6 @@ export default function CreateProductForm({
     data: null,
   })
 
-  // Local state for brands and dialogs
   const [brandsList, setBrandsList] = React.useState<Brand[]>(
     initialBrands || []
   )
@@ -321,45 +316,12 @@ export default function CreateProductForm({
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Top Header & Actions Bar */}
-        <div className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              Create Product
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Configure product details, variants, media, and inventory
-              settings.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isSubmitting}
-              onClick={() => form.reset()}
-            >
-              Discard Changes
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="min-w-32 cursor-pointer shadow-xs"
-            >
-              {isSubmitting ? (
-                <>
-                  <Spinner className="mr-2 size-4" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <CheckCircle2Icon className="mr-1.5 size-4" />
-                  Save Product
-                </>
-              )}
-            </Button>
-          </div>
+        {/* Top Header */}
+        <div className="border-b pb-5">
+          <h1 className="text-2xl font-bold tracking-tight">Create Product</h1>
+          <p className="text-sm text-muted-foreground">
+            Configure product details, variants, media, and inventory settings.
+          </p>
         </div>
 
         {/* 2-Column Responsive Layout */}
@@ -604,7 +566,7 @@ export default function CreateProductForm({
               </div>
             </div>
 
-            {/* Organization Card (Categories & Brands with Add/Edit/Delete actions) */}
+            {/* Organization Card */}
             <div className="rounded-xl border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <TagIcon className="size-4 text-primary" />
@@ -890,6 +852,35 @@ export default function CreateProductForm({
             ]}
           />
         )}
+
+        {/* Bottom Actions Bar (Sticky & Convenient) */}
+        <div className="sticky bottom-0 z-20 -mx-4 flex items-center justify-end gap-3 border-t bg-background/90 px-6 py-4 backdrop-blur-md">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isSubmitting}
+            onClick={() => form.reset()}
+          >
+            Discard Changes
+          </Button>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="min-w-32 cursor-pointer shadow-xs"
+          >
+            {isSubmitting ? (
+              <>
+                <Spinner className="mr-2 size-4" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <CheckCircle2Icon className="mr-1.5 size-4" />
+                Save Product
+              </>
+            )}
+          </Button>
+        </div>
       </form>
 
       {/* --- Category Sheets & Dialogs --- */}

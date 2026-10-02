@@ -1,3 +1,4 @@
+import { headers } from "next/headers"
 import { getAdminProductsList } from "@/lib/actions/products/queries/get-admin-products"
 import { DataTable } from "@/components/dashboard/products/all_products/data-table"
 import { AdminProductSummary } from "@/lib/actions/products/types"
@@ -16,14 +17,20 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
-  const result = await getAdminProductsList()
+  const headersList = await headers()
+  const userAgent = headersList.get("user-agent") || ""
+  const isMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      userAgent
+    )
 
+  const result = await getAdminProductsList()
   const products: AdminProductSummary[] =
     result.success && result.data ? result.data : []
 
   return (
     <div className="flex w-full flex-1 flex-col">
-      <DataTable data={products} />
+      <DataTable data={products} initialIsMobile={isMobile} />
     </div>
   )
 }

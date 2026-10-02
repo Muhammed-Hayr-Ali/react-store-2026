@@ -3,25 +3,6 @@
 import * as React from "react"
 import Link from "next/link"
 import {
-  closestCenter,
-  DndContext,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-  type UniqueIdentifier,
-} from "@dnd-kit/core"
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
-import {
-  arrayMove,
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable"
-import { CSS } from "@dnd-kit/utilities"
-import {
   columnFilteringFeature,
   columnVisibilityFeature,
   createColumnHelper,
@@ -30,20 +11,17 @@ import {
   createSortedRowModel,
   FlexRender,
   rowPaginationFeature,
-  rowSelectionFeature,
   rowSortingFeature,
   tableFeatures,
   useTable,
   type ColumnFiltersState,
   type ColumnVisibilityState,
-  type Row,
   type SortingState,
 } from "@tanstack/react-table"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -71,7 +49,6 @@ import {
 } from "@/components/ui/table"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
-  GripVerticalIcon,
   CircleCheckIcon,
   CircleXIcon,
   EllipsisVerticalIcon,
@@ -101,7 +78,6 @@ const features = tableFeatures({
   columnFilteringFeature,
   columnVisibilityFeature,
   rowPaginationFeature,
-  rowSelectionFeature,
   rowSortingFeature,
   filteredRowModel: createFilteredRowModel(),
   paginatedRowModel: createPaginatedRowModel(),
@@ -110,83 +86,67 @@ const features = tableFeatures({
 
 const columnHelper = createColumnHelper<typeof features, AdminProductSummary>()
 
-// -----------------------------------------------------------------------------
-// 2. Drag Handle Component (dnd-kit)
-// -----------------------------------------------------------------------------
-function DragHandle({ id }: { id: string }) {
-  const { attributes, listeners } = useSortable({ id })
+const HIDEABLE_COLUMNS = [
+  "category_name",
+  "brand_name",
+  "variants_count",
+  "total_stock",
+  "price_range",
+  "is_active",
+]
 
-  return (
-    <Button
-      {...attributes}
-      {...listeners}
-      variant="ghost"
-      size="icon"
-      className="size-7 text-muted-foreground hover:bg-transparent"
-    >
-      <GripVerticalIcon className="size-3 text-muted-foreground" />
-      <span className="sr-only">Drag to reorder</span>
-    </Button>
-  )
+const columnLabelsMap: Record<string, string> = {
+  name: "Product",
+  category_name: "Category",
+  brand_name: "Brand",
+  variants_count: "Variants",
+  total_stock: "Stock",
+  price_range: "Price Range",
+  is_active: "Status",
+}
+
+function getColumnTitle(column: {
+  id: string
+  columnDef: { header?: unknown }
+}): string {
+  if (columnLabelsMap[column.id]) {
+    return columnLabelsMap[column.id]
+  }
+  const header = column.columnDef.header
+  if (typeof header === "string") {
+    return header
+  }
+  return column.id
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase())
+}
+
+interface DataTableProps {
+  data: AdminProductSummary[]
+  initialIsMobile?: boolean
 }
 
 // -----------------------------------------------------------------------------
-// 3. Draggable Table Row Component
-// -----------------------------------------------------------------------------
-function DraggableRow({
-  row,
-}: {
-  row: Row<typeof features, AdminProductSummary>
-}) {
-  const { transform, transition, setNodeRef, isDragging } = useSortable({
-    id: row.original.id,
-  })
-
-  return (
-    <TableRow
-      data-state={row.getIsSelected() && "selected"}
-      data-dragging={isDragging}
-      ref={setNodeRef}
-      className="relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80"
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition: transition,
-      }}
-    >
-      {row.getVisibleCells().map((cell) => (
-        <TableCell key={cell.id}>
-          <FlexRender cell={cell} />
-        </TableCell>
-      ))}
-    </TableRow>
-  )
-}
-
-// -----------------------------------------------------------------------------
-// 4. Main DataTable Component
+// 2. Main DataTable Component
 // -----------------------------------------------------------------------------
 export function DataTable({
   data: initialData,
-}: {
-  data: AdminProductSummary[]
-}) {
+  initialIsMobile = false,
+}: DataTableProps) {
   const [data, setData] = React.useState(() => initialData)
   const [prevInitialData, setPrevInitialData] = React.useState(initialData)
   const [currentTab, setCurrentTab] = React.useState<
     "all" | "active" | "low-stock"
   >("all")
 
-  // حالة المنتج المحدد للحذف
   const [productToDelete, setProductToDelete] =
     React.useState<AdminProductSummary | null>(null)
 
-  // مزامنة البيانات أثناء مرحلة التصيير (Render Phase)
   if (initialData !== prevInitialData) {
     setPrevInitialData(initialData)
     setData(initialData)
   }
 
-  // فلترة المنتجات بناءً على التبويب النشط
   const filteredData = React.useMemo(() => {
     if (currentTab === "active") {
       return data.filter((item) => item.is_active)
@@ -197,7 +157,6 @@ export function DataTable({
     return data
   }, [data, currentTab])
 
-  // حساب الأعداد للشارات في التبويبات
   const activeCount = React.useMemo(
     () => data.filter((item) => item.is_active).length,
     [data]
@@ -207,82 +166,58 @@ export function DataTable({
     [data]
   )
 
-  // حالات الجدول
-  const [rowSelection, setRowSelection] = React.useState({})
+  // التهيئة الابتدائية المباشرة بحسب ما وصل من السيرفر
   const [columnVisibility, setColumnVisibility] =
-    React.useState<ColumnVisibilityState>({})
+    React.useState<ColumnVisibilityState>(() => {
+      const initialVisibility: ColumnVisibilityState = {}
+      HIDEABLE_COLUMNS.forEach((colId) => {
+        initialVisibility[colId] = !initialIsMobile
+      })
+      return initialVisibility
+    })
+
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   )
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: initialIsMobile ? 14 : 10,
   })
 
-  // إعداد السحب والإفلات
-  const sortableId = React.useId()
-  const sensors = useSensors(
-    useSensor(MouseSensor, {}),
-    useSensor(TouchSensor, {}),
-    useSensor(KeyboardSensor, {})
-  )
+  // تحديث القيم في حال تم تدوير الشاشة أو تغيير حجم النافذة في المتصفح
+  React.useEffect(() => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 768
 
-  const dataIds = React.useMemo<UniqueIdentifier[]>(
-    () => filteredData?.map(({ id }) => id) || [],
-    [filteredData]
-  )
+      setPagination((prev) => {
+        const nextSize = isMobile ? 20 : 10
+        if (prev.pageSize === nextSize) return prev
+        return { ...prev, pageSize: nextSize, pageIndex: 0 }
+      })
 
-  // تعريف الأعمدة داخل المكوّن للوصول إلى setProductToDelete
+      setColumnVisibility((prev) => {
+        const nextVisibility: ColumnVisibilityState = { ...prev }
+        HIDEABLE_COLUMNS.forEach((colId) => {
+          nextVisibility[colId] = !isMobile
+        })
+        return nextVisibility
+      })
+    }
+
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
+
   const columns = React.useMemo(
     () =>
       columnHelper.columns([
-        columnHelper.display({
-          id: "drag",
-          header: () => null,
-          cell: ({ row }) => <DragHandle id={row.original.id} />,
-        }),
-
-        columnHelper.display({
-          id: "select",
-          header: ({ table }) => (
-            <div className="flex items-center justify-center">
-              <Checkbox
-                checked={
-                  table.getIsAllPageRowsSelected() ||
-                  (table.getIsSomePageRowsSelected() && "indeterminate")
-                }
-                onCheckedChange={(value) =>
-                  table.toggleAllPageRowsSelected(!!value)
-                }
-                aria-label="Select all"
-              />
-            </div>
-          ),
-          cell: ({ row }) => (
-            <div className="flex items-center justify-center">
-              <Checkbox
-                checked={row.getIsSelected()}
-                onCheckedChange={(value) => row.toggleSelected(!!value)}
-                aria-label="Select row"
-              />
-            </div>
-          ),
-          enableSorting: false,
-          enableHiding: false,
-        }),
-
         columnHelper.accessor("name", {
           header: "Product",
           cell: ({ row }) => (
-            <div className="flex flex-col">
-              <span className="font-semibold text-foreground">
-                {row.original.name}
-              </span>
-              <span className="font-mono text-xs text-muted-foreground">
-                /{row.original.slug}
-              </span>
-            </div>
+            <span className="font-semibold text-foreground">
+              {row.original.name}
+            </span>
           ),
           enableHiding: false,
         }),
@@ -389,17 +324,7 @@ export function DataTable({
         columnHelper.display({
           id: "actions",
           cell: ({ row }) => (
-            <div className="flex items-center justify-end gap-1">
-              <Link
-                href={`/product/${row.original.slug}`}
-                target="_blank"
-                className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                title="Preview in Store"
-              >
-                <ExternalLinkIcon className="size-3.5" />
-                <span className="sr-only">Preview</span>
-              </Link>
-
+            <div className="flex items-center justify-end">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -411,7 +336,18 @@ export function DataTable({
                     <span className="sr-only">Actions</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuContent align="end" className="w-44">
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href={`/product/${row.original.slug}`}
+                      target="_blank"
+                      className="flex cursor-pointer items-center"
+                    >
+                      <ExternalLinkIcon className="me-2 size-3.5" />
+                      View in Store
+                    </Link>
+                  </DropdownMenuItem>
+
                   <DropdownMenuItem asChild>
                     <Link
                       href={`/dashboard/products/${row.original.slug}/edit`}
@@ -454,7 +390,6 @@ export function DataTable({
 
                   <DropdownMenuSeparator />
 
-                  {/* فتح دايلوج الحذف */}
                   <DropdownMenuItem
                     variant="destructive"
                     className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
@@ -479,77 +414,140 @@ export function DataTable({
     state: {
       sorting,
       columnVisibility,
-      rowSelection,
       columnFilters,
       pagination,
     },
     getRowId: (row) => row.id,
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange: setPagination,
   })
 
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event
-    if (active && over && active.id !== over.id) {
-      setData((currentData) => {
-        const oldIndex = currentData.findIndex((item) => item.id === active.id)
-        const newIndex = currentData.findIndex((item) => item.id === over.id)
-        if (oldIndex !== -1 && newIndex !== -1) {
-          return arrayMove(currentData, oldIndex, newIndex)
-        }
-        return currentData
-      })
+  const getFilterLabel = () => {
+    switch (currentTab) {
+      case "active":
+        return { label: "Active", count: activeCount }
+      case "low-stock":
+        return { label: "Low Stock", count: lowStockCount }
+      default:
+        return { label: "All Products", count: data.length }
     }
   }
+
+  const activeFilterInfo = getFilterLabel()
 
   return (
     <div className="flex w-full flex-col justify-start gap-4">
       {/* Table Header Controls */}
-      <div className="flex items-center justify-between">
-        <Tabs
-          value={currentTab}
-          onValueChange={(val) => {
-            setCurrentTab(val as "all" | "active" | "low-stock")
-            table.setPageIndex(0)
-          }}
-        >
-          <TabsList className="flex">
-            <TabsTrigger value="all">
-              All Products{" "}
-              <Badge variant="secondary" className="ms-1.5">
-                {data.length}
-              </Badge>
-            </TabsTrigger>
-            <TabsTrigger value="active">
-              Active{" "}
-              <Badge variant="secondary" className="ms-1.5">
-                {activeCount}
-              </Badge>
-            </TabsTrigger>
-            <TabsTrigger value="low-stock">
-              Low Stock{" "}
-              <Badge variant="secondary" className="ms-1.5">
-                {lowStockCount}
-              </Badge>
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        {/* شاشات سطح المكتب والتابلت */}
+        <div className="hidden sm:block">
+          <Tabs
+            value={currentTab}
+            onValueChange={(val) => {
+              setCurrentTab(val as "all" | "active" | "low-stock")
+              table.setPageIndex(0)
+            }}
+          >
+            <TabsList className="flex">
+              <TabsTrigger value="all">
+                All Products{" "}
+                <Badge variant="secondary" className="ms-1.5">
+                  {data.length}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="active">
+                Active{" "}
+                <Badge variant="secondary" className="ms-1.5">
+                  {activeCount}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="low-stock">
+                Low Stock{" "}
+                <Badge variant="secondary" className="ms-1.5">
+                  {lowStockCount}
+                </Badge>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
 
-        <div className="flex items-center gap-2">
-          {/* Column Visibility Selector */}
+        {/* شاشات الجوال الصغيرة */}
+        <div className="block sm:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                <Columns3Icon className="me-1.5 size-3.5" />
-                Columns
-                <ChevronDownIcon className="ms-1.5 size-3.5" />
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1 px-2 text-[11px] font-medium"
+              >
+                <span>{activeFilterInfo.label}</span>
+                <Badge
+                  variant="secondary"
+                  className="ms-0.5 h-4.5 px-1 text-[10px] tabular-nums"
+                >
+                  {activeFilterInfo.count}
+                </Badge>
+                <ChevronDownIcon className="ms-0.5 size-3 opacity-60" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-36">
+            <DropdownMenuContent align="start" className="w-36 text-xs">
+              <DropdownMenuItem
+                className="flex cursor-pointer items-center justify-between py-1.5 text-xs"
+                onClick={() => {
+                  setCurrentTab("all")
+                  table.setPageIndex(0)
+                }}
+              >
+                <span>All Products</span>
+                <Badge variant="secondary" className="text-[10px] tabular-nums">
+                  {data.length}
+                </Badge>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="flex cursor-pointer items-center justify-between py-1.5 text-xs"
+                onClick={() => {
+                  setCurrentTab("active")
+                  table.setPageIndex(0)
+                }}
+              >
+                <span>Active</span>
+                <Badge variant="secondary" className="text-[10px] tabular-nums">
+                  {activeCount}
+                </Badge>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="flex cursor-pointer items-center justify-between py-1.5 text-xs"
+                onClick={() => {
+                  setCurrentTab("low-stock")
+                  table.setPageIndex(0)
+                }}
+              >
+                <span>Low Stock</span>
+                <Badge variant="secondary" className="text-[10px] tabular-nums">
+                  {lowStockCount}
+                </Badge>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* أدوات التحكم الإضافية */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs sm:h-9"
+              >
+                <Columns3Icon className="me-1 size-3.5 sm:me-1.5" />
+                <span className="xs:inline hidden">Columns</span>
+                <ChevronDownIcon className="ms-1 size-3 opacity-60 sm:ms-1.5 sm:size-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
               {table
                 .getAllColumns()
                 .filter(
@@ -566,21 +564,20 @@ export function DataTable({
                         column.toggleVisibility(!!value)
                       }
                     >
-                      {column.id}
+                      {getColumnTitle(column)}
                     </DropdownMenuCheckboxItem>
                   )
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Add Product Button */}
-          <Button asChild>
+          <Button asChild size="sm" className="h-8 text-xs sm:h-9">
             <Link
               href={appRoutes.dashboard.products.create}
               className="flex items-center"
             >
-              <PlusIcon className="me-1.5 size-3.5" />
-              Create New Product
+              <PlusIcon className="size-3.5" />
+              <span className="hidden sm:block">Create New Product</span>
             </Link>
           </Button>
         </div>
@@ -588,60 +585,49 @@ export function DataTable({
 
       {/* Main Table Container */}
       <div className="w-full overflow-hidden rounded-lg border">
-        <DndContext
-          collisionDetection={closestCenter}
-          modifiers={[restrictToVerticalAxis]}
-          onDragEnd={handleDragEnd}
-          sensors={sensors}
-          id={sortableId}
-        >
-          <Table className="w-full">
-            <TableHeader className="sticky top-0 z-10 bg-muted">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id} colSpan={header.colSpan}>
-                        {header.isPlaceholder ? null : (
-                          <FlexRender header={header} />
-                        )}
-                      </TableHead>
-                    )
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody className="**:data-[slot=table-cell]:first:w-8">
-              {table.getRowModel().rows?.length ? (
-                <SortableContext
-                  items={dataIds}
-                  strategy={verticalListSortingStrategy}
-                >
-                  {table.getRowModel().rows.map((row) => (
-                    <DraggableRow key={row.id} row={row} />
+        <Table className="w-full">
+          <TableHeader className="sticky top-0 z-10 bg-muted">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id} colSpan={header.colSpan}>
+                      {header.isPlaceholder ? null : (
+                        <FlexRender header={header} />
+                      )}
+                    </TableHead>
+                  )
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      <FlexRender cell={cell} />
+                    </TableCell>
                   ))}
-                </SortableContext>
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center text-muted-foreground"
-                  >
-                    No products found.
-                  </TableCell>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </DndContext>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center text-muted-foreground"
+                >
+                  No products found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
 
-      {/* Pagination & Selection Stats Footer */}
+      {/* Pagination Footer */}
       <div className="flex items-center justify-between px-1">
-        <div className="hidden flex-1 text-sm text-muted-foreground lg:flex">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
         <div className="flex w-full items-center gap-8 lg:w-fit">
           <div className="hidden items-center gap-2 lg:flex">
             <Label htmlFor="rows-per-page" className="text-sm font-medium">

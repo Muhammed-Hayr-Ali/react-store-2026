@@ -89,9 +89,9 @@ export function FlashProductCard({
         )}
 
         {/* شارة الخصم العائمة */}
-        <div className="absolute start-1 top-1 z-10 flex flex-col gap-0.5">
+        <div className="absolute inset-s-1 top-1 z-10 flex flex-col gap-0.5">
           {product.discount_percentage ? (
-            <span className="text-destructive-foreground py-0.2 inline-flex items-center gap-0.5 rounded bg-destructive/90 px-1 text-[8px] shadow-xs backdrop-blur-xs sm:text-[9px] text-white">
+            <span className="text-destructive-foreground py-0.2 inline-flex items-center gap-0.5 rounded bg-destructive/90 px-1 text-[8px] text-white shadow-xs backdrop-blur-xs sm:text-[9px]">
               <FlameIcon className="size-2.5 fill-current" />
               {product.discount_percentage}%
             </span>
