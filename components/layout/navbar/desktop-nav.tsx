@@ -108,7 +108,7 @@ function UserMenu({ user }: { user: CurrentUser }) {
           </AvatarFallback>
         </Avatar>
       </CustomPopoverTrigger>
-      <CustomPopoverContent align="end" className="w-56 gap-0 rounded-md p-0">
+      <CustomPopoverContent align="end" className=" gap-0 rounded-md p-0">
         <CustomPopoverHeader className="px-4 py-3">
           <UserProfile user={user} />
         </CustomPopoverHeader>

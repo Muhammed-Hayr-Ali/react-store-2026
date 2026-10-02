@@ -90,6 +90,24 @@ export type CreatedVariant = {
   sku: string
 }
 
+// مخطط ملخص المنتج المقتضب المخصص لجدول لوحة التحكم
+export const adminProductSummarySchema = z.object({
+  id: z.string().uuid("invalid_id"),
+  name: z.string(),
+  slug: z.string(),
+  is_active: z.boolean(),
+  is_featured: z.boolean(),
+  created_at: z.string(),
+  category_name: z.string().nullable(),
+  brand_name: z.string().nullable(),
+  variants_count: z.number().int().min(0),
+  total_stock: z.number().int().min(0),
+  min_price: z.number().min(0),
+  max_price: z.number().min(0),
+})
+
+export type AdminProductSummary = z.infer<typeof adminProductSummarySchema>
+
 // ============================================================================
 // 2. أنواع البيانات (Types)
 // ============================================================================
