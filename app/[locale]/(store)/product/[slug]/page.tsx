@@ -14,7 +14,7 @@ import type {
 } from "@/lib/actions/reviews/types"
 import { getCurrentUser } from "@/lib/actions/utils/profile"
 
-// ✅ استيرادات تعدد العملات
+// استيرادات تعدد العملات
 import { getSelectedCurrency } from "@/lib/actions/currency/queries/get_selected_currency"
 import { getExchangeRates } from "@/lib/actions/currency/queries/get-rates"
 
@@ -72,7 +72,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const parentCategoryId = (product.category as { parent_id?: string | null })
     ?.parent_id
 
-  // ✅ جلب البيانات بالتوازي لأفضل أداء ممكن
+  // جلب البيانات بالتوازي لأفضل أداء ممكن
   const [
     summaryResult,
     reviewsResult,
@@ -89,7 +89,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     getExchangeRates(),
   ])
 
-  // ✅ حساب معدل الصرف بأمان (افتراضي 1 إذا لم يتم العثور على العملة)
+  // حساب معدل الصرف بأمان
   const currentRate =
     exchangeRates.find((r) => r.currency_code === selectedCurrency)
       ?.rate_from_usd ?? 1
@@ -132,22 +132,32 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 pt-28 pb-16 sm:px-6 md:pt-32 md:pb-24 lg:px-8">
-      {/* Breadcrumb Navigation */}
+      {/* روابط التنقل السريع Breadcrumb Navigation */}
       <div className="mb-6">
         <Breadcrumb>
           <BreadcrumbList>
+            {/* رابط الصفحة الرئيسية */}
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href={`/${locale}`}>{homeLabel}</Link>
+                <Link
+                  href={`/${locale}`}
+                  className="transition-colors hover:text-foreground"
+                >
+                  {homeLabel}
+                </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
 
-            {parentCategory && (
+            {/* رابط التصنيف الأب (إن وجد) */}
+            {parentCategory && parentCategory.slug && (
               <>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link href={`/${locale}/category/${parentCategory.slug}`}>
+                    <Link
+                      href={`/${locale}/category/${parentCategory.slug}`}
+                      className="transition-colors hover:text-foreground"
+                    >
                       {parentCategoryName}
                     </Link>
                   </BreadcrumbLink>
@@ -155,12 +165,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </>
             )}
 
-            {currentCategory && (
+            {/* رابط التصنيف الحالي المباشر للمنتج */}
+            {currentCategory && currentCategory.slug && (
               <>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link href={`/${locale}/category/${currentCategory.slug}`}>
+                    <Link
+                      href={`/${locale}/category/${currentCategory.slug}`}
+                      className="transition-colors hover:text-foreground"
+                    >
                       {currentCategoryName}
                     </Link>
                   </BreadcrumbLink>
@@ -168,10 +182,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </>
             )}
 
+            {/* عنصر المنتج الحالي المعروض */}
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              {/* ✅ تم تصحيح max-w-50 إلى max-w-[12rem] لتجنب تحذيرات Tailwind */}
-              <BreadcrumbPage className="max-w-[12rem] truncate font-medium sm:max-w-xs">
+              <BreadcrumbPage className="max-w-[12rem] truncate font-medium text-foreground sm:max-w-xs">
                 {product.name}
               </BreadcrumbPage>
             </BreadcrumbItem>
@@ -179,15 +193,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </Breadcrumb>
       </div>
 
-      {/* Product Details Section */}
-      {/* ✅ تمرير العملة ومعدل الصرف للمكون */}
+      {/* قسم تفاصيل المنتج */}
       <ProductDetailsPage
         product={product}
         currency={selectedCurrency}
         exchangeRate={currentRate}
       />
 
-      {/* Reviews Section */}
+      {/* قسم المراجعات والتقييمات */}
       <div id="reviews" className="mt-16 border-t border-border/60 pt-12">
         <ProductReviews
           currentUserId={user?.id}

@@ -1,19 +1,22 @@
 "use client"
 
 import * as React from "react"
-import { LatestProductItem } from "@/lib/actions/products/types"
+import {
+  LatestProductItem,
+  CategoryProductItem,
+} from "@/lib/actions/products/types"
 import type { CurrencyCode } from "@/lib/actions/currency/types"
 import { ProductCard } from "./product-card"
 
 interface ProductsGridProps {
   title?: string
-  products: LatestProductItem[]
+  products: (LatestProductItem | CategoryProductItem)[]
   currency: CurrencyCode
   exchangeRate: number
 }
 
 export default function ProductsGrid({
-  title = "Latest Products",
+  title,
   products,
   currency,
   exchangeRate,
@@ -32,7 +35,7 @@ export default function ProductsGrid({
         </div>
       )}
 
-      {/* تصغير حجم البطاقات عبر زيادة الأعمدة وتقليل الـ gap */}
+      {/* شبكة متجاوبة ومدمجة للأجهزة المحمولة والشاشات الكبيرة */}
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7">
         {products.map((product) => (
           <ProductCard

@@ -244,3 +244,55 @@ export interface RawLatestProductQueryResult {
   product_variants: RawProductVariant[] | null
   product_images: RawProductImage[] | null
 }
+
+
+
+
+
+
+
+// ============================================================================
+// استعلام المنتجات حسب التصنيف (Products By Category)
+// ============================================================================
+
+export const getProductsByCategorySchema = z.object({
+  categorySlug: z.string().min(1, "category_slug_required").optional(),
+  categoryId: z.string().uuid("invalid_category_id").optional(),
+  limit: z.number().int().positive().max(100).default(20),
+  activeOnly: z.boolean().default(true),
+}).refine(
+  (data) => Boolean(data.categorySlug || data.categoryId),
+  {
+    message: "Either categorySlug or categoryId must be provided",
+    path: ["categorySlug"],
+  }
+)
+
+export type GetProductsByCategoryOptions = z.infer<typeof getProductsByCategorySchema>
+
+export interface CategoryProductItem {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  is_featured: boolean
+  created_at: string
+  brand_name: string | null
+  category_name: string | null
+  category_slug: string | null
+  primary_image_url: string | null
+  min_price: number
+}
+
+export interface RawCategoryProductQueryResult {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  is_featured: boolean
+  created_at: string
+  brand: RawBrand | null
+  category: RawCategory | null
+  product_variants: RawProductVariant[] | null
+  product_images: RawProductImage[] | null
+}

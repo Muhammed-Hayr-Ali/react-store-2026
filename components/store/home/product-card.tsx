@@ -6,13 +6,16 @@ import { useLocale } from "next-intl"
 import { ShoppingBagIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { LatestProductItem } from "@/lib/actions/products/types"
+import {
+  LatestProductItem,
+  CategoryProductItem,
+} from "@/lib/actions/products/types"
 import { formatPrice as formatCurrencyPrice } from "@/lib/actions/currency/utils"
 import type { CurrencyCode } from "@/lib/actions/currency/types"
 import { getSiteAssetUrl } from "@/lib/database/supabase/storage"
 
 interface ProductCardProps {
-  product: LatestProductItem
+  product: LatestProductItem | CategoryProductItem
   currency: CurrencyCode
   exchangeRate: number
 }
@@ -35,7 +38,7 @@ export function ProductCard({
     : null
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-lg border border-border/50 bg-card transition-all duration-300 hover:shadow-sm">
+    <div className="group relative mx-auto flex w-full max-w-[155px] flex-col overflow-hidden rounded-lg border border-border/50 bg-card transition-all duration-300 hover:shadow-sm sm:max-w-[175px]">
       {/* رابط صورة المنتج */}
       <Link
         href={`/${locale}/product/${product.slug}`}
@@ -62,7 +65,7 @@ export function ProductCard({
         )}
       </Link>
 
-      {/* تفاصيل المنتج والسعر بحواشي ملمومة */}
+      {/* تفاصيل المنتج والسعر */}
       <div className="flex flex-1 flex-col justify-between p-2 sm:p-2.5">
         <div className="space-y-0.5">
           {product.category_name && (
