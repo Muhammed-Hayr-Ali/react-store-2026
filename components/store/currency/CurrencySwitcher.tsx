@@ -82,7 +82,7 @@ export function CurrencySwitcher({
 
       <CustomPopoverContent
         align="end"
-        className="w-36 rounded-lg border bg-popover p-1 shadow-md"
+        className="w-30 rounded-lg border-none bg-popover p-0.5 shadow-none"
       >
         <div className="flex flex-col gap-0.5">
           {SUPPORTED_CURRENCIES.map((currency) => {
