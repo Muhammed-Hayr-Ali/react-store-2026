@@ -4,9 +4,16 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import type { ProductWithRelations } from "../types"
 
+interface GetProductOptions {
+  activeOnly?: boolean
+}
+
 export async function getProductCompleteBySlug(
-  slug: string
+  slug: string,
+  options: GetProductOptions = {}
 ): Promise<ApiResult<ProductWithRelations>> {
+  const { activeOnly = true } = options
+
   if (!slug || typeof slug !== "string") {
     return {
       success: false,
@@ -17,7 +24,8 @@ export async function getProductCompleteBySlug(
 
   const supabase = await createServerClient()
 
-  const { data, error } = await supabase
+  // بناء الاستعلام الأساسي
+  let query = supabase
     .from("products")
     .select(
       `
@@ -34,8 +42,13 @@ export async function getProductCompleteBySlug(
     `
     )
     .eq("slug", slug)
-    .eq("is_active", true)
-    .single()
+
+  // تطبيق شرط التفعيل فقط إذا كان activeOnly يساوي true
+  if (activeOnly) {
+    query = query.eq("is_active", true)
+  }
+
+  const { data, error } = await query.single()
 
   if (error) {
     if (error.code === "PGRST116") {

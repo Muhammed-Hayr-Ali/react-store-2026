@@ -1,16 +1,29 @@
+import { getAdminProductsList } from "@/lib/actions/products/queries/get-admin-products"
 import { DataTable } from "@/components/dashboard/products/all_products/data-table"
+import { AdminProductSummary } from "@/lib/actions/products/types"
+import { appConfig } from "@/lib/config/app_config"
+import { createMetadata } from "@/lib/config/metadata_generator"
 
-import data from "./data.json"
+export const dynamic = "force-dynamic"
 
-export default function Page() {
+export async function generateMetadata() {
+  return createMetadata({
+    siteName: appConfig.name,
+    title: "All Products - Dashboard",
+    description:
+      "Manage store inventory, monitor stock levels, view variants, and control product pricing.",
+  })
+}
+
+export default async function Page() {
+  const result = await getAdminProductsList()
+
+  const products: AdminProductSummary[] =
+    result.success && result.data ? result.data : []
+
   return (
-   
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <DataTable data={data} />
-            </div>
-          </div>
-        </div>
+    <div className="flex w-full flex-1 flex-col">
+      <DataTable data={products} />
+    </div>
   )
 }

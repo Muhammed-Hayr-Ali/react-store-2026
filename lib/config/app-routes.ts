@@ -9,5 +9,9 @@ export const appRoutes = {
   dashboard: {
     home: "/dashboard",
     account: "/dashboard/account",
+    products: {
+      allProducts: "/dashboard/products",
+      create: "/dashboard/products/create",
+    },
   },
 }

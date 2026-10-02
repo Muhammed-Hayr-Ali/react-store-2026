@@ -263,22 +263,11 @@ export const appConfig = {
           },
         ],
         navMain: [
-       
           {
             title: "Products",
-            url: "#",
+            url: "/dashboard/products",
             icon: Package,
             isActive: false,
-            items: [
-              {
-                title: "All Products",
-                url: "/dashboard/products",
-              },
-              {
-                title: "Add New Product",
-                url: "/dashboard/products/create",
-              },
-            ],
           },
         ],
       },
