@@ -91,7 +91,7 @@ export default function FeaturedHeroSlider({
   if (!slides || slides.length === 0) return null
 
   return (
-    <div className="relative mx-auto w-full max-w-7xl px-3 py-2 sm:px-6 sm:py-3">
+    <div className="mx-auto w-full max-w-6xl px-4 py-2 sm:px-6 sm:py-3 lg:px-8">
       <div
         className="group relative overflow-hidden rounded-2xl border-0 sm:rounded-3xl"
         ref={emblaRef}
@@ -102,7 +102,6 @@ export default function FeaturedHeroSlider({
               key={slide.id}
               className="relative min-w-0 flex-[0_0_100%] transition-opacity duration-300"
             >
-              {/* زيادة ارتفاع السلايدر ليكون أكثر بروزاً */}
               <Link
                 href={`/${locale}/product/${slide.slug}`}
                 className="relative block h-56 w-full overflow-hidden sm:h-72 md:h-84 lg:h-96"

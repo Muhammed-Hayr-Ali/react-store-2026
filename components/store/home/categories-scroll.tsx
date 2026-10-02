@@ -20,7 +20,6 @@ export default function CategoriesScroll({
   const locale = useLocale()
   const isRtl = locale === "ar"
 
-  // إعدادات الالتصاق ببداية كل عنصر Snap
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
     containScroll: "trimSnaps",
@@ -59,7 +58,7 @@ export default function CategoriesScroll({
   if (!categories || categories.length === 0) return null
 
   return (
-    <div className="relative mx-auto w-full max-w-7xl px-3 py-3 sm:px-6">
+    <div className="mx-auto w-full max-w-6xl px-4 py-3 sm:px-6 lg:px-8">
       {/* الترويسة وأزرار التمرير السريعة */}
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-bold tracking-tight text-foreground sm:text-base">
