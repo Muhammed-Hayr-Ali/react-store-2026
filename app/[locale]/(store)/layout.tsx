@@ -7,15 +7,22 @@ export default async function MainLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-
   const user = await getCurrentUser()
 
-
   return (
-    <main>
+    <div className="relative flex min-h-screen flex-col bg-background text-foreground">
+      {/* شريط التنقل العلوي */}
       <Navbar user={user} />
-       {children}
-       <Footer />
-    </main>
+
+      {/* 
+        الحاوية الرئيسية:
+        - flex-1: تدفع الفوتر لأسفل الصفحة حتى لو كان المحتوى قصيراً
+        - pt-16 إلى pt-20: تمنع اختفاء الجزء العلوي خلف شريط التنقل المثبت
+      */}
+      <main className="flex-1 pt-16 sm:pt-20">{children}</main>
+
+      {/* تذييل الصفحة */}
+      <Footer />
+    </div>
   )
 }

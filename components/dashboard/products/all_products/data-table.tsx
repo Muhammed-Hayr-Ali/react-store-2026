@@ -86,6 +86,7 @@ import {
   Trash2Icon,
   PencilIcon,
   CopyIcon,
+  LinkIcon,
 } from "lucide-react"
 
 import { AdminProductSummary } from "@/lib/actions/products/types"
@@ -447,6 +448,7 @@ export function DataTable({
                       toast.success("Product link copied!")
                     }}
                   >
+                    <LinkIcon className="me-2 size-3.5" />
                     Copy Store Link
                   </DropdownMenuItem>
 
