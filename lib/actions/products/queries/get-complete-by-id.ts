@@ -1,11 +1,8 @@
-
-
-
 "use server"
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { ProductWithRelations } from "../types"
+import type { ProductWithRelations } from "../types"
 
 /**
  * جلب منتج واحد مع تصنيفه، علامته التجارية، متغيراته، وصوره المرتبطة به
@@ -13,7 +10,6 @@ import { ProductWithRelations } from "../types"
 export async function getProductCompleteById(
   id: string
 ): Promise<ApiResult<ProductWithRelations | null>> {
-  // حماية إضافية: منع الاستعلام إذا كان الـ ID غير صالح
   if (!id || typeof id !== "string" || id === "undefined" || id === "null") {
     return {
       success: false,
@@ -26,19 +22,19 @@ export async function getProductCompleteById(
 
   const supabase = await createServerClient()
 
-  // ✅ استخدام الاستعلام المتداخل (Nested Select) مع Aliases
   const { data, error } = await supabase
     .from("products")
     .select(
       `
       *,
-      category:categories (
+      category:categories!products_category_id_fkey (
         id,
         name,
         name_ar,
-        slug
+        slug,
+        parent_id
       ),
-      brand:brands (
+      brand:brands!products_brand_id_fkey (
         id,
         name,
         name_ar,
@@ -49,14 +45,14 @@ export async function getProductCompleteById(
         id,
         sku,
         name,
-        attributes,
         price,
         compare_at_price,
         stock_quantity,
         track_inventory,
         low_stock_threshold,
         is_active,
-        sort_order
+        sort_order,
+        attributes
       ),
       product_images (
         id,
@@ -82,5 +78,5 @@ export async function getProductCompleteById(
     }
   }
 
-  return { success: true, data: data as ProductWithRelations }
+  return { success: true, data: data as unknown as ProductWithRelations }
 }

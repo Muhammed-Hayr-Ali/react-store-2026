@@ -24,26 +24,50 @@ export async function getProductCompleteBySlug(
 
   const supabase = await createServerClient()
 
-  // بناء الاستعلام الأساسي
   let query = supabase
     .from("products")
     .select(
       `
       *,
-      category:categories!products_category_id_fkey (id, name, slug, name_ar, parent_id),
-      brand:brands!products_brand_id_fkey (id, name, slug, name_ar, logo_url),
+      category:categories!products_category_id_fkey (
+        id,
+        name,
+        name_ar,
+        slug,
+        parent_id
+      ),
+      brand:brands!products_brand_id_fkey (
+        id,
+        name,
+        name_ar,
+        slug,
+        logo_url
+      ),
       product_variants (
-        id, sku, name, price, is_active, attributes, sort_order, 
-        stock_quantity, track_inventory, compare_at_price, low_stock_threshold
+        id,
+        sku,
+        name,
+        price,
+        compare_at_price,
+        stock_quantity,
+        track_inventory,
+        low_stock_threshold,
+        is_active,
+        sort_order,
+        attributes
       ),
       product_images (
-        id, url, alt_text, is_primary, sort_order, variant_id
+        id,
+        url,
+        alt_text,
+        is_primary,
+        sort_order,
+        variant_id
       )
     `
     )
     .eq("slug", slug)
 
-  // تطبيق شرط التفعيل فقط إذا كان activeOnly يساوي true
   if (activeOnly) {
     query = query.eq("is_active", true)
   }
@@ -61,5 +85,5 @@ export async function getProductCompleteBySlug(
     }
   }
 
-  return { success: true, data: data as ProductWithRelations }
+  return { success: true, data: data as unknown as ProductWithRelations }
 }

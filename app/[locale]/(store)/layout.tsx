@@ -11,15 +11,15 @@ export default async function MainLayout({
 
   return (
     <div className="relative flex min-h-screen flex-col bg-background text-foreground">
-      {/* شريط التنقل العلوي */}
+      {/* شريط التنقل العلوي بارتفاع h-14 */}
       <Navbar user={user} />
 
       {/* 
         الحاوية الرئيسية:
-        - flex-1: تدفع الفوتر لأسفل الصفحة حتى لو كان المحتوى قصيراً
-        - pt-16 إلى pt-20: تمنع اختفاء الجزء العلوي خلف شريط التنقل المثبت
+        - pt-14: تعويض دقيق ومطابق بنسبة 100% لارتفاع الناف بار الثابت (h-14 = 56px)
+        - flex-1: إبقاء الفوتر في الأسفل
       */}
-      <main className="flex-1 pt-16 sm:pt-20">{children}</main>
+      <main className="flex-1 pt-14">{children}</main>
 
       {/* تذييل الصفحة */}
       <Footer />

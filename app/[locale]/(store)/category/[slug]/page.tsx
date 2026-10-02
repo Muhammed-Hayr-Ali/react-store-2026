@@ -63,8 +63,8 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     products[0]?.category_name || decodeURIComponent(slug).replace(/-/g, " ")
 
   return (
-    <div className="flex w-full flex-col py-4 sm:py-6">
-      {/* شريط مسار التصفح والرجوع */}
+    <div className="w-full pt-2 pb-8 sm:pt-4 sm:pb-12">
+      {/* شريط مسار التصفح والرجوع مطابق تماماً لعرض وحواشي الناف بار */}
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="mb-4 flex items-center justify-between border-b border-border/40 pb-3">
           <div className="flex items-center gap-2">
@@ -98,7 +98,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           exchangeRate={currentRate}
         />
       ) : (
-        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-center px-4 py-16 text-center sm:px-6 lg:px-8">
+        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-center px-4 py-12 text-center sm:px-6 lg:px-8">
           <div className="flex size-14 items-center justify-center rounded-full bg-muted/60 text-muted-foreground">
             <PackageXIcon className="size-7" />
           </div>

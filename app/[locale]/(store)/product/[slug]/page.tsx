@@ -131,9 +131,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
     : null
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 pt-28 pb-16 sm:px-6 md:pt-32 md:pb-24 lg:px-8">
+    <div className="mx-auto w-full max-w-6xl px-4 pt-2 pb-8 sm:px-6 sm:pt-4 sm:pb-12 lg:px-8">
       {/* روابط التنقل السريع Breadcrumb Navigation */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <Breadcrumb>
           <BreadcrumbList>
             {/* رابط الصفحة الرئيسية */}
@@ -201,7 +201,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
       />
 
       {/* قسم المراجعات والتقييمات */}
-      <div id="reviews" className="mt-16 border-t border-border/60 pt-12">
+      <div
+        id="reviews"
+        className="mt-12 border-t border-border/60 pt-10 sm:mt-16 sm:pt-12"
+      >
         <ProductReviews
           currentUserId={user?.id}
           summary={summary}
@@ -209,6 +212,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
           productId={productId}
         />
       </div>
-    </main>
+    </div>
   )
 }

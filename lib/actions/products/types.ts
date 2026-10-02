@@ -1,10 +1,10 @@
 import { z } from "zod"
 
 // ============================================================================
-// 1. مخططات Zod الأساسية (Core Schemas)
+// 1. مخططات Zod الأساسية (Core Schemas & Entity Types)
 // ============================================================================
 
-// مخطط جدول المنتجات الرئيسي (مطابق لهيكل قاعدة البيانات الفعلي)
+// مخطط جدول المنتجات الرئيسي (مطابق لقاعدة البيانات)
 export const productSchema = z.object({
   id: z.string().uuid("invalid_id"),
   brand_id: z.string().uuid("invalid_brand_id").nullable().optional(),
@@ -25,7 +25,7 @@ export const productSchema = z.object({
 
 export type Product = z.infer<typeof productSchema>
 
-// مخطط متغير المنتج (Product Variant) مع شرط التحقق من سعر المقارنة
+// مخطط متغير المنتج (Product Variant)
 export const variantSchema = z
   .object({
     sku: z.string().min(1, "sku_required"),
@@ -93,8 +93,31 @@ export interface CreatedVariant {
 }
 
 // ============================================================================
-// 3. أنواع العلاقات الكاملة (Product With Relations)
+// 3. أنواع تفاصيل المنتج والعلاقات الكاملة (Product With Relations)
 // ============================================================================
+
+export interface ProductVariantItem {
+  id: string
+  sku: string
+  name: string | null
+  attributes: Record<string, string>
+  price: number
+  compare_at_price: number | null
+  stock_quantity: number
+  track_inventory: boolean
+  low_stock_threshold: number
+  is_active: boolean
+  sort_order: number
+}
+
+export interface ProductImageItem {
+  id: string
+  url: string
+  alt_text: string | null
+  is_primary: boolean
+  sort_order: number
+  variant_id: string | null
+}
 
 export interface ProductWithRelations {
   id: string
@@ -122,32 +145,12 @@ export interface ProductWithRelations {
     id: string
     name: string
     name_ar?: string | null
-    slug?: string
+    slug: string // ✅ حقل slug أصبح ثابتاً ومطلوباً
     logo_url?: string | null
   } | null
 
-  product_variants: {
-    id: string
-    sku: string
-    name: string | null
-    attributes: Record<string, string>
-    price: number
-    compare_at_price: number | null
-    stock_quantity: number
-    track_inventory: boolean
-    low_stock_threshold: number
-    is_active: boolean
-    sort_order: number
-  }[]
-
-  product_images: {
-    id: string
-    url: string
-    alt_text: string | null
-    is_primary: boolean
-    sort_order: number
-    variant_id: string | null
-  }[]
+  product_variants: ProductVariantItem[]
+  product_images: ProductImageItem[]
 }
 
 // ============================================================================
@@ -172,10 +175,10 @@ export const adminProductSummarySchema = z.object({
 export type AdminProductSummary = z.infer<typeof adminProductSummarySchema>
 
 // ============================================================================
-// 5. استعلامات ومكونات واجهة المتجر (Storefront Queries & Feeds)
+// 5. استعلامات ومكونات واجهة المتجر (Storefront Feeds & Queries)
 // ============================================================================
 
-// شرائح العرض الرئيسية (Featured Slider)
+// أ. شريحة العرض البارزة (Featured Slide)
 export interface FeaturedProductSlide {
   id: string
   name: string
@@ -186,7 +189,7 @@ export interface FeaturedProductSlide {
   brand_name: string | null
 }
 
-// استعلام أحدث المنتجات (Latest Products)
+// ب. أحدث المنتجات (Latest Products)
 export const getLatestProductsSchema = z.object({
   limit: z.number().int().positive().max(50).default(10),
   activeOnly: z.boolean().default(true),
@@ -201,23 +204,89 @@ export interface LatestProductItem {
   description: string | null
   created_at: string
   brand_name: string | null
+  brand_slug?: string | null // ✅ إضافة سلوج الماركة لأحدث المنتجات
   category_name: string | null
   category_slug: string | null
   primary_image_url: string | null
-  min_price: number // بالسنت
+  min_price: number
+}
+
+// ج. استعلام المنتجات حسب التصنيف (Products By Category)
+export const getProductsByCategorySchema = z
+  .object({
+    categorySlug: z.string().min(1, "category_slug_required").optional(),
+    categoryId: z.string().uuid("invalid_category_id").optional(),
+    limit: z.number().int().positive().max(100).default(20),
+    activeOnly: z.boolean().default(true),
+  })
+  .refine((data) => Boolean(data.categorySlug || data.categoryId), {
+    message: "Either categorySlug or categoryId must be provided",
+    path: ["categorySlug"],
+  })
+
+export type GetProductsByCategoryOptions = z.infer<
+  typeof getProductsByCategorySchema
+>
+
+export interface CategoryProductItem {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  is_featured: boolean
+  created_at: string
+  brand_name: string | null
+  brand_slug?: string | null // ✅ إضافة سلوج الماركة لمنتجات التصنيف
+  category_name: string | null
+  category_slug: string | null
+  primary_image_url: string | null
+  min_price: number
+}
+
+// د. استعلام المنتجات حسب الماركة (Products By Brand)
+export const getProductsByBrandSchema = z
+  .object({
+    brandSlug: z.string().min(1, "brand_slug_required").optional(),
+    brandId: z.string().uuid("invalid_brand_id").optional(),
+    limit: z.number().int().positive().max(100).default(20),
+    activeOnly: z.boolean().default(true),
+  })
+  .refine((data) => Boolean(data.brandSlug || data.brandId), {
+    message: "Either brandSlug or brandId must be provided",
+    path: ["brandSlug"],
+  })
+
+export type GetProductsByBrandOptions = z.infer<typeof getProductsByBrandSchema>
+
+export interface BrandProductItem {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  is_featured: boolean
+  created_at: string
+  brand_name: string | null
+  brand_slug: string | null // ✅ مطلوب دائماً لمنتجات الماركة
+  category_name: string | null
+  category_slug: string | null
+  primary_image_url: string | null
+  min_price: number
 }
 
 // ============================================================================
-// 6. أنواع استعلامات Supabase الخام (Raw DB Query Types - Strongly Typed)
+// 6. أنواع استعلامات Supabase الخام (Raw DB Strongly Typed Results)
 // ============================================================================
 
 export interface RawBrand {
   name: string
+  slug?: string | null // ✅ إضافة السلوج للاستعلامات
 }
 
 export interface RawCategory {
   name: string
   slug: string
+  name_ar?: string | null
+  parent_id?: string | null
 }
 
 export interface RawProductVariant {
@@ -245,45 +314,6 @@ export interface RawLatestProductQueryResult {
   product_images: RawProductImage[] | null
 }
 
-
-
-
-
-
-
-// ============================================================================
-// استعلام المنتجات حسب التصنيف (Products By Category)
-// ============================================================================
-
-export const getProductsByCategorySchema = z.object({
-  categorySlug: z.string().min(1, "category_slug_required").optional(),
-  categoryId: z.string().uuid("invalid_category_id").optional(),
-  limit: z.number().int().positive().max(100).default(20),
-  activeOnly: z.boolean().default(true),
-}).refine(
-  (data) => Boolean(data.categorySlug || data.categoryId),
-  {
-    message: "Either categorySlug or categoryId must be provided",
-    path: ["categorySlug"],
-  }
-)
-
-export type GetProductsByCategoryOptions = z.infer<typeof getProductsByCategorySchema>
-
-export interface CategoryProductItem {
-  id: string
-  name: string
-  slug: string
-  description: string | null
-  is_featured: boolean
-  created_at: string
-  brand_name: string | null
-  category_name: string | null
-  category_slug: string | null
-  primary_image_url: string | null
-  min_price: number
-}
-
 export interface RawCategoryProductQueryResult {
   id: string
   name: string
@@ -297,46 +327,6 @@ export interface RawCategoryProductQueryResult {
   product_images: RawProductImage[] | null
 }
 
-
-
-
-
-
-
-
-// ============================================================================
-// استعلام المنتجات حسب الماركة (Products By Brand)
-// ============================================================================
-
-export const getProductsByBrandSchema = z
-  .object({
-    brandSlug: z.string().min(1, "brand_slug_required").optional(),
-    brandId: z.string().uuid("invalid_brand_id").optional(),
-    limit: z.number().int().positive().max(100).default(20),
-    activeOnly: z.boolean().default(true),
-  })
-  .refine((data) => Boolean(data.brandSlug || data.brandId), {
-    message: "Either brandSlug or brandId must be provided",
-    path: ["brandSlug"],
-  })
-
-export type GetProductsByBrandOptions = z.infer<typeof getProductsByBrandSchema>
-
-export interface BrandProductItem {
-  id: string
-  name: string
-  slug: string
-  description: string | null
-  is_featured: boolean
-  created_at: string
-  brand_name: string | null
-  brand_slug: string | null
-  category_name: string | null
-  category_slug: string | null
-  primary_image_url: string | null
-  min_price: number
-}
-
 export interface RawBrandProductQueryResult {
   id: string
   name: string
@@ -344,7 +334,7 @@ export interface RawBrandProductQueryResult {
   description: string | null
   is_featured: boolean
   created_at: string
-  brand: { name: string; slug?: string } | null
+  brand: RawBrand | null
   category: RawCategory | null
   product_variants: RawProductVariant[] | null
   product_images: RawProductImage[] | null

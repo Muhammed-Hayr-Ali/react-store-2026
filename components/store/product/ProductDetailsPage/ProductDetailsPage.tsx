@@ -18,8 +18,8 @@ import type { CurrencyCode } from "@/lib/actions/currency/types"
 
 interface ProductDetailsProps {
   product: ProductWithRelations
-  currency: CurrencyCode // ✅ إضافة جديدة
-  exchangeRate: number // ✅ إضافة جديدة
+  currency: CurrencyCode
+  exchangeRate: number
 }
 
 export default function ProductDetailsPage({
@@ -151,7 +151,6 @@ export default function ProductDetailsPage({
         )
       : null
 
-  // ✅ السعر الإجمالي بالسنت (ليتم تمريره لدالة التنسيق)
   const totalPriceInCents = selectedVariant
     ? selectedVariant.price * quantity
     : 0
@@ -173,12 +172,14 @@ export default function ProductDetailsPage({
         <ProductHeader
           productName={product.name}
           categoryName={product.category?.name}
+          categorySlug={product.category?.slug} // ✅ تم تمرير السلوج للتصنيف
           brandName={product.brand?.name}
+          brandSlug={product.brand?.slug} // ✅ تم تمرير السلوج للماركة
           selectedVariant={selectedVariant}
           isOutOfStock={isOutOfStock}
           isLowStock={isLowStock}
-          currency={currency} // ✅ تمرير العملة
-          exchangeRate={exchangeRate} // ✅ تمرير سعر الصرف
+          currency={currency}
+          exchangeRate={exchangeRate}
         />
 
         <Separator />
@@ -196,9 +197,9 @@ export default function ProductDetailsPage({
 
         <ProductActions
           quantity={quantity}
-          totalPriceInCents={totalPriceInCents} // ✅ تمرير السعر بالسنت
-          currency={currency} // ✅ تمرير العملة
-          exchangeRate={exchangeRate} // ✅ تمرير سعر الصرف
+          totalPriceInCents={totalPriceInCents}
+          currency={currency}
+          exchangeRate={exchangeRate}
           isOutOfStock={isOutOfStock}
           maxStock={selectedVariant?.stock_quantity ?? 0}
           onQuantityChange={handleQuantityChange}
