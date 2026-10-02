@@ -1,10 +1,10 @@
 import { z } from "zod"
 
 // ============================================================================
-// 1. مخططات Zod (Schemas)
+// 1. مخططات Zod الأساسية (Core Schemas)
 // ============================================================================
 
-// مخطط المنتج الأساسي
+// مخطط جدول المنتجات الرئيسي (مطابق لهيكل قاعدة البيانات الفعلي)
 export const productSchema = z.object({
   id: z.string().uuid("invalid_id"),
   brand_id: z.string().uuid("invalid_brand_id").nullable().optional(),
@@ -25,7 +25,7 @@ export const productSchema = z.object({
 
 export type Product = z.infer<typeof productSchema>
 
-// مخطط المتغير (Variant) مع شرط المقارنة اللحظي
+// مخطط متغير المنتج (Product Variant) مع شرط التحقق من سعر المقارنة
 export const variantSchema = z
   .object({
     sku: z.string().min(1, "sku_required"),
@@ -41,7 +41,6 @@ export const variantSchema = z
   })
   .refine(
     (data) => {
-      // إذا كان السعر قبل الخصم موجوداً وله قيمة رقمية
       if (
         data.compare_at_price !== null &&
         data.compare_at_price !== undefined &&
@@ -53,13 +52,13 @@ export const variantSchema = z
     },
     {
       message: "Compare-at price must be greater than original price.",
-      path: ["compare_at_price"], // ربط الخطأ مباشرة بحقل compare_at_price
+      path: ["compare_at_price"],
     }
   )
 
 export type VariantInput = z.infer<typeof variantSchema>
 
-// مخطط الصورة (Image)
+// مخطط صورة المنتج (Product Image)
 export const imageSchema = z.object({
   url: z.string().url("image_link_invalid"),
   alt_text: z.string().optional().or(z.literal("")),
@@ -69,7 +68,10 @@ export const imageSchema = z.object({
 
 export type ImageInput = z.infer<typeof imageSchema>
 
-// المخطط الشامل لإنشاء المنتج (منتج + متغيرات + صور)
+// ============================================================================
+// 2. مخططات الإدخال والتعديل (Mutations Schemas & Inputs)
+// ============================================================================
+
 export const createProductCompleteSchema = productSchema
   .omit({
     id: true,
@@ -85,34 +87,16 @@ export type CreateProductCompleteInput = z.infer<
   typeof createProductCompleteSchema
 >
 
-export type CreatedVariant = {
+export interface CreatedVariant {
   id: string
   sku: string
 }
 
-// مخطط ملخص المنتج المقتضب المخصص لجدول لوحة التحكم
-export const adminProductSummarySchema = z.object({
-  id: z.string().uuid("invalid_id"),
-  name: z.string(),
-  slug: z.string(),
-  is_active: z.boolean(),
-  is_featured: z.boolean(),
-  created_at: z.string(),
-  category_name: z.string().nullable(),
-  brand_name: z.string().nullable(),
-  variants_count: z.number().int().min(0),
-  total_stock: z.number().int().min(0),
-  min_price: z.number().min(0),
-  max_price: z.number().min(0),
-})
-
-export type AdminProductSummary = z.infer<typeof adminProductSummarySchema>
-
 // ============================================================================
-// 2. أنواع البيانات (Types)
+// 3. أنواع العلاقات الكاملة (Product With Relations)
 // ============================================================================
 
-export type ProductWithRelations = {
+export interface ProductWithRelations {
   id: string
   brand_id: string | null
   category_id: string
@@ -131,14 +115,15 @@ export type ProductWithRelations = {
     name: string
     name_ar: string | null
     slug: string
+    parent_id?: string | null
   } | null
 
   brand: {
     id: string
     name: string
-    name_ar: string | null
-    slug: string
-    logo_url: string | null
+    name_ar?: string | null
+    slug?: string
+    logo_url?: string | null
   } | null
 
   product_variants: {
@@ -165,6 +150,32 @@ export type ProductWithRelations = {
   }[]
 }
 
+// ============================================================================
+// 4. مخططات وأنواع لوحة التحكم (Admin Dashboard)
+// ============================================================================
+
+export const adminProductSummarySchema = z.object({
+  id: z.string().uuid("invalid_id"),
+  name: z.string(),
+  slug: z.string(),
+  is_active: z.boolean(),
+  is_featured: z.boolean(),
+  created_at: z.string(),
+  category_name: z.string().nullable(),
+  brand_name: z.string().nullable(),
+  variants_count: z.number().int().min(0),
+  total_stock: z.number().int().min(0),
+  min_price: z.number().min(0),
+  max_price: z.number().min(0),
+})
+
+export type AdminProductSummary = z.infer<typeof adminProductSummarySchema>
+
+// ============================================================================
+// 5. استعلامات ومكونات واجهة المتجر (Storefront Queries & Feeds)
+// ============================================================================
+
+// شرائح العرض الرئيسية (Featured Slider)
 export interface FeaturedProductSlide {
   id: string
   name: string
@@ -173,4 +184,63 @@ export interface FeaturedProductSlide {
   min_price: number
   primary_image_url: string | null
   brand_name: string | null
+}
+
+// استعلام أحدث المنتجات (Latest Products)
+export const getLatestProductsSchema = z.object({
+  limit: z.number().int().positive().max(50).default(10),
+  activeOnly: z.boolean().default(true),
+})
+
+export type GetLatestProductsOptions = z.infer<typeof getLatestProductsSchema>
+
+export interface LatestProductItem {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  created_at: string
+  brand_name: string | null
+  category_name: string | null
+  category_slug: string | null
+  primary_image_url: string | null
+  min_price: number // بالسنت
+}
+
+// ============================================================================
+// 6. أنواع استعلامات Supabase الخام (Raw DB Query Types - Strongly Typed)
+// ============================================================================
+
+export interface RawBrand {
+  name: string
+}
+
+export interface RawCategory {
+  name: string
+  slug: string
+}
+
+export interface RawProductVariant {
+  price: number
+  compare_at_price?: number | null
+  is_active: boolean
+}
+
+export interface RawProductImage {
+  url: string
+  alt_text?: string | null
+  is_primary: boolean
+  sort_order?: number | null
+}
+
+export interface RawLatestProductQueryResult {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  created_at: string
+  brand: RawBrand | null
+  category: RawCategory | null
+  product_variants: RawProductVariant[] | null
+  product_images: RawProductImage[] | null
 }

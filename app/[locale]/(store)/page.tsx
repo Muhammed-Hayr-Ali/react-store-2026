@@ -1,14 +1,16 @@
-import StorePage from "@/components/store/home/StorePage"
 import FeaturedHeroSlider from "@/components/store/home/featured-hero-slider"
 import CategoriesScroll from "@/components/store/home/categories-scroll"
+
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getFeaturedProductSlides } from "@/lib/actions/products/queries/get-featured-slides"
 import { getRootCategories } from "@/lib/actions/categories/queries/get-root-categories"
+import { getLatestProducts } from "@/lib/actions/products/queries/get-latest-products"
 
 // استيراد أدوات جلب العملة وأسعار الصرف
 import { getSelectedCurrency } from "@/lib/actions/currency/queries/get_selected_currency"
 import { getExchangeRates } from "@/lib/actions/currency/queries/get-rates"
+import ProductsGrid from "@/components/store/home/products-grid"
 
 export async function generateMetadata() {
   return createMetadata({
@@ -21,13 +23,19 @@ export async function generateMetadata() {
 
 export default async function Page() {
   // جلب كافة البيانات في السيرفر بالتوازي لتحقيق أعلى سرعة تحميل
-  const [featuredResult, categoriesResult, selectedCurrency, exchangeRates] =
-    await Promise.all([
-      getFeaturedProductSlides({ limit: 5 }),
-      getRootCategories({ activeOnly: true }),
-      getSelectedCurrency(),
-      getExchangeRates(),
-    ])
+  const [
+    featuredResult,
+    categoriesResult,
+    latestResult,
+    selectedCurrency,
+    exchangeRates,
+  ] = await Promise.all([
+    getFeaturedProductSlides({ limit: 5 }),
+    getRootCategories({ activeOnly: true }),
+    getLatestProducts({ limit: 20, activeOnly: true }),
+    getSelectedCurrency(),
+    getExchangeRates(),
+  ])
 
   const slides =
     featuredResult.success && featuredResult.data ? featuredResult.data : []
@@ -35,6 +43,8 @@ export default async function Page() {
     categoriesResult.success && categoriesResult.data
       ? categoriesResult.data
       : []
+  const latestProducts =
+    latestResult.success && latestResult.data ? latestResult.data : []
 
   // حساب سعر الصرف المقابل للعملة الحالية
   const currentRate =
@@ -61,8 +71,15 @@ export default async function Page() {
         </section>
       )}
 
-      {/* باقي أقسام المتجر */}
-      <StorePage />
+      {/* شبكة أحدث المنتجات */}
+      {latestProducts.length > 0 && (
+        <ProductsGrid
+          title="Latest Products"
+          products={latestProducts}
+          currency={selectedCurrency}
+          exchangeRate={currentRate}
+        />
+      )}
     </div>
   )
 }

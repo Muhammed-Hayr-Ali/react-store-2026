@@ -20,8 +20,9 @@ export default function CategoriesScroll({
   const locale = useLocale()
   const isRtl = locale === "ar"
 
+  // إعدادات الالتصاق ببداية كل عنصر Snap
   const [emblaRef, emblaApi] = useEmblaCarousel({
-    dragFree: true,
+    align: "start",
     containScroll: "trimSnaps",
     direction: isRtl ? "rtl" : "ltr",
   })
@@ -104,7 +105,6 @@ export default function CategoriesScroll({
             const displayName =
               isRtl && category.name_ar ? category.name_ar : category.name
 
-            // استخراج الرابط الصحيح سواء كان مساراً نسبياً أو رابطاً مطلقاً
             const imageUrl = getSiteAssetUrl(category.image_url)
 
             return (

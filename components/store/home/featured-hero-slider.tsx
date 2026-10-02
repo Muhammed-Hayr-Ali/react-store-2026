@@ -5,16 +5,10 @@ import Link from "next/link"
 import { useLocale } from "next-intl"
 import useEmblaCarousel from "embla-carousel-react"
 import Autoplay from "embla-carousel-autoplay"
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ArrowRightIcon,
-  ArrowLeftIcon,
-} from "lucide-react"
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { FeaturedProductSlide } from "@/lib/actions/products/types"
-import { formatPrice as formatCurrencyPrice } from "@/lib/actions/currency/utils"
 import type { CurrencyCode } from "@/lib/actions/currency/types"
 
 interface FeaturedHeroSliderProps {
@@ -25,8 +19,6 @@ interface FeaturedHeroSliderProps {
 
 export default function FeaturedHeroSlider({
   slides,
-  currency,
-  exchangeRate,
 }: FeaturedHeroSliderProps) {
   const locale = useLocale()
   const isRtl = locale === "ar"
@@ -101,83 +93,39 @@ export default function FeaturedHeroSlider({
   return (
     <div className="relative mx-auto w-full max-w-7xl px-3 py-2 sm:px-6 sm:py-3">
       <div
-        className="group relative overflow-hidden rounded-2xl bg-muted/50 sm:rounded-3xl"
+        className="group relative overflow-hidden rounded-2xl border-0 sm:rounded-3xl"
         ref={emblaRef}
       >
         <div className="flex touch-pan-y">
-          {slides.map((slide) => {
-            // تنسيق السعر بالعملة المختارة ومعدل الصرف الممرر
-            const formattedPrice = formatCurrencyPrice(
-              slide.min_price,
-              currency,
-              exchangeRate
-            )
-
-            return (
-              <div
-                key={slide.id}
-                className="min-w-0 flex-[0_0_100%] transition-opacity duration-300"
+          {slides.map((slide) => (
+            <div
+              key={slide.id}
+              className="relative min-w-0 flex-[0_0_100%] transition-opacity duration-300"
+            >
+              {/* زيادة ارتفاع السلايدر ليكون أكثر بروزاً */}
+              <Link
+                href={`/${locale}/product/${slide.slug}`}
+                className="relative block h-56 w-full overflow-hidden sm:h-72 md:h-84 lg:h-96"
               >
-                <div className="flex h-36 items-center justify-between gap-3 px-4 py-3 sm:h-56 sm:gap-8 sm:px-8 sm:py-6 md:h-64 md:px-10">
-                  {/* قسم النصوص والمعلومات */}
-                  <div className="flex flex-1 flex-col items-start justify-center space-y-1 sm:space-y-2">
-                    {slide.brand_name && (
-                      <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase sm:text-xs">
-                        {slide.brand_name}
-                      </span>
-                    )}
-
-                    <h2 className="line-clamp-1 text-sm font-bold tracking-tight text-foreground sm:text-xl md:text-2xl">
-                      {slide.name}
-                    </h2>
-
-                    <div className="text-sm font-extrabold text-primary tabular-nums sm:text-xl md:text-2xl">
-                      {formattedPrice}
-                    </div>
-
-                    <div className="pt-0.5 sm:pt-1">
-                      <Button
-                        asChild
-                        size="sm"
-                        className="h-7 rounded-full px-3 text-[11px] font-medium shadow-none sm:h-8 sm:px-4 sm:text-xs"
-                      >
-                        <Link href={`/${locale}/product/${slide.slug}`}>
-                          {isRtl ? "تسوق الآن" : "Shop Now"}
-                          {isRtl ? (
-                            <ArrowLeftIcon className="me-1 size-3 sm:size-3.5" />
-                          ) : (
-                            <ArrowRightIcon className="ms-1 size-3 sm:size-3.5" />
-                          )}
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* قسم الصورة */}
-                  <div className="flex h-full w-28 shrink-0 items-center justify-center sm:w-48 md:w-60">
-                    {slide.primary_image_url ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={slide.primary_image_url}
-                        alt={slide.name}
-                        loading="lazy"
-                        className="max-h-24 max-w-full object-contain transition-transform duration-300 group-hover:scale-105 sm:max-h-44 md:max-h-52"
-                      />
-                    ) : (
-                      <div className="flex size-16 items-center justify-center rounded-xl bg-background text-[10px] text-muted-foreground sm:size-24 sm:text-xs">
-                        {isRtl ? "لا توجد صورة" : "No Image"}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )
-          })}
+                {slide.primary_image_url ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={slide.primary_image_url}
+                    alt={slide.name}
+                    loading="lazy"
+                    className="size-full border-0 object-cover object-center transition-transform duration-500 group-hover:scale-[1.01]"
+                  />
+                ) : (
+                  <div className="size-full bg-muted" />
+                )}
+              </Link>
+            </div>
+          ))}
         </div>
 
         {/* أزرار التنقل الجانبية */}
         {slides.length > 1 && (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-between p-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 sm:p-2.5">
+          <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-between p-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 sm:p-2.5">
             <Button
               variant="ghost"
               size="icon"
@@ -210,7 +158,7 @@ export default function FeaturedHeroSlider({
 
         {/* مؤشرات التمرير السفلية */}
         {slides.length > 1 && (
-          <div className="absolute inset-x-0 bottom-1.5 flex items-center justify-center gap-1 sm:bottom-2 sm:gap-1.5">
+          <div className="absolute inset-x-0 bottom-2 z-20 flex items-center justify-center gap-1 sm:bottom-2.5 sm:gap-1.5">
             {scrollSnaps.map((_, index) => (
               <button
                 key={index}
@@ -219,7 +167,7 @@ export default function FeaturedHeroSlider({
                 className={`h-1 rounded-full transition-all duration-300 sm:h-1.5 ${
                   index === selectedIndex
                     ? "w-4 bg-primary sm:w-5"
-                    : "w-1 bg-foreground/15 hover:bg-foreground/25 sm:w-1.5"
+                    : "w-1 bg-foreground/25 hover:bg-foreground/40 sm:w-1.5"
                 }`}
               />
             ))}

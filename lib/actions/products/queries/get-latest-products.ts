@@ -1,0 +1,112 @@
+"use server"
+
+import { createServerClient } from "@/lib/database/supabase/server"
+import { ApiResult } from "@/lib/database/types/utils"
+import {
+  getLatestProductsSchema,
+  GetLatestProductsOptions,
+  LatestProductItem,
+  RawLatestProductQueryResult,
+} from "../types"
+
+/**
+ * جلب أحدث المنتجات المضافة (غير المميزة) لعرضها في المتجر
+ */
+export async function getLatestProducts(
+  options: Partial<GetLatestProductsOptions> = {}
+): Promise<ApiResult<LatestProductItem[]>> {
+  // 1. التحقق من المدخلات
+  const validation = getLatestProductsSchema.safeParse(options)
+  if (!validation.success) {
+    return {
+      success: false,
+      error: "INVALID_PARAMETERS",
+    }
+  }
+
+  const { limit, activeOnly } = validation.data
+
+  try {
+    const supabase = await createServerClient()
+
+    // 2. بناء الاستعلام مع تحديد المفاتيح الأجنبية بدقة لتفادي أخطاء الربط
+    let query = supabase
+      .from("products")
+      .select(
+        `
+        id,
+        name,
+        slug,
+        description,
+        created_at,
+        brand:brands!products_brand_id_fkey (name),
+        category:categories!products_category_id_fkey (name, slug),
+        product_variants (price, is_active),
+        product_images (url, is_primary)
+      `
+      )
+      .eq("is_featured", false)
+      .order("created_at", { ascending: false })
+      .limit(limit)
+
+    if (activeOnly) {
+      query = query.eq("is_active", true)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+      console.error("❌ [GetLatestProducts] Database error:", error.message)
+      return {
+        success: false,
+        error: "FETCH_LATEST_PRODUCTS_ERROR",
+        details: { database: [error.message] },
+      }
+    }
+
+    const rawProducts = (data || []) as unknown as RawLatestProductQueryResult[]
+
+    // 3. تنسيق النتائج، استخراج الصورة الأساسية، وحساب أقل سعر
+    const formattedProducts: LatestProductItem[] = rawProducts.map((prod) => {
+      // حساب أقل سعر بين المتغيرات المفعّلة
+      const activeVariants = (prod.product_variants || []).filter(
+        (v) => v.is_active
+      )
+      const prices = activeVariants.map((v) => Number(v.price))
+      const minPrice = prices.length > 0 ? Math.min(...prices) : 0
+
+      // استخراج الصورة الأساسية أو أول صورة متوفرة
+      const images = prod.product_images || []
+      const primaryImg =
+        images.find((img) => img.is_primary)?.url || images[0]?.url || null
+
+      return {
+        id: prod.id,
+        name: prod.name,
+        slug: prod.slug,
+        description: prod.description,
+        created_at: prod.created_at,
+        min_price: minPrice,
+        primary_image_url: primaryImg,
+        brand_name: prod.brand?.name || null,
+        category_name: prod.category?.name || null,
+        category_slug: prod.category?.slug || null,
+      }
+    })
+
+    return {
+      success: true,
+      data: formattedProducts,
+    }
+  } catch (err) {
+    const errorMessage =
+      err instanceof Error ? err.message : "Unexpected error occurred"
+
+    console.error("❌ [GetLatestProducts] Unexpected Error:", errorMessage)
+    return {
+      success: false,
+      error: "UNEXPECTED_ERROR",
+      details: { database: [errorMessage] },
+    }
+  }
+}
