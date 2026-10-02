@@ -91,7 +91,7 @@ export function FlashProductCard({
         {/* شارة الخصم العائمة */}
         <div className="absolute start-1 top-1 z-10 flex flex-col gap-0.5">
           {product.discount_percentage ? (
-            <span className="text-destructive-foreground py-0.2 inline-flex items-center gap-0.5 rounded bg-destructive/90 px-1 text-[8px] font-bold shadow-xs backdrop-blur-xs sm:text-[9px]">
+            <span className="text-destructive-foreground py-0.2 inline-flex items-center gap-0.5 rounded bg-destructive/90 px-1 text-[8px] shadow-xs backdrop-blur-xs sm:text-[9px] text-white">
               <FlameIcon className="size-2.5 fill-current" />
               {product.discount_percentage}%
             </span>
@@ -164,8 +164,8 @@ export function FlashProductCard({
           <Button
             asChild
             size="icon"
-            variant="default"
-            className="text-destructive-foreground size-5.5 rounded-full bg-destructive shadow-none hover:bg-destructive/90 sm:size-6.5"
+            variant="secondary"
+            className="text-destructive-foreground size-5.5 rounded-full shadow-none sm:size-6.5"
           >
             <Link
               href={`/${locale}/product/${product.slug}`}

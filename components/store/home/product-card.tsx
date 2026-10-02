@@ -17,7 +17,10 @@ import { getSiteAssetUrl } from "@/lib/database/supabase/storage"
 import { cn } from "@/lib/utils"
 
 interface ProductCardProps {
-  product: LatestProductItem | CategoryProductItem | BrandProductItem
+  product: (LatestProductItem | CategoryProductItem | BrandProductItem) & {
+    discount_percentage?: number | null
+    original_price?: number | null
+  }
   currency: CurrencyCode
   exchangeRate: number
   viewMode?: "grid" | "list"
@@ -30,7 +33,6 @@ export function ProductCard({
   viewMode = "grid",
 }: ProductCardProps) {
   const locale = useLocale()
-  // حالة تتبع فشل تحميل الصورة
   const [imageError, setImageError] = React.useState(false)
 
   const formattedPrice = formatCurrencyPrice(
@@ -44,6 +46,17 @@ export function ProductCard({
     : null
 
   const isList = viewMode === "list"
+
+  // حساب نسبة الخصم إذا كانت متوفرة مباشرة أو محسوبة من الأسعار
+  const discount =
+    product.discount_percentage ??
+    (product.original_price && product.original_price > product.min_price
+      ? Math.round(
+          ((product.original_price - product.min_price) /
+            product.original_price) *
+            100
+        )
+      : null)
 
   return (
     <div
@@ -77,6 +90,16 @@ export function ProductCard({
               className={cn("stroke-[1.5]", isList ? "size-6" : "size-8")}
             />
           </div>
+        )}
+
+        {/* شارة نسبة الخصم: خلفية حمراء ونص أبيض ناصع */}
+        {discount && discount > 0 && (
+          <span
+            dir="ltr"
+            className="absolute end-1.5 top-1.5 z-10 rounded bg-red-600 px-1.5 py-0.5 font-mono text-[10px] font-bold text-white shadow-xs"
+          >
+            -{discount}%
+          </span>
         )}
 
         {product.brand_name && !isList && (

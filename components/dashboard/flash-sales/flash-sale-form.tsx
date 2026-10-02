@@ -2,9 +2,12 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { useForm, useFieldArray } from "react-hook-form"
+import { useForm, useFieldArray, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { format } from "date-fns"
+import { type DateRange } from "react-day-picker"
 import {
+  CalendarIcon,
   CheckIcon,
   FlameIcon,
   Loader2Icon,
@@ -17,6 +20,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
+import { Calendar } from "@/components/ui/calendar"
+import { Field, FieldLabel } from "@/components/ui/field"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import {
   Select,
   SelectContent,
@@ -24,11 +34,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
 import {
   Command,
   CommandEmpty,
@@ -45,6 +50,7 @@ import {
 import { FlashSaleDiscountType } from "@/lib/actions/flash-sales/types"
 import { createFlashSale } from "@/lib/actions/flash-sales/mutations/create"
 import { updateFlashSale } from "@/lib/actions/flash-sales/mutations/update"
+import { cn } from "@/lib/utils"
 
 export interface SelectableProduct {
   id: string
@@ -117,7 +123,7 @@ export function FlashSaleForm({
     control,
     handleSubmit,
     setValue,
-    watch,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<FlashSaleFormInput>({
     resolver: zodResolver(flashSaleFormSchema),
@@ -138,18 +144,75 @@ export function FlashSaleForm({
     name: "items",
   })
 
-  const watchedItems = watch("items")
-  const watchedTitle = watch("title")
+  const watchedItems = useWatch({ control, name: "items" })
+  const isActive = useWatch({ control, name: "isActive" })
+  const startsAt = useWatch({ control, name: "startsAt" })
+  const endsAt = useWatch({ control, name: "endsAt" })
+
+  const dateRange: DateRange | undefined = React.useMemo(() => {
+    const from = startsAt ? new Date(startsAt) : undefined
+    const to = endsAt ? new Date(endsAt) : undefined
+    return {
+      from: from && !isNaN(from.getTime()) ? from : undefined,
+      to: to && !isNaN(to.getTime()) ? to : undefined,
+    }
+  }, [startsAt, endsAt])
+
+  const startTime =
+    startsAt && startsAt.length >= 16 ? startsAt.slice(11, 16) : "00:00"
+  const endTime = endsAt && endsAt.length >= 16 ? endsAt.slice(11, 16) : "23:59"
+
+  const handleRangeSelect = (range: DateRange | undefined) => {
+    if (range?.from) {
+      const year = range.from.getFullYear()
+      const month = String(range.from.getMonth() + 1).padStart(2, "0")
+      const day = String(range.from.getDate()).padStart(2, "0")
+      setValue("startsAt", `${year}-${month}-${day}T${startTime}`, {
+        shouldValidate: true,
+      })
+    }
+
+    if (range?.to) {
+      const year = range.to.getFullYear()
+      const month = String(range.to.getMonth() + 1).padStart(2, "0")
+      const day = String(range.to.getDate()).padStart(2, "0")
+      setValue("endsAt", `${year}-${month}-${day}T${endTime}`, {
+        shouldValidate: true,
+      })
+    }
+  }
+
+  const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const time = e.target.value
+    const datePart =
+      startsAt && startsAt.length >= 10
+        ? startsAt.slice(0, 10)
+        : new Date().toISOString().slice(0, 10)
+    setValue("startsAt", `${datePart}T${time}`, { shouldValidate: true })
+  }
+
+  const handleEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const time = e.target.value
+    const datePart =
+      endsAt && endsAt.length >= 10
+        ? endsAt.slice(0, 10)
+        : new Date().toISOString().slice(0, 10)
+    setValue("endsAt", `${datePart}T${time}`, { shouldValidate: true })
+  }
 
   const handleTitleBlur = () => {
-    const currentSlug = watch("slug")
-    if (!currentSlug && watchedTitle && !saleId) {
-      setValue("slug", generateSlug(watchedTitle), { shouldValidate: true })
+    const currentSlug = getValues("slug")
+    const currentTitle = getValues("title")
+    if (!currentSlug && currentTitle && !saleId) {
+      setValue("slug", generateSlug(currentTitle), { shouldValidate: true })
     }
   }
 
   const handleSelectProduct = (product: SelectableProduct) => {
-    const isAlreadySelected = fields.some((f) => f.productId === product.id)
+    const currentFields = getValues("items") || []
+    const isAlreadySelected = currentFields.some(
+      (f) => f.productId === product.id
+    )
     if (!isAlreadySelected) {
       append({
         productId: product.id,
@@ -186,7 +249,7 @@ export function FlashSaleForm({
         </div>
       )}
 
-      {/* قسم 1: تفاصيل الحملة العامة */}
+      {/* General Information */}
       <div className="space-y-4 rounded-xl border border-border bg-card p-4 sm:p-6">
         <h3 className="border-b border-border/40 pb-2 text-sm font-semibold text-foreground">
           General Information
@@ -260,7 +323,7 @@ export function FlashSaleForm({
             </div>
             <Switch
               id="isActive"
-              checked={watch("isActive")}
+              checked={isActive}
               onCheckedChange={(checked) => setValue("isActive", checked)}
             />
           </div>
@@ -279,44 +342,94 @@ export function FlashSaleForm({
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 border-t border-border/30 pt-2 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="startsAt" className="text-xs">
-              Starts At <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="startsAt"
-              type="datetime-local"
-              {...register("startsAt")}
-              className="text-xs"
-            />
-            {errors.startsAt && (
-              <p className="text-[11px] text-destructive">
-                {errors.startsAt.message}
-              </p>
-            )}
+        {/* Campaign Duration (Range Calendar + Time Picker Fields) */}
+        <div className="space-y-2 border-t border-border/30 pt-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            {/* Date Range Picker */}
+            <div className="flex-1 space-y-1">
+              <Label htmlFor="date-picker-range" className="text-xs">
+                Date Range <span className="text-destructive">*</span>
+              </Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    id="date-picker-range"
+                    disabled={isSubmitting}
+                    className={cn(
+                      "w-full justify-start px-2.5 text-xs font-normal",
+                      !dateRange?.from && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 size-3.5" />
+                    {dateRange?.from ? (
+                      dateRange.to ? (
+                        <>
+                          {format(dateRange.from, "LLL dd, y")} -{" "}
+                          {format(dateRange.to, "LLL dd, y")}
+                        </>
+                      ) : (
+                        format(dateRange.from, "LLL dd, y")
+                      )
+                    ) : (
+                      <span>Pick campaign date range</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="range"
+                    defaultMonth={dateRange?.from}
+                    selected={dateRange}
+                    onSelect={handleRangeSelect}
+                    numberOfMonths={2}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Start Time Input (مكون الوقت الأصلي) */}
+            <Field className="w-full sm:w-32">
+              <FieldLabel htmlFor="start-time-picker" className="text-xs">
+                Start Time
+              </FieldLabel>
+              <Input
+                type="time"
+                id="start-time-picker"
+                step="1"
+                value={startTime}
+                disabled={isSubmitting}
+                onChange={handleStartTimeChange}
+                className="appearance-none bg-background font-mono text-xs [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+              />
+            </Field>
+
+            {/* End Time Input (مكون الوقت الأصلي) */}
+            <Field className="w-full sm:w-32">
+              <FieldLabel htmlFor="end-time-picker" className="text-xs">
+                End Time
+              </FieldLabel>
+              <Input
+                type="time"
+                id="end-time-picker"
+                step="1"
+                value={endTime}
+                disabled={isSubmitting}
+                onChange={handleEndTimeChange}
+                className="appearance-none bg-background font-mono text-xs [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+              />
+            </Field>
           </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="endsAt" className="text-xs">
-              Ends At <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="endsAt"
-              type="datetime-local"
-              {...register("endsAt")}
-              className="text-xs"
-            />
-            {errors.endsAt && (
-              <p className="text-[11px] text-destructive">
-                {errors.endsAt.message}
-              </p>
-            )}
-          </div>
+          {(errors.startsAt || errors.endsAt) && (
+            <p className="text-[11px] text-destructive">
+              {errors.startsAt?.message || errors.endsAt?.message}
+            </p>
+          )}
         </div>
       </div>
 
-      {/* قسم 2: اختيار وتخصيص منتجات الحملة */}
+      {/* Participating Products */}
       <div className="space-y-4 rounded-xl border border-border bg-card p-4 sm:p-6">
         <div className="flex items-center justify-between border-b border-border/40 pb-2">
           <div>
@@ -519,7 +632,7 @@ export function FlashSaleForm({
         )}
       </div>
 
-      {/* أزرار الإجراءات */}
+      {/* Form Action Buttons */}
       <div className="flex items-center justify-end gap-3 pt-2">
         <Button
           type="button"

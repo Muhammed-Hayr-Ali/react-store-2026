@@ -106,7 +106,7 @@ export function ProductGallery({
           )}
 
           {!isOutOfStock && discountPercentage && (
-            <span className="text-destructive-foreground absolute start-4 top-4 animate-in rounded-full bg-destructive px-3 py-1 text-xs font-bold tracking-wide shadow-md duration-300 zoom-in-90 fade-in">
+            <span className="text-destructive-foreground absolute start-4 top-4 animate-in rounded-full bg-destructive px-3 py-1 text-xs font-medium tracking-wide shadow-md duration-300 zoom-in-90 fade-in text-white">
               {discountPercentage}% OFF
             </span>
           )}
