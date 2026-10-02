@@ -1,4 +1,4 @@
-import { DataTable } from "@/components/data-table"
+import { DataTable } from "@/components/dashboard/products/all_products/data-table"
 
 import data from "./data.json"
 
