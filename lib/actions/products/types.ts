@@ -164,3 +164,13 @@ export type ProductWithRelations = {
     variant_id: string | null
   }[]
 }
+
+export interface FeaturedProductSlide {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  min_price: number
+  primary_image_url: string | null
+  brand_name: string | null
+}

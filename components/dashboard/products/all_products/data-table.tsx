@@ -39,6 +39,7 @@ import {
   type Row,
   type SortingState,
 } from "@tanstack/react-table"
+import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -89,8 +90,8 @@ import {
 
 import { AdminProductSummary } from "@/lib/actions/products/types"
 import { appRoutes } from "@/lib/config/app-routes"
-import { toast } from "sonner"
 import { duplicateProduct } from "@/lib/actions/products/mutations/duplicate"
+import DeleteProductDialog from "../delete/delete-product-dialog"
 
 // -----------------------------------------------------------------------------
 // 1. TanStack Table Features Registration
@@ -129,254 +130,7 @@ function DragHandle({ id }: { id: string }) {
 }
 
 // -----------------------------------------------------------------------------
-// 3. Table Columns Definition
-// -----------------------------------------------------------------------------
-const columns = columnHelper.columns([
-  // Drag Column
-  columnHelper.display({
-    id: "drag",
-    header: () => null,
-    cell: ({ row }) => <DragHandle id={row.original.id} />,
-  }),
-
-  // Row Selection Column
-  columnHelper.display({
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  }),
-
-  // Product Name & Slug Column
-  columnHelper.accessor("name", {
-    header: "Product",
-    cell: ({ row }) => (
-      <div className="flex flex-col">
-        <span className="font-semibold text-foreground">
-          {row.original.name}
-        </span>
-        <span className="font-mono text-xs text-muted-foreground">
-          /{row.original.slug}
-        </span>
-      </div>
-    ),
-    enableHiding: false,
-  }),
-
-  // Category Name Column
-  columnHelper.accessor("category_name", {
-    header: "Category",
-    cell: ({ row }) => (
-      <Badge
-        variant="outline"
-        className="px-2 py-0.5 text-xs text-muted-foreground"
-      >
-        {row.original.category_name || "—"}
-      </Badge>
-    ),
-  }),
-
-  // Brand Name Column
-  columnHelper.accessor("brand_name", {
-    header: "Brand",
-    cell: ({ row }) => (
-      <span className="text-xs font-medium text-foreground">
-        {row.original.brand_name || "—"}
-      </span>
-    ),
-  }),
-
-  // Total Variants Count Column
-  columnHelper.accessor("variants_count", {
-    header: () => <div className="text-center">Variants</div>,
-    cell: ({ row }) => (
-      <div className="text-center tabular-nums">
-        <Badge variant="secondary" className="px-2 py-0.5 text-xs">
-          {row.original.variants_count}
-        </Badge>
-      </div>
-    ),
-  }),
-
-  // Aggregated Stock Quantity Column
-  columnHelper.accessor("total_stock", {
-    header: () => <div className="text-center">Stock</div>,
-    cell: ({ row }) => {
-      const stock = row.original.total_stock
-      const isLow = stock <= 10
-      return (
-        <div className="text-center tabular-nums">
-          <span
-            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-              isLow
-                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-            }`}
-          >
-            {stock}
-          </span>
-        </div>
-      )
-    },
-  }),
-
-  // Price Range Column (Calculated from Cents)
-  columnHelper.display({
-    id: "price_range",
-    header: "Price Range",
-    cell: ({ row }) => {
-      const min = (row.original.min_price / 100).toFixed(2)
-      const max = (row.original.max_price / 100).toFixed(2)
-      const isSinglePrice = row.original.min_price === row.original.max_price
-
-      return (
-        <div className="flex items-center gap-1 text-xs font-semibold tabular-nums">
-          <span>${min}</span>
-          {!isSinglePrice && (
-            <>
-              <span className="text-muted-foreground">-</span>
-              <span>${max}</span>
-            </>
-          )}
-        </div>
-      )
-    },
-  }),
-
-  // Status Badge Column
-  columnHelper.accessor("is_active", {
-    header: () => <div className="text-center">Status</div>,
-    cell: ({ row }) => (
-      <div className="flex justify-center">
-        <Badge
-          variant="outline"
-          className={`gap-1 px-2 py-0.5 text-xs ${
-            row.original.is_active
-              ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
-              : "text-muted-foreground"
-          }`}
-        >
-          {row.original.is_active ? (
-            <CircleCheckIcon className="size-3 fill-emerald-500 text-background" />
-          ) : (
-            <CircleXIcon className="size-3 fill-muted-foreground text-background" />
-          )}
-          {row.original.is_active ? "Active" : "Inactive"}
-        </Badge>
-      </div>
-    ),
-  }),
-
-  // Actions Dropdown & Preview Link Column
-  columnHelper.display({
-    id: "actions",
-    cell: ({ row }) => (
-      <div className="flex items-center justify-end gap-1">
-        {/* زر معاينة المنتج في المتجر */}
-        <Link
-          href={`/product/${row.original.slug}`}
-          target="_blank"
-          className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          title="Preview in Store"
-        >
-          <ExternalLinkIcon className="size-3.5" />
-          <span className="sr-only">Preview</span>
-        </Link>
-
-        {/* القائمة المنسدلة للعمليات */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="flex size-7 text-muted-foreground data-[state=open]:bg-muted"
-              size="icon"
-            >
-              <EllipsisVerticalIcon className="size-4" />
-              <span className="sr-only">Actions</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40">
-            {/* رابط صفحة تحرير المنتج بالاعتماد على slug */}
-            <DropdownMenuItem asChild>
-              <Link
-                href={`/dashboard/products/${row.original.slug}/edit`}
-                className="flex cursor-pointer items-center"
-              >
-                <PencilIcon className="me-2 size-3.5" />
-                Edit Product
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="cursor-pointer"
-              onClick={async () => {
-                toast.promise(duplicateProduct(row.original.id), {
-                  loading: "Duplicating product...",
-                  success: (res) => {
-                    if (!res.success) throw new Error(res.error)
-                    return "Product duplicated successfully!"
-                  },
-                  error: "Failed to duplicate product",
-                })
-              }}
-            >
-              <CopyIcon className="me-2 size-3.5" />
-              Duplicate
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="cursor-pointer"
-              onClick={() => {
-                navigator.clipboard.writeText(
-                  `${window.location.origin}/product/${row.original.slug}`
-                )
-                toast.success("Product link copied!")
-              }}
-            >
-              Copy Store Link
-            </DropdownMenuItem>
-
-            <DropdownMenuSeparator />
-
-            {/* زر الحذف */}
-            <DropdownMenuItem
-              variant="destructive"
-              className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
-              onClick={() => {
-                // استدعاء دالة الحذف أو فتح نافذة التأكيد (Delete Dialog)
-                console.log("Delete product ID:", row.original.id)
-              }}
-            >
-              <Trash2Icon className="me-2 size-3.5" />
-              Delete Product
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    ),
-  }),
-])
-
-// -----------------------------------------------------------------------------
-// 4. Draggable Table Row Component
+// 3. Draggable Table Row Component
 // -----------------------------------------------------------------------------
 function DraggableRow({
   row,
@@ -408,7 +162,7 @@ function DraggableRow({
 }
 
 // -----------------------------------------------------------------------------
-// 5. Main DataTable Component
+// 4. Main DataTable Component
 // -----------------------------------------------------------------------------
 export function DataTable({
   data: initialData,
@@ -421,13 +175,17 @@ export function DataTable({
     "all" | "active" | "low-stock"
   >("all")
 
-  // Sync state when initialData changes during render phase
+  // حالة المنتج المحدد للحذف
+  const [productToDelete, setProductToDelete] =
+    React.useState<AdminProductSummary | null>(null)
+
+  // مزامنة البيانات أثناء مرحلة التصيير (Render Phase)
   if (initialData !== prevInitialData) {
     setPrevInitialData(initialData)
     setData(initialData)
   }
 
-  // Filter products dynamically based on selected tab
+  // فلترة المنتجات بناءً على التبويب النشط
   const filteredData = React.useMemo(() => {
     if (currentTab === "active") {
       return data.filter((item) => item.is_active)
@@ -438,7 +196,7 @@ export function DataTable({
     return data
   }, [data, currentTab])
 
-  // Compute statistics for tabs count badges
+  // حساب الأعداد للشارات في التبويبات
   const activeCount = React.useMemo(
     () => data.filter((item) => item.is_active).length,
     [data]
@@ -448,7 +206,7 @@ export function DataTable({
     [data]
   )
 
-  // TanStack Table states
+  // حالات الجدول
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
     React.useState<ColumnVisibilityState>({})
@@ -461,7 +219,7 @@ export function DataTable({
     pageSize: 10,
   })
 
-  // Drag and drop setup
+  // إعداد السحب والإفلات
   const sortableId = React.useId()
   const sensors = useSensors(
     useSensor(MouseSensor, {}),
@@ -474,7 +232,244 @@ export function DataTable({
     [filteredData]
   )
 
-  // Table instance initialization using filtered data
+  // تعريف الأعمدة داخل المكوّن للوصول إلى setProductToDelete
+  const columns = React.useMemo(
+    () =>
+      columnHelper.columns([
+        columnHelper.display({
+          id: "drag",
+          header: () => null,
+          cell: ({ row }) => <DragHandle id={row.original.id} />,
+        }),
+
+        columnHelper.display({
+          id: "select",
+          header: ({ table }) => (
+            <div className="flex items-center justify-center">
+              <Checkbox
+                checked={
+                  table.getIsAllPageRowsSelected() ||
+                  (table.getIsSomePageRowsSelected() && "indeterminate")
+                }
+                onCheckedChange={(value) =>
+                  table.toggleAllPageRowsSelected(!!value)
+                }
+                aria-label="Select all"
+              />
+            </div>
+          ),
+          cell: ({ row }) => (
+            <div className="flex items-center justify-center">
+              <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                aria-label="Select row"
+              />
+            </div>
+          ),
+          enableSorting: false,
+          enableHiding: false,
+        }),
+
+        columnHelper.accessor("name", {
+          header: "Product",
+          cell: ({ row }) => (
+            <div className="flex flex-col">
+              <span className="font-semibold text-foreground">
+                {row.original.name}
+              </span>
+              <span className="font-mono text-xs text-muted-foreground">
+                /{row.original.slug}
+              </span>
+            </div>
+          ),
+          enableHiding: false,
+        }),
+
+        columnHelper.accessor("category_name", {
+          header: "Category",
+          cell: ({ row }) => (
+            <Badge
+              variant="outline"
+              className="px-2 py-0.5 text-xs text-muted-foreground"
+            >
+              {row.original.category_name || "—"}
+            </Badge>
+          ),
+        }),
+
+        columnHelper.accessor("brand_name", {
+          header: "Brand",
+          cell: ({ row }) => (
+            <span className="text-xs font-medium text-foreground">
+              {row.original.brand_name || "—"}
+            </span>
+          ),
+        }),
+
+        columnHelper.accessor("variants_count", {
+          header: () => <div className="text-center">Variants</div>,
+          cell: ({ row }) => (
+            <div className="text-center tabular-nums">
+              <Badge variant="secondary" className="px-2 py-0.5 text-xs">
+                {row.original.variants_count}
+              </Badge>
+            </div>
+          ),
+        }),
+
+        columnHelper.accessor("total_stock", {
+          header: () => <div className="text-center">Stock</div>,
+          cell: ({ row }) => {
+            const stock = row.original.total_stock
+            const isLow = stock <= 10
+            return (
+              <div className="text-center tabular-nums">
+                <span
+                  className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                    isLow
+                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                      : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                  }`}
+                >
+                  {stock}
+                </span>
+              </div>
+            )
+          },
+        }),
+
+        columnHelper.display({
+          id: "price_range",
+          header: "Price Range",
+          cell: ({ row }) => {
+            const min = (row.original.min_price / 100).toFixed(2)
+            const max = (row.original.max_price / 100).toFixed(2)
+            const isSinglePrice =
+              row.original.min_price === row.original.max_price
+
+            return (
+              <div className="flex items-center gap-1 text-xs font-semibold tabular-nums">
+                <span>${min}</span>
+                {!isSinglePrice && (
+                  <>
+                    <span className="text-muted-foreground">-</span>
+                    <span>${max}</span>
+                  </>
+                )}
+              </div>
+            )
+          },
+        }),
+
+        columnHelper.accessor("is_active", {
+          header: () => <div className="text-center">Status</div>,
+          cell: ({ row }) => (
+            <div className="flex justify-center">
+              <Badge
+                variant="outline"
+                className={`gap-1 px-2 py-0.5 text-xs ${
+                  row.original.is_active
+                    ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {row.original.is_active ? (
+                  <CircleCheckIcon className="size-3 fill-emerald-500 text-background" />
+                ) : (
+                  <CircleXIcon className="size-3 fill-muted-foreground text-background" />
+                )}
+                {row.original.is_active ? "Active" : "Inactive"}
+              </Badge>
+            </div>
+          ),
+        }),
+
+        columnHelper.display({
+          id: "actions",
+          cell: ({ row }) => (
+            <div className="flex items-center justify-end gap-1">
+              <Link
+                href={`/product/${row.original.slug}`}
+                target="_blank"
+                className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                title="Preview in Store"
+              >
+                <ExternalLinkIcon className="size-3.5" />
+                <span className="sr-only">Preview</span>
+              </Link>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="flex size-7 text-muted-foreground data-[state=open]:bg-muted"
+                    size="icon"
+                  >
+                    <EllipsisVerticalIcon className="size-4" />
+                    <span className="sr-only">Actions</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40">
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href={`/dashboard/products/${row.original.slug}/edit`}
+                      className="flex cursor-pointer items-center"
+                    >
+                      <PencilIcon className="me-2 size-3.5" />
+                      Edit Product
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={async () => {
+                      toast.promise(duplicateProduct(row.original.id), {
+                        loading: "Duplicating product...",
+                        success: (res) => {
+                          if (!res.success) throw new Error(res.error)
+                          return "Product duplicated successfully!"
+                        },
+                        error: "Failed to duplicate product",
+                      })
+                    }}
+                  >
+                    <CopyIcon className="me-2 size-3.5" />
+                    Duplicate
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => {
+                      navigator.clipboard.writeText(
+                        `${window.location.origin}/product/${row.original.slug}`
+                      )
+                      toast.success("Product link copied!")
+                    }}
+                  >
+                    Copy Store Link
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  {/* فتح دايلوج الحذف */}
+                  <DropdownMenuItem
+                    variant="destructive"
+                    className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
+                    onClick={() => setProductToDelete(row.original)}
+                  >
+                    <Trash2Icon className="me-2 size-3.5" />
+                    Delete Product
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ),
+        }),
+      ]),
+    []
+  )
+
   const table = useTable({
     features,
     data: filteredData,
@@ -495,7 +490,6 @@ export function DataTable({
     onPaginationChange: setPagination,
   })
 
-  // Handle reordering completion
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
     if (active && over && active.id !== over.id) {
@@ -518,7 +512,7 @@ export function DataTable({
           value={currentTab}
           onValueChange={(val) => {
             setCurrentTab(val as "all" | "active" | "low-stock")
-            table.setPageIndex(0) // Reset to first page on tab change
+            table.setPageIndex(0)
           }}
         >
           <TabsList className="flex">
@@ -714,6 +708,18 @@ export function DataTable({
           </div>
         </div>
       </div>
+
+      {/* دايلوج تأكيد الحذف */}
+      <DeleteProductDialog
+        product={productToDelete}
+        isOpen={Boolean(productToDelete)}
+        onOpenChange={(open) => {
+          if (!open) setProductToDelete(null)
+        }}
+        onSuccess={(deletedId) => {
+          setData((prev) => prev.filter((item) => item.id !== deletedId))
+        }}
+      />
     </div>
   )
 }

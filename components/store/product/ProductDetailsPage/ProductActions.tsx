@@ -48,7 +48,20 @@ export function ProductActions({
             Quantity:
           </span>
           <div className="inline-flex items-center rounded-lg border bg-background p-0.5 shadow-xs">
-            <CustomButton
+       <CustomButton
+              variant="ghost"
+              size="icon"
+              onClick={() => onQuantityChange(quantity + 1)}
+              disabled={isOutOfStock || quantity >= maxStock}
+              className="size-7 rounded-md disabled:pointer-events-none disabled:opacity-40"
+              aria-label="Increase quantity"
+            >
+              <PlusIcon className="size-3.5" />
+            </CustomButton>         
+            <span className="w-10 text-center text-xs font-semibold text-foreground tabular-nums">
+              {isOutOfStock ? 0 : quantity}
+            </span>
+<CustomButton
               variant="ghost"
               size="icon"
               onClick={() => onQuantityChange(quantity - 1)}
@@ -59,20 +72,7 @@ export function ProductActions({
               <MinusIcon className="size-3.5" />
             </CustomButton>
 
-            <span className="w-10 text-center text-xs font-semibold text-foreground tabular-nums">
-              {isOutOfStock ? 0 : quantity}
-            </span>
-
-            <CustomButton
-              variant="ghost"
-              size="icon"
-              onClick={() => onQuantityChange(quantity + 1)}
-              disabled={isOutOfStock || quantity >= maxStock}
-              className="size-7 rounded-md disabled:pointer-events-none disabled:opacity-40"
-              aria-label="Increase quantity"
-            >
-              <PlusIcon className="size-3.5" />
-            </CustomButton>
+        
           </div>
         </div>
 
