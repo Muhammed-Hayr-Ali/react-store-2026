@@ -296,3 +296,56 @@ export interface RawCategoryProductQueryResult {
   product_variants: RawProductVariant[] | null
   product_images: RawProductImage[] | null
 }
+
+
+
+
+
+
+
+
+// ============================================================================
+// استعلام المنتجات حسب الماركة (Products By Brand)
+// ============================================================================
+
+export const getProductsByBrandSchema = z
+  .object({
+    brandSlug: z.string().min(1, "brand_slug_required").optional(),
+    brandId: z.string().uuid("invalid_brand_id").optional(),
+    limit: z.number().int().positive().max(100).default(20),
+    activeOnly: z.boolean().default(true),
+  })
+  .refine((data) => Boolean(data.brandSlug || data.brandId), {
+    message: "Either brandSlug or brandId must be provided",
+    path: ["brandSlug"],
+  })
+
+export type GetProductsByBrandOptions = z.infer<typeof getProductsByBrandSchema>
+
+export interface BrandProductItem {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  is_featured: boolean
+  created_at: string
+  brand_name: string | null
+  brand_slug: string | null
+  category_name: string | null
+  category_slug: string | null
+  primary_image_url: string | null
+  min_price: number
+}
+
+export interface RawBrandProductQueryResult {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  is_featured: boolean
+  created_at: string
+  brand: { name: string; slug?: string } | null
+  category: RawCategory | null
+  product_variants: RawProductVariant[] | null
+  product_images: RawProductImage[] | null
+}

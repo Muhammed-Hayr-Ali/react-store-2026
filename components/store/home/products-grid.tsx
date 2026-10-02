@@ -4,17 +4,17 @@ import * as React from "react"
 import {
   LatestProductItem,
   CategoryProductItem,
+  BrandProductItem,
 } from "@/lib/actions/products/types"
 import type { CurrencyCode } from "@/lib/actions/currency/types"
 import { ProductCard } from "./product-card"
 
 interface ProductsGridProps {
   title?: string
-  products: (LatestProductItem | CategoryProductItem)[]
+  products: (LatestProductItem | CategoryProductItem | BrandProductItem)[]
   currency: CurrencyCode
   exchangeRate: number
 }
-
 export default function ProductsGrid({
   title,
   products,

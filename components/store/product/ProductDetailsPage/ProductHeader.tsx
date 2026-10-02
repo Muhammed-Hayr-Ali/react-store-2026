@@ -1,34 +1,41 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
+import { useLocale } from "next-intl"
 import { AlertCircleIcon } from "lucide-react"
 import { ProductVariantItem } from "./utils"
 import { formatPrice as formatCurrencyPrice } from "@/lib/actions/currency/utils"
-// ✅ استيراد دالة تنسيق السعر الجديدة ونوع العملة
 import type { CurrencyCode } from "@/lib/actions/currency/types"
 
 interface ProductHeaderProps {
   productName: string
   categoryName?: string
+  categorySlug?: string
   brandName?: string
+  brandSlug?: string
   selectedVariant: ProductVariantItem | null
   isOutOfStock: boolean
   isLowStock: boolean
-  currency: CurrencyCode // ✅ إضافة جديدة
-  exchangeRate: number // ✅ إضافة جديدة
+  currency: CurrencyCode
+  exchangeRate: number
 }
 
 export function ProductHeader({
   productName,
   categoryName,
+  categorySlug,
   brandName,
+  brandSlug,
   selectedVariant,
   isOutOfStock,
   isLowStock,
   currency,
   exchangeRate,
 }: ProductHeaderProps) {
-  // ✅ حساب الأسعار المنسقة بالعملة المختارة
+  const locale = useLocale()
+
+  // حساب الأسعار المنسقة بالعملة المختارة
   const currentPrice = selectedVariant
     ? formatCurrencyPrice(selectedVariant.price, currency, exchangeRate)
     : formatCurrencyPrice(0, currency, exchangeRate)
@@ -45,16 +52,35 @@ export function ProductHeader({
 
   return (
     <div className="space-y-2.5">
+      {/* روابط التصنيف والماركة */}
       <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground">
-        {categoryName && (
-          <span className="rounded-md bg-muted px-2 py-0.5 text-foreground">
-            {categoryName}
-          </span>
-        )}
+        {categoryName &&
+          (categorySlug ? (
+            <Link
+              href={`/${locale}/category/${categorySlug}`}
+              className="rounded-md bg-muted px-2 py-0.5 text-foreground transition-colors hover:bg-muted/80 hover:underline"
+            >
+              {categoryName}
+            </Link>
+          ) : (
+            <span className="rounded-md bg-muted px-2 py-0.5 text-foreground">
+              {categoryName}
+            </span>
+          ))}
+
         {brandName && (
           <>
             <span>•</span>
-            <span>{brandName}</span>
+            {brandSlug ? (
+              <Link
+                href={`/${locale}/brand/${brandSlug}`}
+                className="transition-colors hover:text-foreground hover:underline"
+              >
+                {brandName}
+              </Link>
+            ) : (
+              <span>{brandName}</span>
+            )}
           </>
         )}
       </div>
@@ -74,12 +100,12 @@ export function ProductHeader({
             </div>
           ) : (
             <>
-              {/* ✅ عرض السعر الحالي بالعملة المختارة (بدون علامة $ ثابتة) */}
+              {/* عرض السعر الحالي بالعملة المختارة */}
               <span className="text-2xl font-extrabold tracking-tight text-foreground tabular-nums sm:text-3xl">
                 {currentPrice}
               </span>
 
-              {/* ✅ عرض سعر المقارنة (إن وجد) بالعملة المختارة */}
+              {/* عرض سعر المقارنة إن وجد */}
               {comparePrice && (
                 <span className="text-base text-muted-foreground tabular-nums line-through decoration-destructive/50">
                   {comparePrice}
