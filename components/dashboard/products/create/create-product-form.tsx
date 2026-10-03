@@ -49,7 +49,6 @@ import {
 
 import { createProduct } from "@/lib/actions/products/mutations/create"
 import {
-  createProductCompleteSchema,
   CreateProductCompleteInput,
 } from "@/lib/actions/products/types"
 import { Category } from "@/lib/actions/categories"
@@ -64,6 +63,7 @@ import DeleteCategoryDialog from "@/components/dashboard/categories/delete-categ
 import CreateBrandSheet from "../../brand/create-brand"
 import UpdateBrandSheet from "../../brand/update-brand"
 import DeleteBrandDialog from "../../brand/delete-brand"
+import { createProductCompleteSchema } from "@/lib/actions/products"
 
 type FormValues = CreateProductCompleteInput
 

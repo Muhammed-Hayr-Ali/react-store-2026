@@ -51,7 +51,7 @@ import {
 } from "@/components/ui/select"
 
 import {
-  createProductCompleteSchema,
+  
   CreateProductCompleteInput,
   ProductWithRelations,
 } from "@/lib/actions/products/types"
@@ -68,6 +68,7 @@ import CreateBrandSheet from "../../brand/create-brand"
 import UpdateBrandSheet from "../../brand/update-brand"
 import DeleteBrandDialog from "../../brand/delete-brand"
 import { updateProduct } from "@/lib/actions/products/mutations/update"
+import { createProductCompleteSchema } from "@/lib/actions/products"
 
 type FormValues = CreateProductCompleteInput
 
