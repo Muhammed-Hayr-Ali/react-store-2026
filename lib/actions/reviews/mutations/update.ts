@@ -1,23 +1,34 @@
+/**
+ * @file lib/actions/reviews/mutations/update.ts
+ * @description Server Action to modify an existing review owned by the authenticated user.
+ */
+
 "use server"
 
+import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { Review, UpdateReviewInput, updateReviewSchema } from "../types"
+import { Review, UpdateReviewInput } from "../types"
+import { updateReviewSchema } from "../schemas"
+
+// ============================================================================
+// Main Action Function
+// ============================================================================
 
 export async function updateReview(
   data: UpdateReviewInput
 ): Promise<ApiResult<Review | null>> {
+  // 1. Validate payload
   const validation = updateReviewSchema.safeParse(data)
   if (!validation.success) {
-    const details: Record<string, string[]> = {}
-    for (const issue of validation.error.issues) {
-      const path = issue.path.join(".") || "root"
-      if (!details[path]) details[path] = []
-      details[path].push(issue.message)
+    return {
+      success: false,
+      error: "VALIDATION_ERROR",
+      details: validation.error.flatten().fieldErrors,
     }
-    return { success: false, error: "VALIDATION_ERROR", details }
   }
 
+  // 2. Authenticate user
   const supabase = await createServerClient()
   const {
     data: { user },
@@ -25,7 +36,10 @@ export async function updateReview(
   } = await supabase.auth.getUser()
 
   if (authError || !user) {
-    return { success: false, error: "UNAUTHORIZED_ACCESS" }
+    return {
+      success: false,
+      error: "UNAUTHORIZED_ACCESS",
+    }
   }
 
   const cleanData = {
@@ -35,7 +49,7 @@ export async function updateReview(
 
   const { id, ...updatePayload } = cleanData
 
-  // ✅ الأمان: التحديث فقط إذا كان المعرف يطابق ومعرف المستخدم يطابق
+  // 3. Update review with user ownership guard
   const { data: updatedReview, error } = await supabase
     .from("product_reviews")
     .update(updatePayload)
@@ -47,7 +61,7 @@ export async function updateReview(
   if (error) {
     return {
       success: false,
-      error: "UPDATE_ERROR",
+      error: "UPDATE_REVIEW_ERROR",
       details: { database: [error.message] },
     }
   }
@@ -55,10 +69,16 @@ export async function updateReview(
   if (!updatedReview) {
     return {
       success: false,
-      error: "NOT_FOUND_OR_UNAUTHORIZED",
-      details: { database: ["لا يمكنك تعديل هذا التقييم أو أنه غير موجود"] },
+      error: "REVIEW_NOT_FOUND_OR_UNAUTHORIZED",
+      details: { database: ["Review not found or unauthorized to update."] },
     }
   }
 
-  return { success: true, data: updatedReview as Review }
+  // 4. Invalidate paths
+  revalidatePath(`/product/${updatedReview.product_id}`)
+
+  return {
+    success: true,
+    data: updatedReview as Review,
+  }
 }

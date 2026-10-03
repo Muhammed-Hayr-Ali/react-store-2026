@@ -1,28 +1,34 @@
+/**
+ * @file lib/actions/reviews/mutations/create.ts
+ * @description Server Action to insert a customer review for a specific product.
+ */
+
 "use server"
 
+import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { Review, CreateReviewInput, createReviewSchema } from "../types"
+import { Review, CreateReviewInput } from "../types"
+import { createReviewSchema } from "../schemas"
 
-/**
- * إضافة تقييم جديد لمنتج (يجب أن يكون المستخدم مسجل الدخول)
- */
+// ============================================================================
+// Main Action Function
+// ============================================================================
+
 export async function createReview(
   data: CreateReviewInput
 ): Promise<ApiResult<Review | null>> {
-  // 1. التحقق من صحة البيانات (Validation)
+  // 1. Validate payload
   const validation = createReviewSchema.safeParse(data)
   if (!validation.success) {
-    const details: Record<string, string[]> = {}
-    for (const issue of validation.error.issues) {
-      const path = issue.path.join(".") || "root"
-      if (!details[path]) details[path] = []
-      details[path].push(issue.message)
+    return {
+      success: false,
+      error: "VALIDATION_ERROR",
+      details: validation.error.flatten().fieldErrors,
     }
-    return { success: false, error: "VALIDATION_ERROR", details }
   }
 
-  // 2. التحقق من تسجيل الدخول
+  // 2. Authenticate user
   const supabase = await createServerClient()
   const {
     data: { user },
@@ -30,39 +36,39 @@ export async function createReview(
   } = await supabase.auth.getUser()
 
   if (authError || !user) {
-    return { success: false, error: "UNAUTHORIZED_ACCESS" }
+    return {
+      success: false,
+      error: "UNAUTHORIZED_ACCESS",
+    }
   }
 
-  // 3. تنظيف البيانات
+  // 3. Clean payload
   const cleanData = {
     ...validation.data,
     comment: validation.data.comment === "" ? null : validation.data.comment,
     user_id: user.id,
   }
 
-  // 4. الإدراج في قاعدة البيانات
+  // 4. Insert into database
   const { data: newReview, error: insertError } = await supabase
     .from("product_reviews")
     .insert(cleanData)
     .select()
     .single()
 
-  // 5. معالجة الأخطاء
   if (insertError) {
     if (insertError.code === "23505") {
-      // unique violation: المستخدم قيّم هذا المنتج مسبقاً
       return {
         success: false,
         error: "REVIEW_ALREADY_EXISTS",
-        details: { database: ["لقد قمت بتقييم هذا المنتج مسبقاً"] },
+        details: { database: ["You have already reviewed this product."] },
       }
     }
     if (insertError.code === "23503") {
-      // foreign key violation: المنتج غير موجود
       return {
         success: false,
         error: "PRODUCT_NOT_FOUND",
-        details: { database: ["المنتج المحدد غير موجود"] },
+        details: { database: ["The specified product does not exist."] },
       }
     }
     return {
@@ -72,5 +78,12 @@ export async function createReview(
     }
   }
 
-  return { success: true, data: newReview as Review }
+  // 5. Invalidate paths
+  revalidatePath(`/product/${validation.data.product_id}`)
+  revalidatePath("/")
+
+  return {
+    success: true,
+    data: newReview as Review,
+  }
 }
