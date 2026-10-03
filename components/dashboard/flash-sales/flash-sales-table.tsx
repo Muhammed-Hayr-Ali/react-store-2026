@@ -24,9 +24,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { AdminFlashSaleItem } from "@/lib/actions/flash-sales/queries/get-all-flash-sales"
 import { toggleFlashSaleStatus } from "@/lib/actions/flash-sales/mutations/toggle-status"
 import { deleteFlashSale } from "@/lib/actions/flash-sales/mutations/delete"
+import { AdminFlashSaleItem } from "@/lib/actions/flash-sales"
 
 interface FlashSalesTableProps {
   sales: AdminFlashSaleItem[]

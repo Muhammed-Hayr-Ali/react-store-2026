@@ -45,9 +45,8 @@ import {
 
 import {
   flashSaleFormSchema,
-  FlashSaleFormInput,
 } from "@/lib/actions/flash-sales/schemas"
-import { FlashSaleDiscountType } from "@/lib/actions/flash-sales/types"
+import { FlashSaleDiscountType, FlashSaleFormInput } from "@/lib/actions/flash-sales/types"
 import { createFlashSale } from "@/lib/actions/flash-sales/mutations/create"
 import { updateFlashSale } from "@/lib/actions/flash-sales/mutations/update"
 import { cn } from "@/lib/utils"
