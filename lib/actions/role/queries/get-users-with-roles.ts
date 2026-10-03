@@ -8,6 +8,7 @@
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { AppPermission } from "../types"
+import { RoleRecord } from "../mutations/create-role"
 
 // ============================================================================
 // Types
@@ -27,7 +28,7 @@ export interface UserWithRoles {
   last_name: string | null
   email: string | null
   profile_image: string | null
-  roles: RoleDetail[]
+  roles: RoleRecord[]
 }
 
 interface UserRoleRelationRow {
