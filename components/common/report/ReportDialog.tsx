@@ -91,7 +91,7 @@ export function ReportDialog({
         setDetails("")
       }, 1500)
     } else {
-      setErrorMsg(res.message || "Failed to submit report")
+      setErrorMsg(res.error || "Failed to submit report")
     }
   }
 
