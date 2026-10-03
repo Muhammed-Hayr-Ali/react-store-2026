@@ -8,27 +8,29 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { CustomInput } from "@/components/ui/custom-input"
 import { AppLogo } from "@/components/ui/app-logo"
-import { ThemeToggle } from "@/components/layout/footer/theme-toggle"
 import { appConfig } from "@/lib/config/app_config"
 
-const Footer = () => {
+import { footerConfig } from "./footer-config"
+import { ThemeToggle } from "./theme-toggle"
+
+export default function Footer() {
   return (
     <footer className="w-full border-t border-border/60 bg-background text-sm text-muted-foreground">
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-        {/* ===== Main Footer Grid ===== */}
+        {/* شبكة محتويات الفوتر */}
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {/* ===== 1. Brand Section ===== */}
+          {/* 1. قسم العلامة التجارية والوصف */}
           <div className="flex flex-col gap-4 sm:col-span-2 lg:col-span-1">
             <AppLogo size="md" />
             <p className="max-w-sm text-xs leading-relaxed text-muted-foreground/90">
               {appConfig.description}
             </p>
 
-            {/* Social Links */}
+            {/* قنوات التواصل الاجتماعي */}
             <div className="flex flex-wrap items-center gap-2">
-              {appConfig.menu.socialMediaLinks.items.map((item) => (
+              {footerConfig.socialLinks.map((item) => (
                 <Button
-                  key={item.key}
+                  key={item.label}
                   variant="secondary"
                   size="icon"
                   className="size-8 rounded-lg text-muted-foreground shadow-none hover:text-foreground"
@@ -38,21 +40,21 @@ const Footer = () => {
                     href={item.href}
                     target="_blank"
                     rel="noreferrer"
-                    aria-label={item.label || item.key}
+                    aria-label={item.label}
                   >
                     <item.icon className="size-4" />
-                    <span className="sr-only">{item.label || item.key}</span>
+                    <span className="sr-only">{item.label}</span>
                   </Link>
                 </Button>
               ))}
             </div>
           </div>
 
-          {/* ===== 2. Quick Links ===== */}
-          <FooterSection title={appConfig.menu.quickLinks.name}>
+          {/* 2. الروابط السريعة */}
+          <FooterSection title={footerConfig.quickLinks.title}>
             <ul className="flex flex-col gap-2.5">
-              {appConfig.menu.quickLinks.items.map((item) => (
-                <li key={item.key}>
+              {footerConfig.quickLinks.items.map((item) => (
+                <li key={item.label}>
                   <Link
                     href={item.href}
                     className="text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:underline focus-visible:outline-none"
@@ -64,11 +66,11 @@ const Footer = () => {
             </ul>
           </FooterSection>
 
-          {/* ===== 3. Support Links ===== */}
-          <FooterSection title={appConfig.menu.supportLinks.name}>
+          {/* 3. روابط الدعم والمساعدة */}
+          <FooterSection title={footerConfig.supportLinks.title}>
             <ul className="flex flex-col gap-2.5">
-              {appConfig.menu.supportLinks.items.map((item) => (
-                <li key={item.key}>
+              {footerConfig.supportLinks.items.map((item) => (
+                <li key={item.label}>
                   <Link
                     href={item.href}
                     className="text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:underline focus-visible:outline-none"
@@ -80,11 +82,11 @@ const Footer = () => {
             </ul>
           </FooterSection>
 
-          {/* ===== 4. Newsletter ===== */}
+          {/* 4. النشرة البريدية */}
           <NewsletterSection />
         </div>
 
-        {/* ===== Footer Bottom ===== */}
+        {/* الجزء السفلي للحقوق والمظهر */}
         <div className="mt-10 border-t border-border/50 pt-6">
           <div className="flex flex-col-reverse items-center justify-between gap-4 sm:flex-row">
             <p className="text-xs text-muted-foreground">
@@ -100,12 +102,6 @@ const Footer = () => {
     </footer>
   )
 }
-
-export default Footer
-
-// =====================================================
-// Helper Components
-// =====================================================
 
 function FooterSection({
   title,
@@ -137,7 +133,6 @@ function NewsletterSection() {
     }
 
     setIsSubmitting(true)
-
     try {
       await new Promise((resolve) => setTimeout(resolve, 600))
       toast.success("Thanks for subscribing! 🎉")
@@ -179,7 +174,7 @@ function NewsletterSection() {
           variant="secondary"
           size="icon"
           disabled={isSubmitting}
-          className="size-9 shrink-0 rounded-lg shadow-none"
+          className="size-9 shrink-0 cursor-pointer rounded-lg shadow-none"
           aria-label="Subscribe to newsletter"
         >
           {isSubmitting ? (

@@ -1,5 +1,5 @@
-import Footer from "@/components/layout/footer/footer"
 import Navbar from "@/components/store/navbar/navbar"
+import Footer from "@/components/store/footer/footer"
 import { getCurrentUser } from "@/lib/actions/utils/profile"
 
 export default async function MainLayout({
