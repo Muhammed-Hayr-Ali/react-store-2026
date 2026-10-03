@@ -1,5 +1,16 @@
+/**
+ * @file lib/actions/flash-sales/queries/get-available-products.ts
+ * @description Query to retrieve lightweight product records eligible for addition to flash sales.
+ */
+
+"use server"
+
 import { createServerClient } from "@/lib/database/supabase/server"
-import { SelectableProduct } from "@/components/dashboard/flash-sales/flash-sale-form"
+import { SelectableProduct } from "../types"
+
+// ============================================================================
+// Internal Types
+// ============================================================================
 
 interface RawProductData {
   id: string
@@ -15,6 +26,10 @@ interface RawProductData {
     is_active: boolean | null
   }> | null
 }
+
+// ============================================================================
+// Main Query Function
+// ============================================================================
 
 export async function getAvailableProducts(): Promise<SelectableProduct[]> {
   const supabase = await createServerClient()
@@ -35,7 +50,7 @@ export async function getAvailableProducts(): Promise<SelectableProduct[]> {
 
   if (error || !data) {
     if (error) {
-      console.error("Error fetching available products:", error.message)
+      console.error("Error in getAvailableProducts:", error.message)
     }
     return []
   }

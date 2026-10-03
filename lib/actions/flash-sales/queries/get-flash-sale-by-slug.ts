@@ -1,9 +1,20 @@
+/**
+ * @file lib/actions/flash-sales/queries/get-flash-sale-by-slug.ts
+ * @description Query to retrieve active flash sale details and products by URL slug.
+ */
+
+"use server"
+
 import { createServerClient } from "@/lib/database/supabase/server"
 import {
   ActiveFlashSale,
   FlashSaleDiscountType,
   FlashSaleProductItem,
 } from "../types"
+
+// ============================================================================
+// Internal Types
+// ============================================================================
 
 interface RawProductImage {
   id: string
@@ -49,6 +60,10 @@ interface RawFlashSaleResponse {
   flash_sale_items: RawFlashSaleItem[]
 }
 
+// ============================================================================
+// Helper Calculation Function
+// ============================================================================
+
 function calculateFlashDiscount(
   basePrice: number,
   discountType: FlashSaleDiscountType,
@@ -91,6 +106,10 @@ function calculateFlashDiscount(
     discountPercentage: percentage,
   }
 }
+
+// ============================================================================
+// Main Query Function
+// ============================================================================
 
 export async function getFlashSaleBySlug(
   slug: string

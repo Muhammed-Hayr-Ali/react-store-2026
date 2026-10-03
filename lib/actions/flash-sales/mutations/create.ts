@@ -1,34 +1,37 @@
+/**
+ * @file lib/actions/flash-sales/mutations/create.ts
+ * @description Server Action to create a new flash sale campaign along with its promotional items.
+ */
+
 "use server"
 
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { FlashSaleFormInput, flashSaleFormSchema } from "../schema"
+import { ApiResult } from "@/lib/database/types/utils"
+import { FlashSaleFormInput } from "../types"
+import { flashSaleFormSchema } from "../schemas"
 
-export interface ActionResponse<T = unknown> {
-  success: boolean
-  message?: string
-  data?: T
-  error?: string
-}
+// ============================================================================
+// Main Action Function
+// ============================================================================
 
-/**
- * 1. إنشاء حملة بيع سريع جديدة مع عناصرها
- */
 export async function createFlashSale(
   rawData: FlashSaleFormInput
-): Promise<ActionResponse<{ id: string }>> {
+): Promise<ApiResult<{ id: string }>> {
+  // 1. Validate payload
   const parseResult = flashSaleFormSchema.safeParse(rawData)
   if (!parseResult.success) {
     return {
       success: false,
-      error: parseResult.error.issues[0]?.message || "Invalid input data",
+      error: "VALIDATION_ERROR",
+      details: parseResult.error.flatten().fieldErrors,
     }
   }
 
   const data = parseResult.data
   const supabase = await createServerClient()
 
-  // التأكد من عدم تكرار الـ Slug
+  // 2. Ensure unique slug
   const { data: existingSlug } = await supabase
     .from("flash_sales")
     .select("id")
@@ -38,11 +41,11 @@ export async function createFlashSale(
   if (existingSlug) {
     return {
       success: false,
-      error: "Slug already exists. Please choose a different one.",
+      error: "SLUG_ALREADY_EXISTS",
     }
   }
 
-  // إدراج سجل الحملة في جدول flash_sales
+  // 3. Insert parent flash sale record
   const { data: createdSale, error: saleError } = await supabase
     .from("flash_sales")
     .insert({
@@ -60,11 +63,12 @@ export async function createFlashSale(
   if (saleError || !createdSale) {
     return {
       success: false,
-      error: saleError?.message || "Failed to create flash sale",
+      error: "CREATE_FLASH_SALE_ERROR",
+      details: { database: [saleError?.message || "Unknown error"] },
     }
   }
 
-  // إدراج عناصر الحملة في جدول flash_sale_items
+  // 4. Insert linked campaign items
   const itemsToInsert = data.items.map((item) => ({
     flash_sale_id: createdSale.id,
     product_id: item.productId,
@@ -79,60 +83,21 @@ export async function createFlashSale(
     .insert(itemsToInsert)
 
   if (itemsError) {
-    // التراجع وحذف الحملة في حال فشل إدخال المنتجات
+    // Rollback parent record on failure
     await supabase.from("flash_sales").delete().eq("id", createdSale.id)
     return {
       success: false,
-      error: itemsError.message || "Failed to add products to the flash sale",
+      error: "INSERT_FLASH_SALE_ITEMS_ERROR",
+      details: { database: [itemsError.message] },
     }
   }
 
+  // 5. Invalidate caches
   revalidatePath("/")
   revalidatePath("/admin/flash-sales")
+
   return {
     success: true,
     data: { id: createdSale.id },
-    message: "Flash sale created successfully",
   }
-}
-
-/**
- * 2. تبديل حالة الحملة (تفعيل / تعطيل سريع)
- */
-export async function toggleFlashSaleStatus(
-  saleId: string,
-  isActive: boolean
-): Promise<ActionResponse> {
-  const supabase = await createServerClient()
-
-  const { error } = await supabase
-    .from("flash_sales")
-    .update({ is_active: isActive })
-    .eq("id", saleId)
-
-  if (error) {
-    return { success: false, error: error.message }
-  }
-
-  revalidatePath("/")
-  revalidatePath("/admin/flash-sales")
-  return { success: true, message: "Flash sale status updated" }
-}
-
-/**
- * 3. حذف حملة بالكامل
- */
-export async function deleteFlashSale(saleId: string): Promise<ActionResponse> {
-  const supabase = await createServerClient()
-
-  // يتم حذف العناصر المرتبطة تلقائياً بفضل قيد ON DELETE CASCADE
-  const { error } = await supabase.from("flash_sales").delete().eq("id", saleId)
-
-  if (error) {
-    return { success: false, error: error.message }
-  }
-
-  revalidatePath("/")
-  revalidatePath("/admin/flash-sales")
-  return { success: true, message: "Flash sale deleted successfully" }
 }

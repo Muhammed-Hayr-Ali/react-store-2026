@@ -1,32 +1,38 @@
+/**
+ * @file lib/actions/flash-sales/mutations/update.ts
+ * @description Server Action to update flash sale campaign attributes and synchronize item discounts.
+ */
+
 "use server"
 
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { flashSaleFormSchema, FlashSaleFormInput } from "../schema"
+import { ApiResult } from "@/lib/database/types/utils"
+import { FlashSaleFormInput } from "../types"
+import { flashSaleFormSchema } from "../schemas"
 
-export interface ActionResponse<T = unknown> {
-  success: boolean
-  message?: string
-  data?: T
-  error?: string
-}
+// ============================================================================
+// Main Action Function
+// ============================================================================
 
 export async function updateFlashSale(
   saleId: string,
   rawData: FlashSaleFormInput
-): Promise<ActionResponse> {
+): Promise<ApiResult<null>> {
+  // 1. Validate payload
   const parseResult = flashSaleFormSchema.safeParse(rawData)
   if (!parseResult.success) {
     return {
       success: false,
-      error: parseResult.error.issues[0]?.message || "Invalid input data",
+      error: "VALIDATION_ERROR",
+      details: parseResult.error.flatten().fieldErrors,
     }
   }
 
   const data = parseResult.data
   const supabase = await createServerClient()
 
-  // فحص عدم تكرار الـ slug مع حملة أخرى
+  // 2. Check for slug collision on different sale record
   const { data: existingSlug } = await supabase
     .from("flash_sales")
     .select("id")
@@ -37,11 +43,11 @@ export async function updateFlashSale(
   if (existingSlug) {
     return {
       success: false,
-      error: "Slug already exists. Please choose a different one.",
+      error: "SLUG_ALREADY_EXISTS",
     }
   }
 
-  // تحديث جدول flash_sales
+  // 3. Update main record
   const { error: saleError } = await supabase
     .from("flash_sales")
     .update({
@@ -58,11 +64,12 @@ export async function updateFlashSale(
   if (saleError) {
     return {
       success: false,
-      error: saleError.message || "Failed to update flash sale",
+      error: "UPDATE_FLASH_SALE_ERROR",
+      details: { database: [saleError.message] },
     }
   }
 
-  // مزامنة العناصر: حذف العناصر القديمة وإعادة إدراج القائمة الجديدة
+  // 4. Synchronize items: purge existing and insert updated list
   await supabase.from("flash_sale_items").delete().eq("flash_sale_id", saleId)
 
   const itemsToInsert = data.items.map((item) => ({
@@ -81,14 +88,18 @@ export async function updateFlashSale(
   if (itemsError) {
     return {
       success: false,
-      error: itemsError.message || "Failed to update flash sale products",
+      error: "UPDATE_FLASH_SALE_ITEMS_ERROR",
+      details: { database: [itemsError.message] },
     }
   }
 
+  // 5. Invalidate caches
   revalidatePath("/")
-  revalidatePath("/dashboard/flash-sales")
+  revalidatePath(`/deals/${data.slug}`)
+  revalidatePath("/admin/flash-sales")
+
   return {
     success: true,
-    message: "Flash sale updated successfully",
+    data: null,
   }
 }

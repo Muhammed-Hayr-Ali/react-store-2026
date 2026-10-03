@@ -1,9 +1,20 @@
+/**
+ * @file lib/actions/flash-sales/queries/get-active-flash-sale.ts
+ * @description Query to retrieve the current active flash sale within valid start/end time windows.
+ */
+
+"use server"
+
 import { createServerClient } from "@/lib/database/supabase/server"
 import {
   ActiveFlashSale,
   FlashSaleDiscountType,
   FlashSaleProductItem,
 } from "../types"
+
+// ============================================================================
+// Internal Types
+// ============================================================================
 
 interface RawProductImage {
   id: string
@@ -49,6 +60,10 @@ interface RawFlashSaleResponse {
   flash_sale_items: RawFlashSaleItem[]
 }
 
+// ============================================================================
+// Helper Calculation Function
+// ============================================================================
+
 function calculateFlashDiscount(
   basePrice: number,
   discountType: FlashSaleDiscountType,
@@ -91,6 +106,10 @@ function calculateFlashDiscount(
     discountPercentage: percentage,
   }
 }
+
+// ============================================================================
+// Main Query Function
+// ============================================================================
 
 export async function getActiveFlashSale(): Promise<ActiveFlashSale | null> {
   const supabase = await createServerClient()
@@ -144,7 +163,7 @@ export async function getActiveFlashSale(): Promise<ActiveFlashSale | null> {
 
   if (error || !data) {
     if (error) {
-      console.error("Error fetching active flash sale:", error.message)
+      console.error("Error in getActiveFlashSale:", error.message)
     }
     return null
   }
@@ -157,7 +176,6 @@ export async function getActiveFlashSale(): Promise<ActiveFlashSale | null> {
 
     const product = item.products
 
-    // استخراج الصورة: تفضيل الصورة الأساسية is_primary أو الأولى حسب الترتيب
     let primaryImageUrl: string | null = null
     if (product.product_images && product.product_images.length > 0) {
       const primaryImg =
@@ -168,7 +186,6 @@ export async function getActiveFlashSale(): Promise<ActiveFlashSale | null> {
       primaryImageUrl = primaryImg?.url ?? null
     }
 
-    // استخراج السعر الأساسي: أقل سعر من بين المتغيرات النشطة
     let basePrice = 0
     if (product.product_variants && product.product_variants.length > 0) {
       const activePrices = product.product_variants

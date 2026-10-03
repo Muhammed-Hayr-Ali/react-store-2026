@@ -1,10 +1,16 @@
-import { createServerClient } from "@/lib/database/supabase/server"
-import { FlashSale } from "../types"
+/**
+ * @file lib/actions/flash-sales/queries/get-all-flash-sales.ts
+ * @description Query to retrieve all flash sales formatted for administrative review and management.
+ */
 
-export interface AdminFlashSaleItem extends FlashSale {
-  item_count: number
-  status: "active" | "scheduled" | "expired" | "disabled"
-}
+"use server"
+
+import { createServerClient } from "@/lib/database/supabase/server"
+import { AdminFlashSaleItem } from "../types"
+
+// ============================================================================
+// Main Query Function
+// ============================================================================
 
 export async function getAllFlashSales(): Promise<AdminFlashSaleItem[]> {
   const supabase = await createServerClient()
@@ -21,7 +27,7 @@ export async function getAllFlashSales(): Promise<AdminFlashSaleItem[]> {
 
   if (error || !data) {
     if (error) {
-      console.error("Error fetching admin flash sales:", error.message)
+      console.error("Error in getAllFlashSales:", error.message)
     }
     return []
   }

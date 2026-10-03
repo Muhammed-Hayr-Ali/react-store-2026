@@ -1,5 +1,16 @@
+/**
+ * @file lib/actions/flash-sales/queries/get-flash-sale-for-edit.ts
+ * @description Query to fetch flash sale data pre-formatted for editing in administration forms.
+ */
+
+"use server"
+
 import { createServerClient } from "@/lib/database/supabase/server"
-import { FlashSaleFormInput } from "../schema"
+import { FlashSaleDiscountType, FlashSaleFormInput } from "../types"
+
+// ============================================================================
+// Internal Types
+// ============================================================================
 
 interface RawProductData {
   id: string
@@ -13,7 +24,7 @@ interface RawProductData {
 interface RawItemData {
   id: string
   product_id: string
-  discount_type: "percentage" | "fixed_amount" | "fixed_price" | "none"
+  discount_type: FlashSaleDiscountType
   discount_value: number | null
   quantity_limit: number | null
   products: RawProductData | null
@@ -30,6 +41,10 @@ interface RawSaleData {
   is_active: boolean
   flash_sale_items: RawItemData[]
 }
+
+// ============================================================================
+// Main Query Function
+// ============================================================================
 
 export async function getFlashSaleForEdit(
   id: string
@@ -70,7 +85,7 @@ export async function getFlashSaleForEdit(
 
   if (error || !data) {
     if (error) {
-      console.error("Error fetching flash sale for edit:", error.message)
+      console.error("Error in getFlashSaleForEdit:", error.message)
     }
     return null
   }

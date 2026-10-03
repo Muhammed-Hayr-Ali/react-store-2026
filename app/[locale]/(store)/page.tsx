@@ -10,7 +10,7 @@ import { createMetadata } from "@/lib/config/metadata_generator"
 import { getFeaturedProductSlides } from "@/lib/actions/products/queries/get-featured-slides"
 import { getRootCategories } from "@/lib/actions/categories/queries/get-root-categories"
 import { getLatestProducts } from "@/lib/actions/products/queries/get-latest-products"
-import { getActiveFlashSale } from "@/lib/actions/flash-sales/queries/get_active_flash_sale"
+import { getActiveFlashSale } from "@/lib/actions/flash-sales/queries/get-active-flash-sale"
 
 // استيراد أدوات جلب العملة وأسعار الصرف
 import { getSelectedCurrency } from "@/lib/actions/currency/queries/get-selected-currency"

@@ -1,18 +1,22 @@
+/**
+ * @file lib/actions/flash-sales/mutations/toggle-status.ts
+ * @description Server Action to toggle the active flag of a flash sale.
+ */
+
 "use server"
 
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
+import { ApiResult } from "@/lib/database/types/utils"
 
-export interface ActionResponse {
-  success: boolean
-  message?: string
-  error?: string
-}
+// ============================================================================
+// Main Action Function
+// ============================================================================
 
 export async function toggleFlashSaleStatus(
   saleId: string,
   isActive: boolean
-): Promise<ActionResponse> {
+): Promise<ApiResult<null>> {
   const supabase = await createServerClient()
 
   const { error } = await supabase
@@ -21,10 +25,18 @@ export async function toggleFlashSaleStatus(
     .eq("id", saleId)
 
   if (error) {
-    return { success: false, error: error.message }
+    return {
+      success: false,
+      error: "TOGGLE_STATUS_ERROR",
+      details: { database: [error.message] },
+    }
   }
 
   revalidatePath("/")
   revalidatePath("/admin/flash-sales")
-  return { success: true, message: "Flash sale status updated" }
+
+  return {
+    success: true,
+    data: null,
+  }
 }
