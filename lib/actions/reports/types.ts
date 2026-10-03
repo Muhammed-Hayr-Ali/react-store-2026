@@ -1,13 +1,44 @@
-import { z } from "zod"
+/**
+ * @file lib/actions/reports/types.ts
+ * @description Pure TypeScript type contracts and interfaces for reports.
+ */
 
-export const createReportSchema = z.object({
-  targetType: z.enum(["product", "review", "technical_issue", "general"]),
-  targetId: z.string().optional(),
-  reason: z.string().min(3, "Reason must be at least 3 characters").max(100),
-  details: z
-    .string()
-    .max(1000, "Details cannot exceed 1000 characters")
-    .optional(),
-})
+import { z } from "zod"
+import {
+  reportSchema,
+  reportTargetTypeSchema,
+  reportStatusSchema,
+  createReportSchema,
+  updateReportStatusSchema,
+  getReportsFilterSchema,
+} from "./schemas"
+
+// ============================================================================
+// Inferred Types
+// ============================================================================
+
+export type ReportTargetType = z.infer<typeof reportTargetTypeSchema>
+export type ReportStatus = z.infer<typeof reportStatusSchema>
+export type Report = z.infer<typeof reportSchema>
 
 export type CreateReportInput = z.infer<typeof createReportSchema>
+export type UpdateReportStatusInput = z.infer<typeof updateReportStatusSchema>
+export type GetReportsFilterOptions = z.infer<typeof getReportsFilterSchema>
+
+// ============================================================================
+// Extended Query Result Types
+// ============================================================================
+
+export interface ReportWithDetails extends Report {
+  reporter?: {
+    id: string
+    email?: string | null
+    first_name?: string | null
+    last_name?: string | null
+  } | null
+  resolver?: {
+    id: string
+    first_name?: string | null
+    last_name?: string | null
+  } | null
+}

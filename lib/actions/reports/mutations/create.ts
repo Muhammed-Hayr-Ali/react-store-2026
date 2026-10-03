@@ -1,19 +1,37 @@
+/**
+ * @file lib/actions/reports/mutations/create.ts
+ * @description Server Action to submit an issue or user moderation report.
+ */
+
 "use server"
 
+import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { CreateReportInput, createReportSchema } from "../types"
+import { ApiResult } from "@/lib/database/types/utils"
+import { CreateReportInput } from "../types"
+import { createReportSchema } from "../schemas"
 
-export async function submitReport(input: CreateReportInput) {
-  const validation = createReportSchema.safeParse(input)
+// ============================================================================
+// Main Action Function
+// ============================================================================
+
+export async function submitReport(
+  payload: CreateReportInput
+): Promise<ApiResult<{ id: string }>> {
+  // 1. Validate payload using Zod schema
+  const validation = createReportSchema.safeParse(payload)
   if (!validation.success) {
     return {
       success: false,
-      error: "VALIDATION_FAILED",
+      error: "VALIDATION_ERROR",
       details: validation.error.flatten().fieldErrors,
     }
   }
 
+  const safeData = validation.data
   const supabase = await createServerClient()
+
+  // 2. Verify authentication
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -21,30 +39,37 @@ export async function submitReport(input: CreateReportInput) {
   if (!user) {
     return {
       success: false,
-      error: "UNAUTHORIZED",
-      message: "You must be logged in to submit a report",
+      error: "UNAUTHORIZED_ACCESS",
     }
   }
 
-  const { error } = await supabase.from("reports").insert({
-    reporter_id: user.id,
-    target_type: validation.data.targetType,
-    target_id: validation.data.targetId || null,
-    reason: validation.data.reason,
-    details: validation.data.details || null,
-    status: "pending",
-  })
+  // 3. Insert report record
+  const { data: newReport, error } = await supabase
+    .from("reports")
+    .insert({
+      reporter_id: user.id,
+      target_type: safeData.targetType,
+      target_id: safeData.targetId || null,
+      reason: safeData.reason,
+      details: safeData.details || null,
+      status: "pending",
+    })
+    .select("id")
+    .single()
 
   if (error) {
     return {
       success: false,
-      error: "INSERT_FAILED",
-      message: error.message,
+      error: "CREATE_REPORT_ERROR",
+      details: { database: [error.message] },
     }
   }
 
+  // 4. Invalidate admin reports list
+  revalidatePath("/admin/reports")
+
   return {
     success: true,
-    message: "Report submitted successfully. Our team will review it shortly.",
+    data: { id: newReport.id },
   }
 }
