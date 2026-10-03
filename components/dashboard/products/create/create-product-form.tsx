@@ -88,21 +88,9 @@ const DEFAULT_IMAGE = {
 }
 
 const PRESET_ATTRIBUTE_KEYS = [
-  {
-    label: "Color",
-    value: "color",
-    placeholder: "e.g., Red or #FF0000",
-  },
-  {
-    label: "Weight",
-    value: "weight",
-    placeholder: "e.g., 250g or 1kg",
-  },
-  {
-    label: "Size",
-    value: "size",
-    placeholder: "e.g., Medium or 42",
-  },
+  { label: "Color", value: "color", placeholder: "e.g., Red or #FF0000" },
+  { label: "Weight", value: "weight", placeholder: "e.g., 250g or 1kg" },
+  { label: "Size", value: "size", placeholder: "e.g., Medium or 42" },
   {
     label: "Flavor",
     value: "flavor",
@@ -272,7 +260,6 @@ export default function CreateProductForm({
       shouldValidate: true,
       shouldDirty: true,
     })
-
     toast.success("SEO details generated successfully!")
   }
 
@@ -332,19 +319,11 @@ export default function CreateProductForm({
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-2 py-4 md:px-4 md:py-6">
+    <>
       <form
         onSubmit={form.handleSubmit(onSubmit, onInvalid)}
         className="space-y-6"
       >
-        {/* Top Header */}
-        <div className="border-b pb-5">
-          <h1 className="text-2xl font-bold tracking-tight">Create Product</h1>
-          <p className="text-sm text-muted-foreground">
-            Configure product details, variants, media, and inventory settings.
-          </p>
-        </div>
-
         {/* Global Error Alert */}
         {errorMessage && (
           <Alert variant="destructive" className="relative pr-9">
@@ -616,7 +595,6 @@ export default function CreateProductForm({
               </div>
 
               <FieldGroup className="space-y-3.5">
-                {/* 1. Category Field */}
                 <Controller
                   name="category_id"
                   control={control}
@@ -708,7 +686,6 @@ export default function CreateProductForm({
                   )}
                 />
 
-                {/* 2. Brand Field */}
                 <Controller
                   name="brand_id"
                   control={control}
@@ -1025,7 +1002,7 @@ export default function CreateProductForm({
           toast.success("Brand deleted successfully!")
         }}
       />
-    </div>
+    </>
   )
 }
 

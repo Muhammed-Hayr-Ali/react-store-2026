@@ -31,7 +31,7 @@ export default async function CreateFlashSalePage({ params }: PageProps) {
         <div>
           <div className="flex items-center gap-2">
             <span className="flex size-7 items-center justify-center rounded-lg bg-secondary shadow-xs">
-              <ZapIcon className="size-4 fill-current text-foreground" />
+              <ZapIcon className="size-4 text-foreground" />
             </span>
             <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
               Create Flash Sale

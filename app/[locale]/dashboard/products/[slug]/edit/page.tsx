@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation"
+import { PackageIcon } from "lucide-react"
+
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getProductCompleteBySlug } from "@/lib/actions/products/queries/get-complete-by-slug"
@@ -6,7 +8,6 @@ import { Category, getAllCategories } from "@/lib/actions/categories"
 import { getAllBrand } from "@/lib/actions/brands/queries/get-all"
 import { Brand } from "@/lib/actions/brands"
 import UpdateProductForm from "@/components/dashboard/products/update/update-product-form"
-
 
 export const dynamic = "force-dynamic"
 
@@ -35,19 +36,16 @@ export default async function Page({
 }) {
   const { slug } = await params
 
-  // 1. جلب بيانات المنتج والتصنيفات والعلامات التجارية بالتوازي
   const [productResult, categoriesResult, brandsResult] = await Promise.all([
     getProductCompleteBySlug(slug, { activeOnly: false }),
     getAllCategories({ activeOnly: true }),
     getAllBrand(),
   ])
 
-  // 2. التحقق من وجود المنتج
   if (!productResult.success || !productResult.data) {
     notFound()
   }
 
-  // 3. استخراج التصنيفات والعلامات التجارية مع حماية من الأخطاء
   const categories: Category[] =
     categoriesResult.success && categoriesResult.data
       ? categoriesResult.data
@@ -57,7 +55,25 @@ export default async function Page({
     brandsResult.success && brandsResult.data ? brandsResult.data : []
 
   return (
-    <div className="flex w-full flex-1 flex-col">
+    <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
+      {/* Header متطابق مع Flash Sale مع أيقونة PackageIcon في الشارة */}
+      <div className="flex items-center gap-3 border-b border-border/40 pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="flex size-7 items-center justify-center rounded-lg bg-secondary shadow-xs">
+              <PackageIcon className="size-4 text-foreground" />
+            </span>
+            <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+              Update Product
+            </h1>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+            Modify product specifications, variants, pricing, and media gallery.
+          </p>
+        </div>
+      </div>
+
+      {/* Form */}
       <UpdateProductForm
         product={productResult.data}
         categories={categories}

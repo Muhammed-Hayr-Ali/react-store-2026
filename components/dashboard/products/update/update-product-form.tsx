@@ -300,7 +300,6 @@ export default function UpdateProductForm({
       shouldValidate: true,
       shouldDirty: true,
     })
-
     toast.success("SEO details generated successfully!")
   }
 
@@ -336,19 +335,11 @@ export default function UpdateProductForm({
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-2 py-4 md:px-4 md:py-6">
+    <>
       <form
         onSubmit={form.handleSubmit(onSubmit, onInvalid)}
         className="space-y-6"
       >
-        {/* Top Header */}
-        <div className="border-b pb-5">
-          <h1 className="text-2xl font-bold tracking-tight">Update Product</h1>
-          <p className="text-sm text-muted-foreground">
-            Modify product specifications, variants, pricing, and media.
-          </p>
-        </div>
-
         {/* Global Error Alert */}
         {errorMessage && (
           <Alert variant="destructive" className="relative pr-9">
@@ -765,7 +756,7 @@ export default function UpdateProductForm({
                                   data: selectedBrandObject,
                                 })
                               }
-                              title="Update selected brand"
+                              title="Edit selected brand"
                               className="size-8 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
                             >
                               <PencilIcon className="size-3.5" />
@@ -1028,7 +1019,7 @@ export default function UpdateProductForm({
           toast.success("Brand deleted successfully!")
         }}
       />
-    </div>
+    </>
   )
 }
 
