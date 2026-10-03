@@ -1,4 +1,3 @@
-import Link from "next/link"
 import { ZapIcon } from "lucide-react"
 
 import { FlashSaleForm } from "@/components/dashboard/flash-sales/flash-sale-form"

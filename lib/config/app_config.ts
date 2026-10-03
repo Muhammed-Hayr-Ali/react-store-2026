@@ -26,6 +26,7 @@ import {
   Truck,
   Undo2,
   User2,
+  ZapIcon,
 } from "lucide-react"
 
 export const APP_NAME = "Marketna"
@@ -272,7 +273,7 @@ export const appConfig = {
           {
             title: "Flash Sales",
             url: "/dashboard/flash-sales",
-            icon: Package,
+            icon: ZapIcon,
             isActive: false,
           },
         ],
