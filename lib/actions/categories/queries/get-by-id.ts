@@ -1,14 +1,25 @@
+/**
+ * @file lib/actions/categories/queries/get-by-id.ts
+ * @description Query to retrieve a single category by primary key UUID.
+ * Handles missing records gracefully by returning null without throwing database errors.
+ */
+
 "use server"
 
 import { z } from "zod"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { Category, categorySchema } from "../types"
+import { Category } from "../types"
+import { categorySchema } from "../schemas"
+
+// ============================================================================
+// Main Query Function
+// ============================================================================
 
 export async function getCategoryById(
   id: string
 ): Promise<ApiResult<Category | null>> {
-  // 1. التحقق من صحة الـ UUID
+  // 1. Validate UUID parameter format
   const idValidation = z.string().uuid("INVALID_ID").safeParse(id)
   if (!idValidation.success) {
     return {
@@ -17,19 +28,22 @@ export async function getCategoryById(
     }
   }
 
-  // 2. تهيئة عميل Supabase
+  // 2. Initialize Supabase client
   const supabase = await createServerClient()
 
-  // 3. جلب التصنيف بالمعرف
+  // 3. Query record by primary key
   const { data, error } = await supabase
     .from("categories")
     .select("*")
     .eq("id", idValidation.data)
     .single()
 
-  // 4. معالجة حالة عدم الوجود بسلاسة
+  // 4. Handle "Not Found" case gracefully (PGRST116 indicates 0 rows returned)
   if (error && error.code === "PGRST116") {
-    return { success: true, data: null }
+    return {
+      success: true,
+      data: null,
+    }
   }
 
   if (error) {
@@ -41,14 +55,17 @@ export async function getCategoryById(
   }
 
   if (!data) {
-    return { success: true, data: null }
+    return {
+      success: true,
+      data: null,
+    }
   }
 
-  // 5. التحقق من مطابقة البيانات مع المخطط
+  // 5. Verify database response with Zod schema
   const parsedData = categorySchema.safeParse(data)
   if (!parsedData.success) {
     console.error(
-      "Database data mismatch in getCategoryById:",
+      "Database schema mismatch in getCategoryById:",
       parsedData.error
     )
     return {
@@ -57,5 +74,8 @@ export async function getCategoryById(
     }
   }
 
-  return { success: true, data: parsedData.data }
+  return {
+    success: true,
+    data: parsedData.data,
+  }
 }

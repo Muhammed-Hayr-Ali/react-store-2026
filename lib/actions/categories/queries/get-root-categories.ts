@@ -1,18 +1,30 @@
+/**
+ * @file lib/actions/categories/queries/get-root-categories.ts
+ * @description Query to retrieve top-level categories where `parent_id` is null.
+ * Commonly consumed by homepage category banners and primary navigation bars.
+ */
+
 "use server"
 
 import { z } from "zod"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { Category, categorySchema } from "../types"
+import { Category } from "../types"
+import { categorySchema } from "../schemas"
 
-interface GetRootCategoriesOptions {
+// ============================================================================
+// Parameter Interfaces
+// ============================================================================
+
+export interface GetRootCategoriesOptions {
   activeOnly?: boolean
   limit?: number
 }
 
-/**
- * جلب التصنيفات الرئيسية فقط (parent_id IS NULL)
- */
+// ============================================================================
+// Main Query Function
+// ============================================================================
+
 export async function getRootCategories(
   options: GetRootCategoriesOptions = {}
 ): Promise<ApiResult<Category[]>> {
@@ -24,7 +36,7 @@ export async function getRootCategories(
     let query = supabase
       .from("categories")
       .select("*")
-      .is("parent_id", null) // شرط التصنيفات الرئيسية فقط
+      .is("parent_id", null)
       .order("sort_order", { ascending: true })
       .order("name", { ascending: true })
 
@@ -39,7 +51,6 @@ export async function getRootCategories(
     const { data, error } = await query
 
     if (error) {
-      console.error("❌ [GetRootCategories] DB Error:", error.message)
       return {
         success: false,
         error: "FETCH_ROOT_CATEGORIES_ERROR",
@@ -47,11 +58,11 @@ export async function getRootCategories(
       }
     }
 
-    // التحقق من صحة مصفوفة البيانات عبر Zod
+    // Verify returned array against schema
     const parsedData = z.array(categorySchema).safeParse(data ?? [])
     if (!parsedData.success) {
       console.error(
-        "❌ [GetRootCategories] Data Validation Error:",
+        "Database schema mismatch in getRootCategories:",
         parsedData.error
       )
       return {
@@ -68,7 +79,6 @@ export async function getRootCategories(
     const errorMessage =
       err instanceof Error ? err.message : "Unknown error occurred"
 
-    console.error("❌ [GetRootCategories] Unexpected Error:", errorMessage)
     return {
       success: false,
       error: "UNEXPECTED_ERROR",

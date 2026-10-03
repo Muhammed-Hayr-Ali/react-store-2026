@@ -1,10 +1,21 @@
+/**
+ * @file lib/actions/brands/mutations/delete.ts
+ * @description Server Action to permanently remove a brand record by UUID.
+ * Enforces parameter format verification, administrator authorization, and cache clearing.
+ */
+
 "use server"
 
 import { z } from "zod"
+import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { hasRole } from "../../role/role-checker"
 import { hasPermission } from "../../role/permission-checker"
+
+// ============================================================================
+// Main Action
+// ============================================================================
 
 export async function deleteBrand(id: string): Promise<ApiResult<null>> {
   // 1. Validate ID format
@@ -16,7 +27,7 @@ export async function deleteBrand(id: string): Promise<ApiResult<null>> {
     }
   }
 
-  // 2. Check authorization in parallel
+  // 2. Perform parallel authorization checks
   const [isAdmin, canDelete] = await Promise.all([
     hasRole("admin"),
     hasPermission("delete_brand"),
@@ -39,7 +50,7 @@ export async function deleteBrand(id: string): Promise<ApiResult<null>> {
   // 3. Initialize Supabase client
   const supabase = await createServerClient()
 
-  // 4. Delete brand record
+  // 4. Delete record from database
   const { error } = await supabase.from("brands").delete().eq("id", id)
 
   if (error) {
@@ -50,5 +61,12 @@ export async function deleteBrand(id: string): Promise<ApiResult<null>> {
     }
   }
 
-  return { success: true, data: null }
+  // 5. Invalidate stale cache paths
+  revalidatePath("/admin/brands")
+  revalidatePath("/")
+
+  return {
+    success: true,
+    data: null,
+  }
 }

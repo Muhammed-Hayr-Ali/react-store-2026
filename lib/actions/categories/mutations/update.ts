@@ -1,17 +1,29 @@
+/**
+ * @file lib/actions/categories/mutations/update.ts
+ * @description Server Action to modify an existing category record by UUID.
+ * Handles partial payload sanitization, permission validation, and dynamic route revalidation.
+ */
+
 "use server"
 
 import { z } from "zod"
+import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { Category, updateCategorySchema, categorySchema } from "../types"
+import { Category } from "../types"
+import { categorySchema, updateCategorySchema } from "../schemas"
 import { hasRole } from "../../role/role-checker"
 import { hasPermission } from "../../role/permission-checker"
+
+// ============================================================================
+// Main Action Function
+// ============================================================================
 
 export async function updateCategory(
   id: string,
   payload: unknown
 ): Promise<ApiResult<Category | null>> {
-  // 1. Validate ID format
+  // 1. Validate UUID format
   const idValidation = z.string().uuid("INVALID_ID").safeParse(id)
   if (!idValidation.success) {
     return {
@@ -20,7 +32,7 @@ export async function updateCategory(
     }
   }
 
-  // 2. Validate payload
+  // 2. Validate partial update payload
   const validation = updateCategorySchema.safeParse(payload)
   if (!validation.success) {
     return {
@@ -32,7 +44,7 @@ export async function updateCategory(
 
   const safeData = validation.data
 
-  // 3. Check authorization in parallel
+  // 3. Perform parallel authorization checks
   const [isAdmin, canUpdate] = await Promise.all([
     hasRole("admin"),
     hasPermission("update_category"),
@@ -55,7 +67,7 @@ export async function updateCategory(
   // 4. Initialize Supabase client
   const supabase = await createServerClient()
 
-  // 5. Update database record
+  // 5. Update record in database
   const { data: updatedCategory, error } = await supabase
     .from("categories")
     .update(safeData)
@@ -85,15 +97,23 @@ export async function updateCategory(
     }
   }
 
-  // 6. Schema verification on returned data
+  // 6. Verify database output against category schema
   const parsedData = categorySchema.safeParse(updatedCategory)
   if (!parsedData.success) {
-    console.error("Database data mismatch on update:", parsedData.error)
+    console.error(
+      "Database schema mismatch on updateCategory:",
+      parsedData.error
+    )
     return {
       success: false,
       error: "DATA_VALIDATION_ERROR",
     }
   }
+
+  // 7. Invalidate dynamic category page and administration route
+  revalidatePath(`/category/${parsedData.data.slug}`)
+  revalidatePath("/admin/categories")
+  revalidatePath("/")
 
   return {
     success: true,

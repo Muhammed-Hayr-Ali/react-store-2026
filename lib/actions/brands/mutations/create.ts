@@ -1,28 +1,39 @@
+/**
+ * @file lib/actions/brands/mutations/create.ts
+ * @description Server Action to insert a new brand into the database.
+ * Handles schema validation, parallel role/permission checks, uniqueness conflict resolution, and cache revalidation.
+ */
+
 "use server"
 
-import { z } from "zod"
+import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { Brand, createBrandSchema, brandSchema } from "../types"
+import { Brand } from "../types"
+import { brandSchema, createBrandSchema } from "../schemas"
 import { hasRole } from "../../role/role-checker"
 import { hasPermission } from "../../role/permission-checker"
+
+// ============================================================================
+// Main Action
+// ============================================================================
 
 export async function createBrand(
   payload: unknown
 ): Promise<ApiResult<Brand | null>> {
-  // 1. Validate payload using schema
+  // 1. Validate payload using Zod schema
   const validation = createBrandSchema.safeParse(payload)
   if (!validation.success) {
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: z.flattenError(validation.error).fieldErrors,
+      details: validation.error.flatten().fieldErrors,
     }
   }
 
   const safeData = validation.data
 
-  // 2. Check authorization in parallel
+  // 2. Perform parallel authorization checks
   const [isAdmin, canCreate] = await Promise.all([
     hasRole("admin"),
     hasPermission("create_brand"),
@@ -45,7 +56,7 @@ export async function createBrand(
   // 3. Initialize Supabase client
   const supabase = await createServerClient()
 
-  // 4. Insert brand into database
+  // 4. Insert record into database
   const { data: newBrand, error } = await supabase
     .from("brands")
     .insert(safeData)
@@ -67,15 +78,19 @@ export async function createBrand(
     }
   }
 
-  // 5. Schema verification on returned data
+  // 5. Schema verification on database output
   const parsedData = brandSchema.safeParse(newBrand)
   if (!parsedData.success) {
-    console.error("Database data mismatch on create:", parsedData.error)
+    console.error("Database schema mismatch on createBrand:", parsedData.error)
     return {
       success: false,
       error: "DATA_VALIDATION_ERROR",
     }
   }
+
+  // 6. Invalidate stale cache paths
+  revalidatePath("/admin/brands")
+  revalidatePath("/")
 
   return {
     success: true,

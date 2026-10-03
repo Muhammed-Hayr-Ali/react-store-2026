@@ -1,4 +1,4 @@
-import { getBrandBySlug } from "@/lib/actions/brands/queries/get_by_slug"
+import { getBrandBySlug } from "@/lib/actions/brands/queries/get-by-slug"
 import { NextRequest, NextResponse } from "next/server"
 
 // http://localhost:3000/api/brand/get_by_slug?slug=almarai

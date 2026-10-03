@@ -1,18 +1,35 @@
+/**
+ * @file lib/actions/categories/queries/get-all.ts
+ * @description Query to retrieve categories supporting optional parent filtering and active status flags.
+ * Results are ordered by sort_order ascending, followed by name ascending.
+ */
+
 "use server"
 
 import { z } from "zod"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { Category, categorySchema } from "../types"
+import { Category } from "../types"
+import { categorySchema } from "../schemas"
+
+// ============================================================================
+// Parameter Interfaces
+// ============================================================================
+
+export interface GetAllCategoriesOptions {
+  parentId?: string | null
+  activeOnly?: boolean
+}
+
+// ============================================================================
+// Main Query Function
+// ============================================================================
 
 export async function getAllCategories({
   parentId,
   activeOnly = true,
-}: {
-  parentId?: string | null
-  activeOnly?: boolean
-} = {}): Promise<ApiResult<Category[]>> {
-  // 1. التحقق من parentId إذا تم تمريره كنص
+}: GetAllCategoriesOptions = {}): Promise<ApiResult<Category[]>> {
+  // 1. Validate parentId if provided
   if (parentId !== undefined && parentId !== null) {
     const parentValidation = z
       .string()
@@ -26,17 +43,17 @@ export async function getAllCategories({
     }
   }
 
-  // 2. تهيئة عميل Supabase
+  // 2. Initialize Supabase client
   const supabase = await createServerClient()
 
-  // 3. بناء الاستعلام مع الترتيب الافتراضي
+  // 3. Build query with ordering defaults
   let query = supabase
     .from("categories")
     .select("*")
     .order("sort_order", { ascending: true })
     .order("name", { ascending: true })
 
-  // 4. تطبيق الفلاتر
+  // 4. Apply optional filters
   if (parentId !== undefined) {
     if (parentId === null) {
       query = query.is("parent_id", null)
@@ -59,11 +76,11 @@ export async function getAllCategories({
     }
   }
 
-  // 5. التحقق من مصفوفة البيانات عبر Zod
+  // 5. Verify returned array against schema
   const parsedData = z.array(categorySchema).safeParse(data ?? [])
   if (!parsedData.success) {
     console.error(
-      "Database data mismatch in getAllCategories:",
+      "Database schema mismatch in getAllCategories:",
       parsedData.error
     )
     return {
@@ -72,5 +89,8 @@ export async function getAllCategories({
     }
   }
 
-  return { success: true, data: parsedData.data }
+  return {
+    success: true,
+    data: parsedData.data,
+  }
 }

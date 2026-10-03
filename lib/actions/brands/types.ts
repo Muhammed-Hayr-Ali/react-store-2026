@@ -1,39 +1,16 @@
-import { z } from "zod"
+/**
+ * @file lib/actions/brands/types.ts
+ * @description Pure TypeScript type definitions inferred from the Brand validation schemas.
+ * Safe for direct import into Client Components without bundling runtime schema logic.
+ */
 
-export const brandSchema = z.object({
-  id: z.uuid("INVALID_ID"),
-  name: z.string().min(1, "NAME_REQUIRED").max(100, "NAME_TOO_LONG"),
-  name_ar: z.string().max(100, "NAME_TOO_LONG").nullable().or(z.literal("")),
-  slug: z
-    .string()
-    .min(1, "SLUG_REQUIRED")
-    .regex(/^[a-z0-9-]+$/, "slug_invalid_format"),
-  logo_url: z.url("INVALID_URL").nullable().or(z.literal("")),
-  logo_alt: z
-    .string()
-    .max(200, "ALT_TEXT_TOO_LONG")
-    .nullable()
-    .or(z.literal("")),
-  created_at: z.string(),
-  updated_at: z.string(),
-})
+import { z } from "zod"
+import { brandSchema, createBrandSchema, updateBrandSchema } from "./schemas"
+
+// ============================================================================
+// Entity & Payload Types
+// ============================================================================
 
 export type Brand = z.infer<typeof brandSchema>
-
-export const createBrandSchema = brandSchema.omit({
-  id: true,
-  created_at: true,
-  updated_at: true,
-})
-
 export type CreateBrand = z.infer<typeof createBrandSchema>
-
-export const updateBrandSchema = brandSchema
-  .omit({
-    id: true,
-    created_at: true,
-    updated_at: true,
-  })
-  .partial()
-
 export type UpdateBrand = z.infer<typeof updateBrandSchema>

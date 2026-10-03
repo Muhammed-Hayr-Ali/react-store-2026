@@ -1,28 +1,39 @@
+/**
+ * @file lib/actions/categories/mutations/create.ts
+ * @description Server Action to insert a new product category into Supabase.
+ * Enforces Zod schema parsing, administrator role verification, duplicate slug detection, and cache revalidation.
+ */
+
 "use server"
 
-import { z } from "zod"
+import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { Category, createCategorySchema, categorySchema } from "../types"
+import { Category } from "../types"
+import { categorySchema, createCategorySchema } from "../schemas"
 import { hasRole } from "../../role/role-checker"
 import { hasPermission } from "../../role/permission-checker"
+
+// ============================================================================
+// Main Action Function
+// ============================================================================
 
 export async function createCategory(
   payload: unknown
 ): Promise<ApiResult<Category | null>> {
-  // 1. Validate payload
+  // 1. Validate payload against Zod schema
   const validation = createCategorySchema.safeParse(payload)
   if (!validation.success) {
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: z.flattenError(validation.error).fieldErrors,
+      details: validation.error.flatten().fieldErrors,
     }
   }
 
   const safeData = validation.data
 
-  // 2. Check authorization in parallel
+  // 2. Perform parallel authorization checks
   const [isAdmin, canCreate] = await Promise.all([
     hasRole("admin"),
     hasPermission("create_category"),
@@ -45,7 +56,7 @@ export async function createCategory(
   // 3. Initialize Supabase client
   const supabase = await createServerClient()
 
-  // 4. Insert into database
+  // 4. Insert category record into database
   const { data: newCategory, error } = await supabase
     .from("categories")
     .insert(safeData)
@@ -67,15 +78,22 @@ export async function createCategory(
     }
   }
 
-  // 5. Schema verification on returned data
+  // 5. Verify database response matches entity schema
   const parsedData = categorySchema.safeParse(newCategory)
   if (!parsedData.success) {
-    console.error("Database data mismatch on create:", parsedData.error)
+    console.error(
+      "Database schema mismatch on createCategory:",
+      parsedData.error
+    )
     return {
       success: false,
       error: "DATA_VALIDATION_ERROR",
     }
   }
+
+  // 6. Invalidate relevant storefront and dashboard cache paths
+  revalidatePath("/admin/categories")
+  revalidatePath("/")
 
   return {
     success: true,

@@ -1,11 +1,23 @@
+/**
+ * @file lib/actions/brands/mutations/update.ts
+ * @description Server Action to update an existing brand by UUID.
+ * Enforces parameter validation, partial schema parsing, authorization, and route cache revalidation.
+ */
+
 "use server"
 
 import { z } from "zod"
+import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { Brand, brandSchema, updateBrandSchema } from "../types"
+import { Brand } from "../types"
+import { brandSchema, updateBrandSchema } from "../schemas"
 import { hasRole } from "../../role/role-checker"
 import { hasPermission } from "../../role/permission-checker"
+
+// ============================================================================
+// Main Action
+// ============================================================================
 
 export async function updateBrand(
   id: string,
@@ -20,7 +32,7 @@ export async function updateBrand(
     }
   }
 
-  // 2. Validate payload
+  // 2. Validate update payload
   const validation = updateBrandSchema.safeParse(payload)
   if (!validation.success) {
     return {
@@ -32,7 +44,7 @@ export async function updateBrand(
 
   const safeData = validation.data
 
-  // 3. Check authorization in parallel
+  // 3. Perform parallel authorization checks
   const [isAdmin, canUpdate] = await Promise.all([
     hasRole("admin"),
     hasPermission("update_brand"),
@@ -55,7 +67,7 @@ export async function updateBrand(
   // 4. Initialize Supabase client
   const supabase = await createServerClient()
 
-  // 5. Update database record
+  // 5. Update record in database
   const { data: updatedBrand, error } = await supabase
     .from("brands")
     .update(safeData)
@@ -85,15 +97,20 @@ export async function updateBrand(
     }
   }
 
-  // 6. Schema verification on returned data
+  // 6. Schema verification on database output
   const parsedData = brandSchema.safeParse(updatedBrand)
   if (!parsedData.success) {
-    console.error("Database data mismatch on update:", parsedData.error)
+    console.error("Database schema mismatch on updateBrand:", parsedData.error)
     return {
       success: false,
       error: "DATA_VALIDATION_ERROR",
     }
   }
+
+  // 7. Invalidate related cache paths
+  revalidatePath(`/brand/${parsedData.data.slug}`)
+  revalidatePath("/admin/brands")
+  revalidatePath("/")
 
   return {
     success: true,
