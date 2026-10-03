@@ -13,7 +13,7 @@ import { getLatestProducts } from "@/lib/actions/products/queries/get-latest-pro
 import { getActiveFlashSale } from "@/lib/actions/flash-sales/queries/get_active_flash_sale"
 
 // استيراد أدوات جلب العملة وأسعار الصرف
-import { getSelectedCurrency } from "@/lib/actions/currency/queries/get_selected_currency"
+import { getSelectedCurrency } from "@/lib/actions/currency/queries/get-selected-currency"
 import { getExchangeRates } from "@/lib/actions/currency/queries/get-rates"
 
 export async function generateMetadata() {

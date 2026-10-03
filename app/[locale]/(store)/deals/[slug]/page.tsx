@@ -4,7 +4,7 @@ import { getLocale } from "next-intl/server"
 import { ZapIcon } from "lucide-react"
 
 import { getFlashSaleBySlug } from "@/lib/actions/flash-sales/queries/get-flash-sale-by-slug"
-import { getSelectedCurrency } from "@/lib/actions/currency/queries/get_selected_currency"
+import { getSelectedCurrency } from "@/lib/actions/currency/queries/get-selected-currency"
 import { getExchangeRates } from "@/lib/actions/currency/queries/get-rates"
 import { CountdownTimer } from "@/components/store/home/countdown-timer"
 import { FlashSaleGrid } from "@/components/store/flash-sale/flash-sale-grid"

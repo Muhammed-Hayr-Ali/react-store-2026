@@ -6,7 +6,7 @@ import DesktopNav from "./desktop-nav"
 import { AppLogo } from "@/components/ui/app-logo"
 
 // ✅ 1. استيراد دالة جلب العملة المختارة
-import { getSelectedCurrency } from "@/lib/actions/currency/queries/get_selected_currency"
+import { getSelectedCurrency } from "@/lib/actions/currency/queries/get-selected-currency"
 
 export default async function Navbar({ user }: { user: CurrentUser | null }) {
   // ✅ 2. جلب العملة الحالية من الكوكيز (تتم في الخادم بسرعة وأمان)

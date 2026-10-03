@@ -15,7 +15,7 @@ import type {
 import { getCurrentUser } from "@/lib/actions/utils/profile"
 
 // استيرادات تعدد العملات
-import { getSelectedCurrency } from "@/lib/actions/currency/queries/get_selected_currency"
+import { getSelectedCurrency } from "@/lib/actions/currency/queries/get-selected-currency"
 import { getExchangeRates } from "@/lib/actions/currency/queries/get-rates"
 
 // Shadcn UI Breadcrumb
