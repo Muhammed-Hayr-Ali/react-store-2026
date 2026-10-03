@@ -8,6 +8,7 @@ import { format } from "date-fns"
 import { type DateRange } from "react-day-picker"
 import {
   CalendarIcon,
+  CheckCircle2Icon,
   CheckIcon,
   FlameIcon,
   Loader2Icon,
@@ -43,13 +44,15 @@ import {
   CommandList,
 } from "@/components/ui/command"
 
+import { flashSaleFormSchema } from "@/lib/actions/flash-sales/schemas"
 import {
-  flashSaleFormSchema,
-} from "@/lib/actions/flash-sales/schemas"
-import { FlashSaleDiscountType, FlashSaleFormInput } from "@/lib/actions/flash-sales/types"
+  FlashSaleDiscountType,
+  FlashSaleFormInput,
+} from "@/lib/actions/flash-sales/types"
 import { createFlashSale } from "@/lib/actions/flash-sales/mutations/create"
 import { updateFlashSale } from "@/lib/actions/flash-sales/mutations/update"
 import { cn } from "@/lib/utils"
+import { Spinner } from "@/components/ui/spinner"
 
 export interface SelectableProduct {
   id: string
@@ -630,32 +633,32 @@ export function FlashSaleForm({
           </div>
         )}
       </div>
-
-      {/* Form Action Buttons */}
-      <div className="flex items-center justify-end gap-3 pt-2">
+      {/* Bottom Actions Bar (Standard Page Flow - No Sticky/Floating on Mobile) */}
+      <div className="flex flex-col-reverse items-stretch justify-end gap-3 border-t pt-6 sm:flex-row sm:items-center">
         <Button
           type="button"
           variant="outline"
-          onClick={() => router.back()}
           disabled={isSubmitting}
-          className="text-xs"
+          onClick={() => router.back()}
+          className="w-full sm:w-auto"
         >
-          Cancel
+          Discard Changes
         </Button>
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="text-destructive-foreground min-w-28 bg-destructive text-xs hover:bg-destructive/90"
+          className="w-full cursor-pointer shadow-xs sm:w-auto sm:min-w-32"
         >
           {isSubmitting ? (
             <>
-              <Loader2Icon className="mr-1.5 size-3.5 animate-spin" />
+              <Spinner className="mr-2 size-4" />
               {saleId ? "Saving..." : "Creating..."}
             </>
-          ) : saleId ? (
-            "Save Changes"
           ) : (
-            "Create Flash Sale"
+            <>
+              <CheckCircle2Icon className="mr-1.5 size-4" />
+              {saleId ? "Save Changes" : "Create Flash Sale"}
+            </>
           )}
         </Button>
       </div>
