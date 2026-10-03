@@ -6,7 +6,7 @@ import { Slot } from "radix-ui"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
-import { CustomButton } from "@/components/ui/custom-button"
+import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import {
   Sheet,
@@ -24,7 +24,6 @@ import {
 import { PanelLeftIcon } from "lucide-react"
 import { CustomInput } from "./custom-input"
 import { Input } from "./input"
-import { Button } from "./button"
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -260,7 +259,7 @@ function SidebarTrigger({
   const { toggleSidebar } = useSidebar()
 
   return (
-    <CustomButton
+    <Button
       data-sidebar="trigger"
       data-slot="sidebar-trigger"
       variant="ghost"
@@ -274,7 +273,7 @@ function SidebarTrigger({
     >
       <PanelLeftIcon className="rtl:rotate-180" />
       <span className="sr-only">Toggle Sidebar</span>
-    </CustomButton>
+    </Button>
   )
 }
 

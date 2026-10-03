@@ -4,7 +4,7 @@ import * as React from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import * as z from "zod"
-import { CustomButton } from "@/components/ui/custom-button"
+import { Button } from "@/components/ui/button"
 import {
   Field,
   FieldError, // Added FieldError to display validation messages
@@ -107,9 +107,9 @@ export function ForgotPasswordForm() {
         )}
 
         <Field>
-          <CustomButton type="submit" disabled={isSubmitting} className="uppercase">
+          <Button type="submit" disabled={isSubmitting} className="uppercase">
             {isSubmitting ? <Spinner /> : "request reset link"}
-          </CustomButton>
+          </Button>
         </Field>
       </FieldGroup>
     </form>

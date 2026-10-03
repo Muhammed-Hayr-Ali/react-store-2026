@@ -10,7 +10,7 @@ import {
 
 // مكونات shadcn القياسية
 import { Separator } from "@/components/ui/separator"
-import { CustomButton } from "@/components/ui/custom-button"
+import { Button } from "@/components/ui/button"
 
 // المكونات الفرعية
 import { ReviewSummary } from "./ReviewSummary"
@@ -60,14 +60,14 @@ export default function ProductReviews({
             </p>
           </div>
 
-          <CustomButton
+          <Button
             variant="outline"
             onClick={() =>
               setDialogState({ id: null, openDialog: "create-review" })
             }
           >
             Write a Review
-          </CustomButton>
+          </Button>
         </div>
 
         <Separator />

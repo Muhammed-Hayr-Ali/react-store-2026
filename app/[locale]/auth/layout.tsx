@@ -1,4 +1,4 @@
-import { CustomButton } from "@/components/ui/custom-button"
+import { Button } from "@/components/ui/button"
 import { FieldDescription } from "@/components/ui/field"
 import { getCurrentUser } from "@/lib/actions/utils/profile"
 import { appRoutes } from "@/lib/config/app-routes"
@@ -20,11 +20,11 @@ export default async function AuthLayout({ children }: Props) {
   return (
     <main className="flex min-h-svh w-full flex-col items-center gap-6">
       <div className="flex w-full px-2 pt-2 md:hidden">
-        <CustomButton variant="ghost" size="icon-sm" className="p-0" asChild>
+        <Button variant="ghost" size="icon-sm" className="p-0" asChild>
           <Link href={appRoutes.home}>
             <ArrowLeft className="rtl:rotate-180" />
           </Link>
-        </CustomButton>
+        </Button>
       </div>
       <div className="flex w-full flex-1 flex-col items-center justify-center">
         <div className="flex w-full max-w-sm flex-col">{children}</div>

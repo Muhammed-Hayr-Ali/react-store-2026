@@ -41,8 +41,7 @@ export default function Layout({
           </Breadcrumb>
         </div>
       </header>
-
-      <main className="flex flex-1 flex-col  px-4 py-4 md:gap-6 md:px-6 md:py-6">
+      <main className="flex flex-1 flex-col overflow-y-auto px-2 py-3 sm:px-4 md:px-6 md:py-5">
         {children}
       </main>
     </SidebarInset>

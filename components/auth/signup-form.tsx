@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import * as z from "zod"
-import { CustomButton } from "@/components/ui/custom-button"
+import { Button } from "@/components/ui/button"
 import {
   Field,
   FieldError, // Added FieldError to display validation messages
@@ -137,7 +137,7 @@ export function SignUpForm() {
                 autoComplete="new-password"
                 prefixIcon={<Lock size="16" />}
                 suffixIcon={
-                  <CustomButton
+                  <Button
                     type="button"
                     variant="ghost"
                     onClick={() => setShowPassword(!showPassword)}
@@ -148,7 +148,7 @@ export function SignUpForm() {
                     ) : (
                       <EyeOff size="16" />
                     )}
-                  </CustomButton>
+                  </Button>
                 }
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -162,9 +162,9 @@ export function SignUpForm() {
         )}
 
         <Field>
-          <CustomButton type="submit" disabled={isSubmitting} className="uppercase">
+          <Button type="submit" disabled={isSubmitting} className="uppercase">
             {isSubmitting ? <Spinner /> : "sign up"}
-          </CustomButton>
+          </Button>
         </Field>
 
         <FieldSeparator className="my-1">Or</FieldSeparator>

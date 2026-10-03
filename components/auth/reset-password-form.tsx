@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import * as z from "zod"
-import { CustomButton } from "@/components/ui/custom-button"
+import { Button } from "@/components/ui/button"
 
 
 import {
@@ -62,11 +62,11 @@ export function ResetPasswordForm() {
           Reset password link is missing or invalid. Please request a new link.
         </p>
 
-        <CustomButton variant="outline" className="mt-4" asChild>
+        <Button variant="outline" className="mt-4" asChild>
           <Link href={appRoutes.auth.forgotPassword}>
             Request New Link
           </Link>
-        </CustomButton>
+        </Button>
       </div>
     )
   }
@@ -148,9 +148,9 @@ export function ResetPasswordForm() {
 
         {/* زر الإرسال */}
         <Field className="mt-4">
-          <CustomButton type="submit" disabled={isSubmitting} className="uppercase">
+          <Button type="submit" disabled={isSubmitting} className="uppercase">
             {isSubmitting ? <Spinner /> : "update password"}
-          </CustomButton>
+          </Button>
         </Field>
       </FieldGroup>
     </form>

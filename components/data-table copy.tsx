@@ -54,7 +54,7 @@ import {
 } from "@tanstack/react-table"
 import { z } from "zod"
 
-import { CustomButton } from "@/components/ui/custom-button"
+import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   Drawer,
@@ -133,7 +133,7 @@ const columnHelper = createColumnHelper<typeof features, Category>()
 function DragHandle({ id }: { id: string }) {
   const { attributes, listeners } = useSortable({ id })
   return (
-    <CustomButton
+    <Button
       {...attributes}
       {...listeners}
       variant="ghost"
@@ -142,7 +142,7 @@ function DragHandle({ id }: { id: string }) {
     >
       <IconGripVertical className="size-3" />
       <span className="sr-only">Drag to reorder</span>
-    </CustomButton>
+    </Button>
   )
 }
 
@@ -223,14 +223,14 @@ const columns = columnHelper.columns([
     cell: () => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <CustomButton
+          <Button
             variant="ghost"
             className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
             size="icon"
           >
             <IconDotsVertical className="size-4" />
             <span className="sr-only">Open menu</span>
-          </CustomButton>
+          </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-40">
           <DropdownMenuItem>
@@ -283,12 +283,12 @@ function TableCellViewer({ item }: { item: Category }) {
   return (
     <Drawer direction="right">
       <DrawerTrigger asChild>
-        <CustomButton
+        <Button
           variant="link"
           className="w-fit px-0 text-left font-medium text-foreground"
         >
           {item.name}
-        </CustomButton>
+        </Button>
       </DrawerTrigger>
       <DrawerContent className="h-full sm:max-w-md">
         <DrawerHeader>
@@ -348,11 +348,11 @@ function TableCellViewer({ item }: { item: Category }) {
         </div>
 
         <DrawerFooter className="pt-2">
-          <CustomButton className="w-full">Edit Category</CustomButton>
+          <Button className="w-full">Edit Category</Button>
           <DrawerClose asChild>
-            <CustomButton variant="outline" className="w-full">
+            <Button variant="outline" className="w-full">
               Close
-            </CustomButton>
+            </Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
@@ -431,11 +431,11 @@ export function CategoriesDataTable({
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <CustomButton variant="outline" size="sm">
+              <Button variant="outline" size="sm">
                 <IconLayoutColumns className="mr-2 size-4" />
                 <span className="hidden lg:inline">Customize Columns</span>
                 <span className="lg:hidden">Columns</span>
-              </CustomButton>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               {table
@@ -465,11 +465,11 @@ export function CategoriesDataTable({
                 ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          <CustomButton variant="default" size="sm">
+          <Button variant="default" size="sm">
             <IconPlus className="mr-2 size-4" />
             <span className="hidden lg:inline">Add Category</span>
             <span className="lg:hidden">Add</span>
-          </CustomButton>
+          </Button>
         </div>
       </div>
 
@@ -555,7 +555,7 @@ export function CategoriesDataTable({
             {table.getPageCount()}
           </div>
           <div className="ml-auto flex items-center gap-2 lg:ml-0">
-            <CustomButton
+            <Button
               variant="outline"
               className="hidden h-8 w-8 p-0 lg:flex"
               onClick={() => table.setPageIndex(0)}
@@ -563,8 +563,8 @@ export function CategoriesDataTable({
             >
               <span className="sr-only">Go to first page</span>
               <IconChevronsLeft className="size-4" />
-            </CustomButton>
-            <CustomButton
+            </Button>
+            <Button
               variant="outline"
               className="size-8"
               size="icon"
@@ -573,8 +573,8 @@ export function CategoriesDataTable({
             >
               <span className="sr-only">Go to previous page</span>
               <IconChevronLeft className="size-4" />
-            </CustomButton>
-            <CustomButton
+            </Button>
+            <Button
               variant="outline"
               className="size-8"
               size="icon"
@@ -583,8 +583,8 @@ export function CategoriesDataTable({
             >
               <span className="sr-only">Go to next page</span>
               <IconChevronRight className="size-4" />
-            </CustomButton>
-            <CustomButton
+            </Button>
+            <Button
               variant="outline"
               className="hidden size-8 lg:flex"
               size="icon"
@@ -593,7 +593,7 @@ export function CategoriesDataTable({
             >
               <span className="sr-only">Go to last page</span>
               <IconChevronsRight className="size-4" />
-            </CustomButton>
+            </Button>
           </div>
         </div>
       </div>

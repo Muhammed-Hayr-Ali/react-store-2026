@@ -4,7 +4,7 @@ import * as React from "react"
 import { BellIcon, UserIcon } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { CustomButton } from "@/components/ui/custom-button"
+import { Button } from "@/components/ui/button"
 import { CurrentUser } from "@/lib/actions/utils/profile"
 import { cn } from "@/lib/utils"
 
@@ -78,7 +78,7 @@ function NotificationButton() {
     <div className="relative">
       {/* نقطة الإشعار باستخدام أبعاد الاتجاه الحديثة inset-e */}
       <span className="absolute -inset-e-0.5 -top-0.5 z-10 size-2 rounded-full bg-emerald-500 ring-2 ring-background" />
-      <CustomButton
+      <Button
         type="button"
         variant="secondary"
         size="icon"
@@ -86,7 +86,7 @@ function NotificationButton() {
         aria-label="Notifications"
       >
         <BellIcon className="size-4" />
-      </CustomButton>
+      </Button>
     </div>
   )
 }

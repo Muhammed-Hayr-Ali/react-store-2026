@@ -10,7 +10,7 @@ import {
   XIcon,
 } from "lucide-react"
 import { ProductImageItem } from "./utils"
-import { CustomButton } from "@/components/ui/custom-button"
+import { Button } from "@/components/ui/button"
 
 interface ProductGalleryProps {
   activeImage: string
@@ -164,7 +164,7 @@ export function ProductGallery({
             <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium tracking-widest text-white/80 backdrop-blur-md">
               {currentIndex + 1} / {productImages.length}
             </span>
-            <CustomButton
+            <Button
               type="button"
               variant="ghost"
               size="icon"
@@ -173,7 +173,7 @@ export function ProductGallery({
               aria-label="Close fullscreen gallery"
             >
               <XIcon className="size-5" />
-            </CustomButton>
+            </Button>
           </div>
 
           {/* الصورة المكبرة مع أزرار التنقل */}
@@ -182,7 +182,7 @@ export function ProductGallery({
             className="relative flex max-h-[75vh] w-full max-w-5xl flex-1 items-center justify-center p-2"
           >
             {productImages.length > 1 && (
-              <CustomButton
+              <Button
                 type="button"
                 variant="ghost"
                 size="icon"
@@ -191,7 +191,7 @@ export function ProductGallery({
                 aria-label="Previous image"
               >
                 <ChevronLeftIcon className="size-6 rtl:rotate-180" />
-              </CustomButton>
+              </Button>
             )}
 
             <div className="relative flex max-h-full max-w-full items-center justify-center">
@@ -212,7 +212,7 @@ export function ProductGallery({
             </div>
 
             {productImages.length > 1 && (
-              <CustomButton
+              <Button
                 type="button"
                 variant="ghost"
                 size="icon"
@@ -221,7 +221,7 @@ export function ProductGallery({
                 aria-label="Next image"
               >
                 <ChevronRightIcon className="size-6 rtl:rotate-180" />
-              </CustomButton>
+              </Button>
             )}
           </div>
 

@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Loader2, Send } from "lucide-react"
 import { toast } from "sonner"
 
-import { CustomButton } from "@/components/ui/custom-button"
+import { Button } from "@/components/ui/button"
 import { CustomInput } from "@/components/ui/custom-input"
 import { AppLogo } from "@/components/ui/app-logo"
 import { ThemeToggle } from "@/components/layout/footer/theme-toggle"
@@ -27,7 +27,7 @@ const Footer = () => {
             {/* Social Links */}
             <div className="flex flex-wrap items-center gap-2">
               {appConfig.menu.socialMediaLinks.items.map((item) => (
-                <CustomButton
+                <Button
                   key={item.key}
                   variant="secondary"
                   size="icon"
@@ -43,7 +43,7 @@ const Footer = () => {
                     <item.icon className="size-4" />
                     <span className="sr-only">{item.label || item.key}</span>
                   </Link>
-                </CustomButton>
+                </Button>
               ))}
             </div>
           </div>
@@ -174,7 +174,7 @@ function NewsletterSection() {
           />
         </div>
 
-        <CustomButton
+        <Button
           type="submit"
           variant="secondary"
           size="icon"
@@ -188,7 +188,7 @@ function NewsletterSection() {
             <Send className="size-4 text-foreground" />
           )}
           <span className="sr-only">Subscribe</span>
-        </CustomButton>
+        </Button>
       </form>
     </div>
   )

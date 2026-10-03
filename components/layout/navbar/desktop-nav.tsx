@@ -11,7 +11,7 @@ import {
 } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { CustomButton } from "@/components/ui/custom-button"
+import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import {
   CustomPopover,
@@ -44,24 +44,24 @@ export default function DesktopNav({
   return (
     <div className={cn("hidden items-center gap-3 md:flex", className)}>
       {/* زر البحث */}
-      <CustomButton
+      <Button
         variant="ghost"
         size="icon"
         className="size-8 rounded-lg text-muted-foreground hover:text-foreground"
         aria-label="Search"
       >
         <SearchIcon className="size-4" />
-      </CustomButton>
+      </Button>
 
       {/* زر سلة التسوق */}
-      <CustomButton
+      <Button
         variant="ghost"
         size="icon"
         className="relative size-8 rounded-lg text-muted-foreground hover:text-foreground"
         aria-label="Shopping Cart"
       >
         <ShoppingCartIcon className="size-4" />
-      </CustomButton>
+      </Button>
 
       {/* مبدل العملة */}
       <CurrencySwitcher currentCurrency={currentCurrency} />
@@ -74,21 +74,21 @@ export default function DesktopNav({
         </>
       ) : (
         <div className="ms-1 flex items-center gap-2 border-s border-border/50 ps-3">
-          <CustomButton
+          <Button
             size="sm"
             variant="outline"
             className="h-8 rounded-lg text-xs font-normal"
             asChild
           >
             <Link href={appRoutes.auth.login}>Login</Link>
-          </CustomButton>
-          <CustomButton
+          </Button>
+          <Button
             size="sm"
             className="h-8 rounded-lg text-xs font-normal"
             asChild
           >
             <Link href={appRoutes.auth.signup}>Get Started</Link>
-          </CustomButton>
+          </Button>
         </div>
       )}
     </div>
@@ -133,7 +133,7 @@ function UserMenu({ user }: { user: CurrentUser }) {
         <Separator />
         <div className="p-1.5">
           {appConfig.menu.userMenu.items.map((item) => (
-            <CustomButton
+            <Button
               key={item.href}
               size="sm"
               variant="ghost"
@@ -144,14 +144,14 @@ function UserMenu({ user }: { user: CurrentUser }) {
                 <item.icon className="me-2 size-3.5 text-muted-foreground" />
                 {item.label}
               </Link>
-            </CustomButton>
+            </Button>
           ))}
         </div>
 
         <Separator />
         <div className="p-1.5">
           {appConfig.menu.supportLinks.items.map((item) => (
-            <CustomButton
+            <Button
               key={item.href}
               size="sm"
               variant="ghost"
@@ -162,13 +162,13 @@ function UserMenu({ user }: { user: CurrentUser }) {
                 <item.icon className="me-2 size-3.5 text-muted-foreground" />
                 {item.label}
               </Link>
-            </CustomButton>
+            </Button>
           ))}
         </div>
 
         <Separator />
         <div className="p-1.5">
-          <CustomButton
+          <Button
             size="sm"
             variant="ghost"
             className="h-8.5 w-full justify-start rounded-lg text-xs font-normal text-destructive hover:bg-destructive/10 hover:text-destructive"
@@ -176,7 +176,7 @@ function UserMenu({ user }: { user: CurrentUser }) {
           >
             <LogOutIcon className="me-2 size-3.5" />
             Logout
-          </CustomButton>
+          </Button>
         </div>
       </CustomPopoverContent>
     </CustomPopover>

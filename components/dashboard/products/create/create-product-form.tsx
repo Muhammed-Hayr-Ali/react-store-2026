@@ -26,11 +26,13 @@ import {
   CheckCircle2Icon,
   Wand2Icon,
   PencilIcon,
+  AlertCircleIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   Field,
   FieldError,
@@ -48,9 +50,7 @@ import {
 } from "@/components/ui/select"
 
 import { createProduct } from "@/lib/actions/products/mutations/create"
-import {
-  CreateProductCompleteInput,
-} from "@/lib/actions/products/types"
+import { CreateProductCompleteInput } from "@/lib/actions/products/types"
 import { Category } from "@/lib/actions/categories"
 import { Brand } from "@/lib/actions/brands"
 
@@ -146,6 +146,7 @@ export default function CreateProductForm({
   brands: Brand[] | null
 }) {
   const router = useRouter()
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   const [categoriesList, setCategoriesList] = React.useState<Category[]>(
     initialCategories || []
@@ -227,9 +228,14 @@ export default function CreateProductForm({
 
   const handleGenerateAllSeo = () => {
     if (!currentProductName.trim()) {
-      toast.error("Please enter a product name first")
+      setErrorMessage(
+        "Please enter a product name before generating SEO details."
+      )
+      window.scrollTo({ top: 0, behavior: "smooth" })
       return
     }
+
+    setErrorMessage(null)
 
     const brandSuffix = selectedBrandObject
       ? ` | ${selectedBrandObject.name}`
@@ -271,6 +277,8 @@ export default function CreateProductForm({
   }
 
   async function onSubmit(data: FormValues) {
+    setErrorMessage(null)
+
     const payload: CreateProductCompleteInput = {
       ...data,
       brand_id: data.brand_id || null,
@@ -305,17 +313,29 @@ export default function CreateProductForm({
         result.error === "VALIDATION_ERROR"
           ? "Please check the form for invalid inputs."
           : result.error === "SLUG_ALREADY_EXISTS"
-            ? "The URL slug is already taken."
+            ? "The URL slug is already taken. Please choose another one."
             : result.error === "SKU_ALREADY_EXISTS"
-              ? "One or more SKUs are already in use."
+              ? "One or more SKUs are already in use. Please generate or enter unique SKUs."
               : result.error || "Failed to create product."
-      toast.error(errorMsg)
+
+      setErrorMessage(errorMsg)
+      window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }
 
+  const onInvalid = () => {
+    setErrorMessage(
+      "Please complete all required fields and resolve the errors below before submitting."
+    )
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8">
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+    <div className="mx-auto w-full max-w-7xl px-2 py-4 md:px-4 md:py-6">
+      <form
+        onSubmit={form.handleSubmit(onSubmit, onInvalid)}
+        className="space-y-6"
+      >
         {/* Top Header */}
         <div className="border-b pb-5">
           <h1 className="text-2xl font-bold tracking-tight">Create Product</h1>
@@ -323,6 +343,25 @@ export default function CreateProductForm({
             Configure product details, variants, media, and inventory settings.
           </p>
         </div>
+
+        {/* Global Error Alert */}
+        {errorMessage && (
+          <Alert variant="destructive" className="relative pr-9">
+            <AlertCircleIcon className="size-4" />
+            <AlertTitle>Action Required</AlertTitle>
+            <AlertDescription className="text-xs">
+              {errorMessage}
+            </AlertDescription>
+            <button
+              type="button"
+              onClick={() => setErrorMessage(null)}
+              className="absolute top-3 right-3 cursor-pointer text-muted-foreground hover:text-foreground"
+              aria-label="Close error alert"
+            >
+              <XIcon className="size-4" />
+            </button>
+          </Alert>
+        )}
 
         {/* 2-Column Responsive Layout */}
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
@@ -843,30 +882,24 @@ export default function CreateProductForm({
           </div>
         </div>
 
-        {errors.root && (
-          <FieldError
-            errors={[
-              {
-                message: errors.root.message || "An unexpected error occurred",
-              },
-            ]}
-          />
-        )}
-
-        {/* Bottom Actions Bar (Sticky & Convenient) */}
-        <div className="sticky bottom-0 z-20 -mx-4 flex items-center justify-end gap-3 border-t bg-background/90 px-6 py-4 backdrop-blur-md">
+        {/* Bottom Actions Bar (Standard Page Flow - No Sticky/Floating on Mobile) */}
+        <div className="flex flex-col-reverse items-stretch justify-end gap-3 border-t pt-6 sm:flex-row sm:items-center">
           <Button
             type="button"
             variant="outline"
             disabled={isSubmitting}
-            onClick={() => form.reset()}
+            onClick={() => {
+              form.reset()
+              setErrorMessage(null)
+            }}
+            className="w-full sm:w-auto"
           >
             Discard Changes
           </Button>
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="min-w-32 cursor-pointer shadow-xs"
+            className="w-full cursor-pointer shadow-xs sm:w-auto sm:min-w-32"
           >
             {isSubmitting ? (
               <>
@@ -882,7 +915,6 @@ export default function CreateProductForm({
           </Button>
         </div>
       </form>
-
       {/* --- Category Sheets & Dialogs --- */}
       <CreateCategorySheet
         isOpen={categoryModal.type === "create" ? "create" : null}
@@ -901,7 +933,6 @@ export default function CreateProductForm({
           setCategoryModal({ type: null, data: null })
         }}
       />
-
       <UpdateCategorySheet
         isOpen={categoryModal.type === "update" ? "update" : null}
         onOpenChange={(open) => {
@@ -924,7 +955,6 @@ export default function CreateProductForm({
           toast.success("Category updated successfully!")
         }}
       />
-
       <DeleteCategoryDialog
         isOpen={categoryModal.type === "delete" ? "delete" : null}
         onOpenChange={(open) => {
@@ -943,7 +973,6 @@ export default function CreateProductForm({
           toast.success("Category deleted successfully!")
         }}
       />
-
       {/* --- Brand Sheets & Dialogs --- */}
       <CreateBrandSheet
         isOpen={brandModal.type === "create" ? "create" : null}
@@ -959,7 +988,6 @@ export default function CreateProductForm({
           setBrandModal({ type: null, data: null })
         }}
       />
-
       <UpdateBrandSheet
         isOpen={brandModal.type === "update" ? "update" : null}
         onOpenChange={(open) => {
@@ -976,7 +1004,6 @@ export default function CreateProductForm({
           toast.success("Brand updated successfully!")
         }}
       />
-
       <DeleteBrandDialog
         isOpen={brandModal.type === "delete" ? "delete" : null}
         onOpenChange={(open) => {

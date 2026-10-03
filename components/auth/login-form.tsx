@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import * as z from "zod"
-import { CustomButton } from "@/components/ui/custom-button"
+import { Button } from "@/components/ui/button"
 import {
   Field,
   FieldError, // Added FieldError to display validation messages
@@ -115,7 +115,7 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
                 autoComplete="current-password"
                 prefixIcon={<Lock size="16" />} // Optional: Add a password icon if desired
                 suffixIcon={
-                  <CustomButton
+                  <Button
                     type="button"
                     variant="ghost"
                     onClick={() => setShowPassword(!showPassword)}
@@ -126,7 +126,7 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
                     ) : (
                       <EyeOff size="16" />
                     )}
-                  </CustomButton>
+                  </Button>
                 }
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -159,13 +159,13 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
                 </Badge>
               </div>
             )}
-            <CustomButton
+            <Button
               type="submit"
               disabled={isSubmitting}
               className="w-full uppercase"
             >
               {isSubmitting ? <Spinner /> : "sign In"}
-            </CustomButton>
+            </Button>
           </div>
         </Field>
 

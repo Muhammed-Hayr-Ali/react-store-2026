@@ -12,7 +12,7 @@ import {
   MobileMenuHeader,
 } from "@/components/ui/mobile-menu"
 import { Separator } from "@/components/ui/separator"
-import { CustomButton } from "@/components/ui/custom-button"
+import { Button } from "@/components/ui/button"
 
 import { signOut } from "@/lib/actions/authentication/signOut"
 import { CurrentUser } from "@/lib/actions/utils/profile"
@@ -98,7 +98,7 @@ export default function MobileRightMenu({
         {/* قائمة المستخدم أو الزائر */}
         <div className="flex flex-col">
           {navLinks.map((link) => (
-            <CustomButton
+            <Button
               key={link.key}
               variant="ghost"
               className="flex h-10 items-center justify-start font-normal"
@@ -108,7 +108,7 @@ export default function MobileRightMenu({
                 <link.icon className="mr-2 size-4 rtl:mr-0 rtl:ml-2" />
                 {link.label}
               </Link>
-            </CustomButton>
+            </Button>
           ))}
         </div>
 
@@ -118,7 +118,7 @@ export default function MobileRightMenu({
         {user && (
           <div className="flex flex-col">
             {appConfig.menu.shoppingMenu.items.map((link) => (
-              <CustomButton
+              <Button
                 key={link.key}
                 variant="ghost"
                 className="flex h-10 items-center justify-start font-normal"
@@ -128,7 +128,7 @@ export default function MobileRightMenu({
                   <link.icon className="mr-2 size-4 rtl:mr-0 rtl:ml-2" />
                   {link.label}
                 </Link>
-              </CustomButton>
+              </Button>
             ))}
             <Separator />
           </div>
@@ -137,7 +137,7 @@ export default function MobileRightMenu({
         {/* روابط الدعم والمساعدة */}
         <div className="flex flex-col">
           {appConfig.menu.supportLinksMenu.items.map((link) => (
-            <CustomButton
+            <Button
               key={link.key}
               variant="ghost"
               className="flex h-10 items-center justify-start font-normal"
@@ -147,7 +147,7 @@ export default function MobileRightMenu({
                 <link.icon className="mr-2 size-4 rtl:mr-0 rtl:ml-2" />
                 {link.label}
               </Link>
-            </CustomButton>
+            </Button>
           ))}
         </div>
 
@@ -168,16 +168,16 @@ export default function MobileRightMenu({
       <MobileMenuFooter>
         <div className="flex flex-col">
           {user ? (
-            <CustomButton
+            <Button
               variant="default"
               className="px-4 uppercase"
               onClick={handleLogout}
             >
               Logout
-            </CustomButton>
+            </Button>
           ) : (
             <div className="flex flex-col space-y-2">
-              <CustomButton
+              <Button
                 variant="default"
                 className="px-4 uppercase"
                 asChild
@@ -185,9 +185,9 @@ export default function MobileRightMenu({
                 <Link href={appRoutes.auth.signup} onClick={handleOnClick}>
                   Get Started
                 </Link>
-              </CustomButton>
+              </Button>
 
-              <CustomButton
+              <Button
                 variant="secondary"
                 className="px-4 uppercase"
                 asChild
@@ -195,7 +195,7 @@ export default function MobileRightMenu({
                 <Link href={appRoutes.auth.login} onClick={handleOnClick}>
                   Login
                 </Link>
-              </CustomButton>
+              </Button>
             </div>
           )}
         </div>

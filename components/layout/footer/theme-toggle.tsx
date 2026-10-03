@@ -1,10 +1,9 @@
 "use client"
 
 import { useTheme } from "next-themes"
-import { Button } from "../../ui/button"
 import { Loader2, MoonIcon, SunIcon } from "lucide-react"
 import React from "react"
-import { CustomButton } from "@/components/ui/custom-button"
+import { Button } from "@/components/ui/button"
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
@@ -23,7 +22,7 @@ export function ThemeToggle() {
 
   if(!mounted) {
     return (
-      <CustomButton
+      <Button
         variant="secondary"
         size="icon-lg"
         onClick={() => handleThemeChange(theme === "dark" ? "light" : "dark")}
@@ -31,7 +30,7 @@ export function ThemeToggle() {
       >
         <Loader2 className="animate-spin" />
         <span className="sr-only">Toggle theme</span>
-      </CustomButton>
+      </Button>
     )
   }
 

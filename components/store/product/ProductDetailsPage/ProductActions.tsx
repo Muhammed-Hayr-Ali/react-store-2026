@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { MinusIcon, PlusIcon, ShoppingCartIcon } from "lucide-react"
-import { CustomButton } from "@/components/ui/custom-button"
+import { Button } from "@/components/ui/button"
 
 // ✅ استيراد دالة تنسيق السعر الجديدة ونوع العملة
 import { formatPrice as formatCurrencyPrice } from "@/lib/actions/currency/utils"
@@ -48,7 +48,7 @@ export function ProductActions({
             Quantity:
           </span>
           <div className="inline-flex items-center rounded-lg border bg-background p-0.5 shadow-xs">
-       <CustomButton
+       <Button
               variant="ghost"
               size="icon"
               onClick={() => onQuantityChange(quantity + 1)}
@@ -57,11 +57,11 @@ export function ProductActions({
               aria-label="Increase quantity"
             >
               <PlusIcon className="size-3.5" />
-            </CustomButton>         
+            </Button>         
             <span className="w-10 text-center text-xs font-semibold text-foreground tabular-nums">
               {isOutOfStock ? 0 : quantity}
             </span>
-<CustomButton
+<Button
               variant="ghost"
               size="icon"
               onClick={() => onQuantityChange(quantity - 1)}
@@ -70,7 +70,7 @@ export function ProductActions({
               aria-label="Decrease quantity"
             >
               <MinusIcon className="size-3.5" />
-            </CustomButton>
+            </Button>
 
         
           </div>
@@ -87,7 +87,7 @@ export function ProductActions({
         </div>
       </div>
 
-      <CustomButton
+      <Button
         className="h-11 w-full text-sm font-semibold shadow-xs"
         disabled={isOutOfStock}
         onClick={onAddToCart}
@@ -98,7 +98,7 @@ export function ProductActions({
           : quantity > 1
             ? `Add ${quantity} to Cart`
             : "Add to Cart"}
-      </CustomButton>
+      </Button>
     </div>
   )
 }

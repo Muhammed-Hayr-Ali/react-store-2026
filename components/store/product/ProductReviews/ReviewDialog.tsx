@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import * as z from "zod"
 
-import { CustomButton } from "@/components/ui/custom-button"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -244,15 +244,15 @@ export function ReviewDialog({
         </form>
 
         <DialogFooter>
-          <CustomButton
+          <Button
             variant="outline"
             onClick={() => handleOpenChange(false)}
             disabled={isSubmitting}
             type="button"
           >
             Cancel
-          </CustomButton>
-          <CustomButton
+          </Button>
+          <Button
             type="submit"
             form="review-form"
             disabled={isSubmitting}
@@ -267,7 +267,7 @@ export function ReviewDialog({
             ) : (
               "Submit Review"
             )}
-          </CustomButton>
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

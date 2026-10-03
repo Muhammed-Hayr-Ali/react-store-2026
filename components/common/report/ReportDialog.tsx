@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { CustomButton } from "@/components/ui/custom-button"
+import { Button } from "@/components/ui/button"
 import { submitReport } from "@/lib/actions/reports/mutations/create"
 
 interface ReportDialogProps {
@@ -162,14 +162,14 @@ export function ReportDialog({
             )}
 
             <DialogFooter className="gap-2 sm:gap-0">
-              <CustomButton
+              <Button
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
               >
                 Cancel
-              </CustomButton>
-              <CustomButton
+              </Button>
+              <Button
                 type="submit"
                 variant="destructive"
                 disabled={loading}
@@ -178,7 +178,7 @@ export function ReportDialog({
                   <Loader2Icon className="me-2 size-3 animate-spin" />
                 )}
                 Submit Report
-              </CustomButton>
+              </Button>
             </DialogFooter>
           </form>
         )}

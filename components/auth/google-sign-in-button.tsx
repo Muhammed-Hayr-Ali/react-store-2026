@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { CustomButton } from "@/components/ui/custom-button"
+import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { signInWithGoogle } from "@/lib/actions/authentication/signIn-with-google"
 import { Badge } from "../ui/badge"
@@ -46,7 +46,7 @@ export function GoogleSignInButton({
           </Badge>
         </div>
       )}
-      <CustomButton
+      <Button
         type="button"
         variant={"secondary"}
         onClick={handleGoogleSignIn}
@@ -67,7 +67,7 @@ export function GoogleSignInButton({
         <p>continue with Google</p>
         <div className="size-4" />
         <div className="size-3" />
-      </CustomButton>
+      </Button>
     </div>
   )
 }

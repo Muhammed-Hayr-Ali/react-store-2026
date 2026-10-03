@@ -9,7 +9,7 @@ import {
   FlagIcon,
 } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { CustomButton } from "@/components/ui/custom-button"
+import { Button } from "@/components/ui/button"
 import { ReviewWithProfile } from "@/lib/actions/reviews/types"
 import { ReportDialog } from "@/components/common/report/ReportDialog"
 
@@ -95,7 +95,7 @@ export function ReviewItem({
         <div className="mt-1 flex items-center justify-end">
           {isOwner ? (
             <div className="flex items-center gap-2">
-              <CustomButton
+              <Button
                 type="button"
                 size="icon-sm"
                 variant="outline"
@@ -103,8 +103,8 @@ export function ReviewItem({
                 aria-label="Edit review"
               >
                 <PencilIcon className="size-4" />
-              </CustomButton>
-              <CustomButton
+              </Button>
+              <Button
                 type="button"
                 size="icon-sm"
                 variant="outline"
@@ -112,7 +112,7 @@ export function ReviewItem({
                 aria-label="Delete review"
               >
                 <Trash2Icon className="size-4" />
-              </CustomButton>
+              </Button>
             </div>
           ) : (
             <ReportDialog
