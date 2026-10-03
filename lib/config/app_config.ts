@@ -19,6 +19,7 @@ import {
   Moon,
   Package,
   ShieldCheck,
+  ShieldCheckIcon,
   Store,
   Sun,
   SunMoon,
@@ -26,6 +27,7 @@ import {
   Truck,
   Undo2,
   User2,
+  UsersIcon,
   ZapIcon,
 } from "lucide-react"
 
@@ -276,7 +278,19 @@ export const appConfig = {
             icon: ZapIcon,
             isActive: false,
           },
-          
+
+          {
+            title: "Roles & Permissions",
+            url: "/dashboard/roles",
+            icon: ShieldCheckIcon,
+            isActive: false,
+          },
+          {
+            title: "Users Management",
+            url: "/dashboard/users",
+            icon: UsersIcon,
+            isActive: false,
+          },
         ],
       },
 
