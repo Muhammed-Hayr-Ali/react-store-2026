@@ -7,20 +7,7 @@
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { AppPermission } from "../types"
 import { RoleRecord } from "../mutations/create-role"
-
-// ============================================================================
-// Types
-// ============================================================================
-
-export interface RoleDetail {
-  id: number
-  name: string
-  description: string | null
-  permissions: AppPermission[]
-  created_at: string
-}
 
 export interface UserWithRoles {
   id: string
@@ -31,67 +18,78 @@ export interface UserWithRoles {
   roles: RoleRecord[]
 }
 
-interface UserRoleRelationRow {
-  roles: RoleDetail | null
+interface UserRoleRow {
+  user_id: string
+  roles: RoleRecord | null
 }
-
-interface ProfileWithRolesRow {
-  id: string
-  first_name: string | null
-  last_name: string | null
-  email: string | null
-  profile_image: string | null
-  user_roles: UserRoleRelationRow[] | null
-}
-
-// ============================================================================
-// Query Function
-// ============================================================================
 
 export async function getUsersWithRoles(): Promise<ApiResult<UserWithRoles[]>> {
   const supabase = await createServerClient()
 
-  const { data, error } = await supabase
+  // 1. جلب الملفات الشخصية
+  const { data: profiles, error: profilesError } = await supabase
     .from("profiles")
-    .select(
-      `
-      id,
-      first_name,
-      last_name,
-      email,
-      profile_image,
-      user_roles (
-        roles (
-          id,
-          name,
-          description,
-          permissions,
-          created_at
-        )
-      )
-    `
-    )
+    .select("id, first_name, last_name, email, profile_image")
     .order("created_at", { ascending: false })
 
-  if (error) {
+  if (profilesError) {
     return {
       success: false,
-      error: "GET_USERS_WITH_ROLES_ERROR",
-      details: { database: [error.message] },
+      error: "GET_PROFILES_ERROR",
+      details: { database: [profilesError.message] },
     }
   }
 
-  const rawProfiles = (data ?? []) as unknown as ProfileWithRolesRow[]
+  if (!profiles || profiles.length === 0) {
+    return {
+      success: true,
+      data: [],
+    }
+  }
 
-  const formattedUsers: UserWithRoles[] = rawProfiles.map((user) => ({
-    id: user.id,
-    first_name: user.first_name,
-    last_name: user.last_name,
-    email: user.email,
-    profile_image: user.profile_image,
-    roles: (user.user_roles ?? [])
-      .map((relation) => relation.roles)
-      .filter((role): role is RoleDetail => role !== null),
+  // 2. جلب علاقات الأدوار مع تفاصيل كل دور
+  const { data: userRolesData, error: rolesError } = await supabase
+    .from("user_roles")
+    .select(
+      `
+      user_id,
+      roles (
+        id,
+        name,
+        description,
+        permissions,
+        created_at
+      )
+    `
+    )
+
+  if (rolesError) {
+    return {
+      success: false,
+      error: "GET_USER_ROLES_ERROR",
+      details: { database: [rolesError.message] },
+    }
+  }
+
+  // 3. تجميع الأدوار بحسب user_id
+  const rolesMap = new Map<string, RoleRecord[]>()
+  const rawUserRoles = (userRolesData ?? []) as unknown as UserRoleRow[]
+
+  for (const row of rawUserRoles) {
+    if (!row.roles) continue
+    const current = rolesMap.get(row.user_id) ?? []
+    current.push(row.roles)
+    rolesMap.set(row.user_id, current)
+  }
+
+  // 4. دمج الأدوار مع الحسابات الشخصية
+  const formattedUsers: UserWithRoles[] = profiles.map((profile) => ({
+    id: profile.id,
+    first_name: profile.first_name,
+    last_name: profile.last_name,
+    email: profile.email,
+    profile_image: profile.profile_image,
+    roles: rolesMap.get(profile.id) ?? [],
   }))
 
   return {
