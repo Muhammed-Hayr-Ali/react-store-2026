@@ -10,8 +10,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { UpdateReportStatusInput } from "../types"
 import { updateReportStatusSchema } from "../schemas"
-import { hasRole } from "../../role/role-checker"
-import { hasPermission } from "../../role/permission-checker"
+import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -20,7 +19,27 @@ import { hasPermission } from "../../role/permission-checker"
 export async function updateReportStatus(
   payload: UpdateReportStatusInput
 ): Promise<ApiResult<null>> {
-  // 1. Validate payload
+  // 1. Parallel authorization checks
+  const [isAdmin, canModerate] = await Promise.all([
+    hasRole(ROLES.ADMIN),
+    hasPermission(PERMISSIONS.MANAGE_REPORTS),
+  ])
+
+  if (!isAdmin) {
+    return {
+      success: false,
+      error: "UNAUTHORIZED_ACCESS",
+    }
+  }
+
+  if (!canModerate) {
+    return {
+      success: false,
+      error: "PERMISSION_DENIED",
+    }
+  }
+
+  // 2. Validate payload
   const validation = updateReportStatusSchema.safeParse(payload)
   if (!validation.success) {
     return {
@@ -31,20 +50,6 @@ export async function updateReportStatus(
   }
 
   const { reportId, status, adminNotes } = validation.data
-
-  // 2. Verify admin access
-  const [isAdmin, canModerate] = await Promise.all([
-    hasRole("admin"),
-    hasPermission("manage_reports"),
-  ])
-
-  if (!isAdmin && !canModerate) {
-    return {
-      success: false,
-      error: "UNAUTHORIZED_ACCESS",
-    }
-  }
-
   const supabase = await createServerClient()
   const {
     data: { user },
@@ -72,8 +77,8 @@ export async function updateReportStatus(
     }
   }
 
-  revalidatePath("/admin/reports")
-  revalidatePath(`/admin/reports/${reportId}`)
+  // 4. Invalidate caches
+  revalidatePath("/", "layout")
 
   return {
     success: true,

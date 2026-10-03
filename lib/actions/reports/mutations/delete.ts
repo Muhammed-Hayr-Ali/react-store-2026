@@ -9,13 +9,14 @@ import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { hasRole } from "../../role/role-checker"
+import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
 // ============================================================================
 
 export async function deleteReport(id: string): Promise<ApiResult<null>> {
+  // 1. Validate ID format
   const idValidation = z.string().uuid("INVALID_ID").safeParse(id)
   if (!idValidation.success) {
     return {
@@ -24,11 +25,23 @@ export async function deleteReport(id: string): Promise<ApiResult<null>> {
     }
   }
 
-  const isAdmin = await hasRole("admin")
+  // 2. Parallel authorization checks
+  const [isAdmin, canDelete] = await Promise.all([
+    hasRole(ROLES.ADMIN),
+    hasPermission(PERMISSIONS.DELETE_REPORT),
+  ])
+
   if (!isAdmin) {
     return {
       success: false,
       error: "UNAUTHORIZED_ACCESS",
+    }
+  }
+
+  if (!canDelete) {
+    return {
+      success: false,
+      error: "PERMISSION_DENIED",
     }
   }
 
@@ -43,7 +56,8 @@ export async function deleteReport(id: string): Promise<ApiResult<null>> {
     }
   }
 
-  revalidatePath("/admin/reports")
+  // 3. Invalidate caches
+  revalidatePath("/", "layout")
 
   return {
     success: true,

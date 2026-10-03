@@ -10,6 +10,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { CreateReportInput } from "../types"
 import { createReportSchema } from "../schemas"
+import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -18,7 +19,27 @@ import { createReportSchema } from "../schemas"
 export async function submitReport(
   payload: CreateReportInput
 ): Promise<ApiResult<{ id: string }>> {
-  // 1. Validate payload using Zod schema
+  // 1. Parallel authorization checks
+  const [isCustomer, canCreate] = await Promise.all([
+    hasRole(ROLES.CUSTOMER),
+    hasPermission(PERMISSIONS.CREATE_REPORT),
+  ])
+
+  if (!isCustomer) {
+    return {
+      success: false,
+      error: "UNAUTHORIZED_ACCESS",
+    }
+  }
+
+  if (!canCreate) {
+    return {
+      success: false,
+      error: "PERMISSION_DENIED",
+    }
+  }
+
+  // 2. Validate payload using Zod schema
   const validation = createReportSchema.safeParse(payload)
   if (!validation.success) {
     return {
@@ -31,19 +52,20 @@ export async function submitReport(
   const safeData = validation.data
   const supabase = await createServerClient()
 
-  // 2. Verify authentication
+  // 3. Verify user session
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser()
 
-  if (!user) {
+  if (authError || !user) {
     return {
       success: false,
       error: "UNAUTHORIZED_ACCESS",
     }
   }
 
-  // 3. Insert report record
+  // 4. Insert report record
   const { data: newReport, error } = await supabase
     .from("reports")
     .insert({
@@ -65,8 +87,8 @@ export async function submitReport(
     }
   }
 
-  // 4. Invalidate admin reports list
-  revalidatePath("/admin/reports")
+  // 5. Invalidate caches
+  revalidatePath("/", "layout")
 
   return {
     success: true,
