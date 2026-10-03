@@ -10,6 +10,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { Review, CreateReviewInput } from "../types"
 import { createReviewSchema } from "../schemas"
+import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -18,7 +19,27 @@ import { createReviewSchema } from "../schemas"
 export async function createReview(
   data: CreateReviewInput
 ): Promise<ApiResult<Review | null>> {
-  // 1. Validate payload
+  // 1. Authorization checks using typed constants
+  const [isCustomer, canCreate] = await Promise.all([
+    hasRole(ROLES.CUSTOMER),
+    hasPermission(PERMISSIONS.CREATE_REVIEW),
+  ])
+
+  if (!isCustomer) {
+    return {
+      success: false,
+      error: "UNAUTHORIZED_ACCESS",
+    }
+  }
+
+  if (!canCreate) {
+    return {
+      success: false,
+      error: "PERMISSION_DENIED",
+    }
+  }
+
+  // 2. Validate payload
   const validation = createReviewSchema.safeParse(data)
   if (!validation.success) {
     return {
@@ -28,7 +49,7 @@ export async function createReview(
     }
   }
 
-  // 2. Authenticate user
+  // 3. Authenticate user session
   const supabase = await createServerClient()
   const {
     data: { user },
@@ -42,14 +63,14 @@ export async function createReview(
     }
   }
 
-  // 3. Clean payload
+  // 4. Clean payload
   const cleanData = {
     ...validation.data,
     comment: validation.data.comment === "" ? null : validation.data.comment,
     user_id: user.id,
   }
 
-  // 4. Insert into database
+  // 5. Insert into database
   const { data: newReview, error: insertError } = await supabase
     .from("product_reviews")
     .insert(cleanData)
@@ -78,9 +99,8 @@ export async function createReview(
     }
   }
 
-  // 5. Invalidate paths
-  revalidatePath(`/product/${validation.data.product_id}`)
-  revalidatePath("/")
+  // 6. Invalidate caches
+  revalidatePath("/", "layout")
 
   return {
     success: true,

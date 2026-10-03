@@ -12,8 +12,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { Category } from "../types"
 import { categorySchema, updateCategorySchema } from "../schemas"
-import { hasRole } from "../../role/role-checker"
-import { hasPermission } from "../../role/permission-checker"
+import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -44,10 +43,10 @@ export async function updateCategory(
 
   const safeData = validation.data
 
-  // 3. Perform parallel authorization checks
+  // 3. Perform parallel authorization checks using typed constants
   const [isAdmin, canUpdate] = await Promise.all([
-    hasRole("admin"),
-    hasPermission("update_category"),
+    hasRole(ROLES.ADMIN),
+    hasPermission(PERMISSIONS.UPDATE_CATEGORY),
   ])
 
   if (!isAdmin) {
@@ -110,10 +109,9 @@ export async function updateCategory(
     }
   }
 
-  // 7. Invalidate dynamic category page and administration route
+  // 7. Invalidate dynamic category page and storefront layout
   revalidatePath(`/category/${parsedData.data.slug}`)
-  revalidatePath("/admin/categories")
-  revalidatePath("/")
+  revalidatePath("/", "layout")
 
   return {
     success: true,

@@ -11,8 +11,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { Product, CreateProductCompleteInput, CreatedVariant } from "../types"
 import { createProductCompleteSchema } from "../schemas"
-import { hasRole } from "../../role/role-checker"
-import { hasPermission } from "../../role/permission-checker"
+import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -21,26 +20,33 @@ import { hasPermission } from "../../role/permission-checker"
 export async function createProduct(
   data: CreateProductCompleteInput
 ): Promise<ApiResult<Product | null>> {
-  // 1. Validate payload against Zod schema
+  // 1. Parallel authorization verification using typed constants
+  const [isAdmin, canCreate] = await Promise.all([
+    hasRole(ROLES.ADMIN),
+    hasPermission(PERMISSIONS.CREATE_PRODUCT),
+  ])
+
+  if (!isAdmin) {
+    return {
+      success: false,
+      error: "UNAUTHORIZED_ACCESS",
+    }
+  }
+
+  if (!canCreate) {
+    return {
+      success: false,
+      error: "PERMISSION_DENIED",
+    }
+  }
+
+  // 2. Validate payload against Zod schema
   const validation = createProductCompleteSchema.safeParse(data)
   if (!validation.success) {
     return {
       success: false,
       error: "VALIDATION_ERROR",
       details: validation.error.flatten().fieldErrors,
-    }
-  }
-
-  // 2. Parallel authorization verification
-  const [isAdmin, canCreate] = await Promise.all([
-    hasRole("admin"),
-    hasPermission("create_product"),
-  ])
-
-  if (!isAdmin || !canCreate) {
-    return {
-      success: false,
-      error: "UNAUTHORIZED_ACCESS",
     }
   }
 
@@ -162,8 +168,7 @@ export async function createProduct(
   }
 
   // 6. Revalidate routes
-  revalidatePath("/")
-  revalidatePath("/dashboard/products")
+  revalidatePath("/", "layout")
 
   return {
     success: true,

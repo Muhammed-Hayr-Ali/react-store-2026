@@ -9,8 +9,7 @@ import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { Product, ProductWithRelations } from "../types"
-import { hasRole } from "../../role/role-checker"
-import { hasPermission } from "../../role/permission-checker"
+import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -23,14 +22,24 @@ export async function duplicateProduct(
     return { success: false, error: "INVALID_PRODUCT_ID" }
   }
 
-  // 1. Authorization check
+  // 1. Authorization check using typed constants
   const [isAdmin, canCreate] = await Promise.all([
-    hasRole("admin"),
-    hasPermission("create_product"),
+    hasRole(ROLES.ADMIN),
+    hasPermission(PERMISSIONS.CREATE_PRODUCT),
   ])
 
-  if (!isAdmin || !canCreate) {
-    return { success: false, error: "UNAUTHORIZED_ACCESS" }
+  if (!isAdmin) {
+    return {
+      success: false,
+      error: "UNAUTHORIZED_ACCESS",
+    }
+  }
+
+  if (!canCreate) {
+    return {
+      success: false,
+      error: "PERMISSION_DENIED",
+    }
   }
 
   const supabase = await createServerClient()
@@ -166,7 +175,7 @@ export async function duplicateProduct(
     }
   }
 
-  revalidatePath("/dashboard/products")
+  revalidatePath("/", "layout")
 
   return {
     success: true,

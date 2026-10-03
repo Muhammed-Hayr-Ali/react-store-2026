@@ -10,8 +10,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { Product, CreateProductCompleteInput, CreatedVariant } from "../types"
 import { createProductCompleteSchema } from "../schemas"
-import { hasRole } from "../../role/role-checker"
-import { hasPermission } from "../../role/permission-checker"
+import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -25,7 +24,27 @@ export async function updateProduct(
     return { success: false, error: "INVALID_PRODUCT_ID" }
   }
 
-  // 1. Validate payload
+  // 1. Authorization check using typed constants
+  const [isAdmin, canUpdate] = await Promise.all([
+    hasRole(ROLES.ADMIN),
+    hasPermission(PERMISSIONS.UPDATE_PRODUCT),
+  ])
+
+  if (!isAdmin) {
+    return {
+      success: false,
+      error: "UNAUTHORIZED_ACCESS",
+    }
+  }
+
+  if (!canUpdate) {
+    return {
+      success: false,
+      error: "PERMISSION_DENIED",
+    }
+  }
+
+  // 2. Validate payload
   const validation = createProductCompleteSchema.safeParse(data)
   if (!validation.success) {
     return {
@@ -33,16 +52,6 @@ export async function updateProduct(
       error: "VALIDATION_ERROR",
       details: validation.error.flatten().fieldErrors,
     }
-  }
-
-  // 2. Authorization check
-  const [isAdmin, canUpdate] = await Promise.all([
-    hasRole("admin"),
-    hasPermission("update_product"),
-  ])
-
-  if (!isAdmin || !canUpdate) {
-    return { success: false, error: "UNAUTHORIZED_ACCESS" }
   }
 
   const supabase = await createServerClient()
@@ -182,9 +191,8 @@ export async function updateProduct(
   }
 
   // 6. Invalidate caches
-  revalidatePath("/dashboard/products")
-  revalidatePath(`/dashboard/products/${updatedProduct.slug}/edit`)
   revalidatePath(`/product/${updatedProduct.slug}`)
+  revalidatePath("/", "layout")
 
   return {
     success: true,

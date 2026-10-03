@@ -10,6 +10,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { Review, UpdateReviewInput } from "../types"
 import { updateReviewSchema } from "../schemas"
+import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -18,7 +19,27 @@ import { updateReviewSchema } from "../schemas"
 export async function updateReview(
   data: UpdateReviewInput
 ): Promise<ApiResult<Review | null>> {
-  // 1. Validate payload
+  // 1. Authorization checks using typed constants
+  const [isCustomer, canUpdate] = await Promise.all([
+    hasRole(ROLES.CUSTOMER),
+    hasPermission(PERMISSIONS.UPDATE_REVIEW),
+  ])
+
+  if (!isCustomer) {
+    return {
+      success: false,
+      error: "UNAUTHORIZED_ACCESS",
+    }
+  }
+
+  if (!canUpdate) {
+    return {
+      success: false,
+      error: "PERMISSION_DENIED",
+    }
+  }
+
+  // 2. Validate payload
   const validation = updateReviewSchema.safeParse(data)
   if (!validation.success) {
     return {
@@ -28,7 +49,7 @@ export async function updateReview(
     }
   }
 
-  // 2. Authenticate user
+  // 3. Authenticate user session
   const supabase = await createServerClient()
   const {
     data: { user },
@@ -49,7 +70,7 @@ export async function updateReview(
 
   const { id, ...updatePayload } = cleanData
 
-  // 3. Update review with user ownership guard
+  // 4. Update review with user ownership guard
   const { data: updatedReview, error } = await supabase
     .from("product_reviews")
     .update(updatePayload)
@@ -74,8 +95,8 @@ export async function updateReview(
     }
   }
 
-  // 4. Invalidate paths
-  revalidatePath(`/product/${updatedReview.product_id}`)
+  // 5. Invalidate caches
+  revalidatePath("/", "layout")
 
   return {
     success: true,

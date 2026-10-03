@@ -11,8 +11,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { Brand } from "../types"
 import { brandSchema, createBrandSchema } from "../schemas"
-import { hasRole } from "../../role/role-checker"
-import { hasPermission } from "../../role/permission-checker"
+import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action
@@ -33,10 +32,10 @@ export async function createBrand(
 
   const safeData = validation.data
 
-  // 2. Perform parallel authorization checks
+  // 2. Perform parallel authorization checks using typed constants
   const [isAdmin, canCreate] = await Promise.all([
-    hasRole("admin"),
-    hasPermission("create_brand"),
+    hasRole(ROLES.ADMIN),
+    hasPermission(PERMISSIONS.CREATE_BRAND),
   ])
 
   if (!isAdmin) {
@@ -88,9 +87,8 @@ export async function createBrand(
     }
   }
 
-  // 6. Invalidate stale cache paths
-  revalidatePath("/admin/brands")
-  revalidatePath("/")
+  // 6. Invalidate stale cache paths (المتجر واللوحة بالكامل)
+  revalidatePath("/", "layout")
 
   return {
     success: true,

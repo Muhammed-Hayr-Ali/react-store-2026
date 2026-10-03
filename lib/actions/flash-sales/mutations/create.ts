@@ -10,6 +10,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { FlashSaleFormInput } from "../types"
 import { flashSaleFormSchema } from "../schemas"
+import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -18,7 +19,27 @@ import { flashSaleFormSchema } from "../schemas"
 export async function createFlashSale(
   rawData: FlashSaleFormInput
 ): Promise<ApiResult<{ id: string }>> {
-  // 1. Validate payload
+  // 1. Authorization checks
+  const [isAdmin, canCreate] = await Promise.all([
+    hasRole(ROLES.ADMIN),
+    hasPermission(PERMISSIONS.CREATE_FLASH_SALE),
+  ])
+
+  if (!isAdmin) {
+    return {
+      success: false,
+      error: "UNAUTHORIZED_ACCESS",
+    }
+  }
+
+  if (!canCreate) {
+    return {
+      success: false,
+      error: "PERMISSION_DENIED",
+    }
+  }
+
+  // 2. Validate payload
   const parseResult = flashSaleFormSchema.safeParse(rawData)
   if (!parseResult.success) {
     return {
@@ -31,7 +52,7 @@ export async function createFlashSale(
   const data = parseResult.data
   const supabase = await createServerClient()
 
-  // 2. Ensure unique slug
+  // 3. Ensure unique slug
   const { data: existingSlug } = await supabase
     .from("flash_sales")
     .select("id")
@@ -45,7 +66,7 @@ export async function createFlashSale(
     }
   }
 
-  // 3. Insert parent flash sale record
+  // 4. Insert parent flash sale record
   const { data: createdSale, error: saleError } = await supabase
     .from("flash_sales")
     .insert({
@@ -68,7 +89,7 @@ export async function createFlashSale(
     }
   }
 
-  // 4. Insert linked campaign items
+  // 5. Insert linked campaign items
   const itemsToInsert = data.items.map((item) => ({
     flash_sale_id: createdSale.id,
     product_id: item.productId,
@@ -83,7 +104,6 @@ export async function createFlashSale(
     .insert(itemsToInsert)
 
   if (itemsError) {
-    // Rollback parent record on failure
     await supabase.from("flash_sales").delete().eq("id", createdSale.id)
     return {
       success: false,
@@ -92,9 +112,8 @@ export async function createFlashSale(
     }
   }
 
-  // 5. Invalidate caches
-  revalidatePath("/")
-  revalidatePath("/admin/flash-sales")
+  // 6. Invalidate caches
+  revalidatePath("/", "layout")
 
   return {
     success: true,

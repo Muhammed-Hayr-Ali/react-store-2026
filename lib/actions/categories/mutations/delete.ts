@@ -10,8 +10,7 @@ import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { hasRole } from "../../role/role-checker"
-import { hasPermission } from "../../role/permission-checker"
+import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -27,10 +26,10 @@ export async function deleteCategory(id: string): Promise<ApiResult<null>> {
     }
   }
 
-  // 2. Perform parallel authorization checks
+  // 2. Perform parallel authorization checks using typed constants
   const [isAdmin, canDelete] = await Promise.all([
-    hasRole("admin"),
-    hasPermission("delete_category"),
+    hasRole(ROLES.ADMIN),
+    hasPermission(PERMISSIONS.DELETE_CATEGORY),
   ])
 
   if (!isAdmin) {
@@ -61,9 +60,8 @@ export async function deleteCategory(id: string): Promise<ApiResult<null>> {
     }
   }
 
-  // 5. Invalidate paths that display categories
-  revalidatePath("/admin/categories")
-  revalidatePath("/")
+  // 5. Invalidate stale cache paths (المتجر واللوحة بالكامل)
+  revalidatePath("/", "layout")
 
   return {
     success: true,

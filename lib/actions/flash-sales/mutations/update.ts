@@ -10,6 +10,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { FlashSaleFormInput } from "../types"
 import { flashSaleFormSchema } from "../schemas"
+import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -19,7 +20,27 @@ export async function updateFlashSale(
   saleId: string,
   rawData: FlashSaleFormInput
 ): Promise<ApiResult<null>> {
-  // 1. Validate payload
+  // 1. Authorization checks
+  const [isAdmin, canUpdate] = await Promise.all([
+    hasRole(ROLES.ADMIN),
+    hasPermission(PERMISSIONS.UPDATE_FLASH_SALE),
+  ])
+
+  if (!isAdmin) {
+    return {
+      success: false,
+      error: "UNAUTHORIZED_ACCESS",
+    }
+  }
+
+  if (!canUpdate) {
+    return {
+      success: false,
+      error: "PERMISSION_DENIED",
+    }
+  }
+
+  // 2. Validate payload
   const parseResult = flashSaleFormSchema.safeParse(rawData)
   if (!parseResult.success) {
     return {
@@ -32,7 +53,7 @@ export async function updateFlashSale(
   const data = parseResult.data
   const supabase = await createServerClient()
 
-  // 2. Check for slug collision on different sale record
+  // 3. Check for slug collision on different sale record
   const { data: existingSlug } = await supabase
     .from("flash_sales")
     .select("id")
@@ -47,7 +68,7 @@ export async function updateFlashSale(
     }
   }
 
-  // 3. Update main record
+  // 4. Update main record
   const { error: saleError } = await supabase
     .from("flash_sales")
     .update({
@@ -69,7 +90,7 @@ export async function updateFlashSale(
     }
   }
 
-  // 4. Synchronize items: purge existing and insert updated list
+  // 5. Synchronize items
   await supabase.from("flash_sale_items").delete().eq("flash_sale_id", saleId)
 
   const itemsToInsert = data.items.map((item) => ({
@@ -93,10 +114,9 @@ export async function updateFlashSale(
     }
   }
 
-  // 5. Invalidate caches
-  revalidatePath("/")
+  // 6. Invalidate caches
   revalidatePath(`/deals/${data.slug}`)
-  revalidatePath("/admin/flash-sales")
+  revalidatePath("/", "layout")
 
   return {
     success: true,

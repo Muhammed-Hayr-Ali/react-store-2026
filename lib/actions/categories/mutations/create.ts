@@ -11,8 +11,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { Category } from "../types"
 import { categorySchema, createCategorySchema } from "../schemas"
-import { hasRole } from "../../role/role-checker"
-import { hasPermission } from "../../role/permission-checker"
+import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -33,10 +32,10 @@ export async function createCategory(
 
   const safeData = validation.data
 
-  // 2. Perform parallel authorization checks
+  // 2. Perform parallel authorization checks using typed constants
   const [isAdmin, canCreate] = await Promise.all([
-    hasRole("admin"),
-    hasPermission("create_category"),
+    hasRole(ROLES.ADMIN),
+    hasPermission(PERMISSIONS.CREATE_CATEGORY),
   ])
 
   if (!isAdmin) {
@@ -91,9 +90,8 @@ export async function createCategory(
     }
   }
 
-  // 6. Invalidate relevant storefront and dashboard cache paths
-  revalidatePath("/admin/categories")
-  revalidatePath("/")
+  // 6. Invalidate stale cache paths (المتجر واللوحة بالكامل)
+  revalidatePath("/", "layout")
 
   return {
     success: true,

@@ -1,6 +1,6 @@
 /**
  * @file lib/actions/reviews/mutations/delete.ts
- * @description Server Action to permanently remove a review owned by the authenticated user.
+ * @description Server Action to permanently remove a review.
  */
 
 "use server"
@@ -9,6 +9,7 @@ import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
+import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -26,7 +27,28 @@ export async function deleteReview(
     }
   }
 
-  // 2. Authenticate user
+  // 2. Parallel authorization checks using typed constants
+  const [isAdmin, isCustomer, canDelete] = await Promise.all([
+    hasRole(ROLES.ADMIN),
+    hasRole(ROLES.CUSTOMER),
+    hasPermission(PERMISSIONS.DELETE_REVIEW),
+  ])
+
+  if (!isAdmin && !isCustomer) {
+    return {
+      success: false,
+      error: "UNAUTHORIZED_ACCESS",
+    }
+  }
+
+  if (!canDelete) {
+    return {
+      success: false,
+      error: "PERMISSION_DENIED",
+    }
+  }
+
+  // 3. Authenticate user session
   const supabase = await createServerClient()
   const {
     data: { user },
@@ -40,20 +62,14 @@ export async function deleteReview(
     }
   }
 
-  // 3. Fetch product_id before deletion for cache revalidation
-  const { data: reviewRecord } = await supabase
-    .from("product_reviews")
-    .select("product_id")
-    .eq("id", reviewId)
-    .eq("user_id", user.id)
-    .maybeSingle()
+  // 4. Delete record: Admins can delete any review, regular customers only delete their own
+  let query = supabase.from("product_reviews").delete().eq("id", reviewId)
 
-  // 4. Delete record with user ownership guard
-  const { error } = await supabase
-    .from("product_reviews")
-    .delete()
-    .eq("id", reviewId)
-    .eq("user_id", user.id)
+  if (!isAdmin) {
+    query = query.eq("user_id", user.id)
+  }
+
+  const { error } = await query
 
   if (error) {
     return {
@@ -63,11 +79,8 @@ export async function deleteReview(
     }
   }
 
-  // 5. Invalidate paths
-  if (reviewRecord?.product_id) {
-    revalidatePath(`/product/${reviewRecord.product_id}`)
-  }
-  revalidatePath("/")
+  // 5. Invalidate caches
+  revalidatePath("/", "layout")
 
   return {
     success: true,
