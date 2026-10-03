@@ -137,8 +137,14 @@ export function DataTable({
     "all" | "active" | "low-stock"
   >("all")
 
-  const [productToDelete, setProductToDelete] =
-    React.useState<AdminProductSummary | null>(null)
+  // حالة المودال الموحدة تماماً كباقي مكونات المشروع
+  const [productModal, setProductModal] = React.useState<{
+    type: "delete" | null
+    data: AdminProductSummary | null
+  }>({
+    type: null,
+    data: null,
+  })
 
   if (initialData !== prevInitialData) {
     setPrevInitialData(initialData)
@@ -164,7 +170,6 @@ export function DataTable({
     [data]
   )
 
-  // التهيئة الابتدائية المباشرة بحسب ما وصل من السيرفر
   const [columnVisibility, setColumnVisibility] =
     React.useState<ColumnVisibilityState>(() => {
       const initialVisibility: ColumnVisibilityState = {}
@@ -183,7 +188,6 @@ export function DataTable({
     pageSize: initialIsMobile ? 14 : 10,
   })
 
-  // تحديث القيم في حال تم تدوير الشاشة أو تغيير حجم النافذة في المتصفح
   React.useEffect(() => {
     const handleResize = () => {
       const isMobile = window.innerWidth < 768
@@ -391,7 +395,9 @@ export function DataTable({
                   <DropdownMenuItem
                     variant="destructive"
                     className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
-                    onClick={() => setProductToDelete(row.original)}
+                    onClick={() =>
+                      setProductModal({ type: "delete", data: row.original })
+                    }
                   >
                     <Trash2Icon className="me-2 size-3.5" />
                     Delete Product
@@ -531,7 +537,7 @@ export function DataTable({
           </DropdownMenu>
         </div>
 
-        {/* أدوات التحكم الإضافية (زر الأعمدة فقط بدون زر الإضافة المكرر) */}
+        {/* أدوات التحكم الإضافية */}
         <div className="flex items-center gap-1.5 sm:gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -685,12 +691,12 @@ export function DataTable({
         </div>
       </div>
 
-      {/* دايلوج تأكيد الحذف */}
+      {/* دايلوج تأكيد الحذف بنفس أسلوب isOpen === 'delete' و item */}
       <DeleteProductDialog
-        product={productToDelete}
-        isOpen={Boolean(productToDelete)}
+        isOpen={productModal.type === "delete" ? "delete" : null}
+        item={productModal.data}
         onOpenChange={(open) => {
-          if (!open) setProductToDelete(null)
+          if (!open) setProductModal({ type: null, data: null })
         }}
         onSuccess={(deletedId) => {
           setData((prev) => prev.filter((item) => item.id !== deletedId))
