@@ -4,7 +4,7 @@ import React, { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
-import MenuButton from "../../ui/menu_button"
+import MenuButton from "@/components/ui/menu_button"
 import {
   MobileMenu,
   MobileMenuBody,
@@ -18,23 +18,16 @@ import { signOut } from "@/lib/actions/authentication/signOut"
 import { CurrentUser } from "@/lib/actions/utils/profile"
 import { CurrencyCode } from "@/lib/actions/currency/types"
 import { appRoutes } from "@/lib/config/app-routes"
-import { appConfig } from "@/lib/config/app_config"
+import { storeNavConfig } from "./nav-config"
 
-import UserProfile from "./user-profile"
-import { LanguageAccordion } from "./language-accordion"
-import { ThemeAccordion } from "./theme-accordion"
-import { CurrencyAccordion } from "@/components/store/home/currency-accordion"
+import { UserProfileHeader } from "./user-menu"
+import { LanguageAccordion } from "./preferences/language-accordion"
+import { ThemeAccordion } from "./preferences/theme-accordion"
+import { CurrencyAccordion } from "./preferences/currency-accordion"
 
 interface MobileNavProps {
   user: CurrentUser | null
   currentCurrency: CurrencyCode
-}
-
-interface MobileRightMenuProps {
-  user: CurrentUser | null
-  currentCurrency: CurrencyCode
-  isOpen: boolean
-  setIsOpen: (open: boolean) => void
 }
 
 export function MobileNav({ user, currentCurrency }: MobileNavProps) {
@@ -57,21 +50,25 @@ export function MobileNav({ user, currentCurrency }: MobileNavProps) {
   )
 }
 
-export default function MobileRightMenu({
+function MobileRightMenu({
   user,
   currentCurrency,
   isOpen,
   setIsOpen,
-}: MobileRightMenuProps) {
+}: {
+  user: CurrentUser | null
+  currentCurrency: CurrencyCode
+  isOpen: boolean
+  setIsOpen: (open: boolean) => void
+}) {
   const router = useRouter()
 
-  // تحديد الروابط بناءً على حالة تسجيل الدخول
   const navLinks = user
-    ? appConfig.menu.userMenu.items
-    : appConfig.menu.gestMenu.items
+    ? storeNavConfig.userMenu.items
+    : storeNavConfig.guestMenu.items
 
-  const handleOnClick = () => {
-    setIsOpen(false) // إغلاق القائمة عند النقر على رابط
+  const handleClose = () => {
+    setIsOpen(false)
   }
 
   const handleLogout = async () => {
@@ -86,16 +83,13 @@ export default function MobileRightMenu({
 
   return (
     <MobileMenu isOpen={isOpen} onOpenChange={setIsOpen}>
-      {/* رأس القائمة الجانبية (بيانات المستخدم إن وجد) */}
       {user && (
         <MobileMenuHeader>
-          <UserProfile user={user} />
+          <UserProfileHeader user={user} />
         </MobileMenuHeader>
       )}
 
-      {/* محتوى القائمة الجانبية */}
       <MobileMenuBody className="px-2">
-        {/* قائمة المستخدم أو الزائر */}
         <div className="flex flex-col">
           {navLinks.map((link) => (
             <Button
@@ -104,8 +98,8 @@ export default function MobileRightMenu({
               className="flex h-10 items-center justify-start font-normal"
               asChild
             >
-              <Link href={link.href} onClick={handleOnClick}>
-                <link.icon className="mr-2 size-4 rtl:mr-0 rtl:ml-2" />
+              <Link href={link.href} onClick={handleClose}>
+                <link.icon className="me-2 size-4" />
                 {link.label}
               </Link>
             </Button>
@@ -114,18 +108,17 @@ export default function MobileRightMenu({
 
         <Separator />
 
-        {/* قائمة التسوق للمستخدم المسجل */}
         {user && (
           <div className="flex flex-col">
-            {appConfig.menu.shoppingMenu.items.map((link) => (
+            {storeNavConfig.shoppingMenu.items.map((link) => (
               <Button
                 key={link.key}
                 variant="ghost"
                 className="flex h-10 items-center justify-start font-normal"
                 asChild
               >
-                <Link href={link.href} onClick={handleOnClick}>
-                  <link.icon className="mr-2 size-4 rtl:mr-0 rtl:ml-2" />
+                <Link href={link.href} onClick={handleClose}>
+                  <link.icon className="me-2 size-4" />
                   {link.label}
                 </Link>
               </Button>
@@ -134,17 +127,16 @@ export default function MobileRightMenu({
           </div>
         )}
 
-        {/* روابط الدعم والمساعدة */}
         <div className="flex flex-col">
-          {appConfig.menu.supportLinksMenu.items.map((link) => (
+          {storeNavConfig.supportLinks.items.map((link) => (
             <Button
               key={link.key}
               variant="ghost"
               className="flex h-10 items-center justify-start font-normal"
               asChild
             >
-              <Link href={link.href} onClick={handleOnClick}>
-                <link.icon className="mr-2 size-4 rtl:mr-0 rtl:ml-2" />
+              <Link href={link.href} onClick={handleClose}>
+                <link.icon className="me-2 size-4" />
                 {link.label}
               </Link>
             </Button>
@@ -153,18 +145,16 @@ export default function MobileRightMenu({
 
         <Separator />
 
-        {/* قائمة التفضيلات (اللغة، العملة، المظهر) */}
-        <LanguageAccordion />
+        <LanguageAccordion onSelect={handleClose} />
         <Separator className="my-px" />
         <CurrencyAccordion
           currentCurrency={currentCurrency}
-          onSelect={() => setIsOpen(false)}
+          onSelect={handleClose}
         />
         <Separator className="my-px" />
-        <ThemeAccordion />
+        <ThemeAccordion onSelect={handleClose} />
       </MobileMenuBody>
 
-      {/* أسفل القائمة الجانبية (تسجيل الخروج أو أزرار الدخول) */}
       <MobileMenuFooter>
         <div className="flex flex-col">
           {user ? (
@@ -177,22 +167,14 @@ export default function MobileRightMenu({
             </Button>
           ) : (
             <div className="flex flex-col space-y-2">
-              <Button
-                variant="default"
-                className="px-4 uppercase"
-                asChild
-              >
-                <Link href={appRoutes.auth.signup} onClick={handleOnClick}>
+              <Button variant="default" className="px-4 uppercase" asChild>
+                <Link href={appRoutes.auth.signup} onClick={handleClose}>
                   Get Started
                 </Link>
               </Button>
 
-              <Button
-                variant="secondary"
-                className="px-4 uppercase"
-                asChild
-              >
-                <Link href={appRoutes.auth.login} onClick={handleOnClick}>
+              <Button variant="secondary" className="px-4 uppercase" asChild>
+                <Link href={appRoutes.auth.login} onClick={handleClose}>
                   Login
                 </Link>
               </Button>

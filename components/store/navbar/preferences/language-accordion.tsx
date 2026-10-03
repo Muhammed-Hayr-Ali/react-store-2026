@@ -12,22 +12,28 @@ import {
   CustomAccordionItem,
   CustomAccordionTrigger,
 } from "@/components/ui/custom-accordion"
-import { appConfig } from "@/lib/config/app_config"
+import { storeNavConfig } from "../nav-config"
 import { cn } from "@/lib/utils"
 
-export function LanguageAccordion() {
+interface LanguageAccordionProps {
+  onSelect?: () => void
+}
+
+export function LanguageAccordion({ onSelect }: LanguageAccordionProps) {
   const router = useRouter()
   const pathname = usePathname()
   const currentLocale = useLocale()
 
-  const currentOption = appConfig.menu.preferences.language.options.find(
+  const config = storeNavConfig.preferences.language
+
+  const currentOption = config.options.find(
     (opt) => opt.value === currentLocale || opt.key === currentLocale
   )
 
   const handleLocaleChange = (newLocale: string) => {
+    onSelect?.()
     if (newLocale === currentLocale) return
 
-    // استبدال كود اللغة في بداية المسار دون تكراره (/ar/products -> /en/products)
     const segments = pathname.split("/")
     if (segments[1] === currentLocale) {
       segments[1] = newLocale
@@ -47,8 +53,8 @@ export function LanguageAccordion() {
           )}
         >
           <div className="flex items-center gap-2">
-            <appConfig.menu.preferences.language.icon className="size-4 text-muted-foreground" />
-            <span>{appConfig.menu.preferences.language.name}</span>
+            <config.icon className="size-4 text-muted-foreground" />
+            <span>{config.name}</span>
           </div>
           <span className="text-xs font-semibold text-muted-foreground uppercase">
             ({currentOption?.key || currentLocale})
@@ -56,7 +62,7 @@ export function LanguageAccordion() {
         </CustomAccordionTrigger>
 
         <CustomAccordionContent className="flex flex-col gap-0.5 px-1 pt-1">
-          {appConfig.menu.preferences.language.options.map((item) => {
+          {config.options.map((item) => {
             const isSelected = item.value === currentLocale
             return (
               <Button
@@ -71,7 +77,7 @@ export function LanguageAccordion() {
                 {isSelected ? (
                   <CheckIcon className="size-3.5 text-primary" />
                 ) : (
-                  <span className="size-3.5" />
+                  <span className="size-3.5" aria-hidden="true" />
                 )}
                 <span>{item.label}</span>
               </Button>

@@ -11,12 +11,18 @@ import {
   CustomAccordionItem,
   CustomAccordionTrigger,
 } from "@/components/ui/custom-accordion"
-import { appConfig } from "@/lib/config/app_config"
+import { storeNavConfig } from "../nav-config"
 import { cn } from "@/lib/utils"
 
-export function ThemeAccordion() {
+interface ThemeAccordionProps {
+  onSelect?: () => void
+}
+
+export function ThemeAccordion({ onSelect }: ThemeAccordionProps) {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = React.useState(false)
+
+  const config = storeNavConfig.preferences.appearance
 
   React.useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -26,9 +32,12 @@ export function ThemeAccordion() {
   }, [])
 
   const currentThemeLabel =
-    appConfig.menu.preferences.appearance.options.find(
-      (opt) => opt.value === theme
-    )?.key || theme
+    config.options.find((opt) => opt.value === theme)?.key || theme
+
+  const handleSelectTheme = (newTheme: string) => {
+    setTheme(newTheme)
+    onSelect?.()
+  }
 
   if (!mounted) {
     return (
@@ -41,19 +50,19 @@ export function ThemeAccordion() {
             )}
           >
             <div className="flex items-center gap-2">
-              <appConfig.menu.preferences.appearance.icon className="size-4 text-muted-foreground" />
-              <span>{appConfig.menu.preferences.appearance.name}</span>
+              <config.icon className="size-4 text-muted-foreground" />
+              <span>{config.name}</span>
             </div>
           </CustomAccordionTrigger>
           <CustomAccordionContent className="flex flex-col gap-0.5 px-1 pt-1">
-            {appConfig.menu.preferences.appearance.options.map((item) => (
+            {config.options.map((item) => (
               <Button
                 key={item.key}
                 variant="ghost"
                 disabled
                 className="flex h-9 w-full items-center justify-start gap-2 rounded-lg text-xs font-normal"
               >
-                <span className="size-3.5" />
+                <span className="size-3.5" aria-hidden="true" />
                 <span>{item.label}</span>
               </Button>
             ))}
@@ -73,8 +82,8 @@ export function ThemeAccordion() {
           )}
         >
           <div className="flex items-center gap-2">
-            <appConfig.menu.preferences.appearance.icon className="size-4 text-muted-foreground" />
-            <span>{appConfig.menu.preferences.appearance.name}</span>
+            <config.icon className="size-4 text-muted-foreground" />
+            <span>{config.name}</span>
           </div>
           {currentThemeLabel && (
             <span className="text-xs font-semibold text-muted-foreground uppercase">
@@ -84,13 +93,13 @@ export function ThemeAccordion() {
         </CustomAccordionTrigger>
 
         <CustomAccordionContent className="flex flex-col gap-0.5 px-1 pt-1">
-          {appConfig.menu.preferences.appearance.options.map((item) => {
+          {config.options.map((item) => {
             const isSelected = item.value === theme
             return (
               <Button
                 key={item.key}
                 variant="ghost"
-                onClick={() => setTheme(item.value)}
+                onClick={() => handleSelectTheme(item.value)}
                 className={cn(
                   "flex h-9 w-full items-center justify-start gap-2 rounded-lg text-xs font-normal",
                   !isSelected && "text-muted-foreground"
@@ -99,7 +108,7 @@ export function ThemeAccordion() {
                 {isSelected ? (
                   <CheckIcon className="size-3.5 text-primary" />
                 ) : (
-                  <span className="size-3.5" />
+                  <span className="size-3.5" aria-hidden="true" />
                 )}
                 <span>{item.label}</span>
               </Button>

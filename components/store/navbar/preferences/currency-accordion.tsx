@@ -32,14 +32,14 @@ export function CurrencyAccordion({
 
   const handleCurrencyChange = async (currencyCode: CurrencyCode) => {
     if (currencyCode === currentCurrency) {
-      if (onSelect) onSelect()
+      onSelect?.()
       return
     }
 
     try {
       setIsPending(true)
       await setUserCurrency(currencyCode)
-      if (onSelect) onSelect()
+      onSelect?.()
       router.refresh()
     } catch (error) {
       console.error("Error setting currency:", error)
@@ -54,16 +54,15 @@ export function CurrencyAccordion({
         <CustomAccordionTrigger
           className={cn(
             buttonVariants({ variant: "ghost" }),
-            "flex h-10 items-center justify-start font-normal aria-expanded:bg-transparent"
+            "flex h-10 w-full items-center justify-start font-normal aria-expanded:bg-transparent"
           )}
         >
           {isPending ? (
-            <Loader2 className="mr-2 size-4 animate-spin rtl:mr-0 rtl:ml-2" />
+            <Loader2 className="me-2 size-4 animate-spin" />
           ) : (
-            <Coins className="mr-2 size-4 rtl:mr-0 rtl:ml-2" />
+            <Coins className="me-2 size-4" />
           )}
           <span>Currency</span>
-          {/* تم استبدال ms-auto بـ ms-2 لتكون بجوار الكلمة مباشرة */}
           <span className="ms-2 text-xs font-semibold text-muted-foreground uppercase">
             ({currentCurrency})
           </span>
@@ -80,14 +79,14 @@ export function CurrencyAccordion({
                 disabled={isPending}
                 onClick={() => handleCurrencyChange(currency.code)}
                 className={cn(
-                  "flex items-center justify-start gap-2",
+                  "flex items-center justify-start gap-2 text-xs",
                   !isSelected && "font-normal text-muted-foreground"
                 )}
               >
                 {isSelected ? (
-                  <Check className="h-4 w-4" />
+                  <Check className="size-3.5 text-primary" />
                 ) : (
-                  <div className="h-4 w-4" />
+                  <span className="size-3.5" aria-hidden="true" />
                 )}
                 <span className="font-bold">{currency.code}</span>
                 <span className="text-xs text-muted-foreground">
