@@ -142,4 +142,26 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       },
     ],
   },
+
+  {
+    id: "orders",
+    label: "Orders Management",
+    permissions: [
+      {
+        key: PERMISSIONS.VIEW_ORDERS,
+        label: "View Orders",
+        description: "Allow browsing customer orders and details",
+      },
+      {
+        key: PERMISSIONS.UPDATE_ORDER_STATUS,
+        label: "Update Order Status",
+        description: "Allow changing order shipping or payment status",
+      },
+      {
+        key: PERMISSIONS.CANCEL_ORDER,
+        label: "Cancel Order",
+        description: "Allow refunding and cancelling active orders",
+      },
+    ],
+  },
 ]

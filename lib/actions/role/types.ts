@@ -39,6 +39,10 @@ export const PERMISSIONS = {
   CREATE_REPORT: "create_report",
   MANAGE_REPORTS: "manage_reports",
   DELETE_REPORT: "delete_report",
+  // Orders
+  VIEW_ORDERS: "view_orders",
+  UPDATE_ORDER_STATUS: "update_order_status",
+  CANCEL_ORDER: "cancel_order",
 } as const
 
 export type AppPermission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]
