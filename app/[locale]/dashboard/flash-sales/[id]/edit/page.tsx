@@ -37,25 +37,19 @@ export default async function EditFlashSalePage({ params }: PageProps) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-border/40 pb-4">
-        <Button asChild variant="ghost" size="icon" className="size-8">
-          <Link href={`/${locale}/dashboard/flash-sales`}>
-            <ArrowLeftIcon className="size-4" />
-          </Link>
-        </Button>
-
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-destructive-foreground flex size-6 items-center justify-center rounded-md bg-destructive shadow-xs">
-              <ZapIcon className="size-3.5 fill-current" />
+            <span className="flex size-7 items-center justify-center rounded-lg bg-secondary shadow-xs">
+              <ZapIcon className="size-4 fill-current text-foreground" />
             </span>
-            <h1 className="text-lg font-bold tracking-tight text-foreground sm:text-xl">
+            <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
               Edit Flash Sale
             </h1>
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
             Update campaign duration, settings, and discount rules.
           </p>
         </div>

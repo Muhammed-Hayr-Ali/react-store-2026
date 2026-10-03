@@ -34,9 +34,9 @@ export default function Layout({
               <BreadcrumbItem>
                 <BreadcrumbPage>Products</BreadcrumbPage>
               </BreadcrumbItem>
-              <BreadcrumbSeparator />
+              <BreadcrumbSeparator/>
               <BreadcrumbItem>
-                <BreadcrumbPage>Create</BreadcrumbPage>
+                <BreadcrumbPage>Edit</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>

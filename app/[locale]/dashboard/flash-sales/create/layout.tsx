@@ -8,43 +8,44 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { appRoutes } from "@/lib/config/app-routes"
 
-export default function Layout({
-  children,
-}: Readonly<{
+interface LayoutProps {
   children: React.ReactNode
-}>) {
+  params: Promise<{ locale: string }>
+}
+
+export default async function Layout({ children, params }: LayoutProps) {
+  const { locale } = await params
+
   return (
-    <SidebarInset className="flex h-dvh w-full flex-col overflow-hidden">
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+    <SidebarInset className="flex min-h-screen w-full flex-col">
+      <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="-ms-1" />
           <Separator orientation="vertical" className="me-2 h-4 self-auto" />
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href={appRoutes.dashboard.home}>
+                <BreadcrumbLink href={`/${locale}/dashboard`}>
                   Dashboard
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Products</BreadcrumbPage>
+                <BreadcrumbLink href={`/${locale}/dashboard/flash-sales`}>
+                  Flash Sales
+                </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>All Products</BreadcrumbPage>
+                <BreadcrumbPage>Create</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
       </header>
 
-      {/* تقليص الحشو ليصبح متناسقاً دون تضييق العرض */}
-      <main className="flex flex-1 flex-col overflow-y-auto p-4 md:p-6">
-        {children}
-      </main>
+      <main className="flex-1 px-4 py-4 md:px-6 md:py-6">{children}</main>
     </SidebarInset>
   )
 }

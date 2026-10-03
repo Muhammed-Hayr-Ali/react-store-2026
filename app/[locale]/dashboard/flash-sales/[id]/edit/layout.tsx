@@ -1,3 +1,4 @@
+// app/dashboard/products/[slug]/edit/layout.tsx
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -16,14 +17,11 @@ export default function Layout({
   children: React.ReactNode
 }>) {
   return (
-    <SidebarInset className="w-full h-dvh">
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-        <div className="flex items-center gap-2 px-4">
+    <SidebarInset className="flex min-h-screen w-full flex-col">
+      <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+        <div className="flex items-center gap-2">
           <SidebarTrigger className="-ms-1" />
-          <Separator
-            orientation="vertical"
-            className="me-2 data-vertical:h-4 data-vertical:self-auto"
-          />
+          <Separator orientation="vertical" className="me-2 h-4 self-auto" />
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
@@ -33,15 +31,20 @@ export default function Layout({
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Account</BreadcrumbPage>
+                <BreadcrumbLink href="/dashboard/products">
+                  Products
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Edit</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
       </header>
-      <div className="flex flex-1 flex-col gap-4 overflow-auto py-4 md:gap-6 md:py-6">
-        {children}
-      </div>
+
+      <main className="flex-1 px-4 py-4 md:px-6 md:py-6">{children}</main>
     </SidebarInset>
   )
 }

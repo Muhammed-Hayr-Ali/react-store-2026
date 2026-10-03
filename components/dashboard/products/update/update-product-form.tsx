@@ -26,21 +26,20 @@ import {
   CheckCircle2Icon,
   Wand2Icon,
   PencilIcon,
+  AlertCircleIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
-import {
-  InputGroup,
-  InputGroupTextarea,
-} from "@/components/ui/input-group"
+import { InputGroup, InputGroupTextarea } from "@/components/ui/input-group"
 import { Switch } from "@/components/ui/switch"
 import {
   Select,
@@ -51,7 +50,6 @@ import {
 } from "@/components/ui/select"
 
 import {
-  
   CreateProductCompleteInput,
   ProductWithRelations,
 } from "@/lib/actions/products/types"
@@ -96,8 +94,16 @@ const PRESET_ATTRIBUTE_KEYS = [
   { label: "Color", value: "color", placeholder: "e.g., Red or #FF0000" },
   { label: "Weight", value: "weight", placeholder: "e.g., 250g or 1kg" },
   { label: "Size", value: "size", placeholder: "e.g., Medium or 42" },
-  { label: "Flavor", value: "flavor", placeholder: "e.g., Barbecue or Vanilla" },
-  { label: "Material", value: "material", placeholder: "e.g., Cotton or Plastic" },
+  {
+    label: "Flavor",
+    value: "flavor",
+    placeholder: "e.g., Barbecue or Vanilla",
+  },
+  {
+    label: "Material",
+    value: "material",
+    placeholder: "e.g., Cotton or Plastic",
+  },
 ]
 
 function generateSlug(name: string): string {
@@ -133,6 +139,7 @@ export default function UpdateProductForm({
   brands: Brand[] | null
 }) {
   const router = useRouter()
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   const [categoriesList, setCategoriesList] = React.useState<Category[]>(
     initialCategories || []
@@ -251,9 +258,14 @@ export default function UpdateProductForm({
 
   const handleGenerateAllSeo = () => {
     if (!currentProductName.trim()) {
-      toast.error("Please enter a product name first")
+      setErrorMessage(
+        "Please enter a product name before generating SEO details."
+      )
+      window.scrollTo({ top: 0, behavior: "smooth" })
       return
     }
+
+    setErrorMessage(null)
 
     const brandSuffix = selectedBrandObject
       ? ` | ${selectedBrandObject.name}`
@@ -294,65 +306,70 @@ export default function UpdateProductForm({
     toast.success("SEO details generated successfully!")
   }
 
- async function onSubmit(data: FormValues) {
-   const result = await updateProduct(product.id, data)
+  async function onSubmit(data: FormValues) {
+    setErrorMessage(null)
 
-   if (result.success) {
-     toast.success("Product updated successfully!")
-     router.push("/dashboard/products")
-     router.refresh()
-   } else {
-     const errorMsg =
-       result.error === "VALIDATION_ERROR"
-         ? "Please check the form for invalid inputs."
-         : result.error === "SLUG_ALREADY_EXISTS"
-           ? "The URL slug is already taken."
-           : result.error === "SKU_ALREADY_EXISTS"
-             ? "One or more SKUs are already in use."
-             : result.error || "Failed to update product."
-     toast.error(errorMsg)
-   }
- }
+    const result = await updateProduct(product.id, data)
+
+    if (result.success) {
+      toast.success("Product updated successfully!")
+      router.push("/dashboard/products")
+      router.refresh()
+    } else {
+      console.error("Update Error:", result)
+      const errorMsg =
+        result.error === "VALIDATION_ERROR"
+          ? "Please check the form for invalid inputs."
+          : result.error === "SLUG_ALREADY_EXISTS"
+            ? "The URL slug is already taken. Please choose another one."
+            : result.error === "SKU_ALREADY_EXISTS"
+              ? "One or more SKUs are already in use. Please ensure unique SKUs."
+              : result.error || "Failed to update product."
+
+      setErrorMessage(errorMsg)
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    }
+  }
+
+  const onInvalid = () => {
+    setErrorMessage(
+      "Please complete all required fields and resolve the errors below before submitting."
+    )
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8">
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Top Header & Actions Bar */}
-        <div className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Update Product</h1>
-            <p className="text-sm text-muted-foreground">
-              Modify product specifications, variants, pricing, and media.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isSubmitting}
-              onClick={() => router.back()}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="min-w-32 cursor-pointer shadow-xs"
-            >
-              {isSubmitting ? (
-                <>
-                  <Spinner className="mr-2 size-4" />
-                  Updating...
-                </>
-              ) : (
-                <>
-                  <CheckCircle2Icon className="mr-1.5 size-4" />
-                  Update Product
-                </>
-              )}
-            </Button>
-          </div>
+    <div className="mx-auto w-full max-w-7xl px-2 py-4 md:px-4 md:py-6">
+      <form
+        onSubmit={form.handleSubmit(onSubmit, onInvalid)}
+        className="space-y-6"
+      >
+        {/* Top Header */}
+        <div className="border-b pb-5">
+          <h1 className="text-2xl font-bold tracking-tight">Update Product</h1>
+          <p className="text-sm text-muted-foreground">
+            Modify product specifications, variants, pricing, and media.
+          </p>
         </div>
+
+        {/* Global Error Alert */}
+        {errorMessage && (
+          <Alert variant="destructive" className="relative pr-9">
+            <AlertCircleIcon className="size-4" />
+            <AlertTitle>Action Required</AlertTitle>
+            <AlertDescription className="text-xs">
+              {errorMessage}
+            </AlertDescription>
+            <button
+              type="button"
+              onClick={() => setErrorMessage(null)}
+              className="absolute top-3 right-3 cursor-pointer text-muted-foreground hover:text-foreground"
+              aria-label="Close error alert"
+            >
+              <XIcon className="size-4" />
+            </button>
+          </Alert>
+        )}
 
         {/* 2-Column Responsive Layout */}
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
@@ -880,6 +897,36 @@ export default function UpdateProductForm({
             ]}
           />
         )}
+
+        {/* Bottom Actions Bar (Standard Page Flow - No Sticky/Floating on Mobile) */}
+        <div className="flex flex-col-reverse items-stretch justify-end gap-3 border-t pt-6 sm:flex-row sm:items-center">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isSubmitting}
+            onClick={() => router.back()}
+            className="w-full sm:w-auto"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full cursor-pointer shadow-xs sm:w-auto sm:min-w-32"
+          >
+            {isSubmitting ? (
+              <>
+                <Spinner className="mr-2 size-4" />
+                Updating...
+              </>
+            ) : (
+              <>
+                <CheckCircle2Icon className="mr-1.5 size-4" />
+                Update Product
+              </>
+            )}
+          </Button>
+        </div>
       </form>
 
       {/* --- Category Sheets & Dialogs --- */}
@@ -997,6 +1044,10 @@ export default function UpdateProductForm({
     </div>
   )
 }
+
+// ============================================================================
+// Subcomponents
+// ============================================================================
 
 interface VariantCardProps {
   index: number

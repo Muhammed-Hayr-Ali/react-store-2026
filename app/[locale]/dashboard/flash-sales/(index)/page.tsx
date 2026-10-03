@@ -26,13 +26,13 @@ export default async function FlashSalesPage({ params }: PageProps) {
   const sales = await getAllFlashSales()
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
       {/* Header */}
       <div className="flex flex-col gap-3 border-b border-border/40 pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-destructive-foreground flex size-7 items-center justify-center rounded-lg bg-destructive shadow-xs">
-              <ZapIcon className="size-4 fill-current" />
+            <span className="flex size-7 items-center justify-center rounded-lg bg-secondary shadow-xs">
+              <ZapIcon className="size-4 fill-current text-foreground" />
             </span>
             <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
               Flash Sales
@@ -45,7 +45,8 @@ export default async function FlashSalesPage({ params }: PageProps) {
 
         <Button
           asChild
-          className="text-destructive-foreground gap-1.5 bg-destructive text-xs hover:bg-destructive/90"
+          variant="secondary"
+          className="flex items-center gap-2 sm:ml-auto"
         >
           <Link href={`/${locale}/dashboard/flash-sales/create`}>
             <PlusIcon className="size-3.5" />

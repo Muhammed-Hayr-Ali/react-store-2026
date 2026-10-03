@@ -54,7 +54,6 @@ import {
   EllipsisVerticalIcon,
   Columns3Icon,
   ChevronDownIcon,
-  PlusIcon,
   ChevronsLeftIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -67,7 +66,6 @@ import {
 } from "lucide-react"
 
 import { AdminProductSummary } from "@/lib/actions/products/types"
-import { appRoutes } from "@/lib/config/app-routes"
 import { duplicateProduct } from "@/lib/actions/products/mutations/duplicate"
 import DeleteProductDialog from "../delete/delete-product-dialog"
 
@@ -533,7 +531,7 @@ export function DataTable({
           </DropdownMenu>
         </div>
 
-        {/* أدوات التحكم الإضافية */}
+        {/* أدوات التحكم الإضافية (زر الأعمدة فقط بدون زر الإضافة المكرر) */}
         <div className="flex items-center gap-1.5 sm:gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -570,16 +568,6 @@ export function DataTable({
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-
-          <Button asChild size="sm" className="h-8 text-xs sm:h-9">
-            <Link
-              href={appRoutes.dashboard.products.create}
-              className="flex items-center"
-            >
-              <PlusIcon className="size-3.5" />
-              <span className="hidden sm:block">Create New Product</span>
-            </Link>
-          </Button>
         </div>
       </div>
 

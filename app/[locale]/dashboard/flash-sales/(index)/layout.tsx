@@ -1,4 +1,3 @@
-// layout.tsx
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,15 +8,16 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { appRoutes } from "@/lib/config/app-routes"
 
-export default function Layout({
-  children,
-}: Readonly<{
+interface LayoutProps {
   children: React.ReactNode
-}>) {
+  params: Promise<{ locale: string }>
+}
+
+export default async function Layout({ children, params }: LayoutProps) {
+  const { locale } = await params
+
   return (
-    // استبدال h-dvh بـ min-h-screen ليأخذ الارتفاع الطبيعي ويمتد
     <SidebarInset className="flex min-h-screen w-full flex-col">
       <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
         <div className="flex items-center gap-2">
@@ -26,24 +26,19 @@ export default function Layout({
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href={appRoutes.dashboard.home}>
+                <BreadcrumbLink href={`/${locale}/dashboard`}>
                   Dashboard
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Products</BreadcrumbPage>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Create</BreadcrumbPage>
+                <BreadcrumbPage>Flash Sales</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
       </header>
 
-      {/* إزالة القيود الصارمة للارتفاع ليتحرك التمرير مع المتصفح بالكامل */}
       <main className="flex-1 px-4 py-4 md:px-6 md:py-6">{children}</main>
     </SidebarInset>
   )
