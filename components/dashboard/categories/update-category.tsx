@@ -16,21 +16,20 @@ import {
   CheckCircle2Icon,
   XIcon,
   Wand2Icon,
+  AlertCircleIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
-import {
-  InputGroup,
-  InputGroupTextarea,
-} from "@/components/ui/input-group"
+import { InputGroup, InputGroupTextarea } from "@/components/ui/input-group"
 import { Switch } from "@/components/ui/switch"
 import {
   Select,
@@ -96,25 +95,27 @@ export default function UpdateCategorySheet({
   const isMobile = useIsMobile()
   const locale = useLocale()
   const side = getSide({ isMobile, locale })
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
+  // مزامنة قيم النموذج مباشرة عبر values لتفادي setState داخل Effect
   const form = useForm<FormValues>({
     resolver: zodResolver(updateCategorySchema),
     mode: "onChange",
-    defaultValues: {
-      name: "",
-      name_ar: "",
-      slug: "",
-      description: "",
-      parent_id: null,
-      is_active: true,
-      sort_order: 0,
-      image_url: "",
-      image_alt: "",
+    values: {
+      name: item?.name || "",
+      name_ar: item?.name_ar || "",
+      slug: item?.slug || "",
+      description: item?.description || "",
+      parent_id: item?.parent_id ?? null,
+      is_active: item?.is_active ?? true,
+      sort_order: item?.sort_order ?? 0,
+      image_url: item?.image_url || "",
+      image_alt: item?.image_alt || "",
     },
   })
 
   const {
-    formState: { isSubmitting, errors },
+    formState: { isSubmitting },
     control,
     setValue,
     getFieldState,
@@ -126,27 +127,19 @@ export default function UpdateCategorySheet({
   const isValidImage =
     imageUrl.startsWith("http://") || imageUrl.startsWith("https://")
 
-  React.useEffect(() => {
-    if (isOpen === "update" && item) {
-      form.reset({
-        name: item.name || "",
-        name_ar: item.name_ar || "",
-        slug: item.slug || "",
-        description: item.description || "",
-        parent_id: item.parent_id,
-        is_active: item.is_active ?? true,
-        sort_order: item.sort_order ?? 0,
-        image_url: item.image_url || "",
-        image_alt: item.image_alt || "",
-      })
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setErrorMessage(null)
     }
-  }, [isOpen, item, form])
+    onOpenChange(open)
+  }
 
   const handleGenerateAltText = () => {
     if (!nameValue.trim()) {
-      toast.error("Please enter the English name first")
+      setErrorMessage("Please enter the English name first")
       return
     }
+    setErrorMessage(null)
     const generatedAlt = `${nameValue.trim()} category showcase banner`.slice(
       0,
       200
@@ -159,9 +152,11 @@ export default function UpdateCategorySheet({
 
   async function onSubmit(data: FormValues) {
     if (!item) {
-      toast.error("No category selected for update.")
+      setErrorMessage("No category selected for update.")
       return
     }
+
+    setErrorMessage(null)
 
     const payload = {
       name: data.name,
@@ -180,18 +175,17 @@ export default function UpdateCategorySheet({
     if (result.success) {
       if (result.data) onSuccess(result.data)
       toast.success("Category updated successfully!")
-      onOpenChange(false)
-      form.reset()
+      handleOpenChange(false)
       router.refresh()
     } else {
-      toast.error(
+      setErrorMessage(
         result.error || "Failed to update category. Please try again."
       )
     }
   }
 
   return (
-    <CustomSheet open={isOpen === "update"} onOpenChange={onOpenChange}>
+    <CustomSheet open={isOpen === "update"} onOpenChange={handleOpenChange}>
       <CustomSheetContent
         showCloseButton={false}
         side={side}
@@ -227,6 +221,24 @@ export default function UpdateCategorySheet({
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-5 pb-8"
           >
+            {/* Global Error Alert */}
+            {errorMessage && (
+              <Alert variant="destructive" className="relative pr-9">
+                <AlertCircleIcon className="size-4" />
+                <AlertTitle>Action Required</AlertTitle>
+                <AlertDescription className="text-xs">
+                  {errorMessage}
+                </AlertDescription>
+                <button
+                  type="button"
+                  onClick={() => setErrorMessage(null)}
+                  className="absolute top-3 right-3 cursor-pointer text-muted-foreground hover:text-foreground"
+                >
+                  <XIcon className="size-4" />
+                </button>
+              </Alert>
+            )}
+
             {/* Card 1: Basic Information */}
             <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
@@ -433,7 +445,6 @@ export default function UpdateCategorySheet({
                           rows={3}
                           className="resize-y text-xs"
                         />
-                     
                       </InputGroup>
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -558,29 +569,18 @@ export default function UpdateCategorySheet({
                 />
               </FieldGroup>
             </div>
-
-            {errors.root && (
-              <FieldError
-                errors={[
-                  {
-                    message:
-                      errors.root.message || "An unexpected error occurred",
-                  },
-                ]}
-              />
-            )}
           </form>
         </div>
 
-        {/* Footer - ثابت */}
+        {/* Footer - موحد */}
         <CustomSheetFooter className="shrink-0 border-t bg-card px-5 py-3 sm:px-6 sm:py-4">
-          <div className="flex w-full items-center justify-end gap-2.5">
+          <div className="flex w-full flex-col-reverse items-stretch justify-end gap-2.5 sm:flex-row sm:items-center">
             <CustomSheetClose asChild>
               <Button
                 type="button"
                 variant="outline"
                 disabled={isSubmitting}
-                className="cursor-pointer"
+                className="w-full cursor-pointer sm:w-auto"
               >
                 Discard
               </Button>
@@ -589,7 +589,7 @@ export default function UpdateCategorySheet({
               type="submit"
               form="update-category-form"
               disabled={isSubmitting}
-              className="min-w-32 cursor-pointer shadow-xs"
+              className="w-full cursor-pointer shadow-xs sm:w-auto sm:min-w-32"
             >
               {isSubmitting ? (
                 <>

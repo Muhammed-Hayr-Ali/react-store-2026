@@ -15,11 +15,13 @@ import {
   CheckCircle2Icon,
   XIcon,
   Wand2Icon,
+  AlertCircleIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   Field,
   FieldError,
@@ -74,6 +76,7 @@ export default function CreateBrandSheet({
   const isMobile = useIsMobile()
   const locale = useLocale()
   const side = getSide({ isMobile, locale })
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(createBrandSchema),
@@ -88,7 +91,7 @@ export default function CreateBrandSheet({
   })
 
   const {
-    formState: { isSubmitting, errors },
+    formState: { isSubmitting },
     control,
     setValue,
     getFieldState,
@@ -99,17 +102,21 @@ export default function CreateBrandSheet({
   const isValidImage =
     logoUrl.startsWith("http://") || logoUrl.startsWith("https://")
 
-  React.useEffect(() => {
-    if (isOpen === "create") {
+  // ✅ معالج إغلاق وفتح موحد يصفّر الأخطاء والنموذج دون استدعاء setState داخل الـ Effect
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setErrorMessage(null)
       form.reset()
     }
-  }, [isOpen, form])
+    onOpenChange(open)
+  }
 
   const handleGenerateAltText = () => {
     if (!nameValue.trim()) {
-      toast.error("Please enter the brand name in English first")
+      setErrorMessage("Please enter the brand name in English first")
       return
     }
+    setErrorMessage(null)
     const generatedAlt = `${nameValue.trim()} official logo`
     setValue("logo_alt", generatedAlt, {
       shouldValidate: true,
@@ -118,6 +125,8 @@ export default function CreateBrandSheet({
   }
 
   async function onSubmit(data: FormValues) {
+    setErrorMessage(null)
+
     const payload = {
       name: data.name,
       name_ar: data.name_ar === "" ? null : data.name_ar,
@@ -131,8 +140,7 @@ export default function CreateBrandSheet({
     if (result.success) {
       if (result.data) onSuccess(result.data)
       toast.success("Brand created successfully!")
-      onOpenChange(false)
-      form.reset()
+      handleOpenChange(false)
       router.refresh()
     } else {
       const errorMsg =
@@ -141,12 +149,12 @@ export default function CreateBrandSheet({
           : result.error === "SLUG_ALREADY_EXISTS"
             ? "Slug is already in use."
             : result.error || "Failed to create brand. Please try again."
-      toast.error(errorMsg)
+      setErrorMessage(errorMsg)
     }
   }
 
   return (
-    <CustomSheet open={isOpen === "create"} onOpenChange={onOpenChange}>
+    <CustomSheet open={isOpen === "create"} onOpenChange={handleOpenChange}>
       <CustomSheetContent
         showCloseButton={false}
         side={side}
@@ -182,6 +190,24 @@ export default function CreateBrandSheet({
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-5 pb-8"
           >
+            {/* Global Error Alert */}
+            {errorMessage && (
+              <Alert variant="destructive" className="relative pr-9">
+                <AlertCircleIcon className="size-4" />
+                <AlertTitle>Action Required</AlertTitle>
+                <AlertDescription className="text-xs">
+                  {errorMessage}
+                </AlertDescription>
+                <button
+                  type="button"
+                  onClick={() => setErrorMessage(null)}
+                  className="absolute top-3 right-3 cursor-pointer text-muted-foreground hover:text-foreground"
+                >
+                  <XIcon className="size-4" />
+                </button>
+              </Alert>
+            )}
+
             {/* Card 1: Basic Information */}
             <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
@@ -352,29 +378,18 @@ export default function CreateBrandSheet({
                 />
               </FieldGroup>
             </div>
-
-            {errors.root && (
-              <FieldError
-                errors={[
-                  {
-                    message:
-                      errors.root.message || "An unexpected error occurred",
-                  },
-                ]}
-              />
-            )}
           </form>
         </div>
 
-        {/* Footer - ثابت */}
+        {/* Footer - موحد */}
         <CustomSheetFooter className="shrink-0 border-t bg-card px-5 py-3 sm:px-6 sm:py-4">
-          <div className="flex w-full items-center justify-end gap-2.5">
+          <div className="flex w-full flex-col-reverse items-stretch justify-end gap-2.5 sm:flex-row sm:items-center">
             <CustomSheetClose asChild>
               <Button
                 type="button"
                 variant="outline"
                 disabled={isSubmitting}
-                className="cursor-pointer"
+                className="w-full cursor-pointer sm:w-auto"
               >
                 Discard
               </Button>
@@ -383,7 +398,7 @@ export default function CreateBrandSheet({
               type="submit"
               form="create-brand-form"
               disabled={isSubmitting}
-              className="min-w-32 cursor-pointer shadow-xs"
+              className="w-full cursor-pointer shadow-xs sm:w-auto sm:min-w-32"
             >
               {isSubmitting ? (
                 <>

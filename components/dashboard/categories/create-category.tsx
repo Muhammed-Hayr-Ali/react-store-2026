@@ -16,23 +16,20 @@ import {
   CheckCircle2Icon,
   XIcon,
   Wand2Icon,
+  AlertCircleIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupText,
-  InputGroupTextarea,
-} from "@/components/ui/input-group"
+import { InputGroup, InputGroupTextarea } from "@/components/ui/input-group"
 import { Switch } from "@/components/ui/switch"
 import {
   Select,
@@ -96,6 +93,7 @@ export default function CreateCategorySheet({
   const isMobile = useIsMobile()
   const locale = useLocale()
   const side = getSide({ isMobile, locale })
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(createCategorySchema),
@@ -114,7 +112,7 @@ export default function CreateCategorySheet({
   })
 
   const {
-    formState: { isSubmitting, errors },
+    formState: { isSubmitting },
     control,
     setValue,
     getFieldState,
@@ -126,17 +124,21 @@ export default function CreateCategorySheet({
   const isValidImage =
     imageUrl.startsWith("http://") || imageUrl.startsWith("https://")
 
-  React.useEffect(() => {
-    if (isOpen === "create") {
+  // معالج إغلاق وفتح موحد دون استدعاء setState داخل Effect
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setErrorMessage(null)
       form.reset()
     }
-  }, [isOpen, form])
+    onOpenChange(open)
+  }
 
   const handleGenerateAltText = () => {
     if (!nameValue.trim()) {
-      toast.error("Please enter the English name first")
+      setErrorMessage("Please enter the English name first")
       return
     }
+    setErrorMessage(null)
     const generatedAlt = `${nameValue.trim()} category showcase banner`.slice(
       0,
       200
@@ -148,6 +150,8 @@ export default function CreateCategorySheet({
   }
 
   async function onSubmit(data: FormValues) {
+    setErrorMessage(null)
+
     const payload = {
       name: data.name,
       name_ar: data.name_ar === "" ? null : data.name_ar,
@@ -165,8 +169,7 @@ export default function CreateCategorySheet({
     if (result.success) {
       if (result.data) onSuccess(result.data)
       toast.success("Category created successfully!")
-      onOpenChange(false)
-      form.reset()
+      handleOpenChange(false)
       router.refresh()
     } else {
       const errorMsg =
@@ -175,18 +178,18 @@ export default function CreateCategorySheet({
           : result.error === "SLUG_ALREADY_EXISTS"
             ? "Slug is already in use."
             : result.error || "Failed to create category. Please try again."
-      toast.error(errorMsg)
+      setErrorMessage(errorMsg)
     }
   }
 
   return (
-    <CustomSheet open={isOpen === "create"} onOpenChange={onOpenChange}>
+    <CustomSheet open={isOpen === "create"} onOpenChange={handleOpenChange}>
       <CustomSheetContent
         showCloseButton={false}
         side={side}
         className="flex h-full max-h-screen w-full flex-col p-0 sm:max-w-xl"
       >
-        {/* Header - ثابت لا ينكمش */}
+        {/* Header - ثابت */}
         <CustomSheetHeader className="shrink-0 border-b bg-card px-5 py-4 sm:px-6">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
@@ -209,13 +212,31 @@ export default function CreateCategorySheet({
           </div>
         </CustomSheetHeader>
 
-        {/* Scrollable Form Body - flex-1 min-h-0 لضمان عمل السكرول داخل الجوال */}
+        {/* Scrollable Form Body */}
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6">
           <form
             id="create-category-form"
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-5 pb-8"
           >
+            {/* Global Error Alert */}
+            {errorMessage && (
+              <Alert variant="destructive" className="relative pr-9">
+                <AlertCircleIcon className="size-4" />
+                <AlertTitle>Action Required</AlertTitle>
+                <AlertDescription className="text-xs">
+                  {errorMessage}
+                </AlertDescription>
+                <button
+                  type="button"
+                  onClick={() => setErrorMessage(null)}
+                  className="absolute top-3 right-3 cursor-pointer text-muted-foreground hover:text-foreground"
+                >
+                  <XIcon className="size-4" />
+                </button>
+              </Alert>
+            )}
+
             {/* Card 1: Basic Information */}
             <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
@@ -416,7 +437,6 @@ export default function CreateCategorySheet({
                           rows={3}
                           className="resize-y text-xs"
                         />
-                    
                       </InputGroup>
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -535,29 +555,18 @@ export default function CreateCategorySheet({
                 />
               </FieldGroup>
             </div>
-
-            {errors.root && (
-              <FieldError
-                errors={[
-                  {
-                    message:
-                      errors.root.message || "An unexpected error occurred",
-                  },
-                ]}
-              />
-            )}
           </form>
         </div>
 
-        {/* Footer - ثابت أسفل الشاشة دائماً */}
+        {/* Footer - موحد */}
         <CustomSheetFooter className="shrink-0 border-t bg-card px-5 py-3 sm:px-6 sm:py-4">
-          <div className="flex w-full items-center justify-end gap-2.5">
+          <div className="flex w-full flex-col-reverse items-stretch justify-end gap-2.5 sm:flex-row sm:items-center">
             <CustomSheetClose asChild>
               <Button
                 type="button"
                 variant="outline"
                 disabled={isSubmitting}
-                className="cursor-pointer"
+                className="w-full cursor-pointer sm:w-auto"
               >
                 Discard
               </Button>
@@ -566,7 +575,7 @@ export default function CreateCategorySheet({
               type="submit"
               form="create-category-form"
               disabled={isSubmitting}
-              className="min-w-32 cursor-pointer shadow-xs"
+              className="w-full cursor-pointer shadow-xs sm:w-auto sm:min-w-32"
             >
               {isSubmitting ? (
                 <>

@@ -15,11 +15,13 @@ import {
   CheckCircle2Icon,
   XIcon,
   Wand2Icon,
+  AlertCircleIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   Field,
   FieldError,
@@ -38,8 +40,6 @@ import {
 import { Brand, updateBrand, updateBrandSchema } from "@/lib/actions/brands"
 
 type FormValues = z.infer<typeof updateBrandSchema>
-
-
 
 interface UpdateBrandSheetProps {
   isOpen: string | null
@@ -69,21 +69,23 @@ export default function UpdateBrandSheet({
   const isMobile = useIsMobile()
   const locale = useLocale()
   const side = getSide({ isMobile, locale })
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
+  // مزامنة قيم النموذج مباشرة مع item عبر خاصية values الآمنة في React Hook Form
   const form = useForm<FormValues>({
     resolver: zodResolver(updateBrandSchema),
     mode: "onChange",
-    defaultValues: {
-      name: "",
-      name_ar: "",
-      slug: "",
-      logo_url: "",
-      logo_alt: "",
+    values: {
+      name: item?.name || "",
+      name_ar: item?.name_ar || "",
+      slug: item?.slug || "",
+      logo_url: item?.logo_url || "",
+      logo_alt: item?.logo_alt || "",
     },
   })
 
   const {
-    formState: { isSubmitting, errors },
+    formState: { isSubmitting },
     control,
     setValue,
   } = form
@@ -93,23 +95,20 @@ export default function UpdateBrandSheet({
   const isValidImage =
     logoUrl.startsWith("http://") || logoUrl.startsWith("https://")
 
-  React.useEffect(() => {
-    if (isOpen === "update" && item) {
-      form.reset({
-        name: item.name || "",
-        name_ar: item.name_ar || "",
-        slug: item.slug || "",
-        logo_url: item.logo_url || "",
-        logo_alt: item.logo_alt || "",
-      })
+  // معالج إغلاق وفتح موحد دون استدعاء setState داخل الـ Effect
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setErrorMessage(null)
     }
-  }, [isOpen, item, form])
+    onOpenChange(open)
+  }
 
   const handleGenerateAltText = () => {
     if (!nameValue.trim()) {
-      toast.error("Please enter the brand name in English first")
+      setErrorMessage("Please enter the brand name in English first")
       return
     }
+    setErrorMessage(null)
     const generatedAlt = `${nameValue.trim()} official logo`
     setValue("logo_alt", generatedAlt, {
       shouldValidate: true,
@@ -119,9 +118,11 @@ export default function UpdateBrandSheet({
 
   async function onSubmit(data: FormValues) {
     if (!item) {
-      toast.error("No brand selected for update.")
+      setErrorMessage("No brand selected for update.")
       return
     }
+
+    setErrorMessage(null)
 
     const payload = {
       name: data.name,
@@ -136,16 +137,17 @@ export default function UpdateBrandSheet({
     if (result.success) {
       if (result.data) onSuccess(result.data)
       toast.success("Brand updated successfully!")
-      onOpenChange(false)
-      form.reset()
+      handleOpenChange(false)
       router.refresh()
     } else {
-      toast.error(result.error || "Failed to update brand. Please try again.")
+      setErrorMessage(
+        result.error || "Failed to update brand. Please try again."
+      )
     }
   }
 
   return (
-    <CustomSheet open={isOpen === "update"} onOpenChange={onOpenChange}>
+    <CustomSheet open={isOpen === "update"} onOpenChange={handleOpenChange}>
       <CustomSheetContent
         showCloseButton={false}
         side={side}
@@ -181,6 +183,24 @@ export default function UpdateBrandSheet({
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-5 pb-8"
           >
+            {/* Global Error Alert */}
+            {errorMessage && (
+              <Alert variant="destructive" className="relative pr-9">
+                <AlertCircleIcon className="size-4" />
+                <AlertTitle>Action Required</AlertTitle>
+                <AlertDescription className="text-xs">
+                  {errorMessage}
+                </AlertDescription>
+                <button
+                  type="button"
+                  onClick={() => setErrorMessage(null)}
+                  className="absolute top-3 right-3 cursor-pointer text-muted-foreground hover:text-foreground"
+                >
+                  <XIcon className="size-4" />
+                </button>
+              </Alert>
+            )}
+
             {/* Card 1: Basic Information */}
             <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
@@ -351,29 +371,18 @@ export default function UpdateBrandSheet({
                 />
               </FieldGroup>
             </div>
-
-            {errors.root && (
-              <FieldError
-                errors={[
-                  {
-                    message:
-                      errors.root.message || "An unexpected error occurred",
-                  },
-                ]}
-              />
-            )}
           </form>
         </div>
 
-        {/* Footer - ثابت */}
+        {/* Footer - موحد */}
         <CustomSheetFooter className="shrink-0 border-t bg-card px-5 py-3 sm:px-6 sm:py-4">
-          <div className="flex w-full items-center justify-end gap-2.5">
+          <div className="flex w-full flex-col-reverse items-stretch justify-end gap-2.5 sm:flex-row sm:items-center">
             <CustomSheetClose asChild>
               <Button
                 type="button"
                 variant="outline"
                 disabled={isSubmitting}
-                className="cursor-pointer"
+                className="w-full cursor-pointer sm:w-auto"
               >
                 Discard
               </Button>
@@ -382,7 +391,7 @@ export default function UpdateBrandSheet({
               type="submit"
               form="update-brand-form"
               disabled={isSubmitting}
-              className="min-w-32 cursor-pointer shadow-xs"
+              className="w-full cursor-pointer shadow-xs sm:w-auto sm:min-w-32"
             >
               {isSubmitting ? (
                 <>

@@ -163,7 +163,6 @@ export default function UpdateProductForm({
     data: null,
   })
 
-  // ربط الصور بالـ SKU التابع للمتغير
   const initialImages = React.useMemo(() => {
     if (!product.product_images || product.product_images.length === 0) {
       return [DEFAULT_IMAGE]
@@ -181,7 +180,6 @@ export default function UpdateProductForm({
     })
   }, [product])
 
-  // تجهيز بيانات المتغيرات وتحويل الأسعار من السنتات
   const initialVariants = React.useMemo(() => {
     if (!product.product_variants || product.product_variants.length === 0) {
       return [DEFAULT_VARIANT]
@@ -219,7 +217,7 @@ export default function UpdateProductForm({
   })
 
   const {
-    formState: { isSubmitting, errors },
+    formState: { isSubmitting },
     control,
     setValue,
     getFieldState,
@@ -316,7 +314,6 @@ export default function UpdateProductForm({
       router.push("/dashboard/products")
       router.refresh()
     } else {
-      console.error("Update Error:", result)
       const errorMsg =
         result.error === "VALIDATION_ERROR"
           ? "Please check the form for invalid inputs."
@@ -888,16 +885,6 @@ export default function UpdateProductForm({
           </div>
         </div>
 
-        {errors.root && (
-          <FieldError
-            errors={[
-              {
-                message: errors.root.message || "An unexpected error occurred",
-              },
-            ]}
-          />
-        )}
-
         {/* Bottom Actions Bar (Standard Page Flow - No Sticky/Floating on Mobile) */}
         <div className="flex flex-col-reverse items-stretch justify-end gap-3 border-t pt-6 sm:flex-row sm:items-center">
           <Button
@@ -907,7 +894,7 @@ export default function UpdateProductForm({
             onClick={() => router.back()}
             className="w-full sm:w-auto"
           >
-            Cancel
+            Discard Changes
           </Button>
           <Button
             type="submit"

@@ -189,7 +189,7 @@ export default function CreateProductForm({
   })
 
   const {
-    formState: { isSubmitting, errors },
+    formState: { isSubmitting },
     control,
     setValue,
     getFieldState,
@@ -306,6 +306,7 @@ export default function CreateProductForm({
 
     if (result.success) {
       toast.success("Product created successfully!")
+      router.push("/dashboard/products")
       router.refresh()
     } else {
       console.error("Creation Error:", result)
@@ -915,6 +916,7 @@ export default function CreateProductForm({
           </Button>
         </div>
       </form>
+
       {/* --- Category Sheets & Dialogs --- */}
       <CreateCategorySheet
         isOpen={categoryModal.type === "create" ? "create" : null}
@@ -973,6 +975,7 @@ export default function CreateProductForm({
           toast.success("Category deleted successfully!")
         }}
       />
+
       {/* --- Brand Sheets & Dialogs --- */}
       <CreateBrandSheet
         isOpen={brandModal.type === "create" ? "create" : null}
