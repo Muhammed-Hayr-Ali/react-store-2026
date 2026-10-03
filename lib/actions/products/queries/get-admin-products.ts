@@ -1,10 +1,19 @@
+/**
+ * @file lib/actions/products/queries/get-admin-products.ts
+ * @description Retrieves a concise summary list of all products for the administrative dashboard table.
+ * Calculates aggregate stock quantities and price ranges per product.
+ */
+
 "use server"
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { AdminProductSummary, ProductWithRelations } from "../types"
 
-// شكل السجل القادم من استعلام Supabase مشتق مباشرة من العلاقات في ProductWithRelations
+// ============================================================================
+// Internal Query Types
+// ============================================================================
+
 type AdminProductQueryRecord = Pick<
   ProductWithRelations,
   "id" | "name" | "slug" | "is_active" | "is_featured" | "created_at"
@@ -25,9 +34,10 @@ type AdminProductQueryRecord = Pick<
   > | null
 }
 
-/**
- * جلب قائمة مقتضبة ومباشرة لجميع المنتجات للوحة التحكم
- */
+// ============================================================================
+// Main Query Function
+// ============================================================================
+
 export async function getAdminProductsList(): Promise<
   ApiResult<AdminProductSummary[]>
 > {
@@ -74,13 +84,11 @@ export async function getAdminProductsList(): Promise<
   const products: AdminProductSummary[] = rawProducts.map((prod) => {
     const variants = prod.product_variants ?? []
 
-    // حساب إجمالي المخزون من المتغيرات
-    const total_stock = variants.reduce(
+    const totalStock = variants.reduce(
       (sum, v) => sum + (Number(v.stock_quantity) || 0),
       0
     )
 
-    // استخراج أسعار المتغيرات لحساب النطاق
     const prices = variants
       .map((v) => Number(v.price))
       .filter((p) => !isNaN(p) && p > 0)
@@ -92,10 +100,10 @@ export async function getAdminProductsList(): Promise<
       is_active: prod.is_active,
       is_featured: prod.is_featured,
       created_at: prod.created_at,
-      category_name: prod.category?.name_ar || prod.category?.name || null,
-      brand_name: prod.brand?.name_ar || prod.brand?.name || null,
+      category_name: prod.category?.name || prod.category?.name_ar || null,
+      brand_name: prod.brand?.name || prod.brand?.name_ar || null,
       variants_count: variants.length,
-      total_stock,
+      total_stock: totalStock,
       min_price: prices.length > 0 ? Math.min(...prices) : 0,
       max_price: prices.length > 0 ? Math.max(...prices) : 0,
     }

@@ -1,14 +1,22 @@
+/**
+ * @file lib/actions/products/queries/get-featured-slides.ts
+ * @description Retrieves a curated list of featured products specifically formatted for storefront carousels.
+ */
+
 "use server"
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { FeaturedProductSlide } from "../types"
 
+// ============================================================================
+// Parameter & Internal Query Interfaces
+// ============================================================================
+
 interface GetFeaturedSlidesOptions {
   limit?: number
 }
 
-// 1. تعريف واجهات الأنواع بدقة لمنع استخدام any
 interface RawProductVariant {
   price: number
   is_active: boolean
@@ -33,9 +41,10 @@ interface RawFeaturedProduct {
   product_images: RawProductImage[] | null
 }
 
-/**
- * جلب قائمة المنتجات المتميزة بشكل مختصر ومخصص للسلايد شو
- */
+// ============================================================================
+// Main Query Function
+// ============================================================================
+
 export async function getFeaturedProductSlides(
   options: GetFeaturedSlidesOptions = {}
 ): Promise<ApiResult<FeaturedProductSlide[]>> {
@@ -62,7 +71,6 @@ export async function getFeaturedProductSlides(
       .limit(limit)
 
     if (error) {
-      console.error("❌ [GetFeaturedProductSlides] Error:", error.message)
       return {
         success: false,
         error: "FETCH_FEATURED_PRODUCTS_ERROR",
@@ -72,16 +80,13 @@ export async function getFeaturedProductSlides(
 
     const rawProducts = (data || []) as unknown as RawFeaturedProduct[]
 
-    // تنقيح وتحويل البيانات مع فحص الأنواع الصارم (Strict Type Narrowing)
     const slides: FeaturedProductSlide[] = rawProducts.map((prod) => {
-      // 1. حساب أقل سعر بين المتغيرات المفعّلة
       const activeVariants = (prod.product_variants || []).filter(
         (v) => v.is_active
       )
       const prices = activeVariants.map((v) => Number(v.price))
       const minPrice = prices.length > 0 ? Math.min(...prices) : 0
 
-      // 2. استخراج الصورة الأساسية أو أول صورة متوفرة
       const images = prod.product_images || []
       const primaryImg =
         images.find((img) => img.is_primary)?.url || images[0]?.url || null
@@ -105,10 +110,6 @@ export async function getFeaturedProductSlides(
     const errorMessage =
       err instanceof Error ? err.message : "Unknown error occurred"
 
-    console.error(
-      "❌ [GetFeaturedProductSlides] Unexpected Error:",
-      errorMessage
-    )
     return {
       success: false,
       error: "UNEXPECTED_ERROR",

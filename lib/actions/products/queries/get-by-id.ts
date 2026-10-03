@@ -1,3 +1,8 @@
+/**
+ * @file lib/actions/products/queries/get-by-id.ts
+ * @description Retrieves a single product with nested category and brand hierarchy by UUID.
+ */
+
 "use server"
 
 import { z } from "zod"
@@ -5,10 +10,14 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { ProductWithRelations } from "../types"
 
+// ============================================================================
+// Main Query Function
+// ============================================================================
+
 export async function getProductById(
   id: string
 ): Promise<ApiResult<ProductWithRelations | null>> {
-  // 1. التحقق من صحة المعرف
+  // 1. Validate UUID parameter
   const idValidation = z.string().uuid("INVALID_ID").safeParse(id)
   if (!idValidation.success) {
     return {
@@ -19,7 +28,7 @@ export async function getProductById(
 
   const supabase = await createServerClient()
 
-  // 2. جلب المنتج مع التصنيف وتصنيفه الأب مباشرة في استعلام واحد
+  // 2. Execute query with relational joins
   const { data, error } = await supabase
     .from("products")
     .select(
@@ -61,5 +70,5 @@ export async function getProductById(
     }
   }
 
-  return { success: true, data }
+  return { success: true, data: data as unknown as ProductWithRelations }
 }

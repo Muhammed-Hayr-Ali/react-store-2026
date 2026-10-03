@@ -1,15 +1,21 @@
+/**
+ * @file lib/actions/products/mutations/duplicate.ts
+ * @description Server Action to clone an existing product, re-generating unique SKUs and slugs.
+ */
+
 "use server"
 
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { Product, ProductWithRelations, CreatedVariant } from "../types"
+import { Product, ProductWithRelations } from "../types"
 import { hasRole } from "../../role/role-checker"
 import { hasPermission } from "../../role/permission-checker"
 
-/**
- * عمل نسخة مكررة من منتج موجود مع إضافة Copy للاسم والسلوج وتوليد SKUs جديدة
- */
+// ============================================================================
+// Main Action Function
+// ============================================================================
+
 export async function duplicateProduct(
   productId: string
 ): Promise<ApiResult<Product | null>> {
@@ -17,7 +23,7 @@ export async function duplicateProduct(
     return { success: false, error: "INVALID_PRODUCT_ID" }
   }
 
-  // 1. التحقق من الصلاحيات
+  // 1. Authorization check
   const [isAdmin, canCreate] = await Promise.all([
     hasRole("admin"),
     hasPermission("create_product"),
@@ -29,7 +35,7 @@ export async function duplicateProduct(
 
   const supabase = await createServerClient()
 
-  // 2. جلب المنتج الأصلي مع كافة العلاقات
+  // 2. Fetch original product with relations
   const { data: originalProduct, error: fetchError } = await supabase
     .from("products")
     .select(
@@ -52,7 +58,7 @@ export async function duplicateProduct(
 
   const orig = originalProduct as ProductWithRelations
 
-  // 3. تجهيز الاسم والسلوج الفريد للنسخة
+  // 3. Prepare duplicated copy payload
   const randomSuffix = Math.random().toString(36).substring(2, 6)
   const newName = `${orig.name} (Copy)`
   const newSlug = `${orig.slug}-copy-${randomSuffix}`
@@ -65,11 +71,11 @@ export async function duplicateProduct(
     description: orig.description,
     meta_title: orig.meta_title ? `${orig.meta_title} (Copy)` : null,
     meta_description: orig.meta_description,
-    is_active: false, // تُنشأ كغير نشطة افتراضياً لمراجعتها
+    is_active: false,
     is_featured: false,
   }
 
-  // 4. إنشاء المنتج الأساسي الجديد
+  // 4. Insert duplicated root product
   const { data: duplicatedProduct, error: insertError } = await supabase
     .from("products")
     .insert(newProductPayload)
@@ -88,15 +94,13 @@ export async function duplicateProduct(
 
   const newProductId = duplicatedProduct.id
 
-  // دالة تراجع في حال حدوث أي خطأ في المتغيرات أو الصور
   const rollback = async () => {
     await supabase.from("products").delete().eq("id", newProductId)
   }
 
-  // خريطة لربط الـ ID القديم للمتغير بالـ ID الجديد لربط الصور بدقة
   const oldVariantIdToNewIdMap = new Map<string, string>()
 
-  // 5. تكرار المتغيرات (Product Variants)
+  // 5. Clone variants with distinct SKUs
   if (orig.product_variants && orig.product_variants.length > 0) {
     const variantsPayload = orig.product_variants.map((v, idx) => ({
       product_id: newProductId,
@@ -128,7 +132,6 @@ export async function duplicateProduct(
       }
     }
 
-    // ربط المعرفات القديمة بالجديدة بترتيب المصفوفة
     orig.product_variants.forEach((v, index) => {
       if (insertedVariants[index]) {
         oldVariantIdToNewIdMap.set(v.id, insertedVariants[index].id)
@@ -136,7 +139,7 @@ export async function duplicateProduct(
     })
   }
 
-  // 6. تكرار الصور (Product Images)
+  // 6. Clone images and map to newly created variants
   if (orig.product_images && orig.product_images.length > 0) {
     const imagesPayload = orig.product_images.map((img) => ({
       product_id: newProductId,

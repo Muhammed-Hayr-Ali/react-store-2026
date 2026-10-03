@@ -1,16 +1,21 @@
+/**
+ * @file lib/actions/products/mutations/update.ts
+ * @description Server Action to update an existing product, syncing variants and gallery images.
+ */
+
 "use server"
 
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import {
-  Product,
-  CreateProductCompleteInput,
-  createProductCompleteSchema,
-  CreatedVariant,
-} from "../types"
+import { Product, CreateProductCompleteInput, CreatedVariant } from "../types"
+import { createProductCompleteSchema } from "../schemas"
 import { hasRole } from "../../role/role-checker"
 import { hasPermission } from "../../role/permission-checker"
+
+// ============================================================================
+// Main Action Function
+// ============================================================================
 
 export async function updateProduct(
   productId: string,
@@ -20,13 +25,9 @@ export async function updateProduct(
     return { success: false, error: "INVALID_PRODUCT_ID" }
   }
 
-  // 1. التحقق من صحة البيانات عبر Zod
+  // 1. Validate payload
   const validation = createProductCompleteSchema.safeParse(data)
   if (!validation.success) {
-    console.error(
-      "❌ [UpdateProduct] Validation Error:",
-      validation.error.flatten().fieldErrors
-    )
     return {
       success: false,
       error: "VALIDATION_ERROR",
@@ -34,16 +35,13 @@ export async function updateProduct(
     }
   }
 
-  // 2. التحقق من الصلاحيات بالتوازي
+  // 2. Authorization check
   const [isAdmin, canUpdate] = await Promise.all([
     hasRole("admin"),
-    hasPermission("create_product"), // أو hasPermission("update_product") بحسب جدول الصلاحيات
+    hasPermission("update_product"),
   ])
 
   if (!isAdmin || !canUpdate) {
-    console.error(
-      "❌ [UpdateProduct] Unauthorized Access: User lacks admin role or permission"
-    )
     return { success: false, error: "UNAUTHORIZED_ACCESS" }
   }
 
@@ -60,7 +58,7 @@ export async function updateProduct(
     updated_at: new Date().toISOString(),
   }
 
-  // 3. تحديث السجل في جدول المنتجات
+  // 3. Update primary product record
   const { data: updatedProduct, error: productError } = await supabase
     .from("products")
     .update(cleanProductData)
@@ -69,7 +67,6 @@ export async function updateProduct(
     .single()
 
   if (productError) {
-    console.error("❌ [UpdateProduct] Product Update Error:", productError)
     if (productError.code === "23505") {
       return { success: false, error: "SLUG_ALREADY_EXISTS" }
     }
@@ -80,19 +77,13 @@ export async function updateProduct(
     }
   }
 
-  // 4. تحديث المتغيرات (Product Variants)
-  // لحماية سلامة البيانات: نقوم بحذف المتغيرات السابقة وإعادة إدراجها بالمعرفات والقيم الجديدة
-  // (أو يمكن استخدام upsert إذا كنت تحتفظ بـ variant.id)
+  // 4. Synchronize variants: delete old variants and insert updated set
   const { error: deleteVariantsError } = await supabase
     .from("product_variants")
     .delete()
     .eq("product_id", productId)
 
   if (deleteVariantsError) {
-    console.error(
-      "❌ [UpdateProduct] Delete Variants Error:",
-      deleteVariantsError
-    )
     return {
       success: false,
       error: "UPDATE_VARIANTS_ERROR",
@@ -128,7 +119,6 @@ export async function updateProduct(
       .select("id, sku")
 
     if (variantsError) {
-      console.error("❌ [UpdateProduct] Variants Insert Error:", variantsError)
       if (variantsError.code === "23505") {
         return { success: false, error: "SKU_ALREADY_EXISTS" }
       }
@@ -142,14 +132,13 @@ export async function updateProduct(
     createdVariants = (variantsData || []) as CreatedVariant[]
   }
 
-  // 5. تحديث الصور (Product Images)
+  // 5. Synchronize images: delete old images and insert updated set
   const { error: deleteImagesError } = await supabase
     .from("product_images")
     .delete()
     .eq("product_id", productId)
 
   if (deleteImagesError) {
-    console.error("❌ [UpdateProduct] Delete Images Error:", deleteImagesError)
     return {
       success: false,
       error: "UPDATE_IMAGES_ERROR",
@@ -184,7 +173,6 @@ export async function updateProduct(
       .insert(imagesPayload)
 
     if (imagesError) {
-      console.error("❌ [UpdateProduct] Images Insert Error:", imagesError)
       return {
         success: false,
         error: "UPDATE_IMAGES_ERROR",
@@ -193,14 +181,13 @@ export async function updateProduct(
     }
   }
 
-  // إعادة تنشيط كاش الصفحات المتأثرة
-  revalidatePath(`/dashboard/products`)
+  // 6. Invalidate caches
+  revalidatePath("/dashboard/products")
   revalidatePath(`/dashboard/products/${updatedProduct.slug}/edit`)
   revalidatePath(`/product/${updatedProduct.slug}`)
 
-  console.log(
-    `✅ [UpdateProduct] Successfully updated product: ${updatedProduct.name} (${updatedProduct.id})`
-  )
-
-  return { success: true, data: updatedProduct as Product }
+  return {
+    success: true,
+    data: updatedProduct as Product,
+  }
 }

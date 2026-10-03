@@ -1,22 +1,28 @@
+/**
+ * @file lib/actions/products/queries/get-complete-by-id.ts
+ * @description Retrieves a product including variants, images, category, and brand relationships.
+ */
+
 "use server"
 
+import { z } from "zod"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import type { ProductWithRelations } from "../types"
 
-/**
- * جلب منتج واحد مع تصنيفه، علامته التجارية، متغيراته، وصوره المرتبطة به
- */
+// ============================================================================
+// Main Query Function
+// ============================================================================
+
 export async function getProductCompleteById(
   id: string
 ): Promise<ApiResult<ProductWithRelations | null>> {
-  if (!id || typeof id !== "string" || id === "undefined" || id === "null") {
+  const idValidation = z.string().uuid("INVALID_ID").safeParse(id)
+  if (!idValidation.success) {
     return {
       success: false,
-      error: "INVALID_ID_PROVIDED",
-      details: {
-        database: ["معرف المنتج (ID) مطلوب ويجب أن يكون بصيغة UUID صحيحة"],
-      },
+      error: "INVALID_ID",
+      details: { database: ["Product UUID is required and must be valid."] },
     }
   }
 
@@ -64,7 +70,7 @@ export async function getProductCompleteById(
       )
     `
     )
-    .eq("id", id)
+    .eq("id", idValidation.data)
     .single()
 
   if (error) {

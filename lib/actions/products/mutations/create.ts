@@ -1,26 +1,29 @@
+/**
+ * @file lib/actions/products/mutations/create.ts
+ * @description Server Action to create a complete product with variants and images transactionally.
+ * Performs authorization checks, uniqueness validation, and rollback operations upon sub-insert failure.
+ */
+
 "use server"
 
+import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import {
-  Product,
-  CreateProductCompleteInput,
-  createProductCompleteSchema,
-  CreatedVariant,
-} from "../types"
+import { Product, CreateProductCompleteInput, CreatedVariant } from "../types"
+import { createProductCompleteSchema } from "../schemas"
 import { hasRole } from "../../role/role-checker"
 import { hasPermission } from "../../role/permission-checker"
+
+// ============================================================================
+// Main Action Function
+// ============================================================================
 
 export async function createProduct(
   data: CreateProductCompleteInput
 ): Promise<ApiResult<Product | null>> {
-  // 1. التحقق من صحة البيانات عبر Zod
+  // 1. Validate payload against Zod schema
   const validation = createProductCompleteSchema.safeParse(data)
   if (!validation.success) {
-    console.error(
-      "❌ [CreateProduct] Validation Error:",
-      validation.error.flatten().fieldErrors
-    )
     return {
       success: false,
       error: "VALIDATION_ERROR",
@@ -28,17 +31,17 @@ export async function createProduct(
     }
   }
 
-  // 2. التحقق من الصلاحيات بالتوازي
+  // 2. Parallel authorization verification
   const [isAdmin, canCreate] = await Promise.all([
     hasRole("admin"),
     hasPermission("create_product"),
   ])
 
   if (!isAdmin || !canCreate) {
-    console.error(
-      "❌ [CreateProduct] Unauthorized Access: User lacks admin role or create_product permission"
-    )
-    return { success: false, error: "UNAUTHORIZED_ACCESS" }
+    return {
+      success: false,
+      error: "UNAUTHORIZED_ACCESS",
+    }
   }
 
   const supabase = await createServerClient()
@@ -53,7 +56,7 @@ export async function createProduct(
     meta_description: productOnlyData.meta_description || null,
   }
 
-  // 3. إنشاء المنتج الأساسي
+  // 3. Insert primary product record
   const { data: newProduct, error: productError } = await supabase
     .from("products")
     .insert(cleanProductData)
@@ -61,14 +64,6 @@ export async function createProduct(
     .single()
 
   if (productError) {
-    console.error("❌ [CreateProduct] Product Insert Error:", {
-      message: productError.message,
-      code: productError.code,
-      details: productError.details,
-      hint: productError.hint,
-      cleanProductData,
-    })
-
     if (productError.code === "23505") {
       return { success: false, error: "SLUG_ALREADY_EXISTS" }
     }
@@ -81,22 +76,14 @@ export async function createProduct(
 
   const productId = newProduct.id
 
+  // Helper rollback function to cleanup primary record if children fail
   const rollbackAll = async () => {
-    console.warn(
-      `⚠️ [CreateProduct] Rolling back product creation (ID: ${productId})...`
-    )
-    const { error: deleteError } = await supabase
-      .from("products")
-      .delete()
-      .eq("id", productId)
-    if (deleteError) {
-      console.error("❌ [CreateProduct] Rollback failed:", deleteError)
-    }
+    await supabase.from("products").delete().eq("id", productId)
   }
 
   let createdVariants: CreatedVariant[] = []
 
-  // 4. إنشاء المتغيرات
+  // 4. Insert variants
   if (variants.length > 0) {
     const variantsPayload = variants.map((v, idx) => ({
       product_id: productId,
@@ -123,20 +110,10 @@ export async function createProduct(
       .select("id, sku")
 
     if (variantsError) {
-      console.error("❌ [CreateProduct] Variants Insert Error:", {
-        message: variantsError.message,
-        code: variantsError.code,
-        details: variantsError.details,
-        hint: variantsError.hint,
-        variantsPayload,
-      })
-
       await rollbackAll()
-
       if (variantsError.code === "23505") {
         return { success: false, error: "SKU_ALREADY_EXISTS" }
       }
-
       return {
         success: false,
         error: "CREATE_VARIANTS_ERROR",
@@ -147,7 +124,7 @@ export async function createProduct(
     createdVariants = (variantsData || []) as CreatedVariant[]
   }
 
-  // 5. إنشاء الصور
+  // 5. Insert images
   if (images.length > 0) {
     const imagesPayload = images.map((img) => {
       let targetVariantId: string | null = null
@@ -175,16 +152,7 @@ export async function createProduct(
       .insert(imagesPayload)
 
     if (imagesError) {
-      console.error("❌ [CreateProduct] Images Insert Error:", {
-        message: imagesError.message,
-        code: imagesError.code,
-        details: imagesError.details,
-        hint: imagesError.hint,
-        imagesPayload,
-      })
-
       await rollbackAll()
-
       return {
         success: false,
         error: "CREATE_IMAGES_ERROR",
@@ -193,8 +161,12 @@ export async function createProduct(
     }
   }
 
-  console.log(
-    `✅ [CreateProduct] Successfully created product: ${newProduct.name} (${newProduct.id})`
-  )
-  return { success: true, data: newProduct as Product }
+  // 6. Revalidate routes
+  revalidatePath("/")
+  revalidatePath("/dashboard/products")
+
+  return {
+    success: true,
+    data: newProduct as Product,
+  }
 }

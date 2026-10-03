@@ -1,21 +1,27 @@
+/**
+ * @file lib/actions/products/queries/get-latest-products.ts
+ * @description Retrieves latest non-featured products sorted chronologically for homepage feeds.
+ */
+
 "use server"
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
+import { getLatestProductsSchema } from "../schemas"
 import {
-  getLatestProductsSchema,
   GetLatestProductsOptions,
   LatestProductItem,
   RawLatestProductQueryResult,
 } from "../types"
 
-/**
- * جلب أحدث المنتجات المضافة (غير المميزة) لعرضها في المتجر
- */
+// ============================================================================
+// Main Query Function
+// ============================================================================
+
 export async function getLatestProducts(
   options: Partial<GetLatestProductsOptions> = {}
 ): Promise<ApiResult<LatestProductItem[]>> {
-  // 1. التحقق من المدخلات
+  // 1. Validate query options
   const validation = getLatestProductsSchema.safeParse(options)
   if (!validation.success) {
     return {
@@ -29,7 +35,6 @@ export async function getLatestProducts(
   try {
     const supabase = await createServerClient()
 
-    // 2. بناء الاستعلام مع تحديد المفاتيح الأجنبية بدقة لتفادي أخطاء الربط
     let query = supabase
       .from("products")
       .select(
@@ -39,7 +44,7 @@ export async function getLatestProducts(
         slug,
         description,
         created_at,
-        brand:brands!products_brand_id_fkey (name),
+        brand:brands!products_brand_id_fkey (name, slug),
         category:categories!products_category_id_fkey (name, slug),
         product_variants (price, is_active),
         product_images (url, is_primary)
@@ -56,7 +61,6 @@ export async function getLatestProducts(
     const { data, error } = await query
 
     if (error) {
-      console.error("❌ [GetLatestProducts] Database error:", error.message)
       return {
         success: false,
         error: "FETCH_LATEST_PRODUCTS_ERROR",
@@ -66,16 +70,13 @@ export async function getLatestProducts(
 
     const rawProducts = (data || []) as unknown as RawLatestProductQueryResult[]
 
-    // 3. تنسيق النتائج، استخراج الصورة الأساسية، وحساب أقل سعر
     const formattedProducts: LatestProductItem[] = rawProducts.map((prod) => {
-      // حساب أقل سعر بين المتغيرات المفعّلة
       const activeVariants = (prod.product_variants || []).filter(
         (v) => v.is_active
       )
       const prices = activeVariants.map((v) => Number(v.price))
       const minPrice = prices.length > 0 ? Math.min(...prices) : 0
 
-      // استخراج الصورة الأساسية أو أول صورة متوفرة
       const images = prod.product_images || []
       const primaryImg =
         images.find((img) => img.is_primary)?.url || images[0]?.url || null
@@ -89,6 +90,7 @@ export async function getLatestProducts(
         min_price: minPrice,
         primary_image_url: primaryImg,
         brand_name: prod.brand?.name || null,
+        brand_slug: prod.brand?.slug || null,
         category_name: prod.category?.name || null,
         category_slug: prod.category?.slug || null,
       }
@@ -102,7 +104,6 @@ export async function getLatestProducts(
     const errorMessage =
       err instanceof Error ? err.message : "Unexpected error occurred"
 
-    console.error("❌ [GetLatestProducts] Unexpected Error:", errorMessage)
     return {
       success: false,
       error: "UNEXPECTED_ERROR",

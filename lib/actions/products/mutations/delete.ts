@@ -1,3 +1,8 @@
+/**
+ * @file lib/actions/products/mutations/delete.ts
+ * @description Server Action to safely remove a product and clean up its relational entities.
+ */
+
 "use server"
 
 import { revalidatePath } from "next/cache"
@@ -6,6 +11,10 @@ import { ApiResult } from "@/lib/database/types/utils"
 import { hasRole } from "../../role/role-checker"
 import { hasPermission } from "../../role/permission-checker"
 
+// ============================================================================
+// Main Action Function
+// ============================================================================
+
 export async function deleteProduct(
   productId: string
 ): Promise<ApiResult<{ id: string }>> {
@@ -13,26 +22,22 @@ export async function deleteProduct(
     return {
       success: false,
       error: "INVALID_PRODUCT_ID",
-      details: { database: ["Product ID is required."] },
     }
   }
 
-  // 1. التحقق من الصلاحيات
+  // 1. Authorization check
   const [isAdmin, canDelete] = await Promise.all([
     hasRole("admin"),
     hasPermission("delete_product"),
   ])
 
   if (!isAdmin || !canDelete) {
-    console.error(
-      "❌ [DeleteProduct] Unauthorized Access: User lacks admin role or delete_product permission"
-    )
     return { success: false, error: "UNAUTHORIZED_ACCESS" }
   }
 
   const supabase = await createServerClient()
 
-  // 2. التحقق من وجود المنتج ومعرفة الـ slug الخاص به لتنظيف الكاش
+  // 2. Fetch product slug for cache purging
   const { data: product, error: fetchError } = await supabase
     .from("products")
     .select("id, slug")
@@ -47,28 +52,19 @@ export async function deleteProduct(
     }
   }
 
-  // 3. حذف السجلات المرتبطة بالمنتج (المتغيرات والصور) في حال لم يكن الـ Cascade مفعلاً في قاعدة البيانات
-  const [deleteImagesResult, deleteVariantsResult] = await Promise.all([
+  // 3. Fallback cascade deletion for images and variants
+  await Promise.all([
     supabase.from("product_images").delete().eq("product_id", productId),
     supabase.from("product_variants").delete().eq("product_id", productId),
   ])
 
-  if (deleteImagesResult.error) {
-    console.error("❌ [DeleteProduct] Failed to delete product images:", deleteImagesResult.error)
-  }
-
-  if (deleteVariantsResult.error) {
-    console.error("❌ [DeleteProduct] Failed to delete product variants:", deleteVariantsResult.error)
-  }
-
-  // 4. حذف سجل المنتج الأساسي
+  // 4. Delete root product
   const { error: deleteError } = await supabase
     .from("products")
     .delete()
     .eq("id", productId)
 
   if (deleteError) {
-    console.error("❌ [DeleteProduct] Delete Error:", deleteError)
     return {
       success: false,
       error: "DELETE_PRODUCT_ERROR",
@@ -76,12 +72,11 @@ export async function deleteProduct(
     }
   }
 
-  // 5. إعادة تحديث كاش الصفحات ذات الصلة
+  // 5. Invalidate caches
   revalidatePath("/dashboard/products")
   revalidatePath(`/dashboard/products/${product.slug}/edit`)
   revalidatePath(`/product/${product.slug}`)
-
-  console.log(`✅ [DeleteProduct] Successfully deleted product ID: ${productId}`)
+  revalidatePath("/")
 
   return {
     success: true,

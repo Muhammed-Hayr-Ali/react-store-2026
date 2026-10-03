@@ -1,22 +1,27 @@
+/**
+ * @file lib/actions/products/queries/get-products-by-category.ts
+ * @description Retrieves products associated with a specific category ID or slug, prioritizing featured items.
+ */
+
 "use server"
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
+import { getProductsByCategorySchema } from "../schemas"
 import {
-  getProductsByCategorySchema,
   GetProductsByCategoryOptions,
   CategoryProductItem,
   RawCategoryProductQueryResult,
 } from "../types"
 
-/**
- * جلب المنتجات التابعة لتصنيف محدد (بواسطة الـ Slug أو الـ ID)
- * مع إعطاء الأولوية دائماً للمنتجات المتميزة (is_featured = true) ثم الأحدث تاريخاً
- */
+// ============================================================================
+// Main Query Function
+// ============================================================================
+
 export async function getProductsByCategory(
   options: GetProductsByCategoryOptions
 ): Promise<ApiResult<CategoryProductItem[]>> {
-  // 1. التحقق من المدخلات
+  // 1. Validate options
   const validation = getProductsByCategorySchema.safeParse(options)
   if (!validation.success) {
     return {
@@ -32,7 +37,6 @@ export async function getProductsByCategory(
 
     let resolvedCategoryId = categoryId
 
-    // في حال تم التمرير عبر slug التصنيف، يتم جلب معرف التصنيف أولاً
     if (!resolvedCategoryId && categorySlug) {
       const { data: categoryData, error: catError } = await supabase
         .from("categories")
@@ -51,7 +55,6 @@ export async function getProductsByCategory(
       resolvedCategoryId = categoryData.id
     }
 
-    // 2. بناء استعلام المنتجات للتصنيف
     let query = supabase
       .from("products")
       .select(
@@ -62,14 +65,13 @@ export async function getProductsByCategory(
         description,
         is_featured,
         created_at,
-        brand:brands!products_brand_id_fkey (name),
+        brand:brands!products_brand_id_fkey (name, slug),
         category:categories!products_category_id_fkey (name, slug),
         product_variants (price, is_active),
         product_images (url, is_primary)
       `
       )
       .eq("category_id", resolvedCategoryId!)
-      // الترتيب: المتميز أولاً، ثم الأحدث تاريخاً
       .order("is_featured", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(limit)
@@ -81,7 +83,6 @@ export async function getProductsByCategory(
     const { data, error } = await query
 
     if (error) {
-      console.error("❌ [GetProductsByCategory] Database error:", error.message)
       return {
         success: false,
         error: "FETCH_CATEGORY_PRODUCTS_ERROR",
@@ -92,7 +93,6 @@ export async function getProductsByCategory(
     const rawProducts = (data ||
       []) as unknown as RawCategoryProductQueryResult[]
 
-    // 3. استخراج الأسعار الأقل والصور التابعة
     const formattedProducts: CategoryProductItem[] = rawProducts.map((prod) => {
       const activeVariants = (prod.product_variants || []).filter(
         (v) => v.is_active
@@ -114,6 +114,7 @@ export async function getProductsByCategory(
         min_price: minPrice,
         primary_image_url: primaryImg,
         brand_name: prod.brand?.name || null,
+        brand_slug: prod.brand?.slug || null,
         category_name: prod.category?.name || null,
         category_slug: prod.category?.slug || null,
       }
@@ -127,7 +128,6 @@ export async function getProductsByCategory(
     const errorMessage =
       err instanceof Error ? err.message : "Unexpected error occurred"
 
-    console.error("❌ [GetProductsByCategory] Unexpected Error:", errorMessage)
     return {
       success: false,
       error: "UNEXPECTED_ERROR",

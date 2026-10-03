@@ -1,12 +1,25 @@
+/**
+ * @file lib/actions/products/queries/get-complete-by-slug.ts
+ * @description Retrieves a full product with all related variants and images by its URL slug.
+ */
+
 "use server"
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import type { ProductWithRelations } from "../types"
 
+// ============================================================================
+// Parameter Interfaces
+// ============================================================================
+
 interface GetProductOptions {
   activeOnly?: boolean
 }
+
+// ============================================================================
+// Main Query Function
+// ============================================================================
 
 export async function getProductCompleteBySlug(
   slug: string,
@@ -17,8 +30,8 @@ export async function getProductCompleteBySlug(
   if (!slug || typeof slug !== "string") {
     return {
       success: false,
-      error: "INVALID_SLUG_PROVIDED",
-      details: { database: ["معرف المنتج (Slug) مطلوب"] },
+      error: "INVALID_SLUG",
+      details: { database: ["Product slug is required."] },
     }
   }
 
