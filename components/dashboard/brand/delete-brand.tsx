@@ -19,7 +19,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { Brand, deleteBrand } from "@/lib/actions/brands"
 
 interface DeleteBrandDialogProps {
-  isOpen: string | null
+  isOpen: boolean
   onOpenChange: (open: boolean) => void
   item: Brand | null
   onSuccess?: (deletedBrandId: string) => void
@@ -42,7 +42,7 @@ export default function DeleteBrandDialog({
       const result = await deleteBrand(item.id)
 
       if (result.success) {
-        toast.success("Brand deleted successfully.")
+        toast.success(`Brand "${item.name}" deleted successfully.`)
         onSuccess?.(item.id)
         onOpenChange(false)
       } else {
@@ -57,32 +57,49 @@ export default function DeleteBrandDialog({
   }
 
   return (
-    <CustomAlertDialog open={isOpen === "delete"} onOpenChange={onOpenChange}>
-      <CustomAlertDialogContent className="min-w-1/4">
+    <CustomAlertDialog open={isOpen} onOpenChange={onOpenChange}>
+      <CustomAlertDialogContent className="max-w-md">
         <CustomAlertDialogHeader>
           <CustomAlertDialogMedia>
-            <Trash2Icon className="text-destructive" />
+            <Trash2Icon className="size-5 text-destructive" />
           </CustomAlertDialogMedia>
-          <CustomAlertDialogTitle>Delete Brand</CustomAlertDialogTitle>
-          <CustomAlertDialogDescription>
-            Are you sure you want to delete the brand{" "}
-            <span className="font-semibold wrap-break-word text-foreground">
+          <CustomAlertDialogTitle className="text-base font-bold text-foreground">
+            Delete Brand
+          </CustomAlertDialogTitle>
+          <CustomAlertDialogDescription className="pt-2 text-xs leading-relaxed text-muted-foreground">
+            Are you sure you want to permanently delete{" "}
+            <span className="font-semibold text-foreground">
               &quot;{item.name}&quot;
             </span>
-            ? This action cannot be undone.
+            ? This action cannot be undone and will unlink this brand from all
+            associated products.
           </CustomAlertDialogDescription>
         </CustomAlertDialogHeader>
 
-        <CustomAlertDialogFooter>
-          <CustomAlertDialogCancel disabled={isDeleting}>
+        <CustomAlertDialogFooter className="flex flex-col-reverse items-stretch gap-2 pt-3 sm:flex-row sm:items-center sm:justify-end">
+          <CustomAlertDialogCancel
+            disabled={isDeleting}
+            className="w-full text-xs sm:w-auto"
+          >
             Cancel
           </CustomAlertDialogCancel>
           <CustomAlertDialogAction
             variant="destructive"
             onClick={handleDelete}
             disabled={isDeleting}
+            className="w-full cursor-pointer text-xs shadow-xs sm:w-auto sm:min-w-28"
           >
-            {isDeleting ? <Spinner className="size-4" /> : "Yes, delete"}
+            {isDeleting ? (
+              <>
+                <Spinner className="mr-1.5 size-3.5" />
+                Deleting...
+              </>
+            ) : (
+              <>
+                <Trash2Icon className="mr-1.5 size-3.5" />
+                Delete Brand
+              </>
+            )}
           </CustomAlertDialogAction>
         </CustomAlertDialogFooter>
       </CustomAlertDialogContent>

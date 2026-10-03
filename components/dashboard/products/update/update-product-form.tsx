@@ -949,25 +949,6 @@ export default function UpdateProductForm({
         }}
       />
 
-      <DeleteCategoryDialog
-        isOpen={categoryModal.type === "delete" ? "delete" : null}
-        onOpenChange={(open) => {
-          if (!open) setCategoryModal({ type: null, data: null })
-        }}
-        item={categoryModal.data}
-        onSuccess={(deletedId) => {
-          setCategoriesList((prev) => prev.filter((c) => c.id !== deletedId))
-          if (form.getValues("category_id") === deletedId) {
-            setValue("category_id", "", {
-              shouldValidate: true,
-              shouldDirty: true,
-            })
-          }
-          setCategoryModal({ type: null, data: null })
-          toast.success("Category deleted successfully!")
-        }}
-      />
-
       {/* --- Brand Sheets & Dialogs --- */}
       <CreateBrandSheet
         isOpen={brandModal.type === "create" ? "create" : null}
@@ -1001,8 +982,29 @@ export default function UpdateProductForm({
         }}
       />
 
+      {/* --- Category Delete Dialog --- */}
+      <DeleteCategoryDialog
+        isOpen={categoryModal.type === "delete"}
+        onOpenChange={(open) => {
+          if (!open) setCategoryModal({ type: null, data: null })
+        }}
+        item={categoryModal.data}
+        onSuccess={(deletedId) => {
+          setCategoriesList((prev) => prev.filter((c) => c.id !== deletedId))
+          if (form.getValues("category_id") === deletedId) {
+            setValue("category_id", "", {
+              shouldValidate: true,
+              shouldDirty: true,
+            })
+          }
+          setCategoryModal({ type: null, data: null })
+          toast.success("Category deleted successfully!")
+        }}
+      />
+
+      {/* --- Brand Delete Dialog --- */}
       <DeleteBrandDialog
-        isOpen={brandModal.type === "delete" ? "delete" : null}
+        isOpen={brandModal.type === "delete"}
         onOpenChange={(open) => {
           if (!open) setBrandModal({ type: null, data: null })
         }}
@@ -1019,6 +1021,9 @@ export default function UpdateProductForm({
           toast.success("Brand deleted successfully!")
         }}
       />
+
+
+
     </>
   )
 }

@@ -20,7 +20,7 @@ import { deleteCategory } from "@/lib/actions/categories/mutations/delete"
 import { Category } from "@/lib/actions/categories"
 
 interface DeleteCategoryDialogProps {
-  isOpen: string | null
+  isOpen: boolean
   onOpenChange: (open: boolean) => void
   item: Category | null
   onSuccess?: (deletedCategoryId: string) => void
@@ -43,7 +43,7 @@ export default function DeleteCategoryDialog({
       const result = await deleteCategory(item.id)
 
       if (result.success) {
-        toast.success("Category deleted successfully.")
+        toast.success(`Category "${item.name}" deleted successfully.`)
         onSuccess?.(item.id)
         onOpenChange(false)
       } else {
@@ -60,32 +60,49 @@ export default function DeleteCategoryDialog({
   }
 
   return (
-    <CustomAlertDialog open={isOpen === "delete"} onOpenChange={onOpenChange}>
-      <CustomAlertDialogContent className="min-w-1/4">
+    <CustomAlertDialog open={isOpen} onOpenChange={onOpenChange}>
+      <CustomAlertDialogContent className="max-w-md">
         <CustomAlertDialogHeader>
           <CustomAlertDialogMedia>
-            <Trash2Icon className="text-destructive" />
+            <Trash2Icon className="size-5 text-destructive" />
           </CustomAlertDialogMedia>
-          <CustomAlertDialogTitle>Delete Category</CustomAlertDialogTitle>
-          <CustomAlertDialogDescription>
-            Are you sure you want to delete the category{" "}
-            <span className="font-semibold wrap-break-word text-foreground">
+          <CustomAlertDialogTitle className="text-base font-bold text-foreground">
+            Delete Category
+          </CustomAlertDialogTitle>
+          <CustomAlertDialogDescription className="pt-2 text-xs leading-relaxed text-muted-foreground">
+            Are you sure you want to permanently delete{" "}
+            <span className="font-semibold text-foreground">
               &quot;{item.name}&quot;
             </span>
-            ? This action cannot be undone.
+            ? This action cannot be undone and will affect any child
+            subcategories or linked products.
           </CustomAlertDialogDescription>
         </CustomAlertDialogHeader>
 
-        <CustomAlertDialogFooter>
-          <CustomAlertDialogCancel disabled={isDeleting}>
+        <CustomAlertDialogFooter className="flex flex-col-reverse items-stretch gap-2 pt-3 sm:flex-row sm:items-center sm:justify-end">
+          <CustomAlertDialogCancel
+            disabled={isDeleting}
+            className="w-full text-xs sm:w-auto"
+          >
             Cancel
           </CustomAlertDialogCancel>
           <CustomAlertDialogAction
             variant="destructive"
             onClick={handleDelete}
             disabled={isDeleting}
+            className="w-full cursor-pointer text-xs shadow-xs sm:w-auto sm:min-w-28"
           >
-            {isDeleting ? <Spinner className="size-4" /> : "Yes, delete"}
+            {isDeleting ? (
+              <>
+                <Spinner className="mr-1.5 size-3.5" />
+                Deleting...
+              </>
+            ) : (
+              <>
+                <Trash2Icon className="mr-1.5 size-3.5" />
+                Delete Category
+              </>
+            )}
           </CustomAlertDialogAction>
         </CustomAlertDialogFooter>
       </CustomAlertDialogContent>
