@@ -1,22 +1,14 @@
 import { Button } from "@/components/ui/button"
 import { FieldDescription } from "@/components/ui/field"
-import { getCurrentUser } from "@/lib/actions/utils/profile"
 import { appRoutes } from "@/lib/config/app-routes"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
-import { redirect } from "next/navigation"
 
 type Props = {
   children: React.ReactNode
 }
 
-export default async function AuthLayout({ children }: Props) {
-  const user = await getCurrentUser()
-
-  if (user) {
-    redirect("/")
-  }
-
+export default function AuthLayout({ children }: Props) {
   return (
     <main className="flex min-h-svh w-full flex-col items-center gap-6">
       <div className="flex w-full px-2 pt-2 md:hidden">

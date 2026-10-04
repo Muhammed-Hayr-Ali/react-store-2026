@@ -1,9 +1,16 @@
+/**
+ * @file lib/middleware/supabase.ts
+ * @description Creates the Supabase SSR client for middleware with cookie sync.
+ */
+
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
-export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
+export async function createMiddlewareSupabaseClient(request: NextRequest) {
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
   })
 
   const supabase = createServerClient(
@@ -18,23 +25,24 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           )
-          supabaseResponse = NextResponse.next({
+          response = NextResponse.next({
             request,
           })
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            response.cookies.set(name, value, options)
           )
         },
       },
     }
   )
 
-  // قراءة المستخدم تقوم بتحديث الجلسة وكتابة الكوكيز الجديدة على الاستجابة
+  let user = null
   try {
-    await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser()
+    user = data.user
   } catch {
-    // تجاهل أخطاء التوكن المنتهي بأمان
+    // تجاهل أخطاء انتهاء الجلسة بأمان
   }
 
-  return supabaseResponse
+  return { supabase, user, response }
 }

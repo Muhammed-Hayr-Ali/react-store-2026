@@ -18,7 +18,6 @@ import { sidebarConfig } from "./sidebar-config"
 
 interface AppSidebarProps {
   currentUser: CurrentUser | null
-  role: string
   side?: "right" | "left" | undefined
 }
 
