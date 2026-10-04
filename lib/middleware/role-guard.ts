@@ -6,6 +6,7 @@
 import { NextResponse, type NextRequest } from "next/server"
 import type { SupabaseClient, User } from "@supabase/supabase-js"
 import { ROLES, type AppRole } from "@/lib/actions/role/types"
+import { appRoutes } from "../config/app-routes"
 
 // ============================================================================
 // 1. تعريف قواعد المسارات المحمية
@@ -110,7 +111,7 @@ export async function handleRouteAccess({
   if (matchedRule) {
     // توجيه غير المسجلين لصفحة الدخول مع حفظ مسار العودة
     if (!user) {
-      return createRedirectResponse("/login", { redirect: pathname })
+      return createRedirectResponse(appRoutes.auth.login, { redirect: pathname })
     }
 
     // جلب أدوار المستخدم بأمان مع معالجة الأخطاء
