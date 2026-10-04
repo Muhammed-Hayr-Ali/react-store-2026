@@ -47,17 +47,6 @@ export default async function ReportDetailPage({ params }: PageProps) {
       <div className="flex flex-col gap-3 border-b border-border/40 pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <Button
-              asChild
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              aria-label="Back to reports list"
-            >
-              <Link href={`/${locale}/dashboard/reports`}>
-                <ArrowLeftIcon className="size-4 rtl:rotate-180" />
-              </Link>
-            </Button>
             <div className="flex size-7 items-center justify-center rounded-lg bg-secondary shadow-xs">
               <ShieldAlertIcon className="size-4 text-foreground" />
             </div>
