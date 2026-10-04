@@ -21,33 +21,34 @@ interface RouteRule {
   fallbackPath: string
 }
 
-/**
- * مصفوفة القواعد:
- * يجب ترتيب المسارات من الأكثر تحديداً وعمقاً إلى الأقل تحديداً
- */
 const PROTECTED_ROUTE_RULES: RouteRule[] = [
   // إدارة الأدوار والصلاحيات: للأدمن فقط
   {
-    prefix: "/dashboard/roles",
+    prefix: `${appRoutes.dashboard.home}/roles`,
     allowedRoles: [ROLES.ADMIN],
-    fallbackPath: "/dashboard",
+    fallbackPath: appRoutes.dashboard.home,
   },
   // إدارة البلاغات والرقابة: للأدمن والمشرفين
   {
-    prefix: "/dashboard/reports",
+    prefix: `${appRoutes.dashboard.home}/reports`,
     allowedRoles: [ROLES.ADMIN, ROLES.MODERATOR],
-    fallbackPath: "/dashboard",
+    fallbackPath: appRoutes.dashboard.home,
   },
-  // القاعدة العامة للوحة التحكم: للأدمن والمشرفين (تمنع العملاء والزوار)
+  // القاعدة العامة للوحة التحكم
   {
-    prefix: "/dashboard",
+    prefix: appRoutes.dashboard.home,
     allowedRoles: [ROLES.ADMIN, ROLES.MODERATOR],
-    fallbackPath: "/",
+    fallbackPath: appRoutes.home,
   },
 ]
 
-// مسارات المصادقة العامة (تمنع المسجلين بالفعل)
-const AUTH_ROUTE_PREFIXES = ["/login", "/register", "/forgot-password"]
+// مسارات المصادقة مشتقة مباشرة من appRoutes لضمان التطابق
+const AUTH_ROUTE_PREFIXES = [
+  appRoutes.auth.login,
+  appRoutes.auth.signup,
+  appRoutes.auth.forgotPassword,
+  appRoutes.auth.resetPassword,
+]
 
 // ============================================================================
 // 2. الدالة الرئيسية لفحص وتوجيه المسار
@@ -68,7 +69,7 @@ export async function handleRouteAccess({
 }: HandleRouteAccessParams): Promise<NextResponse | null> {
   const { pathname } = request.nextUrl
 
-  // 1. استخراج بادئة اللغة والمسار المجرد (يدعم اللغات ذات الحرفين مثل ar, en)
+  // 1. استخراج بادئة اللغة والمسار المجرد
   const segments = pathname.split("/").filter(Boolean)
   const hasLocale = segments.length > 0 && segments[0].length === 2
   const currentLocale = hasLocale ? segments[0] : "en"
@@ -95,12 +96,12 @@ export async function handleRouteAccess({
     return redirectResponse
   }
 
-  // 2. إذا كان المستخدم مسجل دخول وحاول زيارة صفحات تسجيل الدخول/التسجيل
+  // 2. إذا كان المستخدم مسجل دخول وحاول زيارة صفحات الدخول/التسجيل
   const isAuthRoute = AUTH_ROUTE_PREFIXES.some((prefix) =>
     normalizedPath.startsWith(prefix)
   )
   if (isAuthRoute && user) {
-    return createRedirectResponse("/")
+    return createRedirectResponse(appRoutes.home)
   }
 
   // 3. مطابقة المسار مع القواعد المحمية
@@ -111,10 +112,12 @@ export async function handleRouteAccess({
   if (matchedRule) {
     // توجيه غير المسجلين لصفحة الدخول مع حفظ مسار العودة
     if (!user) {
-      return createRedirectResponse(appRoutes.auth.login, { redirect: pathname })
+      return createRedirectResponse(appRoutes.auth.login, {
+        redirect: pathname,
+      })
     }
 
-    // جلب أدوار المستخدم بأمان مع معالجة الأخطاء
+    // جلب أدوار المستخدم بأمان
     let userRolesList: AppRole[] = []
     try {
       const { data: userRoles, error } = await supabase
@@ -128,11 +131,10 @@ export async function handleRouteAccess({
           .filter(Boolean)
       }
     } catch {
-      // في حال حدوث خطأ في الاتصال، يتم تطبيق وجهة الأمان
       return createRedirectResponse(matchedRule.fallbackPath)
     }
 
-    // التحقق من توافر أحد الأدوار المسموحة في القاعدة
+    // التحقق من توافر أحد الأدوار المسموحة
     const hasAllowedRole = matchedRule.allowedRoles.some((role) =>
       userRolesList.includes(role)
     )

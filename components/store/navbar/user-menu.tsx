@@ -17,6 +17,7 @@ import {
 
 import { CurrentUser } from "@/lib/actions/utils/profile"
 import { signOut } from "@/lib/actions/authentication/signOut"
+import { appRoutes } from "@/lib/config/app-routes"
 import { storeNavConfig } from "./nav-config"
 import { cn } from "@/lib/utils"
 
@@ -100,9 +101,14 @@ export default function UserMenu({ user, className }: UserMenuProps) {
   const router = useRouter()
 
   const handleLogout = async () => {
-    const result = await signOut()
-    if (result.success) {
-      router.refresh()
+    try {
+      const result = await signOut()
+      if (result.success) {
+        router.replace(appRoutes.home)
+        router.refresh()
+      }
+    } catch (error) {
+      console.error("Error signing out:", error)
     }
   }
 

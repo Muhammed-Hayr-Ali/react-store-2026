@@ -74,8 +74,11 @@ function MobileRightMenu({
   const handleLogout = async () => {
     setIsOpen(false)
     try {
-      await signOut()
-      router.replace(appRoutes.home)
+      const result = await signOut()
+      if (result.success) {
+        router.replace(appRoutes.home)
+        router.refresh()
+      }
     } catch (error) {
       console.error("Error signing out:", error)
     }
