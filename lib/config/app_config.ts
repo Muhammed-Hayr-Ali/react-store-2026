@@ -8,6 +8,7 @@ import {
   ArrowUpRight,
   ChartColumnStacked,
   Package,
+  ShieldAlert,
   ShieldCheckIcon,
   UsersIcon,
   ZapIcon,
@@ -95,6 +96,11 @@ export const appConfig = {
             url: "/dashboard/flash-sales",
             icon: ZapIcon,
             isActive: false,
+          },
+          {
+            title: "Reports & Issues",
+            url: "/dashboard/reports",
+            icon: ShieldAlert,
           },
           {
             title: "Roles & Permissions",

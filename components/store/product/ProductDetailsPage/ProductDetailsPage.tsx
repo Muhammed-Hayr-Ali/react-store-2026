@@ -175,6 +175,7 @@ export default function ProductDetailsPage({
       {/* تفاصيل المنتج والخيارات */}
       <div className="space-y-6 lg:col-span-6">
         <ProductHeader
+          productId={product.id}
           productName={product.name}
           categoryName={product.category?.name}
           categorySlug={product.category?.slug}
