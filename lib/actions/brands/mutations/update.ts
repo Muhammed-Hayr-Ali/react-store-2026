@@ -1,7 +1,7 @@
 /**
  * @file lib/actions/brands/mutations/update.ts
  * @description Server Action to update an existing brand by UUID.
- * Enforces parameter validation, partial schema parsing, authorization, and route cache revalidation.
+ * Enforces parameter validation, partial schema parsing, permission checks, and route cache revalidation.
  */
 
 "use server"
@@ -12,7 +12,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { Brand } from "../types"
 import { brandSchema, updateBrandSchema } from "../schemas"
-import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
+import { hasPermission, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action
@@ -43,19 +43,8 @@ export async function updateBrand(
 
   const safeData = validation.data
 
-  // 3. Perform parallel authorization checks using typed constants
-  const [isAdmin, canUpdate] = await Promise.all([
-    hasRole(ROLES.ADMIN),
-    hasPermission(PERMISSIONS.UPDATE_BRAND),
-  ])
-
-  if (!isAdmin) {
-    return {
-      success: false,
-      error: "UNAUTHORIZED_ACCESS",
-    }
-  }
-
+  // 3. Perform permission check
+  const canUpdate = await hasPermission(PERMISSIONS.UPDATE_BRAND)
   if (!canUpdate) {
     return {
       success: false,

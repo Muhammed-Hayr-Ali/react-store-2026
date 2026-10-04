@@ -10,7 +10,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { Product, CreateProductCompleteInput, CreatedVariant } from "../types"
 import { createProductCompleteSchema } from "../schemas"
-import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
+import { hasPermission, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -24,19 +24,8 @@ export async function updateProduct(
     return { success: false, error: "INVALID_PRODUCT_ID" }
   }
 
-  // 1. Authorization check using typed constants
-  const [isAdmin, canUpdate] = await Promise.all([
-    hasRole(ROLES.ADMIN),
-    hasPermission(PERMISSIONS.UPDATE_PRODUCT),
-  ])
-
-  if (!isAdmin) {
-    return {
-      success: false,
-      error: "UNAUTHORIZED_ACCESS",
-    }
-  }
-
+  // 1. Permission check
+  const canUpdate = await hasPermission(PERMISSIONS.UPDATE_PRODUCT)
   if (!canUpdate) {
     return {
       success: false,

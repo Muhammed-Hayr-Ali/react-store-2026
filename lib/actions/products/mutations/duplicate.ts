@@ -9,7 +9,7 @@ import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { Product, ProductWithRelations } from "../types"
-import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
+import { hasPermission, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -22,19 +22,8 @@ export async function duplicateProduct(
     return { success: false, error: "INVALID_PRODUCT_ID" }
   }
 
-  // 1. Authorization check using typed constants
-  const [isAdmin, canCreate] = await Promise.all([
-    hasRole(ROLES.ADMIN),
-    hasPermission(PERMISSIONS.CREATE_PRODUCT),
-  ])
-
-  if (!isAdmin) {
-    return {
-      success: false,
-      error: "UNAUTHORIZED_ACCESS",
-    }
-  }
-
+  // 1. Permission check (نسخ المنتج يتطلب صلاحية إنشاء المنتجات)
+  const canCreate = await hasPermission(PERMISSIONS.CREATE_PRODUCT)
   if (!canCreate) {
     return {
       success: false,

@@ -9,7 +9,7 @@ import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
+import { hasPermission, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -27,21 +27,13 @@ export async function deleteReview(
     }
   }
 
-  // 2. Parallel authorization checks using typed constants
-  const [isAdmin, isCustomer, canDelete] = await Promise.all([
-    hasRole(ROLES.ADMIN),
-    hasRole(ROLES.CUSTOMER),
+  // 2. Parallel permission checks (إشراف كامل أو حذف المراجعة الخاصة)
+  const [canModerate, canDeleteOwn] = await Promise.all([
+    hasPermission(PERMISSIONS.MODERATE_REVIEWS),
     hasPermission(PERMISSIONS.DELETE_REVIEW),
   ])
 
-  if (!isAdmin && !isCustomer) {
-    return {
-      success: false,
-      error: "UNAUTHORIZED_ACCESS",
-    }
-  }
-
-  if (!canDelete) {
+  if (!canModerate && !canDeleteOwn) {
     return {
       success: false,
       error: "PERMISSION_DENIED",
@@ -62,10 +54,10 @@ export async function deleteReview(
     }
   }
 
-  // 4. Delete record: Admins can delete any review, regular customers only delete their own
+  // 4. Delete record: إذا كان يملك صلاحية MODERATE_REVIEWS يحذف أي مراجعة، وإلا يحذف مراجعته فقط
   let query = supabase.from("product_reviews").delete().eq("id", reviewId)
 
-  if (!isAdmin) {
+  if (!canModerate) {
     query = query.eq("user_id", user.id)
   }
 

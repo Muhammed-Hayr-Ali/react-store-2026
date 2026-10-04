@@ -1,7 +1,7 @@
 /**
  * @file lib/actions/brands/mutations/create.ts
  * @description Server Action to insert a new brand into the database.
- * Handles schema validation, parallel role/permission checks, uniqueness conflict resolution, and cache revalidation.
+ * Handles schema validation, permission checks, uniqueness conflict resolution, and cache revalidation.
  */
 
 "use server"
@@ -11,7 +11,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { Brand } from "../types"
 import { brandSchema, createBrandSchema } from "../schemas"
-import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
+import { hasPermission, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action
@@ -32,19 +32,8 @@ export async function createBrand(
 
   const safeData = validation.data
 
-  // 2. Perform parallel authorization checks using typed constants
-  const [isAdmin, canCreate] = await Promise.all([
-    hasRole(ROLES.ADMIN),
-    hasPermission(PERMISSIONS.CREATE_BRAND),
-  ])
-
-  if (!isAdmin) {
-    return {
-      success: false,
-      error: "UNAUTHORIZED_ACCESS",
-    }
-  }
-
+  // 2. Perform permission check
+  const canCreate = await hasPermission(PERMISSIONS.CREATE_BRAND)
   if (!canCreate) {
     return {
       success: false,
@@ -87,7 +76,7 @@ export async function createBrand(
     }
   }
 
-  // 6. Invalidate stale cache paths (المتجر واللوحة بالكامل)
+  // 6. Invalidate stale cache paths
   revalidatePath("/", "layout")
 
   return {

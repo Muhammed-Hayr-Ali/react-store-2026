@@ -8,7 +8,7 @@
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../index"
+import { hasPermission, PERMISSIONS } from "../index"
 import {
   updateRolePermissionsSchema,
   UpdateRolePermissionsInput,
@@ -18,19 +18,8 @@ import { RoleRecord } from "./create-role"
 export async function updateRolePermissions(
   payload: UpdateRolePermissionsInput
 ): Promise<ApiResult<RoleRecord | null>> {
-  // 1. Parallel authorization checks
-  const [isAdmin, canUpdate] = await Promise.all([
-    hasRole(ROLES.ADMIN),
-    hasPermission(PERMISSIONS.UPDATE_ROLE),
-  ])
-
-  if (!isAdmin) {
-    return {
-      success: false,
-      error: "UNAUTHORIZED_ACCESS",
-    }
-  }
-
+  // 1. Permission check
+  const canUpdate = await hasPermission(PERMISSIONS.UPDATE_ROLE)
   if (!canUpdate) {
     return {
       success: false,

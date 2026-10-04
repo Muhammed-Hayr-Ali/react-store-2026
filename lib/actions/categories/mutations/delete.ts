@@ -1,7 +1,7 @@
 /**
  * @file lib/actions/categories/mutations/delete.ts
  * @description Server Action to permanently remove a category record by UUID.
- * Verifies ID structure, confirms administrative access, and purges stale route caches.
+ * Verifies ID structure, confirms permission access, and purges stale route caches.
  */
 
 "use server"
@@ -10,7 +10,7 @@ import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
+import { hasPermission, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -26,19 +26,8 @@ export async function deleteCategory(id: string): Promise<ApiResult<null>> {
     }
   }
 
-  // 2. Perform parallel authorization checks using typed constants
-  const [isAdmin, canDelete] = await Promise.all([
-    hasRole(ROLES.ADMIN),
-    hasPermission(PERMISSIONS.DELETE_CATEGORY),
-  ])
-
-  if (!isAdmin) {
-    return {
-      success: false,
-      error: "UNAUTHORIZED_ACCESS",
-    }
-  }
-
+  // 2. Perform permission check
+  const canDelete = await hasPermission(PERMISSIONS.DELETE_CATEGORY)
   if (!canDelete) {
     return {
       success: false,

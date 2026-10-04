@@ -1,7 +1,7 @@
 /**
  * @file lib/actions/categories/mutations/create.ts
  * @description Server Action to insert a new product category into Supabase.
- * Enforces Zod schema parsing, administrator role verification, duplicate slug detection, and cache revalidation.
+ * Enforces Zod schema parsing, permission verification, duplicate slug detection, and cache revalidation.
  */
 
 "use server"
@@ -11,7 +11,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { Category } from "../types"
 import { categorySchema, createCategorySchema } from "../schemas"
-import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
+import { hasPermission, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -32,19 +32,8 @@ export async function createCategory(
 
   const safeData = validation.data
 
-  // 2. Perform parallel authorization checks using typed constants
-  const [isAdmin, canCreate] = await Promise.all([
-    hasRole(ROLES.ADMIN),
-    hasPermission(PERMISSIONS.CREATE_CATEGORY),
-  ])
-
-  if (!isAdmin) {
-    return {
-      success: false,
-      error: "UNAUTHORIZED_ACCESS",
-    }
-  }
-
+  // 2. Perform permission check
+  const canCreate = await hasPermission(PERMISSIONS.CREATE_CATEGORY)
   if (!canCreate) {
     return {
       success: false,

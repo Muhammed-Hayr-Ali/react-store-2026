@@ -8,25 +8,14 @@
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../index"
+import { hasPermission, PERMISSIONS } from "../index"
 import { assignUserRoleSchema, AssignUserRoleInput } from "../schemas"
 
 export async function assignRoleToUser(
   payload: AssignUserRoleInput
 ): Promise<ApiResult<null>> {
-  // 1. Parallel authorization checks
-  const [isAdmin, canAssign] = await Promise.all([
-    hasRole(ROLES.ADMIN),
-    hasPermission(PERMISSIONS.ASSIGN_ROLE),
-  ])
-
-  if (!isAdmin) {
-    return {
-      success: false,
-      error: "UNAUTHORIZED_ACCESS",
-    }
-  }
-
+  // 1. Permission check
+  const canAssign = await hasPermission(PERMISSIONS.ASSIGN_ROLE)
   if (!canAssign) {
     return {
       success: false,

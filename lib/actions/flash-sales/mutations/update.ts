@@ -10,7 +10,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { FlashSaleFormInput } from "../types"
 import { flashSaleFormSchema } from "../schemas"
-import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
+import { hasPermission, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -20,19 +20,8 @@ export async function updateFlashSale(
   saleId: string,
   rawData: FlashSaleFormInput
 ): Promise<ApiResult<null>> {
-  // 1. Authorization checks
-  const [isAdmin, canUpdate] = await Promise.all([
-    hasRole(ROLES.ADMIN),
-    hasPermission(PERMISSIONS.UPDATE_FLASH_SALE),
-  ])
-
-  if (!isAdmin) {
-    return {
-      success: false,
-      error: "UNAUTHORIZED_ACCESS",
-    }
-  }
-
+  // 1. Permission check
+  const canUpdate = await hasPermission(PERMISSIONS.UPDATE_FLASH_SALE)
   if (!canUpdate) {
     return {
       success: false,

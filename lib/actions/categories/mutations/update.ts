@@ -12,7 +12,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { Category } from "../types"
 import { categorySchema, updateCategorySchema } from "../schemas"
-import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
+import { hasPermission, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -43,19 +43,8 @@ export async function updateCategory(
 
   const safeData = validation.data
 
-  // 3. Perform parallel authorization checks using typed constants
-  const [isAdmin, canUpdate] = await Promise.all([
-    hasRole(ROLES.ADMIN),
-    hasPermission(PERMISSIONS.UPDATE_CATEGORY),
-  ])
-
-  if (!isAdmin) {
-    return {
-      success: false,
-      error: "UNAUTHORIZED_ACCESS",
-    }
-  }
-
+  // 3. Perform permission check
+  const canUpdate = await hasPermission(PERMISSIONS.UPDATE_CATEGORY)
   if (!canUpdate) {
     return {
       success: false,

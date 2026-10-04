@@ -8,7 +8,7 @@
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
+import { hasPermission, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -24,19 +24,8 @@ export async function deleteProduct(
     }
   }
 
-  // 1. Authorization check using typed constants
-  const [isAdmin, canDelete] = await Promise.all([
-    hasRole(ROLES.ADMIN),
-    hasPermission(PERMISSIONS.DELETE_PRODUCT),
-  ])
-
-  if (!isAdmin) {
-    return {
-      success: false,
-      error: "UNAUTHORIZED_ACCESS",
-    }
-  }
-
+  // 1. Permission check
+  const canDelete = await hasPermission(PERMISSIONS.DELETE_PRODUCT)
   if (!canDelete) {
     return {
       success: false,

@@ -8,7 +8,7 @@
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
+import { hasPermission, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -17,19 +17,8 @@ import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
 export async function deleteFlashSale(
   saleId: string
 ): Promise<ApiResult<null>> {
-  // 1. Authorization checks
-  const [isAdmin, canDelete] = await Promise.all([
-    hasRole(ROLES.ADMIN),
-    hasPermission(PERMISSIONS.DELETE_FLASH_SALE),
-  ])
-
-  if (!isAdmin) {
-    return {
-      success: false,
-      error: "UNAUTHORIZED_ACCESS",
-    }
-  }
-
+  // 1. Permission check
+  const canDelete = await hasPermission(PERMISSIONS.DELETE_FLASH_SALE)
   if (!canDelete) {
     return {
       success: false,

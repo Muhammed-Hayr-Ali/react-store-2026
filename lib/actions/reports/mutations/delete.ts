@@ -1,7 +1,7 @@
 /**
  * @file lib/actions/reports/mutations/delete.ts
- * @description Server Action to permanently remove a report (admin only).
- * Enforces ID validation, parallel authorization checks, and route cache revalidation.
+ * @description Server Action to permanently remove a report.
+ * Enforces ID validation, permission checks, and route cache revalidation.
  */
 
 "use server"
@@ -10,7 +10,7 @@ import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
+import { hasPermission, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -26,19 +26,8 @@ export async function deleteReport(id: string): Promise<ApiResult<null>> {
     }
   }
 
-  // 2. Perform parallel authorization checks using typed constants
-  const [isAdmin, canDelete] = await Promise.all([
-    hasRole(ROLES.ADMIN),
-    hasPermission(PERMISSIONS.DELETE_REPORT),
-  ])
-
-  if (!isAdmin) {
-    return {
-      success: false,
-      error: "UNAUTHORIZED_ACCESS",
-    }
-  }
-
+  // 2. Perform permission check
+  const canDelete = await hasPermission(PERMISSIONS.DELETE_REPORT)
   if (!canDelete) {
     return {
       success: false,

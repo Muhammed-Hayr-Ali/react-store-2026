@@ -1,7 +1,7 @@
 /**
  * @file lib/actions/reports/mutations/update-status.ts
  * @description Server Action to update the status and admin notes of a report.
- * Enforces parameter validation, schema parsing, parallel authorization, and route cache revalidation.
+ * Enforces parameter validation, schema parsing, permission checks, and route cache revalidation.
  */
 
 "use server"
@@ -11,7 +11,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { Report } from "../types"
 import { reportSchema, updateReportStatusSchema } from "../schemas"
-import { hasRole, hasPermission, ROLES, PERMISSIONS } from "../../role"
+import { hasPermission, PERMISSIONS } from "../../role"
 
 // ============================================================================
 // Main Action Function
@@ -32,19 +32,8 @@ export async function updateReportStatus(
 
   const { reportId, status, adminNotes } = validation.data
 
-  // 2. Perform parallel authorization checks using typed constants
-  const [isAdmin, canManage] = await Promise.all([
-    hasRole(ROLES.ADMIN),
-    hasPermission(PERMISSIONS.MANAGE_REPORTS),
-  ])
-
-  if (!isAdmin) {
-    return {
-      success: false,
-      error: "UNAUTHORIZED_ACCESS",
-    }
-  }
-
+  // 2. Perform permission check
+  const canManage = await hasPermission(PERMISSIONS.MANAGE_REPORTS)
   if (!canManage) {
     return {
       success: false,
