@@ -21,6 +21,8 @@ interface ProductHeaderProps {
   exchangeRate: number
   isFlashSale?: boolean
   flashSalePercentage?: number | null
+  flashSaleSlug?: string | null
+  flashSaleTitle?: string | null
 }
 
 export function ProductHeader({
@@ -36,6 +38,8 @@ export function ProductHeader({
   exchangeRate,
   isFlashSale = false,
   flashSalePercentage,
+  flashSaleSlug,
+  flashSaleTitle,
 }: ProductHeaderProps) {
   const locale = useLocale()
 
@@ -55,14 +59,25 @@ export function ProductHeader({
 
   return (
     <div className="space-y-2.5">
-      {/* روابط التصنيف والماركة وشارة الفلاش */}
       <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground">
-        {isFlashSale && (
-          <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/15 px-2 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
-            <ZapIcon className="size-3 fill-current" />
-            Flash Deal
-          </span>
-        )}
+        {isFlashSale &&
+          (flashSaleSlug ? (
+            <Link
+              href={`/${locale}/deals/${flashSaleSlug}`}
+              className="inline-flex items-center gap-1 rounded-md bg-destructive/15 px-2 py-0.5 text-xs font-bold text-destructive transition-colors hover:bg-destructive/25"
+            >
+              <ZapIcon className="size-3 fill-current" />
+              <span>{flashSaleTitle || "Limited Flash Sale"}</span>
+              <span className="ms-1 font-normal underline opacity-85">
+                (View All)
+              </span>
+            </Link>
+          ) : (
+            <span className="inline-flex items-center gap-1 rounded-md bg-destructive/15 px-2 py-0.5 text-xs font-bold text-destructive">
+              <ZapIcon className="size-3 fill-current" />
+              {flashSaleTitle || "Limited Flash Sale"}
+            </span>
+          ))}
 
         {categoryName &&
           (categorySlug ? (
@@ -100,7 +115,7 @@ export function ProductHeader({
       </h1>
 
       <div className="flex h-11 items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex items-baseline gap-3">
           {isOutOfStock ? (
             <div className="flex items-center gap-2 text-destructive">
               <AlertCircleIcon className="size-6 shrink-0" />
@@ -110,7 +125,13 @@ export function ProductHeader({
             </div>
           ) : (
             <>
-              <span className="text-2xl font-extrabold tracking-tight text-foreground tabular-nums sm:text-3xl">
+              <span
+                className={`text-2xl font-extrabold tracking-tight tabular-nums sm:text-3xl ${
+                  isFlashSale
+                    ? "font-black text-destructive"
+                    : "text-foreground"
+                }`}
+              >
                 {currentPrice}
               </span>
 

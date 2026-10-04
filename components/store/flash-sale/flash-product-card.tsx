@@ -26,7 +26,6 @@ export function FlashProductCard({
   viewMode = "grid",
 }: FlashProductCardProps) {
   const locale = useLocale()
-  const isRtl = locale === "ar"
   const [imageError, setImageError] = React.useState(false)
 
   const isList = viewMode === "list"
@@ -91,12 +90,12 @@ export function FlashProductCard({
         {/* شارة الخصم العائمة */}
         <div className="absolute inset-s-1 top-1 z-10 flex flex-col gap-0.5">
           {product.discount_percentage ? (
-            <span className="text-destructive-foreground py-0.2 inline-flex items-center gap-0.5 rounded bg-destructive/90 px-1 text-[8px] text-white shadow-xs backdrop-blur-xs sm:text-[9px]">
+            <span className="inline-flex items-center gap-0.5 rounded bg-destructive/90 px-1 py-0.5 text-[8px] text-white shadow-xs backdrop-blur-xs sm:text-[9px]">
               <FlameIcon className="size-2.5 fill-current" />
               {product.discount_percentage}%
             </span>
           ) : (
-            <span className="py-0.2 inline-flex items-center rounded bg-primary/90 px-1 text-[8px] font-semibold text-primary-foreground shadow-xs backdrop-blur-xs">
+            <span className="inline-flex items-center rounded bg-primary/90 px-1 py-0.5 text-[8px] font-semibold text-primary-foreground shadow-xs backdrop-blur-xs">
               DEAL
             </span>
           )}
@@ -124,11 +123,11 @@ export function FlashProductCard({
             {product.name}
           </Link>
 
-          {/* شريط تقدم الكمية المباعة المدمج */}
+          {/* شريط تقدم الكمية المباعة */}
           {soldPercentage !== null && (
             <div className="pt-0.5">
               <div className="flex justify-between text-[8px] font-medium text-muted-foreground">
-                <span>{isRtl ? "مباع" : "Sold"}</span>
+                <span>Sold</span>
                 <span>{soldPercentage}%</span>
               </div>
               <div className="mt-0.5 h-1 w-full overflow-hidden rounded-full bg-muted">

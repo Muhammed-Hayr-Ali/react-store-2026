@@ -66,8 +66,6 @@ export function FlashSaleSection({
     return null
   }
 
-  const title = isRtl && sale.title_ar ? sale.title_ar : sale.title
-
   const startStop = canScrollPrev ? "transparent 0%, black 28px" : "black 0%"
   const endStop = canScrollNext
     ? "black calc(100% - 28px), transparent 100%"
@@ -87,7 +85,7 @@ export function FlashSaleSection({
                 <ZapIcon className="size-3.5 fill-current" />
               </span>
               <h2 className="text-sm font-bold tracking-tight text-foreground sm:text-base">
-                {title}
+                {sale.title}
               </h2>
             </div>
 
@@ -98,9 +96,7 @@ export function FlashSaleSection({
                 size="sm"
                 className="h-auto p-0 text-[11px] font-semibold text-destructive hover:underline"
               >
-                <Link href={`/${locale}/deals/${sale.slug}`}>
-                  {isRtl ? "عرض الكل" : "View All"}
-                </Link>
+                <Link href={`/${locale}/deals/${sale.slug}`}>View All</Link>
               </Button>
 
               <div className="flex items-center gap-0.5">
@@ -112,11 +108,7 @@ export function FlashSaleSection({
                   className="size-6.5 rounded-full text-muted-foreground hover:bg-muted disabled:opacity-20 sm:size-7"
                   aria-label="Previous flash products"
                 >
-                  {isRtl ? (
-                    <ChevronRightIcon className="size-3.5" />
-                  ) : (
-                    <ChevronLeftIcon className="size-3.5" />
-                  )}
+                  <ChevronLeftIcon className="size-3.5 rtl:rotate-180" />
                 </Button>
                 <Button
                   variant="ghost"
@@ -126,11 +118,7 @@ export function FlashSaleSection({
                   className="size-6.5 rounded-full text-muted-foreground hover:bg-muted disabled:opacity-20 sm:size-7"
                   aria-label="Next flash products"
                 >
-                  {isRtl ? (
-                    <ChevronLeftIcon className="size-3.5" />
-                  ) : (
-                    <ChevronRightIcon className="size-3.5" />
-                  )}
+                  <ChevronRightIcon className="size-3.5 rtl:rotate-180" />
                 </Button>
               </div>
             </div>
@@ -142,16 +130,16 @@ export function FlashSaleSection({
               targetDate={sale.ends_at}
               onExpire={() => setIsVisible(false)}
               labels={{
-                days: isRtl ? "ي" : "d",
-                hours: isRtl ? "س" : "h",
-                minutes: isRtl ? "د" : "m",
-                seconds: isRtl ? "ث" : "s",
+                days: "d",
+                hours: "h",
+                minutes: "m",
+                seconds: "s",
               }}
             />
           </div>
         </div>
 
-        {/* مسار التمرير (عرض عناصر أكثر مع نسب أضيق) */}
+        {/* مسار التمرير */}
         <div
           className="overflow-hidden transition-all duration-300"
           ref={emblaRef}

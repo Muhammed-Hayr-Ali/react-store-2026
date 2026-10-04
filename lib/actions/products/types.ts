@@ -14,6 +14,7 @@ import {
   getLatestProductsSchema,
   getProductsByCategorySchema,
   getProductsByBrandSchema,
+  getFlashSaleProductsSchema,
 } from "./schemas"
 
 // ============================================================================
@@ -32,10 +33,30 @@ export type GetProductsByCategoryOptions = z.infer<
   typeof getProductsByCategorySchema
 >
 export type GetProductsByBrandOptions = z.infer<typeof getProductsByBrandSchema>
+export type GetFlashSaleProductsOptions = z.infer<
+  typeof getFlashSaleProductsSchema
+>
 
 export interface CreatedVariant {
   id: string
   sku: string
+}
+
+// ============================================================================
+// Flash Sale Types
+// ============================================================================
+
+export interface ProductFlashSaleDeal {
+  id: string
+  title: string
+  title_ar?: string | null
+  slug: string
+  discount_type: "percentage" | "fixed" | "fixed_price" | string
+  discount_value: number
+  calculated_percentage: number
+  end_time: string
+  quantity_limit: number | null
+  sold_count: number
 }
 
 // ============================================================================
@@ -94,6 +115,7 @@ export interface ProductWithRelations {
   } | null
   product_variants: ProductVariantItem[]
   product_images: ProductImageItem[]
+  flash_sale_deal?: ProductFlashSaleDeal | null
 }
 
 // ============================================================================

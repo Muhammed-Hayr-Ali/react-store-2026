@@ -57,10 +57,8 @@ export default function CategoriesScroll({
 
   if (!categories || categories.length === 0) return null
 
-  const startStop = (isRtl ? canScrollPrev : canScrollPrev)
-    ? "transparent 0%, black 48px"
-    : "black 0%"
-  const endStop = (isRtl ? canScrollNext : canScrollNext)
+  const startStop = canScrollPrev ? "transparent 0%, black 48px" : "black 0%"
+  const endStop = canScrollNext
     ? "black calc(100% - 48px), transparent 100%"
     : "black 100%"
   const maskStyle = `linear-gradient(to right, ${startStop}, ${endStop})`
@@ -70,7 +68,7 @@ export default function CategoriesScroll({
       {/* الترويسة وأزرار التمرير السريعة */}
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-bold tracking-tight text-foreground sm:text-base">
-          {isRtl ? "التصنيفات" : "Categories"}
+          Categories
         </h3>
 
         <div className="flex items-center gap-1">
@@ -82,11 +80,7 @@ export default function CategoriesScroll({
             className="size-7 rounded-full text-muted-foreground hover:bg-muted disabled:opacity-30 sm:size-8"
             aria-label="Previous categories"
           >
-            {isRtl ? (
-              <ChevronRightIcon className="size-4" />
-            ) : (
-              <ChevronLeftIcon className="size-4" />
-            )}
+            <ChevronLeftIcon className="size-4 rtl:rotate-180" />
           </Button>
           <Button
             variant="ghost"
@@ -96,11 +90,7 @@ export default function CategoriesScroll({
             className="size-7 rounded-full text-muted-foreground hover:bg-muted disabled:opacity-30 sm:size-8"
             aria-label="Next categories"
           >
-            {isRtl ? (
-              <ChevronLeftIcon className="size-4" />
-            ) : (
-              <ChevronRightIcon className="size-4" />
-            )}
+            <ChevronRightIcon className="size-4 rtl:rotate-180" />
           </Button>
         </div>
       </div>
@@ -116,9 +106,7 @@ export default function CategoriesScroll({
       >
         <div className="flex gap-2 py-1 sm:gap-3">
           {categories.map((category) => {
-            const displayName =
-              isRtl && category.name_ar ? category.name_ar : category.name
-
+            const displayName = category.name
             const imageUrl = getSiteAssetUrl(category.image_url)
 
             return (

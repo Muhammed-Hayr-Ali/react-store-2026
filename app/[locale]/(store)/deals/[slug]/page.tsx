@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation"
 import { cookies } from "next/headers"
-import { getLocale } from "next-intl/server"
 import { ZapIcon } from "lucide-react"
 
 import { getFlashSaleBySlug } from "@/lib/actions/flash-sales/queries/get-flash-sale-by-slug"
@@ -33,8 +32,6 @@ export async function generateMetadata({ params }: PageProps) {
 
 export default async function FlashSalePage({ params }: PageProps) {
   const { slug } = await params
-  const locale = await getLocale()
-  const isRtl = locale === "ar"
 
   const [sale, selectedCurrency, exchangeRates] = await Promise.all([
     getFlashSaleBySlug(slug),
@@ -55,8 +52,6 @@ export default async function FlashSalePage({ params }: PageProps) {
   const initialViewMode = (viewModeCookie === "list" ? "list" : "grid") as
     "grid" | "list"
 
-  const title = isRtl && sale.title_ar ? sale.title_ar : sale.title
-
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
       {/* ترويسة الحملة مع العداد التنازلي */}
@@ -68,7 +63,7 @@ export default async function FlashSalePage({ params }: PageProps) {
                 <ZapIcon className="size-4 fill-current" />
               </span>
               <h1 className="text-lg font-bold tracking-tight text-foreground sm:text-2xl">
-                {title}
+                {sale.title}
               </h1>
             </div>
             {sale.description && (
@@ -80,15 +75,15 @@ export default async function FlashSalePage({ params }: PageProps) {
 
           <div className="flex items-center gap-2 rounded-xl bg-background/80 p-2 shadow-xs backdrop-blur-xs">
             <span className="text-[11px] font-medium text-muted-foreground">
-              {isRtl ? "ينتهي خلال:" : "Ends in:"}
+              Ends in:
             </span>
             <CountdownTimer
               targetDate={sale.ends_at}
               labels={{
-                days: isRtl ? "ي" : "d",
-                hours: isRtl ? "س" : "h",
-                minutes: isRtl ? "د" : "m",
-                seconds: isRtl ? "ث" : "s",
+                days: "d",
+                hours: "h",
+                minutes: "m",
+                seconds: "s",
               }}
             />
           </div>

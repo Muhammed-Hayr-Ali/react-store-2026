@@ -7,27 +7,16 @@
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import type { ProductWithRelations } from "../types"
+import type { ProductWithRelations, ProductFlashSaleDeal } from "../types"
 
 interface GetProductOptions {
   activeOnly?: boolean
 }
 
-export interface FlashSaleDeal {
-  id: string
-  discount_percentage: number
-  sale_price: number | null
-  end_time: string
-}
-
-export type ProductWithFlashSale = ProductWithRelations & {
-  flash_sale_deal?: FlashSaleDeal | null
-}
-
 export async function getProductCompleteBySlug(
   slug: string,
   options: GetProductOptions = {}
-): Promise<ApiResult<ProductWithFlashSale>> {
+): Promise<ApiResult<ProductWithRelations>> {
   const { activeOnly = true } = options
 
   if (!slug || typeof slug !== "string") {
@@ -104,56 +93,108 @@ export async function getProductCompleteBySlug(
 
   const product = productData as unknown as ProductWithRelations
 
-  // فحص عروض الفلاش النشطة لهذا المنتج
-  const { data: flashSaleItem } = await supabase
+  const { data: flashSaleItem, error: flashSaleError } = await supabase
     .from("flash_sale_items")
     .select(
       `
       id,
-      discount_percentage,
-      discount_amount,
+      discount_type,
+      discount_value,
+      quantity_limit,
+      sold_count,
       flash_sales!inner (
         id,
+        title,
+        title_ar,
+        slug,
         is_active,
-        start_time,
-        end_time
+        starts_at,
+        ends_at
       )
     `
     )
     .eq("product_id", product.id)
     .eq("flash_sales.is_active", true)
-    .lte("flash_sales.start_time", now)
-    .gte("flash_sales.end_time", now)
+    .lte("flash_sales.starts_at", now)
+    .gte("flash_sales.ends_at", now)
     .maybeSingle()
 
-  let flash_sale_deal: FlashSaleDeal | null = null
+  if (flashSaleError) {
+    console.error("🔴 [Flash Sale Query Error]:", flashSaleError.message)
+  }
+
+  let flash_sale_deal: ProductFlashSaleDeal | null = null
 
   if (flashSaleItem && flashSaleItem.flash_sales) {
     const parentSale = Array.isArray(flashSaleItem.flash_sales)
       ? flashSaleItem.flash_sales[0]
       : flashSaleItem.flash_sales
 
-    const discountPercentage = Number(flashSaleItem.discount_percentage) || 0
+    const rawDiscountType = String(
+      flashSaleItem.discount_type || ""
+    ).toLowerCase()
+    const discountVal = Number(flashSaleItem.discount_value) || 0
 
-    flash_sale_deal = {
-      id: flashSaleItem.id,
-      discount_percentage: discountPercentage,
-      sale_price: flashSaleItem.discount_amount ? Number(flashSaleItem.discount_amount) : null,
-      end_time: parentSale.end_time,
-    }
+    const isAvailable =
+      flashSaleItem.quantity_limit === null ||
+      flashSaleItem.sold_count < flashSaleItem.quantity_limit
 
-    // تطبيق الخصم فورياً على أسعار الـ variants مع الاحتفاظ بالسعر القديم في compare_at_price
-    if (discountPercentage > 0) {
+    if (isAvailable && discountVal > 0) {
+      let samplePercentage = 0
+
       product.product_variants = product.product_variants.map((variant) => {
-        const originalPrice = variant.price
-        const discountedPrice = Math.round(originalPrice * (1 - discountPercentage / 100))
+        const originalPrice = Number(variant.price)
+        let discountedPrice = originalPrice
+
+        if (
+          rawDiscountType === "fixed_price" ||
+          rawDiscountType === "price" ||
+          rawDiscountType === "fixed_amount_price"
+        ) {
+          discountedPrice = discountVal
+          if (originalPrice > discountedPrice) {
+            samplePercentage = Math.round(
+              ((originalPrice - discountedPrice) / originalPrice) * 100
+            )
+          }
+        } else if (rawDiscountType === "percentage") {
+          discountedPrice = Math.round(originalPrice * (1 - discountVal / 100))
+          samplePercentage = Math.round(discountVal)
+        } else if (
+          rawDiscountType === "fixed" ||
+          rawDiscountType === "fixed_discount" ||
+          rawDiscountType === "fixed_amount"
+        ) {
+          discountedPrice = Math.max(0, originalPrice - discountVal)
+          if (originalPrice > 0) {
+            samplePercentage = Math.round(
+              ((originalPrice - discountedPrice) / originalPrice) * 100
+            )
+          }
+        }
 
         return {
           ...variant,
-          compare_at_price: variant.compare_at_price || originalPrice, // السعر القديم ليظهر مشطوباً
-          price: discountedPrice, // السعر الفعلي بعد خصم الفلاش
+          compare_at_price:
+            variant.compare_at_price && variant.compare_at_price > originalPrice
+              ? variant.compare_at_price
+              : originalPrice,
+          price: discountedPrice,
         }
       })
+
+      flash_sale_deal = {
+        id: flashSaleItem.id,
+        title: parentSale.title,
+        title_ar: parentSale.title_ar,
+        slug: parentSale.slug,
+        discount_type: rawDiscountType,
+        discount_value: discountVal,
+        calculated_percentage: samplePercentage,
+        end_time: parentSale.ends_at,
+        quantity_limit: flashSaleItem.quantity_limit,
+        sold_count: flashSaleItem.sold_count,
+      }
     }
   }
 

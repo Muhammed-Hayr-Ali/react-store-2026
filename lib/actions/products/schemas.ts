@@ -117,6 +117,12 @@ export const getProductsByBrandSchema = z
     path: ["brandSlug"],
   })
 
+export const getFlashSaleProductsSchema = z.object({
+  flashSaleId: z.string().uuid("INVALID_FLASH_SALE_ID").optional(),
+  limit: z.number().int().positive().max(50).default(20),
+  activeOnly: z.boolean().default(true),
+})
+
 export const adminProductSummarySchema = z.object({
   id: z.string().uuid("INVALID_ID"),
   name: z.string(),

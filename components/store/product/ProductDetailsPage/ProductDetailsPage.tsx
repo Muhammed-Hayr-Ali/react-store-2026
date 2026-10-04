@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Separator } from "@/components/ui/separator"
-
+import { ProductWithRelations } from "@/lib/actions/products/types"
 import {
   ProductImageItem,
   ProductVariantItem,
@@ -12,13 +12,13 @@ import { ProductHeader } from "./ProductHeader"
 import { ProductVariantSelector } from "./ProductVariantSelector"
 import { ProductActions } from "./ProductActions"
 import { ProductTrustBadges } from "./ProductTrustBadges"
+import { FlashSaleCountdown } from "./FlashSaleCountdown"
+import { ProductGallery } from "./ProductGallery"
 
 import type { CurrencyCode } from "@/lib/actions/currency/types"
-import { ProductGallery } from "./ProductGallery"
-import { ProductWithFlashSale } from "@/lib/actions/products/queries/get-complete-by-slug"
 
 interface ProductDetailsProps {
-  product: ProductWithFlashSale
+  product: ProductWithRelations
   currency: CurrencyCode
   exchangeRate: number
 }
@@ -142,7 +142,7 @@ export default function ProductDetailsPage({
     selectedVariant.stock_quantity <= (selectedVariant.low_stock_threshold || 5)
   )
 
-  const discountPercentage =
+  const defaultDiscountPercentage =
     selectedVariant?.compare_at_price &&
     selectedVariant.compare_at_price > selectedVariant.price
       ? Math.round(
@@ -151,6 +151,10 @@ export default function ProductDetailsPage({
             100
         )
       : null
+
+  const hasFlashSale = Boolean(product.flash_sale_deal)
+  const activeDiscountPercentage =
+    product.flash_sale_deal?.calculated_percentage ?? defaultDiscountPercentage
 
   const totalPriceInCents = selectedVariant
     ? selectedVariant.price * quantity
@@ -164,7 +168,7 @@ export default function ProductDetailsPage({
         productName={product.name}
         productImages={productImages}
         isOutOfStock={isOutOfStock}
-        discountPercentage={discountPercentage}
+        discountPercentage={activeDiscountPercentage}
         onThumbnailClick={handleThumbnailClick}
       />
 
@@ -182,10 +186,17 @@ export default function ProductDetailsPage({
           currency={currency}
           exchangeRate={exchangeRate}
           isFlashSale={Boolean(product.flash_sale_deal)}
-          flashSalePercentage={
-            product.flash_sale_deal?.discount_percentage ?? discountPercentage
-          }
+          flashSalePercentage={activeDiscountPercentage}
+          flashSaleSlug={product.flash_sale_deal?.slug}
+          flashSaleTitle={product.flash_sale_deal?.title}
         />
+        {/* عرض العدّاد التنازلي الحصري في حال وجود حملة فلاش سارية */}
+        {hasFlashSale && product.flash_sale_deal?.end_time && (
+          <FlashSaleCountdown
+            endTime={product.flash_sale_deal.end_time}
+            discountPercentage={activeDiscountPercentage}
+          />
+        )}
 
         <Separator />
 

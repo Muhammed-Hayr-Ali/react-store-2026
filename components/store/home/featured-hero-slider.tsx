@@ -145,13 +145,9 @@ export default function FeaturedHeroSlider({
               size="icon"
               onClick={scrollPrev}
               className="pointer-events-auto size-7 rounded-full bg-background/80 shadow-xs backdrop-blur-xs hover:bg-background sm:size-8"
-              aria-label={isRtl ? "الشريحة السابقة" : "Previous Slide"}
+              aria-label="Previous slide"
             >
-              {isRtl ? (
-                <ChevronRightIcon className="size-3.5 sm:size-4" />
-              ) : (
-                <ChevronLeftIcon className="size-3.5 sm:size-4" />
-              )}
+              <ChevronLeftIcon className="size-3.5 sm:size-4 rtl:rotate-180" />
             </Button>
 
             <Button
@@ -159,13 +155,9 @@ export default function FeaturedHeroSlider({
               size="icon"
               onClick={scrollNext}
               className="pointer-events-auto size-7 rounded-full bg-background/80 shadow-xs backdrop-blur-xs hover:bg-background sm:size-8"
-              aria-label={isRtl ? "الشريحة التالية" : "Next Slide"}
+              aria-label="Next slide"
             >
-              {isRtl ? (
-                <ChevronLeftIcon className="size-3.5 sm:size-4" />
-              ) : (
-                <ChevronRightIcon className="size-3.5 sm:size-4" />
-              )}
+              <ChevronRightIcon className="size-3.5 sm:size-4 rtl:rotate-180" />
             </Button>
           </div>
         )}
