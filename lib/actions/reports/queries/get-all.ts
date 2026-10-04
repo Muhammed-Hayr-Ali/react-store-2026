@@ -1,19 +1,19 @@
 /**
  * @file lib/actions/reports/queries/get-all.ts
- * @description Retrieves a paginated list of reports with optional status and targetType filters.
+ * @description Retrieves a paginated list of reports with reporter profile and target item previews.
  */
 
 "use server"
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { GetReportsFilterOptions, ReportWithDetails } from "../types"
+import {
+  GetReportsFilterOptions,
+  ReportWithDetails,
+  TargetPreview,
+} from "../types"
 import { getReportsFilterSchema } from "../schemas"
-import { hasRole } from "../../role/role-checker"
-
-// ============================================================================
-// Main Query Function
-// ============================================================================
+import { hasRole, ROLES } from "../../role"
 
 export async function getAllReports(
   options: Partial<GetReportsFilterOptions> = {}
@@ -27,7 +27,7 @@ export async function getAllReports(
     }
   }
 
-  const isAdmin = await hasRole("admin")
+  const isAdmin = await hasRole(ROLES.ADMIN)
   if (!isAdmin) {
     return {
       success: false,
@@ -46,7 +46,8 @@ export async function getAllReports(
       reporter:profiles!reports_reporter_id_fkey (
         id,
         first_name,
-        last_name
+        last_name,
+        email
       )
     `,
       { count: "exact" }
@@ -62,7 +63,7 @@ export async function getAllReports(
     query = query.eq("target_type", targetType)
   }
 
-  const { data, count, error } = await query
+  const { data: reports, count, error } = await query
 
   if (error) {
     return {
@@ -72,10 +73,46 @@ export async function getAllReports(
     }
   }
 
+  // جلب معاينة الهدف المبلّغ عنه (Preview) لعرضه للمشرف مباشرة
+  const populatedReports: ReportWithDetails[] = await Promise.all(
+    (reports || []).map(async (rep) => {
+      let target_preview: TargetPreview = null
+
+      if (rep.target_id) {
+        if (rep.target_type === "review") {
+          const { data: reviewData } = await supabase
+            .from("product_reviews")
+            .select("id, rating, comment, product_id, user_id")
+            .eq("id", rep.target_id)
+            .maybeSingle()
+
+          if (reviewData) {
+            target_preview = { type: "review", data: reviewData }
+          }
+        } else if (rep.target_type === "product") {
+          const { data: productData } = await supabase
+            .from("products")
+            .select("id, name, slug")
+            .eq("id", rep.target_id)
+            .maybeSingle()
+
+          if (productData) {
+            target_preview = { type: "product", data: productData }
+          }
+        }
+      }
+
+      return {
+        ...rep,
+        target_preview,
+      } as ReportWithDetails
+    })
+  )
+
   return {
     success: true,
     data: {
-      reports: (data || []) as ReportWithDetails[],
+      reports: populatedReports,
       total: count || 0,
     },
   }

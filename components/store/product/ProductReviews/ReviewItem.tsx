@@ -11,7 +11,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { ReviewWithProfile } from "@/lib/actions/reviews/types"
-import { ReportDialog } from "@/components/common/report/ReportDialog"
+import { ReportDialog } from "@/components/shared/report-dialog"
 
 interface ReviewItemProps {
   review: ReviewWithProfile
@@ -33,7 +33,6 @@ export function ReviewItem({
       .filter(Boolean)
       .join(" ") || "Verified Customer"
 
-  // تنسيق التاريخ بناءً على لغة المسار المحددة في next-intl
   const formattedDate = format.dateTime(new Date(review.created_at), {
     year: "numeric",
     month: "short",
@@ -119,6 +118,7 @@ export function ReviewItem({
               targetType="review"
               targetId={review.id}
               title="Report Review"
+              description="Help us maintain a constructive community. Why are you reporting this review?"
             >
               <button
                 type="button"

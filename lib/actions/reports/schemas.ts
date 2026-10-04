@@ -1,6 +1,6 @@
 /**
  * @file lib/actions/reports/schemas.ts
- * @description Zod validation schemas for user reports and issue moderation.
+ * @description Zod validation schemas for user reports, issue moderation, and admin resolution.
  */
 
 import { z } from "zod"
@@ -29,19 +29,18 @@ export const reportStatusSchema = z.enum([
 
 export const reportSchema = z.object({
   id: z.string().uuid("INVALID_ID"),
-  reporter_id: z.string().uuid("INVALID_REPORTER_ID"),
+  reporter_id: z.string().uuid("INVALID_REPORTER_ID").nullable().optional(),
   target_type: reportTargetTypeSchema,
   target_id: z.string().nullable().optional(),
   reason: z.string().min(3, "REASON_TOO_SHORT").max(100, "REASON_TOO_LONG"),
   details: z.string().max(1000, "DETAILS_TOO_LONG").nullable().optional(),
+  contact_email: z.string().email("INVALID_EMAIL").nullable().optional(),
   status: reportStatusSchema,
   admin_notes: z
     .string()
     .max(1000, "ADMIN_NOTES_TOO_LONG")
     .nullable()
     .optional(),
-  resolved_by: z.string().uuid("INVALID_ADMIN_ID").nullable().optional(),
-  resolved_at: z.string().nullable().optional(),
   created_at: z.string(),
   updated_at: z.string(),
 })
@@ -64,11 +63,23 @@ export const createReportSchema = z.object({
     .max(1000, "DETAILS_TOO_LONG")
     .optional()
     .or(z.literal("")),
+  contactEmail: z
+    .string()
+    .trim()
+    .email("INVALID_EMAIL")
+    .optional()
+    .or(z.literal("")),
 })
 
 export const updateReportStatusSchema = z.object({
   reportId: z.string().uuid("INVALID_REPORT_ID"),
   status: reportStatusSchema,
+  adminNotes: z.string().trim().max(1000, "ADMIN_NOTES_TOO_LONG").optional(),
+})
+
+export const resolveReportActionSchema = z.object({
+  reportId: z.string().uuid("INVALID_REPORT_ID"),
+  action: z.enum(["dismiss", "delete_target"]),
   adminNotes: z.string().trim().max(1000, "ADMIN_NOTES_TOO_LONG").optional(),
 })
 

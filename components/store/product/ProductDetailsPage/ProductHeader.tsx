@@ -3,12 +3,14 @@
 import * as React from "react"
 import Link from "next/link"
 import { useLocale } from "next-intl"
-import { AlertCircleIcon, ZapIcon } from "lucide-react"
+import { AlertCircleIcon, FlagIcon, ZapIcon } from "lucide-react"
 import { ProductVariantItem } from "./utils"
 import { formatPrice as formatCurrencyPrice } from "@/lib/actions/currency/utils"
 import type { CurrencyCode } from "@/lib/actions/currency/types"
+import { ReportDialog } from "@/components/shared/report-dialog"
 
 interface ProductHeaderProps {
+  productId?: string
   productName: string
   categoryName?: string
   categorySlug?: string
@@ -26,6 +28,7 @@ interface ProductHeaderProps {
 }
 
 export function ProductHeader({
+  productId,
   productName,
   categoryName,
   categorySlug,
@@ -59,54 +62,75 @@ export function ProductHeader({
 
   return (
     <div className="space-y-2.5">
-      <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground">
-        {isFlashSale &&
-          (flashSaleSlug ? (
-            <Link
-              href={`/${locale}/deals/${flashSaleSlug}`}
-              className="inline-flex items-center gap-1 rounded-md bg-destructive/15 px-2 py-0.5 text-xs font-bold text-destructive transition-colors hover:bg-destructive/25"
-            >
-              <ZapIcon className="size-3 fill-current" />
-              <span>{flashSaleTitle || "Limited Flash Sale"}</span>
-              <span className="ms-1 font-normal underline opacity-85">
-                (View All)
-              </span>
-            </Link>
-          ) : (
-            <span className="inline-flex items-center gap-1 rounded-md bg-destructive/15 px-2 py-0.5 text-xs font-bold text-destructive">
-              <ZapIcon className="size-3 fill-current" />
-              {flashSaleTitle || "Limited Flash Sale"}
-            </span>
-          ))}
-
-        {categoryName &&
-          (categorySlug ? (
-            <Link
-              href={`/${locale}/category/${categorySlug}`}
-              className="rounded-md bg-muted px-2 py-0.5 text-foreground transition-colors hover:bg-muted/80 hover:underline"
-            >
-              {categoryName}
-            </Link>
-          ) : (
-            <span className="rounded-md bg-muted px-2 py-0.5 text-foreground">
-              {categoryName}
-            </span>
-          ))}
-
-        {brandName && (
-          <>
-            <span>•</span>
-            {brandSlug ? (
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-medium text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-2">
+          {isFlashSale &&
+            (flashSaleSlug ? (
               <Link
-                href={`/${locale}/brand/${brandSlug}`}
-                className="transition-colors hover:text-foreground hover:underline"
+                href={`/${locale}/deals/${flashSaleSlug}`}
+                className="inline-flex items-center gap-1 rounded-md bg-destructive/15 px-2 py-0.5 text-xs font-bold text-destructive transition-colors hover:bg-destructive/25"
               >
-                {brandName}
+                <ZapIcon className="size-3 fill-current" />
+                <span>{flashSaleTitle || "Limited Flash Sale"}</span>
+                <span className="ms-1 font-normal underline opacity-85">
+                  (View All)
+                </span>
               </Link>
             ) : (
-              <span>{brandName}</span>
-            )}
-          </>
+              <span className="inline-flex items-center gap-1 rounded-md bg-destructive/15 px-2 py-0.5 text-xs font-bold text-destructive">
+                <ZapIcon className="size-3 fill-current" />
+                {flashSaleTitle || "Limited Flash Sale"}
+              </span>
+            ))}
+
+          {categoryName &&
+            (categorySlug ? (
+              <Link
+                href={`/${locale}/category/${categorySlug}`}
+                className="rounded-md bg-muted px-2 py-0.5 text-foreground transition-colors hover:bg-muted/80 hover:underline"
+              >
+                {categoryName}
+              </Link>
+            ) : (
+              <span className="rounded-md bg-muted px-2 py-0.5 text-foreground">
+                {categoryName}
+              </span>
+            ))}
+
+          {brandName && (
+            <>
+              <span>•</span>
+              {brandSlug ? (
+                <Link
+                  href={`/${locale}/brand/${brandSlug}`}
+                  className="transition-colors hover:text-foreground hover:underline"
+                >
+                  {brandName}
+                </Link>
+              ) : (
+                <span>{brandName}</span>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* زر الإبلاغ عن المنتج */}
+        {productId && (
+          <ReportDialog
+            targetType="product"
+            targetId={productId}
+            title="Report Product"
+            description="If you notice any inaccuracy, counterfeit issue, or policy violation, please let us know."
+          >
+            <button
+              type="button"
+              className="inline-flex cursor-pointer items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-destructive focus-visible:outline-hidden"
+              aria-label="Report this product"
+            >
+              <FlagIcon className="size-3" />
+              <span>Report</span>
+            </button>
+          </ReportDialog>
         )}
       </div>
 

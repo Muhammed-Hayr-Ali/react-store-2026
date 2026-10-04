@@ -11,7 +11,7 @@ import { Metadata, Viewport } from "next"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
 import { DirectionProvider } from "@/components/ui/direction"
-import { ScrollToTop } from "@/components/common/scroll-to-top"
+import { ScrollToTop } from "@/components/shared/scroll-to-top"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 

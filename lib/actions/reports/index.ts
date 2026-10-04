@@ -14,6 +14,7 @@ export * from "./types"
 // ============================================================================
 export { submitReport } from "./mutations/create"
 export { updateReportStatus } from "./mutations/update-status"
+export { resolveReportAction } from "./mutations/resolve-action"
 export { deleteReport } from "./mutations/delete"
 
 // ============================================================================

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { CustomInput } from "@/components/ui/custom-input"
 import { AppLogo } from "@/components/ui/app-logo"
 import { appConfig } from "@/lib/config/app_config"
+import { ReportDialog } from "@/components/shared/report-dialog"
 
 import { footerConfig } from "./footer-config"
 import { ThemeToggle } from "./theme-toggle"
@@ -66,7 +67,7 @@ export default function Footer() {
             </ul>
           </FooterSection>
 
-          {/* 3. روابط الدعم والمساعدة */}
+          {/* 3. روابط الدعم والمساعدة مع زر الإبلاغ عن مشكلة فنية */}
           <FooterSection title={footerConfig.supportLinks.title}>
             <ul className="flex flex-col gap-2.5">
               {footerConfig.supportLinks.items.map((item) => (
@@ -79,6 +80,20 @@ export default function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <ReportDialog
+                  targetType="technical_issue"
+                  title="Report a Problem"
+                  description="Encountered an issue or a bug while browsing? Let us know so we can fix it quickly."
+                >
+                  <button
+                    type="button"
+                    className="cursor-pointer text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:underline focus-visible:outline-none"
+                  >
+                    Report an Issue
+                  </button>
+                </ReportDialog>
+              </li>
             </ul>
           </FooterSection>
 
