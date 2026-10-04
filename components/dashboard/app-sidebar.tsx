@@ -3,7 +3,7 @@
 import * as React from "react"
 
 import { NavMain } from "@/components/dashboard/nav-main"
-import { NavUser } from "@/components/dashboard/nav-user"
+
 import { TeamSwitcher } from "@/components/dashboard/team-switcher"
 import {
   Sidebar,
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sidebar"
 import { CurrentUser } from "@/lib/actions/utils/profile"
 import { sidebarConfig } from "./sidebar-config"
+import { NavUser } from "./nav-user"
 
 
 interface AppSidebarProps {
