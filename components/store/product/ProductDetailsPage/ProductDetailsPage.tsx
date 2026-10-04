@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Separator } from "@/components/ui/separator"
-import { ProductWithRelations } from "@/lib/actions/products/types"
+
 import {
   ProductImageItem,
   ProductVariantItem,
@@ -15,9 +15,10 @@ import { ProductTrustBadges } from "./ProductTrustBadges"
 
 import type { CurrencyCode } from "@/lib/actions/currency/types"
 import { ProductGallery } from "./ProductGallery"
+import { ProductWithFlashSale } from "@/lib/actions/products/queries/get-complete-by-slug"
 
 interface ProductDetailsProps {
-  product: ProductWithRelations
+  product: ProductWithFlashSale
   currency: CurrencyCode
   exchangeRate: number
 }
@@ -172,14 +173,18 @@ export default function ProductDetailsPage({
         <ProductHeader
           productName={product.name}
           categoryName={product.category?.name}
-          categorySlug={product.category?.slug} // ✅ تم تمرير السلوج للتصنيف
+          categorySlug={product.category?.slug}
           brandName={product.brand?.name}
-          brandSlug={product.brand?.slug} // ✅ تم تمرير السلوج للماركة
+          brandSlug={product.brand?.slug}
           selectedVariant={selectedVariant}
           isOutOfStock={isOutOfStock}
           isLowStock={isLowStock}
           currency={currency}
           exchangeRate={exchangeRate}
+          isFlashSale={Boolean(product.flash_sale_deal)}
+          flashSalePercentage={
+            product.flash_sale_deal?.discount_percentage ?? discountPercentage
+          }
         />
 
         <Separator />

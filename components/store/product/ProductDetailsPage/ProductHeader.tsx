@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { useLocale } from "next-intl"
-import { AlertCircleIcon } from "lucide-react"
+import { AlertCircleIcon, ZapIcon } from "lucide-react"
 import { ProductVariantItem } from "./utils"
 import { formatPrice as formatCurrencyPrice } from "@/lib/actions/currency/utils"
 import type { CurrencyCode } from "@/lib/actions/currency/types"
@@ -19,6 +19,8 @@ interface ProductHeaderProps {
   isLowStock: boolean
   currency: CurrencyCode
   exchangeRate: number
+  isFlashSale?: boolean
+  flashSalePercentage?: number | null
 }
 
 export function ProductHeader({
@@ -32,10 +34,11 @@ export function ProductHeader({
   isLowStock,
   currency,
   exchangeRate,
+  isFlashSale = false,
+  flashSalePercentage,
 }: ProductHeaderProps) {
   const locale = useLocale()
 
-  // حساب الأسعار المنسقة بالعملة المختارة
   const currentPrice = selectedVariant
     ? formatCurrencyPrice(selectedVariant.price, currency, exchangeRate)
     : formatCurrencyPrice(0, currency, exchangeRate)
@@ -52,8 +55,15 @@ export function ProductHeader({
 
   return (
     <div className="space-y-2.5">
-      {/* روابط التصنيف والماركة */}
+      {/* روابط التصنيف والماركة وشارة الفلاش */}
       <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground">
+        {isFlashSale && (
+          <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/15 px-2 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+            <ZapIcon className="size-3 fill-current" />
+            Flash Deal
+          </span>
+        )}
+
         {categoryName &&
           (categorySlug ? (
             <Link
@@ -100,17 +110,21 @@ export function ProductHeader({
             </div>
           ) : (
             <>
-              {/* عرض السعر الحالي بالعملة المختارة */}
               <span className="text-2xl font-extrabold tracking-tight text-foreground tabular-nums sm:text-3xl">
                 {currentPrice}
               </span>
 
-              {/* عرض سعر المقارنة إن وجد */}
               {comparePrice && (
                 <span className="text-base text-muted-foreground tabular-nums line-through decoration-destructive/50">
                   {comparePrice}
                 </span>
               )}
+
+              {flashSalePercentage ? (
+                <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive">
+                  -{flashSalePercentage}%
+                </span>
+              ) : null}
             </>
           )}
         </div>

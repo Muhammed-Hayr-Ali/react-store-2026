@@ -1,6 +1,6 @@
 /**
  * @file lib/actions/products/queries/get-complete-by-slug.ts
- * @description Retrieves a full product with all related variants and images by its URL slug.
+ * @description Retrieves a full product with all related variants, images, and active flash sale data by slug.
  */
 
 "use server"
@@ -9,22 +9,25 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import type { ProductWithRelations } from "../types"
 
-// ============================================================================
-// Parameter Interfaces
-// ============================================================================
-
 interface GetProductOptions {
   activeOnly?: boolean
 }
 
-// ============================================================================
-// Main Query Function
-// ============================================================================
+export interface FlashSaleDeal {
+  id: string
+  discount_percentage: number
+  sale_price: number | null
+  end_time: string
+}
+
+export type ProductWithFlashSale = ProductWithRelations & {
+  flash_sale_deal?: FlashSaleDeal | null
+}
 
 export async function getProductCompleteBySlug(
   slug: string,
   options: GetProductOptions = {}
-): Promise<ApiResult<ProductWithRelations>> {
+): Promise<ApiResult<ProductWithFlashSale>> {
   const { activeOnly = true } = options
 
   if (!slug || typeof slug !== "string") {
@@ -36,6 +39,7 @@ export async function getProductCompleteBySlug(
   }
 
   const supabase = await createServerClient()
+  const now = new Date().toISOString()
 
   let query = supabase
     .from("products")
@@ -85,7 +89,7 @@ export async function getProductCompleteBySlug(
     query = query.eq("is_active", true)
   }
 
-  const { data, error } = await query.single()
+  const { data: productData, error } = await query.single()
 
   if (error) {
     if (error.code === "PGRST116") {
@@ -98,5 +102,66 @@ export async function getProductCompleteBySlug(
     }
   }
 
-  return { success: true, data: data as unknown as ProductWithRelations }
+  const product = productData as unknown as ProductWithRelations
+
+  // فحص عروض الفلاش النشطة لهذا المنتج
+  const { data: flashSaleItem } = await supabase
+    .from("flash_sale_items")
+    .select(
+      `
+      id,
+      discount_percentage,
+      discount_amount,
+      flash_sales!inner (
+        id,
+        is_active,
+        start_time,
+        end_time
+      )
+    `
+    )
+    .eq("product_id", product.id)
+    .eq("flash_sales.is_active", true)
+    .lte("flash_sales.start_time", now)
+    .gte("flash_sales.end_time", now)
+    .maybeSingle()
+
+  let flash_sale_deal: FlashSaleDeal | null = null
+
+  if (flashSaleItem && flashSaleItem.flash_sales) {
+    const parentSale = Array.isArray(flashSaleItem.flash_sales)
+      ? flashSaleItem.flash_sales[0]
+      : flashSaleItem.flash_sales
+
+    const discountPercentage = Number(flashSaleItem.discount_percentage) || 0
+
+    flash_sale_deal = {
+      id: flashSaleItem.id,
+      discount_percentage: discountPercentage,
+      sale_price: flashSaleItem.discount_amount ? Number(flashSaleItem.discount_amount) : null,
+      end_time: parentSale.end_time,
+    }
+
+    // تطبيق الخصم فورياً على أسعار الـ variants مع الاحتفاظ بالسعر القديم في compare_at_price
+    if (discountPercentage > 0) {
+      product.product_variants = product.product_variants.map((variant) => {
+        const originalPrice = variant.price
+        const discountedPrice = Math.round(originalPrice * (1 - discountPercentage / 100))
+
+        return {
+          ...variant,
+          compare_at_price: variant.compare_at_price || originalPrice, // السعر القديم ليظهر مشطوباً
+          price: discountedPrice, // السعر الفعلي بعد خصم الفلاش
+        }
+      })
+    }
+  }
+
+  return {
+    success: true,
+    data: {
+      ...product,
+      flash_sale_deal,
+    },
+  }
 }
