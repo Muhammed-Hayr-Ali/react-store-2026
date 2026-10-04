@@ -1,6 +1,6 @@
 /**
  * @file lib/actions/reports/schemas.ts
- * @description Zod validation schemas for user reports, issue moderation, and admin resolution.
+ * @description Zod validation schemas for user reports, issue moderation, and query filters.
  */
 
 import { z } from "zod"
@@ -18,7 +18,7 @@ export const reportTargetTypeSchema = z.enum([
 
 export const reportStatusSchema = z.enum([
   "pending",
-  "in_review",
+  "under_review",
   "resolved",
   "dismissed",
 ])
@@ -88,8 +88,14 @@ export const resolveReportActionSchema = z.object({
 // ============================================================================
 
 export const getReportsFilterSchema = z.object({
-  status: reportStatusSchema.optional(),
-  targetType: reportTargetTypeSchema.optional(),
-  limit: z.number().int().positive().max(100).default(20),
-  offset: z.number().int().nonnegative().default(0),
+  status: z.preprocess(
+    (val) => (val === "all" || val === "" || val === null ? undefined : val),
+    reportStatusSchema.optional()
+  ),
+  targetType: z.preprocess(
+    (val) => (val === "all" || val === "" || val === null ? undefined : val),
+    reportTargetTypeSchema.optional()
+  ),
+  limit: z.coerce.number().int().positive().max(100).default(20),
+  offset: z.coerce.number().int().nonnegative().default(0),
 })

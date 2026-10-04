@@ -3,10 +3,6 @@ import { ShieldAlertIcon } from "lucide-react"
 
 import { getAllReports } from "@/lib/actions/reports/queries/get-all"
 import { ReportStatus, ReportTargetType } from "@/lib/actions/reports/types"
-import {
-  reportStatusSchema,
-  reportTargetTypeSchema,
-} from "@/lib/actions/reports/schemas"
 import { hasRole, ROLES } from "@/lib/actions/role"
 import { ReportsTable } from "@/components/dashboard/reports/reports-table"
 import { createMetadata } from "@/lib/config/metadata_generator"
@@ -32,6 +28,19 @@ export async function generateMetadata() {
   })
 }
 
+const VALID_STATUSES: readonly string[] = [
+  "pending",
+  "under_review",
+  "resolved",
+  "dismissed",
+]
+const VALID_TARGET_TYPES: readonly string[] = [
+  "product",
+  "review",
+  "technical_issue",
+  "general",
+]
+
 export default async function ReportsPage({ params, searchParams }: PageProps) {
   const { locale } = await params
   const query = await searchParams
@@ -41,15 +50,17 @@ export default async function ReportsPage({ params, searchParams }: PageProps) {
     redirect(`/${locale}/login`)
   }
 
-  const parsedStatus = reportStatusSchema.safeParse(query.status)
-  const status: ReportStatus | undefined = parsedStatus.success
-    ? parsedStatus.data
-    : undefined
+  const rawStatus = query.status
+  const status: ReportStatus | undefined =
+    rawStatus && VALID_STATUSES.includes(rawStatus)
+      ? (rawStatus as ReportStatus)
+      : undefined
 
-  const parsedTargetType = reportTargetTypeSchema.safeParse(query.targetType)
-  const targetType: ReportTargetType | undefined = parsedTargetType.success
-    ? parsedTargetType.data
-    : undefined
+  const rawTargetType = query.targetType
+  const targetType: ReportTargetType | undefined =
+    rawTargetType && VALID_TARGET_TYPES.includes(rawTargetType)
+      ? (rawTargetType as ReportTargetType)
+      : undefined
 
   const limit = query.limit ? parseInt(query.limit, 10) : 20
   const offset = query.offset ? parseInt(query.offset, 10) : 0
@@ -66,7 +77,6 @@ export default async function ReportsPage({ params, searchParams }: PageProps) {
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
-      {/* Header */}
       <div className="flex flex-col gap-3 border-b border-border/40 pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
@@ -84,7 +94,6 @@ export default async function ReportsPage({ params, searchParams }: PageProps) {
         </div>
       </div>
 
-      {/* Reports Table & Controls */}
       <ReportsTable reports={reports} total={total} />
     </div>
   )

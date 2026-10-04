@@ -1,6 +1,7 @@
 /**
  * @file lib/actions/reports/mutations/delete.ts
  * @description Server Action to permanently remove a report (admin only).
+ * Enforces ID validation, parallel authorization checks, and route cache revalidation.
  */
 
 "use server"
@@ -25,7 +26,7 @@ export async function deleteReport(id: string): Promise<ApiResult<null>> {
     }
   }
 
-  // 2. Parallel authorization checks
+  // 2. Perform parallel authorization checks using typed constants
   const [isAdmin, canDelete] = await Promise.all([
     hasRole(ROLES.ADMIN),
     hasPermission(PERMISSIONS.DELETE_REPORT),
@@ -45,8 +46,12 @@ export async function deleteReport(id: string): Promise<ApiResult<null>> {
     }
   }
 
+  // 3. Delete record in database
   const supabase = await createServerClient()
-  const { error } = await supabase.from("reports").delete().eq("id", id)
+  const { error } = await supabase
+    .from("reports")
+    .delete()
+    .eq("id", idValidation.data)
 
   if (error) {
     return {
@@ -56,7 +61,8 @@ export async function deleteReport(id: string): Promise<ApiResult<null>> {
     }
   }
 
-  // 3. Invalidate caches
+  // 4. Invalidate related cache paths
+  revalidatePath("/dashboard/reports")
   revalidatePath("/", "layout")
 
   return {

@@ -1,6 +1,6 @@
 /**
  * @file lib/actions/reports/queries/get-all.ts
- * @description Retrieves a paginated list of reports with reporter profile and target item previews.
+ * @description Retrieves a paginated list of reports with safe profile resolution and target preview.
  */
 
 "use server"
@@ -18,6 +18,14 @@ import { hasRole, ROLES } from "../../role"
 export async function getAllReports(
   options: Partial<GetReportsFilterOptions> = {}
 ): Promise<ApiResult<{ reports: ReportWithDetails[]; total: number }>> {
+  const isAdmin = await hasRole(ROLES.ADMIN)
+  if (!isAdmin) {
+    return {
+      success: false,
+      error: "UNAUTHORIZED_ACCESS",
+    }
+  }
+
   const validation = getReportsFilterSchema.safeParse(options)
   if (!validation.success) {
     return {
@@ -27,31 +35,12 @@ export async function getAllReports(
     }
   }
 
-  const isAdmin = await hasRole(ROLES.ADMIN)
-  if (!isAdmin) {
-    return {
-      success: false,
-      error: "UNAUTHORIZED_ACCESS",
-    }
-  }
-
   const { status, targetType, limit, offset } = validation.data
   const supabase = await createServerClient()
 
   let query = supabase
     .from("reports")
-    .select(
-      `
-      *,
-      reporter:profiles!reports_reporter_id_fkey (
-        id,
-        first_name,
-        last_name,
-        email
-      )
-    `,
-      { count: "exact" }
-    )
+    .select("*", { count: "exact" })
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1)
 
@@ -66,6 +55,7 @@ export async function getAllReports(
   const { data: reports, count, error } = await query
 
   if (error) {
+    console.error("🔴 [getAllReports Error]:", error.message)
     return {
       success: false,
       error: "FETCH_REPORTS_ERROR",
@@ -73,9 +63,47 @@ export async function getAllReports(
     }
   }
 
-  // جلب معاينة الهدف المبلّغ عنه (Preview) لعرضه للمشرف مباشرة
+  if (!reports || reports.length === 0) {
+    return {
+      success: true,
+      data: {
+        reports: [],
+        total: count || 0,
+      },
+    }
+  }
+
+  const reporterIds = Array.from(
+    new Set(
+      reports
+        .map((r) => r.reporter_id)
+        .filter((id): id is string => Boolean(id))
+    )
+  )
+
+  let profilesMap: Record<
+    string,
+    {
+      id: string
+      first_name?: string | null
+      last_name?: string | null
+      email?: string | null
+    }
+  > = {}
+
+  if (reporterIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, first_name, last_name, email")
+      .in("id", reporterIds)
+
+    if (profiles) {
+      profilesMap = Object.fromEntries(profiles.map((p) => [p.id, p]))
+    }
+  }
+
   const populatedReports: ReportWithDetails[] = await Promise.all(
-    (reports || []).map(async (rep) => {
+    reports.map(async (rep) => {
       let target_preview: TargetPreview = null
 
       if (rep.target_id) {
@@ -104,6 +132,7 @@ export async function getAllReports(
 
       return {
         ...rep,
+        reporter: rep.reporter_id ? profilesMap[rep.reporter_id] || null : null,
         target_preview,
       } as ReportWithDetails
     })

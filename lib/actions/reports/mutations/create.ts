@@ -1,6 +1,7 @@
 /**
  * @file lib/actions/reports/mutations/create.ts
- * @description Server Action to submit an issue or moderation report with duplicate prevention.
+ * @description Server Action to submit an issue or moderation report.
+ * Enforces payload validation, user authorization for protected content, duplicate checking, and cache revalidation.
  */
 
 "use server"
@@ -10,6 +11,11 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { CreateReportInput } from "../types"
 import { createReportSchema } from "../schemas"
+import { hasPermission, PERMISSIONS } from "../../role"
+
+// ============================================================================
+// Main Action Function
+// ============================================================================
 
 export async function submitReport(
   payload: CreateReportInput
@@ -46,7 +52,18 @@ export async function submitReport(
     }
   }
 
-  // 4. Prevent duplicate pending reports from the same user for the same target
+  // 4. Permission check for registered users
+  if (reporterId) {
+    const canCreate = await hasPermission(PERMISSIONS.CREATE_REPORT)
+    if (!canCreate) {
+      return {
+        success: false,
+        error: "PERMISSION_DENIED",
+      }
+    }
+  }
+
+  // 5. Prevent duplicate pending reports from the same user for the same target
   if (reporterId && safeData.targetId) {
     const { data: existingReport } = await supabase
       .from("reports")
@@ -68,7 +85,7 @@ export async function submitReport(
     }
   }
 
-  // 5. Insert the report
+  // 6. Insert the report
   const { data: newReport, error } = await supabase
     .from("reports")
     .insert({
@@ -91,6 +108,8 @@ export async function submitReport(
     }
   }
 
+  // 7. Invalidate related cache paths
+  revalidatePath("/dashboard/reports")
   revalidatePath("/", "layout")
 
   return {
