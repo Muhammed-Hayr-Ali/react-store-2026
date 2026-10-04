@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { BellIcon, LogOutIcon, UserIcon } from "lucide-react"
@@ -134,7 +133,7 @@ export default function UserMenu({ user, className }: UserMenuProps) {
 
       <CustomPopoverContent
         align="end"
-        className="w-max max-w-[300px] min-w-[260px] gap-0 rounded-xl p-0 shadow-lg"
+        className="w-max max-w-75 min-w-65 gap-0 rounded-xl p-0 shadow-lg"
       >
         <CustomPopoverHeader className="px-3.5 py-3">
           <UserProfileHeader user={user} />
