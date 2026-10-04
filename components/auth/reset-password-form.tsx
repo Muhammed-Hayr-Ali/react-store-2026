@@ -4,10 +4,12 @@ import * as React from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
-import * as z from "zod"
+import { z } from "zod"
+import Link from "next/link"
+import { EyeIcon, EyeOff, Lock } from "lucide-react"
+import { toast } from "sonner"
+
 import { Button } from "@/components/ui/button"
-
-
 import {
   Field,
   FieldError,
@@ -15,33 +17,29 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { AppLogo } from "@/components/ui/app-logo"
-import Link from "next/link"
 import { Spinner } from "@/components/ui/spinner"
-import { Lock } from "lucide-react"
-import { appRoutes } from "@/lib/config/app-routes"
-import { confirmPasswordReset } from "@/lib/actions/authentication/resetPassword"
+import { CustomInput } from "@/components/ui/custom-input"
 import { AuthHeader } from "./header"
-import { toast } from "sonner"
-import { CustomInput } from "../ui/custom-input"
 
-const resetPasswordSchema = z
-  .object({
-    password: z.string().min(8, "Password must be at least 8 characters long."),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match.",
-    path: ["confirmPassword"],
-  })
+import {
+  confirmPasswordReset,
+  confirmPasswordResetSchema,
+} from "@/lib/actions/authentication"
+import { appRoutes } from "@/lib/config/app-routes"
+
+const clientResetSchema = confirmPasswordResetSchema.omit({ token: true })
+type ClientResetFormValues = z.infer<typeof clientResetSchema>
 
 export function ResetPasswordForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get("token")
 
-  // 2. تهيئة النموذج
-  const form = useForm<z.infer<typeof resetPasswordSchema>>({
-    resolver: zodResolver(resetPasswordSchema),
+  const [showPassword, setShowPassword] = React.useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
+
+  const form = useForm<ClientResetFormValues>({
+    resolver: zodResolver(clientResetSchema),
     defaultValues: {
       password: "",
       confirmPassword: "",
@@ -52,32 +50,33 @@ export function ResetPasswordForm() {
     formState: { isSubmitting },
   } = form
 
-  // إذا لم يكن هناك رمز في الرابط، نعرض رسالة خطأ
   if (!token) {
     return (
       <div className="flex flex-col items-center gap-4 p-6 text-center">
         <AppLogo size="xl" />
-        <h1 className="text-xl font-bold text-red-600">Error</h1>
-        <p className="text-gray-600">
+        <h1 className="text-xl font-bold text-destructive">Error</h1>
+        <p className="text-sm text-muted-foreground">
           Reset password link is missing or invalid. Please request a new link.
         </p>
 
         <Button variant="outline" className="mt-4" asChild>
-          <Link href={appRoutes.auth.forgotPassword}>
-            Request New Link
-          </Link>
+          <Link href={appRoutes.auth.forgotPassword}>Request New Link</Link>
         </Button>
       </div>
     )
   }
 
-  // 3. معالجة إرسال النموذج
-  async function onSubmit(data: z.infer<typeof resetPasswordSchema>) {
-    const result = await confirmPasswordReset(token, data.password)
+  async function onSubmit(data: ClientResetFormValues) {
+    const result = await confirmPasswordReset({
+      token: token as string,
+      password: data.password,
+      confirmPassword: data.confirmPassword,
+    })
 
     if (result.success) {
       toast.success("Success! Your password has been updated.")
-      router.push(appRoutes.auth.login)
+      router.refresh()
+      router.replace(appRoutes.auth.login)
     } else {
       if (result.error === "INVALID_OR_EXPIRED_TOKEN") {
         toast.error(
@@ -112,11 +111,26 @@ export function ResetPasswordForm() {
               <CustomInput
                 {...field}
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 aria-invalid={fieldState.invalid}
                 autoComplete="new-password"
                 prefixIcon={<Lock size="16" />}
+                suffixIcon={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="hover:bg-transparent focus:outline-none"
+                  >
+                    {showPassword ? (
+                      <EyeIcon size="16" />
+                    ) : (
+                      <EyeOff size="16" />
+                    )}
+                  </Button>
+                }
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -135,11 +149,26 @@ export function ResetPasswordForm() {
               <CustomInput
                 {...field}
                 id="confirmPassword"
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 placeholder="••••••••"
                 aria-invalid={fieldState.invalid}
                 autoComplete="new-password"
                 prefixIcon={<Lock size="16" />}
+                suffixIcon={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="hover:bg-transparent focus:outline-none"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeIcon size="16" />
+                    ) : (
+                      <EyeOff size="16" />
+                    )}
+                  </Button>
+                }
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>

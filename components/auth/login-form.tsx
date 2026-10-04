@@ -1,50 +1,46 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
-import * as z from "zod"
+import Link from "next/link"
+import { EyeIcon, EyeOff, Lock, Mail } from "lucide-react"
+import { toast } from "sonner"
+
 import { Button } from "@/components/ui/button"
 import {
   Field,
-  FieldError, // Added FieldError to display validation messages
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
 } from "@/components/ui/field"
-import { signInWithPassword } from "@/lib/actions/authentication/signInWithPassword"
-import Link from "next/link"
-import { Spinner } from "../ui/spinner"
-import { EyeIcon, EyeOff, Lock, Mail } from "lucide-react"
-import { appRoutes } from "@/lib/config/app-routes"
-import { GoogleSignInButton } from "./google-sign-in-button"
+import { Spinner } from "@/components/ui/spinner"
+import { Badge } from "@/components/ui/badge"
+import { CustomInput } from "@/components/ui/custom-input"
 import { AuthHeader } from "./header"
-import { Badge } from "../ui/badge"
-import { toast } from "sonner"
-import { CustomInput } from "../ui/custom-input"
+import { GoogleSignInButton } from "./google-sign-in-button"
 
-// 1. Define the validation schema using Zod
-const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Email is required.")
-    .email("Please enter a valid email address."),
-  password: z.string().min(6, "Password must be at least 6 characters long."),
-})
+import {
+  signInWithPassword,
+  signInWithPasswordSchema,
+  type SignInWithPasswordInput,
+} from "@/lib/actions/authentication"
+import { appRoutes } from "@/lib/config/app-routes"
 
 interface LoginFormProps {
   lastLoginMethod: string | undefined
 }
 
 export function LoginForm({ lastLoginMethod }: LoginFormProps) {
-  //Router for navigation after successful login
   const router = useRouter()
-  // show password toggle
+  const searchParams = useSearchParams()
+  const redirectTarget = searchParams.get("redirect") || appRoutes.home
   const [showPassword, setShowPassword] = React.useState(false)
-  // 2. Initialize the form with React Hook Form and Zod
-  const form = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
+
+  const form = useForm<SignInWithPasswordInput>({
+    resolver: zodResolver(signInWithPasswordSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -55,13 +51,12 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
     formState: { isSubmitting, errors },
   } = form
 
-  // 3. Handle form submission
-  async function onSubmit(data: z.infer<typeof loginSchema>) {
-    const result = await signInWithPassword(data.email, data.password)
+  async function onSubmit(data: SignInWithPasswordInput) {
+    const result = await signInWithPassword(data)
 
     if (result.success) {
-      // On successful login, refresh the page to let the server-side logic handle redirection.
-      router.push(appRoutes.home) // Redirect to the home page or dashboard after successful login
+      router.refresh()
+      router.replace(redirectTarget)
     } else {
       toast.error(result.error || "Invalid email or password.")
     }
@@ -91,9 +86,8 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
                 placeholder="you@domain.com"
                 aria-invalid={fieldState.invalid}
                 autoComplete="email"
-                prefixIcon={<Mail size="16" />} // Optional: Add an email icon if desired
+                prefixIcon={<Mail size="16" />}
               />
-              {/* Render error message if invalid */}
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
@@ -109,15 +103,16 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
               <CustomInput
                 {...field}
                 id="password"
-                type={showPassword ? "text" : "password"} // Toggle between text and password type
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 aria-invalid={fieldState.invalid}
                 autoComplete="current-password"
-                prefixIcon={<Lock size="16" />} // Optional: Add a password icon if desired
+                prefixIcon={<Lock size="16" />}
                 suffixIcon={
                   <Button
                     type="button"
                     variant="ghost"
+                    size="icon-sm"
                     onClick={() => setShowPassword(!showPassword)}
                     className="hover:bg-transparent focus:outline-none"
                   >
@@ -142,7 +137,6 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
           )}
         />
 
-        {/* Display server-side errors */}
         {errors.root && (
           <FieldError errors={[{ message: errors.root.message }]} />
         )}
@@ -169,7 +163,7 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
           </div>
         </Field>
 
-        <FieldSeparator className="-amber-400 my-1">Or</FieldSeparator>
+        <FieldSeparator className="my-1">Or</FieldSeparator>
 
         <Field className="grid gap-4 sm:grid-cols-1">
           <GoogleSignInButton lastLoginMethod={lastLoginMethod} />

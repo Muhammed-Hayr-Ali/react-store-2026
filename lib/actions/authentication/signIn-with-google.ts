@@ -3,8 +3,11 @@
 import { cookies } from "next/headers"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
+import { OAuthSignInResult } from "./types"
 
-export async function signInWithGoogle(): Promise<ApiResult<{ url: string }>> {
+export async function signInWithGoogle(): Promise<
+  ApiResult<OAuthSignInResult>
+> {
   const supabase = await createServerClient()
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
 
@@ -28,7 +31,12 @@ export async function signInWithGoogle(): Promise<ApiResult<{ url: string }>> {
   }
 
   const cookieStore = await cookies()
-  cookieStore.set("login_method", "google")
+  cookieStore.set("login_method", "google", {
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  })
 
   return {
     success: true,

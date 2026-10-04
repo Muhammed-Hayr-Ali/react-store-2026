@@ -3,37 +3,33 @@
 import * as React from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
-import * as z from "zod"
+import { Mail } from "lucide-react"
+import { toast } from "sonner"
+
 import { Button } from "@/components/ui/button"
 import {
   Field,
-  FieldError, // Added FieldError to display validation messages
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
-import { Spinner } from "../ui/spinner"
-import { appRoutes } from "@/lib/config/app-routes"
-import { requestPasswordReset } from "@/lib/actions/authentication/resetPassword"
-import { IsSuccess } from "./request-is-success"
-import { Mail } from "lucide-react"
+import { Spinner } from "@/components/ui/spinner"
+import { CustomInput } from "@/components/ui/custom-input"
 import { AuthHeader } from "./header"
-import { toast } from "sonner"
-import { CustomInput } from "../ui/custom-input"
+import { IsSuccess } from "./request-is-success"
 
-// 1. Define the validation schema using Zod
-const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Email is required.")
-    .email("Please enter a valid email address."),
-})
+import {
+  requestPasswordReset,
+  requestPasswordResetSchema,
+  type RequestPasswordResetInput,
+} from "@/lib/actions/authentication"
+import { appRoutes } from "@/lib/config/app-routes"
 
 export function ForgotPasswordForm() {
-  // success state to handle successful password reset request
   const [isSuccess, setIsSuccess] = React.useState(false)
-  // 2. Initialize the form with React Hook Form and Zod
-  const form = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
+
+  const form = useForm<RequestPasswordResetInput>({
+    resolver: zodResolver(requestPasswordResetSchema),
     defaultValues: {
       email: "",
     },
@@ -43,17 +39,16 @@ export function ForgotPasswordForm() {
     formState: { isSubmitting, errors },
   } = form
 
-  // 3. Handle form submission
-  async function onSubmit(data: z.infer<typeof loginSchema>) {
-    const result = await requestPasswordReset(data.email)
+  async function onSubmit(data: RequestPasswordResetInput) {
+    const result = await requestPasswordReset(data)
     if (result.success) {
       setIsSuccess(true)
-      // On successful password reset request, refresh the page to let the server-side logic handle redirection.
       toast.success("Password reset link sent! Please check your email.")
-
     } else {
-      // On failure, set a form error to display to the user.
-      toast.error(result.error || "Failed to send password reset link. Please try again later.")
+      toast.error(
+        result.error ||
+          "Failed to send password reset link. Please try again later."
+      )
     }
   }
 
@@ -93,15 +88,13 @@ export function ForgotPasswordForm() {
                 placeholder="you@domain.com"
                 aria-invalid={fieldState.invalid}
                 autoComplete="email"
-                prefixIcon={<Mail size="16" />} // Optional: Add an email icon if desired
+                prefixIcon={<Mail size="16" />}
               />
-              {/* Render error message if invalid */}
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />
 
-        {/* Display server-side errors */}
         {errors.root && (
           <FieldError errors={[{ message: errors.root.message }]} />
         )}

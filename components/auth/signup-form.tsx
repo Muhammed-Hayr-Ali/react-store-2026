@@ -1,45 +1,38 @@
 "use client"
 
+import React from "react"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
-import * as z from "zod"
+import { EyeIcon, EyeOff, Lock, Mail, User } from "lucide-react"
+import { toast } from "sonner"
+
 import { Button } from "@/components/ui/button"
 import {
   Field,
-  FieldError, // Added FieldError to display validation messages
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
 } from "@/components/ui/field"
-import { signUpWithPassword } from "@/lib/actions/authentication/signUpWithPassword"
-import { Spinner } from "../ui/spinner"
-import { EyeIcon, EyeOff, Lock, Mail, User } from "lucide-react"
-import React from "react"
-import { appRoutes } from "@/lib/config/app-routes"
-import { GoogleSignInButton } from "./google-sign-in-button"
+import { Spinner } from "@/components/ui/spinner"
+import { CustomInput } from "@/components/ui/custom-input"
 import { AuthHeader } from "./header"
-import { toast } from "sonner"
-import { CustomInput } from "../ui/custom-input"
+import { GoogleSignInButton } from "./google-sign-in-button"
 
-// 1. Define the validation schema using Zod
-const signUpSchema = z.object({
-  name: z.string().min(1, "Name is required."),
-  email: z
-    .string()
-    .min(1, "Email is required.")
-    .email("Please enter a valid email address."),
-  password: z.string().min(6, "Password must be at least 6 characters long."),
-})
+import {
+  signUpWithPassword,
+  signUpWithPasswordSchema,
+  type SignUpWithPasswordInput,
+} from "@/lib/actions/authentication"
+import { appRoutes } from "@/lib/config/app-routes"
 
 export function SignUpForm() {
-  // Router for navigation after successful signup
   const router = useRouter()
-  // show password toggle
   const [showPassword, setShowPassword] = React.useState(false)
-  // 2. Initialize the form with React Hook Form and Zod
-  const form = useForm<z.infer<typeof signUpSchema>>({
-    resolver: zodResolver(signUpSchema),
+
+  const form = useForm<SignUpWithPasswordInput>({
+    resolver: zodResolver(signUpWithPasswordSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -51,17 +44,12 @@ export function SignUpForm() {
     formState: { isSubmitting, errors },
   } = form
 
-  // 3. Handle form submission
-  async function onSubmit(data: z.infer<typeof signUpSchema>) {
-    const result = await signUpWithPassword(
-      data.name,
-      data.email,
-      data.password
-    )
+  async function onSubmit(data: SignUpWithPasswordInput) {
+    const result = await signUpWithPassword(data)
 
     if (result.success) {
-      // On successful signup, redirect to the login page or dashboard.
-      router.push("/") // Redirect to the login page after successful signup
+      router.refresh()
+      router.replace(appRoutes.home)
     } else {
       toast.error(result.error || "Signup failed. Please try again.")
     }
@@ -90,10 +78,9 @@ export function SignUpForm() {
                 type="text"
                 placeholder="Your Name"
                 aria-invalid={fieldState.invalid}
-                autoComplete="off"
-                prefixIcon={<User size="16" />} // Optional: Add a user icon if desired
+                autoComplete="name"
+                prefixIcon={<User size="16" />}
               />
-              {/* Render error message if invalid */}
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
@@ -112,10 +99,9 @@ export function SignUpForm() {
                 type="email"
                 placeholder="you@domain.com"
                 aria-invalid={fieldState.invalid}
-                autoComplete="off"
-                prefixIcon={<Mail size="16" />} // Optional: Add an email icon if desired
+                autoComplete="email"
+                prefixIcon={<Mail size="16" />}
               />
-              {/* Render error message if invalid */}
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
@@ -131,7 +117,7 @@ export function SignUpForm() {
               <CustomInput
                 {...field}
                 id="password"
-                type={showPassword ? "text" : "password"} // Toggle between text and password type
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 aria-invalid={fieldState.invalid}
                 autoComplete="new-password"
@@ -140,6 +126,7 @@ export function SignUpForm() {
                   <Button
                     type="button"
                     variant="ghost"
+                    size="icon-sm"
                     onClick={() => setShowPassword(!showPassword)}
                     className="hover:bg-transparent focus:outline-none"
                   >
@@ -156,7 +143,6 @@ export function SignUpForm() {
           )}
         />
 
-        {/* Display server-side errors */}
         {errors.root && (
           <FieldError errors={[{ message: errors.root.message }]} />
         )}
@@ -176,5 +162,3 @@ export function SignUpForm() {
     </form>
   )
 }
-
-

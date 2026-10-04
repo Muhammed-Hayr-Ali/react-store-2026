@@ -23,11 +23,11 @@ export default function AuthLayout({ children }: Props) {
       </div>
       <FieldDescription className="text-center text-[10px]">
         By continuing, you agree to the{" "}
-        <Link className="text-primary" href="#">
+        <Link className="text-primary hover:underline" href="#">
           Terms of Service
         </Link>{" "}
         and{" "}
-        <Link className="text-primary" href="#">
+        <Link className="text-primary hover:underline" href="#">
           Privacy Policy
         </Link>
         .
@@ -35,3 +35,8 @@ export default function AuthLayout({ children }: Props) {
     </main>
   )
 }
+
+
+
+
+
