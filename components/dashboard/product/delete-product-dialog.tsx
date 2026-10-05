@@ -5,16 +5,16 @@ import { toast } from "sonner"
 import { Trash2Icon } from "lucide-react"
 
 import {
-  CustomAlertDialog,
-  CustomAlertDialogAction,
-  CustomAlertDialogCancel,
-  CustomAlertDialogContent,
-  CustomAlertDialogDescription,
-  CustomAlertDialogFooter,
-  CustomAlertDialogHeader,
-  CustomAlertDialogMedia,
-  CustomAlertDialogTitle,
-} from "@/components/ui/custom-alert-dialog"
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Spinner } from "@/components/ui/spinner"
 import { deleteProduct } from "@/lib/actions/products/mutations/delete"
 import { AdminProductSummary } from "@/lib/actions/products/types"
@@ -56,35 +56,35 @@ export default function DeleteProductDialog({
   }
 
   return (
-    <CustomAlertDialog open={isOpen === "delete"} onOpenChange={onOpenChange}>
-      <CustomAlertDialogContent className="min-w-1/4">
-        <CustomAlertDialogHeader>
-          <CustomAlertDialogMedia>
+    <AlertDialog open={isOpen === "delete"} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="min-w-1/4">
+        <AlertDialogHeader>
+          <AlertDialogMedia>
             <Trash2Icon className="text-destructive" />
-          </CustomAlertDialogMedia>
-          <CustomAlertDialogTitle>Delete Product</CustomAlertDialogTitle>
-          <CustomAlertDialogDescription>
+          </AlertDialogMedia>
+          <AlertDialogTitle>Delete Product</AlertDialogTitle>
+          <AlertDialogDescription>
             Are you sure you want to delete the product{" "}
             <span className="font-semibold wrap-break-word text-foreground">
               &quot;{item.name}&quot;
             </span>
             ? This action cannot be undone.
-          </CustomAlertDialogDescription>
-        </CustomAlertDialogHeader>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
 
-        <CustomAlertDialogFooter>
-          <CustomAlertDialogCancel disabled={isDeleting}>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isDeleting}>
             Cancel
-          </CustomAlertDialogCancel>
-          <CustomAlertDialogAction
+          </AlertDialogCancel>
+          <AlertDialogAction
             variant="destructive"
             onClick={handleDelete}
             disabled={isDeleting}
           >
             {isDeleting ? <Spinner className="size-4" /> : "Yes, delete"}
-          </CustomAlertDialogAction>
-        </CustomAlertDialogFooter>
-      </CustomAlertDialogContent>
-    </CustomAlertDialog>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }

@@ -5,16 +5,16 @@ import { toast } from "sonner"
 import { Trash2Icon } from "lucide-react"
 
 import {
-  CustomAlertDialog,
-  CustomAlertDialogAction,
-  CustomAlertDialogCancel,
-  CustomAlertDialogContent,
-  CustomAlertDialogDescription,
-  CustomAlertDialogFooter,
-  CustomAlertDialogHeader,
-  CustomAlertDialogMedia,
-  CustomAlertDialogTitle,
-} from "@/components/ui/custom-alert-dialog"
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Spinner } from "@/components/ui/spinner"
 import { Brand, deleteBrand } from "@/lib/actions/brands"
 
@@ -57,33 +57,33 @@ export default function DeleteBrandDialog({
   }
 
   return (
-    <CustomAlertDialog open={isOpen} onOpenChange={onOpenChange}>
-      <CustomAlertDialogContent className="max-w-md">
-        <CustomAlertDialogHeader>
-          <CustomAlertDialogMedia>
+    <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="max-w-md">
+        <AlertDialogHeader>
+          <AlertDialogMedia>
             <Trash2Icon className="size-5 text-destructive" />
-          </CustomAlertDialogMedia>
-          <CustomAlertDialogTitle className="text-base font-bold text-foreground">
+          </AlertDialogMedia>
+          <AlertDialogTitle className="text-base font-bold text-foreground">
             Delete Brand
-          </CustomAlertDialogTitle>
-          <CustomAlertDialogDescription className="pt-2 text-xs leading-relaxed text-muted-foreground">
+          </AlertDialogTitle>
+          <AlertDialogDescription className="pt-2 text-xs leading-relaxed text-muted-foreground">
             Are you sure you want to permanently delete{" "}
             <span className="font-semibold text-foreground">
               &quot;{item.name}&quot;
             </span>
             ? This action cannot be undone and will unlink this brand from all
             associated products.
-          </CustomAlertDialogDescription>
-        </CustomAlertDialogHeader>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
 
-        <CustomAlertDialogFooter className="flex flex-col-reverse items-stretch gap-2 pt-3 sm:flex-row sm:items-center sm:justify-end">
-          <CustomAlertDialogCancel
+        <AlertDialogFooter className="flex flex-col-reverse items-stretch gap-2 pt-3 sm:flex-row sm:items-center sm:justify-end">
+          <AlertDialogCancel
             disabled={isDeleting}
             className="w-full text-xs sm:w-auto"
           >
             Cancel
-          </CustomAlertDialogCancel>
-          <CustomAlertDialogAction
+          </AlertDialogCancel>
+          <AlertDialogAction
             variant="destructive"
             onClick={handleDelete}
             disabled={isDeleting}
@@ -100,9 +100,9 @@ export default function DeleteBrandDialog({
                 Delete Brand
               </>
             )}
-          </CustomAlertDialogAction>
-        </CustomAlertDialogFooter>
-      </CustomAlertDialogContent>
-    </CustomAlertDialog>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
