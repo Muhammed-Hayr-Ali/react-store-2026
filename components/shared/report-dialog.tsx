@@ -200,7 +200,7 @@ export function ReportDialog({
               <p className="text-xs font-medium text-destructive">{errorMsg}</p>
             )}
 
-            <DialogFooter className="gap-2 sm:gap-0">
+            <DialogFooter>
               <Button
                 type="button"
                 variant="outline"

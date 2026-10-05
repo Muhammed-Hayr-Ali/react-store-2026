@@ -3,8 +3,6 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import {
-  AlertTriangleIcon,
-  CheckCircle2Icon,
   ExternalLinkIcon,
   FileTextIcon,
   Loader2Icon,
@@ -93,10 +91,10 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-      {/* العمود الرئيسي: تفاصيل البلاغ والمحتوى */}
-      <div className="space-y-6 lg:col-span-2">
+      {/* العمود الرئيسي: تفاصيل البلاغ، المحتوى، وبيانات المبلغ */}
+      <div className="min-w-0 space-y-6 lg:col-span-2">
         {/* بطاقة معلومات البلاغ الأساسية */}
-        <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+        <div className="min-w-0 space-y-4 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
           <div className="flex items-center justify-between border-b border-border/40 pb-3">
             <div className="flex items-center gap-2">
               <TagIcon className="size-4 text-primary" />
@@ -114,17 +112,17 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
               <span className="font-semibold text-muted-foreground">
                 Reason:
               </span>
-              <p className="mt-0.5 text-sm font-bold text-destructive">
+              <p className="mt-0.5 text-sm font-bold wrap-break-word text-destructive">
                 {report.reason}
               </p>
             </div>
 
             {report.details && (
-              <div className="space-y-1">
+              <div className="min-w-0 space-y-1">
                 <span className="font-semibold text-muted-foreground">
                   Detailed Description:
                 </span>
-                <div className="rounded-lg border border-border/60 bg-muted/20 p-3 font-mono text-xs leading-relaxed whitespace-pre-wrap text-foreground">
+                <div className="overflow-hidden rounded-lg border border-border/60 bg-muted/20 p-3 font-mono text-xs leading-relaxed wrap-break-word break-all whitespace-pre-wrap text-foreground">
                   {report.details}
                 </div>
               </div>
@@ -132,9 +130,9 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
           </div>
         </div>
 
-        {/* بطاقة معاينة العنصر المستهدف */}
+        {/* بطاقة معاينة العنصر المستهدف (إن وجد) */}
         {report.target_preview && (
-          <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+          <div className="min-w-0 space-y-4 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
             <div className="flex items-center justify-between border-b border-border/40 pb-3">
               <div className="flex items-center gap-2">
                 <FileTextIcon className="size-4 text-primary" />
@@ -145,7 +143,7 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
             </div>
 
             {report.target_preview.type === "review" && (
-              <div className="space-y-3 rounded-lg border border-border/60 bg-muted/15 p-3.5 text-xs">
+              <div className="min-w-0 space-y-3 rounded-lg border border-border/60 bg-muted/15 p-3.5 text-xs">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-muted-foreground">
                     Given Rating:
@@ -158,11 +156,11 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
                   <span className="font-semibold text-muted-foreground">
                     Review Text:
                   </span>
-                  <p className="rounded-md bg-background p-3 text-foreground italic shadow-2xs">
-                    
+                  <p className="rounded-md bg-background p-3 wrap-break-word break-all whitespace-pre-wrap text-foreground italic shadow-2xs">
+                    &quot;
                     {report.target_preview.data.comment ||
                       "No comment provided."}
-                    
+                    &quot;
                   </p>
                 </div>
 
@@ -183,17 +181,22 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
             )}
 
             {report.target_preview.type === "product" && (
-              <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/15 p-3.5 text-xs">
-                <div>
-                  <span className="block text-sm font-semibold text-foreground">
+              <div className="flex flex-col gap-3 rounded-lg border border-border/60 bg-muted/15 p-3.5 text-xs sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <span className="block truncate text-sm font-semibold text-foreground">
                     {report.target_preview.data.name}
                   </span>
-                  <span className="font-mono text-[11px] text-muted-foreground">
+                  <span className="font-mono text-[11px] break-all text-muted-foreground">
                     ID: {report.target_preview.data.id}
                   </span>
                 </div>
 
-                <Button variant="outline" size="sm" asChild className="gap-1.5">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className="shrink-0 gap-1.5"
+                >
                   <a
                     href={`/product/${report.target_preview.data.slug}`}
                     target="_blank"
@@ -207,11 +210,49 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
             )}
           </div>
         )}
+
+        {/* بيانات المستخدم صاحب البلاغ في أسفل التفاصيل */}
+        <div className="min-w-0 space-y-3 rounded-xl border border-border bg-card p-4 text-xs shadow-xs sm:p-5">
+          <div className="flex items-center gap-2 border-b border-border/40 pb-2.5 font-semibold text-foreground">
+            <UserIcon className="size-4 text-primary" />
+            Reporter Info
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="min-w-0 space-y-1">
+              <span className="font-semibold text-muted-foreground">User:</span>
+              <p className="truncate font-medium text-foreground">
+                {reporterName}
+              </p>
+            </div>
+
+            {report.contact_email && (
+              <div className="min-w-0 space-y-1">
+                <span className="font-semibold text-muted-foreground">
+                  Contact Email:
+                </span>
+                <p className="font-mono break-all text-foreground">
+                  {report.contact_email}
+                </p>
+              </div>
+            )}
+
+            {report.reporter_id && (
+              <div className="min-w-0 space-y-1 sm:col-span-2">
+                <span className="font-semibold text-muted-foreground">
+                  User ID:
+                </span>
+                <p className="truncate font-mono text-[11px] text-muted-foreground">
+                  {report.reporter_id}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* العمود الجانبي: حالة البلاغ وملاحظات الإدارة */}
-      <div className="space-y-6">
-        {/* الإشراف وتغيير الحالة */}
+      {/* العمود الجانبي: مخصص حصراً لإجراءات الإشراف */}
+      <div className="min-w-0 space-y-6">
         <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
           <h2 className="border-b border-border/40 pb-2 text-sm font-semibold text-foreground">
             Moderation Action
@@ -265,41 +306,6 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
               Save Changes
             </Button>
           </div>
-        </div>
-
-        {/* بيانات المستخدم صاحب البلاغ */}
-        <div className="space-y-3 rounded-xl border border-border bg-card p-4 text-xs shadow-xs">
-          <div className="flex items-center gap-2 border-b border-border/40 pb-2 font-semibold text-foreground">
-            <UserIcon className="size-4 text-primary" />
-            Reporter Info
-          </div>
-
-          <div className="space-y-1">
-            <span className="font-semibold text-muted-foreground">User:</span>
-            <p className="font-medium text-foreground">{reporterName}</p>
-          </div>
-
-          {report.contact_email && (
-            <div className="space-y-1">
-              <span className="font-semibold text-muted-foreground">
-                Contact Email:
-              </span>
-              <p className="font-mono text-foreground">
-                {report.contact_email}
-              </p>
-            </div>
-          )}
-
-          {report.reporter_id && (
-            <div className="space-y-1 pt-1">
-              <span className="font-semibold text-muted-foreground">
-                User ID:
-              </span>
-              <p className="truncate font-mono text-[10px] text-muted-foreground">
-                {report.reporter_id}
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </div>

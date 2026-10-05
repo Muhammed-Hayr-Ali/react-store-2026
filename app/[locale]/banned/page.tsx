@@ -1,9 +1,16 @@
 import { redirect } from "next/navigation"
-import { ShieldAlertIcon, LogOutIcon, MailIcon } from "lucide-react"
+import {
+  ShieldAlertIcon,
+  LogOutIcon,
+  MessageSquareWarningIcon,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { getCurrentUserStatus } from "@/lib/actions/users/queries/get-current-user-status"
 import { createServerClient } from "@/lib/database/supabase/server"
+import { ReportDialog } from "@/components/shared/report-dialog"
+
+
 interface BannedPageProps {
   params: Promise<{ locale: string }>
 }
@@ -54,27 +61,28 @@ export default async function BannedPage({ params }: BannedPageProps) {
         )}
 
         <div className="flex flex-col gap-2 pt-2">
+          {/* نموذج تقديم تظلم عبر نظام البلاغات */}
+          <ReportDialog
+            targetType="general"
+            title="Appeal Account Suspension"
+            description="Explain why you believe this suspension was made in error or submit a request for review."
+          >
+            <Button variant="outline" className="w-full cursor-pointer text-xs">
+              <MessageSquareWarningIcon className="mr-1.5 size-3.5 text-muted-foreground" />
+              Appeal Suspension / Contact Support
+            </Button>
+          </ReportDialog>
+
           <form action={handleSignOut}>
             <Button
               type="submit"
-              variant="outline"
-              className="w-full cursor-pointer text-xs"
+              variant="ghost"
+              className="w-full cursor-pointer text-xs text-muted-foreground hover:text-foreground"
             >
               <LogOutIcon className="mr-1.5 size-3.5" />
               Sign Out
             </Button>
           </form>
-
-          <Button
-            asChild
-            variant="ghost"
-            className="w-full text-xs text-muted-foreground"
-          >
-            <a href="mailto:support@marketna.com">
-              <MailIcon className="mr-1.5 size-3.5" />
-              Contact Support
-            </a>
-          </Button>
         </div>
       </div>
     </div>

@@ -12,6 +12,7 @@ import { ApiResult } from "@/lib/database/types/utils"
 import { CreateReportInput } from "../types"
 import { createReportSchema } from "../schemas"
 import { hasPermission, PERMISSIONS } from "../../role"
+import { createAdminClient } from "@/lib/database/supabase/admin"
 
 // ============================================================================
 // Main Action Function
@@ -52,8 +53,23 @@ export async function submitReport(
     }
   }
 
-  // 4. Permission check for registered users
+  // فحص حالة المستخدم الحالية لمعرفة ما إذا كان محظوراً
+  let isUserBanned = false
   if (reporterId) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("status")
+      .eq("id", reporterId)
+      .single()
+
+    isUserBanned = profile?.status === "banned"
+  }
+
+  // 4. Permission check for registered users
+  // استثناء خاص: يُسمح للمستخدم المحظور فقط بإرسال بلاغ عام كالتماس/اعتراض على الحظر
+  const isBannedUserAppeal = isUserBanned && safeData.targetType === "general"
+
+  if (reporterId && !isBannedUserAppeal) {
     const canCreate = await hasPermission(PERMISSIONS.CREATE_REPORT)
     if (!canCreate) {
       return {
@@ -64,29 +80,40 @@ export async function submitReport(
   }
 
   // 5. Prevent duplicate pending reports from the same user for the same target
-  if (reporterId && safeData.targetId) {
-    const { data: existingReport } = await supabase
+  if (reporterId) {
+    const query = supabase
       .from("reports")
       .select("id")
       .eq("reporter_id", reporterId)
       .eq("target_type", safeData.targetType)
-      .eq("target_id", safeData.targetId)
       .eq("status", "pending")
-      .maybeSingle()
+
+    if (safeData.targetId) {
+      query.eq("target_id", safeData.targetId)
+    }
+
+    const { data: existingReport } = await query.maybeSingle()
 
     if (existingReport) {
       return {
         success: false,
         error: "ALREADY_REPORTED",
         details: {
-          form: ["You have already submitted a pending report for this item."],
+          form: [
+            isBannedUserAppeal
+              ? "You already have a pending suspension appeal under review."
+              : "You have already submitted a pending report for this item.",
+          ],
         },
       }
     }
   }
 
   // 6. Insert the report
-  const { data: newReport, error } = await supabase
+  // في حال كان المستخدم محظوراً، نستخدم عميل الإدارة لتخطي أي قيود RLS تمنع المحظور من الكتابة
+  const dbClient = isBannedUserAppeal ? createAdminClient() : supabase
+
+  const { data: newReport, error } = await dbClient
     .from("reports")
     .insert({
       reporter_id: reporterId,
