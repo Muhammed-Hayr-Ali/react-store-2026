@@ -18,6 +18,7 @@ export const appRoutes = {
     reports: "/dashboard/reports",
     roles: "/dashboard/roles",
     staffAccess: "/dashboard/staff-access",
+    notifications: "/dashboard/notifications", // إضافة مسار الإشعارات
     banned: "/banned",
     users: "/dashboard/users",
   },

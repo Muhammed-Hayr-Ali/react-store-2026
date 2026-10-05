@@ -11,15 +11,11 @@ import {
 } from "@/components/ui/custom-popover"
 import { Badge } from "@/components/ui/badge"
 import { NotificationRecord } from "@/lib/actions/notifications/types"
-import {
-  markNotificationAsRead,
-  markAllNotificationsAsRead,
-  deleteNotification,
-  deleteAllNotifications,
-} from "@/lib/actions/notifications"
 import { createClient } from "@/lib/database/supabase/client"
 import Link from "next/link"
-
+// استيراد الدوال التي يحتاجها العميل فقط مباشرة من مساراتها دون استيراد index العام
+import { markNotificationAsRead, markAllNotificationsAsRead } from "@/lib/actions/notifications/mutations/mark-read"
+import { deleteNotification, deleteAllNotifications } from "@/lib/actions/notifications/mutations/delete"
 interface NotificationDropdownProps {
   initialNotifications: NotificationRecord[]
   initialUnreadCount: number

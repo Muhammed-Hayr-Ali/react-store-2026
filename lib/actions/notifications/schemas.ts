@@ -1,7 +1,7 @@
 import { z } from "zod"
 
 export const createNotificationSchema = z.object({
-  userId: z.string().uuid("Invalid user ID format"),
+  userId: z.string().min(1, "User ID is required"),
   title: z.string().min(1, "Title is required").max(100, "Title is too long"),
   message: z
     .string()
@@ -20,12 +20,15 @@ export const broadcastNotificationSchema = z
       .max(500, "Message is too long"),
     type: z.enum(["info", "success", "warning", "error"]).default("info"),
     link: z.string().optional().nullable(),
-    targetType: z.enum(["all", "role"]),
-    roleName: z.string().optional(),
+    targetType: z.enum(["all", "role"]).default("all"),
+    roleName: z.string().optional().nullable(),
   })
   .refine(
     (data) => {
-      if (data.targetType === "role" && !data.roleName) {
+      if (
+        data.targetType === "role" &&
+        (!data.roleName || data.roleName.trim() === "")
+      ) {
         return false
       }
       return true

@@ -6,6 +6,7 @@ import {
   FileSpreadsheet,
   ShieldCheck,
   UserCog,
+  Bell, // استيراد أيقونة الإشعارات
 } from "lucide-react"
 import { appRoutes } from "@/lib/config/app-routes"
 
@@ -45,6 +46,11 @@ export const sidebarConfig = {
       title: "Staff Access",
       url: appRoutes.dashboard.staffAccess,
       icon: UserCog,
+    },
+    {
+      title: "Notifications",
+      url: appRoutes.dashboard.notifications,
+      icon: Bell,
     },
   ],
 }
