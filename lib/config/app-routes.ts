@@ -19,5 +19,6 @@ export const appRoutes = {
     roles: "/dashboard/roles",
     staffAccess: "/dashboard/staff-access",
     banned: "/banned",
+    users: "/dashboard/users",
   },
 } as const

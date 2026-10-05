@@ -5,6 +5,7 @@ import {
   FileSpreadsheet,
   ShieldCheck,
   UserCog,
+  Users,
 } from "lucide-react"
 import { appRoutes } from "@/lib/config/app-routes"
 
@@ -24,6 +25,11 @@ export const sidebarConfig = {
       title: "Flash Sales",
       url: appRoutes.dashboard.flashSales,
       icon: Zap,
+    },
+    {
+      title: "Users Management",
+      url: appRoutes.dashboard.users,
+      icon: Users,
     },
     {
       title: "Reports & Issues",
