@@ -1,44 +1,44 @@
-import { APP_NAME } from "@/lib/config/app_config"
-import { AppLogo } from "../ui/app-logo"
-import { Package, ShieldAlert, ShieldCheckIcon, UsersIcon, ZapIcon } from "lucide-react"
+import {
+  LayoutDashboard,
+  Package,
+  Zap,
+  FileSpreadsheet,
+  ShieldCheck,
+  Users,
+} from "lucide-react"
+import { appRoutes } from "@/lib/config/app-routes"
 
 export const sidebarConfig = {
-  teams: [
-    {
-      name: APP_NAME,
-      logo: AppLogo,
-      plan: "Admin Plan",
-    },
-  ],
   navMain: [
     {
+      title: "Overview",
+      url: appRoutes.dashboard.home,
+      icon: LayoutDashboard,
+    },
+    {
       title: "Products",
-      url: "/dashboard/products",
+      url: appRoutes.dashboard.products.allProducts,
       icon: Package,
-      isActive: false,
     },
     {
       title: "Flash Sales",
-      url: "/dashboard/flash-sales",
-      icon: ZapIcon,
-      isActive: false,
+      url: appRoutes.dashboard.flashSales,
+      icon: Zap,
     },
     {
       title: "Reports & Issues",
-      url: "/dashboard/reports",
-      icon: ShieldAlert,
+      url: appRoutes.dashboard.reports,
+      icon: FileSpreadsheet,
     },
     {
       title: "Roles & Permissions",
-      url: "/dashboard/roles",
-      icon: ShieldCheckIcon,
-      isActive: false,
+      url: appRoutes.dashboard.roles,
+      icon: ShieldCheck,
     },
     {
       title: "Users Management",
-      url: "/dashboard/users",
-      icon: UsersIcon,
-      isActive: false,
+      url: appRoutes.dashboard.users,
+      icon: Users,
     },
   ],
 }

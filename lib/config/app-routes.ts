@@ -5,6 +5,7 @@ export const appRoutes = {
     signup: "/auth/signup",
     forgotPassword: "/auth/forgot-password",
     resetPassword: "/auth/reset-password",
+    callback: "/auth/callback",
   },
   dashboard: {
     home: "/dashboard",
@@ -13,5 +14,9 @@ export const appRoutes = {
       allProducts: "/dashboard/products",
       create: "/dashboard/products/create",
     },
+    flashSales: "/dashboard/flash-sales",
+    reports: "/dashboard/reports",
+    roles: "/dashboard/roles",
+    users: "/dashboard/users",
   },
-}
+} as const

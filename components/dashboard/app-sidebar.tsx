@@ -3,8 +3,7 @@
 import * as React from "react"
 
 import { NavMain } from "@/components/dashboard/nav-main"
-
-import { TeamSwitcher } from "@/components/dashboard/team-switcher"
+import { StoreSwitcher } from "@/components/dashboard/store-switcher"
 import {
   Sidebar,
   SidebarContent,
@@ -16,7 +15,6 @@ import { CurrentUser } from "@/lib/actions/utils/profile"
 import { sidebarConfig } from "./sidebar-config"
 import { NavUser } from "./nav-user"
 
-
 interface AppSidebarProps {
   currentUser: CurrentUser | null
   side?: "right" | "left" | undefined
@@ -27,9 +25,13 @@ export function AppSidebar({
   side,
   ...props
 }: React.ComponentProps<typeof Sidebar> & AppSidebarProps) {
-  
   const user = {
-    name: currentUser?.first_name || currentUser?.last_name || "Guest",
+    name:
+      [currentUser?.first_name, currentUser?.last_name]
+        .filter(Boolean)
+        .join(" ") ||
+      currentUser?.email?.split("@")[0] ||
+      "Guest",
     email: currentUser?.email || "you@domain.com",
     avatar: currentUser?.profile_image || "/images/avatar.jpg",
   }
@@ -37,11 +39,10 @@ export function AppSidebar({
   return (
     <Sidebar collapsible="icon" {...props} side={side}>
       <SidebarHeader>
-        <TeamSwitcher teams={sidebarConfig.teams} />
+        <StoreSwitcher />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={sidebarConfig.navMain} />
-        {/* <NavProjects projects={data.projects} /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />
@@ -50,7 +51,3 @@ export function AppSidebar({
     </Sidebar>
   )
 }
-
-
-
-
