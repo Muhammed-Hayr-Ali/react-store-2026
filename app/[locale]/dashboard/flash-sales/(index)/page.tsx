@@ -1,7 +1,5 @@
-import Link from "next/link"
-import { PlusIcon, ZapIcon } from "lucide-react"
+import { ZapIcon } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
 import { getAllFlashSales } from "@/lib/actions/flash-sales/queries/get-all-flash-sales"
 import { FlashSalesTable } from "@/components/dashboard/flash-sales/flash-sales-table"
 import { createMetadata } from "@/lib/config/metadata_generator"
@@ -21,13 +19,11 @@ export async function generateMetadata() {
   })
 }
 
-export default async function FlashSalesPage({ params }: PageProps) {
-  const { locale } = await params
+export default async function FlashSalesPage() {
   const sales = await getAllFlashSales()
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
-      {/* Header */}
       <div className="flex flex-col gap-3 border-b border-border/40 pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
@@ -42,20 +38,8 @@ export default async function FlashSalesPage({ params }: PageProps) {
             Create, schedule, and manage limited-time flash sale campaigns.
           </p>
         </div>
-
-        <Button
-          asChild
-          variant="secondary"
-          className="flex items-center gap-2 sm:ml-auto"
-        >
-          <Link href={`/${locale}/dashboard/flash-sales/create`}>
-            <PlusIcon className="size-3.5" />
-            Create Flash Sale
-          </Link>
-        </Button>
       </div>
 
-      {/* Campaigns Table */}
       <FlashSalesTable sales={sales} />
     </div>
   )

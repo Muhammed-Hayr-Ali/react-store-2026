@@ -36,6 +36,8 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronsRightIcon,
+  ListFilterIcon,
+  PlusIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -91,6 +93,22 @@ const columnLabelsMap: Record<string, string> = {
   duration: "Duration",
   item_count: "Products",
   is_active: "Active",
+}
+
+function getColumnTitle(column: {
+  id: string
+  columnDef: { header?: unknown }
+}): string {
+  if (columnLabelsMap[column.id]) {
+    return columnLabelsMap[column.id]
+  }
+  const header = column.columnDef.header
+  if (typeof header === "string") {
+    return header
+  }
+  return column.id
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase())
 }
 
 function formatDate(isoString: string): string {
@@ -173,6 +191,10 @@ export function FlashSalesTable({
   )
   const scheduledCount = React.useMemo(
     () => data.filter((s) => s.status === "scheduled").length,
+    [data]
+  )
+  const expiredCount = React.useMemo(
+    () => data.filter((s) => s.status === "expired").length,
     [data]
   )
 
@@ -403,8 +425,8 @@ export function FlashSalesTable({
 
   return (
     <div className="flex w-full flex-col justify-start gap-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:w-64">
+      <div className="flex w-full items-center gap-2">
+        <div className="relative min-w-0 flex-1">
           <SearchIcon className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search campaigns..."
@@ -413,7 +435,7 @@ export function FlashSalesTable({
               setSearchQuery(e.target.value)
               table.setPageIndex(0)
             }}
-            className="h-8 ps-8 pe-8 text-xs"
+            className="h-8 w-full ps-8 pe-8 text-xs"
           />
           {searchQuery && (
             <button
@@ -429,8 +451,74 @@ export function FlashSalesTable({
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex h-8 items-center overflow-hidden rounded-md border border-input bg-background p-0.5">
+        <div className="flex shrink-0 items-center gap-2">
+          <div className="block sm:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="size-8"
+                  title="Filter"
+                >
+                  <ListFilterIcon className="size-3.5" />
+                  <span className="sr-only">Filter</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-36 text-xs">
+                <DropdownMenuItem
+                  onClick={() => {
+                    setCurrentTab("all")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between"
+                >
+                  <span>All</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {data.length}
+                  </Badge>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setCurrentTab("active")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between"
+                >
+                  <span>Active</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {activeCount}
+                  </Badge>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setCurrentTab("scheduled")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between"
+                >
+                  <span>Scheduled</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {scheduledCount}
+                  </Badge>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setCurrentTab("expired")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between"
+                >
+                  <span>Expired</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {expiredCount}
+                  </Badge>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          <div className="hidden h-8 items-center overflow-hidden rounded-md border border-input bg-background p-0.5 sm:inline-flex">
             <button
               type="button"
               onClick={() => {
@@ -507,6 +595,12 @@ export function FlashSalesTable({
               }`}
             >
               Expired
+              <Badge
+                variant="secondary"
+                className="ms-1.5 px-1.5 py-0 text-[10px]"
+              >
+                {expiredCount}
+              </Badge>
             </button>
           </div>
 
@@ -535,11 +629,31 @@ export function FlashSalesTable({
                     checked={col.getIsVisible()}
                     onCheckedChange={(value) => col.toggleVisibility(!!value)}
                   >
-                    {columnLabelsMap[col.id] || col.id}
+                    {getColumnTitle(col)}
                   </DropdownMenuCheckboxItem>
                 ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <Link href={`/${locale}/dashboard/flash-sales/create`}>
+            <Button
+              variant="default"
+              size="icon"
+              className="size-8 sm:hidden"
+              title="Create Flash Sale"
+            >
+              <PlusIcon className="size-3.5" />
+              <span className="sr-only">Create Flash Sale</span>
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              className="hidden h-8 gap-1.5 px-3 text-xs sm:inline-flex"
+            >
+              <PlusIcon className="size-3.5" />
+              <span>Create Flash Sale</span>
+            </Button>
+          </Link>
         </div>
       </div>
 

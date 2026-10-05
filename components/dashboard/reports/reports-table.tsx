@@ -35,6 +35,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronsRightIcon,
+  ListFilterIcon,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -193,6 +194,14 @@ export function ReportsTable({
   )
   const reviewCount = React.useMemo(
     () => data.filter((r) => r.status === "under_review").length,
+    [data]
+  )
+  const resolvedCount = React.useMemo(
+    () => data.filter((r) => r.status === "resolved").length,
+    [data]
+  )
+  const dismissedCount = React.useMemo(
+    () => data.filter((r) => r.status === "dismissed").length,
     [data]
   )
 
@@ -424,8 +433,8 @@ export function ReportsTable({
 
   return (
     <div className="flex w-full flex-col justify-start gap-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:w-64">
+      <div className="flex w-full items-center gap-2">
+        <div className="relative min-w-0 flex-1">
           <SearchIcon className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search reports..."
@@ -434,7 +443,7 @@ export function ReportsTable({
               setSearchQuery(e.target.value)
               table.setPageIndex(0)
             }}
-            className="h-8 ps-8 pe-8 text-xs"
+            className="h-8 w-full ps-8 pe-8 text-xs"
           />
           {searchQuery && (
             <button
@@ -450,8 +459,86 @@ export function ReportsTable({
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex h-8 items-center overflow-hidden rounded-md border border-input bg-background p-0.5">
+        <div className="flex shrink-0 items-center gap-2">
+          <div className="block sm:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="size-8"
+                  title="Filter"
+                >
+                  <ListFilterIcon className="size-3.5" />
+                  <span className="sr-only">Filter</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-36 text-xs">
+                <DropdownMenuItem
+                  onClick={() => {
+                    setCurrentTab("all")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between"
+                >
+                  <span>All</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {data.length}
+                  </Badge>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setCurrentTab("pending")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between"
+                >
+                  <span>Pending</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {pendingCount}
+                  </Badge>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setCurrentTab("under_review")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between"
+                >
+                  <span>Review</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {reviewCount}
+                  </Badge>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setCurrentTab("resolved")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between"
+                >
+                  <span>Resolved</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {resolvedCount}
+                  </Badge>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setCurrentTab("dismissed")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between"
+                >
+                  <span>Dismissed</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {dismissedCount}
+                  </Badge>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          <div className="hidden h-8 items-center overflow-hidden rounded-md border border-input bg-background p-0.5 sm:inline-flex">
             <button
               type="button"
               onClick={() => {
@@ -528,6 +615,12 @@ export function ReportsTable({
               }`}
             >
               Resolved
+              <Badge
+                variant="secondary"
+                className="ms-1.5 px-1.5 py-0 text-[10px]"
+              >
+                {resolvedCount}
+              </Badge>
             </button>
 
             <button
@@ -543,6 +636,12 @@ export function ReportsTable({
               }`}
             >
               Dismissed
+              <Badge
+                variant="secondary"
+                className="ms-1.5 px-1.5 py-0 text-[10px]"
+              >
+                {dismissedCount}
+              </Badge>
             </button>
           </div>
 

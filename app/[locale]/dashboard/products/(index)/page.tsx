@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { headers } from "next/headers"
-import { PackageIcon, PlusIcon } from "lucide-react"
+import { PackageIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { getAdminProductsList } from "@/lib/actions/products/queries/get-admin-products"
@@ -35,7 +35,6 @@ export default async function Page() {
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
-      {/* Header (مطابق تماماً لصفحة العروض) */}
       <div className="flex flex-col gap-3 border-b border-border/40 pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
@@ -51,20 +50,8 @@ export default async function Page() {
             pricing.
           </p>
         </div>
-
-        <Button
-          asChild
-          variant="secondary"
-          className="flex items-center gap-2 sm:ml-auto"
-        >
-          <Link href={appRoutes.dashboard.products.create}>
-            <PlusIcon className="size-3.5" />
-            Create Product
-          </Link>
-        </Button>
       </div>
 
-      {/* Products Data Table */}
       <DataTable data={products} initialIsMobile={isMobile} />
     </div>
   )

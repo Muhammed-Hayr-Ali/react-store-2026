@@ -30,6 +30,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronsRightIcon,
+  ListFilterIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -65,9 +66,6 @@ import { UserWithRoles } from "@/lib/actions/role/queries/get-users-with-roles"
 import { RoleRecord } from "@/lib/actions/role/mutations/create-role"
 import { removeRoleFromUser } from "@/lib/actions/role/mutations/remove-user-role"
 
-// -----------------------------------------------------------------------------
-// 1. TanStack Table Setup
-// -----------------------------------------------------------------------------
 const features = tableFeatures({
   columnFilteringFeature,
   columnVisibilityFeature,
@@ -80,7 +78,6 @@ const features = tableFeatures({
 
 const columnHelper = createColumnHelper<typeof features, UserWithRoles>()
 
-// الأعمدة المخفية تلقائياً على شاشات الجوال
 const HIDEABLE_COLUMNS = ["email", "roles"]
 
 const columnLabelsMap: Record<string, string> = {
@@ -95,9 +92,6 @@ interface StaffAccessTableProps {
   initialIsMobile?: boolean
 }
 
-// -----------------------------------------------------------------------------
-// 2. Main Component (StaffAccessTable)
-// -----------------------------------------------------------------------------
 export function StaffAccessTable({
   initialUsers,
   availableRoles,
@@ -157,7 +151,6 @@ export function StaffAccessTable({
     }
   }
 
-  // فلترة مدمجة تجمع بين التبويبات والبحث النصي
   const filteredUsers = React.useMemo(() => {
     return users.filter((user) => {
       const rolesCount = user.roles.length
@@ -386,9 +379,8 @@ export function StaffAccessTable({
 
   return (
     <div className="flex w-full flex-col justify-start gap-4">
-      {/* Controls Bar: شريط علوي موحد متطابق بارتفاع h-8 ومحاذاة تامة */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:w-64">
+      <div className="flex w-full items-center gap-2">
+        <div className="relative min-w-0 flex-1">
           <SearchIcon className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search users..."
@@ -397,7 +389,7 @@ export function StaffAccessTable({
               setSearchQuery(e.target.value)
               table.setPageIndex(0)
             }}
-            className="h-8 ps-8 pe-8 text-xs"
+            className="h-8 w-full ps-8 pe-8 text-xs"
           />
           {searchQuery && (
             <button
@@ -413,9 +405,62 @@ export function StaffAccessTable({
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {/* شريط الفلترة المتصل بدون شادو */}
-          <div className="inline-flex h-8 items-center overflow-hidden rounded-md border border-input bg-background p-0.5">
+        <div className="flex shrink-0 items-center gap-2">
+          <div className="block sm:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="size-8"
+                  title="Filter"
+                >
+                  <ListFilterIcon className="size-3.5" />
+                  <span className="sr-only">Filter</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-36 text-xs">
+                <DropdownMenuItem
+                  onClick={() => {
+                    setCurrentTab("all")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between"
+                >
+                  <span>All</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {users.length}
+                  </Badge>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setCurrentTab("assigned")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between"
+                >
+                  <span>Assigned</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {assignedCount}
+                  </Badge>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setCurrentTab("unassigned")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between"
+                >
+                  <span>Unassigned</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {unassignedCount}
+                  </Badge>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          <div className="hidden h-8 items-center overflow-hidden rounded-md border border-input bg-background p-0.5 sm:inline-flex">
             <button
               type="button"
               onClick={() => {
@@ -480,7 +525,6 @@ export function StaffAccessTable({
             </button>
           </div>
 
-          {/* زر اختيار الأعمدة كأيقونة مربعة size-8 */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -514,7 +558,6 @@ export function StaffAccessTable({
         </div>
       </div>
 
-      {/* Main Table */}
       <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">
         <div className="overflow-x-auto">
           <Table className="w-full">
@@ -574,7 +617,6 @@ export function StaffAccessTable({
         </div>
       </div>
 
-      {/* Pagination Footer */}
       <div className="flex items-center justify-between px-1">
         <div className="flex w-full items-center gap-8 lg:w-fit">
           <div className="hidden items-center gap-2 lg:flex">
