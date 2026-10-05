@@ -5,15 +5,15 @@ import { toast } from "sonner"
 import { ShieldAlertIcon, CheckCircle2Icon } from "lucide-react"
 
 import {
-  CustomAlertDialog,
-  CustomAlertDialogCancel,
-  CustomAlertDialogContent,
-  CustomAlertDialogDescription,
-  CustomAlertDialogFooter,
-  CustomAlertDialogHeader,
-  CustomAlertDialogMedia,
-  CustomAlertDialogTitle,
-} from "@/components/ui/custom-alert-dialog"
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { Field, FieldLabel } from "@/components/ui/field"
@@ -81,21 +81,21 @@ function UserStatusContent({
 
   return (
     <>
-      <CustomAlertDialogHeader>
-        <CustomAlertDialogMedia>
+      <AlertDialogHeader>
+        <AlertDialogMedia>
           <ShieldAlertIcon className="size-5 text-amber-500" />
-        </CustomAlertDialogMedia>
-        <CustomAlertDialogTitle className="text-base font-bold text-foreground">
+        </AlertDialogMedia>
+        <AlertDialogTitle className="text-base font-bold text-foreground">
           Update Account Status
-        </CustomAlertDialogTitle>
-        <CustomAlertDialogDescription className="text-xs leading-relaxed text-muted-foreground">
+        </AlertDialogTitle>
+        <AlertDialogDescription className="text-xs leading-relaxed text-muted-foreground">
           Manage account accessibility and status for{" "}
           <span className="font-semibold text-foreground">
             &quot;{userDisplayName}&quot;
           </span>
           .
-        </CustomAlertDialogDescription>
-      </CustomAlertDialogHeader>
+        </AlertDialogDescription>
+      </AlertDialogHeader>
 
       <div className="space-y-3 py-2">
         <Field>
@@ -134,13 +134,13 @@ function UserStatusContent({
         )}
       </div>
 
-      <CustomAlertDialogFooter className="flex flex-col-reverse items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end">
-        <CustomAlertDialogCancel
+      <AlertDialogFooter className="flex flex-col-reverse items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end">
+        <AlertDialogCancel
           disabled={isSubmitting}
           className="w-full text-xs sm:w-auto"
         >
           Cancel
-        </CustomAlertDialogCancel>
+        </AlertDialogCancel>
         <Button
           type="button"
           onClick={handleUpdate}
@@ -159,7 +159,7 @@ function UserStatusContent({
             </>
           )}
         </Button>
-      </CustomAlertDialogFooter>
+      </AlertDialogFooter>
     </>
   )
 }
@@ -171,8 +171,8 @@ export function UserStatusDialog({
   onSuccess,
 }: UserStatusDialogProps) {
   return (
-    <CustomAlertDialog open={isOpen} onOpenChange={onOpenChange}>
-      <CustomAlertDialogContent className="max-w-md">
+    <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="max-w-md">
         {isOpen && user && (
           <UserStatusContent
             key={user.id}
@@ -181,7 +181,7 @@ export function UserStatusDialog({
             onSuccess={onSuccess}
           />
         )}
-      </CustomAlertDialogContent>
-    </CustomAlertDialog>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }

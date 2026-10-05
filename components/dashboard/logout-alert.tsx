@@ -1,16 +1,16 @@
 "use client"
 
 import {
-  CustomAlertDialog,
-  CustomAlertDialogAction,
-  CustomAlertDialogCancel,
-  CustomAlertDialogContent,
-  CustomAlertDialogDescription,
-  CustomAlertDialogFooter,
-  CustomAlertDialogHeader,
-  CustomAlertDialogMedia,
-  CustomAlertDialogTitle,
-} from "@/components/ui/custom-alert-dialog"
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { LogOutIcon } from "lucide-react"
 import React from "react"
 import { Spinner } from "../ui/spinner"
@@ -44,27 +44,27 @@ export function LogoutAlertDialog({
   }
 
   return (
-    <CustomAlertDialog open={staus === "logout"} onOpenChange={onOpenChange}>
-      <CustomAlertDialogContent>
-        <CustomAlertDialogHeader>
-          <CustomAlertDialogMedia>
+    <AlertDialog open={staus === "logout"} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogMedia>
             <LogOutIcon />
-          </CustomAlertDialogMedia>
+          </AlertDialogMedia>
 
-          <CustomAlertDialogTitle>
+          <AlertDialogTitle>
             Logout from your account
-          </CustomAlertDialogTitle>
-          <CustomAlertDialogDescription>
+          </AlertDialogTitle>
+          <AlertDialogDescription>
             Are you sure you want to logout from your account?
-          </CustomAlertDialogDescription>
-        </CustomAlertDialogHeader>
-        <CustomAlertDialogFooter>
-          <CustomAlertDialogCancel>Cancel</CustomAlertDialogCancel>
-          <CustomAlertDialogAction variant="destructive" onClick={handleLogout}>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction variant="destructive" onClick={handleLogout}>
             {isLoading ? <Spinner /> : "Yes, Logout"}
-          </CustomAlertDialogAction>
-        </CustomAlertDialogFooter>
-      </CustomAlertDialogContent>
-    </CustomAlertDialog>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }

@@ -5,15 +5,15 @@ import { toast } from "sonner"
 import { ShieldPlusIcon, CheckCircle2Icon } from "lucide-react"
 
 import {
-  CustomAlertDialog,
-  CustomAlertDialogCancel,
-  CustomAlertDialogContent,
-  CustomAlertDialogDescription,
-  CustomAlertDialogFooter,
-  CustomAlertDialogHeader,
-  CustomAlertDialogMedia,
-  CustomAlertDialogTitle,
-} from "@/components/ui/custom-alert-dialog"
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { Field, FieldLabel } from "@/components/ui/field"
@@ -96,21 +96,21 @@ function AssignRoleContent({
 
   return (
     <>
-      <CustomAlertDialogHeader>
-        <CustomAlertDialogMedia>
+      <AlertDialogHeader>
+        <AlertDialogMedia>
           <ShieldPlusIcon className="size-5 text-primary" />
-        </CustomAlertDialogMedia>
-        <CustomAlertDialogTitle className="text-base font-bold text-foreground">
+        </AlertDialogMedia>
+        <AlertDialogTitle className="text-base font-bold text-foreground">
           Assign Access Role
-        </CustomAlertDialogTitle>
-        <CustomAlertDialogDescription className="text-xs leading-relaxed text-muted-foreground">
+        </AlertDialogTitle>
+        <AlertDialogDescription className="text-xs leading-relaxed text-muted-foreground">
           Grant a new security role to{" "}
           <span className="font-semibold text-foreground">
             &quot;{userDisplayName}&quot;
           </span>
           .
-        </CustomAlertDialogDescription>
-      </CustomAlertDialogHeader>
+        </AlertDialogDescription>
+      </AlertDialogHeader>
 
       <div className="py-2">
         <Field>
@@ -147,13 +147,13 @@ function AssignRoleContent({
         </Field>
       </div>
 
-      <CustomAlertDialogFooter className="flex flex-col-reverse items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end">
-        <CustomAlertDialogCancel
+      <AlertDialogFooter className="flex flex-col-reverse items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end">
+        <AlertDialogCancel
           disabled={isSubmitting}
           className="w-full text-xs sm:w-auto"
         >
           Cancel
-        </CustomAlertDialogCancel>
+        </AlertDialogCancel>
         <Button
           type="button"
           onClick={handleAssign}
@@ -174,7 +174,7 @@ function AssignRoleContent({
             </>
           )}
         </Button>
-      </CustomAlertDialogFooter>
+      </AlertDialogFooter>
     </>
   )
 }
@@ -187,8 +187,8 @@ export default function AssignRoleDialog({
   onSuccess,
 }: AssignRoleDialogProps) {
   return (
-    <CustomAlertDialog open={isOpen} onOpenChange={onOpenChange}>
-      <CustomAlertDialogContent className="max-w-md">
+    <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="max-w-md">
         {isOpen && user && (
           <AssignRoleContent
             key={user.id}
@@ -198,7 +198,7 @@ export default function AssignRoleDialog({
             onSuccess={onSuccess}
           />
         )}
-      </CustomAlertDialogContent>
-    </CustomAlertDialog>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
