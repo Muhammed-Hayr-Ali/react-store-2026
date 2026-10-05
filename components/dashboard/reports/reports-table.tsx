@@ -302,18 +302,6 @@ export function ReportsTable({
               >
                 {row.original.reason}
               </Link>
-              {row.original.details ? (
-                <div
-                  className="truncate text-xs text-muted-foreground"
-                  title={row.original.details}
-                >
-                  {row.original.details}
-                </div>
-              ) : (
-                <div className="font-mono text-[11px] text-muted-foreground/80">
-                  #{row.original.id.slice(0, 8)}
-                </div>
-              )}
             </div>
           ),
           enableHiding: false,
@@ -645,25 +633,82 @@ export function ReportsTable({
             </button>
           </div>
 
-          <Select
-            value={targetTypeFilter}
-            onValueChange={(val) => {
-              setTargetTypeFilter(val)
-              table.setPageIndex(0)
-            }}
-          >
-            <SelectTrigger className="h-8 w-28 text-xs">
-              <FilterIcon className="me-1.5 size-3 text-muted-foreground" />
-              <SelectValue placeholder="All Types" />
-            </SelectTrigger>
-            <SelectContent align="end">
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="product">Product</SelectItem>
-              <SelectItem value="review">Review</SelectItem>
-              <SelectItem value="technical_issue">Issue</SelectItem>
-              <SelectItem value="general">General</SelectItem>
-            </SelectContent>
-          </Select>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-8"
+                title="Filter by Type"
+              >
+                <FilterIcon className="size-3.5" />
+                <span className="sr-only">Filter by Type</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40 text-xs">
+              <DropdownMenuItem
+                onClick={() => {
+                  setTargetTypeFilter("all")
+                  table.setPageIndex(0)
+                }}
+                className="flex cursor-pointer items-center justify-between"
+              >
+                <span>All Types</span>
+                {targetTypeFilter === "all" && (
+                  <span className="font-bold text-primary">✓</span>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setTargetTypeFilter("product")
+                  table.setPageIndex(0)
+                }}
+                className="flex cursor-pointer items-center justify-between"
+              >
+                <span>Product</span>
+                {targetTypeFilter === "product" && (
+                  <span className="font-bold text-primary">✓</span>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setTargetTypeFilter("review")
+                  table.setPageIndex(0)
+                }}
+                className="flex cursor-pointer items-center justify-between"
+              >
+                <span>Review</span>
+                {targetTypeFilter === "review" && (
+                  <span className="font-bold text-primary">✓</span>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setTargetTypeFilter("technical_issue")
+                  table.setPageIndex(0)
+                }}
+                className="flex cursor-pointer items-center justify-between"
+              >
+                <span>Issue</span>
+                {targetTypeFilter === "technical_issue" && (
+                  <span className="font-bold text-primary">✓</span>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setTargetTypeFilter("general")
+                  table.setPageIndex(0)
+                }}
+                className="flex cursor-pointer items-center justify-between"
+              >
+                <span>General</span>
+                {targetTypeFilter === "general" && (
+                  <span className="font-bold text-primary">✓</span>
+                )}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

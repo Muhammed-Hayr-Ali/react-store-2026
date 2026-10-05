@@ -32,6 +32,7 @@ import {
   ChevronRightIcon,
   ChevronsRightIcon,
   ListFilterIcon,
+  PlusIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -442,6 +443,26 @@ export default function RolesTable({
                 ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <Link href={`/${locale}/dashboard/roles/create`}>
+            <Button
+              variant="default"
+              size="icon"
+              className="size-8 sm:hidden"
+              title="Create Role"
+            >
+              <PlusIcon className="size-3.5" />
+              <span className="sr-only">Create Role</span>
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              className="hidden h-8 gap-1.5 px-3 text-xs sm:inline-flex"
+            >
+              <PlusIcon className="size-3.5" />
+              <span>Create Role</span>
+            </Button>
+          </Link>
         </div>
       </div>
 

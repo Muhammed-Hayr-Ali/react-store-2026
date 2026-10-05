@@ -85,7 +85,7 @@ const features = tableFeatures({
 
 const columnHelper = createColumnHelper<typeof features, AdminFlashSaleItem>()
 
-const HIDEABLE_COLUMNS = ["status", "duration", "item_count"]
+const HIDEABLE_COLUMNS = ["status", "duration", "item_count", "is_active"]
 
 const columnLabelsMap: Record<string, string> = {
   title: "Campaign",
@@ -351,7 +351,6 @@ export function FlashSalesTable({
               />
             </div>
           ),
-          enableHiding: false,
         }),
 
         columnHelper.display({

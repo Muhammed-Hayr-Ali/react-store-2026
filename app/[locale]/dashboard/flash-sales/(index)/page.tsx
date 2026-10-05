@@ -5,11 +5,7 @@ import { FlashSalesTable } from "@/components/dashboard/flash-sales/flash-sales-
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { appConfig } from "@/lib/config/app_config"
 
-interface PageProps {
-  params: Promise<{
-    locale: string
-  }>
-}
+
 
 export async function generateMetadata() {
   return createMetadata({
