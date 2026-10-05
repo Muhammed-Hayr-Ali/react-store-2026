@@ -79,7 +79,7 @@ const features = tableFeatures({
 
 const columnHelper = createColumnHelper<typeof features, AdminUserSummary>()
 
-const HIDEABLE_COLUMNS = ["phone_number", "roles", "created_at"]
+const HIDEABLE_COLUMNS = ["phone_number", "roles", "status", "created_at"]
 
 const columnLabelsMap: Record<string, string> = {
   user: "User",
@@ -216,6 +216,7 @@ export function DataTable({
         }),
 
         columnHelper.accessor("phone_number", {
+          id: "phone_number",
           header: "Phone",
           cell: ({ row }) => (
             <span className="text-xs text-muted-foreground">
@@ -225,6 +226,7 @@ export function DataTable({
         }),
 
         columnHelper.accessor("roles", {
+          id: "roles",
           header: "Roles",
           cell: ({ row }) => (
             <div className="flex flex-wrap gap-1">
@@ -246,6 +248,7 @@ export function DataTable({
         }),
 
         columnHelper.accessor("status", {
+          id: "status",
           header: () => <div className="text-center">Status</div>,
           cell: ({ row }) => {
             const status = row.original.status
@@ -278,6 +281,7 @@ export function DataTable({
         }),
 
         columnHelper.accessor("created_at", {
+          id: "created_at",
           header: "Joined",
           cell: ({ row }) => {
             const date = new Date(row.original.created_at)
