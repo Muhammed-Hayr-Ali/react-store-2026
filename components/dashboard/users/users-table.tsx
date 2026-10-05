@@ -71,7 +71,7 @@ import {
 import { AdminUserSummary, UserStatus } from "@/lib/actions/users/types"
 import { UserStatusDialog } from "./user-status-dialog"
 import { DeleteUserDialog } from "./delete-user-dialog"
-import { UserFormDialog } from "./user-form-sheet.tsx"
+import { UserFormSheet } from "./user-form-sheet"
 
 const features = tableFeatures({
   columnFilteringFeature,
@@ -109,13 +109,14 @@ export function DataTable({
   const [currentTab, setCurrentTab] = React.useState<"all" | UserStatus>("all")
   const [searchQuery, setSearchQuery] = React.useState("")
   const params = useParams()
-  const locale = (params?.locale as string) || "en"
 
   const [selectedUser, setSelectedUser] =
     React.useState<AdminUserSummary | null>(null)
   const [isStatusOpen, setIsStatusOpen] = React.useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = React.useState(false)
-  const [isFormOpen, setIsFormOpen] = React.useState(false)
+  const [formMode, setFormMode] = React.useState<"create" | "update" | null>(
+    null
+  )
 
   if (initialData !== prevInitialData) {
     setPrevInitialData(initialData)
@@ -336,7 +337,7 @@ export function DataTable({
                     className="cursor-pointer"
                     onClick={() => {
                       setSelectedUser(row.original)
-                      setIsFormOpen(true)
+                      setFormMode("update")
                     }}
                   >
                     <PencilIcon className="me-2 size-3.5" />
@@ -573,7 +574,7 @@ export function DataTable({
             title="Create User"
             onClick={() => {
               setSelectedUser(null)
-              setIsFormOpen(true)
+              setFormMode("create")
             }}
           >
             <PlusIcon className="size-3.5" />
@@ -585,7 +586,7 @@ export function DataTable({
             className="hidden h-8 gap-1.5 px-3 text-xs sm:inline-flex"
             onClick={() => {
               setSelectedUser(null)
-              setIsFormOpen(true)
+              setFormMode("create")
             }}
           >
             <PlusIcon className="size-3.5" />
@@ -743,9 +744,11 @@ export function DataTable({
         }}
       />
 
-      <UserFormDialog
-        isOpen={isFormOpen}
-        onOpenChange={setIsFormOpen}
+      <UserFormSheet
+        isOpen={formMode}
+        onOpenChange={(open) => {
+          if (!open) setFormMode(null)
+        }}
         user={selectedUser}
         onSuccess={(updatedUser, isEditing) => {
           if (isEditing) {
