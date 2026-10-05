@@ -19,6 +19,7 @@ import { CurrentUser } from "@/lib/actions/utils/profile"
 import { CurrencyCode } from "@/lib/actions/currency/types"
 import { appRoutes } from "@/lib/config/app-routes"
 import { storeNavConfig } from "./nav-config"
+import type { NotificationRecord } from "@/lib/actions/notifications/types"
 
 import { UserProfileHeader } from "./user-menu"
 import { LanguageAccordion } from "./preferences/language-accordion"
@@ -28,9 +29,16 @@ import { CurrencyAccordion } from "./preferences/currency-accordion"
 interface MobileNavProps {
   user: CurrentUser | null
   currentCurrency: CurrencyCode
+  initialNotifications: NotificationRecord[]
+  initialUnreadCount: number
 }
 
-export function MobileNav({ user, currentCurrency }: MobileNavProps) {
+export function MobileNav({
+  user,
+  currentCurrency,
+  initialNotifications,
+  initialUnreadCount,
+}: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -43,6 +51,8 @@ export function MobileNav({ user, currentCurrency }: MobileNavProps) {
       <MobileRightMenu
         user={user}
         currentCurrency={currentCurrency}
+        initialNotifications={initialNotifications}
+        initialUnreadCount={initialUnreadCount}
         isOpen={isOpen}
         setIsOpen={setIsOpen}
       />
@@ -53,11 +63,15 @@ export function MobileNav({ user, currentCurrency }: MobileNavProps) {
 function MobileRightMenu({
   user,
   currentCurrency,
+  initialNotifications,
+  initialUnreadCount,
   isOpen,
   setIsOpen,
 }: {
   user: CurrentUser | null
   currentCurrency: CurrencyCode
+  initialNotifications: NotificationRecord[]
+  initialUnreadCount: number
   isOpen: boolean
   setIsOpen: (open: boolean) => void
 }) {
@@ -88,7 +102,11 @@ function MobileRightMenu({
     <MobileMenu isOpen={isOpen} onOpenChange={setIsOpen}>
       {user && (
         <MobileMenuHeader>
-          <UserProfileHeader user={user} />
+          <UserProfileHeader
+            user={user}
+            initialNotifications={initialNotifications}
+            initialUnreadCount={initialUnreadCount}
+          />
         </MobileMenuHeader>
       )}
 

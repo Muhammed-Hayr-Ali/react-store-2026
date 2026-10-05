@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { BellIcon, LogOutIcon, UserIcon } from "lucide-react"
+import { LogOutIcon, UserIcon } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -19,18 +19,26 @@ import { signOut } from "@/lib/actions/authentication/signOut"
 import { appRoutes } from "@/lib/config/app-routes"
 import { storeNavConfig } from "./nav-config"
 import { cn } from "@/lib/utils"
+import { NotificationDropdown } from "@/components/notifications/notification-dropdown"
+import type { NotificationRecord } from "@/lib/actions/notifications/types"
 
 interface UserMenuProps {
   user: CurrentUser
   className?: string
+  initialNotifications: NotificationRecord[]
+  initialUnreadCount: number
 }
 
 export function UserProfileHeader({
   user,
   className,
+  initialNotifications,
+  initialUnreadCount,
 }: {
   user: CurrentUser
   className?: string
+  initialNotifications: NotificationRecord[]
+  initialUnreadCount: number
 }) {
   const displayName =
     [user.first_name, user.last_name].filter(Boolean).join(" ") ||
@@ -79,24 +87,23 @@ export function UserProfileHeader({
       </div>
 
       <div className="shrink-0 ps-1">
-        <div className="relative">
-          <span className="absolute -inset-e-0.5 -top-0.5 z-10 size-2 rounded-full bg-emerald-500 ring-2 ring-background" />
-          <Button
-            type="button"
-            variant="secondary"
-            size="icon"
-            className="size-8 rounded-lg text-muted-foreground hover:text-foreground"
-            aria-label="Notifications"
-          >
-            <BellIcon className="size-4" />
-          </Button>
-        </div>
+        {/* استبدال الجرس الوهمي بمكون الإشعارات الحقيقي */}
+        <NotificationDropdown
+          initialNotifications={initialNotifications}
+          initialUnreadCount={initialUnreadCount}
+          currentUserId={user.id}
+        />
       </div>
     </div>
   )
 }
 
-export default function UserMenu({ user, className }: UserMenuProps) {
+export default function UserMenu({
+  user,
+  className,
+  initialNotifications,
+  initialUnreadCount,
+}: UserMenuProps) {
   const router = useRouter()
 
   const handleLogout = async () => {
@@ -136,7 +143,11 @@ export default function UserMenu({ user, className }: UserMenuProps) {
         className="w-max max-w-75 min-w-65 gap-0 rounded-xl p-0 shadow-lg"
       >
         <CustomPopoverHeader className="px-3.5 py-3">
-          <UserProfileHeader user={user} />
+          <UserProfileHeader
+            user={user}
+            initialNotifications={initialNotifications}
+            initialUnreadCount={initialUnreadCount}
+          />
         </CustomPopoverHeader>
 
         <Separator />
