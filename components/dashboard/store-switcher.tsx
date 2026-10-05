@@ -6,7 +6,6 @@ import { ExternalLink, ShoppingBag } from "lucide-react"
 
 import {
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
@@ -34,7 +33,7 @@ export function StoreSwitcher() {
             {/* أيقونة الشعار مع نقطة حالة ناعمة */}
             <div className="relative flex size-8.5 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs">
               <ShoppingBag className="size-4.5" />
-              <span className="absolute -end-0.5 -top-0.5 size-2 rounded-full bg-emerald-500 ring-2 ring-sidebar" />
+              <span className="absolute -inset-e-0.5 -top-0.5 size-2 rounded-full bg-emerald-500 ring-2 ring-sidebar" />
             </div>
 
             {/* نصوص الهوية (تختفي تلقائياً عند انكماش الشريط) */}
