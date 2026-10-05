@@ -84,7 +84,7 @@ export default function UsersClient({
         <Table className="w-full">
           <TableHeader className="bg-muted">
             <TableRow>
-              <TableHead className="w-[240px]">User</TableHead>
+              <TableHead className="w-60">User</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Assigned Roles</TableHead>
               <TableHead className="text-end">Actions</TableHead>
