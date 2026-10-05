@@ -5,6 +5,22 @@ import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useTransition } from "react"
 import {
+  columnFilteringFeature,
+  columnVisibilityFeature,
+  createColumnHelper,
+  createFilteredRowModel,
+  createPaginatedRowModel,
+  createSortedRowModel,
+  FlexRender,
+  rowPaginationFeature,
+  rowSortingFeature,
+  tableFeatures,
+  useTable,
+  type ColumnFiltersState,
+  type ColumnVisibilityState,
+  type SortingState,
+} from "@tanstack/react-table"
+import {
   CalendarIcon,
   ClockIcon,
   ExternalLinkIcon,
@@ -16,6 +32,11 @@ import {
   XCircleIcon,
   XIcon,
   ZapIcon,
+  Columns3Icon,
+  ChevronsLeftIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronsRightIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -24,17 +45,54 @@ import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+
 import { toggleFlashSaleStatus } from "@/lib/actions/flash-sales/mutations/toggle-status"
 import { deleteFlashSale } from "@/lib/actions/flash-sales/mutations/delete"
 import { AdminFlashSaleItem } from "@/lib/actions/flash-sales"
 
-interface FlashSalesTableProps {
-  sales: AdminFlashSaleItem[]
+const features = tableFeatures({
+  columnFilteringFeature,
+  columnVisibilityFeature,
+  rowPaginationFeature,
+  rowSortingFeature,
+  filteredRowModel: createFilteredRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+  sortedRowModel: createSortedRowModel(),
+})
+
+const columnHelper = createColumnHelper<typeof features, AdminFlashSaleItem>()
+
+// الأعمدة القابلة للإخفاء (تخفى افتراضياً على الجوال)
+const HIDEABLE_COLUMNS = ["status", "duration", "item_count"]
+
+const columnLabelsMap: Record<string, string> = {
+  title: "Campaign",
+  status: "Status",
+  duration: "Duration",
+  item_count: "Products",
+  is_active: "Active",
 }
 
 function formatDate(isoString: string): string {
@@ -54,17 +112,36 @@ function formatTime(isoString: string): string {
   return `${hours}:${minutes}`
 }
 
-export function FlashSalesTable({ sales }: FlashSalesTableProps) {
+interface FlashSalesTableProps {
+  sales: AdminFlashSaleItem[]
+  initialIsMobile?: boolean
+}
+
+export function FlashSalesTable({
+  sales: initialData,
+  initialIsMobile = false,
+}: FlashSalesTableProps) {
+  const [data, setData] = React.useState(() => initialData)
+  const [prevInitialData, setPrevInitialData] = React.useState(initialData)
+  const [currentTab, setCurrentTab] = React.useState<string>("all")
+  const [searchQuery, setSearchQuery] = React.useState("")
   const [isPending, startTransition] = useTransition()
   const params = useParams()
   const locale = (params?.locale as string) || "en"
 
-  const [searchQuery, setSearchQuery] = React.useState("")
-  const [currentTab, setCurrentTab] = React.useState<string>("all")
+  if (initialData !== prevInitialData) {
+    setPrevInitialData(initialData)
+    setData(initialData)
+  }
 
   const handleToggle = (id: string, currentActive: boolean) => {
     startTransition(async () => {
       await toggleFlashSaleStatus(id, !currentActive)
+      setData((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, is_active: !currentActive } : item
+        )
+      )
     })
   }
 
@@ -72,33 +149,75 @@ export function FlashSalesTable({ sales }: FlashSalesTableProps) {
     if (confirm("Are you sure you want to delete this flash sale?")) {
       startTransition(async () => {
         await deleteFlashSale(id)
+        setData((prev) => prev.filter((item) => item.id !== id))
       })
     }
   }
 
-  const filteredSales = React.useMemo(() => {
-    return sales.filter((sale) => {
-      const matchesTab = currentTab === "all" || sale.status === currentTab
+  const filteredData = React.useMemo(() => {
+    return data.filter((item) => {
+      const matchesTab = currentTab === "all" || item.status === currentTab
       if (!matchesTab) return false
 
       if (!searchQuery.trim()) return true
       const q = searchQuery.toLowerCase().trim()
-      const title = (sale.title || "").toLowerCase()
-      const titleAr = (sale.title_ar || "").toLowerCase()
-      const slug = (sale.slug || "").toLowerCase()
+      const title = (item.title || "").toLowerCase()
+      const titleAr = (item.title_ar || "").toLowerCase()
+      const slug = (item.slug || "").toLowerCase()
 
       return title.includes(q) || titleAr.includes(q) || slug.includes(q)
     })
-  }, [sales, currentTab, searchQuery])
+  }, [data, currentTab, searchQuery])
 
   const activeCount = React.useMemo(
-    () => sales.filter((s) => s.status === "active").length,
-    [sales]
+    () => data.filter((s) => s.status === "active").length,
+    [data]
   )
   const scheduledCount = React.useMemo(
-    () => sales.filter((s) => s.status === "scheduled").length,
-    [sales]
+    () => data.filter((s) => s.status === "scheduled").length,
+    [data]
   )
+
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<ColumnVisibilityState>(() => {
+      const initial: ColumnVisibilityState = {}
+      HIDEABLE_COLUMNS.forEach((colId) => {
+        initial[colId] = !initialIsMobile
+      })
+      return initial
+    })
+
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  )
+  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [pagination, setPagination] = React.useState({
+    pageIndex: 0,
+    pageSize: initialIsMobile ? 9 : 10,
+  })
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 768
+      setPagination((prev) => {
+        const nextSize = isMobile ? 20 : 10
+        if (prev.pageSize === nextSize) return prev
+        return { ...prev, pageSize: nextSize, pageIndex: 0 }
+      })
+
+      setColumnVisibility((prev) => {
+        const nextVisibility: ColumnVisibilityState = { ...prev }
+        HIDEABLE_COLUMNS.forEach((colId) => {
+          nextVisibility[colId] = !isMobile
+        })
+        return nextVisibility
+      })
+    }
+
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
 
   const getStatusBadge = (status: AdminFlashSaleItem["status"]) => {
     switch (status) {
@@ -132,22 +251,192 @@ export function FlashSalesTable({ sales }: FlashSalesTableProps) {
     }
   }
 
+  const columns = React.useMemo(
+    () =>
+      columnHelper.columns([
+        columnHelper.accessor("title", {
+          id: "title",
+          header: "Campaign",
+          cell: ({ row }) => (
+            <div>
+              <div className="font-semibold text-foreground">
+                {row.original.title}
+              </div>
+              {row.original.title_ar && (
+                <div className="text-xs text-muted-foreground">
+                  {row.original.title_ar}
+                </div>
+              )}
+              <div className="font-mono text-[11px] text-muted-foreground/80">
+                /{row.original.slug}
+              </div>
+            </div>
+          ),
+          enableHiding: false,
+        }),
+
+        columnHelper.accessor("status", {
+          id: "status",
+          header: "Status",
+          cell: ({ row }) => getStatusBadge(row.original.status),
+        }),
+
+        columnHelper.display({
+          id: "duration",
+          header: "Duration",
+          cell: ({ row }) => (
+            <div
+              className="text-xs text-muted-foreground"
+              suppressHydrationWarning
+            >
+              <div className="flex items-center gap-1 font-mono text-[11px]">
+                <CalendarIcon className="size-3 shrink-0 text-muted-foreground" />
+                <span>{formatDate(row.original.starts_at)}</span>
+                <span>→</span>
+                <span>{formatDate(row.original.ends_at)}</span>
+              </div>
+              <div className="mt-0.5 font-mono text-[10px] text-muted-foreground/70">
+                {formatTime(row.original.starts_at)} -{" "}
+                {formatTime(row.original.ends_at)}
+              </div>
+            </div>
+          ),
+        }),
+
+        columnHelper.accessor("item_count", {
+          id: "item_count",
+          header: () => <div className="text-center">Products</div>,
+          cell: ({ row }) => (
+            <div className="text-center">
+              <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 text-xs font-medium text-foreground">
+                <PackageIcon className="size-3 text-muted-foreground" />
+                {row.original.item_count}
+              </span>
+            </div>
+          ),
+        }),
+
+        columnHelper.accessor("is_active", {
+          id: "is_active",
+          header: () => <div className="text-center">Active</div>,
+          cell: ({ row }) => (
+            <div className="flex justify-center">
+              <Switch
+                checked={row.original.is_active}
+                disabled={isPending}
+                onCheckedChange={() =>
+                  handleToggle(row.original.id, row.original.is_active)
+                }
+                aria-label="Toggle flash sale status"
+              />
+            </div>
+          ),
+          enableHiding: false, // يبقى دائماً على الجوال
+        }),
+
+        columnHelper.display({
+          id: "actions",
+          cell: ({ row }) => (
+            <div className="flex items-center justify-end">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-7 text-muted-foreground data-[state=open]:bg-muted"
+                  >
+                    <MoreVerticalIcon className="size-4" />
+                    <span className="sr-only">Actions</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-44 text-xs">
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href={`/${locale}/dashboard/flash-sales/${row.original.id}/edit`}
+                      className="flex cursor-pointer items-center gap-2"
+                    >
+                      <PencilIcon className="size-3.5" />
+                      Edit Campaign
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href={`/${locale}/deals/${row.original.slug}`}
+                      target="_blank"
+                      className="flex cursor-pointer items-center gap-2"
+                    >
+                      <ExternalLinkIcon className="size-3.5" />
+                      View Page
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleDelete(row.original.id)}
+                    className="flex cursor-pointer items-center gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
+                  >
+                    <Trash2Icon className="size-3.5" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ),
+          enableHiding: false,
+        }),
+      ]),
+    [isPending, locale]
+  )
+
+  const table = useTable({
+    features,
+    data: filteredData,
+    columns,
+    state: {
+      sorting,
+      columnVisibility,
+      columnFilters,
+      pagination,
+    },
+    getRowId: (row) => row.id,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    onPaginationChange: setPagination,
+  })
+
+  // دالة تحديد فئات الإخفاء التلقائي على الجوال للأعمدة الثانوية
+  const getColumnResponsiveClasses = (columnId: string) => {
+    if (
+      columnId === "status" ||
+      columnId === "duration" ||
+      columnId === "item_count"
+    ) {
+      return "hidden md:table-cell"
+    }
+    return ""
+  }
+
   return (
     <div className="flex w-full flex-col justify-start gap-4">
-      {/* Controls Bar الموحد */}
+      {/* Controls Bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:max-w-xs">
+        <div className="relative w-full sm:w-64">
           <SearchIcon className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search campaigns by title or slug..."
+            placeholder="Search campaigns..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-9 ps-8 pe-8 text-xs"
+            onChange={(e) => {
+              setSearchQuery(e.target.value)
+              table.setPageIndex(0)
+            }}
+            className="h-8 ps-8 pe-8 text-xs"
           />
           {searchQuery && (
             <button
               type="button"
-              onClick={() => setSearchQuery("")}
+              onClick={() => {
+                setSearchQuery("")
+                table.setPageIndex(0)
+              }}
               className="absolute inset-e-2 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-foreground"
             >
               <XIcon className="size-3.5" />
@@ -155,174 +444,255 @@ export function FlashSalesTable({ sales }: FlashSalesTableProps) {
           )}
         </div>
 
-        <Tabs value={currentTab} onValueChange={setCurrentTab}>
-          <TabsList className="h-9">
-            <TabsTrigger value="all" className="text-xs">
-              All{" "}
-              <Badge variant="secondary" className="ms-1.5 px-1.5 py-0">
-                {sales.length}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="inline-flex h-8 items-center overflow-hidden rounded-md border border-input bg-background p-0.5">
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentTab("all")
+                table.setPageIndex(0)
+              }}
+              className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
+                currentTab === "all"
+                  ? "bg-muted font-semibold text-foreground"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              }`}
+            >
+              All
+              <Badge
+                variant="secondary"
+                className="ms-1.5 px-1.5 py-0 text-[10px]"
+              >
+                {data.length}
               </Badge>
-            </TabsTrigger>
-            <TabsTrigger value="active" className="text-xs">
-              Active{" "}
-              <Badge variant="secondary" className="ms-1.5 px-1.5 py-0">
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentTab("active")
+                table.setPageIndex(0)
+              }}
+              className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
+                currentTab === "active"
+                  ? "bg-muted font-semibold text-foreground"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              }`}
+            >
+              Active
+              <Badge
+                variant="secondary"
+                className="ms-1.5 px-1.5 py-0 text-[10px]"
+              >
                 {activeCount}
               </Badge>
-            </TabsTrigger>
-            <TabsTrigger value="scheduled" className="text-xs">
-              Scheduled{" "}
-              <Badge variant="secondary" className="ms-1.5 px-1.5 py-0">
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentTab("scheduled")
+                table.setPageIndex(0)
+              }}
+              className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
+                currentTab === "scheduled"
+                  ? "bg-muted font-semibold text-foreground"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              }`}
+            >
+              Scheduled
+              <Badge
+                variant="secondary"
+                className="ms-1.5 px-1.5 py-0 text-[10px]"
+              >
                 {scheduledCount}
               </Badge>
-            </TabsTrigger>
-            <TabsTrigger value="expired" className="text-xs">
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentTab("expired")
+                table.setPageIndex(0)
+              }}
+              className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
+                currentTab === "expired"
+                  ? "bg-muted font-semibold text-foreground"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              }`}
+            >
               Expired
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+            </button>
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-8"
+                title="Toggle Columns"
+              >
+                <Columns3Icon className="size-3.5" />
+                <span className="sr-only">Toggle Columns</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              {table
+                .getAllColumns()
+                .filter(
+                  (col) =>
+                    typeof col.accessorFn !== "undefined" && col.getCanHide()
+                )
+                .map((col) => (
+                  <DropdownMenuCheckboxItem
+                    key={col.id}
+                    checked={col.getIsVisible()}
+                    onCheckedChange={(value) => col.toggleVisibility(!!value)}
+                  >
+                    {columnLabelsMap[col.id] || col.id}
+                  </DropdownMenuCheckboxItem>
+                ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
-      {/* Main Table */}
-      {filteredSales.length === 0 ? (
-        <div className="flex min-h-[300px] flex-col items-center justify-center rounded-xl border border-dashed border-border p-8 text-center">
-          <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-            <ZapIcon className="size-6 text-muted-foreground" />
-          </div>
-          <h3 className="mt-3 text-sm font-semibold text-foreground">
-            No flash sales found
-          </h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            No promotional campaigns match your current filters.
-          </p>
-        </div>
-      ) : (
-        <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="border-b border-border bg-muted/40 text-xs font-medium text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3">Campaign</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Duration</th>
-                  <th className="px-4 py-3 text-center">Products</th>
-                  <th className="px-4 py-3 text-center">Active</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {filteredSales.map((sale) => (
-                  <tr
-                    key={sale.id}
+      {/* Main Table Container */}
+      <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+        <div className="overflow-x-auto">
+          <Table className="w-full">
+            <TableHeader className="bg-muted/40">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    const responsiveClass = getColumnResponsiveClasses(
+                      header.id
+                    )
+                    return (
+                      <TableHead
+                        key={header.id}
+                        colSpan={header.colSpan}
+                        className={`text-xs font-medium text-muted-foreground ${responsiveClass}`}
+                      >
+                        {header.isPlaceholder ? null : (
+                          <FlexRender header={header} />
+                        )}
+                      </TableHead>
+                    )
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
                     className="transition-colors hover:bg-muted/20"
                   >
-                    <td className="px-4 py-3">
-                      <div className="font-semibold text-foreground">
-                        {sale.title}
-                      </div>
-                      {sale.title_ar && (
-                        <div className="text-xs text-muted-foreground">
-                          {sale.title_ar}
-                        </div>
-                      )}
-                      <div className="font-mono text-[11px] text-muted-foreground/80">
-                        /{sale.slug}
-                      </div>
-                    </td>
+                    {row.getVisibleCells().map((cell) => {
+                      const responsiveClass = getColumnResponsiveClasses(
+                        cell.column.id
+                      )
+                      return (
+                        <TableCell key={cell.id} className={responsiveClass}>
+                          <FlexRender cell={cell} />
+                        </TableCell>
+                      )
+                    })}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center text-xs text-muted-foreground"
+                  >
+                    No flash sales found matching your search.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
 
-                    <td className="px-4 py-3">{getStatusBadge(sale.status)}</td>
-
-                    <td
-                      className="px-4 py-3 text-xs text-muted-foreground"
-                      suppressHydrationWarning
+      {/* Pagination Footer */}
+      <div className="flex items-center justify-between px-1">
+        <div className="flex w-full items-center gap-8 lg:w-fit">
+          <div className="hidden items-center gap-2 lg:flex">
+            <Label htmlFor="rows-per-page" className="text-xs font-medium">
+              Rows per page
+            </Label>
+            <Select
+              value={`${table.state.pagination.pageSize}`}
+              onValueChange={(value) => table.setPageSize(Number(value))}
+            >
+              <SelectTrigger
+                size="sm"
+                className="h-8 w-20 text-xs"
+                id="rows-per-page"
+              >
+                <SelectValue placeholder={table.state.pagination.pageSize} />
+              </SelectTrigger>
+              <SelectContent side="top">
+                <SelectGroup>
+                  {[10, 20, 30, 40, 50].map((pageSize) => (
+                    <SelectItem
+                      key={pageSize}
+                      value={`${pageSize}`}
+                      className="text-xs"
                     >
-                      <div className="flex items-center gap-1 font-mono text-[11px]">
-                        <CalendarIcon className="size-3 shrink-0 text-muted-foreground" />
-                        <span>{formatDate(sale.starts_at)}</span>
-                        <span>→</span>
-                        <span>{formatDate(sale.ends_at)}</span>
-                      </div>
-                      <div className="mt-0.5 font-mono text-[10px] text-muted-foreground/70">
-                        {formatTime(sale.starts_at)} -{" "}
-                        {formatTime(sale.ends_at)}
-                      </div>
-                    </td>
-
-                    <td className="px-4 py-3 text-center">
-                      <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 text-xs font-medium text-foreground">
-                        <PackageIcon className="size-3 text-muted-foreground" />
-                        {sale.item_count}
-                      </span>
-                    </td>
-
-                    <td className="px-4 py-3 text-center">
-                      <Switch
-                        checked={sale.is_active}
-                        disabled={isPending}
-                        onCheckedChange={() =>
-                          handleToggle(sale.id, sale.is_active)
-                        }
-                        aria-label="Toggle flash sale status"
-                      />
-                    </td>
-
-                    <td className="px-4 py-3 text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-8"
-                          >
-                            <MoreVerticalIcon className="size-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href={`/${locale}/dashboard/flash-sales/${sale.id}/edit`}
-                              className="flex items-center gap-2"
-                            >
-                              <PencilIcon className="size-3.5" />
-                              Edit
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href={`/${locale}/deals/${sale.slug}`}
-                              target="_blank"
-                              className="flex items-center gap-2"
-                            >
-                              <ExternalLinkIcon className="size-3.5" />
-                              View Page
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleDelete(sale.id)}
-                            className="flex items-center gap-2 text-destructive focus:text-destructive"
-                          >
-                            <Trash2Icon className="size-3.5" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      {pageSize}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="text-xs font-medium text-muted-foreground">
+            Page {table.state.pagination.pageIndex + 1} of{" "}
+            {table.getPageCount() || 1}
+          </div>
+          <div className="ms-auto flex items-center gap-2 lg:ms-0">
+            <Button
+              variant="outline"
+              className="hidden h-8 w-8 p-0 lg:flex"
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <ChevronsLeftIcon className="size-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className="size-8"
+              size="icon"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <ChevronLeftIcon className="size-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className="size-8"
+              size="icon"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              <ChevronRightIcon className="size-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className="hidden size-8 lg:flex"
+              size="icon"
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage()}
+            >
+              <ChevronsRightIcon className="size-4" />
+            </Button>
           </div>
         </div>
-      )}
-
-      {/* Footer */}
-      <div className="flex items-center justify-between px-1 text-xs text-muted-foreground">
-        <span>Showing flash sale campaigns</span>
-        <span>
-          Total Campaigns:{" "}
-          <strong className="font-semibold text-foreground">
-            {sales.length}
-          </strong>
-        </span>
       </div>
     </div>
   )

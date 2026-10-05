@@ -15,6 +15,8 @@ import { LogOutIcon } from "lucide-react"
 import React from "react"
 import { Spinner } from "../ui/spinner"
 import { signOut } from "@/lib/actions/authentication/signOut"
+import { appRoutes } from "@/lib/config/app-routes"
+import { useRouter } from "next/navigation"
 
 interface LogoutAlertDialogProps {
   staus: string | null
@@ -27,19 +29,19 @@ export function LogoutAlertDialog({
   onOpenChange,
 }: LogoutAlertDialogProps) {
   const [isLoading, setIsLoading] = React.useState(false)
+  const router = useRouter()
 
-// handle logout
-const handleLogout = async () => {
-  setIsLoading(true)
-  try {
-    await signOut()
-  } catch (error) {
-    console.error("Error signing out:", error)
-  } finally {
-    setIsLoading(false)
-    onOpenChange(false)
+  const handleLogout = async () => {
+    try {
+      const result = await signOut()
+      if (result.success) {
+        router.replace(appRoutes.home)
+        router.refresh()
+      }
+    } catch (error) {
+      console.error("Error signing out:", error)
+    }
   }
-}
 
   return (
     <CustomAlertDialog open={staus === "logout"} onOpenChange={onOpenChange}>

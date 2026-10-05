@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
+import { toast } from "sonner"
 import {
   columnFilteringFeature,
   columnVisibilityFeature,
@@ -18,17 +18,28 @@ import {
   type ColumnVisibilityState,
   type SortingState,
 } from "@tanstack/react-table"
-import { toast } from "sonner"
+import {
+  UserCheckIcon,
+  ShieldPlusIcon,
+  XIcon,
+  ShieldIcon,
+  SearchIcon,
+  Columns3Icon,
+  EllipsisVerticalIcon,
+  ChevronsLeftIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronsRightIcon,
+} from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Label } from "@/components/ui/label"
@@ -48,30 +59,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import {
-  CircleCheckIcon,
-  CircleXIcon,
-  EllipsisVerticalIcon,
-  Columns3Icon,
-  ChevronsLeftIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronsRightIcon,
-  ExternalLinkIcon,
-  Trash2Icon,
-  PencilIcon,
-  CopyIcon,
-  LinkIcon,
-  SearchIcon,
-  XIcon,
-} from "lucide-react"
 
-import { AdminProductSummary } from "@/lib/actions/products/types"
-import { duplicateProduct } from "@/lib/actions/products/mutations/duplicate"
-import DeleteProductDialog from "./delete-product-dialog"
+import AssignRoleDialog from "./assign-role-dialog"
+import { UserWithRoles } from "@/lib/actions/role/queries/get-users-with-roles"
+import { RoleRecord } from "@/lib/actions/role/mutations/create-role"
+import { removeRoleFromUser } from "@/lib/actions/role/mutations/remove-user-role"
 
 // -----------------------------------------------------------------------------
-// 1. TanStack Table Features Registration
+// 1. TanStack Table Setup
 // -----------------------------------------------------------------------------
 const features = tableFeatures({
   columnFilteringFeature,
@@ -83,107 +78,127 @@ const features = tableFeatures({
   sortedRowModel: createSortedRowModel(),
 })
 
-const columnHelper = createColumnHelper<typeof features, AdminProductSummary>()
+const columnHelper = createColumnHelper<typeof features, UserWithRoles>()
 
-const HIDEABLE_COLUMNS = [
-  "category_name",
-  "brand_name",
-  "variants_count",
-  "total_stock",
-  "price_range",
-  "is_active",
-]
+// الأعمدة المخفية تلقائياً على شاشات الجوال
+const HIDEABLE_COLUMNS = ["email", "roles"]
 
 const columnLabelsMap: Record<string, string> = {
-  name: "Product",
-  category_name: "Category",
-  brand_name: "Brand",
-  variants_count: "Variants",
-  total_stock: "Stock",
-  price_range: "Price Range",
-  is_active: "Status",
+  user: "User",
+  email: "Email",
+  roles: "Assigned Roles",
 }
 
-function getColumnTitle(column: {
-  id: string
-  columnDef: { header?: unknown }
-}): string {
-  if (columnLabelsMap[column.id]) {
-    return columnLabelsMap[column.id]
-  }
-  const header = column.columnDef.header
-  if (typeof header === "string") {
-    return header
-  }
-  return column.id
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (char) => char.toUpperCase())
-}
-
-interface DataTableProps {
-  data: AdminProductSummary[]
+interface StaffAccessTableProps {
+  initialUsers: UserWithRoles[]
+  availableRoles: RoleRecord[]
   initialIsMobile?: boolean
 }
 
 // -----------------------------------------------------------------------------
-// 2. Main DataTable Component
+// 2. Main Component (StaffAccessTable)
 // -----------------------------------------------------------------------------
-export function DataTable({
-  data: initialData,
+export function StaffAccessTable({
+  initialUsers,
+  availableRoles,
   initialIsMobile = false,
-}: DataTableProps) {
-  const [data, setData] = React.useState(() => initialData)
-  const [prevInitialData, setPrevInitialData] = React.useState(initialData)
+}: StaffAccessTableProps) {
+  const [users, setUsers] = React.useState<UserWithRoles[]>(initialUsers)
+  const [prevInitialUsers, setPrevInitialUsers] = React.useState(initialUsers)
   const [currentTab, setCurrentTab] = React.useState<
-    "all" | "active" | "low-stock"
+    "all" | "assigned" | "unassigned"
   >("all")
   const [searchQuery, setSearchQuery] = React.useState("")
+  const [selectedUser, setSelectedUser] = React.useState<UserWithRoles | null>(
+    null
+  )
+  const [isAssignOpen, setIsAssignOpen] = React.useState(false)
+  const [revokingMap, setRevokingMap] = React.useState<Record<string, boolean>>(
+    {}
+  )
 
-  const [productModal, setProductModal] = React.useState<{
-    type: "delete" | null
-    data: AdminProductSummary | null
-  }>({
-    type: null,
-    data: null,
-  })
-
-  if (initialData !== prevInitialData) {
-    setPrevInitialData(initialData)
-    setData(initialData)
+  if (initialUsers !== prevInitialUsers) {
+    setPrevInitialUsers(initialUsers)
+    setUsers(initialUsers)
   }
 
-  // فلترة متزامنة للبحث المكتوب مع أزرار التبويبات
-  const filteredData = React.useMemo(() => {
-    return data.filter((item) => {
-      if (currentTab === "active" && !item.is_active) return false
-      if (currentTab === "low-stock" && item.total_stock > 10) return false
+  const handleRevokeRole = async (
+    userId: string,
+    roleId: number,
+    roleName: string
+  ) => {
+    const key = `${userId}-${roleId}`
+    setRevokingMap((prev) => ({ ...prev, [key]: true }))
+
+    try {
+      const res = await removeRoleFromUser({ userId, roleId })
+      if (res.success) {
+        toast.success(`Role "${roleName}" removed successfully.`)
+        setUsers((prev) =>
+          prev.map((u) => {
+            if (u.id !== userId) return u
+            return {
+              ...u,
+              roles: u.roles.filter((r) => r.id !== roleId),
+            }
+          })
+        )
+      } else {
+        toast.error(res.error || "Failed to remove role.")
+      }
+    } catch {
+      toast.error("An unexpected error occurred.")
+    } finally {
+      setRevokingMap((prev) => {
+        const next = { ...prev }
+        delete next[key]
+        return next
+      })
+    }
+  }
+
+  // فلترة مدمجة تجمع بين التبويبات والبحث النصي
+  const filteredUsers = React.useMemo(() => {
+    return users.filter((user) => {
+      const rolesCount = user.roles.length
+      if (currentTab === "assigned" && rolesCount === 0) return false
+      if (currentTab === "unassigned" && rolesCount > 0) return false
 
       if (!searchQuery.trim()) return true
-      const q = searchQuery.toLowerCase().trim()
-      const name = (item.name || "").toLowerCase()
-      const category = (item.category_name || "").toLowerCase()
-      const brand = (item.brand_name || "").toLowerCase()
+      const query = searchQuery.toLowerCase().trim()
+      const fullName = [user.first_name, user.last_name]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+      const email = (user.email || "").toLowerCase()
+      const rolesMatch = user.roles.some((r) =>
+        r.name.toLowerCase().includes(query)
+      )
 
-      return name.includes(q) || category.includes(q) || brand.includes(q)
+      return fullName.includes(query) || email.includes(query) || rolesMatch
     })
-  }, [data, currentTab, searchQuery])
+  }, [users, currentTab, searchQuery])
 
-  const activeCount = React.useMemo(
-    () => data.filter((item) => item.is_active).length,
-    [data]
+  const assignedCount = React.useMemo(
+    () => users.filter((u) => u.roles.length > 0).length,
+    [users]
   )
-  const lowStockCount = React.useMemo(
-    () => data.filter((item) => item.total_stock <= 10).length,
-    [data]
+  const unassignedCount = React.useMemo(
+    () => users.filter((u) => u.roles.length === 0).length,
+    [users]
   )
 
   const [columnVisibility, setColumnVisibility] =
     React.useState<ColumnVisibilityState>(() => {
-      const initialVisibility: ColumnVisibilityState = {}
+      const isMobile =
+        typeof window !== "undefined"
+          ? window.innerWidth < 768
+          : initialIsMobile
+      const initial: ColumnVisibilityState = {}
       HIDEABLE_COLUMNS.forEach((colId) => {
-        initialVisibility[colId] = !initialIsMobile
+        initial[colId] = !isMobile
       })
-      return initialVisibility
+      return initial
     })
 
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -198,7 +213,6 @@ export function DataTable({
   React.useEffect(() => {
     const handleResize = () => {
       const isMobile = window.innerWidth < 768
-
       setPagination((prev) => {
         const nextSize = isMobile ? 20 : 10
         if (prev.pageSize === nextSize) return prev
@@ -214,6 +228,7 @@ export function DataTable({
       })
     }
 
+    handleResize()
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [])
@@ -221,113 +236,92 @@ export function DataTable({
   const columns = React.useMemo(
     () =>
       columnHelper.columns([
-        columnHelper.accessor("name", {
-          header: "Product",
+        columnHelper.accessor(
+          (row) =>
+            [row.first_name, row.last_name].filter(Boolean).join(" ") ||
+            "Anonymous User",
+          {
+            id: "user",
+            header: "User",
+            cell: ({ row }) => {
+              const fullName = [row.original.first_name, row.original.last_name]
+                .filter(Boolean)
+                .join(" ")
+              return (
+                <div className="flex items-center gap-2.5">
+                  <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-bold text-foreground uppercase">
+                    {row.original.first_name ? (
+                      row.original.first_name[0]
+                    ) : (
+                      <UserCheckIcon className="size-3.5" />
+                    )}
+                  </div>
+                  <span className="text-xs font-semibold text-foreground">
+                    {fullName || "Anonymous User"}
+                  </span>
+                </div>
+              )
+            },
+            enableHiding: false,
+          }
+        ),
+
+        columnHelper.accessor("email", {
+          id: "email",
+          header: "Email",
           cell: ({ row }) => (
-            <span className="font-semibold text-foreground">
-              {row.original.name}
+            <span className="font-mono text-xs text-muted-foreground">
+              {row.original.email || "—"}
             </span>
           ),
-          enableHiding: false,
         }),
 
-        columnHelper.accessor("category_name", {
-          header: "Category",
-          cell: ({ row }) => (
-            <Badge
-              variant="outline"
-              className="px-2 py-0.5 text-xs text-muted-foreground"
-            >
-              {row.original.category_name || "—"}
-            </Badge>
-          ),
-        }),
-
-        columnHelper.accessor("brand_name", {
-          header: "Brand",
-          cell: ({ row }) => (
-            <span className="text-xs font-medium text-foreground">
-              {row.original.brand_name || "—"}
-            </span>
-          ),
-        }),
-
-        columnHelper.accessor("variants_count", {
-          header: () => <div className="text-center">Variants</div>,
-          cell: ({ row }) => (
-            <div className="text-center tabular-nums">
-              <Badge variant="secondary" className="px-2 py-0.5 text-xs">
-                {row.original.variants_count}
-              </Badge>
-            </div>
-          ),
-        }),
-
-        columnHelper.accessor("total_stock", {
-          header: () => <div className="text-center">Stock</div>,
+        columnHelper.accessor("roles", {
+          id: "roles",
+          header: "Assigned Roles",
           cell: ({ row }) => {
-            const stock = row.original.total_stock
-            const isLow = stock <= 10
+            const userRoles = row.original.roles || []
             return (
-              <div className="text-center tabular-nums">
-                <span
-                  className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                    isLow
-                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                      : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                  }`}
-                >
-                  {stock}
-                </span>
-              </div>
-            )
-          },
-        }),
-
-        columnHelper.display({
-          id: "price_range",
-          header: "Price Range",
-          cell: ({ row }) => {
-            const min = (row.original.min_price / 100).toFixed(2)
-            const max = (row.original.max_price / 100).toFixed(2)
-            const isSinglePrice =
-              row.original.min_price === row.original.max_price
-
-            return (
-              <div className="flex items-center gap-1 text-xs font-semibold tabular-nums">
-                <span>${min}</span>
-                {!isSinglePrice && (
-                  <>
-                    <span className="text-muted-foreground">-</span>
-                    <span>${max}</span>
-                  </>
-                )}
-              </div>
-            )
-          },
-        }),
-
-        columnHelper.accessor("is_active", {
-          header: () => <div className="text-center">Status</div>,
-          cell: ({ row }) => (
-            <div className="flex justify-center">
-              <Badge
-                variant="outline"
-                className={`gap-1 px-2 py-0.5 text-xs ${
-                  row.original.is_active
-                    ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {row.original.is_active ? (
-                  <CircleCheckIcon className="size-3 fill-emerald-500 text-background" />
+              <div className="flex flex-wrap items-center gap-1.5">
+                {userRoles.length > 0 ? (
+                  userRoles.map((role) => {
+                    const isRevoking = Boolean(
+                      revokingMap[`${row.original.id}-${role.id}`]
+                    )
+                    return (
+                      <Badge
+                        key={role.id}
+                        variant="secondary"
+                        className="gap-1 py-0.5 ps-2 pe-1 text-[11px] font-semibold uppercase"
+                      >
+                        <ShieldIcon className="size-3 text-primary opacity-70" />
+                        <span>{role.name}</span>
+                        <button
+                          type="button"
+                          disabled={isRevoking}
+                          onClick={() =>
+                            handleRevokeRole(
+                              row.original.id,
+                              role.id,
+                              role.name
+                            )
+                          }
+                          className="ms-0.5 cursor-pointer rounded-full p-0.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                          title={`Remove ${role.name}`}
+                        >
+                          <XIcon className="size-3" />
+                        </button>
+                      </Badge>
+                    )
+                  })
                 ) : (
-                  <CircleXIcon className="size-3 fill-muted-foreground text-background" />
+                  <span className="text-[11px] text-muted-foreground italic">
+                    No roles assigned
+                  </span>
                 )}
-                {row.original.is_active ? "Active" : "Inactive"}
-              </Badge>
-            </div>
-          ),
+              </div>
+            )
+          },
         }),
 
         columnHelper.display({
@@ -338,89 +332,37 @@ export function DataTable({
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="flex size-7 text-muted-foreground data-[state=open]:bg-muted"
                     size="icon"
+                    className="size-7 text-muted-foreground data-[state=open]:bg-muted"
                   >
                     <EllipsisVerticalIcon className="size-4" />
                     <span className="sr-only">Actions</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-44">
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href={`/product/${row.original.slug}`}
-                      target="_blank"
-                      className="flex cursor-pointer items-center"
-                    >
-                      <ExternalLinkIcon className="me-2 size-3.5" />
-                      View in Store
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href={`/dashboard/products/${row.original.slug}/edit`}
-                      className="flex cursor-pointer items-center"
-                    >
-                      <PencilIcon className="me-2 size-3.5" />
-                      Edit Product
-                    </Link>
-                  </DropdownMenuItem>
-
+                <DropdownMenuContent align="end" className="w-40 text-xs">
                   <DropdownMenuItem
-                    className="cursor-pointer"
-                    onClick={async () => {
-                      toast.promise(duplicateProduct(row.original.id), {
-                        loading: "Duplicating product...",
-                        success: (res) => {
-                          if (!res.success) throw new Error(res.error)
-                          return "Product duplicated successfully!"
-                        },
-                        error: "Failed to duplicate product",
-                      })
-                    }}
-                  >
-                    <CopyIcon className="me-2 size-3.5" />
-                    Duplicate
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem
-                    className="cursor-pointer"
+                    className="cursor-pointer gap-2"
                     onClick={() => {
-                      navigator.clipboard.writeText(
-                        `${window.location.origin}/product/${row.original.slug}`
-                      )
-                      toast.success("Product link copied!")
+                      setSelectedUser(row.original)
+                      setIsAssignOpen(true)
                     }}
                   >
-                    <LinkIcon className="me-2 size-3.5" />
-                    Copy Store Link
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator />
-
-                  <DropdownMenuItem
-                    variant="destructive"
-                    className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
-                    onClick={() =>
-                      setProductModal({ type: "delete", data: row.original })
-                    }
-                  >
-                    <Trash2Icon className="me-2 size-3.5" />
-                    Delete Product
+                    <ShieldPlusIcon className="size-3.5 text-primary" />
+                    Assign Role
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           ),
+          enableHiding: false,
         }),
       ]),
-    []
+    [revokingMap]
   )
 
   const table = useTable({
     features,
-    data: filteredData,
+    data: filteredUsers,
     columns,
     state: {
       sorting,
@@ -435,15 +377,21 @@ export function DataTable({
     onPaginationChange: setPagination,
   })
 
+  const getColumnResponsiveClasses = (columnId: string) => {
+    if (HIDEABLE_COLUMNS.includes(columnId)) {
+      return "hidden md:table-cell"
+    }
+    return ""
+  }
+
   return (
     <div className="flex w-full flex-col justify-start gap-4">
-      {/* Controls Bar: ارتفاع موحد h-8 (32px) مع إزالة الشادو وتصغير البحث وأيقونة الأعمدة */}
+      {/* Controls Bar: شريط علوي موحد متطابق بارتفاع h-8 ومحاذاة تامة */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        {/* حقل البحث السريع (تم تقليص عرضه إلى w-64 وارتفاعه إلى h-8) */}
         <div className="relative w-full sm:w-64">
           <SearchIcon className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search products..."
+            placeholder="Search users..."
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value)
@@ -465,9 +413,8 @@ export function DataTable({
           )}
         </div>
 
-        {/* مجموعة الفلترة وزر اختيار الأعمدة (كلاهما بارتفاع h-8 وبدون شادو) */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* شريط الفلترة بدون شادو وبارتفاع h-8 */}
+          {/* شريط الفلترة المتصل بدون شادو */}
           <div className="inline-flex h-8 items-center overflow-hidden rounded-md border border-input bg-background p-0.5">
             <button
               type="button"
@@ -486,54 +433,54 @@ export function DataTable({
                 variant="secondary"
                 className="ms-1.5 px-1.5 py-0 text-[10px]"
               >
-                {data.length}
+                {users.length}
               </Badge>
             </button>
 
             <button
               type="button"
               onClick={() => {
-                setCurrentTab("active")
+                setCurrentTab("assigned")
                 table.setPageIndex(0)
               }}
               className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
-                currentTab === "active"
+                currentTab === "assigned"
                   ? "bg-muted font-semibold text-foreground"
                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
               }`}
             >
-              Active
+              Assigned
               <Badge
                 variant="secondary"
                 className="ms-1.5 px-1.5 py-0 text-[10px]"
               >
-                {activeCount}
+                {assignedCount}
               </Badge>
             </button>
 
             <button
               type="button"
               onClick={() => {
-                setCurrentTab("low-stock")
+                setCurrentTab("unassigned")
                 table.setPageIndex(0)
               }}
               className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
-                currentTab === "low-stock"
+                currentTab === "unassigned"
                   ? "bg-muted font-semibold text-foreground"
                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
               }`}
             >
-              Low Stock
+              Unassigned
               <Badge
                 variant="secondary"
                 className="ms-1.5 px-1.5 py-0 text-[10px]"
               >
-                {lowStockCount}
+                {unassignedCount}
               </Badge>
             </button>
           </div>
 
-          {/* زر الأعمدة: أيقونة فقط مربعة h-8 w-8 */}
+          {/* زر اختيار الأعمدة كأيقونة مربعة size-8 */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -550,29 +497,24 @@ export function DataTable({
               {table
                 .getAllColumns()
                 .filter(
-                  (column) =>
-                    typeof column.accessorFn !== "undefined" &&
-                    column.getCanHide()
+                  (col) =>
+                    typeof col.accessorFn !== "undefined" && col.getCanHide()
                 )
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {getColumnTitle(column)}
-                    </DropdownMenuCheckboxItem>
-                  )
-                })}
+                .map((col) => (
+                  <DropdownMenuCheckboxItem
+                    key={col.id}
+                    checked={col.getIsVisible()}
+                    onCheckedChange={(value) => col.toggleVisibility(!!value)}
+                  >
+                    {columnLabelsMap[col.id] || col.id}
+                  </DropdownMenuCheckboxItem>
+                ))}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
 
-      {/* Main Table Container */}
+      {/* Main Table */}
       <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">
         <div className="overflow-x-auto">
           <Table className="w-full">
@@ -580,11 +522,14 @@ export function DataTable({
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
+                    const responsiveClass = getColumnResponsiveClasses(
+                      header.id
+                    )
                     return (
                       <TableHead
                         key={header.id}
                         colSpan={header.colSpan}
-                        className="text-xs font-medium text-muted-foreground"
+                        className={`text-xs font-medium text-muted-foreground ${responsiveClass}`}
                       >
                         {header.isPlaceholder ? null : (
                           <FlexRender header={header} />
@@ -602,11 +547,16 @@ export function DataTable({
                     key={row.id}
                     className="transition-colors hover:bg-muted/20"
                   >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        <FlexRender cell={cell} />
-                      </TableCell>
-                    ))}
+                    {row.getVisibleCells().map((cell) => {
+                      const responsiveClass = getColumnResponsiveClasses(
+                        cell.column.id
+                      )
+                      return (
+                        <TableCell key={cell.id} className={responsiveClass}>
+                          <FlexRender cell={cell} />
+                        </TableCell>
+                      )
+                    })}
                   </TableRow>
                 ))
               ) : (
@@ -615,7 +565,7 @@ export function DataTable({
                     colSpan={columns.length}
                     className="h-24 text-center text-xs text-muted-foreground"
                   >
-                    No products found matching your search.
+                    No users found matching your search.
                   </TableCell>
                 </TableRow>
               )}
@@ -633,9 +583,7 @@ export function DataTable({
             </Label>
             <Select
               value={`${table.state.pagination.pageSize}`}
-              onValueChange={(value) => {
-                table.setPageSize(Number(value))
-              }}
+              onValueChange={(value) => table.setPageSize(Number(value))}
             >
               <SelectTrigger
                 size="sm"
@@ -703,17 +651,28 @@ export function DataTable({
         </div>
       </div>
 
-      {/* دايلوج تأكيد الحذف */}
-      <DeleteProductDialog
-        isOpen={productModal.type === "delete" ? "delete" : null}
-        item={productModal.data}
+      <AssignRoleDialog
+        isOpen={isAssignOpen}
         onOpenChange={(open) => {
-          if (!open) setProductModal({ type: null, data: null })
+          setIsAssignOpen(open)
+          if (!open) setSelectedUser(null)
         }}
-        onSuccess={(deletedId) => {
-          setData((prev) => prev.filter((item) => item.id !== deletedId))
+        user={selectedUser}
+        availableRoles={availableRoles}
+        onSuccess={(userId, assignedRole) => {
+          setUsers((prev) =>
+            prev.map((u) => {
+              if (u.id !== userId) return u
+              return {
+                ...u,
+                roles: [...u.roles, assignedRole],
+              }
+            })
+          )
         }}
       />
     </div>
   )
 }
+
+export default StaffAccessTable

@@ -1,9 +1,14 @@
-import { ShieldCheckIcon } from "lucide-react"
+import Link from "next/link"
+import { headers } from "next/headers"
+import { ShieldCheckIcon, PlusIcon } from "lucide-react"
 
+import { Button } from "@/components/ui/button"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getAllRoles } from "@/lib/actions/role/queries/get-all-roles"
-import RolesClient from "@/components/dashboard/roles/roles-client"
+import { RolesTable } from "@/components/dashboard/roles/roles-table"
+
+export const dynamic = "force-dynamic"
 
 export async function generateMetadata() {
   return createMetadata({
@@ -14,13 +19,20 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
+  const headersList = await headers()
+  const userAgent = headersList.get("user-agent") || ""
+  const isMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      userAgent
+    )
+
   const result = await getAllRoles()
   const roles = result.success && result.data ? result.data : []
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
-      {/* Header الترويسة الموحدة مع الشارة */}
-      <div className="flex items-center gap-3 border-b border-border/40 pb-4">
+      {/* Header مطابق تماماً لصفحة المنتجات */}
+      <div className="flex flex-col gap-3 border-b border-border/40 pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
             <span className="flex size-7 items-center justify-center rounded-lg bg-secondary shadow-xs">
@@ -35,10 +47,22 @@ export default async function Page() {
             the platform.
           </p>
         </div>
+
+        {/* زر الإضافة كصفحة مستقلة مثل صفحة المنتجات */}
+        <Button
+          asChild
+          variant="secondary"
+          className="flex items-center gap-2 sm:ml-auto"
+        >
+          <Link href="/dashboard/roles/create">
+            <PlusIcon className="size-3.5" />
+            Create Role
+          </Link>
+        </Button>
       </div>
 
-      {/* العميل الرئيسي الذي يدير الجدول والـ Sheets */}
-      <RolesClient initialRoles={roles} />
+      {/* Roles Data Table */}
+      <RolesTable initialRoles={roles} initialIsMobile={isMobile} />
     </div>
   )
 }

@@ -4,7 +4,7 @@ import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getAllRoles } from "@/lib/actions/role/queries/get-all-roles"
 import { getUsersWithRoles } from "@/lib/actions/role/queries/get-users-with-roles"
-import UsersClient from "@/components/dashboard/staff-access/users-client"
+import StaffAccessTable from "@/components/dashboard/staff-access/staff-access-table"
 
 export async function generateMetadata() {
   return createMetadata({
@@ -44,7 +44,7 @@ export default async function Page() {
       </div>
 
       {/* المكون العميل الذي يدير عرض الجدول وتعيين الأدوار */}
-      <UsersClient initialUsers={users} availableRoles={roles} />
+      <StaffAccessTable initialUsers={users} availableRoles={roles} />
     </div>
   )
 }
