@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useParams } from "next/navigation"
 import {
   columnFilteringFeature,
   columnVisibilityFeature,
@@ -33,6 +34,9 @@ import {
   SearchIcon,
   XIcon,
   ListFilterIcon,
+  PlusIcon,
+  PencilIcon,
+  Trash2Icon,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -66,6 +70,8 @@ import {
 } from "@/components/ui/table"
 import { AdminUserSummary, UserStatus } from "@/lib/actions/users/types"
 import { UserStatusDialog } from "./user-status-dialog"
+import { DeleteUserDialog } from "./delete-user-dialog"
+import { UserFormDialog } from "./user-form-sheet.tsx"
 
 const features = tableFeatures({
   columnFilteringFeature,
@@ -102,10 +108,14 @@ export function DataTable({
   const [prevInitialData, setPrevInitialData] = React.useState(initialData)
   const [currentTab, setCurrentTab] = React.useState<"all" | UserStatus>("all")
   const [searchQuery, setSearchQuery] = React.useState("")
+  const params = useParams()
+  const locale = (params?.locale as string) || "en"
 
   const [selectedUser, setSelectedUser] =
     React.useState<AdminUserSummary | null>(null)
   const [isStatusOpen, setIsStatusOpen] = React.useState(false)
+  const [isDeleteOpen, setIsDeleteOpen] = React.useState(false)
+  const [isFormOpen, setIsFormOpen] = React.useState(false)
 
   if (initialData !== prevInitialData) {
     setPrevInitialData(initialData)
@@ -322,7 +332,16 @@ export function DataTable({
                     Copy Email
                   </DropdownMenuItem>
 
-                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => {
+                      setSelectedUser(row.original)
+                      setIsFormOpen(true)
+                    }}
+                  >
+                    <PencilIcon className="me-2 size-3.5" />
+                    Edit User
+                  </DropdownMenuItem>
 
                   <DropdownMenuItem
                     className="cursor-pointer"
@@ -333,6 +352,19 @@ export function DataTable({
                   >
                     <ShieldAlertIcon className="me-2 size-3.5" />
                     Change Status
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem
+                    className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
+                    onClick={() => {
+                      setSelectedUser(row.original)
+                      setIsDeleteOpen(true)
+                    }}
+                  >
+                    <Trash2Icon className="me-2 size-3.5" />
+                    Delete Account
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -533,6 +565,32 @@ export function DataTable({
                 ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <Button
+            variant="default"
+            size="icon"
+            className="size-8 sm:hidden"
+            title="Create User"
+            onClick={() => {
+              setSelectedUser(null)
+              setIsFormOpen(true)
+            }}
+          >
+            <PlusIcon className="size-3.5" />
+            <span className="sr-only">Create User</span>
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            className="hidden h-8 gap-1.5 px-3 text-xs sm:inline-flex"
+            onClick={() => {
+              setSelectedUser(null)
+              setIsFormOpen(true)
+            }}
+          >
+            <PlusIcon className="size-3.5" />
+            <span>Create User</span>
+          </Button>
         </div>
       </div>
 
@@ -673,6 +731,30 @@ export function DataTable({
                 : u
             )
           )
+        }}
+      />
+
+      <DeleteUserDialog
+        isOpen={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
+        user={selectedUser}
+        onSuccess={(deletedId) => {
+          setData((prev) => prev.filter((u) => u.id !== deletedId))
+        }}
+      />
+
+      <UserFormDialog
+        isOpen={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        user={selectedUser}
+        onSuccess={(updatedUser, isEditing) => {
+          if (isEditing) {
+            setData((prev) =>
+              prev.map((u) => (u.id === updatedUser.id ? updatedUser : u))
+            )
+          } else {
+            setData((prev) => [updatedUser, ...prev])
+          }
         }}
       />
     </div>

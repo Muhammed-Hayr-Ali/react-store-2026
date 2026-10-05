@@ -74,6 +74,12 @@ export const PERMISSIONS = {
   UPDATE_ROLE: "update_role",
   ASSIGN_ROLE: "assign_role",
   REMOVE_ROLE: "remove_role",
+
+  // --- 13. Users & Access Control ---
+  CREATE_USER: "create_user",
+  UPDATE_USER: "update_user",
+  ASSIGN_USER: "assign_user",
+  DELETE_USER: "remove_user",
 } as const
 
 export type AppPermission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]

@@ -3,7 +3,7 @@ import { UsersIcon } from "lucide-react"
 
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import { getAdminUsersList } from "@/lib/actions/users/queries/get-admin-users"
+import { getAdminUsersList } from "@/lib/actions/users"
 import { DataTable } from "@/components/dashboard/users/users-table"
 
 export const dynamic = "force-dynamic"
@@ -11,9 +11,8 @@ export const dynamic = "force-dynamic"
 export async function generateMetadata() {
   return createMetadata({
     siteName: appConfig.name,
-    title: "User Management",
-    description:
-      "Monitor registered customers, update account states, and manage ban status.",
+    title: "Users Management",
+    description: "Manage system users, access status, and roles.",
   })
 }
 
@@ -25,8 +24,8 @@ export default async function Page() {
       userAgent
     )
 
-  const res = await getAdminUsersList()
-  const users = res.success && res.data ? res.data : []
+  const result = await getAdminUsersList()
+  const users = result.success && result.data ? result.data : []
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
@@ -41,8 +40,8 @@ export default async function Page() {
             </h1>
           </div>
           <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-            Monitor registered platform accounts, customer activity, and account
-            standing.
+            Manage user accounts, monitor system access status, and control
+            permissions.
           </p>
         </div>
       </div>

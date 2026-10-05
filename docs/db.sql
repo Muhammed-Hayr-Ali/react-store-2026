@@ -11,21 +11,6 @@ CREATE TABLE public.password_reset_tokens (
   CONSTRAINT password_reset_tokens_pkey PRIMARY KEY (id),
   CONSTRAINT password_reset_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );
-CREATE TABLE public.profiles (
-  id uuid NOT NULL,
-  first_name text,
-  last_name text,
-  email text UNIQUE,
-  phone_number text UNIQUE,
-  profile_image text,
-  gender text CHECK (gender = ANY (ARRAY['male'::text, 'female'::text, 'other'::text])),
-  phone_verified_at timestamp with time zone,
-  email_verified_at timestamp with time zone,
-  created_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now()),
-  updated_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now()),
-  CONSTRAINT profiles_pkey PRIMARY KEY (id),
-  CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
-);
 CREATE TABLE public.roles (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   name text NOT NULL UNIQUE,
@@ -176,4 +161,22 @@ CREATE TABLE public.flash_sale_items (
   CONSTRAINT flash_sale_items_pkey PRIMARY KEY (id),
   CONSTRAINT flash_sale_items_flash_sale_id_fkey FOREIGN KEY (flash_sale_id) REFERENCES public.flash_sales(id),
   CONSTRAINT flash_sale_items_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.products(id)
+);
+CREATE TABLE public.profiles (
+  id uuid NOT NULL,
+  first_name text,
+  last_name text,
+  email text UNIQUE,
+  phone_number text UNIQUE,
+  profile_image text,
+  gender text CHECK (gender = ANY (ARRAY['male'::text, 'female'::text, 'other'::text])),
+  status text NOT NULL DEFAULT 'active'::text CHECK (status = ANY (ARRAY['active'::text, 'suspended'::text, 'banned'::text])),
+  ban_reason text,
+  banned_at timestamp with time zone,
+  phone_verified_at timestamp with time zone,
+  email_verified_at timestamp with time zone,
+  created_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now()),
+  updated_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now()),
+  CONSTRAINT profiles_pkey PRIMARY KEY (id),
+  CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
 );

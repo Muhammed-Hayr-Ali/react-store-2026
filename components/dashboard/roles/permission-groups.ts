@@ -266,4 +266,31 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       },
     ],
   },
+
+  {
+    id: "users_security",
+    label: "Security & Users Control",
+    permissions: [
+      {
+        key: PERMISSIONS.CREATE_USER,
+        label: "Create User",
+        description: "Create new staff or customer accounts",
+      },
+      {
+        key: PERMISSIONS.UPDATE_USER,
+        label: "Update User",
+        description: "Modify user details, roles, and permissions",
+      },
+      {
+        key: PERMISSIONS.ASSIGN_USER,
+        label: "Assign User",
+        description: "Bind permissions and roles to specific staff users",
+      },
+      {
+        key: PERMISSIONS.DELETE_USER,
+        label: "Remove User",
+        description: "Revoke system roles from existing users",
+      },
+    ],
+  },
 ]
