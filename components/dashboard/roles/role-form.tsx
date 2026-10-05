@@ -168,8 +168,59 @@ export default function CreateRoleForm({
         </Alert>
       )}
 
-      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-        <div className="min-w-0 space-y-6 lg:col-span-2">
+      <div className="flex flex-col space-y-6 lg:grid lg:grid-cols-3 lg:items-start lg:gap-6 lg:space-y-0">
+        {/* Role Information - تظهر أولاً على الجوال عبر order-1 */}
+        <div className="order-1 min-w-0 space-y-6 lg:order-2">
+          <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+            <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
+              <ShieldIcon className="size-4 text-primary" />
+              <h2 className="text-sm font-semibold text-card-foreground">
+                Role Information
+              </h2>
+            </div>
+
+            <FieldGroup className="space-y-4">
+              <Field>
+                <FieldLabel htmlFor="role-name" className="text-xs">
+                  Role Identifier <span className="text-destructive">*</span>
+                </FieldLabel>
+                <Input
+                  id="role-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. editor, moderator"
+                  disabled={isSubmitting || isEditing}
+                  className="h-9 font-mono text-xs uppercase"
+                />
+              </Field>
+
+              <Field>
+                <div className="flex items-center justify-between">
+                  <FieldLabel htmlFor="role-description" className="text-xs">
+                    Description
+                  </FieldLabel>
+                  <span className="text-[10px] text-muted-foreground tabular-nums">
+                    {description.length}/300
+                  </span>
+                </div>
+                <InputGroup className="bg-background">
+                  <InputGroupTextarea
+                    id="role-description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Briefly describe the role scope and duties..."
+                    rows={4}
+                    disabled={isSubmitting}
+                    className="resize-y text-xs"
+                  />
+                </InputGroup>
+              </Field>
+            </FieldGroup>
+          </div>
+        </div>
+
+        {/* Permissions Matrix - تظهر ثانياً على الجوال عبر order-2 */}
+        <div className="order-2 min-w-0 space-y-6 lg:order-1 lg:col-span-2">
           <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
             <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
               <div className="flex items-center gap-2">
@@ -276,54 +327,8 @@ export default function CreateRoleForm({
           </div>
         </div>
 
-        <div className="min-w-0 space-y-6">
-          <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
-            <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
-              <ShieldIcon className="size-4 text-primary" />
-              <h2 className="text-sm font-semibold text-card-foreground">
-                Role Information
-              </h2>
-            </div>
-
-            <FieldGroup className="space-y-4">
-              <Field>
-                <FieldLabel htmlFor="role-name" className="text-xs">
-                  Role Identifier <span className="text-destructive">*</span>
-                </FieldLabel>
-                <Input
-                  id="role-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. editor, moderator"
-                  disabled={isSubmitting || isEditing}
-                  className="h-9 font-mono text-xs uppercase"
-                />
-              </Field>
-
-              <Field>
-                <div className="flex items-center justify-between">
-                  <FieldLabel htmlFor="role-description" className="text-xs">
-                    Description
-                  </FieldLabel>
-                  <span className="text-[10px] text-muted-foreground tabular-nums">
-                    {description.length}/300
-                  </span>
-                </div>
-                <InputGroup className="bg-background">
-                  <InputGroupTextarea
-                    id="role-description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Briefly describe the role scope and duties..."
-                    rows={4}
-                    disabled={isSubmitting}
-                    className="resize-y text-xs"
-                  />
-                </InputGroup>
-              </Field>
-            </FieldGroup>
-          </div>
-
+        {/* Coverage Summary - تظهر أخيراً دائماً عبر order-3 */}
+        <div className="order-3 min-w-0 space-y-6 lg:order-3">
           <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
             <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
               <SparklesIcon className="size-4 text-primary" />
