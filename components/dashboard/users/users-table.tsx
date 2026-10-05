@@ -23,9 +23,10 @@ import {
   CircleXIcon,
   EllipsisVerticalIcon,
   Columns3Icon,
-  ChevronDownIcon,
+  ChevronsLeftIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ChevronsRightIcon,
   UserCheckIcon,
   ShieldAlertIcon,
   CopyIcon,
@@ -62,7 +63,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AdminUserSummary, UserStatus } from "@/lib/actions/users/types"
 import { UserStatusDialog } from "./user-status-dialog"
 
@@ -297,7 +297,7 @@ export function DataTable({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-8 text-muted-foreground"
+                    className="size-7 text-muted-foreground data-[state=open]:bg-muted"
                   >
                     <EllipsisVerticalIcon className="size-4" />
                     <span className="sr-only">Actions</span>
@@ -352,19 +352,19 @@ export function DataTable({
 
   return (
     <div className="flex w-full flex-col justify-start gap-4">
-      {/* Controls Bar */}
+      {/* Controls Bar: موحد بارتفاع h-8 ومطابق للمشروع */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        {/* Search Input */}
-        <div className="relative w-full sm:max-w-xs">
+        {/* Search Input sm:w-64 و h-8 */}
+        <div className="relative w-full sm:w-64">
           <SearchIcon className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search by name, email or phone..."
+            placeholder="Search users..."
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value)
               table.setPageIndex(0)
             }}
-            className="h-9 ps-8 pe-8 text-xs"
+            className="h-8 ps-8 pe-8 text-xs"
           />
           {searchQuery && (
             <button
@@ -380,43 +380,83 @@ export function DataTable({
           )}
         </div>
 
-        {/* Status Tabs & Columns */}
+        {/* شريط الفلترة المتصل بدون شادو وزر الأعمدة المربع */}
         <div className="flex flex-wrap items-center gap-2">
-          <Tabs
-            value={currentTab}
-            onValueChange={(val) => {
-              setCurrentTab(val as "all" | UserStatus)
-              table.setPageIndex(0)
-            }}
-          >
-            <TabsList className="h-9">
-              <TabsTrigger value="all" className="text-xs">
-                All{" "}
-                <Badge variant="secondary" className="ms-1.5 px-1.5 py-0">
-                  {data.length}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="active" className="text-xs">
-                Active{" "}
-                <Badge variant="secondary" className="ms-1.5 px-1.5 py-0">
-                  {activeCount}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="banned" className="text-xs">
-                Banned{" "}
-                <Badge variant="secondary" className="ms-1.5 px-1.5 py-0">
-                  {bannedCount}
-                </Badge>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="inline-flex h-8 items-center overflow-hidden rounded-md border border-input bg-background p-0.5">
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentTab("all")
+                table.setPageIndex(0)
+              }}
+              className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
+                currentTab === "all"
+                  ? "bg-muted font-semibold text-foreground"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              }`}
+            >
+              All
+              <Badge
+                variant="secondary"
+                className="ms-1.5 px-1.5 py-0 text-[10px]"
+              >
+                {data.length}
+              </Badge>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentTab("active")
+                table.setPageIndex(0)
+              }}
+              className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
+                currentTab === "active"
+                  ? "bg-muted font-semibold text-foreground"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              }`}
+            >
+              Active
+              <Badge
+                variant="secondary"
+                className="ms-1.5 px-1.5 py-0 text-[10px]"
+              >
+                {activeCount}
+              </Badge>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentTab("banned")
+                table.setPageIndex(0)
+              }}
+              className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
+                currentTab === "banned"
+                  ? "bg-muted font-semibold text-foreground"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              }`}
+            >
+              Banned
+              <Badge
+                variant="secondary"
+                className="ms-1.5 px-1.5 py-0 text-[10px]"
+              >
+                {bannedCount}
+              </Badge>
+            </button>
+          </div>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-9 text-xs">
-                <Columns3Icon className="me-1.5 size-3.5" />
-                <span>Columns</span>
-                <ChevronDownIcon className="ms-1.5 size-3 opacity-60" />
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-8"
+                title="Toggle Columns"
+              >
+                <Columns3Icon className="size-3.5" />
+                <span className="sr-only">Toggle Columns</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
@@ -530,6 +570,14 @@ export function DataTable({
           <div className="ms-auto flex items-center gap-2 lg:ms-0">
             <Button
               variant="outline"
+              className="hidden h-8 w-8 p-0 lg:flex"
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <ChevronsLeftIcon className="size-4" />
+            </Button>
+            <Button
+              variant="outline"
               size="icon"
               className="size-8"
               onClick={() => table.previousPage()}
@@ -545,6 +593,15 @@ export function DataTable({
               disabled={!table.getCanNextPage()}
             >
               <ChevronRightIcon className="size-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className="hidden size-8 lg:flex"
+              size="icon"
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage()}
+            >
+              <ChevronsRightIcon className="size-4" />
             </Button>
           </div>
         </div>
