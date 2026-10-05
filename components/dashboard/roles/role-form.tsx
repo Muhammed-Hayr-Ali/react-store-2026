@@ -20,7 +20,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { InputGroup, InputGroupTextarea } from "@/components/ui/input-group"
-import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
 
 import { PERMISSION_GROUPS } from "@/components/dashboard/roles/permission-groups"
 import { createRole } from "@/lib/actions/role/mutations/create-role"
@@ -148,6 +148,138 @@ export default function CreateRoleForm({
     }
   }
 
+  // دالة مصفوفة الصلاحيات المشتركة
+  const renderPermissionsMatrix = () => (
+    <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+      <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
+        <div className="flex items-center gap-2">
+          <LayersIcon className="size-4 text-primary" />
+          <div>
+            <h2 className="text-sm font-semibold text-card-foreground">
+              Permissions Matrix
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Assign granular feature and module capabilities
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={selectAllPermissions}
+            className="h-8 cursor-pointer px-2.5 text-xs text-muted-foreground hover:text-foreground"
+          >
+            Select All
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={clearAllPermissions}
+            className="h-8 cursor-pointer px-2.5 text-xs text-muted-foreground hover:text-foreground"
+          >
+            Clear
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        {PERMISSION_GROUPS.map((group) => {
+          const groupPermKeys = group.permissions.map((p) => p.key)
+          const isGroupChecked = groupPermKeys.every((p) =>
+            selectedPermissions.includes(p)
+          )
+
+          return (
+            <div
+              key={group.id}
+              className="space-y-3 rounded-lg border border-border bg-muted/10 p-4 transition-all hover:border-muted-foreground/30"
+            >
+              <div className="flex items-center justify-between border-b border-border/60 pb-2">
+                <span className="text-xs font-bold text-card-foreground">
+                  {group.label}
+                </span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => toggleGroupAll(groupPermKeys)}
+                  className="h-7 gap-1 px-2 text-[11px] text-muted-foreground hover:text-foreground"
+                >
+                  {isGroupChecked ? (
+                    <CheckSquare2Icon className="size-3.5 text-primary" />
+                  ) : (
+                    <SquareIcon className="size-3.5" />
+                  )}
+                  {isGroupChecked ? "Unselect Group" : "Select Group"}
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                {group.permissions.map((perm) => {
+                  const isChecked = selectedPermissions.includes(perm.key)
+                  return (
+                    <div
+                      key={perm.key}
+                      onClick={() => togglePermission(perm.key)}
+                      className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-2.5 transition-colors ${
+                        isChecked
+                          ? "border-primary/40 bg-primary/5"
+                          : "border-border/60 hover:bg-muted/20"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => {}}
+                        className="mt-0.5 rounded border-muted-foreground/30 accent-primary"
+                      />
+                      <div className="space-y-0.5">
+                        <p className="text-xs leading-none font-semibold text-foreground">
+                          {perm.label}
+                        </p>
+                        <p className="text-[11px] leading-tight text-muted-foreground">
+                          {perm.description}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+
+  // دالة ملخص التغطية المشتركة
+  const renderCoverageSummary = () => (
+    <div className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-xs">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <SparklesIcon className="size-4 text-primary" />
+          <h2 className="text-xs font-semibold text-card-foreground">
+            Coverage Summary
+          </h2>
+        </div>
+        <span className="font-mono text-xs font-medium text-muted-foreground">
+          {selectedPermissions.length} / {totalPossiblePermissions}
+        </span>
+      </div>
+
+      <Progress
+        value={
+          (selectedPermissions.length / (totalPossiblePermissions || 1)) * 100
+        }
+        className="h-1.5"
+      />
+    </div>
+  )
+
   return (
     <form noValidate onSubmit={handleSubmit} className="space-y-6">
       {errorMessage && (
@@ -169,7 +301,7 @@ export default function CreateRoleForm({
       )}
 
       <div className="flex flex-col space-y-6 lg:grid lg:grid-cols-3 lg:items-start lg:gap-6 lg:space-y-0">
-        {/* Role Information - تظهر أولاً على الجوال عبر order-1 */}
+        {/* Role Information (تظهر أولاً على الجوال، وفي العمود الجانبي على الشاشات الكبيرة) */}
         <div className="order-1 min-w-0 space-y-6 lg:order-2">
           <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
             <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
@@ -217,142 +349,21 @@ export default function CreateRoleForm({
               </Field>
             </FieldGroup>
           </div>
+
+          {/* Coverage Summary - يظهر هنا فقط على الشاشات الكبيرة (Desktop) */}
+          <div className="hidden lg:block">{renderCoverageSummary()}</div>
         </div>
 
-        {/* Permissions Matrix - تظهر ثانياً على الجوال عبر order-2 */}
+        {/* Permissions Matrix (تظهر ثانياً على الجوال عبر order-2، وتشغل عمودين على الشاشات الكبيرة) */}
         <div className="order-2 min-w-0 space-y-6 lg:order-1 lg:col-span-2">
-          <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
-            <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
-              <div className="flex items-center gap-2">
-                <LayersIcon className="size-4 text-primary" />
-                <div>
-                  <h2 className="text-sm font-semibold text-card-foreground">
-                    Permissions Matrix
-                  </h2>
-                  <p className="text-xs text-muted-foreground">
-                    Assign granular feature and module capabilities
-                  </p>
-                </div>
-              </div>
+          {/* Permissions Matrix - يظهر هنا فقط على الشاشات الكبيرة (Desktop) */}
+          <div className="hidden lg:block">{renderPermissionsMatrix()}</div>
 
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={selectAllPermissions}
-                  className="h-8 cursor-pointer px-2.5 text-xs text-muted-foreground hover:text-foreground"
-                >
-                  Select All
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearAllPermissions}
-                  className="h-8 cursor-pointer px-2.5 text-xs text-muted-foreground hover:text-foreground"
-                >
-                  Clear
-                </Button>
-              </div>
-            </div>
+          {/* Permissions Matrix - يظهر هنا فقط على الجوال (Mobile) */}
+          <div className="block lg:hidden">{renderPermissionsMatrix()}</div>
 
-            <div className="space-y-4">
-              {PERMISSION_GROUPS.map((group) => {
-                const groupPermKeys = group.permissions.map((p) => p.key)
-                const isGroupChecked = groupPermKeys.every((p) =>
-                  selectedPermissions.includes(p)
-                )
-
-                return (
-                  <div
-                    key={group.id}
-                    className="space-y-3 rounded-lg border border-border bg-muted/10 p-4 transition-all hover:border-muted-foreground/30"
-                  >
-                    <div className="flex items-center justify-between border-b border-border/60 pb-2">
-                      <span className="text-xs font-bold text-card-foreground">
-                        {group.label}
-                      </span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleGroupAll(groupPermKeys)}
-                        className="h-7 gap-1 px-2 text-[11px] text-muted-foreground hover:text-foreground"
-                      >
-                        {isGroupChecked ? (
-                          <CheckSquare2Icon className="size-3.5 text-primary" />
-                        ) : (
-                          <SquareIcon className="size-3.5" />
-                        )}
-                        {isGroupChecked ? "Unselect Group" : "Select Group"}
-                      </Button>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-                      {group.permissions.map((perm) => {
-                        const isChecked = selectedPermissions.includes(perm.key)
-                        return (
-                          <div
-                            key={perm.key}
-                            onClick={() => togglePermission(perm.key)}
-                            className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-2.5 transition-colors ${
-                              isChecked
-                                ? "border-primary/40 bg-primary/5"
-                                : "border-border/60 hover:bg-muted/20"
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() => {}}
-                              className="mt-0.5 rounded border-muted-foreground/30 accent-primary"
-                            />
-                            <div className="space-y-0.5">
-                              <p className="text-xs leading-none font-semibold text-foreground">
-                                {perm.label}
-                              </p>
-                              <p className="text-[11px] leading-tight text-muted-foreground">
-                                {perm.description}
-                              </p>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Coverage Summary - تظهر أخيراً دائماً عبر order-3 */}
-        <div className="order-3 min-w-0 space-y-6 lg:order-3">
-          <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
-            <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
-              <SparklesIcon className="size-4 text-primary" />
-              <h2 className="text-sm font-semibold text-card-foreground">
-                Coverage Summary
-              </h2>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between rounded-lg border border-border bg-muted/15 p-3">
-                <span className="text-xs font-medium text-muted-foreground">
-                  Selected
-                </span>
-                <Badge variant="secondary" className="font-mono text-xs">
-                  {selectedPermissions.length} / {totalPossiblePermissions}
-                </Badge>
-              </div>
-
-              <p className="text-[11px] leading-relaxed text-muted-foreground">
-                Users assigned to this role will instantly acquire access to the
-                selected operations across platform APIs and interfaces.
-              </p>
-            </div>
-          </div>
+          {/* Coverage Summary - يظهر هنا فقط على الشاشات الصغيرة (Mobile) */}
+          <div className="block lg:hidden">{renderCoverageSummary()}</div>
         </div>
       </div>
 
