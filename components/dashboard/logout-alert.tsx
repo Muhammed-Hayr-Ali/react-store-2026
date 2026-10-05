@@ -19,32 +19,38 @@ import { appRoutes } from "@/lib/config/app-routes"
 import { useRouter } from "next/navigation"
 
 interface LogoutAlertDialogProps {
-  staus: string | null
+  status: string | null
   data?: unknown
   onOpenChange: (open: boolean) => void
 }
 
 export function LogoutAlertDialog({
-  staus,
+  status,
   onOpenChange,
 }: LogoutAlertDialogProps) {
   const [isLoading, setIsLoading] = React.useState(false)
   const router = useRouter()
 
-  const handleLogout = async () => {
+  const handleLogout = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault() // لمنع إغلاق الدايلوج افتراضياً قبل انتهاء الطلب
+    setIsLoading(true)
+
     try {
       const result = await signOut()
       if (result.success) {
+        onOpenChange(false) // إغلاق الدايلوج يدوياً بعد النجاح
         router.replace(appRoutes.home)
         router.refresh()
       }
     } catch (error) {
       console.error("Error signing out:", error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
   return (
-    <AlertDialog open={staus === "logout"} onOpenChange={onOpenChange}>
+    <AlertDialog open={status === "logout"} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogMedia>
@@ -59,9 +65,22 @@ export function LogoutAlertDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction variant="destructive" onClick={handleLogout}>
-            {isLoading ? <Spinner /> : "Yes, Logout"}
+          <AlertDialogCancel disabled={isLoading}>
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            variant="destructive"
+            onClick={handleLogout}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <Spinner className="mr-2 size-4" />
+                Logging out...
+              </>
+            ) : (
+              "Yes, Logout"
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
