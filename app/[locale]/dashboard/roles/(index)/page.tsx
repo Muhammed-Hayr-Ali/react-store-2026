@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getAllRoles } from "@/lib/actions/role/queries/get-all-roles"
-import { RolesTable } from "@/components/dashboard/roles/roles-table"
+import RolesTable from "@/components/dashboard/roles/roles-table"
 
 export const dynamic = "force-dynamic"
 
