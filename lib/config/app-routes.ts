@@ -17,6 +17,6 @@ export const appRoutes = {
     flashSales: "/dashboard/flash-sales",
     reports: "/dashboard/reports",
     roles: "/dashboard/roles",
-    users: "/dashboard/users",
+    staffAccess: "/dashboard/staff-access",
   },
 } as const

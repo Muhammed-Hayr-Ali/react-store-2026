@@ -4,7 +4,7 @@ import {
   Zap,
   FileSpreadsheet,
   ShieldCheck,
-  Users,
+  UserCog,
 } from "lucide-react"
 import { appRoutes } from "@/lib/config/app-routes"
 
@@ -36,9 +36,9 @@ export const sidebarConfig = {
       icon: ShieldCheck,
     },
     {
-      title: "Users Management",
-      url: appRoutes.dashboard.users,
-      icon: Users,
+      title: "Staff Access",
+      url: appRoutes.dashboard.staffAccess,
+      icon: UserCog,
     },
   ],
 }
