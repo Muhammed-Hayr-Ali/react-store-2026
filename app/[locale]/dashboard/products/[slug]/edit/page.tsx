@@ -7,7 +7,8 @@ import { getProductCompleteBySlug } from "@/lib/actions/products/queries/get-com
 import { Category, getAllCategories } from "@/lib/actions/categories"
 import { getAllBrand } from "@/lib/actions/brands/queries/get-all"
 import { Brand } from "@/lib/actions/brands"
-import UpdateProductForm from "@/components/dashboard/products/update/update-product-form"
+import UpdateProductForm from "@/components/dashboard/product/update-product-form"
+
 
 export const dynamic = "force-dynamic"
 

@@ -4,7 +4,7 @@ import { UsersIcon } from "lucide-react"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getAdminUsersList } from "@/lib/actions/users/queries/get-admin-users"
-import { DataTable } from "@/components/dashboard/users/data-table"
+import { DataTable } from "@/components/dashboard/users/users-table"
 
 export const dynamic = "force-dynamic"
 

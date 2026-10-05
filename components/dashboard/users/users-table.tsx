@@ -111,7 +111,6 @@ export function DataTable({
     setData(initialData)
   }
 
-  // فلترة متزامنة للبحث السريع + تبويبات الحالة
   const filteredData = React.useMemo(() => {
     return data.filter((item) => {
       const matchesTab = currentTab === "all" || item.status === currentTab
@@ -298,7 +297,7 @@ export function DataTable({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-7 text-muted-foreground data-[state=open]:bg-muted"
+                    className="size-8 text-muted-foreground"
                   >
                     <EllipsisVerticalIcon className="size-4" />
                     <span className="sr-only">Actions</span>
@@ -374,7 +373,7 @@ export function DataTable({
                 setSearchQuery("")
                 table.setPageIndex(0)
               }}
-              className="absolute inset-e-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute inset-e-2 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-foreground"
             >
               <XIcon className="size-3.5" />
             </button>
@@ -390,22 +389,22 @@ export function DataTable({
               table.setPageIndex(0)
             }}
           >
-            <TabsList>
-              <TabsTrigger value="all">
+            <TabsList className="h-9">
+              <TabsTrigger value="all" className="text-xs">
                 All{" "}
-                <Badge variant="secondary" className="ms-1.5">
+                <Badge variant="secondary" className="ms-1.5 px-1.5 py-0">
                   {data.length}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger value="active">
+              <TabsTrigger value="active" className="text-xs">
                 Active{" "}
-                <Badge variant="secondary" className="ms-1.5">
+                <Badge variant="secondary" className="ms-1.5 px-1.5 py-0">
                   {activeCount}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger value="banned">
+              <TabsTrigger value="banned" className="text-xs">
                 Banned{" "}
-                <Badge variant="secondary" className="ms-1.5">
+                <Badge variant="secondary" className="ms-1.5 px-1.5 py-0">
                   {bannedCount}
                 </Badge>
               </TabsTrigger>
@@ -414,14 +413,10 @@ export function DataTable({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 text-xs sm:h-9"
-              >
-                <Columns3Icon className="me-1 size-3.5 sm:me-1.5" />
+              <Button variant="outline" size="sm" className="h-9 text-xs">
+                <Columns3Icon className="me-1.5 size-3.5" />
                 <span>Columns</span>
-                <ChevronDownIcon className="ms-1 size-3 opacity-60 sm:ms-1.5 sm:size-3.5" />
+                <ChevronDownIcon className="ms-1.5 size-3 opacity-60" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
@@ -446,64 +441,81 @@ export function DataTable({
       </div>
 
       {/* Main Table */}
-      <div className="w-full overflow-hidden rounded-lg border">
-        <Table className="w-full">
-          <TableHeader className="sticky top-0 z-10 bg-muted">
-            {table.getHeaderGroups().map((group) => (
-              <TableRow key={group.id}>
-                {group.headers.map((header) => (
-                  <TableHead key={header.id} colSpan={header.colSpan}>
-                    {header.isPlaceholder ? null : (
-                      <FlexRender header={header} />
-                    )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      <FlexRender cell={cell} />
-                    </TableCell>
+      <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+        <div className="overflow-x-auto">
+          <Table className="w-full">
+            <TableHeader className="bg-muted/40">
+              {table.getHeaderGroups().map((group) => (
+                <TableRow key={group.id}>
+                  {group.headers.map((header) => (
+                    <TableHead
+                      key={header.id}
+                      colSpan={header.colSpan}
+                      className="text-xs font-medium text-muted-foreground"
+                    >
+                      {header.isPlaceholder ? null : (
+                        <FlexRender header={header} />
+                      )}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center text-muted-foreground"
-                >
-                  No users found matching your search.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    className="transition-colors hover:bg-muted/20"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        <FlexRender cell={cell} />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center text-xs text-muted-foreground"
+                  >
+                    No users found matching your search.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       {/* Pagination Footer */}
       <div className="flex items-center justify-between px-1">
         <div className="flex w-full items-center gap-8 lg:w-fit">
           <div className="hidden items-center gap-2 lg:flex">
-            <Label htmlFor="rows-per-page" className="text-sm font-medium">
+            <Label htmlFor="rows-per-page" className="text-xs font-medium">
               Rows per page
             </Label>
             <Select
               value={`${table.state.pagination.pageSize}`}
               onValueChange={(val) => table.setPageSize(Number(val))}
             >
-              <SelectTrigger size="sm" className="w-20" id="rows-per-page">
+              <SelectTrigger
+                size="sm"
+                className="h-8 w-20 text-xs"
+                id="rows-per-page"
+              >
                 <SelectValue placeholder={table.state.pagination.pageSize} />
               </SelectTrigger>
               <SelectContent side="top">
                 <SelectGroup>
                   {[10, 20, 30, 50].map((size) => (
-                    <SelectItem key={size} value={`${size}`}>
+                    <SelectItem
+                      key={size}
+                      value={`${size}`}
+                      className="text-xs"
+                    >
                       {size}
                     </SelectItem>
                   ))}
@@ -511,7 +523,7 @@ export function DataTable({
               </SelectContent>
             </Select>
           </div>
-          <div className="text-sm font-medium">
+          <div className="text-xs font-medium text-muted-foreground">
             Page {table.state.pagination.pageIndex + 1} of{" "}
             {table.getPageCount() || 1}
           </div>

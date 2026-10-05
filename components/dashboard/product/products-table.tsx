@@ -22,6 +22,7 @@ import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -63,11 +64,13 @@ import {
   PencilIcon,
   CopyIcon,
   LinkIcon,
+  SearchIcon,
+  XIcon,
 } from "lucide-react"
 
 import { AdminProductSummary } from "@/lib/actions/products/types"
 import { duplicateProduct } from "@/lib/actions/products/mutations/duplicate"
-import DeleteProductDialog from "../delete/delete-product-dialog"
+import DeleteProductDialog from "./delete-product-dialog"
 
 // -----------------------------------------------------------------------------
 // 1. TanStack Table Features Registration
@@ -136,8 +139,8 @@ export function DataTable({
   const [currentTab, setCurrentTab] = React.useState<
     "all" | "active" | "low-stock"
   >("all")
+  const [searchQuery, setSearchQuery] = React.useState("")
 
-  // حالة المودال الموحدة تماماً كباقي مكونات المشروع
   const [productModal, setProductModal] = React.useState<{
     type: "delete" | null
     data: AdminProductSummary | null
@@ -151,15 +154,21 @@ export function DataTable({
     setData(initialData)
   }
 
+  // فلترة مدمجة تجمع بين التبويبات والبحث النصي السريع
   const filteredData = React.useMemo(() => {
-    if (currentTab === "active") {
-      return data.filter((item) => item.is_active)
-    }
-    if (currentTab === "low-stock") {
-      return data.filter((item) => item.total_stock <= 10)
-    }
-    return data
-  }, [data, currentTab])
+    return data.filter((item) => {
+      if (currentTab === "active" && !item.is_active) return false
+      if (currentTab === "low-stock" && item.total_stock > 10) return false
+
+      if (!searchQuery.trim()) return true
+      const q = searchQuery.toLowerCase().trim()
+      const name = (item.name || "").toLowerCase()
+      const category = (item.category_name || "").toLowerCase()
+      const brand = (item.brand_name || "").toLowerCase()
+
+      return name.includes(q) || category.includes(q) || brand.includes(q)
+    })
+  }, [data, currentTab, searchQuery])
 
   const activeCount = React.useMemo(
     () => data.filter((item) => item.is_active).length,
@@ -428,25 +437,38 @@ export function DataTable({
     onPaginationChange: setPagination,
   })
 
-  const getFilterLabel = () => {
-    switch (currentTab) {
-      case "active":
-        return { label: "Active", count: activeCount }
-      case "low-stock":
-        return { label: "Low Stock", count: lowStockCount }
-      default:
-        return { label: "All Products", count: data.length }
-    }
-  }
-
-  const activeFilterInfo = getFilterLabel()
-
   return (
     <div className="flex w-full flex-col justify-start gap-4">
-      {/* Table Header Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        {/* شاشات سطح المكتب والتابلت */}
-        <div className="hidden sm:block">
+      {/* Controls Bar الموحد المتناسق مع باقي الجداول */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {/* حقل البحث السريع مع زر المسح */}
+        <div className="relative w-full sm:max-w-xs">
+          <SearchIcon className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search products by name, category or brand..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value)
+              table.setPageIndex(0)
+            }}
+            className="h-9 ps-8 pe-8 text-xs"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery("")
+                table.setPageIndex(0)
+              }}
+              className="absolute inset-e-2 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-foreground"
+            >
+              <XIcon className="size-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* التبويبات وقائمة الأعمدة الموحدة */}
+        <div className="flex flex-wrap items-center gap-2">
           <Tabs
             value={currentTab}
             onValueChange={(val) => {
@@ -454,101 +476,34 @@ export function DataTable({
               table.setPageIndex(0)
             }}
           >
-            <TabsList className="flex">
-              <TabsTrigger value="all">
-                All Products{" "}
-                <Badge variant="secondary" className="ms-1.5">
+            <TabsList className="h-9">
+              <TabsTrigger value="all" className="text-xs">
+                All{" "}
+                <Badge variant="secondary" className="ms-1.5 px-1.5 py-0">
                   {data.length}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger value="active">
+              <TabsTrigger value="active" className="text-xs">
                 Active{" "}
-                <Badge variant="secondary" className="ms-1.5">
+                <Badge variant="secondary" className="ms-1.5 px-1.5 py-0">
                   {activeCount}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger value="low-stock">
+              <TabsTrigger value="low-stock" className="text-xs">
                 Low Stock{" "}
-                <Badge variant="secondary" className="ms-1.5">
+                <Badge variant="secondary" className="ms-1.5 px-1.5 py-0">
                   {lowStockCount}
                 </Badge>
               </TabsTrigger>
             </TabsList>
           </Tabs>
-        </div>
 
-        {/* شاشات الجوال الصغيرة */}
-        <div className="block sm:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 gap-1 px-2 text-[11px] font-medium"
-              >
-                <span>{activeFilterInfo.label}</span>
-                <Badge
-                  variant="secondary"
-                  className="ms-0.5 h-4.5 px-1 text-[10px] tabular-nums"
-                >
-                  {activeFilterInfo.count}
-                </Badge>
-                <ChevronDownIcon className="ms-0.5 size-3 opacity-60" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-36 text-xs">
-              <DropdownMenuItem
-                className="flex cursor-pointer items-center justify-between py-1.5 text-xs"
-                onClick={() => {
-                  setCurrentTab("all")
-                  table.setPageIndex(0)
-                }}
-              >
-                <span>All Products</span>
-                <Badge variant="secondary" className="text-[10px] tabular-nums">
-                  {data.length}
-                </Badge>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="flex cursor-pointer items-center justify-between py-1.5 text-xs"
-                onClick={() => {
-                  setCurrentTab("active")
-                  table.setPageIndex(0)
-                }}
-              >
-                <span>Active</span>
-                <Badge variant="secondary" className="text-[10px] tabular-nums">
-                  {activeCount}
-                </Badge>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="flex cursor-pointer items-center justify-between py-1.5 text-xs"
-                onClick={() => {
-                  setCurrentTab("low-stock")
-                  table.setPageIndex(0)
-                }}
-              >
-                <span>Low Stock</span>
-                <Badge variant="secondary" className="text-[10px] tabular-nums">
-                  {lowStockCount}
-                </Badge>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* أدوات التحكم الإضافية */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 text-xs sm:h-9"
-              >
-                <Columns3Icon className="me-1 size-3.5 sm:me-1.5" />
-                <span className="xs:inline hidden">Columns</span>
-                <ChevronDownIcon className="ms-1 size-3 opacity-60 sm:ms-1.5 sm:size-3.5" />
+              <Button variant="outline" size="sm" className="h-9 text-xs">
+                <Columns3Icon className="me-1.5 size-3.5" />
+                <span>Columns</span>
+                <ChevronDownIcon className="ms-1.5 size-3 opacity-60" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
@@ -577,54 +532,63 @@ export function DataTable({
         </div>
       </div>
 
-      {/* Main Table Container */}
-      <div className="w-full overflow-hidden rounded-lg border">
-        <Table className="w-full">
-          <TableHeader className="sticky top-0 z-10 bg-muted">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id} colSpan={header.colSpan}>
-                      {header.isPlaceholder ? null : (
-                        <FlexRender header={header} />
-                      )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      <FlexRender cell={cell} />
-                    </TableCell>
-                  ))}
+      {/* Main Table Container مع دعم التمرير السلس على الجوال */}
+      <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+        <div className="overflow-x-auto">
+          <Table className="w-full">
+            <TableHeader className="bg-muted/40">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead
+                        key={header.id}
+                        colSpan={header.colSpan}
+                        className="text-xs font-medium text-muted-foreground"
+                      >
+                        {header.isPlaceholder ? null : (
+                          <FlexRender header={header} />
+                        )}
+                      </TableHead>
+                    )
+                  })}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center text-muted-foreground"
-                >
-                  No products found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    className="transition-colors hover:bg-muted/20"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        <FlexRender cell={cell} />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center text-xs text-muted-foreground"
+                  >
+                    No products found matching your search.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       {/* Pagination Footer */}
       <div className="flex items-center justify-between px-1">
         <div className="flex w-full items-center gap-8 lg:w-fit">
           <div className="hidden items-center gap-2 lg:flex">
-            <Label htmlFor="rows-per-page" className="text-sm font-medium">
+            <Label htmlFor="rows-per-page" className="text-xs font-medium">
               Rows per page
             </Label>
             <Select
@@ -633,13 +597,21 @@ export function DataTable({
                 table.setPageSize(Number(value))
               }}
             >
-              <SelectTrigger size="sm" className="w-20" id="rows-per-page">
+              <SelectTrigger
+                size="sm"
+                className="h-8 w-20 text-xs"
+                id="rows-per-page"
+              >
                 <SelectValue placeholder={table.state.pagination.pageSize} />
               </SelectTrigger>
               <SelectContent side="top">
                 <SelectGroup>
                   {[10, 20, 30, 40, 50].map((pageSize) => (
-                    <SelectItem key={pageSize} value={`${pageSize}`}>
+                    <SelectItem
+                      key={pageSize}
+                      value={`${pageSize}`}
+                      className="text-xs"
+                    >
                       {pageSize}
                     </SelectItem>
                   ))}
@@ -647,7 +619,7 @@ export function DataTable({
               </SelectContent>
             </Select>
           </div>
-          <div className="flex w-fit items-center justify-center text-sm font-medium">
+          <div className="text-xs font-medium text-muted-foreground">
             Page {table.state.pagination.pageIndex + 1} of{" "}
             {table.getPageCount() || 1}
           </div>
@@ -691,7 +663,7 @@ export function DataTable({
         </div>
       </div>
 
-      {/* دايلوج تأكيد الحذف بنفس أسلوب isOpen === 'delete' و item */}
+      {/* دايلوج تأكيد الحذف */}
       <DeleteProductDialog
         isOpen={productModal.type === "delete" ? "delete" : null}
         item={productModal.data}

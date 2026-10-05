@@ -49,8 +49,10 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { createProduct } from "@/lib/actions/products/mutations/create"
-import { CreateProductCompleteInput } from "@/lib/actions/products/types"
+import {
+  CreateProductCompleteInput,
+  ProductWithRelations,
+} from "@/lib/actions/products/types"
 import { Category } from "@/lib/actions/categories"
 import { Brand } from "@/lib/actions/brands"
 
@@ -60,9 +62,10 @@ import UpdateCategorySheet from "@/components/dashboard/categories/update-catego
 import DeleteCategoryDialog from "@/components/dashboard/categories/delete-category"
 
 // Brand sheets & dialogs
-import CreateBrandSheet from "../../brand/create-brand"
-import UpdateBrandSheet from "../../brand/update-brand"
-import DeleteBrandDialog from "../../brand/delete-brand"
+import CreateBrandSheet from "../brand/create-brand"
+import UpdateBrandSheet from "../brand/update-brand"
+import DeleteBrandDialog from "../brand/delete-brand"
+import { updateProduct } from "@/lib/actions/products/mutations/update"
 import { createProductCompleteSchema } from "@/lib/actions/products"
 
 type FormValues = CreateProductCompleteInput
@@ -126,10 +129,12 @@ function generateRandomSku(productName?: string, variantName?: string): string {
   return vPart ? `${pPart}-${vPart}-${rand}` : `${pPart}-${rand}`
 }
 
-export default function CreateProductForm({
+export default function UpdateProductForm({
+  product,
   categories: initialCategories,
   brands: initialBrands,
 }: {
+  product: ProductWithRelations
   categories: Category[] | null
   brands: Brand[] | null
 }) {
@@ -158,21 +163,56 @@ export default function CreateProductForm({
     data: null,
   })
 
+  const initialImages = React.useMemo(() => {
+    if (!product.product_images || product.product_images.length === 0) {
+      return [DEFAULT_IMAGE]
+    }
+    return product.product_images.map((img) => {
+      const linkedVariant = product.product_variants.find(
+        (v) => v.id === img.variant_id
+      )
+      return {
+        url: img.url,
+        alt_text: img.alt_text || "",
+        is_primary: img.is_primary,
+        variant_sku: linkedVariant?.sku || "",
+      }
+    })
+  }, [product])
+
+  const initialVariants = React.useMemo(() => {
+    if (!product.product_variants || product.product_variants.length === 0) {
+      return [DEFAULT_VARIANT]
+    }
+    return product.product_variants.map((v, idx) => ({
+      sku: v.sku,
+      name: v.name || "",
+      attributes: v.attributes || {},
+      price: v.price / 100,
+      compare_at_price: v.compare_at_price ? v.compare_at_price / 100 : null,
+      stock_quantity: v.stock_quantity,
+      track_inventory: v.track_inventory,
+      low_stock_threshold: v.low_stock_threshold,
+      is_active: v.is_active,
+      sort_order: v.sort_order || idx + 1,
+    }))
+  }, [product])
+
   const form = useForm<FormValues>({
     resolver: zodResolver(createProductCompleteSchema),
     mode: "onChange",
     defaultValues: {
-      name: "",
-      slug: "",
-      category_id: "",
-      brand_id: null,
-      description: null,
-      meta_title: null,
-      meta_description: null,
-      is_active: true,
-      is_featured: false,
-      variants: [DEFAULT_VARIANT],
-      images: [DEFAULT_IMAGE],
+      name: product.name,
+      slug: product.slug,
+      category_id: product.category_id,
+      brand_id: product.brand_id,
+      description: product.description,
+      meta_title: product.meta_title,
+      meta_description: product.meta_description,
+      is_active: product.is_active,
+      is_featured: product.is_featured,
+      variants: initialVariants,
+      images: initialImages,
     },
   })
 
@@ -266,45 +306,21 @@ export default function CreateProductForm({
   async function onSubmit(data: FormValues) {
     setErrorMessage(null)
 
-    const payload: CreateProductCompleteInput = {
-      ...data,
-      brand_id: data.brand_id || null,
-      description: data.description || null,
-      meta_title: data.meta_title || null,
-      meta_description: data.meta_description || null,
-      variants: data.variants.map((v, idx) => ({
-        ...v,
-        name: v.name || "",
-        attributes: v.attributes || {},
-        sort_order: idx + 1,
-        compare_at_price:
-          v.compare_at_price !== null && v.compare_at_price !== undefined
-            ? Number(v.compare_at_price)
-            : null,
-      })),
-      images: data.images.map((img) => ({
-        ...img,
-        alt_text: img.alt_text || "",
-        variant_sku: img.variant_sku || "",
-      })),
-    }
-
-    const result = await createProduct(payload)
+    const result = await updateProduct(product.id, data)
 
     if (result.success) {
-      toast.success("Product created successfully!")
+      toast.success("Product updated successfully!")
       router.push("/dashboard/products")
       router.refresh()
     } else {
-      console.error("Creation Error:", result)
       const errorMsg =
         result.error === "VALIDATION_ERROR"
           ? "Please check the form for invalid inputs."
           : result.error === "SLUG_ALREADY_EXISTS"
             ? "The URL slug is already taken. Please choose another one."
             : result.error === "SKU_ALREADY_EXISTS"
-              ? "One or more SKUs are already in use. Please generate or enter unique SKUs."
-              : result.error || "Failed to create product."
+              ? "One or more SKUs are already in use. Please ensure unique SKUs."
+              : result.error || "Failed to update product."
 
       setErrorMessage(errorMsg)
       window.scrollTo({ top: 0, behavior: "smooth" })
@@ -654,7 +670,7 @@ export default function CreateProductForm({
                                   data: selectedCategoryObject,
                                 })
                               }
-                              title="Edit selected category"
+                              title="Update selected category"
                               className="size-8 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
                             >
                               <PencilIcon className="size-3.5" />
@@ -866,10 +882,7 @@ export default function CreateProductForm({
             type="button"
             variant="outline"
             disabled={isSubmitting}
-            onClick={() => {
-              form.reset()
-              setErrorMessage(null)
-            }}
+            onClick={() => router.back()}
             className="w-full sm:w-auto"
           >
             Discard Changes
@@ -882,12 +895,12 @@ export default function CreateProductForm({
             {isSubmitting ? (
               <>
                 <Spinner className="mr-2 size-4" />
-                Saving...
+                Updating...
               </>
             ) : (
               <>
                 <CheckCircle2Icon className="mr-1.5 size-4" />
-                Save Product
+                Update Product
               </>
             )}
           </Button>
@@ -912,6 +925,7 @@ export default function CreateProductForm({
           setCategoryModal({ type: null, data: null })
         }}
       />
+
       <UpdateCategorySheet
         isOpen={categoryModal.type === "update" ? "update" : null}
         onOpenChange={(open) => {
@@ -950,6 +964,7 @@ export default function CreateProductForm({
           setBrandModal({ type: null, data: null })
         }}
       />
+
       <UpdateBrandSheet
         isOpen={brandModal.type === "update" ? "update" : null}
         onOpenChange={(open) => {
@@ -1006,6 +1021,9 @@ export default function CreateProductForm({
           toast.success("Brand deleted successfully!")
         }}
       />
+
+
+
     </>
   )
 }

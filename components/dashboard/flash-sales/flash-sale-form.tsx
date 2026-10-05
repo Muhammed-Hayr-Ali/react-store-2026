@@ -11,7 +11,6 @@ import {
   CheckCircle2Icon,
   CheckIcon,
   FlameIcon,
-  Loader2Icon,
   PlusIcon,
   Trash2Icon,
 } from "lucide-react"
@@ -129,6 +128,7 @@ export function FlashSaleForm({
     formState: { errors, isSubmitting },
   } = useForm<FlashSaleFormInput>({
     resolver: zodResolver(flashSaleFormSchema),
+    shouldFocusError: false,
     defaultValues: initialData || {
       title: "",
       titleAr: "",
@@ -244,396 +244,435 @@ export function FlashSaleForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form
+      noValidate
+      onSubmit={handleSubmit(onSubmit, (validationErrors) => {
+        console.error("Form Validation Errors:", validationErrors)
+      })}
+      className="space-y-6"
+    >
       {serverError && (
         <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs font-semibold text-destructive">
           {serverError}
         </div>
       )}
 
-      {/* General Information */}
-      <div className="space-y-4 rounded-xl border border-border bg-card p-4 sm:p-6">
-        <h3 className="border-b border-border/40 pb-2 text-sm font-semibold text-foreground">
-          General Information
-        </h3>
+      {/* Grid Layout: نظام العمودين */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* العمود الرئيسي (lg:col-span-2): يحتوي على General Info فوق Participating Products */}
+        <div className="min-w-0 space-y-6 lg:col-span-2">
+          {/* 1. بطاقة المعلومات العامة */}
+          <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-6">
+            <h3 className="border-b border-border/40 pb-2 text-sm font-semibold text-foreground">
+              General Information
+            </h3>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="title" className="text-xs">
-              Campaign Title (EN) <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="title"
-              placeholder="e.g. Weekend Flash Deals"
-              {...register("title")}
-              onBlur={handleTitleBlur}
-              className="text-xs"
-            />
-            {errors.title && (
-              <p className="text-[11px] text-destructive">
-                {errors.title.message}
-              </p>
-            )}
-          </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="title" className="text-xs">
+                  Title (EN) <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="title"
+                  placeholder="e.g. Weekend Flash Deals"
+                  {...register("title")}
+                  onBlur={handleTitleBlur}
+                  className="text-xs"
+                />
+                {errors.title && (
+                  <p className="text-[11px] text-destructive">
+                    {errors.title.message}
+                  </p>
+                )}
+              </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="titleAr" className="text-xs">
-              Campaign Title (AR)
-            </Label>
-            <Input
-              id="titleAr"
-              placeholder="مثال: عروض نهاية الأسبوع السريعة"
-              dir="rtl"
-              {...register("titleAr")}
-              className="text-xs"
-            />
-            {errors.titleAr && (
-              <p className="text-[11px] text-destructive">
-                {errors.titleAr.message}
-              </p>
-            )}
-          </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="titleAr" className="text-xs">
+                  Title (AR)
+                </Label>
+                <Input
+                  id="titleAr"
+                  placeholder="مثال: عروض نهاية الأسبوع"
+                  dir="rtl"
+                  {...register("titleAr")}
+                  className="text-xs"
+                />
+                {errors.titleAr && (
+                  <p className="text-[11px] text-destructive">
+                    {errors.titleAr.message}
+                  </p>
+                )}
+              </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="slug" className="text-xs">
-              URL Slug <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="slug"
-              placeholder="weekend-flash-deals"
-              {...register("slug")}
-              className="font-mono text-xs"
-            />
-            {errors.slug && (
-              <p className="text-[11px] text-destructive">
-                {errors.slug.message}
-              </p>
-            )}
-          </div>
-
-          <div className="flex items-center justify-between pt-5 sm:justify-start sm:gap-6">
-            <div className="space-y-0.5">
-              <Label
-                htmlFor="isActive"
-                className="cursor-pointer text-xs font-medium"
-              >
-                Campaign Active Status
-              </Label>
-              <p className="text-[10px] text-muted-foreground">
-                Display campaign when start time is reached
-              </p>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="slug" className="text-xs">
+                  URL Slug <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="slug"
+                  placeholder="weekend-flash-deals"
+                  {...register("slug")}
+                  className="font-mono text-xs"
+                />
+                {errors.slug && (
+                  <p className="text-[11px] text-destructive">
+                    {errors.slug.message}
+                  </p>
+                )}
+              </div>
             </div>
-            <Switch
-              id="isActive"
-              checked={isActive}
-              onCheckedChange={(checked) => setValue("isActive", checked)}
-            />
-          </div>
-        </div>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="description" className="text-xs">
-            Description
-          </Label>
-          <Textarea
-            id="description"
-            rows={2}
-            placeholder="Short details regarding the campaign terms or perks..."
-            {...register("description")}
-            className="resize-none text-xs"
-          />
-        </div>
-
-        {/* Campaign Duration (Range Calendar + Time Picker Fields) */}
-        <div className="space-y-2 border-t border-border/30 pt-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-            {/* Date Range Picker */}
-            <div className="flex-1 space-y-1">
-              <Label htmlFor="date-picker-range" className="text-xs">
-                Date Range <span className="text-destructive">*</span>
+            <div className="space-y-1.5">
+              <Label htmlFor="description" className="text-xs">
+                Description
               </Label>
-              <Popover>
+              <Textarea
+                id="description"
+                rows={2}
+                placeholder="Short details regarding the campaign terms or perks..."
+                {...register("description")}
+                className="resize-none text-xs"
+              />
+            </div>
+          </div>
+
+          {/* 2. بطاقة المنتجات المشاركة */}
+          <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-6">
+            <div className="flex flex-col gap-2 border-b border-border/40 pb-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">
+                  Participating Products ({fields.length})
+                </h3>
+                <p className="text-[11px] text-muted-foreground">
+                  Configure tailored discounts and quantity limits for each
+                  product.
+                </p>
+              </div>
+
+              <Popover
+                open={productSearchOpen}
+                onOpenChange={setProductSearchOpen}
+              >
                 <PopoverTrigger asChild>
                   <Button
+                    type="button"
+                    size="sm"
                     variant="outline"
-                    id="date-picker-range"
-                    disabled={isSubmitting}
-                    className={cn(
-                      "w-full justify-start px-2.5 text-xs font-normal",
-                      !dateRange?.from && "text-muted-foreground"
-                    )}
+                    className="shrink-0 gap-1.5 self-start text-xs sm:self-auto"
                   >
-                    <CalendarIcon className="mr-2 size-3.5" />
-                    {dateRange?.from ? (
-                      dateRange.to ? (
-                        <>
-                          {format(dateRange.from, "LLL dd, y")} -{" "}
-                          {format(dateRange.to, "LLL dd, y")}
-                        </>
-                      ) : (
-                        format(dateRange.from, "LLL dd, y")
-                      )
-                    ) : (
-                      <span>Pick campaign date range</span>
-                    )}
+                    <PlusIcon className="size-3.5" />
+                    Add Products
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="range"
-                    defaultMonth={dateRange?.from}
-                    selected={dateRange}
-                    onSelect={handleRangeSelect}
-                    numberOfMonths={2}
-                  />
+                <PopoverContent className="w-80 p-0" align="end">
+                  <Command>
+                    <CommandInput
+                      placeholder="Search store products..."
+                      className="text-xs"
+                    />
+                    <CommandList>
+                      <CommandEmpty className="p-3 text-center text-xs text-muted-foreground">
+                        No products found.
+                      </CommandEmpty>
+                      <CommandGroup>
+                        {availableProducts.map((product) => {
+                          const isSelected = fields.some(
+                            (f) => f.productId === product.id
+                          )
+                          return (
+                            <CommandItem
+                              key={product.id}
+                              value={product.name}
+                              disabled={isSelected}
+                              onSelect={() => handleSelectProduct(product)}
+                              className="flex items-center justify-between text-xs"
+                            >
+                              <span className="truncate">{product.name}</span>
+                              <span className="ml-2 font-mono text-muted-foreground">
+                                ${product.price}
+                              </span>
+                              {isSelected && (
+                                <CheckIcon className="ml-1 size-3.5 text-primary" />
+                              )}
+                            </CommandItem>
+                          )
+                        })}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
                 </PopoverContent>
               </Popover>
             </div>
 
-            {/* Start Time Input (مكون الوقت الأصلي) */}
-            <Field className="w-full sm:w-32">
-              <FieldLabel htmlFor="start-time-picker" className="text-xs">
-                Start Time
-              </FieldLabel>
-              <Input
-                type="time"
-                id="start-time-picker"
-                step="1"
-                value={startTime}
-                disabled={isSubmitting}
-                onChange={handleStartTimeChange}
-                className="appearance-none bg-background font-mono text-xs [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
-              />
-            </Field>
+            {errors.items && (
+              <p className="text-xs font-medium text-destructive">
+                {errors.items.message}
+              </p>
+            )}
 
-            {/* End Time Input (مكون الوقت الأصلي) */}
-            <Field className="w-full sm:w-32">
-              <FieldLabel htmlFor="end-time-picker" className="text-xs">
-                End Time
-              </FieldLabel>
-              <Input
-                type="time"
-                id="end-time-picker"
-                step="1"
-                value={endTime}
-                disabled={isSubmitting}
-                onChange={handleEndTimeChange}
-                className="appearance-none bg-background font-mono text-xs [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
-              />
-            </Field>
-          </div>
-
-          {(errors.startsAt || errors.endsAt) && (
-            <p className="text-[11px] text-destructive">
-              {errors.startsAt?.message || errors.endsAt?.message}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Participating Products */}
-      <div className="space-y-4 rounded-xl border border-border bg-card p-4 sm:p-6">
-        <div className="flex items-center justify-between border-b border-border/40 pb-2">
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">
-              Participating Products ({fields.length})
-            </h3>
-            <p className="text-[11px] text-muted-foreground">
-              Configure tailored discounts and quantity limits for each product.
-            </p>
-          </div>
-
-          <Popover open={productSearchOpen} onOpenChange={setProductSearchOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                className="gap-1.5 text-xs"
-              >
-                <PlusIcon className="size-3.5" />
-                Add Products
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-0" align="end">
-              <Command>
-                <CommandInput
-                  placeholder="Search store products..."
-                  className="text-xs"
-                />
-                <CommandList>
-                  <CommandEmpty className="p-3 text-center text-xs text-muted-foreground">
-                    No products found.
-                  </CommandEmpty>
-                  <CommandGroup>
-                    {availableProducts.map((product) => {
-                      const isSelected = fields.some(
-                        (f) => f.productId === product.id
+            {fields.length === 0 ? (
+              <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-12 text-center">
+                <FlameIcon className="mb-2 size-8 text-muted-foreground/50" />
+                <p className="text-xs font-medium text-foreground">
+                  No products added yet
+                </p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">
+                  Click &quot;Add Products&quot; above to select items for this
+                  flash sale.
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto rounded-lg border border-border">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-muted/40 font-medium text-muted-foreground">
+                    <tr>
+                      <th className="px-3 py-2.5">Product</th>
+                      <th className="w-32 px-3 py-2.5">Discount Type</th>
+                      <th className="w-24 px-3 py-2.5">Value</th>
+                      <th className="w-24 px-3 py-2.5">Deal Price</th>
+                      <th className="w-24 px-3 py-2.5">Limit</th>
+                      <th className="w-10 px-3 py-2.5 text-right"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {fields.map((field, index) => {
+                      const currentItem = watchedItems?.[index]
+                      const discountType: FlashSaleDiscountType =
+                        currentItem?.discountType || "percentage"
+                      const discountVal = currentItem?.discountValue
+                      const previewPrice = getPreviewPrice(
+                        field.productPrice,
+                        discountType,
+                        discountVal
                       )
+
                       return (
-                        <CommandItem
-                          key={product.id}
-                          value={product.name}
-                          disabled={isSelected}
-                          onSelect={() => handleSelectProduct(product)}
-                          className="flex items-center justify-between text-xs"
-                        >
-                          <span className="truncate">{product.name}</span>
-                          <span className="ml-2 font-mono text-muted-foreground">
-                            ${product.price}
-                          </span>
-                          {isSelected && (
-                            <CheckIcon className="ml-1 size-3.5 text-primary" />
-                          )}
-                        </CommandItem>
+                        <tr key={field.id} className="hover:bg-muted/15">
+                          <td className="px-3 py-2">
+                            <div className="font-semibold text-foreground">
+                              {field.productName}
+                            </div>
+                            <div className="font-mono text-[10px] text-muted-foreground">
+                              Base: ${field.productPrice}
+                            </div>
+                          </td>
+
+                          <td className="px-3 py-2">
+                            <Select
+                              value={discountType}
+                              onValueChange={(val: FlashSaleDiscountType) =>
+                                setValue(`items.${index}.discountType`, val, {
+                                  shouldValidate: true,
+                                })
+                              }
+                            >
+                              <SelectTrigger className="h-7 text-[11px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="percentage">
+                                  Percentage (%)
+                                </SelectItem>
+                                <SelectItem value="fixed_amount">
+                                  Fixed Off ($)
+                                </SelectItem>
+                                <SelectItem value="fixed_price">
+                                  Set Price ($)
+                                </SelectItem>
+                                <SelectItem value="none">
+                                  No Discount
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </td>
+
+                          <td className="px-3 py-2">
+                            {discountType !== "none" ? (
+                              <Input
+                                type="number"
+                                step="any"
+                                min="0"
+                                max={
+                                  discountType === "percentage"
+                                    ? 100
+                                    : undefined
+                                }
+                                placeholder="0"
+                                className="h-7 font-mono text-[11px]"
+                                {...register(`items.${index}.discountValue`, {
+                                  setValueAs: (v) =>
+                                    v === "" || v === null || v === undefined
+                                      ? 0
+                                      : Number(v),
+                                })}
+                              />
+                            ) : (
+                              <span className="text-[11px] text-muted-foreground">
+                                -
+                              </span>
+                            )}
+                          </td>
+
+                          <td className="px-3 py-2 font-mono font-bold text-destructive">
+                            ${previewPrice.toFixed(2)}
+                          </td>
+
+                          {/* حقل Limit: يمكن تركه فارغاً بالكامل ليتم حفظه كـ null دون تركيز إجباري */}
+                          <td className="px-3 py-2">
+                            <Input
+                              type="number"
+                              placeholder="All"
+                              className="h-7 font-mono text-[11px]"
+                              {...register(`items.${index}.quantityLimit`, {
+                                setValueAs: (v) => {
+                                  if (v === "" || v === null || v === undefined)
+                                    return null
+                                  const num = Number(v)
+                                  return isNaN(num) || num <= 0
+                                    ? null
+                                    : Math.floor(num)
+                                },
+                              })}
+                            />
+                          </td>
+
+                          <td className="px-3 py-2 text-right">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => remove(index)}
+                              className="size-7 text-muted-foreground hover:text-destructive"
+                            >
+                              <Trash2Icon className="size-3.5" />
+                            </Button>
+                          </td>
+                        </tr>
                       )
                     })}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
 
-        {errors.items && (
-          <p className="text-xs font-medium text-destructive">
-            {errors.items.message}
-          </p>
-        )}
-
-        {fields.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-8 text-center">
-            <FlameIcon className="mb-1 size-8 text-muted-foreground/50" />
-            <p className="text-xs font-medium text-foreground">
-              No products added yet
-            </p>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">
-              Click &quot;Add Products&quot; above to select items for this
-              flash sale.
-            </p>
+        {/* العمود الجانبي (lg:col-span-1): مخصص لضبط الحالة والمدة الزمنية */}
+        <div className="min-w-0 space-y-6 lg:col-span-1">
+          {/* بطاقة التفعيل */}
+          <div className="rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label
+                  htmlFor="isActive"
+                  className="cursor-pointer text-xs font-semibold text-foreground"
+                >
+                  Campaign Status
+                </Label>
+                <p className="text-[10px] text-muted-foreground">
+                  Activate or deactivate this campaign
+                </p>
+              </div>
+              <Switch
+                id="isActive"
+                checked={isActive}
+                onCheckedChange={(checked) => setValue("isActive", checked)}
+              />
+            </div>
           </div>
-        ) : (
-          <div className="overflow-x-auto rounded-lg border border-border">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-muted/40 font-medium text-muted-foreground">
-                <tr>
-                  <th className="px-3 py-2.5">Product</th>
-                  <th className="w-32 px-3 py-2.5">Discount Type</th>
-                  <th className="w-24 px-3 py-2.5">Value</th>
-                  <th className="w-24 px-3 py-2.5">Deal Price</th>
-                  <th className="w-24 px-3 py-2.5">Limit</th>
-                  <th className="w-10 px-3 py-2.5 text-right"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {fields.map((field, index) => {
-                  const currentItem = watchedItems?.[index]
-                  const discountType: FlashSaleDiscountType =
-                    currentItem?.discountType || "percentage"
-                  const discountVal = currentItem?.discountValue
-                  const previewPrice = getPreviewPrice(
-                    field.productPrice,
-                    discountType,
-                    discountVal
-                  )
 
-                  return (
-                    <tr key={field.id} className="hover:bg-muted/15">
-                      <td className="px-3 py-2">
-                        <div className="font-semibold text-foreground">
-                          {field.productName}
-                        </div>
-                        <div className="font-mono text-[10px] text-muted-foreground">
-                          Base: ${field.productPrice}
-                        </div>
-                      </td>
+          {/* بطاقة التوقيت والجدولة */}
+          <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+            <h3 className="border-b border-border/40 pb-2 text-sm font-semibold text-foreground">
+              Schedule & Duration
+            </h3>
 
-                      <td className="px-3 py-2">
-                        <Select
-                          value={discountType}
-                          onValueChange={(val: FlashSaleDiscountType) =>
-                            setValue(`items.${index}.discountType`, val, {
-                              shouldValidate: true,
-                            })
-                          }
-                        >
-                          <SelectTrigger className="h-7 text-[11px]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="percentage">
-                              Percentage (%)
-                            </SelectItem>
-                            <SelectItem value="fixed_amount">
-                              Fixed Off ($)
-                            </SelectItem>
-                            <SelectItem value="fixed_price">
-                              Set Price ($)
-                            </SelectItem>
-                            <SelectItem value="none">No Discount</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </td>
-
-                      <td className="px-3 py-2">
-                        {discountType !== "none" ? (
-                          <Input
-                            type="number"
-                            step="any"
-                            min="0"
-                            max={
-                              discountType === "percentage" ? 100 : undefined
-                            }
-                            placeholder="0"
-                            className="h-7 font-mono text-[11px]"
-                            {...register(`items.${index}.discountValue`, {
-                              valueAsNumber: true,
-                            })}
-                          />
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <Label htmlFor="date-picker-range" className="text-xs">
+                  Date Range <span className="text-destructive">*</span>
+                </Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      id="date-picker-range"
+                      disabled={isSubmitting}
+                      className={cn(
+                        "w-full justify-start px-2.5 text-xs font-normal",
+                        !dateRange?.from && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 size-3.5" />
+                      {dateRange?.from ? (
+                        dateRange.to ? (
+                          <>
+                            {format(dateRange.from, "LLL dd, y")} -{" "}
+                            {format(dateRange.to, "LLL dd, y")}
+                          </>
                         ) : (
-                          <span className="text-[11px] text-muted-foreground">
-                            -
-                          </span>
-                        )}
-                      </td>
+                          format(dateRange.from, "LLL dd, y")
+                        )
+                      ) : (
+                        <span>Pick date range</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="range"
+                      defaultMonth={dateRange?.from}
+                      selected={dateRange}
+                      onSelect={handleRangeSelect}
+                      numberOfMonths={2}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
 
-                      <td className="px-3 py-2 font-mono font-bold text-destructive">
-                        ${previewPrice.toFixed(2)}
-                      </td>
+              <div className="grid grid-cols-2 gap-2">
+                <Field className="w-full">
+                  <FieldLabel htmlFor="start-time-picker" className="text-xs">
+                    Start Time
+                  </FieldLabel>
+                  <Input
+                    type="time"
+                    id="start-time-picker"
+                    step="1"
+                    value={startTime}
+                    disabled={isSubmitting}
+                    onChange={handleStartTimeChange}
+                    className="appearance-none bg-background font-mono text-xs [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                  />
+                </Field>
 
-                      <td className="px-3 py-2">
-                        <Input
-                          type="number"
-                          min="1"
-                          placeholder="All"
-                          className="h-7 font-mono text-[11px]"
-                          {...register(`items.${index}.quantityLimit`, {
-                            setValueAs: (v) =>
-                              v === "" || isNaN(v) ? null : Number(v),
-                          })}
-                        />
-                      </td>
+                <Field className="w-full">
+                  <FieldLabel htmlFor="end-time-picker" className="text-xs">
+                    End Time
+                  </FieldLabel>
+                  <Input
+                    type="time"
+                    id="end-time-picker"
+                    step="1"
+                    value={endTime}
+                    disabled={isSubmitting}
+                    onChange={handleEndTimeChange}
+                    className="appearance-none bg-background font-mono text-xs [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                  />
+                </Field>
+              </div>
 
-                      <td className="px-3 py-2 text-right">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => remove(index)}
-                          className="size-7 text-muted-foreground hover:text-destructive"
-                        >
-                          <Trash2Icon className="size-3.5" />
-                        </Button>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+              {(errors.startsAt || errors.endsAt) && (
+                <p className="text-[11px] text-destructive">
+                  {errors.startsAt?.message || errors.endsAt?.message}
+                </p>
+              )}
+            </div>
           </div>
-        )}
+        </div>
       </div>
-      {/* Bottom Actions Bar (Standard Page Flow - No Sticky/Floating on Mobile) */}
+
+      {/* شريط الإجراءات السفلي */}
       <div className="flex flex-col-reverse items-stretch justify-end gap-3 border-t pt-6 sm:flex-row sm:items-center">
         <Button
           type="button"

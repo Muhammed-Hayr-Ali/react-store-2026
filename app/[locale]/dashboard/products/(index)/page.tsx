@@ -4,11 +4,11 @@ import { PackageIcon, PlusIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { getAdminProductsList } from "@/lib/actions/products/queries/get-admin-products"
-import { DataTable } from "@/components/dashboard/products/all_products/data-table"
 import { AdminProductSummary } from "@/lib/actions/products/types"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { appRoutes } from "@/lib/config/app-routes"
+import { DataTable } from "@/components/dashboard/product/products-table"
 
 export const dynamic = "force-dynamic"
 

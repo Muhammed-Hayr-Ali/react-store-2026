@@ -8,20 +8,33 @@ import {
   CheckCircle2Icon,
   ClockIcon,
   EyeIcon,
+  FilterIcon,
   MoreVerticalIcon,
+  SearchIcon,
   ShieldAlertIcon,
   Trash2Icon,
   XCircleIcon,
+  XIcon,
 } from "lucide-react"
 import { toast } from "sonner"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   ReportStatus,
   ReportTargetType,
@@ -58,6 +71,7 @@ export function ReportsTable({ reports, total }: ReportsTableProps) {
   const params = useParams()
   const locale = (params?.locale as string) || "en"
 
+  const [searchQuery, setSearchQuery] = React.useState("")
   const currentStatus = searchParams.get("status") || "all"
   const currentTargetType = searchParams.get("targetType") || "all"
 
@@ -85,6 +99,28 @@ export function ReportsTable({ reports, total }: ReportsTableProps) {
       })
     }
   }
+
+  // فلترة محلية سريعة بالبحث
+  const filteredReports = React.useMemo(() => {
+    if (!searchQuery.trim()) return reports
+    const q = searchQuery.toLowerCase().trim()
+    return reports.filter((r) => {
+      const reporterName = [r.reporter?.first_name, r.reporter?.last_name]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+      const email = (r.reporter?.email || r.contact_email || "").toLowerCase()
+      const reason = (r.reason || "").toLowerCase()
+      const details = (r.details || "").toLowerCase()
+
+      return (
+        reporterName.includes(q) ||
+        email.includes(q) ||
+        reason.includes(q) ||
+        details.includes(q)
+      )
+    })
+  }, [reports, searchQuery])
 
   const getStatusBadge = (status: ReportStatus) => {
     switch (status) {
@@ -128,48 +164,78 @@ export function ReportsTable({ reports, total }: ReportsTableProps) {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Filters Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-3 shadow-xs">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="me-1 text-xs font-semibold text-muted-foreground">
-            Status:
-          </span>
-          {["all", "pending", "under_review", "resolved", "dismissed"].map(
-            (s) => (
-              <Button
-                key={s}
-                variant={currentStatus === s ? "secondary" : "ghost"}
-                size="sm"
-                className="h-7 text-xs capitalize"
-                onClick={() => handleFilterChange("status", s)}
-              >
-                {s.replace("_", " ")}
-              </Button>
-            )
+    <div className="flex w-full flex-col justify-start gap-4">
+      {/* Controls Bar المماثل لجدول Users */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {/* حقل البحث */}
+        <div className="relative w-full sm:max-w-xs">
+          <SearchIcon className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search reports by reason, user or email..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-9 ps-8 pe-8 text-xs"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="absolute inset-e-2 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-foreground"
+            >
+              <XIcon className="size-3.5" />
+            </button>
           )}
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-muted-foreground">
-            Type:
-          </span>
-          <select
-            value={currentTargetType}
-            onChange={(e) => handleFilterChange("targetType", e.target.value)}
-            className="h-8 rounded-lg border border-border bg-background px-2.5 text-xs focus:ring-1 focus:ring-primary focus:outline-hidden"
+        {/* التبويبات والفلاتر */}
+        <div className="flex flex-wrap items-center gap-2">
+          <Tabs
+            value={currentStatus}
+            onValueChange={(val) => handleFilterChange("status", val)}
           >
-            <option value="all">All Types</option>
-            <option value="product">Product</option>
-            <option value="review">Review</option>
-            <option value="technical_issue">Technical Issue</option>
-            <option value="general">General</option>
-          </select>
+            <TabsList className="h-9">
+              <TabsTrigger value="all" className="text-xs">
+                All{" "}
+                <Badge variant="secondary" className="ms-1.5 px-1.5 py-0">
+                  {total}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="pending" className="text-xs">
+                Pending
+              </TabsTrigger>
+              <TabsTrigger value="under_review" className="text-xs">
+                Review
+              </TabsTrigger>
+              <TabsTrigger value="resolved" className="text-xs">
+                Resolved
+              </TabsTrigger>
+              <TabsTrigger value="dismissed" className="text-xs">
+                Dismissed
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          <Select
+            value={currentTargetType}
+            onValueChange={(val) => handleFilterChange("targetType", val)}
+          >
+            <SelectTrigger className="h-9 w-32 text-xs">
+              <FilterIcon className="me-1.5 size-3.5 text-muted-foreground" />
+              <SelectValue placeholder="All Types" />
+            </SelectTrigger>
+            <SelectContent align="end">
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="product">Product</SelectItem>
+              <SelectItem value="review">Review</SelectItem>
+              <SelectItem value="technical_issue">Issue</SelectItem>
+              <SelectItem value="general">General</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
       {/* Main Table */}
-      {reports.length === 0 ? (
+      {filteredReports.length === 0 ? (
         <div className="flex min-h-[300px] flex-col items-center justify-center rounded-xl border border-dashed border-border p-8 text-center">
           <div className="flex size-12 items-center justify-center rounded-full bg-muted">
             <ShieldAlertIcon className="size-6 text-muted-foreground" />
@@ -178,12 +244,11 @@ export function ReportsTable({ reports, total }: ReportsTableProps) {
             No reports found
           </h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            There are currently no moderation flags or platform issue reports
-            matching this filter.
+            No moderation flags or issues match your search criteria.
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+        <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="border-b border-border bg-muted/40 text-xs font-medium text-muted-foreground">
@@ -197,7 +262,7 @@ export function ReportsTable({ reports, total }: ReportsTableProps) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {reports.map((report) => {
+                {filteredReports.map((report) => {
                   const reporterName =
                     [report.reporter?.first_name, report.reporter?.last_name]
                       .filter(Boolean)
@@ -296,7 +361,8 @@ export function ReportsTable({ reports, total }: ReportsTableProps) {
         </div>
       )}
 
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
+      {/* Footer */}
+      <div className="flex items-center justify-between px-1 text-xs text-muted-foreground">
         <span>Showing reports data</span>
         <span>
           Total Reports:{" "}

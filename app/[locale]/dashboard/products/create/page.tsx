@@ -2,10 +2,10 @@ import { PackageIcon } from "lucide-react"
 
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import CreateProductForm from "@/components/dashboard/products/create/create-product-form"
 import { Category, getAllCategories } from "@/lib/actions/categories"
 import { getAllBrand } from "@/lib/actions/brands/queries/get-all"
 import { Brand } from "@/lib/actions/brands"
+import CreateProductForm from "@/components/dashboard/product/product-form"
 
 export async function generateMetadata() {
   return createMetadata({

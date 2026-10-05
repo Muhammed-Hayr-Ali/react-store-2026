@@ -49,10 +49,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import {
-  CreateProductCompleteInput,
-  ProductWithRelations,
-} from "@/lib/actions/products/types"
+import { createProduct } from "@/lib/actions/products/mutations/create"
+import { CreateProductCompleteInput } from "@/lib/actions/products/types"
 import { Category } from "@/lib/actions/categories"
 import { Brand } from "@/lib/actions/brands"
 
@@ -62,10 +60,9 @@ import UpdateCategorySheet from "@/components/dashboard/categories/update-catego
 import DeleteCategoryDialog from "@/components/dashboard/categories/delete-category"
 
 // Brand sheets & dialogs
-import CreateBrandSheet from "../../brand/create-brand"
-import UpdateBrandSheet from "../../brand/update-brand"
-import DeleteBrandDialog from "../../brand/delete-brand"
-import { updateProduct } from "@/lib/actions/products/mutations/update"
+import CreateBrandSheet from "../brand/create-brand"
+import UpdateBrandSheet from "../brand/update-brand"
+import DeleteBrandDialog from "../brand/delete-brand"
 import { createProductCompleteSchema } from "@/lib/actions/products"
 
 type FormValues = CreateProductCompleteInput
@@ -129,12 +126,10 @@ function generateRandomSku(productName?: string, variantName?: string): string {
   return vPart ? `${pPart}-${vPart}-${rand}` : `${pPart}-${rand}`
 }
 
-export default function UpdateProductForm({
-  product,
+export default function CreateProductForm({
   categories: initialCategories,
   brands: initialBrands,
 }: {
-  product: ProductWithRelations
   categories: Category[] | null
   brands: Brand[] | null
 }) {
@@ -163,56 +158,22 @@ export default function UpdateProductForm({
     data: null,
   })
 
-  const initialImages = React.useMemo(() => {
-    if (!product.product_images || product.product_images.length === 0) {
-      return [DEFAULT_IMAGE]
-    }
-    return product.product_images.map((img) => {
-      const linkedVariant = product.product_variants.find(
-        (v) => v.id === img.variant_id
-      )
-      return {
-        url: img.url,
-        alt_text: img.alt_text || "",
-        is_primary: img.is_primary,
-        variant_sku: linkedVariant?.sku || "",
-      }
-    })
-  }, [product])
-
-  const initialVariants = React.useMemo(() => {
-    if (!product.product_variants || product.product_variants.length === 0) {
-      return [DEFAULT_VARIANT]
-    }
-    return product.product_variants.map((v, idx) => ({
-      sku: v.sku,
-      name: v.name || "",
-      attributes: v.attributes || {},
-      price: v.price / 100,
-      compare_at_price: v.compare_at_price ? v.compare_at_price / 100 : null,
-      stock_quantity: v.stock_quantity,
-      track_inventory: v.track_inventory,
-      low_stock_threshold: v.low_stock_threshold,
-      is_active: v.is_active,
-      sort_order: v.sort_order || idx + 1,
-    }))
-  }, [product])
-
   const form = useForm<FormValues>({
     resolver: zodResolver(createProductCompleteSchema),
     mode: "onChange",
+    shouldFocusError: false,
     defaultValues: {
-      name: product.name,
-      slug: product.slug,
-      category_id: product.category_id,
-      brand_id: product.brand_id,
-      description: product.description,
-      meta_title: product.meta_title,
-      meta_description: product.meta_description,
-      is_active: product.is_active,
-      is_featured: product.is_featured,
-      variants: initialVariants,
-      images: initialImages,
+      name: "",
+      slug: "",
+      category_id: "",
+      brand_id: null,
+      description: null,
+      meta_title: null,
+      meta_description: null,
+      is_active: true,
+      is_featured: false,
+      variants: [DEFAULT_VARIANT],
+      images: [DEFAULT_IMAGE],
     },
   })
 
@@ -306,21 +267,45 @@ export default function UpdateProductForm({
   async function onSubmit(data: FormValues) {
     setErrorMessage(null)
 
-    const result = await updateProduct(product.id, data)
+    const payload: CreateProductCompleteInput = {
+      ...data,
+      brand_id: data.brand_id || null,
+      description: data.description || null,
+      meta_title: data.meta_title || null,
+      meta_description: data.meta_description || null,
+      variants: data.variants.map((v, idx) => ({
+        ...v,
+        name: v.name || "",
+        attributes: v.attributes || {},
+        sort_order: idx + 1,
+        compare_at_price:
+          v.compare_at_price !== null && v.compare_at_price !== undefined
+            ? Number(v.compare_at_price)
+            : null,
+      })),
+      images: data.images.map((img) => ({
+        ...img,
+        alt_text: img.alt_text || "",
+        variant_sku: img.variant_sku || "",
+      })),
+    }
+
+    const result = await createProduct(payload)
 
     if (result.success) {
-      toast.success("Product updated successfully!")
+      toast.success("Product created successfully!")
       router.push("/dashboard/products")
       router.refresh()
     } else {
+      console.error("Creation Error:", result)
       const errorMsg =
         result.error === "VALIDATION_ERROR"
           ? "Please check the form for invalid inputs."
           : result.error === "SLUG_ALREADY_EXISTS"
             ? "The URL slug is already taken. Please choose another one."
             : result.error === "SKU_ALREADY_EXISTS"
-              ? "One or more SKUs are already in use. Please ensure unique SKUs."
-              : result.error || "Failed to update product."
+              ? "One or more SKUs are already in use. Please generate or enter unique SKUs."
+              : result.error || "Failed to create product."
 
       setErrorMessage(errorMsg)
       window.scrollTo({ top: 0, behavior: "smooth" })
@@ -337,6 +322,7 @@ export default function UpdateProductForm({
   return (
     <>
       <form
+        noValidate
         onSubmit={form.handleSubmit(onSubmit, onInvalid)}
         className="space-y-6"
       >
@@ -361,12 +347,12 @@ export default function UpdateProductForm({
 
         {/* 2-Column Responsive Layout */}
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-          <div className="space-y-6 lg:col-span-2">
+          <div className="min-w-0 space-y-6 lg:col-span-2">
             {/* Card 1: Basic Information */}
-            <div className="rounded-xl border bg-card p-5 shadow-xs">
-              <div className="mb-4 flex items-center gap-2 border-b pb-3">
+            <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+              <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
                 <PackageIcon className="size-4 text-primary" />
-                <h2 className="font-semibold text-card-foreground">
+                <h2 className="text-sm font-semibold text-card-foreground">
                   Basic Information
                 </h2>
               </div>
@@ -378,7 +364,7 @@ export default function UpdateProductForm({
                     control={control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="product-name">
+                        <FieldLabel htmlFor="product-name" className="text-xs">
                           Product Name{" "}
                           <span className="text-destructive">*</span>
                         </FieldLabel>
@@ -386,6 +372,7 @@ export default function UpdateProductForm({
                           {...field}
                           id="product-name"
                           placeholder="e.g., Premium Oxford Cotton Shirt"
+                          className="h-9 text-xs"
                           onChange={(e) => {
                             field.onChange(e)
                             const slugState = getFieldState("slug")
@@ -408,14 +395,14 @@ export default function UpdateProductForm({
                     control={control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="product-slug">
+                        <FieldLabel htmlFor="product-slug" className="text-xs">
                           URL Slug <span className="text-destructive">*</span>
                         </FieldLabel>
                         <Input
                           {...field}
                           id="product-slug"
                           placeholder="premium-oxford-cotton-shirt"
-                          className="font-mono text-xs"
+                          className="h-9 font-mono text-xs"
                         />
                         {fieldState.invalid && (
                           <FieldError errors={[fieldState.error]} />
@@ -431,7 +418,10 @@ export default function UpdateProductForm({
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
                       <div className="flex items-center justify-between">
-                        <FieldLabel htmlFor="product-description">
+                        <FieldLabel
+                          htmlFor="product-description"
+                          className="text-xs"
+                        >
                           Description
                         </FieldLabel>
                         <span className="text-[10px] text-muted-foreground tabular-nums">
@@ -448,7 +438,7 @@ export default function UpdateProductForm({
                           }
                           placeholder="Provide a detailed description of the product features..."
                           rows={4}
-                          className="resize-y text-sm"
+                          className="resize-y text-xs"
                         />
                       </InputGroup>
                       {fieldState.invalid && (
@@ -461,12 +451,12 @@ export default function UpdateProductForm({
             </div>
 
             {/* Card 2: Variants & Pricing */}
-            <div className="rounded-xl border bg-card p-5 shadow-xs">
-              <div className="mb-4 flex items-center justify-between border-b pb-3">
+            <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+              <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
                 <div className="flex items-center gap-2">
                   <LayersIcon className="size-4 text-primary" />
                   <div>
-                    <h2 className="font-semibold text-card-foreground">
+                    <h2 className="text-sm font-semibold text-card-foreground">
                       Variants & Pricing
                     </h2>
                     <p className="text-xs text-muted-foreground">
@@ -507,12 +497,12 @@ export default function UpdateProductForm({
             </div>
 
             {/* Card 3: Media Gallery */}
-            <div className="rounded-xl border bg-card p-5 shadow-xs">
-              <div className="mb-4 flex items-center justify-between border-b pb-3">
+            <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+              <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
                 <div className="flex items-center gap-2">
                   <ImageIcon className="size-4 text-primary" />
                   <div>
-                    <h2 className="font-semibold text-card-foreground">
+                    <h2 className="text-sm font-semibold text-card-foreground">
                       Media Gallery
                     </h2>
                     <p className="text-xs text-muted-foreground">
@@ -551,11 +541,11 @@ export default function UpdateProductForm({
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
-            <div className="rounded-xl border bg-card p-5 shadow-xs">
-              <div className="mb-4 flex items-center gap-2 border-b pb-3">
+          <div className="min-w-0 space-y-6">
+            <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+              <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
                 <SparklesIcon className="size-4 text-primary" />
-                <h2 className="font-semibold text-card-foreground">
+                <h2 className="text-sm font-semibold text-card-foreground">
                   Product Status
                 </h2>
               </div>
@@ -565,7 +555,7 @@ export default function UpdateProductForm({
                   name="is_active"
                   control={control}
                   render={({ field }) => (
-                    <div className="flex items-center justify-between rounded-lg border bg-muted/15 p-3">
+                    <div className="flex items-center justify-between rounded-lg border border-border bg-muted/15 p-3">
                       <div className="space-y-0.5">
                         <span className="text-xs font-semibold">Active</span>
                         <p className="text-[11px] text-muted-foreground">
@@ -584,7 +574,7 @@ export default function UpdateProductForm({
                   name="is_featured"
                   control={control}
                   render={({ field }) => (
-                    <div className="flex items-center justify-between rounded-lg border bg-muted/15 p-3">
+                    <div className="flex items-center justify-between rounded-lg border border-border bg-muted/15 p-3">
                       <div className="space-y-0.5">
                         <span className="text-xs font-semibold">Featured</span>
                         <p className="text-[11px] text-muted-foreground">
@@ -602,10 +592,10 @@ export default function UpdateProductForm({
             </div>
 
             {/* Organization Card */}
-            <div className="rounded-xl border bg-card p-5 shadow-xs">
-              <div className="mb-4 flex items-center gap-2 border-b pb-3">
+            <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+              <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
                 <TagIcon className="size-4 text-primary" />
-                <h2 className="font-semibold text-card-foreground">
+                <h2 className="text-sm font-semibold text-card-foreground">
                   Organization
                 </h2>
               </div>
@@ -629,7 +619,7 @@ export default function UpdateProductForm({
                         >
                           <SelectTrigger
                             aria-invalid={fieldState.invalid}
-                            className="h-8 flex-1 text-xs"
+                            className="h-9 flex-1 text-xs"
                           >
                             <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
@@ -653,7 +643,7 @@ export default function UpdateProductForm({
                             setCategoryModal({ type: "create", data: null })
                           }
                           title="Create Category"
-                          className="size-8 shrink-0 cursor-pointer"
+                          className="size-9 shrink-0 cursor-pointer"
                         >
                           <PlusIcon className="size-3.5" />
                         </Button>
@@ -670,8 +660,8 @@ export default function UpdateProductForm({
                                   data: selectedCategoryObject,
                                 })
                               }
-                              title="Update selected category"
-                              className="size-8 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
+                              title="Edit selected category"
+                              className="size-9 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
                             >
                               <PencilIcon className="size-3.5" />
                             </Button>
@@ -687,7 +677,7 @@ export default function UpdateProductForm({
                                 })
                               }
                               title="Delete selected category"
-                              className="size-8 shrink-0 cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              className="size-9 shrink-0 cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive"
                             >
                               <Trash2Icon className="size-3.5" />
                             </Button>
@@ -718,7 +708,7 @@ export default function UpdateProductForm({
                           }
                           value={field.value ?? "none"}
                         >
-                          <SelectTrigger className="h-8 flex-1 text-xs">
+                          <SelectTrigger className="h-9 flex-1 text-xs">
                             <SelectValue placeholder="Select a brand" />
                           </SelectTrigger>
                           <SelectContent>
@@ -739,7 +729,7 @@ export default function UpdateProductForm({
                             setBrandModal({ type: "create", data: null })
                           }
                           title="Create Brand"
-                          className="size-8 shrink-0 cursor-pointer"
+                          className="size-9 shrink-0 cursor-pointer"
                         >
                           <PlusIcon className="size-3.5" />
                         </Button>
@@ -757,7 +747,7 @@ export default function UpdateProductForm({
                                 })
                               }
                               title="Edit selected brand"
-                              className="size-8 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
+                              className="size-9 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
                             >
                               <PencilIcon className="size-3.5" />
                             </Button>
@@ -773,7 +763,7 @@ export default function UpdateProductForm({
                                 })
                               }
                               title="Delete selected brand"
-                              className="size-8 shrink-0 cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              className="size-9 shrink-0 cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive"
                             >
                               <Trash2Icon className="size-3.5" />
                             </Button>
@@ -787,11 +777,11 @@ export default function UpdateProductForm({
             </div>
 
             {/* SEO Details Card */}
-            <div className="rounded-xl border bg-card p-5 shadow-xs">
-              <div className="mb-4 flex items-center justify-between border-b pb-3">
+            <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+              <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
                 <div className="flex items-center gap-2">
                   <GlobeIcon className="size-4 text-primary" />
-                  <h2 className="font-semibold text-card-foreground">
+                  <h2 className="text-sm font-semibold text-card-foreground">
                     SEO Details
                   </h2>
                 </div>
@@ -801,7 +791,7 @@ export default function UpdateProductForm({
                   variant="outline"
                   size="sm"
                   onClick={handleGenerateAllSeo}
-                  className="h-7 cursor-pointer gap-1.5 px-2.5 text-[11px] font-medium text-primary hover:text-primary"
+                  className="h-8 cursor-pointer gap-1.5 px-2.5 text-[11px] font-medium text-primary hover:text-primary"
                 >
                   <Wand2Icon className="size-3" />
                   Generate SEO
@@ -827,7 +817,7 @@ export default function UpdateProductForm({
                         id="meta-title"
                         value={field.value ?? ""}
                         placeholder="Page title in search results"
-                        className="h-8 text-xs"
+                        className="h-9 text-xs"
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -876,38 +866,41 @@ export default function UpdateProductForm({
           </div>
         </div>
 
-        {/* Bottom Actions Bar (Standard Page Flow - No Sticky/Floating on Mobile) */}
-        <div className="flex flex-col-reverse items-stretch justify-end gap-3 border-t pt-6 sm:flex-row sm:items-center">
+        {/* Bottom Actions Bar */}
+        <div className="flex flex-col-reverse items-stretch justify-end gap-3 border-t border-border pt-6 sm:flex-row sm:items-center">
           <Button
             type="button"
             variant="outline"
             disabled={isSubmitting}
-            onClick={() => router.back()}
-            className="w-full sm:w-auto"
+            onClick={() => {
+              form.reset()
+              setErrorMessage(null)
+            }}
+            className="h-9 w-full text-xs sm:w-auto"
           >
             Discard Changes
           </Button>
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full cursor-pointer shadow-xs sm:w-auto sm:min-w-32"
+            className="h-9 w-full cursor-pointer text-xs shadow-xs sm:w-auto sm:min-w-32"
           >
             {isSubmitting ? (
               <>
                 <Spinner className="mr-2 size-4" />
-                Updating...
+                Saving...
               </>
             ) : (
               <>
                 <CheckCircle2Icon className="mr-1.5 size-4" />
-                Update Product
+                Save Product
               </>
             )}
           </Button>
         </div>
       </form>
 
-      {/* --- Category Sheets & Dialogs --- */}
+      {/* Sheets & Dialogs */}
       <CreateCategorySheet
         isOpen={categoryModal.type === "create" ? "create" : null}
         onOpenChange={(open) => {
@@ -925,7 +918,6 @@ export default function UpdateProductForm({
           setCategoryModal({ type: null, data: null })
         }}
       />
-
       <UpdateCategorySheet
         isOpen={categoryModal.type === "update" ? "update" : null}
         onOpenChange={(open) => {
@@ -949,7 +941,6 @@ export default function UpdateProductForm({
         }}
       />
 
-      {/* --- Brand Sheets & Dialogs --- */}
       <CreateBrandSheet
         isOpen={brandModal.type === "create" ? "create" : null}
         onOpenChange={(open) => {
@@ -964,7 +955,6 @@ export default function UpdateProductForm({
           setBrandModal({ type: null, data: null })
         }}
       />
-
       <UpdateBrandSheet
         isOpen={brandModal.type === "update" ? "update" : null}
         onOpenChange={(open) => {
@@ -982,7 +972,6 @@ export default function UpdateProductForm({
         }}
       />
 
-      {/* --- Category Delete Dialog --- */}
       <DeleteCategoryDialog
         isOpen={categoryModal.type === "delete"}
         onOpenChange={(open) => {
@@ -1002,7 +991,6 @@ export default function UpdateProductForm({
         }}
       />
 
-      {/* --- Brand Delete Dialog --- */}
       <DeleteBrandDialog
         isOpen={brandModal.type === "delete"}
         onOpenChange={(open) => {
@@ -1021,16 +1009,11 @@ export default function UpdateProductForm({
           toast.success("Brand deleted successfully!")
         }}
       />
-
-
-
     </>
   )
 }
 
-// ============================================================================
 // Subcomponents
-// ============================================================================
 
 interface VariantCardProps {
   index: number
@@ -1059,7 +1042,7 @@ function VariantCard({
   }
 
   return (
-    <div className="relative rounded-lg border bg-muted/10 p-4 transition-all hover:border-muted-foreground/30">
+    <div className="relative rounded-lg border border-border bg-muted/10 p-4 transition-all hover:border-muted-foreground/30">
       <div className="mb-3 flex items-center justify-between border-b border-border/60 pb-2">
         <div className="flex items-center gap-2">
           <span className="flex size-5 items-center justify-center rounded-full bg-primary/10 text-[11px] font-bold text-primary">
@@ -1261,7 +1244,7 @@ function ImageCard({
   }
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border bg-muted/10 p-4 sm:flex-row">
+    <div className="flex flex-col gap-4 rounded-lg border border-border bg-muted/10 p-4 sm:flex-row">
       <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-background text-muted-foreground">
         {currentUrl ? (
           <img
@@ -1277,7 +1260,7 @@ function ImageCard({
         )}
       </div>
 
-      <div className="flex-1 space-y-3">
+      <div className="min-w-0 flex-1 space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold">Image #{index + 1}</span>
           <Button
@@ -1455,7 +1438,7 @@ function VariantAttributesManager({
   }
 
   return (
-    <div className="space-y-2.5 rounded-lg border bg-muted/15 p-3">
+    <div className="space-y-2.5 rounded-lg border border-border bg-muted/15 p-3">
       <div className="flex items-center justify-between">
         <FieldLabel className="text-xs font-semibold text-foreground">
           Variant Attributes (e.g., Color, Size, Weight)

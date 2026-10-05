@@ -1,0 +1,35 @@
+import { appConfig } from "@/lib/config/app_config"
+import { createMetadata } from "@/lib/config/metadata_generator"
+
+interface PageProps {
+  params: Promise<{
+    locale: string
+  }>
+}
+
+export async function generateMetadata() {
+  return createMetadata({
+    siteName: appConfig.name,
+    title: "Dashboard Overview",
+    description:
+      "Admin overview for Marketna. Monitor sales performance, metrics, and store activity.",
+  })
+}
+
+export default async function DashboardOverviewPage({ params }: PageProps) {
+  await params
+
+  return (
+    <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
+      {/* شبكة بطاقات الإحصائيات والمؤشرات السريعة */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="aspect-video rounded-xl border border-border bg-card p-4 shadow-xs" />
+        <div className="aspect-video rounded-xl border border-border bg-card p-4 shadow-xs" />
+        <div className="aspect-video rounded-xl border border-border bg-card p-4 shadow-xs" />
+      </div>
+
+      {/* منطقة الرسوم البيانية أو أحدث العمليات والأنشطة */}
+      <div className="min-h-100 flex-1 rounded-xl border border-border bg-card p-6 shadow-xs" />
+    </div>
+  )
+}
