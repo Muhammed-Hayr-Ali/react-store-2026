@@ -17,6 +17,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from "@/components/ui/sidebar"
 
 export function NavMain({
@@ -34,6 +35,13 @@ export function NavMain({
   }[]
 }) {
   const pathname = usePathname()
+  const { isMobile, setOpenMobile } = useSidebar()
+
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+  }
 
   // تجريد بادئة اللغة إن وجدت (مثل /ar/dashboard -> /dashboard)
   const segments = pathname.split("/").filter(Boolean)
@@ -48,12 +56,10 @@ export function NavMain({
         {items.map((item) => {
           const hasChildren = Boolean(item.items && item.items.length > 0)
 
-          // فحص العنصر الفرعي: تطابق تام فقط لمنع تداخل create مع allProducts
           const hasActiveChild = item.items?.some(
             (sub) => normalizedPath === sub.url
           )
 
-          // للعنصر الرئيسي: إذا لم يكن له أبناء نتحقق من تطابقه أو تفرعاته
           const isSingleActive =
             !hasChildren &&
             (item.url === "/dashboard"
@@ -71,10 +77,9 @@ export function NavMain({
               {hasChildren ? (
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    {/* الزر الأب يكتسب فقط حالة الفتح أو إشارة هادئة دون سحب لون التفعيل الكامل عن العنصر الفرعي */}
                     <SidebarMenuButton
                       tooltip={item.title}
-                      isActive={false} // تركه false لمنع تلوين الزر الرئيسي بالتزامن مع الفرعي
+                      isActive={false}
                       className="font-medium data-[state=open]:text-foreground"
                     >
                       {item.icon && <item.icon />}
@@ -85,7 +90,6 @@ export function NavMain({
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       {item.items?.map((subItem) => {
-                        // تطابق دقيق ومطلق فقط
                         const isSubActive = normalizedPath === subItem.url
 
                         return (
@@ -94,7 +98,7 @@ export function NavMain({
                               asChild
                               isActive={isSubActive}
                             >
-                              <Link href={subItem.url}>
+                              <Link href={subItem.url} onClick={handleLinkClick}>
                                 <span>{subItem.title}</span>
                               </Link>
                             </SidebarMenuSubButton>
@@ -111,7 +115,7 @@ export function NavMain({
                     asChild
                     isActive={isSingleActive}
                   >
-                    <Link href={item.url}>
+                    <Link href={item.url} onClick={handleLinkClick}>
                       {item.icon && <item.icon />}
                       <span>{item.title}</span>
                     </Link>

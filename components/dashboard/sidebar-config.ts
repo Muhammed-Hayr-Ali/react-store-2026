@@ -2,10 +2,10 @@ import {
   LayoutDashboard,
   Package,
   Zap,
+  Users,
   FileSpreadsheet,
   ShieldCheck,
   UserCog,
-  Users,
 } from "lucide-react"
 import { appRoutes } from "@/lib/config/app-routes"
 

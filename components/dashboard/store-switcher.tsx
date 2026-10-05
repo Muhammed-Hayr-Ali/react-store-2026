@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { ExternalLink, ShoppingBag } from "lucide-react"
+import { ExternalLink } from "lucide-react"
 
 import {
   SidebarMenu,
@@ -16,27 +16,33 @@ import {
 } from "@/components/ui/tooltip"
 import { APP_NAME } from "@/lib/config/app_config"
 import { appRoutes } from "@/lib/config/app-routes"
+import { AppLogo } from "../ui/app-logo"
 
 export function StoreSwitcher() {
-  const { isMobile, state } = useSidebar()
+  const { isMobile, state, setOpenMobile } = useSidebar()
   const isCollapsed = state === "collapsed" && !isMobile
+
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+  }
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <div className="flex w-full items-center gap-2 rounded-xl p-1.5 transition-colors">
-          {/* رابط لوحة التحكم الرئيسية */}
+          {/* رابط لوحة التحكم الرئيسية مع شعار الموقع وإزالة الشادو */}
           <Link
             href={appRoutes.dashboard.home}
+            onClick={handleLinkClick}
             className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg p-1 transition-opacity hover:opacity-85 focus-visible:outline-hidden"
           >
-            {/* أيقونة الشعار مع نقطة حالة ناعمة */}
-            <div className="relative flex size-8.5 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs">
-              <ShoppingBag className="size-4.5" />
+            <div className="relative flex size-8.5 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <AppLogo size="sm" className="size-5 text-primary-foreground" />
               <span className="absolute -inset-e-0.5 -top-0.5 size-2 rounded-full bg-emerald-500 ring-2 ring-sidebar" />
             </div>
 
-            {/* نصوص الهوية (تختفي تلقائياً عند انكماش الشريط) */}
             {!isCollapsed && (
               <div className="flex min-w-0 flex-col text-start">
                 <span className="truncate text-sm font-semibold tracking-tight text-foreground">
@@ -49,7 +55,6 @@ export function StoreSwitcher() {
             )}
           </Link>
 
-          {/* زر معاينة المتجر المباشر السريع (يظهر فقط في العرض الموسع) */}
           {!isCollapsed && (
             <Tooltip>
               <TooltipTrigger asChild>

@@ -12,8 +12,8 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { CurrentUser } from "@/lib/actions/utils/profile"
-import { sidebarConfig } from "./sidebar-config"
 import { NavUser } from "./nav-user"
+import { sidebarConfig } from "./sidebar-config"
 
 interface AppSidebarProps {
   currentUser: CurrentUser | null
