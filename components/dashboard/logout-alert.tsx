@@ -20,7 +20,6 @@ import { useRouter } from "next/navigation"
 
 interface LogoutAlertDialogProps {
   status: string | null
-  data?: unknown
   onOpenChange: (open: boolean) => void
 }
 

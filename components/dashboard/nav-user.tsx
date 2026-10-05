@@ -50,14 +50,14 @@ export function NavUser({
     data: null,
   })
 
-  // ✅ 2. دالة موحدة لإغلاق أي نافذة
+  // دالة موحدة لإغلاق أي نافذة
   const handleDialogChange = (open: boolean) => {
     if (!open) {
       setDialogState({ activeDialog: null, data: null })
     }
   }
 
-  // ✅ 3. دالة مساعدة لفتح النوافذ (تجعل الكود أنظف)
+  // دالة مساعدة لفتح النوافذ
   const openDialog = (dialogName: string, data?: unknown) => {
     setDialogState({ activeDialog: dialogName, data: data || null })
   }
@@ -140,8 +140,9 @@ export function NavUser({
         </SidebarMenuItem>
       </SidebarMenu>
 
+      {/* تصحيح الاسم هنا من staus إلى status */}
       <LogoutAlertDialog
-        staus={dialogState.activeDialog}
+        status={dialogState.activeDialog}
         onOpenChange={handleDialogChange}
       />
     </>
