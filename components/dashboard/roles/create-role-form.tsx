@@ -24,21 +24,35 @@ import { Badge } from "@/components/ui/badge"
 
 import { PERMISSION_GROUPS } from "@/components/dashboard/roles/permission-groups"
 import { createRole } from "@/lib/actions/role/mutations/create-role"
+import { updateRole } from "@/lib/actions/role/mutations/update-role"
 import { AppPermission } from "@/lib/actions/role/types"
+import { RoleRecord } from "@/lib/actions/role/mutations/create-role"
 
-export default function CreateRoleForm() {
+interface CreateRoleFormProps {
+  initialData?: RoleRecord | null
+  roleId?: string | number
+}
+
+export default function CreateRoleForm({
+  initialData,
+  roleId,
+}: CreateRoleFormProps) {
   const router = useRouter()
   const params = useParams()
   const locale = (params?.locale as string) || "en"
 
+  const isEditing = Boolean(roleId || initialData)
+
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
-  const [name, setName] = React.useState("")
-  const [description, setDescription] = React.useState("")
+  const [name, setName] = React.useState(initialData?.name || "")
+  const [description, setDescription] = React.useState(
+    initialData?.description || ""
+  )
   const [selectedPermissions, setSelectedPermissions] = React.useState<
     AppPermission[]
-  >([])
+  >((initialData?.permissions as AppPermission[]) || [])
 
   const totalPossiblePermissions = React.useMemo(() => {
     return PERMISSION_GROUPS.reduce((acc, g) => acc + g.permissions.length, 0)
@@ -96,18 +110,34 @@ export default function CreateRoleForm() {
 
     setIsSubmitting(true)
     try {
-      const res = await createRole({
-        name: name.trim().toLowerCase(),
-        description: description.trim() || null,
-        permissions: selectedPermissions,
-      })
+      let res
+      if (isEditing && roleId) {
+        res = await updateRole({
+          roleId: Number(roleId),
+          description: description.trim() || null,
+          permissions: selectedPermissions,
+        })
+      } else {
+        res = await createRole({
+          name: name.trim().toLowerCase(),
+          description: description.trim() || null,
+          permissions: selectedPermissions,
+        })
+      }
 
       if (res.success) {
-        toast.success(`Role "${res.data?.name}" created successfully!`)
+        toast.success(
+          isEditing
+            ? `Role updated successfully!`
+            : `Role "${res.data?.name}" created successfully!`
+        )
         router.push(`/${locale}/dashboard/roles`)
         router.refresh()
       } else {
-        setErrorMessage(res.error || "Failed to create role.")
+        setErrorMessage(
+          res.error ||
+            (isEditing ? "Failed to update role." : "Failed to create role.")
+        )
         window.scrollTo({ top: 0, behavior: "smooth" })
       }
     } catch {
@@ -120,7 +150,6 @@ export default function CreateRoleForm() {
 
   return (
     <form noValidate onSubmit={handleSubmit} className="space-y-6">
-      {/* Global Error Alert */}
       {errorMessage && (
         <Alert variant="destructive" className="relative pr-9">
           <AlertCircleIcon className="size-4" />
@@ -139,9 +168,7 @@ export default function CreateRoleForm() {
         </Alert>
       )}
 
-      {/* 2-Column Responsive Layout مطابق لصفحة المنتجات */}
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-        {/* Left Column (2 Cols): مصفوفة الصلاحيات */}
         <div className="min-w-0 space-y-6 lg:col-span-2">
           <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
             <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
@@ -179,7 +206,6 @@ export default function CreateRoleForm() {
               </div>
             </div>
 
-            {/* المجموعات */}
             <div className="space-y-4">
               {PERMISSION_GROUPS.map((group) => {
                 const groupPermKeys = group.permissions.map((p) => p.key)
@@ -250,9 +276,7 @@ export default function CreateRoleForm() {
           </div>
         </div>
 
-        {/* Right Column (Sidebar): معلومات الدور وحالته */}
         <div className="min-w-0 space-y-6">
-          {/* Card 1: Role Information */}
           <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
             <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
               <ShieldIcon className="size-4 text-primary" />
@@ -271,7 +295,7 @@ export default function CreateRoleForm() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. editor, moderator"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isEditing}
                   className="h-9 font-mono text-xs uppercase"
                 />
               </Field>
@@ -300,7 +324,6 @@ export default function CreateRoleForm() {
             </FieldGroup>
           </div>
 
-          {/* Card 2: Permissions Summary */}
           <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
             <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
               <SparklesIcon className="size-4 text-primary" />
@@ -328,7 +351,6 @@ export default function CreateRoleForm() {
         </div>
       </div>
 
-      {/* Bottom Actions Bar المطابق لصفحة المنتجات */}
       <div className="flex flex-col-reverse items-stretch justify-end gap-3 border-t border-border pt-6 sm:flex-row sm:items-center">
         <Button
           type="button"
@@ -352,7 +374,7 @@ export default function CreateRoleForm() {
           ) : (
             <>
               <CheckCircle2Icon className="mr-1.5 size-4" />
-              Save Role
+              {isEditing ? "Update Role" : "Save Role"}
             </>
           )}
         </Button>

@@ -15,7 +15,7 @@ import {
 } from "../schemas"
 import { RoleRecord } from "./create-role"
 
-export async function updateRolePermissions(
+export async function updateRole(
   payload: UpdateRolePermissionsInput
 ): Promise<ApiResult<RoleRecord | null>> {
   // 1. Permission check

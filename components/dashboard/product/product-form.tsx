@@ -50,18 +50,18 @@ import {
 } from "@/components/ui/select"
 
 import { createProduct } from "@/lib/actions/products/mutations/create"
-import { CreateProductCompleteInput } from "@/lib/actions/products/types"
+import { updateProduct } from "@/lib/actions/products/mutations/update"
+import {
+  CreateProductCompleteInput,
+  ProductWithRelations,
+} from "@/lib/actions/products/types"
 import { Category } from "@/lib/actions/categories"
 import { Brand } from "@/lib/actions/brands"
 
-// Category sheets & dialogs
-import CreateCategorySheet from "@/components/dashboard/categories/create-category"
-import UpdateCategorySheet from "@/components/dashboard/categories/update-category"
+import CategoryForm from "@/components/dashboard/categories/category-form"
 import DeleteCategoryDialog from "@/components/dashboard/categories/delete-category"
 
-// Brand sheets & dialogs
-import CreateBrandSheet from "../brand/create-brand"
-import UpdateBrandSheet from "../brand/update-brand"
+import BrandForm from "@/components/dashboard/brand/brand-form"
 import DeleteBrandDialog from "../brand/delete-brand"
 import { createProductCompleteSchema } from "@/lib/actions/products"
 
@@ -126,15 +126,21 @@ function generateRandomSku(productName?: string, variantName?: string): string {
   return vPart ? `${pPart}-${vPart}-${rand}` : `${pPart}-${rand}`
 }
 
-export default function CreateProductForm({
-  categories: initialCategories,
-  brands: initialBrands,
-}: {
+interface ProductFormProps {
+  product?: ProductWithRelations | null
   categories: Category[] | null
   brands: Brand[] | null
-}) {
+}
+
+export default function ProductForm({
+  product,
+  categories: initialCategories,
+  brands: initialBrands,
+}: ProductFormProps) {
   const router = useRouter()
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
+
+  const isEditing = Boolean(product)
 
   const [categoriesList, setCategoriesList] = React.useState<Category[]>(
     initialCategories || []
@@ -158,22 +164,57 @@ export default function CreateProductForm({
     data: null,
   })
 
+  const initialImages = React.useMemo(() => {
+    if (!product?.product_images || product.product_images.length === 0) {
+      return [DEFAULT_IMAGE]
+    }
+    return product.product_images.map((img) => {
+      const linkedVariant = product.product_variants.find(
+        (v) => v.id === img.variant_id
+      )
+      return {
+        url: img.url,
+        alt_text: img.alt_text || "",
+        is_primary: img.is_primary,
+        variant_sku: linkedVariant?.sku || "",
+      }
+    })
+  }, [product])
+
+  const initialVariants = React.useMemo(() => {
+    if (!product?.product_variants || product.product_variants.length === 0) {
+      return [DEFAULT_VARIANT]
+    }
+    return product.product_variants.map((v, idx) => ({
+      sku: v.sku,
+      name: v.name || "",
+      attributes: v.attributes || {},
+      price: v.price / 100,
+      compare_at_price: v.compare_at_price ? v.compare_at_price / 100 : null,
+      stock_quantity: v.stock_quantity,
+      track_inventory: v.track_inventory,
+      low_stock_threshold: v.low_stock_threshold,
+      is_active: v.is_active,
+      sort_order: v.sort_order || idx + 1,
+    }))
+  }, [product])
+
   const form = useForm<FormValues>({
     resolver: zodResolver(createProductCompleteSchema),
     mode: "onChange",
     shouldFocusError: false,
     defaultValues: {
-      name: "",
-      slug: "",
-      category_id: "",
-      brand_id: null,
-      description: null,
-      meta_title: null,
-      meta_description: null,
-      is_active: true,
-      is_featured: false,
-      variants: [DEFAULT_VARIANT],
-      images: [DEFAULT_IMAGE],
+      name: product?.name || "",
+      slug: product?.slug || "",
+      category_id: product?.category_id || "",
+      brand_id: product?.brand_id || null,
+      description: product?.description || null,
+      meta_title: product?.meta_title || null,
+      meta_description: product?.meta_description || null,
+      is_active: product?.is_active ?? true,
+      is_featured: product?.is_featured ?? false,
+      variants: initialVariants,
+      images: initialImages,
     },
   })
 
@@ -290,14 +331,23 @@ export default function CreateProductForm({
       })),
     }
 
-    const result = await createProduct(payload)
+    let result
+    if (isEditing && product) {
+      result = await updateProduct(product.id, payload)
+    } else {
+      result = await createProduct(payload)
+    }
 
     if (result.success) {
-      toast.success("Product created successfully!")
+      toast.success(
+        isEditing
+          ? "Product updated successfully!"
+          : "Product created successfully!"
+      )
       router.push("/dashboard/products")
       router.refresh()
     } else {
-      console.error("Creation Error:", result)
+      console.error("Submission Error:", result)
       const errorMsg =
         result.error === "VALIDATION_ERROR"
           ? "Please check the form for invalid inputs."
@@ -305,7 +355,10 @@ export default function CreateProductForm({
             ? "The URL slug is already taken. Please choose another one."
             : result.error === "SKU_ALREADY_EXISTS"
               ? "One or more SKUs are already in use. Please generate or enter unique SKUs."
-              : result.error || "Failed to create product."
+              : result.error ||
+                (isEditing
+                  ? "Failed to update product."
+                  : "Failed to create product.")
 
       setErrorMessage(errorMsg)
       window.scrollTo({ top: 0, behavior: "smooth" })
@@ -866,10 +919,7 @@ export default function CreateProductForm({
             type="button"
             variant="outline"
             disabled={isSubmitting}
-            onClick={() => {
-              form.reset()
-              setErrorMessage(null)
-            }}
+            onClick={() => router.back()}
             className="h-9 w-full text-xs sm:w-auto"
           >
             Discard Changes
@@ -887,15 +937,15 @@ export default function CreateProductForm({
             ) : (
               <>
                 <CheckCircle2Icon className="mr-1.5 size-4" />
-                Save Product
+                {isEditing ? "Update Product" : "Save Product"}
               </>
             )}
           </Button>
         </div>
       </form>
 
-      {/* Sheets & Dialogs */}
-      <CreateCategorySheet
+      {/* --- Category Sheets & Dialogs --- */}
+      <CategoryForm
         isOpen={categoryModal.type === "create" ? "create" : null}
         onOpenChange={(open) => {
           if (!open) setCategoryModal({ type: null, data: null })
@@ -912,7 +962,8 @@ export default function CreateProductForm({
           setCategoryModal({ type: null, data: null })
         }}
       />
-      <UpdateCategorySheet
+
+      <CategoryForm
         isOpen={categoryModal.type === "update" ? "update" : null}
         onOpenChange={(open) => {
           if (!open) setCategoryModal({ type: null, data: null })
@@ -931,15 +982,16 @@ export default function CreateProductForm({
             )
           )
           setCategoryModal({ type: null, data: null })
-          toast.success("Category updated successfully!")
         }}
       />
 
-      <CreateBrandSheet
+      {/* --- Brand Sheets & Dialogs --- */}
+      <BrandForm
         isOpen={brandModal.type === "create" ? "create" : null}
         onOpenChange={(open) => {
           if (!open) setBrandModal({ type: null, data: null })
         }}
+        item={null}
         onSuccess={(newBrand) => {
           setBrandsList((prev) => [newBrand, ...prev])
           setValue("brand_id", newBrand.id, {
@@ -949,7 +1001,8 @@ export default function CreateProductForm({
           setBrandModal({ type: null, data: null })
         }}
       />
-      <UpdateBrandSheet
+
+      <BrandForm
         isOpen={brandModal.type === "update" ? "update" : null}
         onOpenChange={(open) => {
           if (!open) setBrandModal({ type: null, data: null })
@@ -962,10 +1015,10 @@ export default function CreateProductForm({
             )
           )
           setBrandModal({ type: null, data: null })
-          toast.success("Brand updated successfully!")
         }}
       />
 
+      {/* --- Delete Dialogs --- */}
       <DeleteCategoryDialog
         isOpen={categoryModal.type === "delete"}
         onOpenChange={(open) => {
@@ -1007,7 +1060,9 @@ export default function CreateProductForm({
   )
 }
 
+// ============================================================================
 // Subcomponents
+// ============================================================================
 
 interface VariantCardProps {
   index: number

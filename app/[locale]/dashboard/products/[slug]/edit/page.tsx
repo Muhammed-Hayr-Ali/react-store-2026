@@ -7,8 +7,7 @@ import { getProductCompleteBySlug } from "@/lib/actions/products/queries/get-com
 import { Category, getAllCategories } from "@/lib/actions/categories"
 import { getAllBrand } from "@/lib/actions/brands/queries/get-all"
 import { Brand } from "@/lib/actions/brands"
-import UpdateProductForm from "@/components/dashboard/product/update-product-form"
-
+import ProductForm from "@/components/dashboard/product/product-form"
 
 export const dynamic = "force-dynamic"
 
@@ -57,7 +56,7 @@ export default async function Page({
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
-      {/* Header متطابق مع Flash Sale مع أيقونة PackageIcon في الشارة */}
+      {/* Header الترويسة الموحدة */}
       <div className="flex items-center gap-3 border-b border-border/40 pb-4">
         <div>
           <div className="flex items-center gap-2">
@@ -74,8 +73,8 @@ export default async function Page({
         </div>
       </div>
 
-      {/* Form */}
-      <UpdateProductForm
+      {/* استخدام النموذج الموحد ProductForm مع تمرير بيانات المنتج */}
+      <ProductForm
         product={productResult.data}
         categories={categories}
         brands={brands}

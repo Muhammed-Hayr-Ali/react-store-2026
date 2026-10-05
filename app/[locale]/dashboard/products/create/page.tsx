@@ -5,7 +5,7 @@ import { createMetadata } from "@/lib/config/metadata_generator"
 import { Category, getAllCategories } from "@/lib/actions/categories"
 import { getAllBrand } from "@/lib/actions/brands/queries/get-all"
 import { Brand } from "@/lib/actions/brands"
-import CreateProductForm from "@/components/dashboard/product/product-form"
+import ProductForm from "@/components/dashboard/product/product-form"
 
 export async function generateMetadata() {
   return createMetadata({
@@ -52,8 +52,8 @@ export default async function Page() {
         </div>
       </div>
 
-      {/* Form */}
-      <CreateProductForm categories={categories} brands={brands} />
+      {/* استخدام النموذج الموحد ProductForm */}
+      <ProductForm categories={categories} brands={brands} />
     </div>
   )
 }
