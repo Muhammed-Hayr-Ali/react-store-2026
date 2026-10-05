@@ -2,7 +2,7 @@ import { ShieldCheckIcon } from "lucide-react"
 
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import CreateRoleForm from "@/components/dashboard/roles/create-role-form"
+import CreateRoleForm from "@/components/dashboard/roles/role-form"
 
 export async function generateMetadata() {
   return createMetadata({

@@ -4,7 +4,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import CreateRoleForm from "@/components/dashboard/roles/create-role-form"
+import CreateRoleForm from "@/components/dashboard/roles/role-form"
 import { RoleRecord } from "@/lib/actions/role/mutations/create-role"
 
 export async function generateMetadata() {
