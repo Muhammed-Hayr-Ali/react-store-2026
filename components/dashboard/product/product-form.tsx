@@ -619,7 +619,7 @@ export default function CreateProductForm({
                         >
                           <SelectTrigger
                             aria-invalid={fieldState.invalid}
-                            className="h-9 flex-1 text-xs"
+                            className="h-8 flex-1 text-xs"
                           >
                             <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
@@ -638,14 +638,13 @@ export default function CreateProductForm({
                         <Button
                           type="button"
                           variant="outline"
-                          size="icon"
                           onClick={() =>
                             setCategoryModal({ type: "create", data: null })
                           }
                           title="Create Category"
-                          className="size-9 shrink-0 cursor-pointer"
+                          className="h-7 w-7 shrink-0 cursor-pointer p-0"
                         >
-                          <PlusIcon className="size-3.5" />
+                          <PlusIcon className="size-3" />
                         </Button>
 
                         {selectedCategoryObject && (
@@ -653,7 +652,6 @@ export default function CreateProductForm({
                             <Button
                               type="button"
                               variant="outline"
-                              size="icon"
                               onClick={() =>
                                 setCategoryModal({
                                   type: "update",
@@ -661,15 +659,14 @@ export default function CreateProductForm({
                                 })
                               }
                               title="Edit selected category"
-                              className="size-9 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
+                              className="h-7 w-7 shrink-0 cursor-pointer p-0 text-muted-foreground hover:text-foreground"
                             >
-                              <PencilIcon className="size-3.5" />
+                              <PencilIcon className="size-3" />
                             </Button>
 
                             <Button
                               type="button"
                               variant="outline"
-                              size="icon"
                               onClick={() =>
                                 setCategoryModal({
                                   type: "delete",
@@ -677,9 +674,9 @@ export default function CreateProductForm({
                                 })
                               }
                               title="Delete selected category"
-                              className="size-9 shrink-0 cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              className="h-7 w-7 shrink-0 cursor-pointer p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
                             >
-                              <Trash2Icon className="size-3.5" />
+                              <Trash2Icon className="size-3" />
                             </Button>
                           </>
                         )}
@@ -708,7 +705,7 @@ export default function CreateProductForm({
                           }
                           value={field.value ?? "none"}
                         >
-                          <SelectTrigger className="h-9 flex-1 text-xs">
+                          <SelectTrigger className="h-8 flex-1 text-xs">
                             <SelectValue placeholder="Select a brand" />
                           </SelectTrigger>
                           <SelectContent>
@@ -724,14 +721,13 @@ export default function CreateProductForm({
                         <Button
                           type="button"
                           variant="outline"
-                          size="icon"
                           onClick={() =>
                             setBrandModal({ type: "create", data: null })
                           }
                           title="Create Brand"
-                          className="size-9 shrink-0 cursor-pointer"
+                          className="h-7 w-7 shrink-0 cursor-pointer p-0"
                         >
-                          <PlusIcon className="size-3.5" />
+                          <PlusIcon className="size-3" />
                         </Button>
 
                         {selectedBrandObject && (
@@ -739,7 +735,6 @@ export default function CreateProductForm({
                             <Button
                               type="button"
                               variant="outline"
-                              size="icon"
                               onClick={() =>
                                 setBrandModal({
                                   type: "update",
@@ -747,15 +742,14 @@ export default function CreateProductForm({
                                 })
                               }
                               title="Edit selected brand"
-                              className="size-9 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
+                              className="h-7 w-7 shrink-0 cursor-pointer p-0 text-muted-foreground hover:text-foreground"
                             >
-                              <PencilIcon className="size-3.5" />
+                              <PencilIcon className="size-3" />
                             </Button>
 
                             <Button
                               type="button"
                               variant="outline"
-                              size="icon"
                               onClick={() =>
                                 setBrandModal({
                                   type: "delete",
@@ -763,9 +757,9 @@ export default function CreateProductForm({
                                 })
                               }
                               title="Delete selected brand"
-                              className="size-9 shrink-0 cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              className="h-7 w-7 shrink-0 cursor-pointer p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
                             >
-                              <Trash2Icon className="size-3.5" />
+                              <Trash2Icon className="size-3" />
                             </Button>
                           </>
                         )}

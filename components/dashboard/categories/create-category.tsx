@@ -124,7 +124,6 @@ export default function CreateCategorySheet({
   const isValidImage =
     imageUrl.startsWith("http://") || imageUrl.startsWith("https://")
 
-  // معالج إغلاق وفتح موحد دون استدعاء setState داخل Effect
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       setErrorMessage(null)
@@ -187,10 +186,10 @@ export default function CreateCategorySheet({
       <CustomSheetContent
         showCloseButton={false}
         side={side}
-        className="flex h-full max-h-screen w-full flex-col p-0 sm:max-w-xl"
+        className="flex w-full flex-col p-0 sm:max-w-xl"
       >
-        {/* Header - ثابت */}
-        <CustomSheetHeader className="shrink-0 border-b bg-card px-5 py-4 sm:px-6">
+        {/* Header - ثابت ومعزز بمسافة آمنة علوية للشاشات الصغيرة */}
+        <CustomSheetHeader className="shrink-0 border-b bg-card px-5 py-4 pt-safe sm:px-6">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <CustomSheetTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
@@ -219,7 +218,6 @@ export default function CreateCategorySheet({
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-5 pb-8"
           >
-            {/* Global Error Alert */}
             {errorMessage && (
               <Alert variant="destructive" className="relative pr-9">
                 <AlertCircleIcon className="size-4" />
