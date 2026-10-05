@@ -4,7 +4,7 @@ import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getAllRoles } from "@/lib/actions/role/queries/get-all-roles"
 import { getUsersWithRoles } from "@/lib/actions/role/queries/get-users-with-roles"
-import UsersClient from "@/components/dashboard/users/users-client"
+import UsersClient from "@/components/dashboard/staff-access/users-client"
 
 export async function generateMetadata() {
   return createMetadata({
