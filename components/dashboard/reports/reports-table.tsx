@@ -73,9 +73,6 @@ import {
 } from "@/lib/actions/reports/types"
 import { deleteReport } from "@/lib/actions/reports/mutations/delete"
 
-// -----------------------------------------------------------------------------
-// 1. TanStack Table Setup
-// -----------------------------------------------------------------------------
 const features = tableFeatures({
   columnFilteringFeature,
   columnVisibilityFeature,
@@ -88,7 +85,6 @@ const features = tableFeatures({
 
 const columnHelper = createColumnHelper<typeof features, ReportWithDetails>()
 
-// الأعمدة التي تُخفى تلقائياً على شاشات الجوال
 const HIDEABLE_COLUMNS = ["target_type", "status", "reporter", "created_at"]
 
 const columnLabelsMap: Record<string, string> = {
@@ -122,9 +118,6 @@ interface ReportsTableProps {
   initialIsMobile?: boolean
 }
 
-// -----------------------------------------------------------------------------
-// 2. Main Component
-// -----------------------------------------------------------------------------
 export function ReportsTable({
   reports: initialData,
   initialIsMobile = false,
@@ -205,13 +198,9 @@ export function ReportsTable({
 
   const [columnVisibility, setColumnVisibility] =
     React.useState<ColumnVisibilityState>(() => {
-      const isMobile =
-        typeof window !== "undefined"
-          ? window.innerWidth < 768
-          : initialIsMobile
       const initial: ColumnVisibilityState = {}
       HIDEABLE_COLUMNS.forEach((colId) => {
-        initial[colId] = !isMobile
+        initial[colId] = !initialIsMobile
       })
       return initial
     })
@@ -313,7 +302,7 @@ export function ReportsTable({
                 </div>
               ) : (
                 <div className="font-mono text-[11px] text-muted-foreground/80">
-                  #{row.original.id.slice(0, 8)}[cite: 22]
+                  #{row.original.id.slice(0, 8)}
                 </div>
               )}
             </div>
@@ -433,16 +422,8 @@ export function ReportsTable({
     onPaginationChange: setPagination,
   })
 
-  const getColumnResponsiveClasses = (columnId: string) => {
-    if (HIDEABLE_COLUMNS.includes(columnId)) {
-      return "hidden md:table-cell"
-    }
-    return ""
-  }
-
   return (
     <div className="flex w-full flex-col justify-start gap-4">
-      {/* Controls Bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:w-64">
           <SearchIcon className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -618,29 +599,23 @@ export function ReportsTable({
         </div>
       </div>
 
-      {/* Main Table Container */}
       <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">
         <div className="overflow-x-auto">
           <Table className="w-full">
             <TableHeader className="bg-muted/40">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    const responsiveClass = getColumnResponsiveClasses(
-                      header.id
-                    )
-                    return (
-                      <TableHead
-                        key={header.id}
-                        colSpan={header.colSpan}
-                        className={`text-xs font-medium text-muted-foreground ${responsiveClass}`}
-                      >
-                        {header.isPlaceholder ? null : (
-                          <FlexRender header={header} />
-                        )}
-                      </TableHead>
-                    )
-                  })}
+                  {headerGroup.headers.map((header) => (
+                    <TableHead
+                      key={header.id}
+                      colSpan={header.colSpan}
+                      className="text-xs font-medium text-muted-foreground"
+                    >
+                      {header.isPlaceholder ? null : (
+                        <FlexRender header={header} />
+                      )}
+                    </TableHead>
+                  ))}
                 </TableRow>
               ))}
             </TableHeader>
@@ -651,16 +626,11 @@ export function ReportsTable({
                     key={row.id}
                     className="transition-colors hover:bg-muted/20"
                   >
-                    {row.getVisibleCells().map((cell) => {
-                      const responsiveClass = getColumnResponsiveClasses(
-                        cell.column.id
-                      )
-                      return (
-                        <TableCell key={cell.id} className={responsiveClass}>
-                          <FlexRender cell={cell} />
-                        </TableCell>
-                      )
-                    })}
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        <FlexRender cell={cell} />
+                      </TableCell>
+                    ))}
                   </TableRow>
                 ))
               ) : (
@@ -678,7 +648,6 @@ export function ReportsTable({
         </div>
       </div>
 
-      {/* Pagination Footer */}
       <div className="flex items-center justify-between px-1">
         <div className="flex w-full items-center gap-8 lg:w-fit">
           <div className="hidden items-center gap-2 lg:flex">

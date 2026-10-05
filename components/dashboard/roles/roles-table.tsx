@@ -62,9 +62,6 @@ import {
 } from "@/components/ui/table"
 import { RoleRecord } from "@/lib/actions/role/mutations/create-role"
 
-// -----------------------------------------------------------------------------
-// 1. TanStack Table Setup
-// -----------------------------------------------------------------------------
 const features = tableFeatures({
   columnFilteringFeature,
   columnVisibilityFeature,
@@ -90,10 +87,7 @@ interface RolesTableProps {
   initialIsMobile?: boolean
 }
 
-// -----------------------------------------------------------------------------
-// 2. Main Component (RolesTable)
-// -----------------------------------------------------------------------------
-export function RolesTable({
+export default function RolesTable({
   initialRoles,
   initialIsMobile = false,
 }: RolesTableProps) {
@@ -171,6 +165,7 @@ export function RolesTable({
       })
     }
 
+    handleResize()
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [])
@@ -268,20 +263,8 @@ export function RolesTable({
     onPaginationChange: setPagination,
   })
 
-  const getColumnResponsiveClasses = (columnId: string) => {
-    let classes = ""
-    if (HIDEABLE_COLUMNS.includes(columnId)) {
-      classes += " hidden md:table-cell"
-    }
-    if (columnId === "permissions") {
-      classes += " text-center"
-    }
-    return classes
-  }
-
   return (
     <div className="flex w-full flex-col justify-start gap-4">
-      {/* Controls Bar: مطابق لجدول المنتجات حرفياً */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:w-64">
           <SearchIcon className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -309,7 +292,6 @@ export function RolesTable({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {/* شريط الفلترة المتصل بدون شادو بارتفاع h-8 */}
           <div className="inline-flex h-8 items-center overflow-hidden rounded-md border border-input bg-background p-0.5">
             <button
               type="button"
@@ -375,7 +357,6 @@ export function RolesTable({
             </button>
           </div>
 
-          {/* زر اختيار الأعمدة: أيقونة فقط مربعة h-8 w-8 */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -409,29 +390,23 @@ export function RolesTable({
         </div>
       </div>
 
-      {/* Main Table */}
       <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">
         <div className="overflow-x-auto">
           <Table className="w-full">
             <TableHeader className="bg-muted/40">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    const responsiveClass = getColumnResponsiveClasses(
-                      header.id
-                    )
-                    return (
-                      <TableHead
-                        key={header.id}
-                        colSpan={header.colSpan}
-                        className={`text-xs font-medium text-muted-foreground ${responsiveClass}`}
-                      >
-                        {header.isPlaceholder ? null : (
-                          <FlexRender header={header} />
-                        )}
-                      </TableHead>
-                    )
-                  })}
+                  {headerGroup.headers.map((header) => (
+                    <TableHead
+                      key={header.id}
+                      colSpan={header.colSpan}
+                      className="text-xs font-medium text-muted-foreground"
+                    >
+                      {header.isPlaceholder ? null : (
+                        <FlexRender header={header} />
+                      )}
+                    </TableHead>
+                  ))}
                 </TableRow>
               ))}
             </TableHeader>
@@ -442,16 +417,11 @@ export function RolesTable({
                     key={row.id}
                     className="transition-colors hover:bg-muted/20"
                   >
-                    {row.getVisibleCells().map((cell) => {
-                      const responsiveClass = getColumnResponsiveClasses(
-                        cell.column.id
-                      )
-                      return (
-                        <TableCell key={cell.id} className={responsiveClass}>
-                          <FlexRender cell={cell} />
-                        </TableCell>
-                      )
-                    })}
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        <FlexRender cell={cell} />
+                      </TableCell>
+                    ))}
                   </TableRow>
                 ))
               ) : (
@@ -469,7 +439,6 @@ export function RolesTable({
         </div>
       </div>
 
-      {/* Pagination Footer */}
       <div className="flex items-center justify-between px-1">
         <div className="flex w-full items-center gap-8 lg:w-fit">
           <div className="hidden items-center gap-2 lg:flex">
@@ -549,4 +518,3 @@ export function RolesTable({
   )
 }
 
-export default RolesTable

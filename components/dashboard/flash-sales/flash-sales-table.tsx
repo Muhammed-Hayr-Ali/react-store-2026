@@ -31,7 +31,6 @@ import {
   Trash2Icon,
   XCircleIcon,
   XIcon,
-  ZapIcon,
   Columns3Icon,
   ChevronsLeftIcon,
   ChevronLeftIcon,
@@ -84,7 +83,6 @@ const features = tableFeatures({
 
 const columnHelper = createColumnHelper<typeof features, AdminFlashSaleItem>()
 
-// الأعمدة القابلة للإخفاء (تخفى افتراضياً على الجوال)
 const HIDEABLE_COLUMNS = ["status", "duration", "item_count"]
 
 const columnLabelsMap: Record<string, string> = {
@@ -331,7 +329,7 @@ export function FlashSalesTable({
               />
             </div>
           ),
-          enableHiding: false, // يبقى دائماً على الجوال
+          enableHiding: false,
         }),
 
         columnHelper.display({
@@ -403,21 +401,8 @@ export function FlashSalesTable({
     onPaginationChange: setPagination,
   })
 
-  // دالة تحديد فئات الإخفاء التلقائي على الجوال للأعمدة الثانوية
-  const getColumnResponsiveClasses = (columnId: string) => {
-    if (
-      columnId === "status" ||
-      columnId === "duration" ||
-      columnId === "item_count"
-    ) {
-      return "hidden md:table-cell"
-    }
-    return ""
-  }
-
   return (
     <div className="flex w-full flex-col justify-start gap-4">
-      {/* Controls Bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:w-64">
           <SearchIcon className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -558,29 +543,23 @@ export function FlashSalesTable({
         </div>
       </div>
 
-      {/* Main Table Container */}
       <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">
         <div className="overflow-x-auto">
           <Table className="w-full">
             <TableHeader className="bg-muted/40">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    const responsiveClass = getColumnResponsiveClasses(
-                      header.id
-                    )
-                    return (
-                      <TableHead
-                        key={header.id}
-                        colSpan={header.colSpan}
-                        className={`text-xs font-medium text-muted-foreground ${responsiveClass}`}
-                      >
-                        {header.isPlaceholder ? null : (
-                          <FlexRender header={header} />
-                        )}
-                      </TableHead>
-                    )
-                  })}
+                  {headerGroup.headers.map((header) => (
+                    <TableHead
+                      key={header.id}
+                      colSpan={header.colSpan}
+                      className="text-xs font-medium text-muted-foreground"
+                    >
+                      {header.isPlaceholder ? null : (
+                        <FlexRender header={header} />
+                      )}
+                    </TableHead>
+                  ))}
                 </TableRow>
               ))}
             </TableHeader>
@@ -591,16 +570,11 @@ export function FlashSalesTable({
                     key={row.id}
                     className="transition-colors hover:bg-muted/20"
                   >
-                    {row.getVisibleCells().map((cell) => {
-                      const responsiveClass = getColumnResponsiveClasses(
-                        cell.column.id
-                      )
-                      return (
-                        <TableCell key={cell.id} className={responsiveClass}>
-                          <FlexRender cell={cell} />
-                        </TableCell>
-                      )
-                    })}
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        <FlexRender cell={cell} />
+                      </TableCell>
+                    ))}
                   </TableRow>
                 ))
               ) : (
@@ -618,7 +592,6 @@ export function FlashSalesTable({
         </div>
       </div>
 
-      {/* Pagination Footer */}
       <div className="flex items-center justify-between px-1">
         <div className="flex w-full items-center gap-8 lg:w-fit">
           <div className="hidden items-center gap-2 lg:flex">
