@@ -27,7 +27,6 @@ import {
   FilterIcon,
   MoreVerticalIcon,
   SearchIcon,
-  ShieldAlertIcon,
   Trash2Icon,
   XCircleIcon,
   XIcon,
@@ -128,7 +127,6 @@ interface ReportsTableProps {
 // -----------------------------------------------------------------------------
 export function ReportsTable({
   reports: initialData,
-  total,
   initialIsMobile = false,
 }: ReportsTableProps) {
   const [data, setData] = React.useState(() => initialData)
@@ -298,7 +296,7 @@ export function ReportsTable({
           id: "reason",
           header: "Reported Item",
           cell: ({ row }) => (
-            <div className="max-w-[190px] min-w-0 sm:max-w-xs md:max-w-sm">
+            <div className="max-w-47.5 min-w-0 sm:max-w-xs md:max-w-sm">
               <Link
                 href={`/${locale}/dashboard/reports/${row.original.id}`}
                 className="block truncate font-semibold text-foreground transition-colors hover:text-primary"
