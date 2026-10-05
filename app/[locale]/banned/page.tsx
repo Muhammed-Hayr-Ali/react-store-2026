@@ -3,8 +3,7 @@ import { ShieldAlertIcon, LogOutIcon, MailIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { getCurrentUserStatus } from "@/lib/actions/users/queries/get-current-user-status"
-import { createServerClient } from "@/lib/supabase/server"
-
+import { createServerClient } from "@/lib/database/supabase/server"
 interface BannedPageProps {
   params: Promise<{ locale: string }>
 }
