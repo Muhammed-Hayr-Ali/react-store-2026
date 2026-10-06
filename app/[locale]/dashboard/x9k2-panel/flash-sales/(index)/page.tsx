@@ -4,8 +4,8 @@ import { getAllFlashSales } from "@/lib/actions/flash-sales/queries/get-all-flas
 import { FlashSalesTable } from "@/components/dashboard/flash-sales/flash-sales-table"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { appConfig } from "@/lib/config/app_config"
-
-
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
+import { notFound } from "next/navigation"
 
 export async function generateMetadata() {
   return createMetadata({
@@ -16,6 +16,11 @@ export async function generateMetadata() {
 }
 
 export default async function FlashSalesPage() {
+  const canView = await hasPermission(PERMISSIONS.VIEW_FLASH_SALES)
+  if (!canView) {
+    notFound()
+  }
+
   const sales = await getAllFlashSales()
 
   return (

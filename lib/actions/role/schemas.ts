@@ -1,7 +1,4 @@
 import { z } from "zod"
-import { PERMISSIONS } from "./types"
-
-const permissionValues = Object.values(PERMISSIONS) as [string, ...string[]]
 
 export const createRoleSchema = z.object({
   name: z
@@ -12,7 +9,7 @@ export const createRoleSchema = z.object({
     .toLowerCase(),
   description: z.string().max(255).optional().nullable(),
   permissions: z
-    .array(z.enum(permissionValues))
+    .array(z.string())
     .min(1, "At least one permission is required"),
 })
 
@@ -20,7 +17,7 @@ export const updateRolePermissionsSchema = z.object({
   roleId: z.number().int().positive(),
   description: z.string().max(255).optional().nullable(),
   permissions: z
-    .array(z.enum(permissionValues))
+    .array(z.string())
     .min(1, "At least one permission is required"),
 })
 
@@ -34,4 +31,3 @@ export type UpdateRolePermissionsInput = z.infer<
   typeof updateRolePermissionsSchema
 >
 export type AssignUserRoleInput = z.infer<typeof assignUserRoleSchema>
-

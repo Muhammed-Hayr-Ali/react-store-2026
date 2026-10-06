@@ -18,7 +18,7 @@ export const PERMISSIONS = {
   VIEW_REPORTS: "view_reports",
   VIEW_USER_ROLES: "view_user_roles",
   VIEW_STAFF_ACCESS: "view_staff_access",
-  VIEW_NOTIFICATIONS: "view_notifications",
+  VIEW_NOTIFICATIONS_MANAGEMENT: "view_notifications_Management",
 
   // --- 1. Brands Management ---
   CREATE_BRAND: "create_brand",

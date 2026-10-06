@@ -51,7 +51,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
         description: "Access staff access management page",
       },
       {
-        key: PERMISSIONS.VIEW_NOTIFICATIONS,
+        key: PERMISSIONS.VIEW_NOTIFICATIONS_MANAGEMENT,
         label: "View Notifications Management",
         description: "View platform notification logs and management page",
       },

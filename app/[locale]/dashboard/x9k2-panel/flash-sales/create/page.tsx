@@ -4,6 +4,8 @@ import { FlashSaleForm } from "@/components/dashboard/flash-sales/flash-sale-for
 import { getAvailableProducts } from "@/lib/actions/flash-sales/queries/get-available-products"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { appConfig } from "@/lib/config/app_config"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
+import { notFound } from "next/navigation"
 
 interface PageProps {
   params: Promise<{
@@ -20,6 +22,10 @@ export async function generateMetadata() {
 }
 
 export default async function CreateFlashSalePage({ params }: PageProps) {
+  const canView = await hasPermission(PERMISSIONS.CREATE_FLASH_SALE)
+  if (!canView) {
+    notFound()
+  }
   const { locale } = await params
   const availableProducts = await getAvailableProducts()
 

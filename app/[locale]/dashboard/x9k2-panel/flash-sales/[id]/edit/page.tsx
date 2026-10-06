@@ -6,6 +6,7 @@ import { getAvailableProducts } from "@/lib/actions/flash-sales/queries/get-avai
 import { getFlashSaleForEdit } from "@/lib/actions/flash-sales/queries/get-flash-sale-for-edit"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { appConfig } from "@/lib/config/app_config"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 
 interface PageProps {
   params: Promise<{
@@ -23,6 +24,11 @@ export async function generateMetadata() {
 }
 
 export default async function EditFlashSalePage({ params }: PageProps) {
+  const canView = await hasPermission(PERMISSIONS.UPDATE_FLASH_SALE)
+  if (!canView) {
+    notFound()
+  }
+
   const { locale, id } = await params
 
   const [saleResult, availableProducts] = await Promise.all([

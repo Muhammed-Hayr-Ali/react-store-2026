@@ -5,6 +5,8 @@ import { getAdminUsersList } from "@/lib/actions/users/queries/get-admin-users"
 import { AdminNotificationsTable } from "@/components/dashboard/notifications/admin-notifications-table"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { appConfig } from "@/lib/config/app_config"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
+import { notFound } from "next/navigation"
 
 interface PageProps {
   params: Promise<{
@@ -30,6 +32,10 @@ export default async function AdminNotificationsPage({
   params,
   searchParams,
 }: PageProps) {
+  const canView = await hasPermission(PERMISSIONS.VIEW_NOTIFICATIONS_MANAGEMENT)
+  if (!canView) {
+    notFound()
+  }  
   await params
   await searchParams
 

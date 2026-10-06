@@ -20,6 +20,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { getSidebarConfigByRole } from "./sidebar-config"
+import { appRoutes } from "@/lib/config/app-routes"
 
 interface NavMainProps {
   role?: string
@@ -78,13 +79,12 @@ export function NavMain({ role, permissions = [] }: NavMainProps) {
           const hasActiveChild = item.items?.some(
             (sub) => normalizedPath === sub.url
           )
-          const isSingleActive =
-            !hasChildren &&
-            (item.url === "/dashboard"
-              ? normalizedPath === "/dashboard"
-              : normalizedPath === item.url ||
-                normalizedPath.startsWith(`${item.url}/`))
-
+        const isSingleActive =
+          !hasChildren &&
+          (item.url === appRoutes.dashboard.home || item.url === appRoutes.dashboard.admin.home
+            ? normalizedPath === item.url
+            : normalizedPath === item.url ||
+              normalizedPath.startsWith(`${item.url}/`))
           const IconComponent = item.icon
 
           return (
