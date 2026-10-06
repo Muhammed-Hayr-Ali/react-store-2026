@@ -243,6 +243,7 @@ export function FlashSaleForm({
       router.refresh()
   }
 
+  // Render
   return (
     <form
       noValidate
