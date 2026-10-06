@@ -37,11 +37,7 @@ export const sidebarConfig: SidebarConfig = {
       icon: LayoutDashboard,
       requiredPermission: PERMISSIONS.VIEW_DASHBOARD,
     },
-    {
-      title: "My Account",
-      url: appRoutes.dashboard.account,
-      icon: User,
-    },
+
     {
       title: "Products",
       url: appRoutes.dashboard.admin.products,
@@ -83,6 +79,11 @@ export const sidebarConfig: SidebarConfig = {
       url: appRoutes.dashboard.admin.notifications,
       icon: Bell,
       requiredPermission: PERMISSIONS.VIEW_NOTIFICATIONS_MANAGEMENT,
+    },
+    {
+      title: "My Account",
+      url: appRoutes.dashboard.account,
+      icon: User,
     },
   ],
 }
