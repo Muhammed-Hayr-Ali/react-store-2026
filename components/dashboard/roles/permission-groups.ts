@@ -144,6 +144,38 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     ],
   },
   {
+    id: "reports_moderation",
+    label: "Reports & Moderation Management",
+    permissions: [
+      {
+        key: PERMISSIONS.CREATE_REPORT,
+        label: "Create Report",
+        description: "Submit violation and problem tickets",
+      },
+      {
+        key: PERMISSIONS.UPDATE_REPORT,
+        label: "Update Report",
+        description: "Modify and update report status",
+      },
+      {
+        key: PERMISSIONS.DELETE_REPORT,
+        label: "Delete Report",
+        description: "Purge resolved moderation logs and reports",
+      },
+      {
+        key: PERMISSIONS.VIEW_REPORTS,
+        label: "View Reports",
+        description: "Inspect customer reports and tickets",
+      },
+      {
+        key: PERMISSIONS.MANAGE_REPORTS,
+        label: "Manage Reports",
+        description:
+          "Full administrative control over user reports and complaints",
+      },
+    ],
+  },
+  {
     id: "users_security",
     label: "Users & Profiles Management",
     permissions: [
