@@ -14,7 +14,7 @@ export const sidebarConfig = {
   navMain: [
     {
       title: "Overview",
-      url: appRoutes.dashboard.home,
+      url: appRoutes.dashboard.admin.home,
       icon: LayoutDashboard,
     },
     {
