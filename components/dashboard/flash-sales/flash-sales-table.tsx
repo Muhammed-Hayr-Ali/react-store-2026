@@ -372,7 +372,7 @@ export function FlashSalesTable({
                 <DropdownMenuContent align="end" className="w-44 text-xs">
                   <DropdownMenuItem asChild>
                     <Link
-                      href={`${appRoutes.dashboard.admin.flashSales}/${row.original.slug}/edit`}
+                      href={`${appRoutes.dashboard.admin.flashSales}/${row.original.id}/edit`}
                       className="flex cursor-pointer items-center gap-2"
                     >
                       <PencilIcon className="size-3.5" />
