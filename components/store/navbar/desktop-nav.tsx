@@ -7,7 +7,6 @@ import { SearchIcon, ShoppingCartIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { CurrencySwitcher } from "@/components/store/currency/CurrencySwitcher"
-import { NotificationDropdown } from "@/components/notifications/notification-dropdown"
 
 import { CurrentUser } from "@/lib/actions/utils/profile"
 import { appRoutes } from "@/lib/config/app-routes"
@@ -16,6 +15,7 @@ import type { NotificationRecord } from "@/lib/actions/notifications/types"
 import { cn } from "@/lib/utils"
 
 import UserMenu from "./user-menu"
+import { NotificationPopover } from "@/components/notifications/notification-popover.tsx"
 
 interface DesktopNavProps {
   className?: string
@@ -54,7 +54,7 @@ export default function DesktopNav({
 
       {/* عرض جرس الإشعارات في الديسكتوب للمستخدم المسجل فقط */}
       {user && (
-        <NotificationDropdown
+        <NotificationPopover
           initialNotifications={initialNotifications}
           initialUnreadCount={initialUnreadCount}
           currentUserId={user.id}

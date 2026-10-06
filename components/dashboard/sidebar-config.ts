@@ -6,7 +6,7 @@ import {
   FileSpreadsheet,
   ShieldCheck,
   UserCog,
-  Bell, // استيراد أيقونة الإشعارات
+  Bell,
 } from "lucide-react"
 import { appRoutes } from "@/lib/config/app-routes"
 
@@ -19,37 +19,37 @@ export const sidebarConfig = {
     },
     {
       title: "Products",
-      url: appRoutes.dashboard.products.allProducts,
+      url: appRoutes.dashboard.admin.products,
       icon: Package,
     },
     {
       title: "Flash Sales",
-      url: appRoutes.dashboard.flashSales,
+      url: appRoutes.dashboard.admin.flashSales,
       icon: Zap,
     },
     {
       title: "Users Management",
-      url: appRoutes.dashboard.users,
+      url: appRoutes.dashboard.admin.users,
       icon: Users,
     },
     {
       title: "Reports & Issues",
-      url: appRoutes.dashboard.reports,
+      url: appRoutes.dashboard.admin.reports,
       icon: FileSpreadsheet,
     },
     {
       title: "Roles & Permissions",
-      url: appRoutes.dashboard.roles,
+      url: appRoutes.dashboard.admin.roles,
       icon: ShieldCheck,
     },
     {
       title: "Staff Access",
-      url: appRoutes.dashboard.staffAccess,
+      url: appRoutes.dashboard.admin.staffAccess,
       icon: UserCog,
     },
     {
       title: "Notifications",
-      url: appRoutes.dashboard.notifications,
+      url: appRoutes.dashboard.admin.notifications,
       icon: Bell,
     },
   ],

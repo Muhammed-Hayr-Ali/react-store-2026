@@ -19,7 +19,7 @@ import { signOut } from "@/lib/actions/authentication/signOut"
 import { appRoutes } from "@/lib/config/app-routes"
 import { storeNavConfig } from "./nav-config"
 import { cn } from "@/lib/utils"
-import { NotificationDropdown } from "@/components/notifications/notification-dropdown"
+import { NotificationPopover } from "@/components/notifications/notification-popover.tsx"
 import type { NotificationRecord } from "@/lib/actions/notifications/types"
 
 interface UserMenuProps {
@@ -88,7 +88,7 @@ export function UserProfileHeader({
 
       <div className="shrink-0 ps-1">
         {/* استبدال الجرس الوهمي بمكون الإشعارات الحقيقي */}
-        <NotificationDropdown
+        <NotificationPopover
           initialNotifications={initialNotifications}
           initialUnreadCount={initialUnreadCount}
           currentUserId={user.id}

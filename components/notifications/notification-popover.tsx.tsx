@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useTransition } from "react"
-import { Bell, CheckCheck, Trash2, ExternalLink } from "lucide-react"
+import { CheckCheck, Trash2, ExternalLink, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   CustomPopover,
@@ -13,25 +13,36 @@ import { Badge } from "@/components/ui/badge"
 import { NotificationRecord } from "@/lib/actions/notifications/types"
 import { createClient } from "@/lib/database/supabase/client"
 import Link from "next/link"
-// استيراد الدوال التي يحتاجها العميل فقط مباشرة من مساراتها دون استيراد index العام
-import { markNotificationAsRead, markAllNotificationsAsRead } from "@/lib/actions/notifications/mutations/mark-read"
-import { deleteNotification, deleteAllNotifications } from "@/lib/actions/notifications/mutations/delete"
-interface NotificationDropdownProps {
+import { useRouter, useParams } from "next/navigation"
+import {
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+} from "@/lib/actions/notifications/mutations/mark-read"
+import {
+  deleteNotification,
+  deleteAllNotifications,
+} from "@/lib/actions/notifications/mutations/delete"
+import { NotificationBell } from "./notification-bell"
+
+interface NotificationPopoverProps {
   initialNotifications: NotificationRecord[]
   initialUnreadCount: number
   currentUserId: string
 }
 
-export function NotificationDropdown({
+export function NotificationPopover({
   initialNotifications,
   initialUnreadCount,
   currentUserId,
-}: NotificationDropdownProps) {
+}: NotificationPopoverProps) {
   const [notifications, setNotifications] =
     useState<NotificationRecord[]>(initialNotifications)
   const [unreadCount, setUnreadCount] = useState<number>(initialUnreadCount)
   const [isOpen, setIsOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
+  const params = useParams()
+  const locale = (params?.locale as string) || "en"
   const supabase = createClient()
 
   // Setup Supabase Realtime subscription with a unique channel per component instance
@@ -60,6 +71,14 @@ export function NotificationDropdown({
       supabase.removeChannel(channel)
     }
   }, [currentUserId, supabase])
+
+  const handleBellClick = (e: React.MouseEvent) => {
+    // التوجيه إلى صفحة الإشعارات الكاملة مباشرة على الجوال والشاشات الصغيرة
+    if (window.innerWidth < 768) {
+      e.preventDefault()
+      router.push(`/${locale}/dashboard/notifications`)
+    }
+  }
 
   const handleMarkAsRead = (id: string, isRead: boolean) => {
     if (isRead) return
@@ -123,22 +142,9 @@ export function NotificationDropdown({
   return (
     <CustomPopover open={isOpen} onOpenChange={setIsOpen}>
       <CustomPopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative size-8 rounded-lg text-muted-foreground hover:text-foreground"
-          aria-label="Notifications"
-        >
-          <Bell className="size-4" />
-          {unreadCount > 0 && (
-            <Badge
-              variant="destructive"
-              className="absolute -top-1 -right-1 flex size-4 animate-pulse items-center justify-center rounded-full p-0 text-[9px] font-bold"
-            >
-              {unreadCount > 99 ? "99+" : unreadCount}
-            </Badge>
-          )}
-        </Button>
+        <div onClick={handleBellClick} className="inline-flex cursor-pointer">
+          <NotificationBell unreadCount={unreadCount} />
+        </div>
       </CustomPopoverTrigger>
 
       <CustomPopoverContent
@@ -186,7 +192,6 @@ export function NotificationDropdown({
         <div className="max-h-[380px] divide-y overflow-y-auto">
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
-              <Bell className="mb-2 size-8 opacity-40" />
               <p className="text-sm">No notifications yet</p>
             </div>
           ) : (
@@ -276,6 +281,18 @@ export function NotificationDropdown({
               </div>
             ))
           )}
+        </div>
+
+        {/* Footer Link to Full Page on PC */}
+        <div className="border-t p-2 text-center">
+          <Link
+            href={`/${locale}/dashboard/notifications`}
+            onClick={() => setIsOpen(false)}
+            className="flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:underline"
+          >
+            <span>View all notifications</span>
+            <ArrowRight className="size-3.5" />
+          </Link>
         </div>
       </CustomPopoverContent>
     </CustomPopover>

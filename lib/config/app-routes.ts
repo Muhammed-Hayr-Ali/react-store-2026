@@ -10,16 +10,18 @@ export const appRoutes = {
   dashboard: {
     home: "/dashboard",
     account: "/dashboard/account",
-    products: {
-      allProducts: "/dashboard/products",
-      create: "/dashboard/products/create",
-    },
-    flashSales: "/dashboard/flash-sales",
-    reports: "/dashboard/reports",
-    roles: "/dashboard/roles",
-    staffAccess: "/dashboard/staff-access",
-    notifications: "/dashboard/notifications", // إضافة مسار الإشعارات
     banned: "/banned",
-    users: "/dashboard/users",
+
+    // مسارات الإدارة المحمية والمموهة (Admin Panel)
+    admin: {
+      home: "/dashboard/x9k2-panel",
+      products: "/dashboard/x9k2-panel/products",
+      flashSales: "/dashboard/x9k2-panel/flash-sales",
+      notifications: "/dashboard/x9k2-panel/notifications",
+      reports: "/dashboard/x9k2-panel/reports",
+      roles: "/dashboard/x9k2-panel/roles",
+      staffAccess: "/dashboard/x9k2-panel/staff-access",
+      users: "/dashboard/x9k2-panel/users",
+    },
   },
 } as const
