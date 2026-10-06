@@ -72,6 +72,7 @@ import {
 import { toggleFlashSaleStatus } from "@/lib/actions/flash-sales/mutations/toggle-status"
 import { deleteFlashSale } from "@/lib/actions/flash-sales/mutations/delete"
 import { AdminFlashSaleItem } from "@/lib/actions/flash-sales"
+import { appRoutes } from "@/lib/config/app-routes"
 
 const features = tableFeatures({
   columnFilteringFeature,
@@ -634,7 +635,7 @@ export function FlashSalesTable({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Link href={`/${locale}/dashboard/flash-sales/create`}>
+          <Link href={appRoutes.dashboard.admin.create_flashSales}>
             <Button
               variant="default"
               size="icon"

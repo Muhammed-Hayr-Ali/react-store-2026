@@ -18,6 +18,7 @@ export const appRoutes = {
       products: "/dashboard/x9k2-panel/products",
       create_products: "/dashboard/x9k2-panel/products/create",
       flashSales: "/dashboard/x9k2-panel/flash-sales",
+      create_flashSales: "/dashboard/x9k2-panel/flash-sales/create",
       notifications: "/dashboard/x9k2-panel/notifications",
       reports: "/dashboard/x9k2-panel/reports",
       roles: "/dashboard/x9k2-panel/roles",
