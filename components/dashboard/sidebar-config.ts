@@ -34,65 +34,84 @@ const userSidebarConfig: SidebarConfig = {
   navMain: [
     { title: "Overview", url: appRoutes.dashboard.home, icon: LayoutDashboard },
     { title: "My Account", url: appRoutes.dashboard.account, icon: User },
-    {
-      title: "Notifications",
-      url: appRoutes.dashboard.notifications,
-      icon: Bell,
-      requiredPermission: PERMISSIONS.VIEW_NOTIFICATIONS,
-    },
+   
   ],
 }
+
+
+  // VIEW_DASHBOARD: "view_dashboard",
+  // VIEW_OVERVIEW: "view_overview",
+  // VIEW_PRODUCTS: "view_products",
+  // VIEW_FLASH_SALES: "view_flash_sales",
+  // VIEW_USERS_MANAGEMENT: "view_users_management",
+  // VIEW_REPORTS_AND_ISSUES: "view_reports_and_issues",
+  // VIEW_ROLES_AND_PERMISSIONS: "view_roles_and_permissions",
+  // VIEW_STAFF_ACCESS: "view_staff_access",
+  // VIEW_NOTIFICATIONS_MANAGEMENT: "view_notifications_management",
+
+
+
 
 const adminSidebarConfig: SidebarConfig = {
   navMain: [
     {
-      title: "Overview",
-      url: appRoutes.dashboard.admin.home,
+      title: "Dashboard",
+      url: appRoutes.dashboard.home,
       icon: LayoutDashboard,
       requiredPermission: PERMISSIONS.VIEW_DASHBOARD,
+    },
+    {
+      title: "Overview",
+      url: appRoutes.dashboard.admin.home,
+      icon: Package,
+      requiredPermission: PERMISSIONS.VIEW_OVERVIEW,
     },
     {
       title: "Products",
       url: appRoutes.dashboard.admin.products,
       icon: Package,
-      requiredPermission: PERMISSIONS.VIEW_PRODUCTS, 
+      requiredPermission: PERMISSIONS.VIEW_PRODUCTS,
     },
     {
       title: "Flash Sales",
       url: appRoutes.dashboard.admin.flashSales,
       icon: Zap,
-      requiredPermission: PERMISSIONS.VIEW_FLASH_SALES, 
+      requiredPermission: PERMISSIONS.VIEW_FLASH_SALES,
     },
     {
       title: "Users Management",
       url: appRoutes.dashboard.admin.users,
       icon: Users,
-      requiredPermission: PERMISSIONS.VIEW_USERS, 
+      requiredPermission: PERMISSIONS.VIEW_USERS_MANAGEMENT,
     },
     {
-      title: "Reports & Issues",
+      title: "Reports and Issues",
       url: appRoutes.dashboard.admin.reports,
       icon: FileSpreadsheet,
-      requiredPermission: PERMISSIONS.VIEW_REPORTS, 
+      requiredPermission: PERMISSIONS.VIEW_REPORTS_AND_ISSUES,
     },
     {
-      title: "Roles & Permissions",
+      title: "Roles and Permissions",
       url: appRoutes.dashboard.admin.roles,
       icon: ShieldCheck,
-      requiredPermission: PERMISSIONS.VIEW_USER_ROLES, 
+      requiredPermission: PERMISSIONS.VIEW_ROLES_AND_PERMISSIONS,
     },
     {
       title: "Staff Access",
       url: appRoutes.dashboard.admin.staffAccess,
       icon: UserCog,
-      requiredPermission: PERMISSIONS.ASSIGN_ROLE,
+      requiredPermission: PERMISSIONS.VIEW_STAFF_ACCESS,
     },
     {
       title: "Notifications Management",
       url: appRoutes.dashboard.admin.notifications,
       icon: Bell,
-      requiredPermission: PERMISSIONS.VIEW_NOTIFICATIONS,
+      requiredPermission: PERMISSIONS.VIEW_NOTIFICATIONS_MANAGEMENT,
     },
+   
+
+   
+ 
   ],
 }
 

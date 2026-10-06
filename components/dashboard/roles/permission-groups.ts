@@ -11,45 +11,55 @@ export interface PermissionGroup {
 }
 
 export const PERMISSION_GROUPS: PermissionGroup[] = [
-  // --- 1. مجموعة أذونات العرض والوصول للصفحات (Navigation & Page Views) ---
+
   {
     id: "dashboard_views",
     label: "Dashboard & Page Views",
     permissions: [
       {
         key: PERMISSIONS.VIEW_DASHBOARD,
-        label: "View Dashboard (Overview)",
+        label: "View Dashboard",
+        description: "Access the dashboard overview and main home page",
+      },
+      {
+        key: PERMISSIONS.VIEW_OVERVIEW,
+        label: "View Overview",
         description: "Access the dashboard overview and main home page",
       },
       {
         key: PERMISSIONS.VIEW_PRODUCTS,
         label: "View Products",
-        description: "Access and browse the product inventory catalog page",
+        description: "View and manage products",
       },
       {
         key: PERMISSIONS.VIEW_FLASH_SALES,
         label: "View Flash Sales",
-        description: "View active and scheduled discount campaigns page",
+        description: "View and manage flash sales",
       },
       {
-        key: PERMISSIONS.VIEW_USERS,
+        key: PERMISSIONS.VIEW_USERS_MANAGEMENT,
         label: "View Users Management",
-        description: "Access and view system users list page",
+        description: "View and manage users",
       },
       {
-        key: PERMISSIONS.VIEW_REPORTS,
+        key: PERMISSIONS.VIEW_REPORTS_AND_ISSUES,
         label: "View Reports & Issues",
-        description: "Inspect customer reports, tickets, and issues page",
+        description: "View and manage reports and issues",
       },
       {
-        key: PERMISSIONS.VIEW_USER_ROLES,
+        key: PERMISSIONS.VIEW_ROLES_AND_PERMISSIONS,
         label: "View Roles & Permissions",
-        description: "Inspect roles and permission mappings page",
+        description: "View and manage roles and permissions",
       },
       {
-        key: PERMISSIONS.VIEW_NOTIFICATIONS,
+        key: PERMISSIONS.VIEW_STAFF_ACCESS,
+        label: "View Staff Access",
+        description: "View and manage staff access",
+      },
+      {
+        key: PERMISSIONS.VIEW_NOTIFICATIONS_MANAGEMENT,
         label: "View Notifications Management",
-        description: "View platform notification logs and management page",
+        description: "View and manage notifications",
       },
     ],
   },
