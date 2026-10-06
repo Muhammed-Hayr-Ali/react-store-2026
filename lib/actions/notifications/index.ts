@@ -8,7 +8,11 @@ export { getNotifications } from "./queries/get-notifications"
 export { getAdminNotifications } from "./queries/get-admin-notifications"
 
 // Mutations
-export { deleteNotification, deleteAllNotifications } from "./mutations/delete"
+export {
+  deleteNotification,
+  deleteBatchNotifications,
+  deleteAllNotifications,
+} from "./mutations/delete"
 export {
   markNotificationAsRead,
   markAllNotificationsAsRead,

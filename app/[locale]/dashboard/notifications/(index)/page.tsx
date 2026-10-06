@@ -1,8 +1,7 @@
-import { redirect } from "next/navigation"
 import { BellIcon } from "lucide-react"
 
 import { getAdminNotifications } from "@/lib/actions/notifications/queries/get-admin-notifications"
-import { hasRole, ROLES } from "@/lib/actions/role"
+import { getAdminUsersList } from "@/lib/actions/users/queries/get-admin-users"
 import { AdminNotificationsTable } from "@/components/dashboard/notifications/admin-notifications-table"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { appConfig } from "@/lib/config/app_config"
@@ -10,6 +9,12 @@ import { appConfig } from "@/lib/config/app_config"
 interface PageProps {
   params: Promise<{
     locale: string
+  }>
+  searchParams: Promise<{
+    type?: string
+    isRead?: string
+    limit?: string
+    offset?: string
   }>
 }
 
@@ -21,16 +26,32 @@ export async function generateMetadata() {
   })
 }
 
-export default async function AdminNotificationsPage({ params }: PageProps) {
-  const { locale } = await params
+export default async function AdminNotificationsPage({
+  params,
+  searchParams,
+}: PageProps) {
+  await params
+  await searchParams
 
-  const isAdmin = await hasRole(ROLES.ADMIN)
-  if (!isAdmin) {
-    redirect(`/${locale}/login`)
-  }
+  const [notificationsRes, usersRes] = await Promise.all([
+    getAdminNotifications(),
+    getAdminUsersList({ status: "active" }),
+  ])
 
-  const res = await getAdminNotifications()
-  const notifications = res.success && res.data ? res.data : []
+  const notifications =
+    notificationsRes.success && notificationsRes.data
+      ? notificationsRes.data
+      : []
+
+  const users =
+    usersRes.success && usersRes.data
+      ? usersRes.data.map((u) => ({
+          id: u.id,
+          first_name: u.first_name,
+          last_name: u.last_name,
+          email: u.email,
+        }))
+      : []
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
@@ -50,7 +71,7 @@ export default async function AdminNotificationsPage({ params }: PageProps) {
         </div>
       </div>
 
-      <AdminNotificationsTable notifications={notifications} />
+      <AdminNotificationsTable notifications={notifications} users={users} />
     </div>
   )
 }

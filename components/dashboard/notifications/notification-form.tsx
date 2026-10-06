@@ -11,6 +11,8 @@ import { useLocale } from "next-intl"
 import {
   BellIcon,
   CheckCircle2Icon,
+  CheckIcon,
+  ChevronsUpDownIcon,
   XIcon,
   AlertCircleIcon,
   UserIcon,
@@ -30,6 +32,19 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
   CustomSheet,
   CustomSheetClose,
   CustomSheetContent,
@@ -41,18 +56,21 @@ import {
 
 import { createNotificationSchema } from "@/lib/actions/notifications/schemas"
 import { createNotification } from "@/lib/actions/notifications/mutations/create-notification"
+import { cn } from "@/lib/utils"
 
 type NotificationFormValues = z.infer<typeof createNotificationSchema>
+
+export interface FormUserOption {
+  id: string
+  first_name?: string | null
+  last_name?: string | null
+  email?: string | null
+}
 
 interface NotificationFormProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
-  users?: {
-    id: string
-    first_name?: string | null
-    last_name?: string | null
-    email?: string | null
-  }[]
+  users?: FormUserOption[]
   onSuccess?: () => void
 }
 
@@ -72,28 +90,38 @@ export default function NotificationForm({
   const locale = useLocale()
   const side = getSide({ isMobile, locale })
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
+  const [userPickerOpen, setUserPickerOpen] = React.useState(false)
 
-const {
-  register,
-  control,
-  handleSubmit,
-  reset,
-  formState: { errors, isSubmitting },
-} = useForm({
-  resolver: zodResolver(createNotificationSchema),
-  defaultValues: {
-    userId: "",
-    title: "",
-    message: "",
-    type: "info" as const,
-    link: "",
-  },
-})
+  const {
+    register,
+    control,
+    handleSubmit,
+    setValue,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(createNotificationSchema),
+    defaultValues: {
+      userId: "",
+      title: "",
+      message: "",
+      type: "info" as const,
+      link: "",
+    },
+  })
+
+  const selectedUserId = useWatch({ control, name: "userId" })
   const messageValue = useWatch({ control, name: "message" }) || ""
+
+  const selectedUser = React.useMemo(
+    () => users.find((u) => u.id === selectedUserId),
+    [users, selectedUserId]
+  )
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       setErrorMessage(null)
+      setUserPickerOpen(false)
       reset()
     }
     onOpenChange(open)
@@ -186,46 +214,100 @@ const {
               </div>
 
               <FieldGroup className="space-y-4">
-                <Controller
-                  name="userId"
-                  control={control}
-                  render={({ field }) => (
-                    <Field data-invalid={Boolean(errors.userId)}>
-                      <FieldLabel htmlFor="notif-user" className="text-xs">
-                        Target User <span className="text-destructive">*</span>
-                      </FieldLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
+                {/* حقل اختيار المستخدم المحدث بنظام القائمة القابلة للبحث */}
+                <Field data-invalid={Boolean(errors.userId)}>
+                  <FieldLabel htmlFor="notif-user-trigger" className="text-xs">
+                    Target User <span className="text-destructive">*</span>
+                  </FieldLabel>
+                  <Popover
+                    open={userPickerOpen}
+                    onOpenChange={setUserPickerOpen}
+                  >
+                    <PopoverTrigger asChild>
+                      <Button
+                        id="notif-user-trigger"
+                        type="button"
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={userPickerOpen}
+                        className={cn(
+                          "h-8 w-full justify-between text-xs font-normal",
+                          !selectedUserId && "text-muted-foreground"
+                        )}
                       >
-                        <SelectTrigger id="notif-user" className="h-8 text-xs">
-                          <SelectValue placeholder="Select target user..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {users.map((u) => {
-                            const fullName = [u.first_name, u.last_name]
-                              .filter(Boolean)
-                              .join(" ")
-                            return (
-                              <SelectItem
-                                key={u.id}
-                                value={u.id}
-                                className="text-xs"
-                              >
-                                {fullName || u.email || u.id}
-                              </SelectItem>
-                            )
-                          })}
-                        </SelectContent>
-                      </Select>
-                      {errors.userId && (
-                        <p className="text-[11px] text-destructive">
-                          {errors.userId.message}
-                        </p>
-                      )}
-                    </Field>
+                        <span className="truncate">
+                          {selectedUser
+                            ? [selectedUser.first_name, selectedUser.last_name]
+                                .filter(Boolean)
+                                .join(" ") ||
+                              selectedUser.email ||
+                              selectedUser.id
+                            : "Select target user..."}
+                        </span>
+                        <ChevronsUpDownIcon className="ms-2 size-3.5 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-[--radix-popover-trigger-width] p-0"
+                      align="start"
+                    >
+                      <Command>
+                        <CommandInput
+                          placeholder="Search user name or email..."
+                          className="text-xs"
+                        />
+                        <CommandList>
+                          <CommandEmpty className="p-3 text-center text-xs text-muted-foreground">
+                            {users.length === 0
+                              ? "No users found."
+                              : "No matching user."}
+                          </CommandEmpty>
+                          <CommandGroup>
+                            {users.map((u) => {
+                              const fullName = [u.first_name, u.last_name]
+                                .filter(Boolean)
+                                .join(" ")
+                              const isSelected = u.id === selectedUserId
+
+                              return (
+                                <CommandItem
+                                  key={u.id}
+                                  value={`${fullName} ${u.email ?? ""} ${u.id}`}
+                                  onSelect={() => {
+                                    setValue("userId", u.id, {
+                                      shouldValidate: true,
+                                    })
+                                    setUserPickerOpen(false)
+                                  }}
+                                  className="flex cursor-pointer items-center justify-between text-xs"
+                                >
+                                  <div className="flex flex-col truncate">
+                                    <span className="font-medium text-foreground">
+                                      {fullName || "User Account"}
+                                    </span>
+                                    {u.email && (
+                                      <span className="text-[10px] text-muted-foreground">
+                                        {u.email}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {isSelected && (
+                                    <CheckIcon className="ms-2 size-3.5 shrink-0 text-primary" />
+                                  )}
+                                </CommandItem>
+                              )
+                            })}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  {errors.userId && (
+                    <p className="text-[11px] text-destructive">
+                      {errors.userId.message}
+                    </p>
                   )}
-                />
+                </Field>
 
                 <Controller
                   name="type"

@@ -1,107 +1,158 @@
+/**
+ * @file lib/actions/notifications/mutations/create-notification.ts
+ * @description Server Actions to insert single and broadcast notifications into Supabase.
+ * Enforces Zod schema parsing, permission verification, database insertion, and cache revalidation.
+ */
+
 "use server"
 
-import { createClient } from "@/lib/database/supabase/server"
+import { revalidatePath } from "next/cache"
+import { createServerClient } from "@/lib/database/supabase/server"
+import { ApiResult } from "@/lib/database/types/utils"
 import {
   createNotificationSchema,
   broadcastNotificationSchema,
 } from "../schemas"
-import { z } from "zod"
-import { revalidatePath } from "next/cache"
+import { hasPermission, PERMISSIONS } from "../../role"
 
-// Create a single notification for a specific user
+// ============================================================================
+// Single Notification Action
+// ============================================================================
+
 export async function createNotification(
-  input: z.infer<typeof createNotificationSchema>
-) {
-  const result = createNotificationSchema.safeParse(input)
-  if (!result.success) {
-    return { success: false, error: result.error.issues[0].message }
+  payload: unknown
+): Promise<ApiResult<Notification | null>> {
+  // 1. Validate payload against Zod schema
+  const validation = createNotificationSchema.safeParse(payload)
+  if (!validation.success) {
+    return {
+      success: false,
+      error: "VALIDATION_ERROR",
+      details: validation.error.flatten().fieldErrors,
+    }
   }
 
-  const supabase = await createClient()
+  const safeData = validation.data
 
-  // Optional: Check if the current user is authorized to send notifications
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser()
-
-  if (userError || !user) {
-    return { success: false, error: "Unauthorized" }
+  // 2. Perform permission check
+  const canSend = await hasPermission(PERMISSIONS.SEND_NOTIFICATION)
+  if (!canSend) {
+    return {
+      success: false,
+      error: "PERMISSION_DENIED",
+    }
   }
 
-  const { error } = await supabase.from("notifications").insert({
-    user_id: result.data.userId,
-    title: result.data.title,
-    message: result.data.message,
-    type: result.data.type,
-    link: result.data.link || null,
-  })
+  // 3. Initialize Supabase client
+  const supabase = await createServerClient()
+
+  // 4. Insert notification record into database
+  const { data: newNotification, error } = await supabase
+    .from("notifications")
+    .insert({
+      user_id: safeData.userId,
+      title: safeData.title,
+      message: safeData.message,
+      type: safeData.type,
+      link: safeData.link || null,
+    })
+    .select()
+    .single()
 
   if (error) {
-    return { success: false, error: error.message }
+    return {
+      success: false,
+      error: "CREATE_NOTIFICATION_ERROR",
+      details: { database: [error.message] },
+    }
   }
 
-  return { success: true }
+  // 5. Invalidate stale cache paths
+  revalidatePath("/", "layout")
+
+  return {
+    success: true,
+    data: newNotification as Notification,
+  }
 }
 
-// Broadcast notifications to all users or users with a specific role
+// ============================================================================
+// Broadcast Notification Action
+// ============================================================================
+
 export async function broadcastNotification(
-  input: z.infer<typeof broadcastNotificationSchema>
-) {
-  const result = broadcastNotificationSchema.safeParse(input)
-  if (!result.success) {
-    return { success: false, error: result.error.issues[0].message }
+  payload: unknown
+): Promise<ApiResult<{ count: number }>> {
+  // 1. Validate payload against Zod schema
+  const validation = broadcastNotificationSchema.safeParse(payload)
+  if (!validation.success) {
+    return {
+      success: false,
+      error: "VALIDATION_ERROR",
+      details: validation.error.flatten().fieldErrors,
+    }
   }
 
-  const supabase = await createClient()
+  const safeData = validation.data
 
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser()
-
-  if (userError || !user) {
-    return { success: false, error: "Unauthorized" }
+  // 2. Perform permission check
+  const canBroadcast = await hasPermission(PERMISSIONS.CREATE_NOTIFICATION)
+  if (!canBroadcast) {
+    return {
+      success: false,
+      error: "PERMISSION_DENIED",
+    }
   }
 
-  const { title, message, type, link, targetType, roleName } = result.data
+  // 3. Initialize Supabase client
+  const supabase = await createServerClient()
 
+  // 4. Resolve target user IDs
   let targetUserIds: string[] = []
 
-  if (targetType === "all") {
-    // Fetch all users from auth or profiles table (assuming profiles table has user IDs)
+  if (safeData.targetType === "all") {
     const { data: profiles, error: profilesError } = await supabase
       .from("profiles")
       .select("id")
 
     if (profilesError) {
-      return { success: false, error: "Failed to fetch target users" }
+      return {
+        success: false,
+        error: "FETCH_TARGET_USERS_ERROR",
+        details: { database: [profilesError.message] },
+      }
     }
     targetUserIds = profiles?.map((p) => p.id) || []
-  } else if (targetType === "role" && roleName) {
-    // Fetch users having the specified role
+  } else if (safeData.targetType === "role" && safeData.roleName) {
     const { data: roleMembers, error: roleError } = await supabase
       .from("user_roles")
       .select("user_id")
-      .eq("role", roleName)
+      .eq("role", safeData.roleName)
 
     if (roleError) {
-      return { success: false, error: "Failed to fetch users by role" }
+      return {
+        success: false,
+        error: "FETCH_ROLE_USERS_ERROR",
+        details: { database: [roleError.message] },
+      }
     }
     targetUserIds = roleMembers?.map((r) => r.user_id) || []
   }
 
   if (targetUserIds.length === 0) {
-    return { success: false, error: "No target users found for this broadcast" }
+    return {
+      success: false,
+      error: "NO_TARGET_USERS_FOUND",
+    }
   }
 
-  // Prepare batch insert payload
+  // 5. Prepare batch insert records
   const notificationsPayload = targetUserIds.map((userId) => ({
     user_id: userId,
-    title,
-    message,
-    type,
-    link: link || null,
+    title: safeData.title,
+    message: safeData.message,
+    type: safeData.type,
+    link: safeData.link || null,
   }))
 
   const { error: insertError } = await supabase
@@ -109,9 +160,18 @@ export async function broadcastNotification(
     .insert(notificationsPayload)
 
   if (insertError) {
-    return { success: false, error: insertError.message }
+    return {
+      success: false,
+      error: "BROADCAST_INSERT_ERROR",
+      details: { database: [insertError.message] },
+    }
   }
 
-  revalidatePath("/")
-  return { success: true, count: targetUserIds.length }
+  // 6. Invalidate stale cache paths
+  revalidatePath("/", "layout")
+
+  return {
+    success: true,
+    data: { count: targetUserIds.length },
+  }
 }

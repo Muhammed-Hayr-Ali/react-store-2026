@@ -20,66 +20,40 @@ export const PERMISSIONS = {
   UPDATE_CATEGORY: "update_category",
   DELETE_CATEGORY: "delete_category",
 
-  // --- 3. Products & Inventory Management ---
-  CREATE_PRODUCT: "create_product",
-  UPDATE_PRODUCT: "update_product",
-  DELETE_PRODUCT: "delete_product",
-  MANAGE_INVENTORY: "manage_inventory",
-
-  // --- 4. Orders & Fulfillment ---
-  VIEW_ORDERS: "view_orders",
-  UPDATE_ORDER_STATUS: "update_order_status",
-  CANCEL_ORDER: "cancel_order",
-  PROCESS_REFUND: "process_refund",
-
-  // --- 5. Marketing, Coupons & Discounts ---
+  // --- 3. Marketing, Coupons & Discounts ---
   CREATE_FLASH_SALE: "create_flash_sale",
   UPDATE_FLASH_SALE: "update_flash_sale",
   DELETE_FLASH_SALE: "delete_flash_sale",
-  CREATE_COUPON: "create_coupon",
-  UPDATE_COUPON: "update_coupon",
-  DELETE_COUPON: "delete_coupon",
 
-  // --- 6. Reviews & Customer Feedback ---
-  CREATE_REVIEW: "create_review",
+  // --- 4. Notifications ---
+  CREATE_NOTIFICATION: "create_notification",
+  UPDATE_NOTIFICATION: "update_notification",
+  ASSIGN_NOTIFICATION: "assign_notification",
+  DELETE_NOTIFICATION: "delete_notification",
+  SEND_NOTIFICATION: "send_notification",
+
+  // --- 5. Products & Images Management ---
+  CREATE_PRODUCT: "create_product",
+  UPDATE_PRODUCT: "update_product",
+  DELETE_PRODUCT: "delete_product",
+
+  // --- 6. Reviews Management ---
   UPDATE_REVIEW: "update_review",
   DELETE_REVIEW: "delete_review",
-  MODERATE_REVIEWS: "moderate_reviews",
 
-  // --- 7. Moderation & User Reports ---
-  CREATE_REPORT: "create_report",
-  MANAGE_REPORTS: "manage_reports",
-  DELETE_REPORT: "delete_report",
-
-  // --- 8. Shipping & Delivery Methods ---
-  MANAGE_SHIPPING_ZONES: "manage_shipping_zones",
-  MANAGE_SHIPPING_RATES: "manage_shipping_rates",
-
-  // --- 9. Payments, Wallet & Transactions ---
-  VIEW_TRANSACTIONS: "view_transactions",
-  MANAGE_WALLET: "manage_wallet",
-  MANAGE_PAYMENT_GATEWAYS: "manage_payment_gateways",
-
-  // --- 10. Analytics & Reporting ---
-  VIEW_ANALYTICS: "view_analytics",
-  EXPORT_REPORTS: "export_reports",
-
-  // --- 11. Store & Platform Settings ---
-  MANAGE_STORE_SETTINGS: "manage_store_settings",
-  MANAGE_BANNERS: "manage_banners",
-  MANAGE_NOTIFICATIONS: "manage_notifications",
-
-  // --- 12. Roles & Access Control ---
-  CREATE_ROLE: "create_role",
-  UPDATE_ROLE: "update_role",
-  ASSIGN_ROLE: "assign_role",
-  REMOVE_ROLE: "remove_role",
-
-  // --- 13. Users & Access Control ---
+  // --- 7. Users & Profiles Management ---
   CREATE_USER: "create_user",
   UPDATE_USER: "update_user",
-  ASSIGN_USER: "assign_user",
-  DELETE_USER: "remove_user",
+  DELETE_USER: "delete_user",
+
+  // --- 7. Roles & Permissions Management ---
+  CREATE_ROLE: "create_role",
+  UPDATE_ROLE: "update_role",
+  DELETE_ROLE: "delete_role",
+  MANAGE_ROLES: "manage_roles",
+  ASSIGN_ROLE: "assign_role",
+  VIEW_USER_ROLES: "view_user_roles",
+
 } as const
 
 export type AppPermission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]

@@ -110,9 +110,8 @@ export default function BroadcastForm({
     const result = await broadcastNotification(payload)
 
     if (result.success) {
-      toast.success(
-        `Broadcast sent successfully to ${result.count || 0} users!`
-      )
+      const deliveredCount = result.data?.count ?? 0
+      toast.success(`Broadcast sent successfully to ${deliveredCount} users!`)
       onSuccess?.()
       handleOpenChange(false)
       router.refresh()

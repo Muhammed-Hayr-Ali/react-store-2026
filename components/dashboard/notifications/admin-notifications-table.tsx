@@ -19,18 +19,25 @@ import {
   type SortingState,
 } from "@tanstack/react-table"
 import {
+  AlertCircleIcon,
+  AlertTriangleIcon,
+  CheckCircle2Icon,
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronsLeftIcon,
   ChevronsRightIcon,
   Columns3Icon,
   ExternalLinkIcon,
+  EyeIcon,
   FilterIcon,
+  InfoIcon,
+  LayersIcon,
   MegaphoneIcon,
   MoreVerticalIcon,
   PlusIcon,
   SearchIcon,
   Trash2Icon,
+  UsersIcon,
   XIcon,
 } from "lucide-react"
 
@@ -66,6 +73,13 @@ import { AdminNotificationRecord } from "@/lib/actions/notifications/types"
 import DeleteNotificationDialog from "./delete-notification-dialog"
 import NotificationForm from "./notification-form"
 import BroadcastForm from "./broadcast-form"
+import { NotificationDetailsDialog } from "./notification-details-dialog"
+
+interface DisplayNotificationRecord extends AdminNotificationRecord {
+  isBroadcastGroup?: boolean
+  recipientCount?: number
+  groupedIds?: string[]
+}
 
 const features = tableFeatures({
   columnFilteringFeature,
@@ -79,7 +93,7 @@ const features = tableFeatures({
 
 const columnHelper = createColumnHelper<
   typeof features,
-  AdminNotificationRecord
+  DisplayNotificationRecord
 >()
 
 const HIDEABLE_COLUMNS = ["type", "is_read", "recipient", "created_at"]
@@ -102,6 +116,21 @@ function formatTime(isoString: string): string {
   const d = new Date(isoString)
   if (isNaN(d.getTime())) return ""
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`
+}
+
+// دالة إرجاع الأيقونة واللون المخصص لكل نوع
+function renderTypeIcon(type: string) {
+  switch (type) {
+    case "success":
+      return <CheckCircle2Icon className="size-4 shrink-0 text-emerald-500" />
+    case "warning":
+      return <AlertTriangleIcon className="size-4 shrink-0 text-amber-500" />
+    case "error":
+      return <AlertCircleIcon className="size-4 shrink-0 text-rose-500" />
+    case "info":
+    default:
+      return <InfoIcon className="size-4 shrink-0 text-blue-500" />
+  }
 }
 
 interface AdminNotificationsTableProps {
@@ -128,22 +157,69 @@ export function AdminNotificationsTable({
   const [currentTab, setCurrentTab] = React.useState<string>("all")
   const [typeFilter, setTypeFilter] = React.useState<string>("all")
   const [searchQuery, setSearchQuery] = React.useState("")
+  const [isGrouped, setIsGrouped] = React.useState<boolean>(true)
 
+  // حالات الديالوجات والشيتات
   const [itemToDelete, setItemToDelete] =
-    React.useState<AdminNotificationRecord | null>(null)
-
-  // حالات فتح الشيتات
+    React.useState<DisplayNotificationRecord | null>(null)
+  const [selectedForDetails, setSelectedForDetails] =
+    React.useState<DisplayNotificationRecord | null>(null)
   const [isIndividualOpen, setIsIndividualOpen] = React.useState(false)
   const [isBroadcastOpen, setIsBroadcastOpen] = React.useState(false)
-
 
   if (initialData !== prevInitialData) {
     setPrevInitialData(initialData)
     setData(initialData)
   }
 
+  // تجميع الإشعارات المتطابقة
+  const processedData = React.useMemo<DisplayNotificationRecord[]>(() => {
+    if (!isGrouped) {
+      return data.map((item) => ({
+        ...item,
+        isBroadcastGroup: false,
+        recipientCount: 1,
+        groupedIds: [item.id],
+      }))
+    }
+
+    const groupsMap = new Map<string, AdminNotificationRecord[]>()
+
+    data.forEach((item) => {
+      const minuteStamp = item.created_at ? item.created_at.slice(0, 16) : ""
+      const key = `${item.title}__${item.message}__${item.type}__${minuteStamp}`
+
+      if (!groupsMap.has(key)) {
+        groupsMap.set(key, [])
+      }
+      groupsMap.get(key)!.push(item)
+    })
+
+    const result: DisplayNotificationRecord[] = []
+    groupsMap.forEach((records) => {
+      const first = records[0]
+      if (records.length > 1) {
+        result.push({
+          ...first,
+          isBroadcastGroup: true,
+          recipientCount: records.length,
+          groupedIds: records.map((r) => r.id),
+        })
+      } else {
+        result.push({
+          ...first,
+          isBroadcastGroup: false,
+          recipientCount: 1,
+          groupedIds: [first.id],
+        })
+      }
+    })
+
+    return result
+  }, [data, isGrouped])
+
   const filteredData = React.useMemo(() => {
-    return data.filter((item) => {
+    return processedData.filter((item) => {
       if (currentTab === "read" && !item.is_read) return false
       if (currentTab === "unread" && item.is_read) return false
 
@@ -169,7 +245,7 @@ export function AdminNotificationsTable({
         email.includes(q)
       )
     })
-  }, [data, currentTab, typeFilter, searchQuery])
+  }, [processedData, currentTab, typeFilter, searchQuery])
 
   const unreadCount = React.useMemo(
     () => data.filter((n) => !n.is_read).length,
@@ -228,9 +304,29 @@ export function AdminNotificationsTable({
           id: "title",
           header: "Title",
           cell: ({ row }) => (
-            <div className="max-w-xs min-w-0 sm:max-w-sm md:max-w-md">
-              <div className="font-semibold text-foreground">
-                {row.original.title}
+            <div
+              onClick={() => setSelectedForDetails(row.original)}
+              className="group flex max-w-xs min-w-0 cursor-pointer items-center gap-2.5 sm:max-w-sm md:max-w-md"
+            >
+              {/* أيقونة النوع */}
+              <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted/60">
+                {renderTypeIcon(row.original.type)}
+              </div>
+
+              {/* العنوان وزر البث (نص الرسالة مخفي الآن ليبقى الجدول نظيفاً) */}
+              <div className="flex items-center gap-1.5 truncate">
+                <span className="truncate font-semibold text-foreground transition-colors group-hover:text-primary">
+                  {row.original.title}
+                </span>
+                {row.original.isBroadcastGroup && (
+                  <Badge
+                    variant="secondary"
+                    className="shrink-0 gap-1 px-1.5 py-0 text-[10px] font-normal"
+                  >
+                    <MegaphoneIcon className="size-2.5" />
+                    Broadcast
+                  </Badge>
+                )}
               </div>
             </div>
           ),
@@ -250,23 +346,41 @@ export function AdminNotificationsTable({
         columnHelper.accessor("is_read", {
           id: "is_read",
           header: "Status",
-          cell: ({ row }) => (
-            <span
-              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-                row.original.is_read
-                  ? "bg-muted text-muted-foreground"
-                  : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-              }`}
-            >
-              {row.original.is_read ? "Read" : "Unread"}
-            </span>
-          ),
+          cell: ({ row }) => {
+            if (row.original.isBroadcastGroup) {
+              return (
+                <span className="text-xs text-muted-foreground">Grouped</span>
+              )
+            }
+            return (
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                  row.original.is_read
+                    ? "bg-muted text-muted-foreground"
+                    : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                }`}
+              >
+                {row.original.is_read ? "Read" : "Unread"}
+              </span>
+            )
+          },
         }),
 
         columnHelper.display({
           id: "recipient",
           header: "Recipient",
           cell: ({ row }) => {
+            if (row.original.isBroadcastGroup) {
+              return (
+                <div className="flex items-center gap-1.5 text-xs">
+                  <span className="inline-flex items-center gap-1 rounded-md bg-secondary/80 px-2 py-1 font-medium text-foreground">
+                    <UsersIcon className="size-3 text-primary" />
+                    <span>{row.original.recipientCount} Recipients</span>
+                  </span>
+                </div>
+              )
+            }
+
             const profile = row.original.profiles
             const fullName = [profile?.first_name, profile?.last_name]
               .filter(Boolean)
@@ -318,6 +432,13 @@ export function AdminNotificationsTable({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-44 text-xs">
+                  <DropdownMenuItem
+                    onClick={() => setSelectedForDetails(row.original)}
+                    className="flex cursor-pointer items-center gap-2"
+                  >
+                    <EyeIcon className="size-3.5" />
+                    View Details
+                  </DropdownMenuItem>
                   {row.original.link && (
                     <DropdownMenuItem asChild>
                       <Link
@@ -335,7 +456,9 @@ export function AdminNotificationsTable({
                     className="flex cursor-pointer items-center gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
                   >
                     <Trash2Icon className="size-3.5" />
-                    Delete
+                    {row.original.isBroadcastGroup
+                      ? "Delete Broadcast"
+                      : "Delete"}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -367,33 +490,48 @@ export function AdminNotificationsTable({
   return (
     <>
       <div className="flex w-full flex-col justify-start gap-4">
-        {/* شريط الإجراءات والبحث */}
-        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-1 items-center gap-2">
-            <div className="relative min-w-0 flex-1">
-              <SearchIcon className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search notifications..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value)
+        <div className="flex w-full items-center gap-2">
+          {/* حقل البحث */}
+          <div className="relative min-w-0 flex-1">
+            <SearchIcon className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search notifications..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value)
+                table.setPageIndex(0)
+              }}
+              className="h-8 w-full ps-8 pe-8 text-xs"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery("")
                   table.setPageIndex(0)
                 }}
-                className="h-8 w-full ps-8 pe-8 text-xs"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchQuery("")
-                    table.setPageIndex(0)
-                  }}
-                  className="absolute inset-e-2 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-foreground"
-                >
-                  <XIcon className="size-3.5" />
-                </button>
-              )}
-            </div>
+                className="absolute inset-e-2 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-foreground"
+              >
+                <XIcon className="size-3.5" />
+              </button>
+            )}
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
+            {/* زر التجميع الذكي */}
+            <Button
+              type="button"
+              variant={isGrouped ? "secondary" : "outline"}
+              size="sm"
+              onClick={() => setIsGrouped((prev) => !prev)}
+              className="h-8 gap-1.5 text-xs"
+              title="Group broadcast notifications"
+            >
+              <LayersIcon className="size-3.5" />
+              <span className="hidden sm:inline">
+                {isGrouped ? "Grouped" : "Individual"}
+              </span>
+            </Button>
 
             {/* فلتر التبويب (Read / Unread / All) */}
             <div className="hidden h-8 items-center overflow-hidden rounded-md border border-input bg-background p-0.5 sm:inline-flex">
@@ -414,7 +552,7 @@ export function AdminNotificationsTable({
                   variant="secondary"
                   className="ms-1.5 px-1.5 py-0 text-[10px]"
                 >
-                  {data.length}
+                  {processedData.length}
                 </Badge>
               </button>
 
@@ -461,7 +599,7 @@ export function AdminNotificationsTable({
               </button>
             </div>
 
-            {/* زر فلترة النوع */}
+            {/* فلتر النوع */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -492,7 +630,7 @@ export function AdminNotificationsTable({
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* زر الأعمدة */}
+            {/* زر إظهار/إخفاء الأعمدة */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -522,29 +660,50 @@ export function AdminNotificationsTable({
                   ))}
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
 
-          {/* أزرار الإجراءات لفتح الشيتات */}
-          <div className="flex items-center gap-2">
+            {/* أزرار الإجراءات */}
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => setIsBroadcastOpen(true)}
+              className="size-8 sm:hidden"
+              title="Broadcast Notification"
+            >
+              <MegaphoneIcon className="size-3.5" />
+              <span className="sr-only">Broadcast Notification</span>
+            </Button>
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => setIsBroadcastOpen(true)}
-              className="h-8 gap-1.5 text-xs"
+              className="hidden h-8 gap-1.5 px-3 text-xs sm:inline-flex"
             >
               <MegaphoneIcon className="size-3.5" />
-              Broadcast
+              <span>Broadcast</span>
             </Button>
 
             <Button
               type="button"
-              size="sm"
+              variant="default"
+              size="icon"
               onClick={() => setIsIndividualOpen(true)}
-              className="h-8 gap-1.5 text-xs shadow-xs"
+              className="size-8 sm:hidden"
+              title="New Notification"
             >
               <PlusIcon className="size-3.5" />
-              New Notification
+              <span className="sr-only">New Notification</span>
+            </Button>
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
+              onClick={() => setIsIndividualOpen(true)}
+              className="hidden h-8 gap-1.5 px-3 text-xs sm:inline-flex"
+            >
+              <PlusIcon className="size-3.5" />
+              <span>New Notification</span>
             </Button>
           </div>
         </div>
@@ -676,13 +835,25 @@ export function AdminNotificationsTable({
         </div>
       </div>
 
+      {/* دايلوج عرض تفاصيل الإشعار */}
+      <NotificationDetailsDialog
+        isOpen={Boolean(selectedForDetails)}
+        onOpenChange={(open) => !open && setSelectedForDetails(null)}
+        notification={selectedForDetails}
+      />
+
       {/* دايلوج تأكيد الحذف */}
       <DeleteNotificationDialog
         isOpen={Boolean(itemToDelete)}
         onOpenChange={(open) => !open && setItemToDelete(null)}
         item={itemToDelete}
         onSuccess={(deletedId) => {
-          setData((prev) => prev.filter((item) => item.id !== deletedId))
+          if (itemToDelete?.groupedIds && itemToDelete.groupedIds.length > 0) {
+            const idsToDelete = new Set(itemToDelete.groupedIds)
+            setData((prev) => prev.filter((item) => !idsToDelete.has(item.id)))
+          } else {
+            setData((prev) => prev.filter((item) => item.id !== deletedId))
+          }
           setItemToDelete(null)
         }}
       />
