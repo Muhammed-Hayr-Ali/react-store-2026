@@ -104,7 +104,6 @@ export async function updateFlashSale(
   }
 
   // 6. Invalidate caches
-  revalidatePath(`/deals/${data.slug}`)
   revalidatePath("/", "layout")
 
   return {

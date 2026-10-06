@@ -102,7 +102,6 @@ export function FlashSaleForm({
   availableProducts,
   initialData,
   saleId,
-  onSuccessRedirect = appRoutes.dashboard.admin.flashSales,
 }: FlashSaleFormProps) {
   const router = useRouter()
   const [serverError, setServerError] = React.useState<string | null>(null)
@@ -240,8 +239,8 @@ export function FlashSaleForm({
       return
     }
 
-    router.push(onSuccessRedirect)
-    router.refresh()
+      router.push(appRoutes.dashboard.admin.flashSales)
+      router.refresh()
   }
 
   return (
