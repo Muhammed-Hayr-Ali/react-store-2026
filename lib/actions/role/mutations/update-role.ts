@@ -30,6 +30,11 @@ export async function updateRole(
   // 2. Validate input schema
   const validation = updateRolePermissionsSchema.safeParse(payload)
   if (!validation.success) {
+    console.error(
+      "Validation Error Details:",
+      validation.error.flatten().fieldErrors
+    ) // أضف هذا السطر
+
     return {
       success: false,
       error: "VALIDATION_ERROR",

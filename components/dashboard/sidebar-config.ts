@@ -12,6 +12,7 @@ import {
 } from "lucide-react"
 import { appRoutes } from "@/lib/config/app-routes"
 import { PERMISSIONS, AppPermission } from "@/lib/actions/role"
+import { ROLES } from "@/lib/actions/role/types"
 
 export interface SidebarItem {
   title: string
@@ -24,7 +25,6 @@ export interface SidebarItem {
     requiredPermission?: AppPermission
   }[]
 }
-import { ROLES } from "@/lib/actions/role/types"
 
 interface SidebarConfig {
   navMain: SidebarItem[]
@@ -34,37 +34,16 @@ const userSidebarConfig: SidebarConfig = {
   navMain: [
     { title: "Overview", url: appRoutes.dashboard.home, icon: LayoutDashboard },
     { title: "My Account", url: appRoutes.dashboard.account, icon: User },
-   
   ],
 }
-
-
-  // VIEW_DASHBOARD: "view_dashboard",
-  // VIEW_OVERVIEW: "view_overview",
-  // VIEW_PRODUCTS: "view_products",
-  // VIEW_FLASH_SALES: "view_flash_sales",
-  // VIEW_USERS_MANAGEMENT: "view_users_management",
-  // VIEW_REPORTS_AND_ISSUES: "view_reports_and_issues",
-  // VIEW_ROLES_AND_PERMISSIONS: "view_roles_and_permissions",
-  // VIEW_STAFF_ACCESS: "view_staff_access",
-  // VIEW_NOTIFICATIONS_MANAGEMENT: "view_notifications_management",
-
-
-
 
 const adminSidebarConfig: SidebarConfig = {
   navMain: [
     {
-      title: "Dashboard",
-      url: appRoutes.dashboard.home,
-      icon: LayoutDashboard,
-      requiredPermission: PERMISSIONS.VIEW_DASHBOARD,
-    },
-    {
       title: "Overview",
       url: appRoutes.dashboard.admin.home,
-      icon: Package,
-      requiredPermission: PERMISSIONS.VIEW_OVERVIEW,
+      icon: LayoutDashboard,
+      requiredPermission: PERMISSIONS.VIEW_DASHBOARD,
     },
     {
       title: "Products",
@@ -82,19 +61,19 @@ const adminSidebarConfig: SidebarConfig = {
       title: "Users Management",
       url: appRoutes.dashboard.admin.users,
       icon: Users,
-      requiredPermission: PERMISSIONS.VIEW_USERS_MANAGEMENT,
+      requiredPermission: PERMISSIONS.VIEW_USERS,
     },
     {
-      title: "Reports and Issues",
+      title: "Reports & Issues",
       url: appRoutes.dashboard.admin.reports,
       icon: FileSpreadsheet,
-      requiredPermission: PERMISSIONS.VIEW_REPORTS_AND_ISSUES,
+      requiredPermission: PERMISSIONS.VIEW_REPORTS,
     },
     {
-      title: "Roles and Permissions",
+      title: "Roles & Permissions",
       url: appRoutes.dashboard.admin.roles,
       icon: ShieldCheck,
-      requiredPermission: PERMISSIONS.VIEW_ROLES_AND_PERMISSIONS,
+      requiredPermission: PERMISSIONS.VIEW_USER_ROLES,
     },
     {
       title: "Staff Access",
@@ -106,12 +85,8 @@ const adminSidebarConfig: SidebarConfig = {
       title: "Notifications Management",
       url: appRoutes.dashboard.admin.notifications,
       icon: Bell,
-      requiredPermission: PERMISSIONS.VIEW_NOTIFICATIONS_MANAGEMENT,
+      requiredPermission: PERMISSIONS.VIEW_NOTIFICATIONS,
     },
-   
-
-   
- 
   ],
 }
 

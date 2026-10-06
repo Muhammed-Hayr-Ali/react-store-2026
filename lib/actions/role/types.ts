@@ -10,19 +10,16 @@ export const ROLES = {
 export type AppRole = (typeof ROLES)[keyof typeof ROLES]
 
 export const PERMISSIONS = {
-
-  // --- 0. General ---
+  // --- 0. General & Dashboard Views (أذونات العرض القياسية) ---
   VIEW_DASHBOARD: "view_dashboard",
-  VIEW_OVERVIEW: "view_overview",
   VIEW_PRODUCTS: "view_products",
   VIEW_FLASH_SALES: "view_flash_sales",
-  VIEW_USERS_MANAGEMENT: "view_users_management",
-  VIEW_REPORTS_AND_ISSUES: "view_reports_and_issues",
-  VIEW_ROLES_AND_PERMISSIONS: "view_roles_and_permissions",
+  VIEW_USERS: "view_users",
+  VIEW_REPORTS: "view_reports",
+  VIEW_USER_ROLES: "view_user_roles",
   VIEW_STAFF_ACCESS: "view_staff_access",
-  VIEW_NOTIFICATIONS_MANAGEMENT: "view_notifications_management",
+  VIEW_NOTIFICATIONS: "view_notifications",
 
-  
   // --- 1. Brands Management ---
   CREATE_BRAND: "create_brand",
   UPDATE_BRAND: "update_brand",
@@ -65,7 +62,6 @@ export const PERMISSIONS = {
   CREATE_REPORT: "create_report",
   UPDATE_REPORT: "update_report",
   DELETE_REPORT: "delete_report",
-  VIEW_REPORTS: "view_reports",
   MANAGE_REPORTS: "manage_reports",
 
   // --- 9. Roles & Permissions Management ---
@@ -74,7 +70,6 @@ export const PERMISSIONS = {
   DELETE_ROLE: "delete_role",
   MANAGE_ROLES: "manage_roles",
   ASSIGN_ROLE: "assign_role",
-  VIEW_USER_ROLES: "view_user_roles",
   REMOVE_ROLE: "remove_role",
 } as const
 
@@ -84,3 +79,5 @@ export const roleSchema = z.object({
   role: z.string(),
   permissions: z.array(z.string()),
 })
+
+export type UserRolePermissions = z.infer<typeof roleSchema>
