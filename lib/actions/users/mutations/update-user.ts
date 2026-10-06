@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { createClient } from "@/lib/database/supabase/server"
 import { ActionResponse } from "../types"
 import { hasPermission, PERMISSIONS } from "../../role"
+import { appRoutes } from "@/lib/config/app-routes"
 
 interface UpdateUserParams {
   userId: string
@@ -43,7 +44,7 @@ export async function updateUser(
       return { success: false, error: error.message }
     }
 
-    revalidatePath("/dashboard/users")
+    revalidatePath(appRoutes.dashboard.admin.users)
     return { success: true }
   } catch (err) {
     console.error("Unexpected error in updateUser:", err)

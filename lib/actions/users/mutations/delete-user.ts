@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { ActionResponse } from "../types"
 import { hasPermission, PERMISSIONS } from "../../role"
 import { createAdminClient } from "@/lib/database/supabase/admin"
+import { appRoutes } from "@/lib/config/app-routes"
 
 export async function deleteUser(userId: string): Promise<ActionResponse> {
   try {
@@ -36,7 +37,7 @@ export async function deleteUser(userId: string): Promise<ActionResponse> {
       console.error("Error deleting user profile:", profileError.message)
     }
 
-    revalidatePath("/dashboard/users")
+    revalidatePath(appRoutes.dashboard.admin.users)
     return { success: true }
   } catch (err) {
     console.error("Unexpected error in deleteUser:", err)
