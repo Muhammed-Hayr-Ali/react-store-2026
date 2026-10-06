@@ -10,12 +10,13 @@ export const appRoutes = {
   dashboard: {
     home: "/dashboard",
     account: "/dashboard/account",
-    banned: "/banned",
+    notifications: "/dashboard/notifications",
 
     // مسارات الإدارة المحمية والمموهة (Admin Panel)
     admin: {
       home: "/dashboard/x9k2-panel",
       products: "/dashboard/x9k2-panel/products",
+      create_products: "/dashboard/x9k2-panel/products/create",
       flashSales: "/dashboard/x9k2-panel/flash-sales",
       notifications: "/dashboard/x9k2-panel/notifications",
       reports: "/dashboard/x9k2-panel/reports",

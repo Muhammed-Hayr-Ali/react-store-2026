@@ -1,7 +1,4 @@
-"use client"
-
 import * as React from "react"
-
 import { NavMain } from "@/components/dashboard/nav-main"
 import { StoreSwitcher } from "@/components/dashboard/store-switcher"
 import {
@@ -11,20 +8,20 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { CurrentUser } from "@/lib/actions/utils/profile"
+import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 import { NavUser } from "./nav-user"
-import { sidebarConfig } from "./sidebar-config"
 
-interface AppSidebarProps {
-  currentUser: CurrentUser | null
+
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   side?: "right" | "left" | undefined
 }
 
-export function AppSidebar({
-  currentUser,
-  side,
-  ...props
-}: React.ComponentProps<typeof Sidebar> & AppSidebarProps) {
+export async function AppSidebar({ side, ...props }: AppSidebarProps) {
+  // جلب ملخص المستخدم الشامل بطلب RPC واحد متكامل
+  const currentUser = await getCurrentUser()
+
+  const role = currentUser?.role
+
   const user = {
     name:
       [currentUser?.first_name, currentUser?.last_name]
@@ -36,13 +33,14 @@ export function AppSidebar({
     avatar: currentUser?.profile_image || "/images/avatar.jpg",
   }
 
+
   return (
     <Sidebar collapsible="icon" {...props} side={side}>
       <SidebarHeader>
         <StoreSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={sidebarConfig.navMain} />
+        <NavMain role={role} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />

@@ -16,6 +16,11 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     label: "Brands Management",
     permissions: [
       {
+        key: PERMISSIONS.VIEW_BRANDS,
+        label: "View Brands",
+        description: "Inspect brand listings and manufacturers",
+      },
+      {
         key: PERMISSIONS.CREATE_BRAND,
         label: "Create Brand",
         description: "Register new brands and manufacturers",
@@ -37,10 +42,14 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     label: "Categories Management",
     permissions: [
       {
+        key: PERMISSIONS.VIEW_CATEGORIES,
+        label: "View Categories",
+        description: "Browse category hierarchy trees",
+      },
+      {
         key: PERMISSIONS.CREATE_CATEGORY,
         label: "Create Category",
-        description:
-          "Define new categories and hierarchical parent-child links",
+        description: "Define new categories and hierarchical parent-child links",
       },
       {
         key: PERMISSIONS.UPDATE_CATEGORY,
@@ -58,6 +67,11 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     id: "promotions_coupons",
     label: "Marketing & Discounts",
     permissions: [
+      {
+        key: PERMISSIONS.VIEW_FLASH_SALES,
+        label: "View Flash Sales",
+        description: "View active and scheduled discount campaigns",
+      },
       {
         key: PERMISSIONS.CREATE_FLASH_SALE,
         label: "Create Flash Sale",
@@ -79,6 +93,11 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     id: "notifications_control",
     label: "Notifications Control",
     permissions: [
+      {
+        key: PERMISSIONS.VIEW_NOTIFICATIONS,
+        label: "View Notifications",
+        description: "View platform notification logs",
+      },
       {
         key: PERMISSIONS.CREATE_NOTIFICATION,
         label: "Create Notification",
@@ -111,6 +130,11 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     label: "Products & Images Management",
     permissions: [
       {
+        key: PERMISSIONS.VIEW_PRODUCTS,
+        label: "View Products",
+        description: "Access and browse the product inventory catalog",
+      },
+      {
         key: PERMISSIONS.CREATE_PRODUCT,
         label: "Create Product",
         description: "Add new products, variants, and gallery images",
@@ -131,6 +155,11 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     id: "community_moderation",
     label: "Reviews Management",
     permissions: [
+      {
+        key: PERMISSIONS.VIEW_REVIEWS,
+        label: "View Reviews",
+        description: "View customer product feedback and ratings",
+      },
       {
         key: PERMISSIONS.CREATE_REVIEW,
         label: "Create Review",
@@ -189,6 +218,11 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     id: "users_security",
     label: "Users & Profiles Management",
     permissions: [
+      {
+        key: PERMISSIONS.VIEW_USERS,
+        label: "View Users",
+        description: "Access and view system users list",
+      },
       {
         key: PERMISSIONS.CREATE_USER,
         label: "Create User",

@@ -19,21 +19,13 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { getSidebarConfigByRole } from "./sidebar-config"
 
-export function NavMain({
-  items,
-}: {
-  items: {
-    title: string
-    url: string
-    icon?: LucideIcon
-    isActive?: boolean
-    items?: {
-      title: string
-      url: string
-    }[]
-  }[]
-}) {
+interface NavItemProps {
+  role?: string
+}
+
+export function NavMain({ role }: NavItemProps) {
   const pathname = usePathname()
   const { isMobile, setOpenMobile } = useSidebar()
 
@@ -42,6 +34,10 @@ export function NavMain({
       setOpenMobile(false)
     }
   }
+
+  // استخراج قائمة items مباشرة من الـ config لأن الدالة تعيد كائن SidebarConfig
+  const config = getSidebarConfigByRole(role)
+  const items = config.navMain
 
   // تجريد بادئة اللغة إن وجدت (مثل /ar/dashboard -> /dashboard)
   const segments = pathname.split("/").filter(Boolean)
@@ -67,6 +63,8 @@ export function NavMain({
               : normalizedPath === item.url ||
                 normalizedPath.startsWith(`${item.url}/`))
 
+          const IconComponent = item.icon
+
           return (
             <Collapsible
               key={item.title}
@@ -82,7 +80,7 @@ export function NavMain({
                       isActive={false}
                       className="font-medium data-[state=open]:text-foreground"
                     >
-                      {item.icon && <item.icon />}
+                      {IconComponent && <IconComponent />}
                       <span>{item.title}</span>
                       <ChevronRight className="ms-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180" />
                     </SidebarMenuButton>
@@ -98,7 +96,10 @@ export function NavMain({
                               asChild
                               isActive={isSubActive}
                             >
-                              <Link href={subItem.url} onClick={handleLinkClick}>
+                              <Link
+                                href={subItem.url}
+                                onClick={handleLinkClick}
+                              >
                                 <span>{subItem.title}</span>
                               </Link>
                             </SidebarMenuSubButton>
@@ -116,7 +117,7 @@ export function NavMain({
                     isActive={isSingleActive}
                   >
                     <Link href={item.url} onClick={handleLinkClick}>
-                      {item.icon && <item.icon />}
+                      {IconComponent && <IconComponent />}
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>

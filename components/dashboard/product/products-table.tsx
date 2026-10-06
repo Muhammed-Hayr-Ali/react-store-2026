@@ -72,6 +72,7 @@ import {
 import { AdminProductSummary } from "@/lib/actions/products/types"
 import { duplicateProduct } from "@/lib/actions/products/mutations/duplicate"
 import DeleteProductDialog from "./delete-product-dialog"
+import { appRoutes } from "@/lib/config/app-routes"
 
 const features = tableFeatures({
   columnFilteringFeature,
@@ -357,7 +358,7 @@ export function DataTable({
 
                   <DropdownMenuItem asChild>
                     <Link
-                      href={`/dashboard/products/${row.original.slug}/edit`}
+                      href={`${appRoutes.dashboard.admin.products}/${row.original.slug}/edit`}
                       className="flex cursor-pointer items-center"
                     >
                       <PencilIcon className="me-2 size-3.5" />
@@ -617,7 +618,7 @@ export function DataTable({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Link href={`/${locale}/dashboard/products/create`}>
+          <Link href={appRoutes.dashboard.admin.create_products}>
             <Button
               variant="default"
               size="icon"
