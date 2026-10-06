@@ -36,7 +36,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronsRightIcon,
-  ListFilterIcon,
+  FilterIcon,
   PlusIcon,
 } from "lucide-react"
 
@@ -460,7 +460,7 @@ export function FlashSalesTable({
                   className="size-8"
                   title="Filter"
                 >
-                  <ListFilterIcon className="size-3.5" />
+                  <FilterIcon className="size-3.5" />
                   <span className="sr-only">Filter</span>
                 </Button>
               </DropdownMenuTrigger>

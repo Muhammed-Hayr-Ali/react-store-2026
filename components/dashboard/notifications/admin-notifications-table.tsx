@@ -118,7 +118,6 @@ function formatTime(isoString: string): string {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`
 }
 
-// دالة إرجاع الأيقونة واللون المخصص لكل نوع
 function renderTypeIcon(type: string) {
   switch (type) {
     case "success":
@@ -159,7 +158,6 @@ export function AdminNotificationsTable({
   const [searchQuery, setSearchQuery] = React.useState("")
   const [isGrouped, setIsGrouped] = React.useState<boolean>(true)
 
-  // حالات الديالوجات والشيتات
   const [itemToDelete, setItemToDelete] =
     React.useState<DisplayNotificationRecord | null>(null)
   const [selectedForDetails, setSelectedForDetails] =
@@ -172,7 +170,6 @@ export function AdminNotificationsTable({
     setData(initialData)
   }
 
-  // تجميع الإشعارات المتطابقة
   const processedData = React.useMemo<DisplayNotificationRecord[]>(() => {
     if (!isGrouped) {
       return data.map((item) => ({
@@ -308,12 +305,9 @@ export function AdminNotificationsTable({
               onClick={() => setSelectedForDetails(row.original)}
               className="group flex max-w-xs min-w-0 cursor-pointer items-center gap-2.5 sm:max-w-sm md:max-w-md"
             >
-              {/* أيقونة النوع */}
               <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted/60">
                 {renderTypeIcon(row.original.type)}
               </div>
-
-              {/* العنوان وزر البث (نص الرسالة مخفي الآن ليبقى الجدول نظيفاً) */}
               <div className="flex items-center gap-1.5 truncate">
                 <span className="truncate font-semibold text-foreground transition-colors group-hover:text-primary">
                   {row.original.title}
@@ -533,73 +527,7 @@ export function AdminNotificationsTable({
               </span>
             </Button>
 
-            {/* فلتر التبويب (Read / Unread / All) */}
-            <div className="hidden h-8 items-center overflow-hidden rounded-md border border-input bg-background p-0.5 sm:inline-flex">
-              <button
-                type="button"
-                onClick={() => {
-                  setCurrentTab("all")
-                  table.setPageIndex(0)
-                }}
-                className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
-                  currentTab === "all"
-                    ? "bg-muted font-semibold text-foreground"
-                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                }`}
-              >
-                All
-                <Badge
-                  variant="secondary"
-                  className="ms-1.5 px-1.5 py-0 text-[10px]"
-                >
-                  {processedData.length}
-                </Badge>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setCurrentTab("unread")
-                  table.setPageIndex(0)
-                }}
-                className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
-                  currentTab === "unread"
-                    ? "bg-muted font-semibold text-foreground"
-                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                }`}
-              >
-                Unread
-                <Badge
-                  variant="secondary"
-                  className="ms-1.5 px-1.5 py-0 text-[10px]"
-                >
-                  {unreadCount}
-                </Badge>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setCurrentTab("read")
-                  table.setPageIndex(0)
-                }}
-                className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
-                  currentTab === "read"
-                    ? "bg-muted font-semibold text-foreground"
-                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                }`}
-              >
-                Read
-                <Badge
-                  variant="secondary"
-                  className="ms-1.5 px-1.5 py-0 text-[10px]"
-                >
-                  {readCount}
-                </Badge>
-              </button>
-            </div>
-
-            {/* فلتر النوع */}
+            {/* فلتر النوع المنسدل مع العدّادات بنمط جدول المنتجات */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -609,24 +537,74 @@ export function AdminNotificationsTable({
                   title="Filter by Type"
                 >
                   <FilterIcon className="size-3.5" />
+                  <span className="sr-only">Filter by Type</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40 text-xs">
-                {["all", "info", "success", "warning", "error"].map((type) => (
-                  <DropdownMenuItem
-                    key={type}
-                    onClick={() => {
-                      setTypeFilter(type)
-                      table.setPageIndex(0)
-                    }}
-                    className="flex cursor-pointer items-center justify-between capitalize"
-                  >
-                    <span>{type}</span>
-                    {typeFilter === type && (
-                      <span className="font-bold text-primary">✓</span>
-                    )}
-                  </DropdownMenuItem>
-                ))}
+                <DropdownMenuItem
+                  onClick={() => {
+                    setTypeFilter("all")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between"
+                >
+                  <span>All</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {processedData.length}
+                  </Badge>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={() => {
+                    setTypeFilter("info")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between capitalize"
+                >
+                  <span>Info</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {processedData.filter((i) => i.type === "info").length}
+                  </Badge>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={() => {
+                    setTypeFilter("success")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between capitalize"
+                >
+                  <span>Success</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {processedData.filter((i) => i.type === "success").length}
+                  </Badge>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={() => {
+                    setTypeFilter("warning")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between capitalize"
+                >
+                  <span>Warning</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {processedData.filter((i) => i.type === "warning").length}
+                  </Badge>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={() => {
+                    setTypeFilter("error")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between capitalize"
+                >
+                  <span>Error</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {processedData.filter((i) => i.type === "error").length}
+                  </Badge>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -642,7 +620,7 @@ export function AdminNotificationsTable({
                   <Columns3Icon className="size-3.5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuContent align="end" className="w-40 text-xs">
                 {table
                   .getAllColumns()
                   .filter(
@@ -835,14 +813,12 @@ export function AdminNotificationsTable({
         </div>
       </div>
 
-      {/* دايلوج عرض تفاصيل الإشعار */}
       <NotificationDetailsDialog
         isOpen={Boolean(selectedForDetails)}
         onOpenChange={(open) => !open && setSelectedForDetails(null)}
         notification={selectedForDetails}
       />
 
-      {/* دايلوج تأكيد الحذف */}
       <DeleteNotificationDialog
         isOpen={Boolean(itemToDelete)}
         onOpenChange={(open) => !open && setItemToDelete(null)}
@@ -858,7 +834,6 @@ export function AdminNotificationsTable({
         }}
       />
 
-      {/* شيت إرسال إشعار فردي */}
       <NotificationForm
         isOpen={isIndividualOpen}
         onOpenChange={setIsIndividualOpen}
@@ -868,7 +843,6 @@ export function AdminNotificationsTable({
         }}
       />
 
-      {/* شيت بث إشعار جماعي */}
       <BroadcastForm
         isOpen={isBroadcastOpen}
         onOpenChange={setIsBroadcastOpen}

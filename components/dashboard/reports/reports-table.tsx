@@ -457,7 +457,7 @@ export function ReportsTable({
                   className="size-8"
                   title="Filter"
                 >
-                  <ListFilterIcon className="size-3.5" />
+                  <FilterIcon className="size-3.5" />
                   <span className="sr-only">Filter</span>
                 </Button>
               </DropdownMenuTrigger>
@@ -641,7 +641,7 @@ export function ReportsTable({
                 className="size-8"
                 title="Filter by Type"
               >
-                <FilterIcon className="size-3.5" />
+                <ListFilterIcon className="size-3.5" />
                 <span className="sr-only">Filter by Type</span>
               </Button>
             </DropdownMenuTrigger>
@@ -708,7 +708,6 @@ export function ReportsTable({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
