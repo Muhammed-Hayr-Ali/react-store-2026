@@ -64,6 +64,7 @@ import DeleteCategoryDialog from "@/components/dashboard/categories/delete-categ
 import BrandForm from "@/components/dashboard/brand/brand-form"
 import DeleteBrandDialog from "../brand/delete-brand"
 import { createProductCompleteSchema } from "@/lib/actions/products"
+import { appRoutes } from "@/lib/config/app-routes"
 
 type FormValues = CreateProductCompleteInput
 
@@ -344,7 +345,7 @@ export default function ProductForm({
           ? "Product updated successfully!"
           : "Product created successfully!"
       )
-      router.push("/dashboard/products")
+      router.push(appRoutes.dashboard.admin.products)
       router.refresh()
     } else {
       console.error("Submission Error:", result)

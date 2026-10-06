@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { useParams } from "next/navigation"
 import {
   columnFilteringFeature,
   columnVisibilityFeature,
@@ -136,9 +135,8 @@ export function DataTable({
     "all" | "active" | "low-stock"
   >("all")
   const [searchQuery, setSearchQuery] = React.useState("")
-  const params = useParams()
-  const locale = (params?.locale as string) || "en"
 
+  
   const [productModal, setProductModal] = React.useState<{
     type: "delete" | null
     data: AdminProductSummary | null

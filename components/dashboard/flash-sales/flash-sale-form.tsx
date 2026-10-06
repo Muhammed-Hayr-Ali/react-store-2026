@@ -52,6 +52,7 @@ import { createFlashSale } from "@/lib/actions/flash-sales/mutations/create"
 import { updateFlashSale } from "@/lib/actions/flash-sales/mutations/update"
 import { cn } from "@/lib/utils"
 import { Spinner } from "@/components/ui/spinner"
+import { appRoutes } from "@/lib/config/app-routes"
 
 export interface SelectableProduct {
   id: string
@@ -101,7 +102,7 @@ export function FlashSaleForm({
   availableProducts,
   initialData,
   saleId,
-  onSuccessRedirect = "/dashboard/flash-sales",
+  onSuccessRedirect = appRoutes.dashboard.admin.flashSales,
 }: FlashSaleFormProps) {
   const router = useRouter()
   const [serverError, setServerError] = React.useState<string | null>(null)
