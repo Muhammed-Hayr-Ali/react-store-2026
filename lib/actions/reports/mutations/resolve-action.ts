@@ -60,9 +60,7 @@ export async function resolveReportAction(
   // 4. Perform target action if instructed
   if (action === "delete_target" && report.target_id) {
     if (report.target_type === "review") {
-      const canModerateReviews = await hasPermission(
-        PERMISSIONS.MODERATE_REVIEWS
-      )
+      const canModerateReviews = await hasPermission(PERMISSIONS.UPDATE_REVIEW)
       if (!canModerateReviews) {
         return {
           success: false,

@@ -40,6 +40,7 @@ export const PERMISSIONS = {
   // --- 6. Reviews Management ---
   UPDATE_REVIEW: "update_review",
   DELETE_REVIEW: "delete_review",
+  
 
   // --- 7. Users & Profiles Management ---
   CREATE_USER: "create_user",
