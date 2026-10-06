@@ -61,19 +61,19 @@ const adminSidebarConfig: SidebarConfig = {
       title: "Users Management",
       url: appRoutes.dashboard.admin.users,
       icon: Users,
-      requiredPermission: PERMISSIONS.VIEW_USERS,
+      requiredPermission: PERMISSIONS.VIEW_USERS_MANAGEMENT,
     },
     {
       title: "Reports & Issues",
       url: appRoutes.dashboard.admin.reports,
       icon: FileSpreadsheet,
-      requiredPermission: PERMISSIONS.VIEW_REPORTS,
+      requiredPermission: PERMISSIONS.VIEW_REPORTS_MANAGEMENT,
     },
     {
       title: "Roles & Permissions",
       url: appRoutes.dashboard.admin.roles,
       icon: ShieldCheck,
-      requiredPermission: PERMISSIONS.VIEW_USER_ROLES,
+      requiredPermission: PERMISSIONS.VIEW_ROLES_MANAGEMENT,
     },
     {
       title: "Staff Access",
