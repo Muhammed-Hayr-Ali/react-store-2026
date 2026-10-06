@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronRight, type LucideIcon } from "lucide-react"
+import { ChevronRight } from "lucide-react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 
@@ -21,11 +21,12 @@ import {
 } from "@/components/ui/sidebar"
 import { getSidebarConfigByRole } from "./sidebar-config"
 
-interface NavItemProps {
+interface NavMainProps {
   role?: string
+  permissions?: string[] // مصفوفة الصلاحيات القادمة من بيانات المستخدم
 }
 
-export function NavMain({ role }: NavItemProps) {
+export function NavMain({ role, permissions = [] }: NavMainProps) {
   const pathname = usePathname()
   const { isMobile, setOpenMobile } = useSidebar()
 
@@ -35,11 +36,34 @@ export function NavMain({ role }: NavItemProps) {
     }
   }
 
-  // استخراج قائمة items مباشرة من الـ config لأن الدالة تعيد كائن SidebarConfig
-  const config = getSidebarConfigByRole(role)
-  const items = config.navMain
 
-  // تجريد بادئة اللغة إن وجدت (مثل /ar/dashboard -> /dashboard)
+  
+
+  const config = getSidebarConfigByRole(role)
+
+  // دالة فحص ما إذا كان المستخدم يملك الصلاحية المطلوبة
+  const hasPermission = (requiredPerm?: string) => {
+    if (!requiredPerm) return true // إذا لم تكن هناك صلاحية مطلوبة، يظهر العنصر للجميع
+    // إذا كان أدمن خارق مثلاً أو يملك الصلاحية المحددة
+    return permissions.includes(requiredPerm)
+  }
+
+  // فلترة العناصر الرئيسية والعناصر الفرعية بناءً على صلاحيات المستخدم الفعلية
+  const filteredItems = config.navMain
+    .filter((item) => hasPermission(item.requiredPermission))
+    .map((item) => {
+      if (item.items) {
+        return {
+          ...item,
+          items: item.items.filter((sub) =>
+            hasPermission(sub.requiredPermission)
+          ),
+        }
+      }
+      return item
+    })
+    .filter((item) => !item.items || item.items.length > 0) // إزالة الأقسام الفارغة إذا لم يتبقَ فيها شيء
+
   const segments = pathname.split("/").filter(Boolean)
   const hasLocale = segments.length > 0 && segments[0].length === 2
   const normalizedPath = hasLocale
@@ -49,13 +73,11 @@ export function NavMain({ role }: NavItemProps) {
   return (
     <SidebarGroup>
       <SidebarMenu>
-        {items.map((item) => {
+        {filteredItems.map((item) => {
           const hasChildren = Boolean(item.items && item.items.length > 0)
-
           const hasActiveChild = item.items?.some(
             (sub) => normalizedPath === sub.url
           )
-
           const isSingleActive =
             !hasChildren &&
             (item.url === "/dashboard"

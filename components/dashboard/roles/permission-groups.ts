@@ -11,15 +11,54 @@ export interface PermissionGroup {
 }
 
 export const PERMISSION_GROUPS: PermissionGroup[] = [
+  // --- 1. مجموعة أذونات العرض والوصول للصفحات (Navigation & Page Views) ---
   {
-    id: "brands_management",
-    label: "Brands Management",
+    id: "dashboard_views",
+    label: "Dashboard & Page Views",
     permissions: [
       {
-        key: PERMISSIONS.VIEW_BRANDS,
-        label: "View Brands",
-        description: "Inspect brand listings and manufacturers",
+        key: PERMISSIONS.VIEW_DASHBOARD,
+        label: "View Dashboard (Overview)",
+        description: "Access the dashboard overview and main home page",
       },
+      {
+        key: PERMISSIONS.VIEW_PRODUCTS,
+        label: "View Products",
+        description: "Access and browse the product inventory catalog page",
+      },
+      {
+        key: PERMISSIONS.VIEW_FLASH_SALES,
+        label: "View Flash Sales",
+        description: "View active and scheduled discount campaigns page",
+      },
+      {
+        key: PERMISSIONS.VIEW_USERS,
+        label: "View Users Management",
+        description: "Access and view system users list page",
+      },
+      {
+        key: PERMISSIONS.VIEW_REPORTS,
+        label: "View Reports & Issues",
+        description: "Inspect customer reports, tickets, and issues page",
+      },
+      {
+        key: PERMISSIONS.VIEW_USER_ROLES,
+        label: "View Roles & Permissions",
+        description: "Inspect roles and permission mappings page",
+      },
+      {
+        key: PERMISSIONS.VIEW_NOTIFICATIONS,
+        label: "View Notifications Management",
+        description: "View platform notification logs and management page",
+      },
+    ],
+  },
+
+  // --- 2. مجموعات أذونات التحرير والإدارة (Mutations & Actions) ---
+  {
+    id: "brands_management",
+    label: "Brands Management (Actions)",
+    permissions: [
       {
         key: PERMISSIONS.CREATE_BRAND,
         label: "Create Brand",
@@ -39,17 +78,13 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
   },
   {
     id: "categories_management",
-    label: "Categories Management",
+    label: "Categories Management (Actions)",
     permissions: [
-      {
-        key: PERMISSIONS.VIEW_CATEGORIES,
-        label: "View Categories",
-        description: "Browse category hierarchy trees",
-      },
       {
         key: PERMISSIONS.CREATE_CATEGORY,
         label: "Create Category",
-        description: "Define new categories and hierarchical parent-child links",
+        description:
+          "Define new categories and hierarchical parent-child links",
       },
       {
         key: PERMISSIONS.UPDATE_CATEGORY,
@@ -65,13 +100,8 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
   },
   {
     id: "promotions_coupons",
-    label: "Marketing & Discounts",
+    label: "Marketing & Discounts (Actions)",
     permissions: [
-      {
-        key: PERMISSIONS.VIEW_FLASH_SALES,
-        label: "View Flash Sales",
-        description: "View active and scheduled discount campaigns",
-      },
       {
         key: PERMISSIONS.CREATE_FLASH_SALE,
         label: "Create Flash Sale",
@@ -91,13 +121,8 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
   },
   {
     id: "notifications_control",
-    label: "Notifications Control",
+    label: "Notifications Control (Actions)",
     permissions: [
-      {
-        key: PERMISSIONS.VIEW_NOTIFICATIONS,
-        label: "View Notifications",
-        description: "View platform notification logs",
-      },
       {
         key: PERMISSIONS.CREATE_NOTIFICATION,
         label: "Create Notification",
@@ -127,13 +152,8 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
   },
   {
     id: "products_catalog",
-    label: "Products & Images Management",
+    label: "Products & Images Management (Actions)",
     permissions: [
-      {
-        key: PERMISSIONS.VIEW_PRODUCTS,
-        label: "View Products",
-        description: "Access and browse the product inventory catalog",
-      },
       {
         key: PERMISSIONS.CREATE_PRODUCT,
         label: "Create Product",
@@ -153,13 +173,8 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
   },
   {
     id: "community_moderation",
-    label: "Reviews Management",
+    label: "Reviews Management (Actions)",
     permissions: [
-      {
-        key: PERMISSIONS.VIEW_REVIEWS,
-        label: "View Reviews",
-        description: "View customer product feedback and ratings",
-      },
       {
         key: PERMISSIONS.CREATE_REVIEW,
         label: "Create Review",
@@ -184,7 +199,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
   },
   {
     id: "reports_moderation",
-    label: "Reports & Moderation Management",
+    label: "Reports & Moderation Management (Actions)",
     permissions: [
       {
         key: PERMISSIONS.CREATE_REPORT,
@@ -202,11 +217,6 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
         description: "Purge resolved moderation logs and reports",
       },
       {
-        key: PERMISSIONS.VIEW_REPORTS,
-        label: "View Reports",
-        description: "Inspect customer reports and tickets",
-      },
-      {
         key: PERMISSIONS.MANAGE_REPORTS,
         label: "Manage Reports",
         description:
@@ -216,13 +226,8 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
   },
   {
     id: "users_security",
-    label: "Users & Profiles Management",
+    label: "Users & Profiles Management (Actions)",
     permissions: [
-      {
-        key: PERMISSIONS.VIEW_USERS,
-        label: "View Users",
-        description: "Access and view system users list",
-      },
       {
         key: PERMISSIONS.CREATE_USER,
         label: "Create User",
@@ -242,7 +247,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
   },
   {
     id: "roles_security",
-    label: "Roles & Permissions Management",
+    label: "Roles & Permissions Management (Actions)",
     permissions: [
       {
         key: PERMISSIONS.CREATE_ROLE,
@@ -268,11 +273,6 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
         key: PERMISSIONS.ASSIGN_ROLE,
         label: "Assign Role",
         description: "Bind roles to specific staff users",
-      },
-      {
-        key: PERMISSIONS.VIEW_USER_ROLES,
-        label: "View User Roles",
-        description: "Inspect user role assignments and permission mappings",
       },
     ],
   },

@@ -17,7 +17,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export async function AppSidebar({ side, ...props }: AppSidebarProps) {
-  // جلب ملخص المستخدم الشامل بطلب RPC واحد متكامل
+
   const currentUser = await getCurrentUser()
 
   const role = currentUser?.role
@@ -40,7 +40,7 @@ export async function AppSidebar({ side, ...props }: AppSidebarProps) {
         <StoreSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain role={role} />
+        <NavMain role={role} permissions={currentUser?.permissions} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />

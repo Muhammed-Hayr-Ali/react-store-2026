@@ -49,36 +49,37 @@ const adminSidebarConfig: SidebarConfig = {
       title: "Overview",
       url: appRoutes.dashboard.admin.home,
       icon: LayoutDashboard,
+      requiredPermission: PERMISSIONS.VIEW_DASHBOARD,
     },
     {
       title: "Products",
       url: appRoutes.dashboard.admin.products,
       icon: Package,
-      requiredPermission: PERMISSIONS.VIEW_PRODUCTS, // ربطها بصلاحية عرض المنتجات
+      requiredPermission: PERMISSIONS.VIEW_PRODUCTS, 
     },
     {
       title: "Flash Sales",
       url: appRoutes.dashboard.admin.flashSales,
       icon: Zap,
-      requiredPermission: PERMISSIONS.VIEW_FLASH_SALES, // ربطها بصلاحية عرض العروض
+      requiredPermission: PERMISSIONS.VIEW_FLASH_SALES, 
     },
     {
       title: "Users Management",
       url: appRoutes.dashboard.admin.users,
       icon: Users,
-      requiredPermission: PERMISSIONS.VIEW_USERS, // ربطها بصلاحية عرض المستخدمين
+      requiredPermission: PERMISSIONS.VIEW_USERS, 
     },
     {
       title: "Reports & Issues",
       url: appRoutes.dashboard.admin.reports,
       icon: FileSpreadsheet,
-      requiredPermission: PERMISSIONS.VIEW_REPORTS, // ربطها بصلاحية عرض التقارير
+      requiredPermission: PERMISSIONS.VIEW_REPORTS, 
     },
     {
       title: "Roles & Permissions",
       url: appRoutes.dashboard.admin.roles,
       icon: ShieldCheck,
-      requiredPermission: PERMISSIONS.VIEW_USER_ROLES, // ربطها بصلاحية عرض الأدوار
+      requiredPermission: PERMISSIONS.VIEW_USER_ROLES, 
     },
     {
       title: "Staff Access",
