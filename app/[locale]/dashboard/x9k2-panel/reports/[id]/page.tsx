@@ -1,12 +1,10 @@
 import { notFound, redirect } from "next/navigation"
-import Link from "next/link"
-import { ArrowLeftIcon, ShieldAlertIcon } from "lucide-react"
+import {  ShieldAlertIcon } from "lucide-react"
 
 import { getReportById } from "@/lib/actions/reports/queries/get-by-id"
 import { hasRole, ROLES } from "@/lib/actions/role"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { appConfig } from "@/lib/config/app_config"
-import { Button } from "@/components/ui/button"
 import { ReportDetailsView } from "@/components/dashboard/reports/report-details-view"
 
 interface PageProps {

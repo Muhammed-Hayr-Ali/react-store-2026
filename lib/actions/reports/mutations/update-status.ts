@@ -85,7 +85,6 @@ export async function updateReportStatus(
   }
 
   // 6. Invalidate related cache paths
-  revalidatePath("/dashboard/reports")
   revalidatePath("/", "layout")
 
   return {

@@ -51,7 +51,6 @@ export async function deleteReport(id: string): Promise<ApiResult<null>> {
   }
 
   // 4. Invalidate related cache paths
-  revalidatePath("/dashboard/reports")
   revalidatePath("/", "layout")
 
   return {

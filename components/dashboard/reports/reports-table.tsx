@@ -73,6 +73,7 @@ import {
   ReportWithDetails,
 } from "@/lib/actions/reports/types"
 import { deleteReport } from "@/lib/actions/reports/mutations/delete"
+import { appRoutes } from "@/lib/config/app-routes"
 
 const features = tableFeatures({
   columnFilteringFeature,
@@ -296,7 +297,7 @@ export function ReportsTable({
           cell: ({ row }) => (
             <div className="max-w-47.5 min-w-0 sm:max-w-xs md:max-w-sm">
               <Link
-                href={`/${locale}/dashboard/reports/${row.original.id}`}
+                href={`${appRoutes.dashboard.admin.reports}/${row.original.id}`}
                 className="block truncate font-semibold text-foreground transition-colors hover:text-primary"
                 title={row.original.reason}
               >
@@ -377,7 +378,7 @@ export function ReportsTable({
                 <DropdownMenuContent align="end" className="w-44 text-xs">
                   <DropdownMenuItem asChild>
                     <Link
-                      href={`/${locale}/dashboard/reports/${row.original.id}`}
+                      href={`${appRoutes.dashboard.admin.reports}/${row.original.id}`}
                       className="flex cursor-pointer items-center gap-2"
                     >
                       <EyeIcon className="size-3.5" />

@@ -136,7 +136,6 @@ export async function submitReport(
   }
 
   // 7. Invalidate related cache paths
-  revalidatePath("/dashboard/reports")
   revalidatePath("/", "layout")
 
   return {
