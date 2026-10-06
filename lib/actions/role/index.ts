@@ -11,5 +11,4 @@ export {
   roleSchema,
   type AppRole,
   type AppPermission,
-  type UserRolePermissions,
 } from "./types"
