@@ -45,4 +45,3 @@ export async function AppSidebar({ side, ...props }: AppSidebarProps) {
     </Sidebar>
   )
 }
-"use client"
