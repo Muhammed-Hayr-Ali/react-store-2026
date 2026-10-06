@@ -23,6 +23,7 @@ import {
   deleteAllNotifications,
 } from "@/lib/actions/notifications/mutations/delete"
 import { NotificationBell } from "./notification-bell"
+import { appRoutes } from "@/lib/config/app-routes"
 
 interface NotificationPopoverProps {
   initialNotifications: NotificationRecord[]
@@ -76,7 +77,7 @@ export function NotificationPopover({
     // التوجيه إلى صفحة الإشعارات الكاملة مباشرة على الجوال والشاشات الصغيرة
     if (window.innerWidth < 768) {
       e.preventDefault()
-      router.push(`/${locale}/dashboard/notifications`)
+      router.push(appRoutes.dashboard.admin.notifications)
     }
   }
 
@@ -286,7 +287,7 @@ export function NotificationPopover({
         {/* Footer Link to Full Page on PC */}
         <div className="border-t p-2 text-center">
           <Link
-            href={`/${locale}/dashboard/notifications`}
+            href={appRoutes.dashboard.admin.notifications}
             onClick={() => setIsOpen(false)}
             className="flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:underline"
           >
