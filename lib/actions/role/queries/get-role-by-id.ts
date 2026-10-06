@@ -11,7 +11,7 @@ import { ApiResult } from "@/lib/database/types/utils"
 import { RoleRecord } from "../mutations/create-role"
 
 export async function getRoleById(
-  roleId: number
+  roleId: string
 ): Promise<ApiResult<RoleRecord | null>> {
   const idValidation = z.number().int().positive().safeParse(roleId)
   if (!idValidation.success) {

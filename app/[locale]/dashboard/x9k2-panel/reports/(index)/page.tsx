@@ -1,9 +1,9 @@
-import { redirect } from "next/navigation"
+import { notFound } from "next/navigation"
 import { ShieldAlertIcon } from "lucide-react"
 
 import { getAllReports } from "@/lib/actions/reports/queries/get-all"
 import { ReportStatus, ReportTargetType } from "@/lib/actions/reports/types"
-import { hasRole, ROLES } from "@/lib/actions/role"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { ReportsTable } from "@/components/dashboard/reports/reports-table"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { appConfig } from "@/lib/config/app_config"
@@ -41,14 +41,12 @@ const VALID_TARGET_TYPES: readonly string[] = [
   "general",
 ]
 
-export default async function ReportsPage({ params, searchParams }: PageProps) {
-  const { locale } = await params
-  const query = await searchParams
-
-  const isAdmin = await hasRole(ROLES.ADMIN)
-  if (!isAdmin) {
-    redirect(`/${locale}/login`)
+export default async function ReportsPage({ searchParams }: PageProps) {
+  const canView = await hasPermission(PERMISSIONS.VIEW_REPORTS_MANAGEMENT)
+  if (!canView) {
+    notFound()
   }
+  const query = await searchParams
 
   const rawStatus = query.status
   const status: ReportStatus | undefined =

@@ -1,11 +1,11 @@
 import { ShieldCheckIcon } from "lucide-react"
 import { notFound } from "next/navigation"
-import { createServerClient } from "@/lib/database/supabase/server"
-
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import CreateRoleForm from "@/components/dashboard/roles/role-form"
 import { RoleRecord } from "@/lib/actions/role/mutations/create-role"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
+import { getRoleById } from "@/lib/actions/role/queries/get-role-by-id"
 
 export async function generateMetadata() {
   return createMetadata({
@@ -24,19 +24,20 @@ interface EditRolePageProps {
 }
 
 export default async function EditRolePage({ params }: EditRolePageProps) {
-  const { id } = await params
-  const supabase = await createServerClient()
-
-  // جلب بيانات الدور الحالي من قاعدة البيانات
-  const { data: role, error } = await supabase
-    .from("roles")
-    .select("*")
-    .eq("id", id)
-    .single()
-
-  if (error || !role) {
+  const canView = await hasPermission(PERMISSIONS.UPDATE_ROLE)
+  if (!canView) {
     notFound()
   }
+
+  const { id } = await params
+
+  const res = await getRoleById(id)
+
+  if (!res.success || !res.data) {
+    notFound()
+  }
+
+  const role = res.data
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
@@ -57,7 +58,6 @@ export default async function EditRolePage({ params }: EditRolePageProps) {
         </div>
       </div>
 
-      {/* نموذج التعديل (نفس مكون النموذج مع تمرير البيانات الأولية ومعرف الدور) */}
       <CreateRoleForm initialData={role as RoleRecord} roleId={role.id} />
     </div>
   )

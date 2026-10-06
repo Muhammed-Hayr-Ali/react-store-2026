@@ -5,6 +5,8 @@ import { createMetadata } from "@/lib/config/metadata_generator"
 import { getAllRoles } from "@/lib/actions/role/queries/get-all-roles"
 import { getUsersWithRoles } from "@/lib/actions/role/queries/get-users-with-roles"
 import StaffAccessTable from "@/components/dashboard/staff-access/staff-access-table"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
+import { notFound } from "next/navigation"
 
 export async function generateMetadata() {
   return createMetadata({
@@ -15,6 +17,11 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
+  const canView = await hasPermission(PERMISSIONS.VIEW_STAFF_ACCESS)
+  if (!canView) {
+    notFound()
+  }
+
   const [usersResult, rolesResult] = await Promise.all([
     getUsersWithRoles(),
     getAllRoles(),
@@ -43,7 +50,6 @@ export default async function Page() {
         </div>
       </div>
 
-      {/* المكون العميل الذي يدير عرض الجدول وتعيين الأدوار */}
       <StaffAccessTable initialUsers={users} availableRoles={roles} />
     </div>
   )

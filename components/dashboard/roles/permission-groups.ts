@@ -21,6 +21,11 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
         description: "Access the dashboard overview and main home page",
       },
       {
+        key: PERMISSIONS.VIEW_ADMIN_OVERVIEW,
+        label: "View Admin Overview",
+        description: "Access and view admin dashboard overview page",
+      },
+      {
         key: PERMISSIONS.VIEW_PRODUCTS,
         label: "View Products",
         description: "Access and browse the product inventory catalog page",
@@ -31,17 +36,17 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
         description: "View active and scheduled discount campaigns page",
       },
       {
-        key: PERMISSIONS.VIEW_USERS,
+        key: PERMISSIONS.VIEW_USERS_MANAGEMENT,
         label: "View Users Management",
         description: "Access and view system users list page",
       },
       {
-        key: PERMISSIONS.VIEW_REPORTS,
+        key: PERMISSIONS.VIEW_REPORTS_MANAGEMENT,
         label: "View Reports & Issues",
         description: "Inspect customer reports, tickets, and issues page",
       },
       {
-        key: PERMISSIONS.VIEW_USER_ROLES,
+        key: PERMISSIONS.VIEW_ROLES_MANAGEMENT,
         label: "View Roles & Permissions",
         description: "Inspect roles and permission mappings page",
       },

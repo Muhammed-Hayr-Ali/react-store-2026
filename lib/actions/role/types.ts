@@ -12,11 +12,12 @@ export type AppRole = (typeof ROLES)[keyof typeof ROLES]
 export const PERMISSIONS = {
   // --- 0. General & Dashboard Views (أذونات العرض القياسية) ---
   VIEW_DASHBOARD: "view_dashboard",
+  VIEW_ADMIN_OVERVIEW: "view_admin_overview",
   VIEW_PRODUCTS: "view_products",
   VIEW_FLASH_SALES: "view_flash_sales",
-  VIEW_USERS: "view_users",
-  VIEW_REPORTS: "view_reports",
-  VIEW_USER_ROLES: "view_user_roles",
+  VIEW_USERS_MANAGEMENT: "view_users_management",
+  VIEW_REPORTS_MANAGEMENT: "view_reports_management",
+  VIEW_ROLES_MANAGEMENT: "view_roles_management",
   VIEW_STAFF_ACCESS: "view_staff_access",
   VIEW_NOTIFICATIONS_MANAGEMENT: "view_notifications_Management",
 

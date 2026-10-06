@@ -1,8 +1,8 @@
-import { notFound, redirect } from "next/navigation"
+import { notFound } from "next/navigation"
 import {  ShieldAlertIcon } from "lucide-react"
 
 import { getReportById } from "@/lib/actions/reports/queries/get-by-id"
-import { hasRole, ROLES } from "@/lib/actions/role"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { appConfig } from "@/lib/config/app_config"
 import { ReportDetailsView } from "@/components/dashboard/reports/report-details-view"
@@ -15,6 +15,8 @@ interface PageProps {
 }
 
 export async function generateMetadata({ params }: PageProps) {
+
+
   const { id } = await params
   return createMetadata({
     siteName: appConfig.name,
@@ -24,12 +26,13 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function ReportDetailPage({ params }: PageProps) {
-  const { locale, id } = await params
 
-  const isAdmin = await hasRole(ROLES.ADMIN)
-  if (!isAdmin) {
-    redirect(`/${locale}/login`)
+   const canView = await hasPermission(PERMISSIONS.UPDATE_REPORT)
+  if (!canView) {
+    notFound()
   }
+
+ const { id } = await params
 
   const res = await getReportById(id)
 
@@ -65,7 +68,6 @@ export default async function ReportDetailPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Main View Component */}
       <ReportDetailsView report={report} />
     </div>
   )

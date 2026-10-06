@@ -47,7 +47,7 @@ export default async function CreateFlashSalePage({ params }: PageProps) {
           </p>
         </div>
       </div>
-      {/* Form */}
+
       <FlashSaleForm
         availableProducts={availableProducts}
         onSuccessRedirect={`/${locale}/dashboard/flash-sales`}

@@ -5,6 +5,8 @@ import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getAdminUsersList } from "@/lib/actions/users"
 import { DataTable } from "@/components/dashboard/users/users-table"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
+import { notFound } from "next/navigation"
 
 export const dynamic = "force-dynamic"
 
@@ -17,6 +19,11 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
+  const canView = await hasPermission(PERMISSIONS.VIEW_USERS_MANAGEMENT)
+  if (!canView) {
+    notFound()
+  }
+
   const headersList = await headers()
   const userAgent = headersList.get("user-agent") || ""
   const isMobile =

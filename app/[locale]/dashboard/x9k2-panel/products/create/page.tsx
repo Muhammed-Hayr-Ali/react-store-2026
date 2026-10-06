@@ -6,6 +6,8 @@ import { Category, getAllCategories } from "@/lib/actions/categories"
 import { getAllBrand } from "@/lib/actions/brands/queries/get-all"
 import { Brand } from "@/lib/actions/brands"
 import ProductForm from "@/components/dashboard/product/product-form"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
+import { notFound } from "next/navigation"
 
 export async function generateMetadata() {
   return createMetadata({
@@ -17,6 +19,11 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
+  const canView = await hasPermission(PERMISSIONS.CREATE_PRODUCT)
+  if (!canView) {
+    notFound()
+  }
+
   const [resultCategories, resultBrands] = await Promise.all([
     getAllCategories({ activeOnly: true }),
     getAllBrand(),
@@ -35,7 +42,6 @@ export default async function Page() {
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
-      {/* Header متطابق مع Flash Sale مع أيقونة PackageIcon في الشارة */}
       <div className="flex items-center gap-3 border-b border-border/40 pb-4">
         <div>
           <div className="flex items-center gap-2">
@@ -52,7 +58,6 @@ export default async function Page() {
         </div>
       </div>
 
-      {/* استخدام النموذج الموحد ProductForm */}
       <ProductForm categories={categories} brands={brands} />
     </div>
   )

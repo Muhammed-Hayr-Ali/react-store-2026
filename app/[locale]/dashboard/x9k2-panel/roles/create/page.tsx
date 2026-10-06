@@ -3,6 +3,8 @@ import { ShieldCheckIcon } from "lucide-react"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import CreateRoleForm from "@/components/dashboard/roles/role-form"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
+import { notFound } from "next/navigation"
 
 export async function generateMetadata() {
   return createMetadata({
@@ -14,9 +16,13 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
+  const canView = await hasPermission(PERMISSIONS.CREATE_ROLE)
+  if (!canView) {
+    notFound()
+  }
+
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
-      {/* Header الترويسة الموحدة مع الشارة المربعة مثل صفحة المنتجات */}
       <div className="flex items-center gap-3 border-b border-border/40 pb-4">
         <div>
           <div className="flex items-center gap-2">
@@ -33,7 +39,6 @@ export default async function Page() {
         </div>
       </div>
 
-      {/* نموذج إنشاء الدور بنظام العمودين */}
       <CreateRoleForm />
     </div>
   )

@@ -59,7 +59,6 @@ export default async function EditFlashSalePage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Form */}
       <FlashSaleForm
         saleId={saleResult.saleId}
         initialData={saleResult.initialData}
