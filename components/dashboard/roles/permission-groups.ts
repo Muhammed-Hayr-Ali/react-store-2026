@@ -132,6 +132,11 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     label: "Reviews Management",
     permissions: [
       {
+        key: PERMISSIONS.CREATE_REVIEW,
+        label: "Create Review",
+        description: "Post product reviews and ratings",
+      },
+      {
         key: PERMISSIONS.UPDATE_REVIEW,
         label: "Update Review",
         description: "Edit submitted reviews and stars",
@@ -140,6 +145,11 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
         key: PERMISSIONS.DELETE_REVIEW,
         label: "Delete Review",
         description: "Remove public feedback or reviews",
+      },
+      {
+        key: PERMISSIONS.MODERATE_REVIEWS,
+        label: "Moderate Reviews",
+        description: "Approve, hide, or manage product reviews",
       },
     ],
   },
