@@ -1,9 +1,9 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { createClient } from "@/lib/database/supabase/server"
 import { ActionResponse } from "../types"
 import { hasPermission, PERMISSIONS } from "../../role"
+import { createAdminClient } from "@/lib/database/supabase/admin"
 
 export async function deleteUser(userId: string): Promise<ActionResponse> {
   try {
@@ -16,7 +16,7 @@ export async function deleteUser(userId: string): Promise<ActionResponse> {
       }
     }
 
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
 
     // 2. حذف المستخدم نهائياً من نظام المصادقة عبر Admin API
     const { error: authError } = await supabase.auth.admin.deleteUser(userId)

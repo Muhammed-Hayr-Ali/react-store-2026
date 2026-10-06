@@ -165,23 +165,29 @@ export function UserFormSheet({
           true
         )
       } else {
-        const createData = data as CreateFormValues
-        onSuccess(
-          {
-            id: crypto.randomUUID(),
-            email: createData.email,
-            first_name: createData.firstName || null,
-            last_name: createData.lastName || null,
-            phone_number: createData.phoneNumber || null,
-            profile_image: null,
-            status: "active",
-            ban_reason: null,
-            banned_at: null,
-            created_at: new Date().toISOString(),
-            roles: [],
-          },
-          false
-        )
+        const resData = (result as { success: true; data?: AdminUserSummary })
+          .data
+        if (resData) {
+          onSuccess(resData, false)
+        } else {
+          const createData = data as CreateFormValues
+          onSuccess(
+            {
+              id: "",
+              email: createData.email,
+              first_name: createData.firstName || null,
+              last_name: createData.lastName || null,
+              phone_number: createData.phoneNumber || null,
+              profile_image: null,
+              status: "active",
+              ban_reason: null,
+              banned_at: null,
+              created_at: new Date().toISOString(),
+              roles: [],
+            },
+            false
+          )
+        }
       }
       handleOpenChange(false)
       router.refresh()
