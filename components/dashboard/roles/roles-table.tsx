@@ -63,6 +63,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { RoleRecord } from "@/lib/actions/role/mutations/create-role"
+import { appRoutes } from "@/lib/config/app-routes"
 
 const features = tableFeatures({
   columnFilteringFeature,
@@ -231,7 +232,7 @@ export default function RolesTable({
                 <DropdownMenuContent align="end" className="w-40 text-xs">
                   <DropdownMenuItem asChild>
                     <Link
-                      href={`/${locale}/dashboard/roles/${row.original.id}/edit`}
+                      href={`${appRoutes.dashboard.admin.roles}/${row.original.id}/edit`}
                       className="flex cursor-pointer items-center gap-2"
                     >
                       <PencilIcon className="size-3.5" />
@@ -444,7 +445,9 @@ export default function RolesTable({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Link href={`/${locale}/dashboard/roles/create`}>
+          <Link
+            href={`${appRoutes.dashboard.admin.create_roles}`}
+          >
             <Button
               variant="default"
               size="icon"

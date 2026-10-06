@@ -22,6 +22,7 @@ export const appRoutes = {
       notifications: "/dashboard/x9k2-panel/notifications",
       reports: "/dashboard/x9k2-panel/reports",
       roles: "/dashboard/x9k2-panel/roles",
+      create_roles: "/dashboard/x9k2-panel/roles/create",
       staffAccess: "/dashboard/x9k2-panel/staff-access",
       users: "/dashboard/x9k2-panel/users",
     },

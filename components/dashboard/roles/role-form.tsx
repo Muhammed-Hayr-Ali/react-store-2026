@@ -27,6 +27,7 @@ import { createRole } from "@/lib/actions/role/mutations/create-role"
 import { updateRole } from "@/lib/actions/role/mutations/update-role"
 import { AppPermission } from "@/lib/actions/role/types"
 import { RoleRecord } from "@/lib/actions/role/mutations/create-role"
+import { appRoutes } from "@/lib/config/app-routes"
 
 interface CreateRoleFormProps {
   initialData?: RoleRecord | null
@@ -131,7 +132,7 @@ export default function CreateRoleForm({
             ? `Role updated successfully!`
             : `Role "${res.data?.name}" created successfully!`
         )
-        router.push(`/${locale}/dashboard/roles`)
+        router.push(appRoutes.dashboard.admin.roles)
         router.refresh()
       } else {
         setErrorMessage(
