@@ -39,8 +39,6 @@ export default function CreateRoleForm({
   roleId,
 }: CreateRoleFormProps) {
   const router = useRouter()
-  const params = useParams()
-  const locale = (params?.locale as string) || "en"
 
   const isEditing = Boolean(roleId || initialData)
 

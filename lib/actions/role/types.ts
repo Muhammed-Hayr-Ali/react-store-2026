@@ -10,14 +10,6 @@ export const ROLES = {
 export type AppRole = (typeof ROLES)[keyof typeof ROLES]
 
 export const PERMISSIONS = {
-  // Overview
-  // Products
-  // Flash Sales
-  // Users Management
-  // Reports & Issues
-  // Roles & Permissions
-  // Staff Access
-  // Notifications Management
 
   // --- 0. General ---
   VIEW_DASHBOARD: "view_dashboard",

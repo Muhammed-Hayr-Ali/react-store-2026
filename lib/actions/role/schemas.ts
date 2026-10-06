@@ -7,7 +7,7 @@ export const createRoleSchema = z.object({
   name: z
     .string()
     .min(2, "Role name must be at least 2 characters")
-    .max(50, "Role name too long")
+    .max(150, "Role name too long")
     .trim()
     .toLowerCase(),
   description: z.string().max(255).optional().nullable(),
@@ -34,3 +34,4 @@ export type UpdateRolePermissionsInput = z.infer<
   typeof updateRolePermissionsSchema
 >
 export type AssignUserRoleInput = z.infer<typeof assignUserRoleSchema>
+
