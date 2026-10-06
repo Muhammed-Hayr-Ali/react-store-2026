@@ -1,5 +1,3 @@
-"use client"
-
 import { ChevronRight } from "lucide-react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
@@ -19,15 +17,14 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { getSidebarConfigByRole } from "./sidebar-config"
+import { sidebarConfig } from "./sidebar-config"
 import { appRoutes } from "@/lib/config/app-routes"
 
 interface NavMainProps {
-  role?: string
   permissions?: string[] // مصفوفة الصلاحيات القادمة من بيانات المستخدم
 }
 
-export function NavMain({ role, permissions = [] }: NavMainProps) {
+export function NavMain({ permissions = [] }: NavMainProps) {
   const pathname = usePathname()
   const { isMobile, setOpenMobile } = useSidebar()
 
@@ -37,20 +34,14 @@ export function NavMain({ role, permissions = [] }: NavMainProps) {
     }
   }
 
-
-  
-
-  const config = getSidebarConfigByRole(role)
-
   // دالة فحص ما إذا كان المستخدم يملك الصلاحية المطلوبة
   const hasPermission = (requiredPerm?: string) => {
     if (!requiredPerm) return true // إذا لم تكن هناك صلاحية مطلوبة، يظهر العنصر للجميع
-    // إذا كان أدمن خارق مثلاً أو يملك الصلاحية المحددة
     return permissions.includes(requiredPerm)
   }
 
   // فلترة العناصر الرئيسية والعناصر الفرعية بناءً على صلاحيات المستخدم الفعلية
-  const filteredItems = config.navMain
+  const filteredItems = sidebarConfig.navMain
     .filter((item) => hasPermission(item.requiredPermission))
     .map((item) => {
       if (item.items) {
@@ -63,7 +54,7 @@ export function NavMain({ role, permissions = [] }: NavMainProps) {
       }
       return item
     })
-    .filter((item) => !item.items || item.items.length > 0) // إزالة الأقسام الفارغة إذا لم يتبقَ فيها شيء
+    .filter((item) => !item.items || item.items.length > 0)
 
   const segments = pathname.split("/").filter(Boolean)
   const hasLocale = segments.length > 0 && segments[0].length === 2
@@ -79,12 +70,14 @@ export function NavMain({ role, permissions = [] }: NavMainProps) {
           const hasActiveChild = item.items?.some(
             (sub) => normalizedPath === sub.url
           )
-        const isSingleActive =
-          !hasChildren &&
-          (item.url === appRoutes.dashboard.home || item.url === appRoutes.dashboard.admin.home
-            ? normalizedPath === item.url
-            : normalizedPath === item.url ||
-              normalizedPath.startsWith(`${item.url}/`))
+          const isSingleActive =
+            !hasChildren &&
+            (item.url === appRoutes.dashboard.home ||
+            item.url === appRoutes.dashboard.admin.home
+              ? normalizedPath === item.url
+              : normalizedPath === item.url ||
+                normalizedPath.startsWith(`${item.url}/`))
+
           const IconComponent = item.icon
 
           return (

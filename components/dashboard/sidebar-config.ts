@@ -12,7 +12,6 @@ import {
 } from "lucide-react"
 import { appRoutes } from "@/lib/config/app-routes"
 import { PERMISSIONS, AppPermission } from "@/lib/actions/role"
-import { ROLES } from "@/lib/actions/role/types"
 
 export interface SidebarItem {
   title: string
@@ -30,20 +29,18 @@ interface SidebarConfig {
   navMain: SidebarItem[]
 }
 
-const userSidebarConfig: SidebarConfig = {
-  navMain: [
-    { title: "Overview", url: appRoutes.dashboard.home, icon: LayoutDashboard },
-    { title: "My Account", url: appRoutes.dashboard.account, icon: User },
-  ],
-}
-
-const adminSidebarConfig: SidebarConfig = {
+export const sidebarConfig: SidebarConfig = {
   navMain: [
     {
       title: "Overview",
       url: appRoutes.dashboard.admin.home,
       icon: LayoutDashboard,
       requiredPermission: PERMISSIONS.VIEW_DASHBOARD,
+    },
+    {
+      title: "My Account",
+      url: appRoutes.dashboard.account,
+      icon: User,
     },
     {
       title: "Products",
@@ -88,13 +85,4 @@ const adminSidebarConfig: SidebarConfig = {
       requiredPermission: PERMISSIONS.VIEW_NOTIFICATIONS_MANAGEMENT,
     },
   ],
-}
-
-const roleSidebarMap: Record<string, SidebarConfig> = {
-  [ROLES.ADMIN]: adminSidebarConfig,
-}
-
-export function getSidebarConfigByRole(role?: string | null): SidebarConfig {
-  if (!role) return userSidebarConfig
-  return roleSidebarMap[role] || userSidebarConfig
 }

@@ -11,16 +11,12 @@ import {
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 import { NavUser } from "./nav-user"
 
-
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   side?: "right" | "left" | undefined
 }
 
 export async function AppSidebar({ side, ...props }: AppSidebarProps) {
-
   const currentUser = await getCurrentUser()
-
-  const role = currentUser?.role
 
   const user = {
     name:
@@ -33,14 +29,14 @@ export async function AppSidebar({ side, ...props }: AppSidebarProps) {
     avatar: currentUser?.profile_image || "/images/avatar.jpg",
   }
 
-
   return (
     <Sidebar collapsible="icon" {...props} side={side}>
       <SidebarHeader>
         <StoreSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain role={role} permissions={currentUser?.permissions} />
+        {/* الاعتماد فقط على مصفوفة الصلاحيات الديناميكية */}
+        <NavMain permissions={currentUser?.permissions} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />
@@ -49,3 +45,4 @@ export async function AppSidebar({ side, ...props }: AppSidebarProps) {
     </Sidebar>
   )
 }
+"use client"
