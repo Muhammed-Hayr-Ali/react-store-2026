@@ -85,7 +85,7 @@ const adminSidebarConfig: SidebarConfig = {
       title: "Notifications Management",
       url: appRoutes.dashboard.admin.notifications,
       icon: Bell,
-      requiredPermission: PERMISSIONS.VIEW_NOTIFICATIONS,
+      requiredPermission: PERMISSIONS.VIEW_NOTIFICATIONS_MANAGEMENT,
     },
   ],
 }
