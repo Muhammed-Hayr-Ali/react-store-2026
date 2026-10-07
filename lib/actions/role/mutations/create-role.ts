@@ -1,8 +1,3 @@
-/**
- * @file lib/actions/role/mutations/create-role.ts
- * @description Server Action to define and store a new role with specific permissions.
- */
-
 "use server"
 
 import { revalidatePath } from "next/cache"
@@ -22,35 +17,32 @@ export interface RoleRecord {
 export async function createRole(
   payload: CreateRoleInput
 ): Promise<ApiResult<RoleRecord | null>> {
-  // 1. Permission check
   const canCreate = await hasPermission(PERMISSIONS.CREATE_ROLE)
   if (!canCreate) {
-    return {
-      success: false,
-      error: "PERMISSION_DENIED",
-    }
+    return { success: false, error: "PERMISSION_DENIED" }
   }
 
-  // 2. Validate input schema
   const validation = createRoleSchema.safeParse(payload)
   if (!validation.success) {
-    return {
-      success: false,
-      error: "VALIDATION_ERROR",
-      details: validation.error.flatten().fieldErrors,
+    const fieldErrors: Record<string, string[]> = {}
+    for (const issue of validation.error.issues) {
+      const path = issue.path.join(".")
+      if (!fieldErrors[path]) fieldErrors[path] = []
+      fieldErrors[path].push(issue.message)
     }
+    return { success: false, error: "VALIDATION_ERROR", details: fieldErrors }
   }
 
   const { name, description, permissions } = validation.data
   const supabase = await createServerClient()
 
-  // 3. Insert record into roles table
+  // Supabase يحول مصفوفة JavaScript تلقائياً إلى صيغة jsonb عند إرسالها لعمود من نوع jsonb
   const { data: newRole, error } = await supabase
     .from("roles")
     .insert({
       name,
       description: description || null,
-      permissions,
+      permissions: permissions,
     })
     .select()
     .single()
@@ -66,7 +58,6 @@ export async function createRole(
     }
   }
 
-  // 4. Invalidate global layout cache
   revalidatePath("/", "layout")
 
   return {
