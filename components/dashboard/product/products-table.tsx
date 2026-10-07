@@ -72,6 +72,8 @@ import { AdminProductSummary } from "@/lib/actions/products/types"
 import { duplicateProduct } from "@/lib/actions/products/mutations/duplicate"
 import DeleteProductDialog from "./delete-product-dialog"
 import { appRoutes } from "@/lib/config/app-routes"
+import { Can } from "../can"
+import { PERMISSIONS } from "@/lib/actions/role"
 
 const features = tableFeatures({
   columnFilteringFeature,
@@ -616,25 +618,27 @@ export function DataTable({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Link href={appRoutes.dashboard.admin.create_products}>
-            <Button
-              variant="default"
-              size="icon"
-              className="size-8 sm:hidden"
-              title="Add Product"
-            >
-              <PlusIcon className="size-3.5" />
-              <span className="sr-only">Add Product</span>
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              className="hidden h-8 gap-1.5 px-3 text-xs sm:inline-flex"
-            >
-              <PlusIcon className="size-3.5" />
-              <span>Add Product</span>
-            </Button>
-          </Link>
+          <Can permission={PERMISSIONS.CREATE_PRODUCT}>
+            <Link href={appRoutes.dashboard.admin.create_products}>
+              <Button
+                variant="default"
+                size="icon"
+                className="size-8 sm:hidden"
+                title="Add Product"
+              >
+                <PlusIcon className="size-3.5" />
+                <span className="sr-only">Add Product</span>
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                className="hidden h-8 gap-1.5 px-3 text-xs sm:inline-flex"
+              >
+                <PlusIcon className="size-3.5" />
+                <span>Add Product</span>
+              </Button>
+            </Link>
+          </Can>
         </div>
       </div>
 

@@ -17,10 +17,7 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>
 }) {
-  const canView = await hasPermission(PERMISSIONS.UPDATE_PRODUCT)
-  if (!canView) {
-    notFound()
-  }
+ 
   const { slug } = await params
   const result = await getProductCompleteBySlug(slug)
 
@@ -39,6 +36,11 @@ export default async function Page({
 }: {
   params: Promise<{ slug: string }>
 }) {
+
+ const canView = await hasPermission(PERMISSIONS.UPDATE_PRODUCT)
+ if (!canView) {
+   notFound()
+ }
   const { slug } = await params
 
   const [productResult, categoriesResult, brandsResult] = await Promise.all([
