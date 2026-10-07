@@ -17,7 +17,7 @@ export const createRoleSchema = z.object({
 })
 
 export const updateRolePermissionsSchema = z.object({
-  roleId: z.uuid("Invalid role ID format"),
+  roleId: z.string().uuid("Invalid role ID format"),
   description: z.string().max(255).optional().nullable(),
   permissions: z
     .array(z.enum(permissionValues))
@@ -25,8 +25,8 @@ export const updateRolePermissionsSchema = z.object({
 })
 
 export const assignUserRoleSchema = z.object({
-  userId: z.uuid("Invalid user ID format"),
-  roleId: z.uuid("Invalid role ID format"),
+  userId: z.string().uuid("Invalid user ID format"),
+  roleId: z.string().uuid("Invalid role ID format"),
 })
 
 export type CreateRoleInput = z.infer<typeof createRoleSchema>
