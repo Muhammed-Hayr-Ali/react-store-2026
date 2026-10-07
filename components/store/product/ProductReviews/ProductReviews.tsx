@@ -17,20 +17,23 @@ import { ReviewSummary } from "./ReviewSummary"
 import { ReviewItem } from "./ReviewItem"
 import { ReviewDialog } from "./ReviewDialog"
 import { DeleteReviewDialog } from "./DeleteReviewDialog"
+import { useUser } from "@/lib/context/user-context"
 
 interface ProductReviewsProps {
   summary: ReviewSummaryType
   reviews: ReviewWithProfile[]
   productId: string
-  currentUserId?: string
 }
 
 export default function ProductReviews({
   summary,
   reviews,
   productId,
-  currentUserId,
 }: ProductReviewsProps) {
+
+const { user } = useUser()
+const currentUserId = user?.id
+
   // ✅ حالة موحدة لإدارة جميع الحوارات
   const [dialogState, setDialogState] = React.useState<{
     id: string | null

@@ -54,7 +54,6 @@ export async function generateMetadata({
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug, locale } = await params
-  const user = await getCurrentUser()
 
   const productResult = await getProductCompleteBySlug(slug)
 
@@ -165,7 +164,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage className="max-w-[12rem] truncate font-medium text-foreground sm:max-w-xs">
+              <BreadcrumbPage className="max-w-48 truncate font-medium text-foreground sm:max-w-xs">
                 {product.name}
               </BreadcrumbPage>
             </BreadcrumbItem>
@@ -182,7 +181,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
         className="mt-12 border-t border-border/60 pt-10 sm:mt-16 sm:pt-12"
       >
         <ProductReviews
-          currentUserId={user?.id}
           summary={summary}
           reviews={reviews}
           productId={productId}
