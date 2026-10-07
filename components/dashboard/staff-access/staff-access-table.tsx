@@ -78,11 +78,10 @@ const features = tableFeatures({
 
 const columnHelper = createColumnHelper<typeof features, UserWithRoles>()
 
-const HIDEABLE_COLUMNS = ["email", "roles"]
+const HIDEABLE_COLUMNS = ["roles"]
 
 const columnLabelsMap: Record<string, string> = {
   user: "User",
-  email: "Email",
   roles: "Assigned Roles",
 }
 
@@ -116,7 +115,6 @@ export function StaffAccessTable({
     setUsers(initialUsers)
   }
 
-  // تصحيح: تغيير نوع roleId من number إلى string (UUID)[cite: 27]
   const handleRevokeRole = async (
     userId: string,
     roleId: string,
@@ -250,25 +248,20 @@ export function StaffAccessTable({
                       <UserCheckIcon className="size-3.5" />
                     )}
                   </div>
-                  <span className="text-xs font-semibold text-foreground">
-                    {fullName || "Anonymous User"}
-                  </span>
+                  <div className="flex max-w-xs min-w-0 flex-col">
+                    <span className="truncate text-xs font-semibold text-foreground">
+                      {fullName || "Anonymous User"}
+                    </span>
+                    <span className="truncate text-[11px] text-muted-foreground">
+                      {row.original.email || "No email available"}
+                    </span>
+                  </div>
                 </div>
               )
             },
             enableHiding: false,
           }
         ),
-
-        columnHelper.accessor("email", {
-          id: "email",
-          header: "Email",
-          cell: ({ row }) => (
-            <span className="font-mono text-xs text-muted-foreground">
-              {row.original.email || "—"}
-            </span>
-          ),
-        }),
 
         columnHelper.accessor("roles", {
           id: "roles",
@@ -370,13 +363,6 @@ export function StaffAccessTable({
     onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange: setPagination,
   })
-
-  const getColumnResponsiveClasses = (columnId: string) => {
-    if (HIDEABLE_COLUMNS.includes(columnId)) {
-      return "hidden md:table-cell"
-    }
-    return ""
-  }
 
   return (
     <div className="flex w-full flex-col justify-start gap-4">
@@ -565,22 +551,17 @@ export function StaffAccessTable({
             <TableHeader className="bg-muted/40">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    const responsiveClass = getColumnResponsiveClasses(
-                      header.id
-                    )
-                    return (
-                      <TableHead
-                        key={header.id}
-                        colSpan={header.colSpan}
-                        className={`text-xs font-medium text-muted-foreground ${responsiveClass}`}
-                      >
-                        {header.isPlaceholder ? null : (
-                          <FlexRender header={header} />
-                        )}
-                      </TableHead>
-                    )
-                  })}
+                  {headerGroup.headers.map((header) => (
+                    <TableHead
+                      key={header.id}
+                      colSpan={header.colSpan}
+                      className="text-xs font-medium text-muted-foreground"
+                    >
+                      {header.isPlaceholder ? null : (
+                        <FlexRender header={header} />
+                      )}
+                    </TableHead>
+                  ))}
                 </TableRow>
               ))}
             </TableHeader>
@@ -591,16 +572,11 @@ export function StaffAccessTable({
                     key={row.id}
                     className="transition-colors hover:bg-muted/20"
                   >
-                    {row.getVisibleCells().map((cell) => {
-                      const responsiveClass = getColumnResponsiveClasses(
-                        cell.column.id
-                      )
-                      return (
-                        <TableCell key={cell.id} className={responsiveClass}>
-                          <FlexRender cell={cell} />
-                        </TableCell>
-                      )
-                    })}
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        <FlexRender cell={cell} />
+                      </TableCell>
+                    ))}
                   </TableRow>
                 ))
               ) : (

@@ -1,3 +1,8 @@
+/**
+ * @file components/dashboard/products/product-form.tsx
+ * @description Form component for creating and updating products, variants, and media.
+ */
+
 "use client"
 
 import * as React from "react"
@@ -23,7 +28,6 @@ import {
   SparklesIcon,
   GlobeIcon,
   TagIcon,
-  CheckCircle2Icon,
   Wand2Icon,
   PencilIcon,
   AlertCircleIcon,
@@ -911,37 +915,42 @@ export default function ProductForm({
                 />
               </FieldGroup>
             </div>
-          </div>
-        </div>
 
-        {/* Bottom Actions Bar */}
-        <div className="flex flex-col-reverse items-stretch justify-end gap-3 border-t border-border pt-6 sm:flex-row sm:items-center">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={isSubmitting}
-            onClick={() => router.back()}
-            className="h-9 w-full text-xs sm:w-auto"
-          >
-            Discard Changes
-          </Button>
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="h-9 w-full cursor-pointer text-xs shadow-xs sm:w-auto sm:min-w-32"
-          >
-            {isSubmitting ? (
-              <>
-                <Spinner className="mr-2 size-4" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <CheckCircle2Icon className="mr-1.5 size-4" />
-                {isEditing ? "Update Product" : "Save Product"}
-              </>
-            )}
-          </Button>
+            {/* مكوّن أزرار الإجراءات الجانبي (متجاوب: في الجانب على الشاشات الكبيرة وفي الأسفل على الجوال، بدون أيقونات) */}
+            <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+              <div className="mb-4 border-b border-border/60 pb-3">
+                <h2 className="text-sm font-semibold text-card-foreground">
+                  Actions
+                </h2>
+              </div>
+              <div className="flex flex-col-reverse gap-2 sm:flex-col">
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="h-9 w-full cursor-pointer text-xs shadow-xs"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Spinner className="mr-2 size-4" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>{isEditing ? "Update Product" : "Save Product"}</>
+                  )}
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isSubmitting}
+                  onClick={() => router.back()}
+                  className="h-9 w-full text-xs"
+                >
+                  Discard Changes
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </form>
 

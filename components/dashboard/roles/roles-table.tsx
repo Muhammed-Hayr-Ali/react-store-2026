@@ -77,11 +77,10 @@ const features = tableFeatures({
 
 const columnHelper = createColumnHelper<typeof features, RoleRecord>()
 
-const HIDEABLE_COLUMNS = ["description", "permissions"]
+const HIDEABLE_COLUMNS = ["permissions"]
 
 const columnLabelsMap: Record<string, string> = {
   name: "Role",
-  description: "Description",
   permissions: "Permissions",
 }
 
@@ -180,35 +179,35 @@ export default function RolesTable({
           id: "name",
           header: "Role",
           cell: ({ row }) => (
-            <div className="flex items-center gap-2 font-semibold text-foreground capitalize">
-              <ShieldIcon className="size-3.5 text-primary" />
-              <span>{row.original.name}</span>
+            <div className="flex items-center gap-2.5">
+              <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-secondary text-foreground">
+                <ShieldIcon className="size-3.5 text-primary" />
+              </div>
+              <div className="flex max-w-xs min-w-0 flex-col sm:max-w-md">
+                <span className="truncate text-xs font-semibold text-foreground capitalize">
+                  {row.original.name}
+                </span>
+                <span className="truncate text-[11px] text-muted-foreground">
+                  {row.original.description || "No description provided"}
+                </span>
+              </div>
             </div>
           ),
           enableHiding: false,
         }),
 
-        columnHelper.accessor("description", {
-          id: "description",
-          header: "Description",
-          cell: ({ row }) => (
-            <span className="truncate text-xs text-muted-foreground">
-              {row.original.description || "—"}
-            </span>
-          ),
-        }),
-
         columnHelper.display({
           id: "permissions",
-          header: "Permissions",
+          header: () => <div className="text-center">Permissions</div>,
           cell: ({ row }) => (
             <div className="flex justify-center">
               <Badge
-                variant="secondary"
-                className="gap-1 px-2 py-0.5 text-xs tabular-nums"
+                variant="outline"
+                className="gap-1 px-2 py-0.5 font-mono text-xs font-medium text-muted-foreground"
               >
-                <LayersIcon className="size-3 opacity-60" />
-                {row.original.permissions?.length || 0}
+                <LayersIcon className="size-3 opacity-70" />
+                <span>{row.original.permissions?.length || 0}</span>
+                <span className="text-[10px]">assigned</span>
               </Badge>
             </div>
           ),
@@ -445,9 +444,7 @@ export default function RolesTable({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Link
-            href={`${appRoutes.dashboard.admin.create_roles}`}
-          >
+          <Link href={appRoutes.dashboard.admin.create_roles}>
             <Button
               variant="default"
               size="icon"

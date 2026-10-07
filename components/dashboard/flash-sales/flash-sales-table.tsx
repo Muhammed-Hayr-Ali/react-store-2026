@@ -24,12 +24,13 @@ import {
   CalendarIcon,
   ClockIcon,
   ExternalLinkIcon,
-  MoreVerticalIcon,
+  EllipsisVerticalIcon,
   PackageIcon,
   PencilIcon,
   SearchIcon,
   Trash2Icon,
-  XCircleIcon,
+  CircleCheckIcon,
+  CircleXIcon,
   XIcon,
   Columns3Icon,
   ChevronsLeftIcon,
@@ -38,6 +39,7 @@ import {
   ChevronsRightIcon,
   FilterIcon,
   PlusIcon,
+  ZapIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -49,6 +51,7 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Label } from "@/components/ui/label"
@@ -94,22 +97,6 @@ const columnLabelsMap: Record<string, string> = {
   duration: "Duration",
   item_count: "Products",
   is_active: "Active",
-}
-
-function getColumnTitle(column: {
-  id: string
-  columnDef: { header?: unknown }
-}): string {
-  if (columnLabelsMap[column.id]) {
-    return columnLabelsMap[column.id]
-  }
-  const header = column.columnDef.header
-  if (typeof header === "string") {
-    return header
-  }
-  return column.id
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (char) => char.toUpperCase())
 }
 
 function formatDate(isoString: string): string {
@@ -244,30 +231,42 @@ export function FlashSalesTable({
     switch (status) {
       case "active":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+          <Badge
+            variant="outline"
+            className="gap-1 border-emerald-500/30 px-2 py-0.5 text-xs text-emerald-600 dark:text-emerald-400"
+          >
             <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
             Active
-          </span>
+          </Badge>
         )
       case "scheduled":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400">
+          <Badge
+            variant="outline"
+            className="gap-1 border-blue-500/30 px-2 py-0.5 text-xs text-blue-600 dark:text-blue-400"
+          >
             <ClockIcon className="size-3" />
             Scheduled
-          </span>
+          </Badge>
         )
       case "expired":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">
-            <XCircleIcon className="size-3" />
+          <Badge
+            variant="outline"
+            className="gap-1 px-2 py-0.5 text-xs text-muted-foreground"
+          >
+            <CircleXIcon className="size-3 fill-muted-foreground text-background" />
             Expired
-          </span>
+          </Badge>
         )
       case "disabled":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+          <Badge
+            variant="outline"
+            className="gap-1 border-amber-500/30 px-2 py-0.5 text-xs text-amber-600 dark:text-amber-400"
+          >
             Disabled
-          </span>
+          </Badge>
         )
     }
   }
@@ -279,17 +278,20 @@ export function FlashSalesTable({
           id: "title",
           header: "Campaign",
           cell: ({ row }) => (
-            <div>
-              <div className="font-semibold text-foreground">
-                {row.original.title}
+            <div className="flex items-center gap-2.5">
+              <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-secondary text-foreground">
+                <ZapIcon className="size-3.5 text-amber-500" />
               </div>
-              {row.original.title_ar && (
-                <div className="text-xs text-muted-foreground">
-                  {row.original.title_ar}
-                </div>
-              )}
-              <div className="font-mono text-[11px] text-muted-foreground/80">
-                /{row.original.slug}
+              <div className="flex max-w-xs min-w-0 flex-col sm:max-w-md">
+                <Link
+                  href={`${appRoutes.dashboard.admin.flashSales}/${row.original.id}/edit`}
+                  className="truncate text-xs font-semibold text-foreground transition-colors hover:text-primary hover:underline"
+                >
+                  {row.original.title}
+                </Link>
+                <span className="truncate font-mono text-[11px] text-muted-foreground">
+                  /{row.original.slug}
+                </span>
               </div>
             </div>
           ),
@@ -298,8 +300,12 @@ export function FlashSalesTable({
 
         columnHelper.accessor("status", {
           id: "status",
-          header: "Status",
-          cell: ({ row }) => getStatusBadge(row.original.status),
+          header: () => <div className="text-center">Status</div>,
+          cell: ({ row }) => (
+            <div className="flex justify-center">
+              {getStatusBadge(row.original.status)}
+            </div>
+          ),
         }),
 
         columnHelper.display({
@@ -328,11 +334,14 @@ export function FlashSalesTable({
           id: "item_count",
           header: () => <div className="text-center">Products</div>,
           cell: ({ row }) => (
-            <div className="text-center">
-              <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 text-xs font-medium text-foreground">
+            <div className="flex justify-center">
+              <Badge
+                variant="outline"
+                className="gap-1 px-2 py-0.5 text-xs text-foreground"
+              >
                 <PackageIcon className="size-3 text-muted-foreground" />
-                {row.original.item_count}
-              </span>
+                <span>{row.original.item_count}</span>
+              </Badge>
             </div>
           ),
         }),
@@ -363,9 +372,9 @@ export function FlashSalesTable({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-7 text-muted-foreground data-[state=open]:bg-muted"
+                    className="flex size-7 text-muted-foreground data-[state=open]:bg-muted"
                   >
-                    <MoreVerticalIcon className="size-4" />
+                    <EllipsisVerticalIcon className="size-4" />
                     <span className="sr-only">Actions</span>
                   </Button>
                 </DropdownMenuTrigger>
@@ -373,9 +382,9 @@ export function FlashSalesTable({
                   <DropdownMenuItem asChild>
                     <Link
                       href={`${appRoutes.dashboard.admin.flashSales}/${row.original.id}/edit`}
-                      className="flex cursor-pointer items-center gap-2"
+                      className="flex cursor-pointer items-center"
                     >
-                      <PencilIcon className="size-3.5" />
+                      <PencilIcon className="me-2 size-3.5" />
                       Edit Campaign
                     </Link>
                   </DropdownMenuItem>
@@ -383,17 +392,19 @@ export function FlashSalesTable({
                     <Link
                       href={`/${locale}/deals/${row.original.slug}`}
                       target="_blank"
-                      className="flex cursor-pointer items-center gap-2"
+                      className="flex cursor-pointer items-center"
                     >
-                      <ExternalLinkIcon className="size-3.5" />
+                      <ExternalLinkIcon className="me-2 size-3.5" />
                       View Page
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem
+                    variant="destructive"
                     onClick={() => handleDelete(row.original.id)}
-                    className="flex cursor-pointer items-center gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
+                    className="flex cursor-pointer items-center text-destructive focus:bg-destructive/10 focus:text-destructive"
                   >
-                    <Trash2Icon className="size-3.5" />
+                    <Trash2Icon className="me-2 size-3.5" />
                     Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -629,7 +640,7 @@ export function FlashSalesTable({
                     checked={col.getIsVisible()}
                     onCheckedChange={(value) => col.toggleVisibility(!!value)}
                   >
-                    {getColumnTitle(col)}
+                    {columnLabelsMap[col.id] || col.id}
                   </DropdownMenuCheckboxItem>
                 ))}
             </DropdownMenuContent>

@@ -1,8 +1,3 @@
-/**
- * @file components/dashboard/reports/reports-table.tsx
- * @description Table component for listing, filtering, and managing moderation reports.
- */
-
 "use client"
 
 import * as React from "react"
@@ -25,14 +20,14 @@ import {
   type SortingState,
 } from "@tanstack/react-table"
 import {
-  CheckCircle2Icon,
+  CircleCheckIcon,
+  CircleXIcon,
   ClockIcon,
   EyeIcon,
   FilterIcon,
-  MoreVerticalIcon,
+  EllipsisVerticalIcon,
   SearchIcon,
   Trash2Icon,
-  XCircleIcon,
   XIcon,
   Columns3Icon,
   ChevronsLeftIcon,
@@ -40,6 +35,8 @@ import {
   ChevronRightIcon,
   ChevronsRightIcon,
   ListFilterIcon,
+  AlertTriangleIcon,
+  UserIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -133,7 +130,6 @@ export function ReportsTable({
   const [targetTypeFilter, setTargetTypeFilter] = React.useState<string>("all")
   const [searchQuery, setSearchQuery] = React.useState("")
 
-  // حالة التحكم بدايلوج الحذف في الجدول
   const [reportModal, setReportModal] = React.useState<{
     type: "delete" | null
     data: ReportWithDetails | null
@@ -249,41 +245,45 @@ export function ReportsTable({
     switch (status) {
       case "pending":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-semibold text-destructive">
+          <Badge
+            variant="outline"
+            className="gap-1 border-destructive/30 px-2 py-0.5 text-xs text-destructive"
+          >
             <span className="size-1.5 animate-pulse rounded-full bg-destructive" />
             Pending
-          </span>
+          </Badge>
         )
       case "under_review":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+          <Badge
+            variant="outline"
+            className="gap-1 border-amber-500/30 px-2 py-0.5 text-xs text-amber-600 dark:text-amber-400"
+          >
             <ClockIcon className="size-3" />
             Review
-          </span>
+          </Badge>
         )
       case "resolved":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-            <CheckCircle2Icon className="size-3" />
+          <Badge
+            variant="outline"
+            className="gap-1 border-emerald-500/30 px-2 py-0.5 text-xs text-emerald-600 dark:text-emerald-400"
+          >
+            <CircleCheckIcon className="size-3 fill-emerald-500 text-background" />
             Resolved
-          </span>
+          </Badge>
         )
       case "dismissed":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">
-            <XCircleIcon className="size-3" />
+          <Badge
+            variant="outline"
+            className="gap-1 px-2 py-0.5 text-xs text-muted-foreground"
+          >
+            <CircleXIcon className="size-3 fill-muted-foreground text-background" />
             Dismissed
-          </span>
+          </Badge>
         )
     }
-  }
-
-  const getTargetBadge = (type: ReportTargetType) => {
-    return (
-      <span className="inline-flex items-center rounded-md bg-muted/60 px-2 py-0.5 text-xs font-medium text-foreground capitalize">
-        {type.replace("_", " ")}
-      </span>
-    )
   }
 
   const columns = React.useMemo(
@@ -292,30 +292,52 @@ export function ReportsTable({
         columnHelper.accessor("reason", {
           id: "reason",
           header: "Reported Item",
-          cell: ({ row }) => (
-            <div className="max-w-47.5 min-w-0 sm:max-w-xs md:max-w-sm">
-              <Link
-                href={`${appRoutes.dashboard.admin.reports}/${row.original.id}`}
-                className="block truncate font-semibold text-foreground transition-colors hover:text-primary"
-                title={row.original.reason}
-              >
-                {row.original.reason}
-              </Link>
-            </div>
-          ),
+          cell: ({ row }) => {
+            const report = row.original
+            return (
+              <div className="flex items-center gap-2.5">
+                <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-secondary text-foreground">
+                  <AlertTriangleIcon className="size-3.5 text-destructive" />
+                </div>
+                <div className="flex max-w-xs min-w-0 flex-col sm:max-w-md">
+                  <Link
+                    href={`${appRoutes.dashboard.admin.reports}/${report.id}`}
+                    className="truncate text-xs font-semibold text-foreground transition-colors hover:text-primary hover:underline"
+                    title={report.reason}
+                  >
+                    {report.reason}
+                  </Link>
+                  <span className="truncate text-[11px] text-muted-foreground">
+                    {report.details || "No additional details"}
+                  </span>
+                </div>
+              </div>
+            )
+          },
           enableHiding: false,
         }),
 
         columnHelper.accessor("target_type", {
           id: "target_type",
           header: "Type",
-          cell: ({ row }) => getTargetBadge(row.original.target_type),
+          cell: ({ row }) => (
+            <Badge
+              variant="outline"
+              className="px-2 py-0.5 text-xs text-muted-foreground capitalize"
+            >
+              {row.original.target_type.replace("_", " ")}
+            </Badge>
+          ),
         }),
 
         columnHelper.accessor("status", {
           id: "status",
-          header: "Status",
-          cell: ({ row }) => getStatusBadge(row.original.status),
+          header: () => <div className="text-center">Status</div>,
+          cell: ({ row }) => (
+            <div className="flex justify-center">
+              {getStatusBadge(row.original.status)}
+            </div>
+          ),
         }),
 
         columnHelper.display({
@@ -330,12 +352,23 @@ export function ReportsTable({
               reporter?.email ||
               (row.original as { contact_email?: string }).contact_email ||
               ""
-            const displayName = fullName || email || "Guest User"
 
             return (
-              <span className="truncate text-xs font-medium text-foreground">
-                {displayName}
-              </span>
+              <div className="flex items-center gap-2">
+                <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground">
+                  <UserIcon className="size-3" />
+                </div>
+                <div className="flex min-w-0 flex-col">
+                  <span className="truncate text-xs font-medium text-foreground">
+                    {fullName || "Guest User"}
+                  </span>
+                  {email && (
+                    <span className="truncate text-[10px] text-muted-foreground">
+                      {email}
+                    </span>
+                  )}
+                </div>
+              </div>
             )
           },
         }),
@@ -367,9 +400,9 @@ export function ReportsTable({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-7 text-muted-foreground data-[state=open]:bg-muted"
+                    className="flex size-7 text-muted-foreground data-[state=open]:bg-muted"
                   >
-                    <MoreVerticalIcon className="size-4" />
+                    <EllipsisVerticalIcon className="size-4" />
                     <span className="sr-only">Actions</span>
                   </Button>
                 </DropdownMenuTrigger>
@@ -377,20 +410,21 @@ export function ReportsTable({
                   <DropdownMenuItem asChild>
                     <Link
                       href={`${appRoutes.dashboard.admin.reports}/${row.original.id}`}
-                      className="flex cursor-pointer items-center gap-2"
+                      className="flex cursor-pointer items-center"
                     >
-                      <EyeIcon className="size-3.5" />
+                      <EyeIcon className="me-2 size-3.5" />
                       Inspect Details
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
+                    variant="destructive"
                     onClick={() =>
                       setReportModal({ type: "delete", data: row.original })
                     }
-                    className="flex cursor-pointer items-center gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
+                    className="flex cursor-pointer items-center text-destructive focus:bg-destructive/10 focus:text-destructive"
                   >
-                    <Trash2Icon className="size-3.5" />
-                    Delete
+                    <Trash2Icon className="me-2 size-3.5" />
+                    Delete Report
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -867,7 +901,6 @@ export function ReportsTable({
         </div>
       </div>
 
-      {/* دايلوج حذف التبليغ */}
       <DeleteReportDialog
         isOpen={reportModal.type === "delete" ? "delete" : null}
         item={reportModal.data}

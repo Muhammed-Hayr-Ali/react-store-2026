@@ -7,15 +7,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import {
-  ExternalLinkIcon,
-  FileTextIcon,
-  Loader2Icon,
-  SaveIcon,
-  TagIcon,
-  Trash2Icon,
-  UserIcon,
-} from "lucide-react"
+import { ExternalLinkIcon, FileTextIcon, TagIcon, UserIcon } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -99,20 +91,6 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
 
   return (
     <div className="space-y-6">
-      {/* شريط الإجراءات العلوي (زر حذف البلاغ فقط) */}
-      <div className="flex items-center justify-end">
-        <Button
-          type="button"
-          variant="destructive"
-          size="sm"
-          onClick={() => setDeleteModalOpen(true)}
-          className="gap-1.5 text-xs"
-        >
-          <Trash2Icon className="size-3.5" />
-          Delete Report
-        </Button>
-      </div>
-
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* العمود الرئيسي: تفاصيل البلاغ، المحتوى، وبيانات المبلغ */}
         <div className="min-w-0 space-y-6 lg:col-span-2">
@@ -194,9 +172,8 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
                       size="sm"
                       disabled={isLoading}
                       onClick={handleDeleteTargetContent}
-                      className="gap-1.5"
+                      className="text-xs"
                     >
-                      <Trash2Icon className="size-3.5" />
                       Delete Review & Resolve Report
                     </Button>
                   </div>
@@ -218,7 +195,7 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
                     variant="outline"
                     size="sm"
                     asChild
-                    className="shrink-0 gap-1.5"
+                    className="shrink-0 text-xs"
                   >
                     <a
                       href={`/product/${report.target_preview.data.slug}`}
@@ -317,20 +294,16 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
                 />
               </div>
 
-              {/* أزرار الحفظ وDiscard Changes أسفل بعضها لتشبه النماذج القياسية */}
-              <div className="space-y-2 pt-2">
+              {/* أزرار الإجراءات بنفس ترتيب نموذج المنتجات (Save ثم Discard ثم Delete) */}
+              <div className="mt-3 space-y-2 border-t border-border/40 pt-2">
                 <Button
                   type="button"
+                  variant="destructive"
                   disabled={isLoading}
-                  onClick={handleUpdateStatusAndNotes}
-                  className="w-full gap-1.5"
+                  onClick={() => setDeleteModalOpen(true)}
+                  className="w-full text-xs"
                 >
-                  {isLoading ? (
-                    <Loader2Icon className="size-3.5 animate-spin" />
-                  ) : (
-                    <SaveIcon className="size-3.5" />
-                  )}
-                  Save Changes
+                  Delete Report
                 </Button>
 
                 <Button
@@ -341,6 +314,15 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
                   className="w-full text-xs"
                 >
                   Discard Changes
+                </Button>
+
+                <Button
+                  type="button"
+                  disabled={isLoading}
+                  onClick={handleUpdateStatusAndNotes}
+                  className="w-full text-xs"
+                >
+                  {isLoading ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
             </div>

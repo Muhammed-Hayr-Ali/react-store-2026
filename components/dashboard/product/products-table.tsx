@@ -1,3 +1,8 @@
+/**
+ * @file components/dashboard/products/products-table.tsx
+ * @description Table component for managing products, pagination, filtering, and actions.
+ */
+
 "use client"
 
 import * as React from "react"
@@ -66,6 +71,7 @@ import {
   XIcon,
   FilterIcon,
   PlusIcon,
+  PackageIcon,
 } from "lucide-react"
 
 import { AdminProductSummary } from "@/lib/actions/products/types"
@@ -138,7 +144,6 @@ export function DataTable({
   >("all")
   const [searchQuery, setSearchQuery] = React.useState("")
 
-  
   const [productModal, setProductModal] = React.useState<{
     type: "delete" | null
     data: AdminProductSummary | null
@@ -220,13 +225,31 @@ export function DataTable({
   const columns = React.useMemo(
     () =>
       columnHelper.columns([
+        // الاستبدال داخل تعريف عمود "Product" في products-table.tsx:
         columnHelper.accessor("name", {
           header: "Product",
-          cell: ({ row }) => (
-            <span className="font-semibold text-foreground">
-              {row.original.name}
-            </span>
-          ),
+          cell: ({ row }) => {
+            const product = row.original
+
+            return (
+              <div className="flex items-center gap-2.5">
+                <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-secondary text-foreground">
+                  <PackageIcon className="size-3.5 text-primary" />
+                </div>
+                <div className="flex max-w-xs min-w-0 flex-col sm:max-w-md">
+                  <Link
+                    href={`${appRoutes.dashboard.admin.products}/${product.slug}/edit`}
+                    className="truncate text-xs font-semibold text-foreground transition-colors hover:text-primary hover:underline"
+                  >
+                    {product.name}
+                  </Link>
+                  <span className="truncate font-mono text-[11px] text-muted-foreground">
+                    /{product.slug}
+                  </span>
+                </div>
+              </div>
+            )
+          },
           enableHiding: false,
         }),
 
@@ -344,7 +367,7 @@ export function DataTable({
                     <span className="sr-only">Actions</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuContent align="end" className="w-44 text-xs">
                   <DropdownMenuItem asChild>
                     <Link
                       href={`/product/${row.original.slug}`}
