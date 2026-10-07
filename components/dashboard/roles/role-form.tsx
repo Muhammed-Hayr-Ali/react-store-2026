@@ -112,7 +112,7 @@ export default function CreateRoleForm({
       let res
       if (isEditing && roleId) {
         res = await updateRole({
-          roleId: Number(roleId),
+          roleId: String(roleId),
           description: description.trim() || null,
           permissions: selectedPermissions,
         })
