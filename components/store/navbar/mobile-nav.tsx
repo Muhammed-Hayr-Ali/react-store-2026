@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button"
 
 import { signOut } from "@/lib/actions/authentication/signOut"
 import { CurrentUser } from "@/lib/actions/utils/profile"
-import { CurrencyCode } from "@/lib/actions/currency/types"
 import { appRoutes } from "@/lib/config/app-routes"
 import { storeNavConfig } from "./nav-config"
 import type { NotificationRecord } from "@/lib/actions/notifications/types"
@@ -28,14 +27,12 @@ import { CurrencyAccordion } from "./preferences/currency-accordion"
 
 interface MobileNavProps {
   user: CurrentUser | null
-  currentCurrency: CurrencyCode
   initialNotifications: NotificationRecord[]
   initialUnreadCount: number
 }
 
 export function MobileNav({
   user,
-  currentCurrency,
   initialNotifications,
   initialUnreadCount,
 }: MobileNavProps) {
@@ -50,7 +47,6 @@ export function MobileNav({
       />
       <MobileRightMenu
         user={user}
-        currentCurrency={currentCurrency}
         initialNotifications={initialNotifications}
         initialUnreadCount={initialUnreadCount}
         isOpen={isOpen}
@@ -62,14 +58,12 @@ export function MobileNav({
 
 function MobileRightMenu({
   user,
-  currentCurrency,
   initialNotifications,
   initialUnreadCount,
   isOpen,
   setIsOpen,
 }: {
   user: CurrentUser | null
-  currentCurrency: CurrencyCode
   initialNotifications: NotificationRecord[]
   initialUnreadCount: number
   isOpen: boolean
@@ -168,10 +162,7 @@ function MobileRightMenu({
 
         <LanguageAccordion onSelect={handleClose} />
         <Separator className="my-px" />
-        <CurrencyAccordion
-          currentCurrency={currentCurrency}
-          onSelect={handleClose}
-        />
+        <CurrencyAccordion onSelect={handleClose} />
         <Separator className="my-px" />
         <ThemeAccordion onSelect={handleClose} />
       </MobileMenuBody>

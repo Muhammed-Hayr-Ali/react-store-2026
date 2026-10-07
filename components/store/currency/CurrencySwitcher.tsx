@@ -14,18 +14,16 @@ import {
   CurrencyCode,
   SUPPORTED_CURRENCIES,
 } from "@/lib/actions/currency/types"
+import { useCurrency } from "@/lib/context/currency-context"
 import { cn } from "@/lib/utils"
 
 interface CurrencySwitcherProps {
-  currentCurrency: CurrencyCode
   className?: string
 }
 
-export function CurrencySwitcher({
-  currentCurrency,
-  className,
-}: CurrencySwitcherProps) {
+export function CurrencySwitcher({ className }: CurrencySwitcherProps) {
   const router = useRouter()
+  const { currency: currentCurrency } = useCurrency()
   const [open, setOpen] = React.useState(false)
   const [isPending, startTransition] = React.useTransition()
 
@@ -107,7 +105,11 @@ export function CurrencySwitcher({
                   <span className="text-[11px] text-muted-foreground">
                     {currency.symbol}
                   </span>
-                  {isSelected ? <CheckIcon className="size-3 text-primary"/> : <div className="size-3"/> }
+                  {isSelected ? (
+                    <CheckIcon className="size-3 text-primary" />
+                  ) : (
+                    <div className="size-3" />
+                  )}
                 </div>
               </button>
             )

@@ -16,18 +16,16 @@ import {
   SUPPORTED_CURRENCIES,
 } from "@/lib/actions/currency/types"
 import { setUserCurrency } from "@/lib/actions/currency/mutations/set-currency"
+import { useCurrency } from "@/lib/context/currency-context"
 import { cn } from "@/lib/utils"
 
 interface CurrencyAccordionProps {
-  currentCurrency: CurrencyCode
   onSelect?: () => void
 }
 
-export function CurrencyAccordion({
-  currentCurrency,
-  onSelect,
-}: CurrencyAccordionProps) {
+export function CurrencyAccordion({ onSelect }: CurrencyAccordionProps) {
   const router = useRouter()
+  const { currency: currentCurrency } = useCurrency()
   const [isPending, setIsPending] = React.useState(false)
 
   const handleCurrencyChange = async (currencyCode: CurrencyCode) => {
