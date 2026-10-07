@@ -15,19 +15,11 @@ import { ProductTrustBadges } from "./ProductTrustBadges"
 import { FlashSaleCountdown } from "./FlashSaleCountdown"
 import { ProductGallery } from "./ProductGallery"
 
-import type { CurrencyCode } from "@/lib/actions/currency/types"
-
 interface ProductDetailsProps {
   product: ProductWithRelations
-  currency: CurrencyCode
-  exchangeRate: number
 }
 
-export default function ProductDetailsPage({
-  product,
-  currency,
-  exchangeRate,
-}: ProductDetailsProps) {
+export default function ProductDetailsPage({ product }: ProductDetailsProps) {
   const availableVariants = React.useMemo(
     () => product.product_variants.filter((v) => v.is_active),
     [product.product_variants]
@@ -184,13 +176,12 @@ export default function ProductDetailsPage({
           selectedVariant={selectedVariant}
           isOutOfStock={isOutOfStock}
           isLowStock={isLowStock}
-          currency={currency}
-          exchangeRate={exchangeRate}
           isFlashSale={Boolean(product.flash_sale_deal)}
           flashSalePercentage={activeDiscountPercentage}
           flashSaleSlug={product.flash_sale_deal?.slug}
           flashSaleTitle={product.flash_sale_deal?.title}
         />
+
         {/* عرض العدّاد التنازلي الحصري في حال وجود حملة فلاش سارية */}
         {hasFlashSale && product.flash_sale_deal?.end_time && (
           <FlashSaleCountdown
@@ -215,8 +206,6 @@ export default function ProductDetailsPage({
         <ProductActions
           quantity={quantity}
           totalPriceInCents={totalPriceInCents}
-          currency={currency}
-          exchangeRate={exchangeRate}
           isOutOfStock={isOutOfStock}
           maxStock={selectedVariant?.stock_quantity ?? 0}
           onQuantityChange={handleQuantityChange}

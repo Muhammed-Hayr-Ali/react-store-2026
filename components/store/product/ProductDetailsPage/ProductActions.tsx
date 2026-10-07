@@ -3,16 +3,11 @@
 import * as React from "react"
 import { MinusIcon, PlusIcon, ShoppingCartIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
-// ✅ استيراد دالة تنسيق السعر الجديدة ونوع العملة
-import { formatPrice as formatCurrencyPrice } from "@/lib/actions/currency/utils"
-import type { CurrencyCode } from "@/lib/actions/currency/types"
+import { useCurrency } from "@/lib/context/currency-context"
 
 interface ProductActionsProps {
   quantity: number
-  totalPriceInCents: number // ✅ تم تغيير الاسم من totalPrice
-  currency: CurrencyCode // ✅ إضافة جديدة
-  exchangeRate: number // ✅ إضافة جديدة
+  totalPriceInCents: number
   isOutOfStock: boolean
   maxStock: number
   onQuantityChange: (qty: number) => void
@@ -22,19 +17,14 @@ interface ProductActionsProps {
 export function ProductActions({
   quantity,
   totalPriceInCents,
-  currency,
-  exchangeRate,
   isOutOfStock,
   maxStock,
   onQuantityChange,
   onAddToCart,
 }: ProductActionsProps) {
-  // ✅ حساب السعر الإجمالي بالعملة المختارة
-  const formattedTotalPrice = formatCurrencyPrice(
-    isOutOfStock ? 0 : totalPriceInCents,
-    currency,
-    exchangeRate
-  )
+  const { format } = useCurrency()
+
+  const formattedTotalPrice = format(isOutOfStock ? 0 : totalPriceInCents)
 
   return (
     <div className="space-y-4">
@@ -48,7 +38,7 @@ export function ProductActions({
             Quantity:
           </span>
           <div className="inline-flex items-center rounded-lg border bg-background p-0.5 shadow-xs">
-       <Button
+            <Button
               variant="ghost"
               size="icon"
               onClick={() => onQuantityChange(quantity + 1)}
@@ -57,11 +47,11 @@ export function ProductActions({
               aria-label="Increase quantity"
             >
               <PlusIcon className="size-3.5" />
-            </Button>         
+            </Button>
             <span className="w-10 text-center text-xs font-semibold text-foreground tabular-nums">
               {isOutOfStock ? 0 : quantity}
             </span>
-<Button
+            <Button
               variant="ghost"
               size="icon"
               onClick={() => onQuantityChange(quantity - 1)}
@@ -71,8 +61,6 @@ export function ProductActions({
             >
               <MinusIcon className="size-3.5" />
             </Button>
-
-        
           </div>
         </div>
 
@@ -80,7 +68,6 @@ export function ProductActions({
           <span className="block text-[11px] font-medium text-muted-foreground">
             Total Price
           </span>
-          {/* ✅ عرض السعر الإجمالي بالعملة المختارة (بدون علامة $ ثابتة) */}
           <span className="text-lg font-bold tracking-tight text-foreground tabular-nums">
             {formattedTotalPrice}
           </span>

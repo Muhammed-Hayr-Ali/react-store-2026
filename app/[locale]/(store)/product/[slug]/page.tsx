@@ -14,10 +14,6 @@ import type {
 } from "@/lib/actions/reviews/types"
 import { getCurrentUser } from "@/lib/actions/utils/profile"
 
-// استيرادات تعدد العملات
-import { getSelectedCurrency } from "@/lib/actions/currency/queries/get-selected-currency"
-import { getExchangeRates } from "@/lib/actions/currency/queries/get-rates"
-
 // Shadcn UI Breadcrumb
 import {
   Breadcrumb,
@@ -72,27 +68,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const parentCategoryId = (product.category as { parent_id?: string | null })
     ?.parent_id
 
-  // جلب البيانات بالتوازي لأفضل أداء ممكن
-  const [
-    summaryResult,
-    reviewsResult,
-    parentCategoryResult,
-    selectedCurrency,
-    exchangeRates,
-  ] = await Promise.all([
-    getReviewSummary(productId),
-    getProductReviewsList(productId),
-    parentCategoryId
-      ? getCategoryById(parentCategoryId)
-      : Promise.resolve(null),
-    getSelectedCurrency(),
-    getExchangeRates(),
-  ])
-
-  // حساب معدل الصرف بأمان
-  const currentRate =
-    exchangeRates.find((r) => r.currency_code === selectedCurrency)
-      ?.rate_from_usd ?? 1
+  // جلب المراجعات والتصنيف الأب فقط بالتوازي
+  const [summaryResult, reviewsResult, parentCategoryResult] =
+    await Promise.all([
+      getReviewSummary(productId),
+      getProductReviewsList(productId),
+      parentCategoryId
+        ? getCategoryById(parentCategoryId)
+        : Promise.resolve(null),
+    ])
 
   const defaultSummary: ReviewSummary = {
     averageRating: 0,
@@ -114,7 +98,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const currentCategory = product.category
 
-  // تحديد الأسماء بحسب اللغة النشطة
+  // تحديد التسميات بحسب اللغة
   const isAr = locale === "ar"
   const homeLabel = isAr ? "الرئيسية" : "Home"
 
@@ -132,11 +116,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 pt-4 pb-8 sm:px-6 sm:pt-4 sm:pb-12 lg:px-8">
-      {/* روابط التنقل السريع Breadcrumb Navigation */}
+      {/* روابط التنقل السريع Breadcrumb */}
       <div className="mb-4 sm:mb-6">
         <Breadcrumb>
           <BreadcrumbList>
-            {/* رابط الصفحة الرئيسية */}
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
                 <Link
@@ -148,8 +131,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </BreadcrumbLink>
             </BreadcrumbItem>
 
-            {/* رابط التصنيف الأب (إن وجد) */}
-            {parentCategory && parentCategory.slug && (
+            {parentCategory?.slug && (
               <>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
@@ -165,8 +147,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </>
             )}
 
-            {/* رابط التصنيف الحالي المباشر للمنتج */}
-            {currentCategory && currentCategory.slug && (
+            {currentCategory?.slug && (
               <>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
@@ -182,7 +163,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </>
             )}
 
-            {/* عنصر المنتج الحالي المعروض */}
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbPage className="max-w-[12rem] truncate font-medium text-foreground sm:max-w-xs">
@@ -193,12 +173,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </Breadcrumb>
       </div>
 
-      {/* قسم تفاصيل المنتج */}
-      <ProductDetailsPage
-        product={product}
-        currency={selectedCurrency}
-        exchangeRate={currentRate}
-      />
+      {/* قسم تفاصيل المنتج بدون تمرير يدوي لخصائص العملة */}
+      <ProductDetailsPage product={product} />
 
       {/* قسم المراجعات والتقييمات */}
       <div

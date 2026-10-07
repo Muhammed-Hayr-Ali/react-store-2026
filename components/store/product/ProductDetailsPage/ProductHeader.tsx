@@ -5,9 +5,8 @@ import Link from "next/link"
 import { useLocale } from "next-intl"
 import { AlertCircleIcon, FlagIcon, ZapIcon } from "lucide-react"
 import { ProductVariantItem } from "./utils"
-import { formatPrice as formatCurrencyPrice } from "@/lib/actions/currency/utils"
-import type { CurrencyCode } from "@/lib/actions/currency/types"
 import { ReportDialog } from "@/components/shared/report-dialog"
+import { useCurrency } from "@/lib/context/currency-context"
 
 interface ProductHeaderProps {
   productId?: string
@@ -19,8 +18,6 @@ interface ProductHeaderProps {
   selectedVariant: ProductVariantItem | null
   isOutOfStock: boolean
   isLowStock: boolean
-  currency: CurrencyCode
-  exchangeRate: number
   isFlashSale?: boolean
   flashSalePercentage?: number | null
   flashSaleSlug?: string | null
@@ -37,27 +34,22 @@ export function ProductHeader({
   selectedVariant,
   isOutOfStock,
   isLowStock,
-  currency,
-  exchangeRate,
   isFlashSale = false,
   flashSalePercentage,
   flashSaleSlug,
   flashSaleTitle,
 }: ProductHeaderProps) {
   const locale = useLocale()
+  const { format } = useCurrency()
 
   const currentPrice = selectedVariant
-    ? formatCurrencyPrice(selectedVariant.price, currency, exchangeRate)
-    : formatCurrencyPrice(0, currency, exchangeRate)
+    ? format(selectedVariant.price)
+    : format(0)
 
   const comparePrice =
     selectedVariant?.compare_at_price &&
     selectedVariant.compare_at_price > selectedVariant.price
-      ? formatCurrencyPrice(
-          selectedVariant.compare_at_price,
-          currency,
-          exchangeRate
-        )
+      ? format(selectedVariant.compare_at_price)
       : null
 
   return (
