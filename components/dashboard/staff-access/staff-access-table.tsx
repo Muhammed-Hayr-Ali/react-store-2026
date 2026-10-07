@@ -31,6 +31,7 @@ import {
   ChevronRightIcon,
   ChevronsRightIcon,
   FilterIcon,
+  PlusIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -61,7 +62,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-import AssignRoleDialog from "./assign-role-dialog"
+import AssignRoleSheet from "./assign-role-sheet"
 import { UserWithRoles } from "@/lib/actions/role/queries/get-users-with-roles"
 import { RoleRecord } from "@/lib/actions/role/mutations/create-role"
 import { removeRoleFromUser } from "@/lib/actions/role/mutations/remove-user-role"
@@ -542,6 +543,22 @@ export function StaffAccessTable({
                 ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* زر الفتح المباشر لاختيار مستخدم وتعيين دور */}
+          <Button
+            variant="default"
+            size="icon"
+            className="size-8 sm:hidden"
+            title="Assign Role"
+            onClick={() => {
+              setSelectedUser(users[0] || null)
+              setIsAssignOpen(true)
+            }}
+          >
+            <PlusIcon className="size-3.5" />
+            <span className="sr-only">Assign Role</span>
+          </Button>
+         
         </div>
       </div>
 
@@ -670,7 +687,7 @@ export function StaffAccessTable({
         </div>
       </div>
 
-      <AssignRoleDialog
+      <AssignRoleSheet
         isOpen={isAssignOpen}
         onOpenChange={(open) => {
           setIsAssignOpen(open)

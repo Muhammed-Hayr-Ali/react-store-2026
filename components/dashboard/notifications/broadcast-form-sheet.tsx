@@ -6,15 +6,7 @@ import { Controller, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { useLocale } from "next-intl"
-import {
-  MegaphoneIcon,
-  CheckCircle2Icon,
-  XIcon,
-  AlertCircleIcon,
-  UsersIcon,
-} from "lucide-react"
+import { MegaphoneIcon, XIcon, AlertCircleIcon, UsersIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -30,14 +22,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
-  CustomSheet,
-  CustomSheetClose,
-  CustomSheetContent,
-  CustomSheetDescription,
-  CustomSheetFooter,
-  CustomSheetHeader,
-  CustomSheetTitle,
-} from "@/components/ui/custom-sheet"
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 
 import { broadcastNotificationSchema } from "@/lib/actions/notifications/schemas"
 import { broadcastNotification } from "@/lib/actions/notifications/mutations/create-notification"
@@ -50,20 +42,12 @@ interface BroadcastFormProps {
   onSuccess?: () => void
 }
 
-function getSide({ isMobile, locale }: { isMobile: boolean; locale: string }) {
-  const dir = locale === "ar" ? "left" : "right"
-  return isMobile ? "bottom" : dir
-}
-
 export default function BroadcastForm({
   isOpen,
   onOpenChange,
   onSuccess,
 }: BroadcastFormProps) {
   const router = useRouter()
-  const isMobile = useIsMobile()
-  const locale = useLocale()
-  const side = getSide({ isMobile, locale })
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   const {
@@ -123,34 +107,20 @@ export default function BroadcastForm({
   }
 
   return (
-    <CustomSheet open={isOpen} onOpenChange={handleOpenChange}>
-      <CustomSheetContent
-        showCloseButton={false}
-        side={side}
+    <Sheet open={isOpen} onOpenChange={handleOpenChange}>
+      <SheetContent
+        side="right"
         className="flex w-full flex-col p-0 sm:max-w-xl"
       >
-        <CustomSheetHeader className="pt-safe shrink-0 border-b bg-card px-5 py-4 sm:px-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <CustomSheetTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
-                Broadcast Notification
-              </CustomSheetTitle>
-              <CustomSheetDescription className="text-xs text-muted-foreground">
-                Send a mass alert announcement to all system users or specific
-                roles.
-              </CustomSheetDescription>
-            </div>
-            <CustomSheetClose asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8 text-muted-foreground hover:bg-muted hover:text-foreground"
-              >
-                <XIcon className="size-4" />
-              </Button>
-            </CustomSheetClose>
-          </div>
-        </CustomSheetHeader>
+        <SheetHeader className="shrink-0 border-b bg-card px-5 py-4 sm:px-6">
+          <SheetTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
+            Broadcast Notification
+          </SheetTitle>
+          <SheetDescription className="text-xs text-muted-foreground">
+            Send a mass alert announcement to all system users or specific
+            roles.
+          </SheetDescription>
+        </SheetHeader>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6">
           <form
@@ -364,39 +334,36 @@ export default function BroadcastForm({
           </form>
         </div>
 
-        <CustomSheetFooter className="shrink-0 border-t bg-card px-5 py-3 sm:px-6 sm:py-4">
+        <SheetFooter className="shrink-0 border-t bg-card px-5 py-3 sm:px-6 sm:py-4">
           <div className="flex w-full flex-col-reverse items-stretch justify-end gap-2.5 sm:flex-row sm:items-center">
-            <CustomSheetClose asChild>
+            <SheetClose asChild>
               <Button
                 type="button"
                 variant="outline"
                 disabled={isSubmitting}
-                className="w-full cursor-pointer sm:w-auto"
+                className="w-full cursor-pointer text-xs sm:w-auto"
               >
-                Cancel
+                Discard
               </Button>
-            </CustomSheetClose>
+            </SheetClose>
             <Button
               type="submit"
               form="broadcast-form-element"
               disabled={isSubmitting}
-              className="w-full cursor-pointer shadow-xs sm:w-auto sm:min-w-32"
+              className="w-full cursor-pointer text-xs shadow-xs sm:w-auto sm:min-w-32"
             >
               {isSubmitting ? (
                 <>
-                  <Spinner className="mr-2 size-4" />
+                  <Spinner className="mr-2 size-3.5" />
                   Broadcasting...
                 </>
               ) : (
-                <>
-                  <CheckCircle2Icon className="mr-1.5 size-4" />
-                  Send Broadcast
-                </>
+                "Send Broadcast"
               )}
             </Button>
           </div>
-        </CustomSheetFooter>
-      </CustomSheetContent>
-    </CustomSheet>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   )
 }

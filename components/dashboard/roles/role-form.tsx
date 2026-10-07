@@ -1,3 +1,8 @@
+/**
+ * @file components/dashboard/roles/role-form.tsx
+ * @description Form component for creating and updating access control roles.
+ */
+
 "use client"
 
 import * as React from "react"
@@ -5,7 +10,6 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import {
   ShieldIcon,
-  CheckCircle2Icon,
   CheckSquare2Icon,
   SquareIcon,
   LayersIcon,
@@ -147,138 +151,6 @@ export default function CreateRoleForm({
     }
   }
 
-  // دالة مصفوفة الصلاحيات المشتركة
-  const renderPermissionsMatrix = () => (
-    <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
-      <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
-        <div className="flex items-center gap-2">
-          <LayersIcon className="size-4 text-primary" />
-          <div>
-            <h2 className="text-sm font-semibold text-card-foreground">
-              Permissions Matrix
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              Assign granular feature and module capabilities
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={selectAllPermissions}
-            className="h-8 cursor-pointer px-2.5 text-xs text-muted-foreground hover:text-foreground"
-          >
-            Select All
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={clearAllPermissions}
-            className="h-8 cursor-pointer px-2.5 text-xs text-muted-foreground hover:text-foreground"
-          >
-            Clear
-          </Button>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        {PERMISSION_GROUPS.map((group) => {
-          const groupPermKeys = group.permissions.map((p) => p.key)
-          const isGroupChecked = groupPermKeys.every((p) =>
-            selectedPermissions.includes(p)
-          )
-
-          return (
-            <div
-              key={group.id}
-              className="space-y-3 rounded-lg border border-border bg-muted/10 p-4 transition-all hover:border-muted-foreground/30"
-            >
-              <div className="flex items-center justify-between border-b border-border/60 pb-2">
-                <span className="text-xs font-bold text-card-foreground">
-                  {group.label}
-                </span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => toggleGroupAll(groupPermKeys)}
-                  className="h-7 gap-1 px-2 text-[11px] text-muted-foreground hover:text-foreground"
-                >
-                  {isGroupChecked ? (
-                    <CheckSquare2Icon className="size-3.5 text-primary" />
-                  ) : (
-                    <SquareIcon className="size-3.5" />
-                  )}
-                  {isGroupChecked ? "Unselect Group" : "Select Group"}
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-                {group.permissions.map((perm) => {
-                  const isChecked = selectedPermissions.includes(perm.key)
-                  return (
-                    <div
-                      key={perm.key}
-                      onClick={() => togglePermission(perm.key)}
-                      className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-2.5 transition-colors ${
-                        isChecked
-                          ? "border-primary/40 bg-primary/5"
-                          : "border-border/60 hover:bg-muted/20"
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={() => {}}
-                        className="mt-0.5 rounded border-muted-foreground/30 accent-primary"
-                      />
-                      <div className="space-y-0.5">
-                        <p className="text-xs leading-none font-semibold text-foreground">
-                          {perm.label}
-                        </p>
-                        <p className="text-[11px] leading-tight text-muted-foreground">
-                          {perm.description}
-                        </p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
-
-  // دالة ملخص التغطية المشتركة
-  const renderCoverageSummary = () => (
-    <div className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-xs">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <SparklesIcon className="size-4 text-primary" />
-          <h2 className="text-xs font-semibold text-card-foreground">
-            Coverage Summary
-          </h2>
-        </div>
-        <span className="font-mono text-xs font-medium text-muted-foreground">
-          {selectedPermissions.length} / {totalPossiblePermissions}
-        </span>
-      </div>
-
-      <Progress
-        value={
-          (selectedPermissions.length / (totalPossiblePermissions || 1)) * 100
-        }
-        className="h-1.5"
-      />
-    </div>
-  )
-
   return (
     <form noValidate onSubmit={handleSubmit} className="space-y-6">
       {errorMessage && (
@@ -299,15 +171,130 @@ export default function CreateRoleForm({
         </Alert>
       )}
 
-      <div className="flex flex-col space-y-6 lg:grid lg:grid-cols-3 lg:items-start lg:gap-6 lg:space-y-0">
-        {/* Role Information (تظهر أولاً على الجوال، وفي العمود الجانبي على الشاشات الكبيرة) */}
-        <div className="order-1 min-w-0 space-y-6 lg:order-2">
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+        {/* Main Column */}
+        <div className="min-w-0 space-y-6 lg:col-span-2">
+          {/* Permissions Matrix Card */}
+          <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+            <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
+              <div className="flex items-center gap-2">
+                <LayersIcon className="size-4 text-primary" />
+                <div>
+                  <h2 className="text-sm font-semibold text-card-foreground">
+                    Permissions Matrix
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    Assign granular feature and module capabilities
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={selectAllPermissions}
+                  className="h-8 cursor-pointer px-2.5 text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Select All
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearAllPermissions}
+                  className="h-8 cursor-pointer px-2.5 text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Clear
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {PERMISSION_GROUPS.map((group) => {
+                const groupPermKeys = group.permissions.map((p) => p.key)
+                const isGroupChecked = groupPermKeys.every((p) =>
+                  selectedPermissions.includes(p)
+                )
+
+                return (
+                  <div
+                    key={group.id}
+                    className="space-y-3 rounded-lg border border-border bg-muted/10 p-4 transition-all hover:border-muted-foreground/30"
+                  >
+                    <div className="flex items-center justify-between border-b border-border/60 pb-2">
+                      <span className="text-xs font-bold text-card-foreground">
+                        {group.label}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleGroupAll(groupPermKeys)}
+                        className="h-7 gap-1 px-2 text-[11px] text-muted-foreground hover:text-foreground"
+                      >
+                        {isGroupChecked ? (
+                          <CheckSquare2Icon className="size-3.5 text-primary" />
+                        ) : (
+                          <SquareIcon className="size-3.5" />
+                        )}
+                        {isGroupChecked ? "Unselect Group" : "Select Group"}
+                      </Button>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                      {group.permissions.map((perm) => {
+                        const isChecked = selectedPermissions.includes(perm.key)
+                        return (
+                          <div
+                            key={perm.key}
+                            onClick={() => togglePermission(perm.key)}
+                            className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-2.5 transition-colors ${
+                              isChecked
+                                ? "border-primary/40 bg-primary/5"
+                                : "border-border/60 hover:bg-muted/20"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => {}}
+                              className="mt-0.5 rounded border-muted-foreground/30 accent-primary"
+                            />
+                            <div className="space-y-0.5">
+                              <p className="text-xs leading-none font-semibold text-foreground">
+                                {perm.label}
+                              </p>
+                              <p className="text-[11px] leading-tight text-muted-foreground">
+                                {perm.description}
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Sidebar */}
+        <div className="min-w-0 space-y-6 lg:col-span-1">
+          {/* Role Information Card */}
           <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
             <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
               <ShieldIcon className="size-4 text-primary" />
-              <h2 className="text-sm font-semibold text-card-foreground">
-                Role Information
-              </h2>
+              <div>
+                <h2 className="text-sm font-semibold text-card-foreground">
+                  Role Information
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  Define authorization keys and role descriptions
+                </p>
+              </div>
             </div>
 
             <FieldGroup className="space-y-4">
@@ -349,50 +336,72 @@ export default function CreateRoleForm({
             </FieldGroup>
           </div>
 
-          {/* Coverage Summary - يظهر هنا فقط على الشاشات الكبيرة (Desktop) */}
-          <div className="hidden lg:block">{renderCoverageSummary()}</div>
+          {/* Coverage Summary Card */}
+          <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+            <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
+              <div className="flex items-center gap-2">
+                <SparklesIcon className="size-4 text-primary" />
+                <div>
+                  <h2 className="text-sm font-semibold text-card-foreground">
+                    Coverage Summary
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    Assigned access proportion
+                  </p>
+                </div>
+              </div>
+              <span className="font-mono text-xs font-medium text-muted-foreground">
+                {selectedPermissions.length} / {totalPossiblePermissions}
+              </span>
+            </div>
+
+            <Progress
+              value={
+                (selectedPermissions.length / (totalPossiblePermissions || 1)) *
+                100
+              }
+              className="h-1.5"
+            />
+          </div>
+
+          {/* Actions Card */}
+          <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+            <div className="mb-4 border-b border-border/60 pb-3">
+              <h2 className="text-sm font-semibold text-card-foreground">
+                Actions
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Commit or cancel ongoing modifications
+              </p>
+            </div>
+            <div className="flex flex-col-reverse gap-2 sm:flex-col">
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="h-9 w-full cursor-pointer text-xs shadow-xs"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Spinner className="mr-2 size-4" />
+                    Saving...
+                  </>
+                ) : (
+                  <>{isEditing ? "Update Role" : "Save Role"}</>
+                )}
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isSubmitting}
+                onClick={() => router.back()}
+                className="h-9 w-full text-xs"
+              >
+                Discard Changes
+              </Button>
+            </div>
+          </div>
         </div>
-
-        {/* Permissions Matrix (تظهر ثانياً على الجوال عبر order-2، وتشغل عمودين على الشاشات الكبيرة) */}
-        <div className="order-2 min-w-0 space-y-6 lg:order-1 lg:col-span-2">
-          {/* Permissions Matrix - يظهر هنا فقط على الشاشات الكبيرة (Desktop) */}
-          <div className="hidden lg:block">{renderPermissionsMatrix()}</div>
-
-          {/* Permissions Matrix - يظهر هنا فقط على الجوال (Mobile) */}
-          <div className="block lg:hidden">{renderPermissionsMatrix()}</div>
-
-          {/* Coverage Summary - يظهر هنا فقط على الشاشات الصغيرة (Mobile) */}
-          <div className="block lg:hidden">{renderCoverageSummary()}</div>
-        </div>
-      </div>
-
-      <div className="flex flex-col-reverse items-stretch justify-end gap-3 border-t border-border pt-6 sm:flex-row sm:items-center">
-        <Button
-          type="button"
-          variant="outline"
-          disabled={isSubmitting}
-          onClick={() => router.back()}
-          className="h-9 w-full text-xs sm:w-auto"
-        >
-          Discard Changes
-        </Button>
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="h-9 w-full cursor-pointer text-xs shadow-xs sm:w-auto sm:min-w-32"
-        >
-          {isSubmitting ? (
-            <>
-              <Spinner className="mr-2 size-4" />
-              Saving...
-            </>
-          ) : (
-            <>
-              <CheckCircle2Icon className="mr-1.5 size-4" />
-              {isEditing ? "Update Role" : "Save Role"}
-            </>
-          )}
-        </Button>
       </div>
     </form>
   )

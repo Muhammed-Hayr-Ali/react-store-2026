@@ -62,10 +62,10 @@ import {
 import { Category } from "@/lib/actions/categories"
 import { Brand } from "@/lib/actions/brands"
 
-import CategoryForm from "@/components/dashboard/categories/category-form"
+import CategoryForm from "@/components/dashboard/categories/category-form-sheet"
 import DeleteCategoryDialog from "@/components/dashboard/categories/delete-category"
 
-import BrandForm from "@/components/dashboard/brand/brand-form"
+import BrandForm from "@/components/dashboard/brand/brand-form-sheet"
 import DeleteBrandDialog from "../brand/delete-brand"
 import { createProductCompleteSchema } from "@/lib/actions/products"
 import { appRoutes } from "@/lib/config/app-routes"
@@ -384,7 +384,6 @@ export default function ProductForm({
         onSubmit={form.handleSubmit(onSubmit, onInvalid)}
         className="space-y-6"
       >
-        {/* Global Error Alert */}
         {errorMessage && (
           <Alert variant="destructive" className="relative pr-9">
             <AlertCircleIcon className="size-4" />
@@ -403,16 +402,21 @@ export default function ProductForm({
           </Alert>
         )}
 
-        {/* 2-Column Responsive Layout */}
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
           <div className="min-w-0 space-y-6 lg:col-span-2">
-            {/* Card 1: Basic Information */}
+            {/* Basic Information */}
             <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
                 <PackageIcon className="size-4 text-primary" />
-                <h2 className="text-sm font-semibold text-card-foreground">
-                  Basic Information
-                </h2>
+                <div>
+                  <h2 className="text-sm font-semibold text-card-foreground">
+                    Basic Information
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    Define primary product identity and general presentation
+                    details
+                  </p>
+                </div>
               </div>
 
               <FieldGroup className="space-y-4">
@@ -508,7 +512,7 @@ export default function ProductForm({
               </FieldGroup>
             </div>
 
-            {/* Card 2: Variants & Pricing */}
+            {/* Variants & Pricing */}
             <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
                 <div className="flex items-center gap-2">
@@ -554,7 +558,7 @@ export default function ProductForm({
               </div>
             </div>
 
-            {/* Card 3: Media Gallery */}
+            {/* Media Gallery */}
             <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
                 <div className="flex items-center gap-2">
@@ -599,16 +603,22 @@ export default function ProductForm({
           </div>
 
           {/* Sidebar */}
-          <div className="min-w-0 space-y-6">
+          <div className="min-w-0 space-y-6 lg:col-span-1">
+            {/* Status Card */}
             <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
                 <SparklesIcon className="size-4 text-primary" />
-                <h2 className="text-sm font-semibold text-card-foreground">
-                  Product Status
-                </h2>
+                <div>
+                  <h2 className="text-sm font-semibold text-card-foreground">
+                    Product Status
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    Store availability and visibility state
+                  </p>
+                </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <Controller
                   name="is_active"
                   control={control}
@@ -653,9 +663,14 @@ export default function ProductForm({
             <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
               <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
                 <TagIcon className="size-4 text-primary" />
-                <h2 className="text-sm font-semibold text-card-foreground">
-                  Organization
-                </h2>
+                <div>
+                  <h2 className="text-sm font-semibold text-card-foreground">
+                    Organization
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    Structure catalog taxonomy and branding
+                  </p>
+                </div>
               </div>
 
               <FieldGroup className="space-y-3.5">
@@ -833,9 +848,14 @@ export default function ProductForm({
               <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
                 <div className="flex items-center gap-2">
                   <GlobeIcon className="size-4 text-primary" />
-                  <h2 className="text-sm font-semibold text-card-foreground">
-                    SEO Details
-                  </h2>
+                  <div>
+                    <h2 className="text-sm font-semibold text-card-foreground">
+                      SEO Details
+                    </h2>
+                    <p className="text-xs text-muted-foreground">
+                      Search engine listing previews
+                    </p>
+                  </div>
                 </div>
 
                 <Button
@@ -916,12 +936,15 @@ export default function ProductForm({
               </FieldGroup>
             </div>
 
-            {/* مكوّن أزرار الإجراءات الجانبي (متجاوب: في الجانب على الشاشات الكبيرة وفي الأسفل على الجوال، بدون أيقونات) */}
+            {/* Actions Card */}
             <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
               <div className="mb-4 border-b border-border/60 pb-3">
                 <h2 className="text-sm font-semibold text-card-foreground">
                   Actions
                 </h2>
+                <p className="text-xs text-muted-foreground">
+                  Commit or cancel ongoing modifications
+                </p>
               </div>
               <div className="flex flex-col-reverse gap-2 sm:flex-col">
                 <Button
@@ -954,7 +977,7 @@ export default function ProductForm({
         </div>
       </form>
 
-      {/* --- Category Sheets & Dialogs --- */}
+      {/* --- خارج الـ Form الأساسي بالكامل لمنع التداخل (Portal/Unnested) --- */}
       <CategoryForm
         isOpen={categoryModal.type === "create" ? "create" : null}
         onOpenChange={(open) => {
@@ -995,7 +1018,6 @@ export default function ProductForm({
         }}
       />
 
-      {/* --- Brand Sheets & Dialogs --- */}
       <BrandForm
         isOpen={brandModal.type === "create" ? "create" : null}
         onOpenChange={(open) => {
@@ -1028,7 +1050,6 @@ export default function ProductForm({
         }}
       />
 
-      {/* --- Delete Dialogs --- */}
       <DeleteCategoryDialog
         isOpen={categoryModal.type === "delete"}
         onOpenChange={(open) => {
@@ -1069,10 +1090,6 @@ export default function ProductForm({
     </>
   )
 }
-
-// ============================================================================
-// Subcomponents
-// ============================================================================
 
 interface VariantCardProps {
   index: number

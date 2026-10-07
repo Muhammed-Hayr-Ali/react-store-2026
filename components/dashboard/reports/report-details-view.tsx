@@ -298,14 +298,12 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
               <div className="mt-3 space-y-2 border-t border-border/40 pt-2">
                 <Button
                   type="button"
-                  variant="destructive"
                   disabled={isLoading}
-                  onClick={() => setDeleteModalOpen(true)}
+                  onClick={handleUpdateStatusAndNotes}
                   className="w-full text-xs"
                 >
-                  Delete Report
+                  {isLoading ? "Saving..." : "Save Changes"}
                 </Button>
-
                 <Button
                   type="button"
                   variant="outline"
@@ -315,14 +313,14 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
                 >
                   Discard Changes
                 </Button>
-
                 <Button
                   type="button"
+                  variant="destructive"
                   disabled={isLoading}
-                  onClick={handleUpdateStatusAndNotes}
+                  onClick={() => setDeleteModalOpen(true)}
                   className="w-full text-xs"
                 >
-                  {isLoading ? "Saving..." : "Save Changes"}
+                  Delete Report
                 </Button>
               </div>
             </div>

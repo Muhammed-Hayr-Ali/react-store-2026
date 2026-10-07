@@ -71,8 +71,8 @@ import {
 
 import { AdminNotificationRecord } from "@/lib/actions/notifications/types"
 import DeleteNotificationDialog from "./delete-notification-dialog"
-import NotificationForm from "./notification-form"
-import BroadcastForm from "./broadcast-form"
+import NotificationForm from "./notification-form-sheet"
+import BroadcastForm from "./broadcast-form-sheet"
 import { NotificationDetailsDialog } from "./notification-details-dialog"
 
 interface DisplayNotificationRecord extends AdminNotificationRecord {

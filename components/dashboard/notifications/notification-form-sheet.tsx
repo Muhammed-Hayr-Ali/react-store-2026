@@ -6,11 +6,8 @@ import { Controller, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { useLocale } from "next-intl"
 import {
   BellIcon,
-  CheckCircle2Icon,
   CheckIcon,
   ChevronsUpDownIcon,
   XIcon,
@@ -45,14 +42,14 @@ import {
   CommandList,
 } from "@/components/ui/command"
 import {
-  CustomSheet,
-  CustomSheetClose,
-  CustomSheetContent,
-  CustomSheetDescription,
-  CustomSheetFooter,
-  CustomSheetHeader,
-  CustomSheetTitle,
-} from "@/components/ui/custom-sheet"
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 
 import { createNotificationSchema } from "@/lib/actions/notifications/schemas"
 import { createNotification } from "@/lib/actions/notifications/mutations/create-notification"
@@ -74,11 +71,6 @@ interface NotificationFormProps {
   onSuccess?: () => void
 }
 
-function getSide({ isMobile, locale }: { isMobile: boolean; locale: string }) {
-  const dir = locale === "ar" ? "left" : "right"
-  return isMobile ? "bottom" : dir
-}
-
 export default function NotificationForm({
   isOpen,
   onOpenChange,
@@ -86,9 +78,6 @@ export default function NotificationForm({
   onSuccess,
 }: NotificationFormProps) {
   const router = useRouter()
-  const isMobile = useIsMobile()
-  const locale = useLocale()
-  const side = getSide({ isMobile, locale })
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
   const [userPickerOpen, setUserPickerOpen] = React.useState(false)
 
@@ -153,34 +142,19 @@ export default function NotificationForm({
   }
 
   return (
-    <CustomSheet open={isOpen} onOpenChange={handleOpenChange}>
-      <CustomSheetContent
-        showCloseButton={false}
-        side={side}
+    <Sheet open={isOpen} onOpenChange={handleOpenChange}>
+      <SheetContent
+        side="right"
         className="flex w-full flex-col p-0 sm:max-w-xl"
       >
-        <CustomSheetHeader className="pt-safe shrink-0 border-b bg-card px-5 py-4 sm:px-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <CustomSheetTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
-                Send Notification
-              </CustomSheetTitle>
-              <CustomSheetDescription className="text-xs text-muted-foreground">
-                Dispatch a targeted notification alert directly to a user
-                account.
-              </CustomSheetDescription>
-            </div>
-            <CustomSheetClose asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8 text-muted-foreground hover:bg-muted hover:text-foreground"
-              >
-                <XIcon className="size-4" />
-              </Button>
-            </CustomSheetClose>
-          </div>
-        </CustomSheetHeader>
+        <SheetHeader className="shrink-0 border-b bg-card px-5 py-4 sm:px-6">
+          <SheetTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
+            Send Notification
+          </SheetTitle>
+          <SheetDescription className="text-xs text-muted-foreground">
+            Dispatch a targeted notification alert directly to a user account.
+          </SheetDescription>
+        </SheetHeader>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6">
           <form
@@ -214,7 +188,6 @@ export default function NotificationForm({
               </div>
 
               <FieldGroup className="space-y-4">
-                {/* حقل اختيار المستخدم المحدث بنظام القائمة القابلة للبحث */}
                 <Field data-invalid={Boolean(errors.userId)}>
                   <FieldLabel htmlFor="notif-user-trigger" className="text-xs">
                     Target User <span className="text-destructive">*</span>
@@ -423,39 +396,36 @@ export default function NotificationForm({
           </form>
         </div>
 
-        <CustomSheetFooter className="shrink-0 border-t bg-card px-5 py-3 sm:px-6 sm:py-4">
+        <SheetFooter className="shrink-0 border-t bg-card px-5 py-3 sm:px-6 sm:py-4">
           <div className="flex w-full flex-col-reverse items-stretch justify-end gap-2.5 sm:flex-row sm:items-center">
-            <CustomSheetClose asChild>
+            <SheetClose asChild>
               <Button
                 type="button"
                 variant="outline"
                 disabled={isSubmitting}
-                className="w-full cursor-pointer sm:w-auto"
+                className="w-full cursor-pointer text-xs sm:w-auto"
               >
-                Cancel
+                Discard
               </Button>
-            </CustomSheetClose>
+            </SheetClose>
             <Button
               type="submit"
               form="notification-form-element"
               disabled={isSubmitting}
-              className="w-full cursor-pointer shadow-xs sm:w-auto sm:min-w-32"
+              className="w-full cursor-pointer text-xs shadow-xs sm:w-auto sm:min-w-32"
             >
               {isSubmitting ? (
                 <>
-                  <Spinner className="mr-2 size-4" />
+                  <Spinner className="mr-2 size-3.5" />
                   Sending...
                 </>
               ) : (
-                <>
-                  <CheckCircle2Icon className="mr-1.5 size-4" />
-                  Send Notification
-                </>
+                "Send Notification"
               )}
             </Button>
           </div>
-        </CustomSheetFooter>
-      </CustomSheetContent>
-    </CustomSheet>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   )
 }

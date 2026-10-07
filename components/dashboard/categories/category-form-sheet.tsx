@@ -6,14 +6,11 @@ import { Controller, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { useLocale } from "next-intl"
 import slugify from "slugify"
 import {
   PackageIcon,
   ImageIcon,
   FolderTreeIcon,
-  CheckCircle2Icon,
   XIcon,
   Wand2Icon,
   AlertCircleIcon,
@@ -39,14 +36,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
-  CustomSheet,
-  CustomSheetClose,
-  CustomSheetContent,
-  CustomSheetDescription,
-  CustomSheetFooter,
-  CustomSheetHeader,
-  CustomSheetTitle,
-} from "@/components/ui/custom-sheet"
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 
 import {
   Category,
@@ -77,17 +74,6 @@ interface CategoryFormProps {
   onSuccess: (category: Category) => void
 }
 
-export function getSide({
-  isMobile,
-  locale,
-}: {
-  isMobile: boolean
-  locale: string
-}) {
-  const dir = locale === "ar" ? "left" : "right"
-  return isMobile ? "bottom" : dir
-}
-
 export default function CategoryForm({
   isOpen,
   onOpenChange,
@@ -96,9 +82,6 @@ export default function CategoryForm({
   onSuccess,
 }: CategoryFormProps) {
   const router = useRouter()
-  const isMobile = useIsMobile()
-  const locale = useLocale()
-  const side = getSide({ isMobile, locale })
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   const isEditing = Boolean(item)
@@ -220,43 +203,24 @@ export default function CategoryForm({
   }
 
   return (
-    <CustomSheet open={isOpen === mode} onOpenChange={handleOpenChange}>
-      <CustomSheetContent
-        showCloseButton={false}
-        side={side}
-        className="flex w-full flex-col p-0 sm:max-w-xl"
-      >
-        {/* Header - ثابت ومعزز بمسافة آمنة علوية */}
-        <CustomSheetHeader className="pt-safe shrink-0 border-b bg-card px-5 py-4 sm:px-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <CustomSheetTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
-                {isEditing ? "Edit Category" : "Add Category"}
-              </CustomSheetTitle>
-              <CustomSheetDescription className="text-xs text-muted-foreground">
-                {isEditing
-                  ? "Modify category hierarchy, details, media, and status."
-                  : "Configure category details, parent hierarchy, media, and status."}
-              </CustomSheetDescription>
-            </div>
-            <CustomSheetClose asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8 text-muted-foreground hover:bg-muted hover:text-foreground"
-              >
-                <XIcon className="size-4" />
-              </Button>
-            </CustomSheetClose>
-          </div>
-        </CustomSheetHeader>
+    <Sheet open={isOpen === mode} onOpenChange={handleOpenChange}>
+      <SheetContent side="right" className="flex h-full w-full flex-col p-0">
+        <SheetHeader className="shrink-0 border-b bg-card px-5 py-4 sm:px-6">
+          <SheetTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
+            {isEditing ? "Edit Category" : "Add Category"}
+          </SheetTitle>
+          <SheetDescription className="text-xs text-muted-foreground">
+            {isEditing
+              ? "Modify category hierarchy, details, media, and status."
+              : "Configure category details, parent hierarchy, media, and status."}
+          </SheetDescription>
+        </SheetHeader>
 
-        {/* Scrollable Form Body */}
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6">
           <form
             id="category-form-element"
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-5 pb-8"
+            className="space-y-5 pb-6"
           >
             {errorMessage && (
               <Alert variant="destructive" className="relative pr-9">
@@ -275,7 +239,6 @@ export default function CategoryForm({
               </Alert>
             )}
 
-            {/* Card 1: Basic Information */}
             <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <PackageIcon className="size-4 text-primary" />
@@ -364,7 +327,6 @@ export default function CategoryForm({
               </FieldGroup>
             </div>
 
-            {/* Card 2: Media & Description */}
             <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <ImageIcon className="size-4 text-primary" />
@@ -485,7 +447,6 @@ export default function CategoryForm({
               </FieldGroup>
             </div>
 
-            {/* Card 3: Hierarchy & Status */}
             <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <FolderTreeIcon className="size-4 text-primary" />
@@ -599,40 +560,38 @@ export default function CategoryForm({
           </form>
         </div>
 
-        {/* Footer - موحد */}
-        <CustomSheetFooter className="shrink-0 border-t bg-card px-5 py-3 sm:px-6 sm:py-4">
+        <SheetFooter className="shrink-0 border-t bg-card px-5 py-3 sm:px-6 sm:py-4">
           <div className="flex w-full flex-col-reverse items-stretch justify-end gap-2.5 sm:flex-row sm:items-center">
-            <CustomSheetClose asChild>
+            <SheetClose asChild>
               <Button
                 type="button"
                 variant="outline"
                 disabled={isSubmitting}
-                className="w-full cursor-pointer sm:w-auto"
+                className="w-full cursor-pointer text-xs sm:w-auto"
               >
                 Discard
               </Button>
-            </CustomSheetClose>
+            </SheetClose>
             <Button
               type="submit"
               form="category-form-element"
               disabled={isSubmitting}
-              className="w-full cursor-pointer shadow-xs sm:w-auto sm:min-w-32"
+              className="w-full cursor-pointer text-xs shadow-xs sm:w-auto sm:min-w-32"
             >
               {isSubmitting ? (
                 <>
-                  <Spinner className="mr-2 size-4" />
+                  <Spinner className="mr-2 size-3.5" />
                   Saving...
                 </>
+              ) : isEditing ? (
+                "Save Changes"
               ) : (
-                <>
-                  <CheckCircle2Icon className="mr-1.5 size-4" />
-                  {isEditing ? "Save Changes" : "Save Category"}
-                </>
+                "Save Category"
               )}
             </Button>
           </div>
-        </CustomSheetFooter>
-      </CustomSheetContent>
-    </CustomSheet>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   )
 }

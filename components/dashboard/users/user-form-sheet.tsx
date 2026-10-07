@@ -6,11 +6,8 @@ import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { useLocale } from "next-intl"
 import {
   UserPlusIcon,
-  CheckCircle2Icon,
   XIcon,
   Wand2Icon,
   AlertCircleIcon,
@@ -28,14 +25,14 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import {
-  CustomSheet,
-  CustomSheetClose,
-  CustomSheetContent,
-  CustomSheetDescription,
-  CustomSheetFooter,
-  CustomSheetHeader,
-  CustomSheetTitle,
-} from "@/components/ui/custom-sheet"
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 
 import { AdminUserSummary } from "@/lib/actions/users/types"
 import { createUser } from "@/lib/actions/users/mutations/create-user"
@@ -53,17 +50,6 @@ interface UserFormSheetProps {
   onSuccess: (user: AdminUserSummary, isEditing: boolean) => void
 }
 
-export function getSide({
-  isMobile,
-  locale,
-}: {
-  isMobile: boolean
-  locale: string
-}) {
-  const dir = locale === "ar" ? "left" : "right"
-  return isMobile ? "bottom" : dir
-}
-
 export function UserFormSheet({
   isOpen,
   onOpenChange,
@@ -71,9 +57,6 @@ export function UserFormSheet({
   onSuccess,
 }: UserFormSheetProps) {
   const router = useRouter()
-  const isMobile = useIsMobile()
-  const locale = useLocale()
-  const side = getSide({ isMobile, locale })
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   const isEditing = Boolean(user)
@@ -204,35 +187,21 @@ export function UserFormSheet({
   }
 
   return (
-    <CustomSheet open={isOpen === mode} onOpenChange={handleOpenChange}>
-      <CustomSheetContent
-        showCloseButton={false}
-        side={side}
+    <Sheet open={isOpen === mode} onOpenChange={handleOpenChange}>
+      <SheetContent
+        side="right"
         className="flex w-full flex-col p-0 sm:max-w-xl"
       >
-        <CustomSheetHeader className="pt-safe shrink-0 border-b bg-card px-5 py-4 sm:px-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <CustomSheetTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
-                {isEditing ? "Edit User Account" : "Create New User"}
-              </CustomSheetTitle>
-              <CustomSheetDescription className="text-xs text-muted-foreground">
-                {isEditing
-                  ? "Modify user profile information and details."
-                  : "Fill in the details to register a new user in the system."}
-              </CustomSheetDescription>
-            </div>
-            <CustomSheetClose asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8 text-muted-foreground hover:bg-muted hover:text-foreground"
-              >
-                <XIcon className="size-4" />
-              </Button>
-            </CustomSheetClose>
-          </div>
-        </CustomSheetHeader>
+        <SheetHeader className="shrink-0 border-b bg-card px-5 py-4 sm:px-6">
+          <SheetTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
+            {isEditing ? "Edit User Account" : "Create New User"}
+          </SheetTitle>
+          <SheetDescription className="text-xs text-muted-foreground">
+            {isEditing
+              ? "Modify user profile information and details."
+              : "Fill in the details to register a new user in the system."}
+          </SheetDescription>
+        </SheetHeader>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6">
           <form
@@ -415,39 +384,38 @@ export function UserFormSheet({
           </form>
         </div>
 
-        <CustomSheetFooter className="shrink-0 border-t bg-card px-5 py-3 sm:px-6 sm:py-4">
+        <SheetFooter className="shrink-0 border-t bg-card px-5 py-3 sm:px-6 sm:py-4">
           <div className="flex w-full flex-col-reverse items-stretch justify-end gap-2.5 sm:flex-row sm:items-center">
-            <CustomSheetClose asChild>
+            <SheetClose asChild>
               <Button
                 type="button"
                 variant="outline"
                 disabled={isSubmitting}
-                className="w-full cursor-pointer sm:w-auto"
+                className="w-full cursor-pointer text-xs sm:w-auto"
               >
                 Discard
               </Button>
-            </CustomSheetClose>
+            </SheetClose>
             <Button
               type="submit"
               form="user-form-element"
               disabled={isSubmitting}
-              className="w-full cursor-pointer shadow-xs sm:w-auto sm:min-w-32"
+              className="w-full cursor-pointer text-xs shadow-xs sm:w-auto sm:min-w-32"
             >
               {isSubmitting ? (
                 <>
-                  <Spinner className="mr-2 size-4" />
+                  <Spinner className="mr-2 size-3.5" />
                   Saving...
                 </>
+              ) : isEditing ? (
+                "Save Changes"
               ) : (
-                <>
-                  <CheckCircle2Icon className="mr-1.5 size-4" />
-                  {isEditing ? "Save Changes" : "Save User"}
-                </>
+                "Save User"
               )}
             </Button>
           </div>
-        </CustomSheetFooter>
-      </CustomSheetContent>
-    </CustomSheet>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   )
 }
