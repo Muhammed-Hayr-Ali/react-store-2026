@@ -12,7 +12,7 @@ import { hasPermission, PERMISSIONS, AppPermission } from "../index"
 import { createRoleSchema, CreateRoleInput } from "../schemas"
 
 export interface RoleRecord {
-  id: number
+  id: string
   name: string
   description: string | null
   permissions: AppPermission[]

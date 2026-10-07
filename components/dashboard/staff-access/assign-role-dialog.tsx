@@ -63,16 +63,15 @@ function AssignRoleContent({
       return
     }
 
-    const roleToAssign = availableRoles.find(
-      (r) => r.id === Number(selectedRoleId)
-    )
+    // تصحيح: البحث بالـ UUID النصي مباشرة بدون استخدام Number()[cite: 26]
+    const roleToAssign = availableRoles.find((r) => r.id === selectedRoleId)
     if (!roleToAssign) return
 
     setIsSubmitting(true)
     try {
       const res = await assignRoleToUser({
         userId: user.id,
-        roleId: String(selectedRoleId),
+        roleId: selectedRoleId, // إرسال الـ UUID مباشرة
       })
 
       if (res.success) {
@@ -126,7 +125,7 @@ function AssignRoleContent({
                 {assignableRoles.map((role) => (
                   <SelectItem
                     key={role.id}
-                    value={role.id.toString()}
+                    value={role.id} // تمرير الـ UUID كقيمة مباشرة
                     className="text-xs"
                   >
                     <span className="font-semibold uppercase">{role.name}</span>

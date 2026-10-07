@@ -116,9 +116,10 @@ export function StaffAccessTable({
     setUsers(initialUsers)
   }
 
+  // تصحيح: تغيير نوع roleId من number إلى string (UUID)[cite: 27]
   const handleRevokeRole = async (
     userId: string,
-    roleId: number,
+    roleId: string,
     roleName: string
   ) => {
     const key = `${userId}-${roleId}`
