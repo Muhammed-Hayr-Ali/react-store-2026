@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { useParams } from "next/navigation"
 import {
   columnFilteringFeature,
   columnVisibilityFeature,
@@ -99,8 +98,6 @@ export default function RolesTable({
     "all" | "active" | "empty"
   >("all")
   const [searchQuery, setSearchQuery] = React.useState("")
-  const params = useParams()
-  const locale = (params?.locale as string) || "en"
 
   if (initialRoles !== prevInitialData) {
     setPrevInitialData(initialRoles)
@@ -245,7 +242,7 @@ export default function RolesTable({
           enableHiding: false,
         }),
       ]),
-    [locale]
+    []
   )
 
   const table = useTable({

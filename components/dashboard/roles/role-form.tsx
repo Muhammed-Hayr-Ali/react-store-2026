@@ -284,7 +284,7 @@ export default function CreateRoleForm({
         {/* الحاوية الجانبية: يتم فك تجميعها على الجوال عبر contents لإتاحة الترتيب الحر لكل بطاقة */}
         <div className="contents lg:order-2 lg:col-span-1 lg:flex lg:min-w-0 lg:flex-col lg:space-y-6">
           {/* بطاقة Role Information (على الجوال تظهر أولاً order-1) */}
-          <div className="order-1 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-none">
+          <div className="order-1 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-0">
             <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
               <ShieldIcon className="size-4 text-primary" />
               <div>
@@ -337,7 +337,7 @@ export default function CreateRoleForm({
           </div>
 
           {/* بطاقة Coverage Summary (على الجوال تظهر ثالثاً order-3) */}
-          <div className="order-3 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-none">
+          <div className="order-3 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-0">
             <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
               <div className="flex items-center gap-2">
                 <SparklesIcon className="size-4 text-primary" />
@@ -365,7 +365,7 @@ export default function CreateRoleForm({
           </div>
 
           {/* بطاقة Actions (على الجوال تظهر رابعاً وأخيراً order-4) */}
-          <div className="order-4 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-none">
+          <div className="order-4 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-0">
             <div className="mb-4 border-b border-border/60 pb-3">
               <h2 className="text-sm font-semibold text-card-foreground">
                 Actions
