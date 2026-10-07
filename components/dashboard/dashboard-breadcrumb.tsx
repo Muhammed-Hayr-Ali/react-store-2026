@@ -12,7 +12,9 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 
-// قاموس مسميات المسارات لعرض أسماء أنيقة بدلاً من الكلمات الإنجليزية الخام
+// قائمة المسارات أو البوادئ البرمجية المخفية من شريط التنقل
+const HIDDEN_SEGMENTS = new Set(["x9k2-panel"])
+
 const routeLabels: Record<string, string> = {
   dashboard: "Dashboard",
   products: "Products",
@@ -33,30 +35,44 @@ export default function DashboardBreadcrumb() {
   const params = useParams()
   const locale = (params?.locale as string) || "en"
 
-  // تجريد المسار من الـ locale والحصول على أجزاء المسار
-  const segments = React.useMemo(() => {
-    return pathname
+  // تجريد المسار وحساب الروابط التراكمية مع استبعاد المسارات المخفية
+  const visibleItems = React.useMemo(() => {
+    const rawSegments = pathname
       .split("/")
       .filter(Boolean)
       .filter((seg) => seg !== locale)
+
+    const items: { segment: string; href: string }[] = []
+
+    rawSegments.forEach((segment, idx) => {
+      // بناء المسار التراكمي الفعلي حتى لا تنكسر الروابط اللاحقة
+      const fullHref = `/${locale}/${rawSegments.slice(0, idx + 1).join("/")}`
+
+      if (!HIDDEN_SEGMENTS.has(segment)) {
+        items.push({
+          segment,
+          href: fullHref,
+        })
+      }
+    })
+
+    return items
   }, [pathname, locale])
 
-  if (segments.length === 0) return null
+  if (visibleItems.length === 0) return null
 
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        {segments.map((segment, index) => {
-          const isLast = index === segments.length - 1
-          // بناء مسار الرابط مع الـ locale
-          const href = `/${locale}/${segments.slice(0, index + 1).join("/")}`
+        {visibleItems.map((item, index) => {
+          const isLast = index === visibleItems.length - 1
           const label =
-            routeLabels[segment] ||
-            segment.charAt(0).toUpperCase() +
-              segment.slice(1).replace(/-/g, " ")
+            routeLabels[item.segment] ||
+            item.segment.charAt(0).toUpperCase() +
+              item.segment.slice(1).replace(/-/g, " ")
 
           return (
-            <React.Fragment key={segment}>
+            <React.Fragment key={item.segment}>
               {index > 0 && <BreadcrumbSeparator />}
               <BreadcrumbItem
                 className={index === 0 && !isLast ? "hidden md:block" : ""}
@@ -65,7 +81,7 @@ export default function DashboardBreadcrumb() {
                   <BreadcrumbPage>{label}</BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink asChild>
-                    <Link href={href}>{label}</Link>
+                    <Link href={item.href}>{label}</Link>
                   </BreadcrumbLink>
                 )}
               </BreadcrumbItem>
