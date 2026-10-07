@@ -946,7 +946,7 @@ export default function ProductForm({
                   Commit or cancel ongoing modifications
                 </p>
               </div>
-              <div className="flex flex-col-reverse gap-2 sm:flex-col">
+              <div className="flex flex-col gap-2 sm:flex-col">
                 <Button
                   type="submit"
                   disabled={isSubmitting}

@@ -187,7 +187,7 @@ export default function RolesTable({
                 <span className="truncate text-xs font-semibold text-foreground capitalize">
                   {row.original.name}
                 </span>
-                <span className="truncate text-[11px] text-muted-foreground">
+                <span className="max-w-3xs truncate text-[11px] text-muted-foreground">
                   {row.original.description || "No description provided"}
                 </span>
               </div>

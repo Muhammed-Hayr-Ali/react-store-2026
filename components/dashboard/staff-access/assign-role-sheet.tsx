@@ -147,7 +147,7 @@ export default function AssignRoleSheet({
                             {role.name}
                           </span>
                           {role.description && (
-                            <span className="ms-2 text-[11px] text-muted-foreground">
+                            <span className="max-w-3xs truncate text-[11px] text-muted-foreground">
                               ({role.description})
                             </span>
                           )}

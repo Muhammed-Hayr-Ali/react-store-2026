@@ -304,15 +304,7 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
                 >
                   {isLoading ? "Saving..." : "Save Changes"}
                 </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={isLoading}
-                  onClick={() => router.push(appRoutes.dashboard.admin.reports)}
-                  className="w-full text-xs"
-                >
-                  Discard Changes
-                </Button>
+
                 <Button
                   type="button"
                   variant="destructive"
@@ -321,6 +313,15 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
                   className="w-full text-xs"
                 >
                   Delete Report
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isLoading}
+                  onClick={() => router.push(appRoutes.dashboard.admin.reports)}
+                  className="w-full text-xs"
+                >
+                  Discard Changes
                 </Button>
               </div>
             </div>

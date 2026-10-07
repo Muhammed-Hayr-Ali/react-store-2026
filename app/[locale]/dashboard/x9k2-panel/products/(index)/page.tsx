@@ -22,6 +22,8 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
+
+  
 const canView = await hasPermission(PERMISSIONS.VIEW_PRODUCTS)
 if (!canView) {
   notFound()

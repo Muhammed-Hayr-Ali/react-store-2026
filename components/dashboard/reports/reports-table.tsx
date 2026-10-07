@@ -307,7 +307,7 @@ export function ReportsTable({
                   >
                     {report.reason}
                   </Link>
-                  <span className="truncate text-[11px] text-muted-foreground">
+                  <span className="max-w-3xs truncate text-[11px] text-muted-foreground">
                     {report.details || "No additional details"}
                   </span>
                 </div>

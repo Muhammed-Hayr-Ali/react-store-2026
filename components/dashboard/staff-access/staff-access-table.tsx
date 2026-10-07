@@ -31,7 +31,6 @@ import {
   ChevronRightIcon,
   ChevronsRightIcon,
   FilterIcon,
-  PlusIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -181,15 +180,12 @@ export function StaffAccessTable({
     [users]
   )
 
+  // تهيئة الحالة الأولية بشكل متطابق 100% بين السيرفر والعميل
   const [columnVisibility, setColumnVisibility] =
     React.useState<ColumnVisibilityState>(() => {
-      const isMobile =
-        typeof window !== "undefined"
-          ? window.innerWidth < 768
-          : initialIsMobile
       const initial: ColumnVisibilityState = {}
       HIDEABLE_COLUMNS.forEach((colId) => {
-        initial[colId] = !isMobile
+        initial[colId] = !initialIsMobile
       })
       return initial
     })
@@ -221,6 +217,7 @@ export function StaffAccessTable({
       })
     }
 
+    // مزامنة الأبعاد بمجرد تحميل المكون في المتصفح بأمان
     handleResize()
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
@@ -543,22 +540,6 @@ export function StaffAccessTable({
                 ))}
             </DropdownMenuContent>
           </DropdownMenu>
-
-          {/* زر الفتح المباشر لاختيار مستخدم وتعيين دور */}
-          <Button
-            variant="default"
-            size="icon"
-            className="size-8 sm:hidden"
-            title="Assign Role"
-            onClick={() => {
-              setSelectedUser(users[0] || null)
-              setIsAssignOpen(true)
-            }}
-          >
-            <PlusIcon className="size-3.5" />
-            <span className="sr-only">Assign Role</span>
-          </Button>
-         
         </div>
       </div>
 
