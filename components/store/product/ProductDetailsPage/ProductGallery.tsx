@@ -106,7 +106,7 @@ export function ProductGallery({
           )}
 
           {!isOutOfStock && discountPercentage && (
-            <span className="text-destructive-foreground absolute start-4 top-4 animate-in rounded-full bg-destructive px-3 py-1 text-xs font-medium tracking-wide shadow-md duration-300 zoom-in-90 fade-in text-white">
+            <span className="text-destructive-foreground absolute inset-s-4 top-4 animate-in rounded-full bg-destructive px-3 py-1 text-xs font-medium tracking-wide shadow-md duration-300 zoom-in-90 fade-in text-white">
               {discountPercentage}% OFF
             </span>
           )}
@@ -114,7 +114,7 @@ export function ProductGallery({
 
         {/* شريط الصور المصغرة */}
         {productImages.length > 1 && (
-          <div className="flex touch-pan-x [scrollbar-width:none] items-center gap-3 overflow-x-auto scroll-smooth py-1 [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex touch-pan-x scrollbar-none items-center gap-3 overflow-x-auto scroll-smooth py-1 [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {productImages.map((img) => {
               const isSelected = activeImage === img.url
               const isFailed = Boolean(failedImages[img.url])
@@ -187,7 +187,7 @@ export function ProductGallery({
                 variant="ghost"
                 size="icon"
                 onClick={handlePrev}
-                className="absolute start-2 z-10 size-11 rounded-full bg-white/15 text-white backdrop-blur-md transition-all hover:scale-110 hover:bg-white/30 active:scale-95 sm:start-4"
+                className="absolute inset-s-2 z-10 size-11 rounded-full bg-white/15 text-white backdrop-blur-md transition-all hover:scale-110 hover:bg-white/30 active:scale-95 sm:start-4"
                 aria-label="Previous image"
               >
                 <ChevronLeftIcon className="size-6 rtl:rotate-180" />
@@ -217,7 +217,7 @@ export function ProductGallery({
                 variant="ghost"
                 size="icon"
                 onClick={handleNext}
-                className="absolute end-2 z-10 size-11 rounded-full bg-white/15 text-white backdrop-blur-md transition-all hover:scale-110 hover:bg-white/30 active:scale-95 sm:end-4"
+                className="absolute inset-e-2 z-10 size-11 rounded-full bg-white/15 text-white backdrop-blur-md transition-all hover:scale-110 hover:bg-white/30 active:scale-95 sm:end-4"
                 aria-label="Next image"
               >
                 <ChevronRightIcon className="size-6 rtl:rotate-180" />
@@ -229,7 +229,7 @@ export function ProductGallery({
           {productImages.length > 1 && (
             <div
               onClick={(e) => e.stopPropagation()}
-              className="flex max-w-full [scrollbar-width:none] items-center gap-2 overflow-x-auto scroll-smooth rounded-2xl bg-white/10 p-2 backdrop-blur-md [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+              className="flex max-w-full scrollbar-none items-center gap-2 overflow-x-auto scroll-smooth rounded-2xl bg-white/10 p-2 backdrop-blur-md [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
             >
               {productImages.map((img) => {
                 const isSelected = activeImage === img.url
