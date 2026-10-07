@@ -1,9 +1,13 @@
+/**
+ * @file components/dashboard/reports/reports-table.tsx
+ * @description Table component for listing, filtering, and managing moderation reports.
+ */
+
 "use client"
 
 import * as React from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import { useTransition } from "react"
 import {
   columnFilteringFeature,
   columnVisibilityFeature,
@@ -37,7 +41,6 @@ import {
   ChevronsRightIcon,
   ListFilterIcon,
 } from "lucide-react"
-import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -72,8 +75,8 @@ import {
   ReportTargetType,
   ReportWithDetails,
 } from "@/lib/actions/reports/types"
-import { deleteReport } from "@/lib/actions/reports/mutations/delete"
 import { appRoutes } from "@/lib/config/app-routes"
+import DeleteReportDialog from "./delete-report-dialog"
 
 const features = tableFeatures({
   columnFilteringFeature,
@@ -129,27 +132,22 @@ export function ReportsTable({
   const [currentTab, setCurrentTab] = React.useState<string>("all")
   const [targetTypeFilter, setTargetTypeFilter] = React.useState<string>("all")
   const [searchQuery, setSearchQuery] = React.useState("")
-  const [isPending, startTransition] = useTransition()
+
+  // حالة التحكم بدايلوج الحذف في الجدول
+  const [reportModal, setReportModal] = React.useState<{
+    type: "delete" | null
+    data: ReportWithDetails | null
+  }>({
+    type: null,
+    data: null,
+  })
+
   const params = useParams()
   const locale = (params?.locale as string) || "en"
 
   if (initialData !== prevInitialData) {
     setPrevInitialData(initialData)
     setData(initialData)
-  }
-
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to permanently delete this report?")) {
-      startTransition(async () => {
-        const res = await deleteReport(id)
-        if (res.success) {
-          toast.success("Report deleted successfully")
-          setData((prev) => prev.filter((item) => item.id !== id))
-        } else {
-          toast.error(res.error || "Failed to delete report")
-        }
-      })
-    }
   }
 
   const filteredData = React.useMemo(() => {
@@ -386,8 +384,9 @@ export function ReportsTable({
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    disabled={isPending}
-                    onClick={() => handleDelete(row.original.id)}
+                    onClick={() =>
+                      setReportModal({ type: "delete", data: row.original })
+                    }
                     className="flex cursor-pointer items-center gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
                   >
                     <Trash2Icon className="size-3.5" />
@@ -400,7 +399,7 @@ export function ReportsTable({
           enableHiding: false,
         }),
       ]),
-    [isPending, locale]
+    [locale]
   )
 
   const table = useTable({
@@ -867,6 +866,18 @@ export function ReportsTable({
           </div>
         </div>
       </div>
+
+      {/* دايلوج حذف التبليغ */}
+      <DeleteReportDialog
+        isOpen={reportModal.type === "delete" ? "delete" : null}
+        item={reportModal.data}
+        onOpenChange={(open) => {
+          if (!open) setReportModal({ type: null, data: null })
+        }}
+        onSuccess={(deletedId) => {
+          setData((prev) => prev.filter((item) => item.id !== deletedId))
+        }}
+      />
     </div>
   )
 }

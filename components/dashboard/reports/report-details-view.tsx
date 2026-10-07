@@ -1,3 +1,8 @@
+/**
+ * @file components/dashboard/reports/report-details-view.tsx
+ * @description View component for inspecting and managing individual report details and actions.
+ */
+
 "use client"
 
 import * as React from "react"
@@ -10,6 +15,7 @@ import {
   TagIcon,
   Trash2Icon,
   UserIcon,
+  ArrowLeftIcon,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -26,6 +32,8 @@ import {
 import { ReportStatus, ReportWithDetails } from "@/lib/actions/reports/types"
 import { resolveReportAction } from "@/lib/actions/reports/mutations/resolve-action"
 import { updateReportStatus } from "@/lib/actions/reports/mutations/update-status"
+import { appRoutes } from "@/lib/config/app-routes"
+import DeleteReportDialog from "./delete-report-dialog"
 
 interface ReportDetailsViewProps {
   report: ReportWithDetails
@@ -38,6 +46,7 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
   )
   const [adminNotes, setAdminNotes] = React.useState(report.admin_notes || "")
   const [isLoading, setIsLoading] = React.useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = React.useState(false)
 
   const handleUpdateStatusAndNotes = async () => {
     setIsLoading(true)
@@ -90,224 +99,264 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
     "Guest User"
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-      {/* العمود الرئيسي: تفاصيل البلاغ، المحتوى، وبيانات المبلغ */}
-      <div className="min-w-0 space-y-6 lg:col-span-2">
-        {/* بطاقة معلومات البلاغ الأساسية */}
-        <div className="min-w-0 space-y-4 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
-          <div className="flex items-center justify-between border-b border-border/40 pb-3">
-            <div className="flex items-center gap-2">
-              <TagIcon className="size-4 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">
-                Issue Information
-              </h2>
-            </div>
-            <Badge variant="outline" className="text-xs capitalize">
-              {report.target_type.replace("_", " ")}
-            </Badge>
-          </div>
+    <div className="space-y-6">
+      {/* شريط الإجراءات العلوي (زر الإلغاء والعودة + زر حذف البلاغ) */}
+      <div className="flex items-center justify-between">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => router.push(appRoutes.dashboard.admin.reports)}
+          className="gap-1.5 text-xs"
+        >
+          <ArrowLeftIcon className="size-3.5" />
+          Cancel & Back to Reports
+        </Button>
 
-          <div className="space-y-3 text-xs">
-            <div>
-              <span className="font-semibold text-muted-foreground">
-                Reason:
-              </span>
-              <p className="mt-0.5 text-sm font-bold wrap-break-word text-destructive">
-                {report.reason}
-              </p>
-            </div>
+        <Button
+          type="button"
+          variant="destructive"
+          size="sm"
+          onClick={() => setDeleteModalOpen(true)}
+          className="gap-1.5 text-xs"
+        >
+          <Trash2Icon className="size-3.5" />
+          Delete Report
+        </Button>
+      </div>
 
-            {report.details && (
-              <div className="min-w-0 space-y-1">
-                <span className="font-semibold text-muted-foreground">
-                  Detailed Description:
-                </span>
-                <div className="overflow-hidden rounded-lg border border-border/60 bg-muted/20 p-3 font-mono text-xs leading-relaxed wrap-break-word break-all whitespace-pre-wrap text-foreground">
-                  {report.details}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* بطاقة معاينة العنصر المستهدف (إن وجد) */}
-        {report.target_preview && (
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* العمود الرئيسي: تفاصيل البلاغ، المحتوى، وبيانات المبلغ */}
+        <div className="min-w-0 space-y-6 lg:col-span-2">
+          {/* بطاقة معلومات البلاغ الأساسية */}
           <div className="min-w-0 space-y-4 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
             <div className="flex items-center justify-between border-b border-border/40 pb-3">
               <div className="flex items-center gap-2">
-                <FileTextIcon className="size-4 text-primary" />
+                <TagIcon className="size-4 text-primary" />
                 <h2 className="text-sm font-semibold text-foreground">
-                  Reported Content Preview
+                  Issue Information
                 </h2>
               </div>
+              <Badge variant="outline" className="text-xs capitalize">
+                {report.target_type.replace("_", " ")}
+              </Badge>
             </div>
 
-            {report.target_preview.type === "review" && (
-              <div className="min-w-0 space-y-3 rounded-lg border border-border/60 bg-muted/15 p-3.5 text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-muted-foreground">
-                    Given Rating:
-                  </span>
-                  <span className="font-bold text-amber-500">
-                    {report.target_preview.data.rating} / 5 Stars
-                  </span>
-                </div>
-                <div className="space-y-1">
-                  <span className="font-semibold text-muted-foreground">
-                    Review Text:
-                  </span>
-                  <p className="rounded-md bg-background p-3 wrap-break-word break-all whitespace-pre-wrap text-foreground italic shadow-2xs">
-                    &quot;
-                    {report.target_preview.data.comment ||
-                      "No comment provided."}
-                    &quot;
-                  </p>
-                </div>
+            <div className="space-y-3 text-xs">
+              <div>
+                <span className="font-semibold text-muted-foreground">
+                  Reason:
+                </span>
+                <p className="mt-0.5 text-sm font-bold wrap-break-word text-destructive">
+                  {report.reason}
+                </p>
+              </div>
 
-                <div className="pt-2">
+              {report.details && (
+                <div className="min-w-0 space-y-1">
+                  <span className="font-semibold text-muted-foreground">
+                    Detailed Description:
+                  </span>
+                  <div className="overflow-hidden rounded-lg border border-border/60 bg-muted/20 p-3 font-mono text-xs leading-relaxed wrap-break-word break-all whitespace-pre-wrap text-foreground">
+                    {report.details}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* بطاقة معاينة العنصر المستهدف (إن وجد) */}
+          {report.target_preview && (
+            <div className="min-w-0 space-y-4 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+              <div className="flex items-center justify-between border-b border-border/40 pb-3">
+                <div className="flex items-center gap-2">
+                  <FileTextIcon className="size-4 text-primary" />
+                  <h2 className="text-sm font-semibold text-foreground">
+                    Reported Content Preview
+                  </h2>
+                </div>
+              </div>
+
+              {report.target_preview.type === "review" && (
+                <div className="min-w-0 space-y-3 rounded-lg border border-border/60 bg-muted/15 p-3.5 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-muted-foreground">
+                      Given Rating:
+                    </span>
+                    <span className="font-bold text-amber-500">
+                      {report.target_preview.data.rating} / 5 Stars
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="font-semibold text-muted-foreground">
+                      Review Text:
+                    </span>
+                    <p className="rounded-md bg-background p-3 wrap-break-word break-all whitespace-pre-wrap text-foreground italic shadow-2xs">
+                      &quot;
+                      {report.target_preview.data.comment ||
+                        "No comment provided."}
+                      &quot;
+                    </p>
+                  </div>
+
+                  <div className="pt-2">
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      disabled={isLoading}
+                      onClick={handleDeleteTargetContent}
+                      className="gap-1.5"
+                    >
+                      <Trash2Icon className="size-3.5" />
+                      Delete Review & Resolve Report
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {report.target_preview.type === "product" && (
+                <div className="flex flex-col gap-3 rounded-lg border border-border/60 bg-muted/15 p-3.5 text-xs sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <span className="block truncate text-sm font-semibold text-foreground">
+                      {report.target_preview.data.name}
+                    </span>
+                    <span className="font-mono text-[11px] break-all text-muted-foreground">
+                      ID: {report.target_preview.data.id}
+                    </span>
+                  </div>
+
                   <Button
-                    type="button"
-                    variant="destructive"
+                    variant="outline"
                     size="sm"
-                    disabled={isLoading}
-                    onClick={handleDeleteTargetContent}
-                    className="gap-1.5"
+                    asChild
+                    className="shrink-0 gap-1.5"
                   >
-                    <Trash2Icon className="size-3.5" />
-                    Delete Review & Resolve Report
+                    <a
+                      href={`/product/${report.target_preview.data.slug}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      View Storefront Product
+                      <ExternalLinkIcon className="size-3.5" />
+                    </a>
                   </Button>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+          )}
 
-            {report.target_preview.type === "product" && (
-              <div className="flex flex-col gap-3 rounded-lg border border-border/60 bg-muted/15 p-3.5 text-xs sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
-                  <span className="block truncate text-sm font-semibold text-foreground">
-                    {report.target_preview.data.name}
-                  </span>
-                  <span className="font-mono text-[11px] break-all text-muted-foreground">
-                    ID: {report.target_preview.data.id}
-                  </span>
-                </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  asChild
-                  className="shrink-0 gap-1.5"
-                >
-                  <a
-                    href={`/product/${report.target_preview.data.slug}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    View Storefront Product
-                    <ExternalLinkIcon className="size-3.5" />
-                  </a>
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* بيانات المستخدم صاحب البلاغ في أسفل التفاصيل */}
-        <div className="min-w-0 space-y-3 rounded-xl border border-border bg-card p-4 text-xs shadow-xs sm:p-5">
-          <div className="flex items-center gap-2 border-b border-border/40 pb-2.5 font-semibold text-foreground">
-            <UserIcon className="size-4 text-primary" />
-            Reporter Info
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="min-w-0 space-y-1">
-              <span className="font-semibold text-muted-foreground">User:</span>
-              <p className="truncate font-medium text-foreground">
-                {reporterName}
-              </p>
+          {/* بيانات المستخدم صاحب البلاغ في أسفل التفاصيل */}
+          <div className="min-w-0 space-y-3 rounded-xl border border-border bg-card p-4 text-xs shadow-xs sm:p-5">
+            <div className="flex items-center gap-2 border-b border-border/40 pb-2.5 font-semibold text-foreground">
+              <UserIcon className="size-4 text-primary" />
+              Reporter Info
             </div>
 
-            {report.contact_email && (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="min-w-0 space-y-1">
                 <span className="font-semibold text-muted-foreground">
-                  Contact Email:
+                  User:
                 </span>
-                <p className="font-mono break-all text-foreground">
-                  {report.contact_email}
+                <p className="truncate font-medium text-foreground">
+                  {reporterName}
                 </p>
               </div>
-            )}
 
-            {report.reporter_id && (
-              <div className="min-w-0 space-y-1 sm:col-span-2">
-                <span className="font-semibold text-muted-foreground">
-                  User ID:
-                </span>
-                <p className="truncate font-mono text-[11px] text-muted-foreground">
-                  {report.reporter_id}
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* العمود الجانبي: مخصص حصراً لإجراءات الإشراف */}
-      <div className="min-w-0 space-y-6">
-        <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
-          <h2 className="border-b border-border/40 pb-2 text-sm font-semibold text-foreground">
-            Moderation Action
-          </h2>
-
-          <div className="space-y-3 text-xs">
-            <div className="space-y-1.5">
-              <label className="font-semibold text-foreground">
-                Current Status
-              </label>
-              <Select
-                value={selectedStatus}
-                onValueChange={(val: ReportStatus) => setSelectedStatus(val)}
-              >
-                <SelectTrigger className="h-9 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="under_review">Under Review</SelectItem>
-                  <SelectItem value="resolved">Resolved</SelectItem>
-                  <SelectItem value="dismissed">Dismissed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="font-semibold text-foreground">
-                Internal Admin Notes
-              </label>
-              <Textarea
-                value={adminNotes}
-                onChange={(e) => setAdminNotes(e.target.value)}
-                placeholder="Log internal resolution steps, investigation details..."
-                rows={4}
-                className="resize-none text-xs"
-              />
-            </div>
-
-            <Button
-              type="button"
-              disabled={isLoading}
-              onClick={handleUpdateStatusAndNotes}
-              className="w-full gap-1.5"
-            >
-              {isLoading ? (
-                <Loader2Icon className="size-3.5 animate-spin" />
-              ) : (
-                <SaveIcon className="size-3.5" />
+              {report.contact_email && (
+                <div className="min-w-0 space-y-1">
+                  <span className="font-semibold text-muted-foreground">
+                    Contact Email:
+                  </span>
+                  <p className="font-mono break-all text-foreground">
+                    {report.contact_email}
+                  </p>
+                </div>
               )}
-              Save Changes
-            </Button>
+
+              {report.reporter_id && (
+                <div className="min-w-0 space-y-1 sm:col-span-2">
+                  <span className="font-semibold text-muted-foreground">
+                    User ID:
+                  </span>
+                  <p className="truncate font-mono text-[11px] text-muted-foreground">
+                    {report.reporter_id}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* العمود الجانبي: مخصص حصراً لإجراءات الإشراف */}
+        <div className="min-w-0 space-y-6">
+          <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+            <h2 className="border-b border-border/40 pb-2 text-sm font-semibold text-foreground">
+              Moderation Action
+            </h2>
+
+            <div className="space-y-3 text-xs">
+              <div className="space-y-1.5">
+                <label className="font-semibold text-foreground">
+                  Current Status
+                </label>
+                <Select
+                  value={selectedStatus}
+                  onValueChange={(val: ReportStatus) => setSelectedStatus(val)}
+                >
+                  <SelectTrigger className="h-9 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="under_review">Under Review</SelectItem>
+                    <SelectItem value="resolved">Resolved</SelectItem>
+                    <SelectItem value="dismissed">Dismissed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-semibold text-foreground">
+                  Internal Admin Notes
+                </label>
+                <Textarea
+                  value={adminNotes}
+                  onChange={(e) => setAdminNotes(e.target.value)}
+                  placeholder="Log internal resolution steps, investigation details..."
+                  rows={4}
+                  className="resize-none text-xs"
+                />
+              </div>
+
+              <Button
+                type="button"
+                disabled={isLoading}
+                onClick={handleUpdateStatusAndNotes}
+                className="w-full gap-1.5"
+              >
+                {isLoading ? (
+                  <Loader2Icon className="size-3.5 animate-spin" />
+                ) : (
+                  <SaveIcon className="size-3.5" />
+                )}
+                Save Changes
+              </Button>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* دايلوج حذف البلاغ */}
+      <DeleteReportDialog
+        isOpen={deleteModalOpen ? "delete" : null}
+        onOpenChange={(open) => setDeleteModalOpen(open)}
+        item={report}
+        onSuccess={() => {
+          router.push(appRoutes.dashboard.admin.reports)
+          router.refresh()
+        }}
+      />
     </div>
   )
 }
