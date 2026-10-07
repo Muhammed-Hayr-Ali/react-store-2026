@@ -10,7 +10,6 @@ import { CurrencySwitcher } from "@/components/store/currency/CurrencySwitcher"
 
 import { CurrentUser } from "@/lib/actions/utils/profile"
 import { appRoutes } from "@/lib/config/app-routes"
-import type { CurrencyCode } from "@/lib/actions/currency/types"
 import type { NotificationRecord } from "@/lib/actions/notifications/types"
 import { cn } from "@/lib/utils"
 
@@ -20,7 +19,6 @@ import { NotificationPopover } from "@/components/notifications/notification-pop
 interface DesktopNavProps {
   className?: string
   user: CurrentUser | null
-  currentCurrency: CurrencyCode
   initialNotifications: NotificationRecord[]
   initialUnreadCount: number
 }
@@ -28,7 +26,6 @@ interface DesktopNavProps {
 export default function DesktopNav({
   user,
   className,
-  currentCurrency,
   initialNotifications,
   initialUnreadCount,
 }: DesktopNavProps) {
@@ -61,7 +58,7 @@ export default function DesktopNav({
         />
       )}
 
-      <CurrencySwitcher currentCurrency={currentCurrency} />
+      <CurrencySwitcher />
 
       {user ? (
         <>

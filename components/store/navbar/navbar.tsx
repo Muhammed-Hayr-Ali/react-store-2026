@@ -1,6 +1,5 @@
 import Link from "next/link"
 import { getCurrentUser } from "@/lib/actions/utils/profile"
-import { getSelectedCurrency } from "@/lib/actions/currency/queries/get-selected-currency"
 import { getNotifications } from "@/lib/actions/notifications/queries/get-notifications"
 import { AppLogo } from "@/components/ui/app-logo"
 
@@ -9,9 +8,8 @@ import { MobileNav } from "./mobile-nav"
 import type { NotificationRecord } from "@/lib/actions/notifications/types"
 
 export default async function Navbar() {
-  const [user, currentCurrency, notificationsRes] = await Promise.all([
+  const [user, notificationsRes] = await Promise.all([
     getCurrentUser(),
-    getSelectedCurrency(),
     getNotifications(),
   ])
 
@@ -37,13 +35,11 @@ export default async function Navbar() {
           <div className="flex flex-1 items-center justify-end gap-4 md:gap-6">
             <DesktopNav
               user={user}
-              currentCurrency={currentCurrency}
               initialNotifications={notifications}
               initialUnreadCount={unreadCount}
             />
             <MobileNav
               user={user}
-              currentCurrency={currentCurrency}
               initialNotifications={notifications}
               initialUnreadCount={unreadCount}
             />
