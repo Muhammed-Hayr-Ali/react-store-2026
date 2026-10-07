@@ -34,3 +34,4 @@ export type UpdateRolePermissionsInput = z.infer<
   typeof updateRolePermissionsSchema
 >
 export type AssignUserRoleInput = z.infer<typeof assignUserRoleSchema>
+  

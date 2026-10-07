@@ -40,7 +40,6 @@ if (!validation.success) {
     fieldErrors[path].push(issue.message)
   }
 
-  console.error("Validation Error Details:", fieldErrors)
 
   return {
     success: false,
