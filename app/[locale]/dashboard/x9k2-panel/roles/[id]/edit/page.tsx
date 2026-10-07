@@ -24,17 +24,19 @@ interface EditRolePageProps {
 }
 
 export default async function EditRolePage({ params }: EditRolePageProps) {
-
-  
-
   const { id } = await params
+  const canView = await hasPermission(PERMISSIONS.UPDATE_ROLE)
+  if (!canView) {
+    console.error("Permission denied for updating roles")
+    notFound()
+  }
 
   const res = await getRoleById(id)
 
   if (!res.success || !res.data) {
+    console.error("Failed to fetch role by id:", res)
     notFound()
   }
-
   const role = res.data
 
   return (
