@@ -1,46 +1,11 @@
 /**
  * @file lib/middleware/role-guard.ts
- * @description Evaluates route accessibility based on authentication status and user roles using a declarative rule map.
+ * @description Disabled role checking - allows any authenticated user access to dashboard.
  */
 
 import { NextResponse, type NextRequest } from "next/server"
 import type { SupabaseClient, User } from "@supabase/supabase-js"
-import { ROLES, type AppRole } from "@/lib/actions/role/types"
 import { appRoutes } from "../config/app-routes"
-
-// ============================================================================
-// 1. تعريف قواعد المسارات المحمية
-// ============================================================================
-
-interface RouteRule {
-  /** بادئة المسار المراد حمايته */
-  prefix: string
-  /** الأدوار المسموح لها بالدخول */
-  allowedRoles: AppRole[]
-  /** الوجهة التي يتم تحويل المستخدم إليها عند انعدام الصلاحية */
-  fallbackPath: string
-}
-
-const PROTECTED_ROUTE_RULES: RouteRule[] = [
-  // إدارة الأدوار والصلاحيات: للأدمن فقط
-  {
-    prefix: `${appRoutes.dashboard.home}/roles`,
-    allowedRoles: [ROLES.ADMIN],
-    fallbackPath: appRoutes.dashboard.home,
-  },
-  // إدارة البلاغات والرقابة: للأدمن والمشرفين
-  {
-    prefix: `${appRoutes.dashboard.home}/reports`,
-    allowedRoles: [ROLES.ADMIN, ROLES.MODERATOR],
-    fallbackPath: appRoutes.dashboard.home,
-  },
-  // القاعدة العامة للوحة التحكم
-  {
-    prefix: appRoutes.dashboard.home,
-    allowedRoles: [ROLES.ADMIN, ROLES.MODERATOR],
-    fallbackPath: appRoutes.home,
-  },
-]
 
 // مسارات المصادقة مشتقة مباشرة من appRoutes لضمان التطابق
 const AUTH_ROUTE_PREFIXES = [
@@ -49,10 +14,6 @@ const AUTH_ROUTE_PREFIXES = [
   appRoutes.auth.forgotPassword,
   appRoutes.auth.resetPassword,
 ]
-
-// ============================================================================
-// 2. الدالة الرئيسية لفحص وتوجيه المسار
-// ============================================================================
 
 interface HandleRouteAccessParams {
   request: NextRequest
@@ -104,44 +65,13 @@ export async function handleRouteAccess({
     return createRedirectResponse(appRoutes.home)
   }
 
-  // 3. مطابقة المسار مع القواعد المحمية
-  const matchedRule = PROTECTED_ROUTE_RULES.find((rule) =>
-    normalizedPath.startsWith(rule.prefix)
-  )
-
-  if (matchedRule) {
-    // توجيه غير المسجلين لصفحة الدخول مع حفظ مسار العودة
-    if (!user) {
-      return createRedirectResponse(appRoutes.auth.login, {
-        redirect: pathname,
-      })
-    }
-
-    // جلب أدوار المستخدم بأمان
-    let userRolesList: AppRole[] = []
-    try {
-      const { data: userRoles, error } = await supabase
-        .from("user_roles")
-        .select("roles(name)")
-        .eq("user_id", user.id)
-
-      if (!error && userRoles) {
-        userRolesList = userRoles
-          .map((r) => (r.roles as unknown as { name: AppRole })?.name)
-          .filter(Boolean)
-      }
-    } catch {
-      return createRedirectResponse(matchedRule.fallbackPath)
-    }
-
-    // التحقق من توافر أحد الأدوار المسموحة
-    const hasAllowedRole = matchedRule.allowedRoles.some((role) =>
-      userRolesList.includes(role)
-    )
-
-    if (!hasAllowedRole) {
-      return createRedirectResponse(matchedRule.fallbackPath)
-    }
+  // 3. تم إيقاف فحص الأدوار (Role Guard) بناءً على طلبك،
+  // مع الاكتفاء بطلب تسجيل الدخول فقط للمسارات التي تبدأ بـ /dashboard إذا أردت:
+  const isDashboardRoute = normalizedPath.startsWith(appRoutes.dashboard.home)
+  if (isDashboardRoute && !user) {
+    return createRedirectResponse(appRoutes.auth.login, {
+      redirect: pathname,
+    })
   }
 
   return null

@@ -13,7 +13,8 @@ import { RoleRecord } from "../mutations/create-role"
 export async function getRoleById(
   roleId: string
 ): Promise<ApiResult<RoleRecord | null>> {
-  const idValidation = z.number().int().positive().safeParse(roleId)
+  // التعديل هنا: التحقق من أن المعرّف هو UUID صالح
+  const idValidation = z.string().uuid().safeParse(roleId)
   if (!idValidation.success) {
     return {
       success: false,

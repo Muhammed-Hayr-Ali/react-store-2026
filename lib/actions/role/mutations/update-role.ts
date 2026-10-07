@@ -29,19 +29,25 @@ export async function updateRole(
 
   // 2. Validate input schema
   const validation = updateRolePermissionsSchema.safeParse(payload)
-  if (!validation.success) {
-    console.error(
-      "Validation Error Details:",
-      validation.error.flatten().fieldErrors
-    ) // أضف هذا السطر
-
-    return {
-      success: false,
-      error: "VALIDATION_ERROR",
-      details: validation.error.flatten().fieldErrors,
+if (!validation.success) {
+  // طريقة حديثة وآمنة لتجميع الأخطاء بدون استخدام الدوال الـ deprecated أو غير الموجودة
+  const fieldErrors: Record<string, string[]> = {}
+  for (const issue of validation.error.issues) {
+    const path = issue.path.join(".")
+    if (!fieldErrors[path]) {
+      fieldErrors[path] = []
     }
+    fieldErrors[path].push(issue.message)
   }
 
+  console.error("Validation Error Details:", fieldErrors)
+
+  return {
+    success: false,
+    error: "VALIDATION_ERROR",
+    details: fieldErrors,
+  }
+}
   const { roleId, description, permissions } = validation.data
   const supabase = await createServerClient()
 
