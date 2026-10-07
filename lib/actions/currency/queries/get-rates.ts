@@ -1,48 +1,25 @@
-/**
- * @file lib/actions/currency/queries/get-rates.ts
- * @description Query to retrieve exchange rates relative to USD from Supabase.
- * Validates database rows against schema and provides a safe fallback rate list.
- */
-
 "use server"
 
-import { z } from "zod"
+import { cache } from "react"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { ApiResult } from "@/lib/database/types/utils"
 import { ExchangeRate } from "../types"
-import { exchangeRateSchema } from "../schemas"
+import { ApiResult } from "@/lib/database/types/utils"
 
-// ============================================================================
-// Main Query Function
-// ============================================================================
-
-export async function getExchangeRates(): Promise<ExchangeRate[]> {
-  // 1. Initialize Supabase client
+export const getExchangeRates = cache(async (): Promise<ExchangeRate[]> => {
   const supabase = await createServerClient()
-
-  // 2. Query exchange rates table
   const { data, error } = await supabase
     .from("exchange_rates")
     .select("currency_code, rate_from_usd, updated_at")
+    .order("currency_code", { ascending: true })
 
-  if (error) {
-    console.error("Database error in getExchangeRates:", error.message)
-    return []
-  }
+  if (error || !data) return []
 
-  // 3. Verify returned dataset matches schema
-  const parsedData = z.array(exchangeRateSchema).safeParse(data || [])
-  if (!parsedData.success) {
-    console.error(
-      "Database schema mismatch in getExchangeRates:",
-      parsedData.error
-    )
-    return []
-  }
-
-  return parsedData.data
-}
-
+  return data.map((row) => ({
+    currency_code: row.currency_code,
+    rate_from_usd: Number(row.rate_from_usd),
+    updated_at: row.updated_at,
+  }))
+})
 // ============================================================================
 // Standard ApiResult Query Function
 // ============================================================================
