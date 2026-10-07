@@ -69,7 +69,6 @@ import {
 
 import {
   ReportStatus,
-  ReportTargetType,
   ReportWithDetails,
 } from "@/lib/actions/reports/types"
 import { appRoutes } from "@/lib/config/app-routes"
@@ -433,7 +432,7 @@ export function ReportsTable({
           enableHiding: false,
         }),
       ]),
-    [locale]
+    [locale ]
   )
 
   const table = useTable({
