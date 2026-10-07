@@ -72,7 +72,7 @@ function AssignRoleContent({
     try {
       const res = await assignRoleToUser({
         userId: user.id,
-        roleId: Number(selectedRoleId),
+        roleId: String(selectedRoleId),
       })
 
       if (res.success) {
