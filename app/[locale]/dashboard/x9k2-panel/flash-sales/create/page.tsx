@@ -1,11 +1,11 @@
 import { ZapIcon } from "lucide-react"
 
-import { FlashSaleForm } from "@/components/dashboard/flash-sales/flash-sale-form"
 import { getAvailableProducts } from "@/lib/actions/flash-sales/queries/get-available-products"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { appConfig } from "@/lib/config/app_config"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { notFound } from "next/navigation"
+import { FlashSaleForm } from "@/components/dashboard/flash-sales/flash-sale-form"
 
 interface PageProps {
   params: Promise<{
