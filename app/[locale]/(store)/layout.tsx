@@ -12,12 +12,11 @@ export default async function MainLayout({
 
   return (
     <div className="relative flex min-h-screen flex-col bg-background text-foreground">
-      <Navbar />
-      <main className="flex-1 pt-14">
-        <CurrencyProvider currency={currency} rate={rate}>
-          {children}
-        </CurrencyProvider>
-      </main>
+      <CurrencyProvider currency={currency} rate={rate}>
+        <Navbar />
+        <main className="flex-1 pt-14">{children}</main>{" "}
+      </CurrencyProvider>
+
       <Footer />
     </div>
   )
