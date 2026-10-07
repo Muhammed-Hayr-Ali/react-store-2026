@@ -24,10 +24,8 @@ interface EditRolePageProps {
 }
 
 export default async function EditRolePage({ params }: EditRolePageProps) {
-  const canView = await hasPermission(PERMISSIONS.UPDATE_ROLE)
-  if (!canView) {
-    notFound()
-  }
+
+  
 
   const { id } = await params
 
