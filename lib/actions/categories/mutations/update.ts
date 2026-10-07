@@ -4,6 +4,7 @@
  * Handles partial payload sanitization, permission validation, and dynamic route revalidation.
  */
 
+
 "use server"
 
 import { z } from "zod"
@@ -34,10 +35,16 @@ export async function updateCategory(
   // 2. Validate partial update payload
   const validation = updateCategorySchema.safeParse(payload)
   if (!validation.success) {
+    const fieldErrors: Record<string, string[]> = {}
+    for (const issue of validation.error.issues) {
+      const path = issue.path.join(".")
+      if (!fieldErrors[path]) fieldErrors[path] = []
+      fieldErrors[path].push(issue.message)
+    }
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: validation.error.flatten().fieldErrors,
+      details: fieldErrors,
     }
   }
 

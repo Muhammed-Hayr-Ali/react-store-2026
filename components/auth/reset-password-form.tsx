@@ -1,3 +1,7 @@
+/**
+ * @file components/auth/reset-password-form.tsx
+ */
+
 "use client"
 
 import * as React from "react"
@@ -6,8 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
 import Link from "next/link"
-import { EyeIcon, EyeOff, Lock } from "lucide-react"
-import { toast } from "sonner"
+import { EyeIcon, EyeOff, Lock, AlertCircleIcon, XIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -19,6 +22,7 @@ import {
 import { AppLogo } from "@/components/ui/app-logo"
 import { Spinner } from "@/components/ui/spinner"
 import { CustomInput } from "@/components/ui/custom-input"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AuthHeader } from "./header"
 
 import {
@@ -37,6 +41,7 @@ export function ResetPasswordForm() {
 
   const [showPassword, setShowPassword] = React.useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   const form = useForm<ClientResetFormValues>({
     resolver: zodResolver(clientResetSchema),
@@ -67,6 +72,7 @@ export function ResetPasswordForm() {
   }
 
   async function onSubmit(data: ClientResetFormValues) {
+    setErrorMessage(null)
     const result = await confirmPasswordReset({
       token: token as string,
       password: data.password,
@@ -74,16 +80,15 @@ export function ResetPasswordForm() {
     })
 
     if (result.success) {
-      toast.success("Success! Your password has been updated.")
       router.refresh()
       router.replace(appRoutes.auth.login)
     } else {
       if (result.error === "INVALID_OR_EXPIRED_TOKEN") {
-        toast.error(
+        setErrorMessage(
           "Reset password link is invalid or has expired. Please request a new link."
         )
       } else {
-        toast.error("Failed to update password. Please try again later.")
+        setErrorMessage("Failed to update password. Please try again later.")
       }
     }
   }
@@ -100,6 +105,23 @@ export function ResetPasswordForm() {
           linkText="Sign In"
           linkHref={appRoutes.auth.login}
         />
+
+        {errorMessage && (
+          <Alert variant="destructive" className="relative pr-9">
+            <AlertCircleIcon className="size-4" />
+            <AlertTitle>Action Required</AlertTitle>
+            <AlertDescription className="text-xs">
+              {errorMessage}
+            </AlertDescription>
+            <button
+              type="button"
+              onClick={() => setErrorMessage(null)}
+              className="absolute top-3 right-3 cursor-pointer text-muted-foreground hover:text-foreground"
+            >
+              <XIcon className="size-4" />
+            </button>
+          </Alert>
+        )}
 
         {/* حقل كلمة المرور الجديدة */}
         <Controller

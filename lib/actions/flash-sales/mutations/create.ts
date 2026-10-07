@@ -12,10 +12,6 @@ import { FlashSaleFormInput } from "../types"
 import { flashSaleFormSchema } from "../schemas"
 import { hasPermission, PERMISSIONS } from "../../role"
 
-// ============================================================================
-// Main Action Function
-// ============================================================================
-
 export async function createFlashSale(
   rawData: FlashSaleFormInput
 ): Promise<ApiResult<{ id: string }>> {
@@ -31,10 +27,16 @@ export async function createFlashSale(
   // 2. Validate payload
   const parseResult = flashSaleFormSchema.safeParse(rawData)
   if (!parseResult.success) {
+    const fieldErrors: Record<string, string[]> = {}
+    for (const issue of parseResult.error.issues) {
+      const path = issue.path.join(".")
+      if (!fieldErrors[path]) fieldErrors[path] = []
+      fieldErrors[path].push(issue.message)
+    }
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: parseResult.error.flatten().fieldErrors,
+      details: fieldErrors,
     }
   }
 

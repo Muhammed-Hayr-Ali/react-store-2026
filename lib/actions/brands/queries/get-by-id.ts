@@ -12,10 +12,6 @@ import { ApiResult } from "@/lib/database/types/utils"
 import { Brand } from "../types"
 import { brandSchema } from "../schemas"
 
-// ============================================================================
-// Main Query
-// ============================================================================
-
 export async function getBrandById(
   id: string
 ): Promise<ApiResult<Brand | null>> {
@@ -31,11 +27,11 @@ export async function getBrandById(
   // 2. Initialize Supabase client
   const supabase = await createServerClient()
 
-  // 3. Query record by primary key
+  // 3. Query record by primary key using validated id
   const { data, error } = await supabase
     .from("brands")
     .select("*")
-    .eq("id", id)
+    .eq("id", idValidation.data)
     .single()
 
   // 4. Handle "Not Found" case gracefully (PGRST116 indicates 0 rows returned)

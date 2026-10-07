@@ -1,10 +1,17 @@
+/**
+ * @file lib/actions/notifications/queries/get-notifications.ts
+ */
+
 "use server"
 
-import { createClient } from "@/lib/database/supabase/server"
-import { GetNotificationsResponse, NotificationRecord } from "../types"
+import { createServerClient } from "@/lib/database/supabase/server"
+import { ApiResult } from "@/lib/database/types/utils"
+import { NotificationRecord } from "../types"
 
-export async function getNotifications(): Promise<GetNotificationsResponse> {
-  const supabase = await createClient()
+export async function getNotifications(): Promise<
+  ApiResult<{ notifications: NotificationRecord[]; unreadCount: number }>
+> {
+  const supabase = await createServerClient()
 
   const {
     data: { user },
@@ -12,7 +19,7 @@ export async function getNotifications(): Promise<GetNotificationsResponse> {
   } = await supabase.auth.getUser()
 
   if (userError || !user) {
-    return { success: false, error: "Unauthorized" }
+    return { success: false, error: "UNAUTHORIZED_ACCESS" }
   }
 
   const { data, error } = await supabase
@@ -23,7 +30,11 @@ export async function getNotifications(): Promise<GetNotificationsResponse> {
     .limit(30)
 
   if (error) {
-    return { success: false, error: error.message }
+    return {
+      success: false,
+      error: "FETCH_NOTIFICATIONS_ERROR",
+      details: { database: [error.message] },
+    }
   }
 
   const notifications = (data as NotificationRecord[]) || []

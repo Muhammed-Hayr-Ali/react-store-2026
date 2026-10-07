@@ -1,10 +1,13 @@
+/**
+ * @file components/auth/forgot-password-form.tsx
+ */
+
 "use client"
 
 import * as React from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
-import { Mail } from "lucide-react"
-import { toast } from "sonner"
+import { Mail, AlertCircleIcon, XIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -15,6 +18,7 @@ import {
 } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { CustomInput } from "@/components/ui/custom-input"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AuthHeader } from "./header"
 import { IsSuccess } from "./request-is-success"
 
@@ -27,6 +31,7 @@ import { appRoutes } from "@/lib/config/app-routes"
 
 export function ForgotPasswordForm() {
   const [isSuccess, setIsSuccess] = React.useState(false)
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   const form = useForm<RequestPasswordResetInput>({
     resolver: zodResolver(requestPasswordResetSchema),
@@ -40,12 +45,12 @@ export function ForgotPasswordForm() {
   } = form
 
   async function onSubmit(data: RequestPasswordResetInput) {
+    setErrorMessage(null)
     const result = await requestPasswordReset(data)
     if (result.success) {
       setIsSuccess(true)
-      toast.success("Password reset link sent! Please check your email.")
     } else {
-      toast.error(
+      setErrorMessage(
         result.error ||
           "Failed to send password reset link. Please try again later."
       )
@@ -73,6 +78,23 @@ export function ForgotPasswordForm() {
           linkText="Sign In"
           linkHref={appRoutes.auth.login}
         />
+
+        {errorMessage && (
+          <Alert variant="destructive" className="relative pr-9">
+            <AlertCircleIcon className="size-4" />
+            <AlertTitle>Action Required</AlertTitle>
+            <AlertDescription className="text-xs">
+              {errorMessage}
+            </AlertDescription>
+            <button
+              type="button"
+              onClick={() => setErrorMessage(null)}
+              className="absolute top-3 right-3 cursor-pointer text-muted-foreground hover:text-foreground"
+            >
+              <XIcon className="size-4" />
+            </button>
+          </Alert>
+        )}
 
         {/* Email Field */}
         <Controller

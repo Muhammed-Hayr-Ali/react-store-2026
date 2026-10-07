@@ -1,11 +1,22 @@
+/**
+ * @file components/auth/signup-form.tsx
+ */
+
 "use client"
 
 import React from "react"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
-import { EyeIcon, EyeOff, Lock, Mail, User } from "lucide-react"
-import { toast } from "sonner"
+import {
+  EyeIcon,
+  EyeOff,
+  Lock,
+  Mail,
+  User,
+  AlertCircleIcon,
+  XIcon,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -17,6 +28,7 @@ import {
 } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { CustomInput } from "@/components/ui/custom-input"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AuthHeader } from "./header"
 import { GoogleSignInButton } from "./google-sign-in-button"
 
@@ -30,6 +42,7 @@ import { appRoutes } from "@/lib/config/app-routes"
 export function SignUpForm() {
   const router = useRouter()
   const [showPassword, setShowPassword] = React.useState(false)
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   const form = useForm<SignUpWithPasswordInput>({
     resolver: zodResolver(signUpWithPasswordSchema),
@@ -45,13 +58,14 @@ export function SignUpForm() {
   } = form
 
   async function onSubmit(data: SignUpWithPasswordInput) {
+    setErrorMessage(null)
     const result = await signUpWithPassword(data)
 
     if (result.success) {
       router.refresh()
       router.replace(appRoutes.home)
     } else {
-      toast.error(result.error || "Signup failed. Please try again.")
+      setErrorMessage(result.error || "Signup failed. Please try again.")
     }
   }
 
@@ -64,6 +78,23 @@ export function SignUpForm() {
           linkText="Sign In"
           linkHref={appRoutes.auth.login}
         />
+
+        {errorMessage && (
+          <Alert variant="destructive" className="relative pr-9">
+            <AlertCircleIcon className="size-4" />
+            <AlertTitle>Action Required</AlertTitle>
+            <AlertDescription className="text-xs">
+              {errorMessage}
+            </AlertDescription>
+            <button
+              type="button"
+              onClick={() => setErrorMessage(null)}
+              className="absolute top-3 right-3 cursor-pointer text-muted-foreground hover:text-foreground"
+            >
+              <XIcon className="size-4" />
+            </button>
+          </Alert>
+        )}
 
         {/* Name Field */}
         <Controller

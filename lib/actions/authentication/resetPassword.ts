@@ -1,3 +1,7 @@
+/**
+ * @file lib/actions/authentication/resetPassword.ts
+ */
+
 "use server"
 
 import React from "react"
@@ -17,10 +21,16 @@ export async function requestPasswordReset(
 ): Promise<ApiResult<null>> {
   const validation = requestPasswordResetSchema.safeParse(input)
   if (!validation.success) {
+    const fieldErrors: Record<string, string[]> = {}
+    for (const issue of validation.error.issues) {
+      const path = issue.path.join(".")
+      if (!fieldErrors[path]) fieldErrors[path] = []
+      fieldErrors[path].push(issue.message)
+    }
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: validation.error.flatten().fieldErrors,
+      details: fieldErrors,
     }
   }
 
@@ -34,7 +44,6 @@ export async function requestPasswordReset(
       .eq("email", email)
       .single()
 
-    // حماية ضد كشف الحسابات (Prevent Email Enumeration)
     if (profileError) {
       if (profileError.code === "PGRST116") {
         return { success: true, data: null }
@@ -85,10 +94,16 @@ export async function confirmPasswordReset(
 ): Promise<ApiResult<null>> {
   const validation = confirmPasswordResetSchema.safeParse(input)
   if (!validation.success) {
+    const fieldErrors: Record<string, string[]> = {}
+    for (const issue of validation.error.issues) {
+      const path = issue.path.join(".")
+      if (!fieldErrors[path]) fieldErrors[path] = []
+      fieldErrors[path].push(issue.message)
+    }
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: validation.error.flatten().fieldErrors,
+      details: fieldErrors,
     }
   }
 

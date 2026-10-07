@@ -5,18 +5,20 @@
 
 "use server"
 
+import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { hasPermission, PERMISSIONS } from "../../role"
 
-// ============================================================================
-// Main Action Function
-// ============================================================================
-
 export async function deleteFlashSale(
   saleId: string
 ): Promise<ApiResult<null>> {
+  const idValidation = z.string().uuid("INVALID_SALE_ID").safeParse(saleId)
+  if (!idValidation.success) {
+    return { success: false, error: "INVALID_SALE_ID" }
+  }
+
   // 1. Permission check
   const canDelete = await hasPermission(PERMISSIONS.DELETE_FLASH_SALE)
   if (!canDelete) {
@@ -29,7 +31,10 @@ export async function deleteFlashSale(
   const supabase = await createServerClient()
 
   // 2. Delete record (foreign key cascade handles items)
-  const { error } = await supabase.from("flash_sales").delete().eq("id", saleId)
+  const { error } = await supabase
+    .from("flash_sales")
+    .delete()
+    .eq("id", idValidation.data)
 
   if (error) {
     return {

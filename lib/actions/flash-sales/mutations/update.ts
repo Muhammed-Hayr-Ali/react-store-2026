@@ -5,6 +5,7 @@
 
 "use server"
 
+import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
@@ -12,14 +13,17 @@ import { FlashSaleFormInput } from "../types"
 import { flashSaleFormSchema } from "../schemas"
 import { hasPermission, PERMISSIONS } from "../../role"
 
-// ============================================================================
-// Main Action Function
-// ============================================================================
-
 export async function updateFlashSale(
   saleId: string,
   rawData: FlashSaleFormInput
 ): Promise<ApiResult<null>> {
+  // 0. Validate saleId UUID
+  const idValidation = z.string().uuid("INVALID_SALE_ID").safeParse(saleId)
+  if (!idValidation.success) {
+    return { success: false, error: "INVALID_SALE_ID" }
+  }
+  const validSaleId = idValidation.data
+
   // 1. Permission check
   const canUpdate = await hasPermission(PERMISSIONS.UPDATE_FLASH_SALE)
   if (!canUpdate) {
@@ -32,10 +36,16 @@ export async function updateFlashSale(
   // 2. Validate payload
   const parseResult = flashSaleFormSchema.safeParse(rawData)
   if (!parseResult.success) {
+    const fieldErrors: Record<string, string[]> = {}
+    for (const issue of parseResult.error.issues) {
+      const path = issue.path.join(".")
+      if (!fieldErrors[path]) fieldErrors[path] = []
+      fieldErrors[path].push(issue.message)
+    }
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: parseResult.error.flatten().fieldErrors,
+      details: fieldErrors,
     }
   }
 
@@ -47,7 +57,7 @@ export async function updateFlashSale(
     .from("flash_sales")
     .select("id")
     .eq("slug", data.slug)
-    .neq("id", saleId)
+    .neq("id", validSaleId)
     .maybeSingle()
 
   if (existingSlug) {
@@ -69,7 +79,7 @@ export async function updateFlashSale(
       ends_at: new Date(data.endsAt).toISOString(),
       is_active: data.isActive,
     })
-    .eq("id", saleId)
+    .eq("id", validSaleId)
 
   if (saleError) {
     return {
@@ -80,10 +90,13 @@ export async function updateFlashSale(
   }
 
   // 5. Synchronize items
-  await supabase.from("flash_sale_items").delete().eq("flash_sale_id", saleId)
+  await supabase
+    .from("flash_sale_items")
+    .delete()
+    .eq("flash_sale_id", validSaleId)
 
   const itemsToInsert = data.items.map((item) => ({
-    flash_sale_id: saleId,
+    flash_sale_id: validSaleId,
     product_id: item.productId,
     discount_type: item.discountType,
     discount_value: item.discountType === "none" ? null : item.discountValue,

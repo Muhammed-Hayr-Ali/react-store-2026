@@ -1,3 +1,7 @@
+/**
+ * @file components/auth/login-form.tsx
+ */
+
 "use client"
 
 import * as React from "react"
@@ -5,8 +9,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import Link from "next/link"
-import { EyeIcon, EyeOff, Lock, Mail } from "lucide-react"
-import { toast } from "sonner"
+import { EyeIcon, EyeOff, Lock, Mail, AlertCircleIcon, XIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -19,6 +22,7 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { Badge } from "@/components/ui/badge"
 import { CustomInput } from "@/components/ui/custom-input"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AuthHeader } from "./header"
 import { GoogleSignInButton } from "./google-sign-in-button"
 
@@ -38,6 +42,7 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
   const searchParams = useSearchParams()
   const redirectTarget = searchParams.get("redirect") || appRoutes.home
   const [showPassword, setShowPassword] = React.useState(false)
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   const form = useForm<SignInWithPasswordInput>({
     resolver: zodResolver(signInWithPasswordSchema),
@@ -52,13 +57,14 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
   } = form
 
   async function onSubmit(data: SignInWithPasswordInput) {
+    setErrorMessage(null)
     const result = await signInWithPassword(data)
 
     if (result.success) {
       router.refresh()
       router.replace(redirectTarget)
     } else {
-      toast.error(result.error || "Invalid email or password.")
+      setErrorMessage(result.error || "Invalid email or password.")
     }
   }
 
@@ -71,6 +77,23 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
           linkText="Sign Up"
           linkHref={appRoutes.auth.signup}
         />
+
+        {errorMessage && (
+          <Alert variant="destructive" className="relative pr-9">
+            <AlertCircleIcon className="size-4" />
+            <AlertTitle>Action Required</AlertTitle>
+            <AlertDescription className="text-xs">
+              {errorMessage}
+            </AlertDescription>
+            <button
+              type="button"
+              onClick={() => setErrorMessage(null)}
+              className="absolute top-3 right-3 cursor-pointer text-muted-foreground hover:text-foreground"
+            >
+              <XIcon className="size-4" />
+            </button>
+          </Alert>
+        )}
 
         {/* Email Field */}
         <Controller

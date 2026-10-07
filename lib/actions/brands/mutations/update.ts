@@ -14,10 +14,6 @@ import { Brand } from "../types"
 import { brandSchema, updateBrandSchema } from "../schemas"
 import { hasPermission, PERMISSIONS } from "../../role"
 
-// ============================================================================
-// Main Action
-// ============================================================================
-
 export async function updateBrand(
   id: string,
   payload: unknown
@@ -34,10 +30,16 @@ export async function updateBrand(
   // 2. Validate update payload
   const validation = updateBrandSchema.safeParse(payload)
   if (!validation.success) {
+    const fieldErrors: Record<string, string[]> = {}
+    for (const issue of validation.error.issues) {
+      const path = issue.path.join(".")
+      if (!fieldErrors[path]) fieldErrors[path] = []
+      fieldErrors[path].push(issue.message)
+    }
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: validation.error.flatten().fieldErrors,
+      details: fieldErrors,
     }
   }
 

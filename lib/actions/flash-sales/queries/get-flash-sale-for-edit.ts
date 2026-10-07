@@ -5,6 +5,7 @@
 
 "use server"
 
+import { z } from "zod"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { FlashSaleDiscountType, FlashSaleFormInput } from "../types"
 
@@ -49,6 +50,11 @@ interface RawSaleData {
 export async function getFlashSaleForEdit(
   id: string
 ): Promise<{ saleId: string; initialData: FlashSaleFormInput } | null> {
+  const idValidation = z.string().uuid("INVALID_SALE_ID").safeParse(id)
+  if (!idValidation.success) {
+    return null
+  }
+
   const supabase = await createServerClient()
 
   const { data, error } = await supabase
@@ -80,7 +86,7 @@ export async function getFlashSaleForEdit(
       )
     `
     )
-    .eq("id", id)
+    .eq("id", idValidation.data)
     .maybeSingle()
 
   if (error || !data) {

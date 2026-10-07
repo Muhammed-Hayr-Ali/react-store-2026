@@ -1,7 +1,6 @@
 /**
  * @file lib/actions/notifications/mutations/create-notification.ts
  * @description Server Actions to insert single and broadcast notifications into Supabase.
- * Enforces Zod schema parsing, permission verification, database insertion, and cache revalidation.
  */
 
 "use server"
@@ -9,44 +8,40 @@
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
+import { NotificationRecord } from "../types"
 import {
   createNotificationSchema,
   broadcastNotificationSchema,
 } from "../schemas"
 import { hasPermission, PERMISSIONS } from "../../role"
 
-// ============================================================================
-// Single Notification Action
-// ============================================================================
-
 export async function createNotification(
   payload: unknown
-): Promise<ApiResult<Notification | null>> {
-  // 1. Validate payload against Zod schema
+): Promise<ApiResult<NotificationRecord | null>> {
   const validation = createNotificationSchema.safeParse(payload)
   if (!validation.success) {
+    const fieldErrors: Record<string, string[]> = {}
+    for (const issue of validation.error.issues) {
+      const path = issue.path.join(".")
+      if (!fieldErrors[path]) fieldErrors[path] = []
+      fieldErrors[path].push(issue.message)
+    }
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: validation.error.flatten().fieldErrors,
+      details: fieldErrors,
     }
   }
 
   const safeData = validation.data
 
-  // 2. Perform permission check
   const canSend = await hasPermission(PERMISSIONS.SEND_NOTIFICATION)
   if (!canSend) {
-    return {
-      success: false,
-      error: "PERMISSION_DENIED",
-    }
+    return { success: false, error: "PERMISSION_DENIED" }
   }
 
-  // 3. Initialize Supabase client
   const supabase = await createServerClient()
 
-  // 4. Insert notification record into database
   const { data: newNotification, error } = await supabase
     .from("notifications")
     .insert({
@@ -67,47 +62,40 @@ export async function createNotification(
     }
   }
 
-  // 5. Invalidate stale cache paths
   revalidatePath("/", "layout")
 
   return {
     success: true,
-    data: newNotification as Notification,
+    data: newNotification as NotificationRecord,
   }
 }
-
-// ============================================================================
-// Broadcast Notification Action
-// ============================================================================
 
 export async function broadcastNotification(
   payload: unknown
 ): Promise<ApiResult<{ count: number }>> {
-  // 1. Validate payload against Zod schema
   const validation = broadcastNotificationSchema.safeParse(payload)
   if (!validation.success) {
+    const fieldErrors: Record<string, string[]> = {}
+    for (const issue of validation.error.issues) {
+      const path = issue.path.join(".")
+      if (!fieldErrors[path]) fieldErrors[path] = []
+      fieldErrors[path].push(issue.message)
+    }
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: validation.error.flatten().fieldErrors,
+      details: fieldErrors,
     }
   }
 
   const safeData = validation.data
 
-  // 2. Perform permission check
   const canBroadcast = await hasPermission(PERMISSIONS.CREATE_NOTIFICATION)
   if (!canBroadcast) {
-    return {
-      success: false,
-      error: "PERMISSION_DENIED",
-    }
+    return { success: false, error: "PERMISSION_DENIED" }
   }
 
-  // 3. Initialize Supabase client
   const supabase = await createServerClient()
-
-  // 4. Resolve target user IDs
   let targetUserIds: string[] = []
 
   if (safeData.targetType === "all") {
@@ -140,13 +128,9 @@ export async function broadcastNotification(
   }
 
   if (targetUserIds.length === 0) {
-    return {
-      success: false,
-      error: "NO_TARGET_USERS_FOUND",
-    }
+    return { success: false, error: "NO_TARGET_USERS_FOUND" }
   }
 
-  // 5. Prepare batch insert records
   const notificationsPayload = targetUserIds.map((userId) => ({
     user_id: userId,
     title: safeData.title,
@@ -167,7 +151,6 @@ export async function broadcastNotification(
     }
   }
 
-  // 6. Invalidate stale cache paths
   revalidatePath("/", "layout")
 
   return {

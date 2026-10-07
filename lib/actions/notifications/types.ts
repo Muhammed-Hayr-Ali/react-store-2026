@@ -13,15 +13,6 @@ export interface NotificationRecord {
   created_at: string
 }
 
-export interface GetNotificationsResponse {
-  success: boolean
-  data?: {
-    notifications: NotificationRecord[]
-    unreadCount: number
-  }
-  error?: string
-}
-
 export interface AdminNotificationRecord extends NotificationRecord {
   profiles?: {
     first_name: string | null

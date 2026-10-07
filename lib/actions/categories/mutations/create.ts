@@ -23,10 +23,16 @@ export async function createCategory(
   // 1. Validate payload against Zod schema
   const validation = createCategorySchema.safeParse(payload)
   if (!validation.success) {
+    const fieldErrors: Record<string, string[]> = {}
+    for (const issue of validation.error.issues) {
+      const path = issue.path.join(".")
+      if (!fieldErrors[path]) fieldErrors[path] = []
+      fieldErrors[path].push(issue.message)
+    }
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: validation.error.flatten().fieldErrors,
+      details: fieldErrors,
     }
   }
 
@@ -79,7 +85,7 @@ export async function createCategory(
     }
   }
 
-  // 6. Invalidate stale cache paths (المتجر واللوحة بالكامل)
+  // 6. Invalidate stale cache paths
   revalidatePath("/", "layout")
 
   return {

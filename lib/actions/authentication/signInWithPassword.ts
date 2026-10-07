@@ -1,3 +1,7 @@
+/**
+ * @file lib/actions/authentication/signInWithPassword.ts
+ */
+
 "use server"
 
 import { cookies } from "next/headers"
@@ -12,10 +16,16 @@ export async function signInWithPassword(
 ): Promise<ApiResult<null>> {
   const validation = signInWithPasswordSchema.safeParse(input)
   if (!validation.success) {
+    const fieldErrors: Record<string, string[]> = {}
+    for (const issue of validation.error.issues) {
+      const path = issue.path.join(".")
+      if (!fieldErrors[path]) fieldErrors[path] = []
+      fieldErrors[path].push(issue.message)
+    }
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: validation.error.flatten().fieldErrors,
+      details: fieldErrors,
     }
   }
 

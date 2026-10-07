@@ -1,6 +1,5 @@
 /**
  * @file lib/actions/notifications/mutations/delete.ts
- * @description Server Actions to remove notification records with admin authorization checks.
  */
 
 "use server"
@@ -25,12 +24,15 @@ export async function deleteNotification(id: string): Promise<ApiResult<null>> {
   } = await supabase.auth.getUser()
 
   if (userError || !user) {
-    return { success: false, error: "UNAUTHORIZED" }
+    return { success: false, error: "UNAUTHORIZED_ACCESS" }
   }
 
   const isAdmin = await hasRole(ROLES.ADMIN)
 
-  let query = supabase.from("notifications").delete().eq("id", id)
+  let query = supabase
+    .from("notifications")
+    .delete()
+    .eq("id", idValidation.data)
   if (!isAdmin) {
     query = query.eq("user_id", user.id)
   }
@@ -49,14 +51,15 @@ export async function deleteNotification(id: string): Promise<ApiResult<null>> {
   return { success: true, data: null }
 }
 
-// دالة حذف مجموعة إشعارات دفعة واحدة (للإشعارات المجمعة / Broadcast)
 export async function deleteBatchNotifications(
   ids: string[]
 ): Promise<ApiResult<{ count: number }>> {
-  if (!ids || ids.length === 0) {
-    return { success: false, error: "NO_IDS_PROVIDED" }
+  const idsValidation = z.array(z.string().uuid()).safeParse(ids)
+  if (!idsValidation.success || idsValidation.data.length === 0) {
+    return { success: false, error: "INVALID_OR_EMPTY_IDS" }
   }
 
+  const validIds = idsValidation.data
   const supabase = await createServerClient()
 
   const {
@@ -65,12 +68,12 @@ export async function deleteBatchNotifications(
   } = await supabase.auth.getUser()
 
   if (userError || !user) {
-    return { success: false, error: "UNAUTHORIZED" }
+    return { success: false, error: "UNAUTHORIZED_ACCESS" }
   }
 
   const isAdmin = await hasRole(ROLES.ADMIN)
 
-  let query = supabase.from("notifications").delete().in("id", ids)
+  let query = supabase.from("notifications").delete().in("id", validIds)
   if (!isAdmin) {
     query = query.eq("user_id", user.id)
   }
@@ -86,7 +89,7 @@ export async function deleteBatchNotifications(
   }
 
   revalidatePath("/", "layout")
-  return { success: true, data: { count: ids.length } }
+  return { success: true, data: { count: validIds.length } }
 }
 
 export async function deleteAllNotifications(): Promise<ApiResult<null>> {
@@ -98,7 +101,7 @@ export async function deleteAllNotifications(): Promise<ApiResult<null>> {
   } = await supabase.auth.getUser()
 
   if (userError || !user) {
-    return { success: false, error: "UNAUTHORIZED" }
+    return { success: false, error: "UNAUTHORIZED_ACCESS" }
   }
 
   const { error } = await supabase
