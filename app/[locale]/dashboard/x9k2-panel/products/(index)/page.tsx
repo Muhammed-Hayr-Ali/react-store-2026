@@ -22,10 +22,10 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
-// const canView = await hasPermission(PERMISSIONS.VIEW_PRODUCTS)
-// if (!canView) {
-//   notFound()
-// }
+const canView = await hasPermission(PERMISSIONS.VIEW_PRODUCTS)
+if (!canView) {
+  notFound()
+}
 
   const headersList = await headers()
   const userAgent = headersList.get("user-agent") || ""
