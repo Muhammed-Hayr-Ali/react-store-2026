@@ -1,34 +1,44 @@
+/**
+ * @file lib/actions/users/mutations/update-user.ts
+ * @description Server Action to update user profile information.
+ */
+
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { createClient } from "@/lib/database/supabase/server"
-import { ActionResponse } from "../types"
+import { createServerClient } from "@/lib/database/supabase/server"
+import { ApiResult } from "@/lib/database/types/utils"
 import { hasPermission, PERMISSIONS } from "../../role"
+import { updateUserSchema, UpdateUserFormValues } from "../schemas"
 import { appRoutes } from "@/lib/config/app-routes"
 
-interface UpdateUserParams {
-  userId: string
-  firstName?: string
-  lastName?: string
-  phoneNumber?: string
-}
-
 export async function updateUser(
-  params: UpdateUserParams
-): Promise<ActionResponse> {
-  try {
-    // 1. التحقق من الصلاحيات
-    const canUpdate = await hasPermission(PERMISSIONS.UPDATE_USER)
-    if (!canUpdate) {
-      return {
-        success: false,
-        error: "PERMISSION_DENIED",
-      }
+  payload: UpdateUserFormValues
+): Promise<ApiResult<null>> {
+  // 1. Permission check
+  const canUpdate = await hasPermission(PERMISSIONS.UPDATE_USER)
+  if (!canUpdate) {
+    return { success: false, error: "PERMISSION_DENIED" }
+  }
+
+  // 2. Validate input schema
+  const validation = updateUserSchema.safeParse(payload)
+  if (!validation.success) {
+    const fieldErrors: Record<string, string[]> = {}
+    for (const issue of validation.error.issues) {
+      const path = issue.path.join(".")
+      if (!fieldErrors[path]) fieldErrors[path] = []
+      fieldErrors[path].push(issue.message)
     }
+    return { success: false, error: "VALIDATION_ERROR", details: fieldErrors }
+  }
 
-    const supabase = await createClient()
+  const params = validation.data
 
-    // 2. تحديث بيانات الملف الشخصي في جدول profiles
+  try {
+    const supabase = await createServerClient()
+
+    // 3. Update profile
     const { error } = await supabase
       .from("profiles")
       .update({
@@ -40,17 +50,16 @@ export async function updateUser(
       .eq("id", params.userId)
 
     if (error) {
-      console.error("Error updating user:", error.message)
-      return { success: false, error: error.message }
+      return {
+        success: false,
+        error: "UPDATE_USER_ERROR",
+        details: { database: [error.message] },
+      }
     }
 
     revalidatePath(appRoutes.dashboard.admin.users)
-    return { success: true }
+    return { success: true, data: null }
   } catch (err) {
-    console.error("Unexpected error in updateUser:", err)
-    return {
-      success: false,
-      error: "An unexpected error occurred while updating the user.",
-    }
+    return { success: false, error: "UNEXPECTED_ERROR" }
   }
 }

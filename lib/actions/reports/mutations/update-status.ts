@@ -23,10 +23,16 @@ export async function updateReportStatus(
   // 1. Validate update payload
   const validation = updateReportStatusSchema.safeParse(payload)
   if (!validation.success) {
+    const fieldErrors: Record<string, string[]> = {}
+    for (const issue of validation.error.issues) {
+      const path = issue.path.join(".")
+      if (!fieldErrors[path]) fieldErrors[path] = []
+      fieldErrors[path].push(issue.message)
+    }
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: validation.error.flatten().fieldErrors,
+      details: fieldErrors,
     }
   }
 

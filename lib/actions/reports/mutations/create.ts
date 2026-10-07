@@ -24,10 +24,16 @@ export async function submitReport(
   // 1. Validate payload
   const validation = createReportSchema.safeParse(payload)
   if (!validation.success) {
+    const fieldErrors: Record<string, string[]> = {}
+    for (const issue of validation.error.issues) {
+      const path = issue.path.join(".")
+      if (!fieldErrors[path]) fieldErrors[path] = []
+      fieldErrors[path].push(issue.message)
+    }
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: validation.error.flatten().fieldErrors,
+      details: fieldErrors,
     }
   }
 

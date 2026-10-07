@@ -12,10 +12,6 @@ import { Review, UpdateReviewInput } from "../types"
 import { updateReviewSchema } from "../schemas"
 import { hasPermission, PERMISSIONS } from "../../role"
 
-// ============================================================================
-// Main Action Function
-// ============================================================================
-
 export async function updateReview(
   data: UpdateReviewInput
 ): Promise<ApiResult<Review | null>> {
@@ -31,10 +27,16 @@ export async function updateReview(
   // 2. Validate payload
   const validation = updateReviewSchema.safeParse(data)
   if (!validation.success) {
+    const fieldErrors: Record<string, string[]> = {}
+    for (const issue of validation.error.issues) {
+      const path = issue.path.join(".")
+      if (!fieldErrors[path]) fieldErrors[path] = []
+      fieldErrors[path].push(issue.message)
+    }
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: validation.error.flatten().fieldErrors,
+      details: fieldErrors, // التعديل هنا
     }
   }
 

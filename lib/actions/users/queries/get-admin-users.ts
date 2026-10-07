@@ -1,7 +1,13 @@
+/**
+ * @file lib/actions/users/queries/get-admin-users.ts
+ * @description Fetches the list of all users for the admin dashboard via Supabase RPC.
+ */
+
 "use server"
 
-import { createClient } from "@/lib/database/supabase/server"
-import { AdminUserSummary, GetAdminUsersResult, UserStatus } from "../types"
+import { createServerClient } from "@/lib/database/supabase/server"
+import { ApiResult } from "@/lib/database/types/utils"
+import { AdminUserSummary, UserStatus } from "../types"
 
 interface GetAdminUsersParams {
   search?: string
@@ -10,9 +16,9 @@ interface GetAdminUsersParams {
 
 export async function getAdminUsersList(
   params?: GetAdminUsersParams
-): Promise<GetAdminUsersResult> {
+): Promise<ApiResult<AdminUserSummary[]>> {
   try {
-    const supabase = await createClient()
+    const supabase = await createServerClient()
 
     const { data, error } = await supabase.rpc("get_admin_users_list", {
       p_search: params?.search?.trim() || null,
@@ -20,8 +26,11 @@ export async function getAdminUsersList(
     })
 
     if (error) {
-      console.error("Error fetching admin users:", error.message)
-      return { success: false, error: error.message, data: [] }
+      return {
+        success: false,
+        error: "GET_USERS_ERROR",
+        details: { database: [error.message] },
+      }
     }
 
     return {
@@ -29,11 +38,9 @@ export async function getAdminUsersList(
       data: (data as AdminUserSummary[]) || [],
     }
   } catch (err) {
-    console.error("Unexpected error in getAdminUsersList:", err)
     return {
       success: false,
-      error: "An unexpected error occurred while fetching users.",
-      data: [],
+      error: "UNEXPECTED_ERROR",
     }
   }
 }

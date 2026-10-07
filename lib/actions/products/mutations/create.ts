@@ -32,10 +32,16 @@ export async function createProduct(
   // 2. Validate payload against Zod schema
   const validation = createProductCompleteSchema.safeParse(data)
   if (!validation.success) {
+    const fieldErrors: Record<string, string[]> = {}
+    for (const issue of validation.error.issues) {
+      const path = issue.path.join(".")
+      if (!fieldErrors[path]) fieldErrors[path] = []
+      fieldErrors[path].push(issue.message)
+    }
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: validation.error.flatten().fieldErrors,
+      details: fieldErrors,
     }
   }
 

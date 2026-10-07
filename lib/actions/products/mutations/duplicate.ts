@@ -5,6 +5,7 @@
 
 "use server"
 
+import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
@@ -18,11 +19,17 @@ import { hasPermission, PERMISSIONS } from "../../role"
 export async function duplicateProduct(
   productId: string
 ): Promise<ApiResult<Product | null>> {
-  if (!productId) {
+  // 1. Validate Product ID
+  const idValidation = z
+    .string()
+    .uuid("INVALID_PRODUCT_ID")
+    .safeParse(productId)
+  if (!idValidation.success) {
     return { success: false, error: "INVALID_PRODUCT_ID" }
   }
+  const validProductId = idValidation.data
 
-  // 1. Permission check (نسخ المنتج يتطلب صلاحية إنشاء المنتجات)
+  // 2. Permission check
   const canCreate = await hasPermission(PERMISSIONS.CREATE_PRODUCT)
   if (!canCreate) {
     return {
@@ -33,7 +40,7 @@ export async function duplicateProduct(
 
   const supabase = await createServerClient()
 
-  // 2. Fetch original product with relations
+  // 3. Fetch original product with relations
   const { data: originalProduct, error: fetchError } = await supabase
     .from("products")
     .select(
@@ -43,7 +50,7 @@ export async function duplicateProduct(
       product_images (*)
     `
     )
-    .eq("id", productId)
+    .eq("id", validProductId)
     .single()
 
   if (fetchError || !originalProduct) {
@@ -56,7 +63,7 @@ export async function duplicateProduct(
 
   const orig = originalProduct as ProductWithRelations
 
-  // 3. Prepare duplicated copy payload
+  // 4. Prepare duplicated copy payload
   const randomSuffix = Math.random().toString(36).substring(2, 6)
   const newName = `${orig.name} (Copy)`
   const newSlug = `${orig.slug}-copy-${randomSuffix}`
@@ -73,7 +80,7 @@ export async function duplicateProduct(
     is_featured: false,
   }
 
-  // 4. Insert duplicated root product
+  // 5. Insert duplicated root product
   const { data: duplicatedProduct, error: insertError } = await supabase
     .from("products")
     .insert(newProductPayload)
@@ -98,7 +105,7 @@ export async function duplicateProduct(
 
   const oldVariantIdToNewIdMap = new Map<string, string>()
 
-  // 5. Clone variants with distinct SKUs
+  // 6. Clone variants with distinct SKUs
   if (orig.product_variants && orig.product_variants.length > 0) {
     const variantsPayload = orig.product_variants.map((v, idx) => ({
       product_id: newProductId,
@@ -137,7 +144,7 @@ export async function duplicateProduct(
     })
   }
 
-  // 6. Clone images and map to newly created variants
+  // 7. Clone images and map to newly created variants
   if (orig.product_images && orig.product_images.length > 0) {
     const imagesPayload = orig.product_images.map((img) => ({
       product_id: newProductId,

@@ -1,13 +1,13 @@
 import * as z from "zod"
 
-// Profile
+// Profile Example
 // {
 //    "id":"b07bdbdb-9b33-4fa5-8815-667298234096",
 //    "first_name":"Mohammed kher",
 //    "last_name":null,
 //    "email":"m.thelord963@gmail.com",
 //    "phone_number":null,
-//    "profile_image":"https://cdnimages.shemaletubevideos.com/images/galleries/0108/19234/584e92bcfd4e0f3460535613332c627a.jpg",
+//    "profile_image":"https://example.com/profile.jpg",
 //    "gender":"other",
 //    "phone_verified_at":null,
 //    "email_verified_at":null,
@@ -17,10 +17,10 @@ import * as z from "zod"
 
 // 1. الـ Schema الكامل المطابق لجدول profiles في قاعدة البيانات
 export const profileSchema = z.object({
-  id: z.uuid(),
+  id: z.string().uuid(), // تصحيح: z.string().uuid() بدلاً من z.uuid()
   first_name: z.string().nullish(),
   last_name: z.string().nullish(),
-  email: z.email().nullish(),
+  email: z.string().email().nullish(), // تصحيح: z.string().email() بدلاً من z.email()
   phone_number: z.string().nullish(),
   profile_image: z.string().nullish(),
   gender: z.enum(["male", "female", "other"]).nullish(),

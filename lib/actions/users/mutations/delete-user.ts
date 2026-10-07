@@ -1,33 +1,44 @@
+/**
+ * @file lib/actions/users/mutations/delete-user.ts
+ * @description Server Action to completely delete a user from auth and profiles.
+ */
+
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { ActionResponse } from "../types"
-import { hasPermission, PERMISSIONS } from "../../role"
+import { z } from "zod"
 import { createAdminClient } from "@/lib/database/supabase/admin"
+import { ApiResult } from "@/lib/database/types/utils"
+import { hasPermission, PERMISSIONS } from "../../role"
 import { appRoutes } from "@/lib/config/app-routes"
 
-export async function deleteUser(userId: string): Promise<ActionResponse> {
+export async function deleteUser(userId: string): Promise<ApiResult<null>> {
+  // 1. Permission check
+  const canDelete = await hasPermission(PERMISSIONS.DELETE_USER)
+  if (!canDelete) {
+    return { success: false, error: "PERMISSION_DENIED" }
+  }
+
+  // 2. Validate input schema
+  const idValidation = z.string().uuid().safeParse(userId)
+  if (!idValidation.success) {
+    return { success: false, error: "INVALID_USER_ID" }
+  }
+
   try {
-    // 1. التحقق من الصلاحيات
-    const canDelete = await hasPermission(PERMISSIONS.DELETE_USER)
-    if (!canDelete) {
+    const supabase = await createAdminClient()
+
+    // 3. Delete from auth (Admin API)
+    const { error: authError } = await supabase.auth.admin.deleteUser(userId)
+    if (authError) {
       return {
         success: false,
-        error: "PERMISSION_DENIED",
+        error: "DELETE_USER_AUTH_ERROR",
+        details: { database: [authError.message] },
       }
     }
 
-    const supabase = await createAdminClient()
-
-    // 2. حذف المستخدم نهائياً من نظام المصادقة عبر Admin API
-    const { error: authError } = await supabase.auth.admin.deleteUser(userId)
-
-    if (authError) {
-      console.error("Error deleting user from auth:", authError.message)
-      return { success: false, error: authError.message }
-    }
-
-    // 3. حذف السجل من جدول الـ profiles
+    // 4. Delete profile (Cascade should handle this usually, but good for safety)
     const { error: profileError } = await supabase
       .from("profiles")
       .delete()
@@ -38,12 +49,8 @@ export async function deleteUser(userId: string): Promise<ActionResponse> {
     }
 
     revalidatePath(appRoutes.dashboard.admin.users)
-    return { success: true }
+    return { success: true, data: null }
   } catch (err) {
-    console.error("Unexpected error in deleteUser:", err)
-    return {
-      success: false,
-      error: "An unexpected error occurred while deleting the user.",
-    }
+    return { success: false, error: "UNEXPECTED_ERROR" }
   }
 }

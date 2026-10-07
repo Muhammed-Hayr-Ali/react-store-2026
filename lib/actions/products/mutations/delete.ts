@@ -5,6 +5,7 @@
 
 "use server"
 
+import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
@@ -17,14 +18,20 @@ import { hasPermission, PERMISSIONS } from "../../role"
 export async function deleteProduct(
   productId: string
 ): Promise<ApiResult<{ id: string }>> {
-  if (!productId || typeof productId !== "string") {
+  // 1. Validate Product ID
+  const idValidation = z
+    .string()
+    .uuid("INVALID_PRODUCT_ID")
+    .safeParse(productId)
+  if (!idValidation.success) {
     return {
       success: false,
       error: "INVALID_PRODUCT_ID",
     }
   }
+  const validProductId = idValidation.data
 
-  // 1. Permission check
+  // 2. Permission check
   const canDelete = await hasPermission(PERMISSIONS.DELETE_PRODUCT)
   if (!canDelete) {
     return {
@@ -35,11 +42,11 @@ export async function deleteProduct(
 
   const supabase = await createServerClient()
 
-  // 2. Fetch product slug for cache purging
+  // 3. Fetch product slug for cache purging
   const { data: product, error: fetchError } = await supabase
     .from("products")
     .select("id, slug")
-    .eq("id", productId)
+    .eq("id", validProductId)
     .single()
 
   if (fetchError || !product) {
@@ -50,17 +57,17 @@ export async function deleteProduct(
     }
   }
 
-  // 3. Fallback cascade deletion for images and variants
+  // 4. Fallback cascade deletion for images and variants
   await Promise.all([
-    supabase.from("product_images").delete().eq("product_id", productId),
-    supabase.from("product_variants").delete().eq("product_id", productId),
+    supabase.from("product_images").delete().eq("product_id", validProductId),
+    supabase.from("product_variants").delete().eq("product_id", validProductId),
   ])
 
-  // 4. Delete root product
+  // 5. Delete root product
   const { error: deleteError } = await supabase
     .from("products")
     .delete()
-    .eq("id", productId)
+    .eq("id", validProductId)
 
   if (deleteError) {
     return {
@@ -70,12 +77,12 @@ export async function deleteProduct(
     }
   }
 
-  // 5. Invalidate caches
+  // 6. Invalidate caches
   revalidatePath(`/product/${product.slug}`)
   revalidatePath("/", "layout")
 
   return {
     success: true,
-    data: { id: productId },
+    data: { id: validProductId },
   }
 }

@@ -1,5 +1,6 @@
 "use server"
 
+import { z } from "zod"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { PublicProfile } from "./types"
@@ -16,11 +17,20 @@ export default async function readProfile({
     }
   }
 
+  // التحقق من أن المعرّف هو UUID صالح
+  const idValidation = z.string().uuid("INVALID_ID").safeParse(userId)
+  if (!idValidation.success) {
+    return {
+      success: false,
+      error: "INVALID_USER_ID",
+    }
+  }
+
   const supabase = await createServerClient()
 
-  //   get profile from custom function
+  // get profile from custom function
   const { data, error } = await supabase.rpc("read_profile", {
-    p_id: userId,
+    p_id: idValidation.data,
   })
 
   if (error) {
@@ -28,13 +38,13 @@ export default async function readProfile({
       success: false,
       error: "FAILED_TO_FETCH_PUBLIC_PROFILE",
       details: {
-        error: [error.message],
+        database: [error.message],
       },
     }
   }
 
   return {
     success: true,
-    data,
+    data: data as PublicProfile,
   }
 }

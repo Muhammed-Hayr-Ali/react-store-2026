@@ -1,48 +1,44 @@
+/**
+ * @file lib/actions/users/mutations/create-user.ts
+ * @description Server Action to create a new user via Supabase Admin API.
+ */
+
 "use server"
 
 import { revalidatePath } from "next/cache"
 import { createAdminClient } from "@/lib/database/supabase/admin"
 import { ApiResult } from "@/lib/database/types/utils"
 import { AdminUserSummary } from "../types"
-import { createUserSchema } from "../schemas"
+import { createUserSchema, CreateUserFormValues } from "../schemas"
 import { hasPermission, PERMISSIONS } from "../../role"
 
-interface CreateUserParams {
-  email: string
-  password?: string
-  firstName?: string
-  lastName?: string
-  phoneNumber?: string
-}
-
 export async function createUser(
-  payload: unknown
+  payload: CreateUserFormValues
 ): Promise<ApiResult<AdminUserSummary | null>> {
-  // 1. التحقق من صحة المدخلات عبر Zod
+  // 1. Permission check
+  const canCreate = await hasPermission(PERMISSIONS.CREATE_USER)
+  if (!canCreate) {
+    return { success: false, error: "PERMISSION_DENIED" }
+  }
+
+  // 2. Validate input schema
   const validation = createUserSchema.safeParse(payload)
   if (!validation.success) {
-    return {
-      success: false,
-      error: "VALIDATION_ERROR",
-      details: validation.error.flatten().fieldErrors,
+    const fieldErrors: Record<string, string[]> = {}
+    for (const issue of validation.error.issues) {
+      const path = issue.path.join(".")
+      if (!fieldErrors[path]) fieldErrors[path] = []
+      fieldErrors[path].push(issue.message)
     }
+    return { success: false, error: "VALIDATION_ERROR", details: fieldErrors }
   }
 
   const safeData = validation.data
 
   try {
-    // 2. التحقق من الصلاحيات
-    const canCreate = await hasPermission(PERMISSIONS.CREATE_USER)
-    if (!canCreate) {
-      return {
-        success: false,
-        error: "PERMISSION_DENIED",
-      }
-    }
-
     const supabase = createAdminClient()
 
-    // 3. إنشاء المستخدم في النظام عبر Admin API
+    // 3. Create user via Admin API
     const { data: authData, error: authError } =
       await supabase.auth.admin.createUser({
         email: safeData.email,
@@ -55,21 +51,14 @@ export async function createUser(
       })
 
     if (authError || !authData.user) {
-      console.error("Error creating user in auth:", authError?.message)
-
-      // التحقق مما إذا كان الخطأ بسبب أن البريد الإلكتروني مستخدم مسبقاً
       const errorMsg = authError?.message?.toLowerCase() || ""
       if (
         errorMsg.includes("already registered") ||
         errorMsg.includes("already exists") ||
         errorMsg.includes("email_exists")
       ) {
-        return {
-          success: false,
-          error: "EMAIL_ALREADY_EXISTS",
-        }
+        return { success: false, error: "EMAIL_ALREADY_EXISTS" }
       }
-
       return {
         success: false,
         error: "CREATE_USER_ERROR",
@@ -79,7 +68,7 @@ export async function createUser(
 
     const userId = authData.user.id
 
-    // 4. حفظ بيانات الملف الشخصي في جدول profiles
+    // 4. Save profile to profiles table
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
       .upsert({
@@ -98,7 +87,6 @@ export async function createUser(
       console.error("Error saving user profile:", profileError.message)
     }
 
-    // 5. تجهيز كائن البيانات المُعاد للـ Frontend
     const newUserSummary: AdminUserSummary = {
       id: userId,
       email: authData.user.email || safeData.email,
@@ -114,15 +102,11 @@ export async function createUser(
     }
 
     revalidatePath("/", "layout")
-    return {
-      success: true,
-      data: newUserSummary,
-    }
+    return { success: true, data: newUserSummary }
   } catch (err) {
-    console.error("Unexpected error in createUser:", err)
     return {
       success: false,
-      error: "An unexpected error occurred while creating the user.",
+      error: "UNEXPECTED_ERROR",
     }
   }
 }

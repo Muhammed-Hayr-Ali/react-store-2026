@@ -1,3 +1,8 @@
+/**
+ * @file lib/actions/users/types.ts
+ * @description Type definitions for user management.
+ */
+
 export type UserStatus = "active" | "suspended" | "banned"
 
 export interface AdminUserSummary {
@@ -13,10 +18,3 @@ export interface AdminUserSummary {
   created_at: string
   roles: string[]
 }
-
-export type GetAdminUsersResult =
-  | { success: true; data: AdminUserSummary[] }
-  | { success: false; error: string; data: [] }
-
-export type ActionResponse =
-  { success: true } | { success: false; error: string }
