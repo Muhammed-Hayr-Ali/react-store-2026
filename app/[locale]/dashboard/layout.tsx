@@ -8,8 +8,6 @@ import {
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import DashboardBreadcrumb from "@/components/dashboard/dashboard-breadcrumb"
-import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
-import { UserProvider } from "@/lib/context/user-context"
 
 export default async function DashboardLayout({
   children,
@@ -20,11 +18,8 @@ export default async function DashboardLayout({
   const side = locale === "ar" ? "right" : "left"
 
   // جلب بيانات المستخدم وصلاحياته على السيرفر لمرة واحدة
-  const currentUser = await getCurrentUser()
-  const permissions = currentUser?.permissions || []
 
   return (
-    <UserProvider user={currentUser} permissions={permissions}>
       <SidebarProvider>
         {/* الـ AppSidebar يعالج جلب بياناته وصلاحياته ذاتياً على السيرفر */}
         <AppSidebar side={side} />
@@ -45,6 +40,6 @@ export default async function DashboardLayout({
           <main className="flex-1 px-4 py-4 md:px-6 md:py-6">{children}</main>
         </SidebarInset>
       </SidebarProvider>
-    </UserProvider>
+   
   )
 }

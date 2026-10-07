@@ -1,13 +1,11 @@
 import { notFound } from "next/navigation"
-import {  ShieldAlertIcon } from "lucide-react"
+import { ShieldAlertIcon } from "lucide-react"
 
 import { getReportById } from "@/lib/actions/reports/queries/get-by-id"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { appConfig } from "@/lib/config/app_config"
 import { ReportDetailsView } from "@/components/dashboard/reports/report-details-view"
-
-export const dynamic = "force-dynamic"
 
 interface PageProps {
   params: Promise<{
@@ -17,8 +15,6 @@ interface PageProps {
 }
 
 export async function generateMetadata({ params }: PageProps) {
-
-
   const { id } = await params
   return createMetadata({
     siteName: appConfig.name,
@@ -28,13 +24,12 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function ReportDetailPage({ params }: PageProps) {
-
-   const canView = await hasPermission(PERMISSIONS.UPDATE_REPORT)
+  const canView = await hasPermission(PERMISSIONS.UPDATE_REPORT)
   if (!canView) {
     notFound()
   }
 
- const { id } = await params
+  const { id } = await params
 
   const res = await getReportById(id)
 

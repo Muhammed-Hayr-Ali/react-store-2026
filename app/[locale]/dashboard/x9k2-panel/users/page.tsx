@@ -8,8 +8,6 @@ import { DataTable } from "@/components/dashboard/users/users-table"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { notFound } from "next/navigation"
 
-export const dynamic = "force-dynamic"
-
 export async function generateMetadata() {
   return createMetadata({
     siteName: appConfig.name,

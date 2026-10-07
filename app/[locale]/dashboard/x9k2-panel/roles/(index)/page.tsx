@@ -8,8 +8,6 @@ import RolesTable from "@/components/dashboard/roles/roles-table"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { notFound } from "next/navigation"
 
-export const dynamic = "force-dynamic"
-
 export async function generateMetadata() {
   return createMetadata({
     siteName: appConfig.name,
@@ -19,11 +17,10 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
-
-    const canView = await hasPermission(PERMISSIONS.VIEW_ROLES_MANAGEMENT)
-    if (!canView) {
-      notFound()
-    }
+  const canView = await hasPermission(PERMISSIONS.VIEW_ROLES_MANAGEMENT)
+  if (!canView) {
+    notFound()
+  }
 
   const headersList = await headers()
   const userAgent = headersList.get("user-agent") || ""

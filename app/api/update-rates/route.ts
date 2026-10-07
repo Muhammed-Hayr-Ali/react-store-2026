@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/database/supabase/admin"
 
-export const dynamic = "force-dynamic"
-
 interface ExchangeRateResponse {
   result: string
   base_code: string
@@ -88,8 +86,3 @@ export async function GET(request: Request) {
     )
   }
 }
-
-
-
-
-

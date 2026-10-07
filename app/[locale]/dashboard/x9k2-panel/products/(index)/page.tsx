@@ -5,12 +5,10 @@ import { getAdminProductsList } from "@/lib/actions/products/queries/get-admin-p
 import { AdminProductSummary } from "@/lib/actions/products/types"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import {  } from "@/lib/config/app-routes"
+import {} from "@/lib/config/app-routes"
 import { DataTable } from "@/components/dashboard/product/products-table"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { notFound } from "next/navigation"
-
-export const dynamic = "force-dynamic"
 
 export async function generateMetadata() {
   return createMetadata({
@@ -22,12 +20,10 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
-
-  
-const canView = await hasPermission(PERMISSIONS.VIEW_PRODUCTS)
-if (!canView) {
-  notFound()
-}
+  const canView = await hasPermission(PERMISSIONS.VIEW_PRODUCTS)
+  if (!canView) {
+    notFound()
+  }
 
   const headersList = await headers()
   const userAgent = headersList.get("user-agent") || ""

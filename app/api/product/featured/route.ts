@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getFeaturedProductSlides } from "@/lib/actions/products/queries/get-featured-slides"
 
-export const dynamic = "force-dynamic"
-
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)

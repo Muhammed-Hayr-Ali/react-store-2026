@@ -10,14 +10,11 @@ import { Brand } from "@/lib/actions/brands"
 import ProductForm from "@/components/dashboard/product/product-form"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 
-export const dynamic = "force-dynamic"
-
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>
 }) {
- 
   const { slug } = await params
   const result = await getProductCompleteBySlug(slug)
 
@@ -36,11 +33,10 @@ export default async function Page({
 }: {
   params: Promise<{ slug: string }>
 }) {
-
- const canView = await hasPermission(PERMISSIONS.UPDATE_PRODUCT)
- if (!canView) {
-   notFound()
- }
+  const canView = await hasPermission(PERMISSIONS.UPDATE_PRODUCT)
+  if (!canView) {
+    notFound()
+  }
   const { slug } = await params
 
   const [productResult, categoriesResult, brandsResult] = await Promise.all([
