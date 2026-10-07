@@ -19,7 +19,7 @@ export const PERMISSIONS = {
   VIEW_REPORTS_MANAGEMENT: "view_reports_management",
   VIEW_ROLES_MANAGEMENT: "view_roles_management",
   VIEW_STAFF_ACCESS: "view_staff_access",
-  VIEW_NOTIFICATIONS_MANAGEMENT: "view_notifications_Management",
+  VIEW_NOTIFICATIONS_MANAGEMENT: "view_notifications_management", // تم تعديل حرف M إلى صغير لتجنب خطأ المطابقة
 
   // --- 1. Brands Management ---
   CREATE_BRAND: "create_brand",
