@@ -7,6 +7,10 @@ import { RoleRecord } from "@/lib/actions/role/mutations/create-role"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { getRoleById } from "@/lib/actions/role/queries/get-role-by-id"
 
+
+export const dynamic = 'force-dynamic'
+
+
 export async function generateMetadata() {
   return createMetadata({
     siteName: appConfig.name,

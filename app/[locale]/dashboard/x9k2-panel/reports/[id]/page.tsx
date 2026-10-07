@@ -7,6 +7,8 @@ import { createMetadata } from "@/lib/config/metadata_generator"
 import { appConfig } from "@/lib/config/app_config"
 import { ReportDetailsView } from "@/components/dashboard/reports/report-details-view"
 
+export const dynamic = "force-dynamic"
+
 interface PageProps {
   params: Promise<{
     locale: string
