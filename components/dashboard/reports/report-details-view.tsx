@@ -15,7 +15,6 @@ import {
   TagIcon,
   Trash2Icon,
   UserIcon,
-  ArrowLeftIcon,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -100,19 +99,8 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
 
   return (
     <div className="space-y-6">
-      {/* شريط الإجراءات العلوي (زر الإلغاء والعودة + زر حذف البلاغ) */}
-      <div className="flex items-center justify-between">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => router.push(appRoutes.dashboard.admin.reports)}
-          className="gap-1.5 text-xs"
-        >
-          <ArrowLeftIcon className="size-3.5" />
-          Cancel & Back to Reports
-        </Button>
-
+      {/* شريط الإجراءات العلوي (زر حذف البلاغ فقط) */}
+      <div className="flex items-center justify-end">
         <Button
           type="button"
           variant="destructive"
@@ -329,19 +317,32 @@ export function ReportDetailsView({ report }: ReportDetailsViewProps) {
                 />
               </div>
 
-              <Button
-                type="button"
-                disabled={isLoading}
-                onClick={handleUpdateStatusAndNotes}
-                className="w-full gap-1.5"
-              >
-                {isLoading ? (
-                  <Loader2Icon className="size-3.5 animate-spin" />
-                ) : (
-                  <SaveIcon className="size-3.5" />
-                )}
-                Save Changes
-              </Button>
+              {/* أزرار الحفظ وDiscard Changes أسفل بعضها لتشبه النماذج القياسية */}
+              <div className="space-y-2 pt-2">
+                <Button
+                  type="button"
+                  disabled={isLoading}
+                  onClick={handleUpdateStatusAndNotes}
+                  className="w-full gap-1.5"
+                >
+                  {isLoading ? (
+                    <Loader2Icon className="size-3.5 animate-spin" />
+                  ) : (
+                    <SaveIcon className="size-3.5" />
+                  )}
+                  Save Changes
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isLoading}
+                  onClick={() => router.push(appRoutes.dashboard.admin.reports)}
+                  className="w-full text-xs"
+                >
+                  Discard Changes
+                </Button>
+              </div>
             </div>
           </div>
         </div>
