@@ -12,7 +12,6 @@ import type {
   ReviewSummary,
   ReviewWithProfile,
 } from "@/lib/actions/reviews/types"
-import { getCurrentUser } from "@/lib/actions/utils/profile"
 
 // Shadcn UI Breadcrumb
 import {

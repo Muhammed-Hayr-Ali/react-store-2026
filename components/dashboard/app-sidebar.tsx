@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 import { NavMain } from "@/components/dashboard/nav-main"
 import { StoreSwitcher } from "@/components/dashboard/store-switcher"
@@ -8,26 +10,17 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
+import { useUser } from "@/lib/context/user-context"
 import { NavUser } from "./nav-user"
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   side?: "right" | "left" | undefined
 }
 
-export async function AppSidebar({ side, ...props }: AppSidebarProps) {
-  const currentUser = await getCurrentUser()
+export function AppSidebar({ side, ...props }: AppSidebarProps) {
+  const { user, permissions } = useUser()
 
-  const user = {
-    name:
-      [currentUser?.first_name, currentUser?.last_name]
-        .filter(Boolean)
-        .join(" ") ||
-      currentUser?.email?.split("@")[0] ||
-      "Guest",
-    email: currentUser?.email || "you@domain.com",
-    avatar: currentUser?.profile_image || "/images/avatar.jpg",
-  }
+  if (!user) return null
 
   return (
     <Sidebar collapsible="icon" {...props} side={side}>
@@ -35,8 +28,7 @@ export async function AppSidebar({ side, ...props }: AppSidebarProps) {
         <StoreSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        {/* الاعتماد فقط على مصفوفة الصلاحيات الديناميكية */}
-        <NavMain permissions={currentUser?.permissions} />
+        <NavMain permissions={permissions} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />

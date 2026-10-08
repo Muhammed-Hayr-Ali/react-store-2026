@@ -75,7 +75,6 @@ export default function DashboardBreadcrumb() {
             <React.Fragment key={item.segment}>
               {index > 0 && <BreadcrumbSeparator />}
               <BreadcrumbItem
-                className={index === 0 && !isLast ? "hidden md:block" : ""}
               >
                 {isLast ? (
                   <BreadcrumbPage>{label}</BreadcrumbPage>

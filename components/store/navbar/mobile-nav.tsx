@@ -24,18 +24,20 @@ import { UserProfileHeader } from "./user-menu"
 import { LanguageAccordion } from "./preferences/language-accordion"
 import { ThemeAccordion } from "./preferences/theme-accordion"
 import { CurrencyAccordion } from "./preferences/currency-accordion"
+import { useUser } from "@/lib/context/user-context"
 
 interface MobileNavProps {
-  user: CurrentUser | null
+
   initialNotifications: NotificationRecord[]
   initialUnreadCount: number
 }
 
 export function MobileNav({
-  user,
+
   initialNotifications,
   initialUnreadCount,
 }: MobileNavProps) {
+  
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -46,7 +48,6 @@ export function MobileNav({
         onClick={() => setIsOpen(!isOpen)}
       />
       <MobileRightMenu
-        user={user}
         initialNotifications={initialNotifications}
         initialUnreadCount={initialUnreadCount}
         isOpen={isOpen}
@@ -57,18 +58,21 @@ export function MobileNav({
 }
 
 function MobileRightMenu({
-  user,
   initialNotifications,
   initialUnreadCount,
   isOpen,
   setIsOpen,
 }: {
-  user: CurrentUser | null
   initialNotifications: NotificationRecord[]
   initialUnreadCount: number
   isOpen: boolean
   setIsOpen: (open: boolean) => void
 }) {
+
+  const { user } = useUser()
+
+
+
   const router = useRouter()
 
   const navLinks = user
@@ -97,7 +101,6 @@ function MobileRightMenu({
       {user && (
         <MobileMenuHeader>
           <UserProfileHeader
-            user={user}
             initialNotifications={initialNotifications}
             initialUnreadCount={initialUnreadCount}
           />

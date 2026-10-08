@@ -8,27 +8,30 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { CurrencySwitcher } from "@/components/store/currency/CurrencySwitcher"
 
-import { CurrentUser } from "@/lib/actions/utils/profile"
 import { appRoutes } from "@/lib/config/app-routes"
 import type { NotificationRecord } from "@/lib/actions/notifications/types"
 import { cn } from "@/lib/utils"
 
 import UserMenu from "./user-menu"
 import { NotificationPopover } from "@/components/notifications/notification-popover.tsx"
+import { useUser } from "@/lib/context/user-context"
 
 interface DesktopNavProps {
   className?: string
-  user: CurrentUser | null
   initialNotifications: NotificationRecord[]
   initialUnreadCount: number
 }
 
 export default function DesktopNav({
-  user,
   className,
   initialNotifications,
   initialUnreadCount,
 }: DesktopNavProps) {
+
+
+const { user } = useUser()
+
+
   return (
     <div className={cn("hidden items-center gap-3 md:flex", className)}>
       <Button
@@ -64,7 +67,6 @@ export default function DesktopNav({
         <>
           <Separator orientation="vertical" className="mx-1 h-5" />
           <UserMenu
-            user={user}
             initialNotifications={initialNotifications}
             initialUnreadCount={initialUnreadCount}
           />

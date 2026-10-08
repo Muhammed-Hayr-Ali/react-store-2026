@@ -7,29 +7,24 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { getCurrentUserStatus } from "@/lib/actions/users/queries/get-current-user-status"
-import { createServerClient } from "@/lib/database/supabase/server"
 import { ReportDialog } from "@/components/shared/report-dialog"
+import { signOut } from "@/lib/actions/authentication"
+import { appRoutes } from "@/lib/config/app-routes"
 
-
-interface BannedPageProps {
-  params: Promise<{ locale: string }>
-}
-
-export default async function BannedPage({ params }: BannedPageProps) {
-  const { locale } = await params
+export default async function BannedPage() {
   const { isAuthenticated, status, banReason } = await getCurrentUserStatus()
 
-  // إذا لم يكن المستخدم مسجلاً أو لم يكن محظوراً، يعاد توجيهه إلى الصفحة الرئيسية
   if (!isAuthenticated || status !== "banned") {
-    redirect(`/${locale}`)
+    redirect(appRoutes.home)
   }
 
-  // إجراء سيرفر فوري لتسجيل الخروج
-  const handleSignOut = async () => {
+
+  async function handleSignOut() {
     "use server"
-    const supabase = await createServerClient()
-    await supabase.auth.signOut()
-    redirect(`/${locale}/auth/login`)
+    const result = await signOut()
+    if (result.success) {
+      redirect(appRoutes.auth.login)
+    }
   }
 
   return (
@@ -61,14 +56,13 @@ export default async function BannedPage({ params }: BannedPageProps) {
         )}
 
         <div className="flex flex-col gap-2 pt-2">
-          {/* نموذج تقديم تظلم عبر نظام البلاغات */}
           <ReportDialog
             targetType="general"
             title="Appeal Account Suspension"
             description="Explain why you believe this suspension was made in error or submit a request for review."
           >
             <Button variant="outline" className="w-full cursor-pointer text-xs">
-              <MessageSquareWarningIcon className="mr-1.5 size-3.5 text-muted-foreground" />
+              <MessageSquareWarningIcon className="me-1.5 size-3.5 text-muted-foreground" />
               Appeal Suspension / Contact Support
             </Button>
           </ReportDialog>
@@ -79,7 +73,7 @@ export default async function BannedPage({ params }: BannedPageProps) {
               variant="ghost"
               className="w-full cursor-pointer text-xs text-muted-foreground hover:text-foreground"
             >
-              <LogOutIcon className="mr-1.5 size-3.5" />
+              <LogOutIcon className="me-1.5 size-3.5" />
               Sign Out
             </Button>
           </form>

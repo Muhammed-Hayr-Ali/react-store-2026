@@ -14,36 +14,33 @@ import {
   CustomPopoverTrigger,
 } from "@/components/ui/custom-popover"
 
-import { CurrentUser } from "@/lib/actions/utils/profile"
 import { signOut } from "@/lib/actions/authentication/signOut"
 import { appRoutes } from "@/lib/config/app-routes"
 import { storeNavConfig } from "./nav-config"
 import { cn } from "@/lib/utils"
-import { NotificationPopover } from "@/components/notifications/notification-popover.tsx"
 import type { NotificationRecord } from "@/lib/actions/notifications/types"
+import { useUser } from "@/lib/context/user-context"
+import { NotificationPopover } from "@/components/notifications/notification-popover.tsx"
+
 
 interface UserMenuProps {
-  user: CurrentUser
   className?: string
   initialNotifications: NotificationRecord[]
   initialUnreadCount: number
 }
 
 export function UserProfileHeader({
-  user,
   className,
   initialNotifications,
   initialUnreadCount,
 }: {
-  user: CurrentUser
   className?: string
   initialNotifications: NotificationRecord[]
   initialUnreadCount: number
 }) {
-  const displayName =
-    [user.first_name, user.last_name].filter(Boolean).join(" ") ||
-    user.email?.split("@")[0] ||
-    "User"
+  const { user } = useUser()
+
+  if (!user) return null
 
   return (
     <div
@@ -55,8 +52,8 @@ export function UserProfileHeader({
       <div className="flex min-w-0 items-center gap-3">
         <Avatar className="size-10 shrink-0">
           <AvatarImage
-            src={user.profile_image || undefined}
-            alt={displayName}
+            src={user.avatar}
+            alt={user.name}
           />
           <AvatarFallback className="p-1.5">
             <UserIcon className="size-full text-muted-foreground" />
@@ -66,18 +63,16 @@ export function UserProfileHeader({
         <div className="flex min-w-0 flex-col items-start justify-center">
           <p
             className="w-full truncate text-xs font-semibold text-foreground"
-            title={displayName}
+            title={user.name}
           >
-            {displayName}
+            {user.name}
           </p>
-          {user.email && (
-            <p
-              className="w-full truncate text-[11px] text-muted-foreground"
-              title={user.email}
-            >
-              {user.email}
-            </p>
-          )}
+          <p
+            className="w-full truncate text-[11px] text-muted-foreground"
+            title={user.email}
+          >
+            {user.email}
+          </p>
           {user.role === "admin" && (
             <span className="mt-0.5 inline-flex items-center rounded bg-primary/10 px-1.5 py-0.5 text-[9px] font-semibold text-primary">
               Admin
@@ -87,7 +82,6 @@ export function UserProfileHeader({
       </div>
 
       <div className="shrink-0 ps-1">
-        {/* استبدال الجرس الوهمي بمكون الإشعارات الحقيقي */}
         <NotificationPopover
           initialNotifications={initialNotifications}
           initialUnreadCount={initialUnreadCount}
@@ -99,12 +93,14 @@ export function UserProfileHeader({
 }
 
 export default function UserMenu({
-  user,
   className,
   initialNotifications,
   initialUnreadCount,
 }: UserMenuProps) {
   const router = useRouter()
+  const { user } = useUser()
+
+  if (!user) return null
 
   const handleLogout = async () => {
     try {
@@ -130,7 +126,7 @@ export default function UserMenu({
           aria-label="User profile menu"
         >
           <Avatar className="size-8 ring-2 ring-transparent transition-all hover:ring-primary/20">
-            <AvatarImage src={user.profile_image || undefined} />
+            <AvatarImage src={user.avatar} />
             <AvatarFallback className="p-1.5">
               <UserIcon className="size-4 text-muted-foreground" />
             </AvatarFallback>
@@ -144,7 +140,6 @@ export default function UserMenu({
       >
         <CustomPopoverHeader className="px-3.5 py-3">
           <UserProfileHeader
-            user={user}
             initialNotifications={initialNotifications}
             initialUnreadCount={initialUnreadCount}
           />

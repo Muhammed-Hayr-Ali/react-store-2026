@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext } from "react"
+import React, { createContext, useContext, useMemo } from "react"
 
 export type CurrentUser = {
   id: string
@@ -17,8 +17,17 @@ export type CurrentUser = {
   permissions: string[]
 }
 
+export type FormattedUser = {
+  id: string
+  name: string
+  email: string
+  avatar: string
+  role: string
+}
+
 interface UserContextType {
-  user: CurrentUser | null
+  rawUser: CurrentUser | null
+  user: FormattedUser | null
   permissions: string[]
   hasPermission: (permission: string) => boolean
 }
@@ -26,7 +35,7 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
 export function UserProvider({
-  user,
+  user: rawUser,
   permissions = [],
   children,
 }: {
@@ -34,13 +43,37 @@ export function UserProvider({
   permissions?: string[]
   children: React.ReactNode
 }) {
+  const formattedUser = useMemo<FormattedUser | null>(() => {
+    if (!rawUser) return null
+
+    const name =
+      [rawUser.first_name, rawUser.last_name].filter(Boolean).join(" ") ||
+      rawUser.email?.split("@")[0] ||
+      "User"
+
+    return {
+      id: rawUser.id,
+      name,
+      email: rawUser.email || "you@domain.com",
+      avatar: rawUser.profile_image || "/images/avatar.jpg",
+      role: rawUser.role,
+    }
+  }, [rawUser])
+
   const hasPermission = (permission: string) => {
     if (!permissions) return false
     return permissions.includes(permission)
   }
 
   return (
-    <UserContext.Provider value={{ user, permissions, hasPermission }}>
+    <UserContext.Provider
+      value={{
+        rawUser,
+        user: formattedUser,
+        permissions,
+        hasPermission,
+      }}
+    >
       {children}
     </UserContext.Provider>
   )
