@@ -21,7 +21,7 @@ export type FormattedUser = {
   id: string
   name: string
   email: string
-  avatar: string | undefined
+  avatar: string
   role: string
 }
 
