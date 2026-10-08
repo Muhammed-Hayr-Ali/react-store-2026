@@ -7,7 +7,6 @@ import {
   ShieldCheck,
   UserCog,
   Bell,
-  User,
   type LucideIcon,
   StoreIcon,
 } from "lucide-react"
@@ -39,13 +38,13 @@ export const sidebarConfig: SidebarConfig = {
     },
     {
       title: "My Account", // أو "Dashboard"
-      url: appRoutes.dashboard.home,
+      url: appRoutes.dashboard.user.overview,
       icon: LayoutDashboard,
-      requiredPermission: PERMISSIONS.VIEW_DASHBOARD,
+      requiredPermission: PERMISSIONS.VIEW_USER_OVERVIEW,
     },
     {
       title: "Admin Panel", // أو "Admin Overview"
-      url: appRoutes.dashboard.admin.home,
+      url: appRoutes.dashboard.admin.overview,
       icon: ShieldCheck, // أو LayoutDashboard
       requiredPermission: PERMISSIONS.VIEW_ADMIN_OVERVIEW,
     },
@@ -91,10 +90,6 @@ export const sidebarConfig: SidebarConfig = {
       icon: Bell,
       requiredPermission: PERMISSIONS.VIEW_NOTIFICATIONS_MANAGEMENT,
     },
-    {
-      title: "My Account",
-      url: appRoutes.dashboard.account,
-      icon: User,
-    },
+    
   ],
 }

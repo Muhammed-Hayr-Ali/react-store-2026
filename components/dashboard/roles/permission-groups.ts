@@ -16,14 +16,16 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     label: "Dashboard & Page Views",
     permissions: [
       {
-        key: PERMISSIONS.VIEW_DASHBOARD,
-        label: "View Dashboard (Overview)",
-        description: "Access the dashboard overview and main home page",
+        key: PERMISSIONS.VIEW_USER_OVERVIEW,
+        label: "View User Dashboard",
+        description:
+          "Access personal account overview, recent orders, and activity",
       },
       {
         key: PERMISSIONS.VIEW_ADMIN_OVERVIEW,
-        label: "View Admin Overview",
-        description: "Access and view admin dashboard overview page",
+        label: "View Admin Panel",
+        description:
+          "Access store analytics, revenue reports, and management overview",
       },
       {
         key: PERMISSIONS.VIEW_PRODUCTS,
