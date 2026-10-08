@@ -3,12 +3,11 @@
 import { useFormatter } from "next-intl"
 import {
   StarIcon,
-  User2Icon,
   PencilIcon,
   Trash2Icon,
   FlagIcon,
 } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { ReviewWithProfile } from "@/lib/actions/reviews/types"
 import { ReportDialog } from "@/components/shared/report-dialog"

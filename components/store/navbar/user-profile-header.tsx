@@ -1,9 +1,7 @@
 "use client"
 
-import * as React from "react"
-import { UserIcon } from "lucide-react"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { useUser } from "@/lib/context/user-context"
 import type { NotificationRecord } from "@/lib/actions/notifications/types"
 import { cn } from "@/lib/utils"
