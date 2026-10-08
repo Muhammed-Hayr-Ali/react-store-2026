@@ -9,6 +9,7 @@ import {
   Bell,
   User,
   type LucideIcon,
+  StoreIcon,
 } from "lucide-react"
 import { appRoutes } from "@/lib/config/app-routes"
 import { PERMISSIONS, AppPermission } from "@/lib/actions/role"
@@ -32,12 +33,22 @@ interface SidebarConfig {
 export const sidebarConfig: SidebarConfig = {
   navMain: [
     {
-      title: "Overview",
-      url: appRoutes.dashboard.admin.home,
+      title: "Store",
+      url: appRoutes.home,
+      icon: StoreIcon,
+    },
+    {
+      title: "My Account", // أو "Dashboard"
+      url: appRoutes.dashboard.home,
       icon: LayoutDashboard,
       requiredPermission: PERMISSIONS.VIEW_DASHBOARD,
     },
-
+    {
+      title: "Admin Panel", // أو "Admin Overview"
+      url: appRoutes.dashboard.admin.home,
+      icon: ShieldCheck, // أو LayoutDashboard
+      requiredPermission: PERMISSIONS.VIEW_ADMIN_OVERVIEW,
+    },
     {
       title: "Products",
       url: appRoutes.dashboard.admin.products,

@@ -48,31 +48,6 @@ export function StoreSwitcher() {
             )}
           </SidebarMenuButton>
 
-          {/* زر عرض المتجر في الشاشات العادية */}
-          {!isCollapsed && !isMobile && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button asChild type="button" variant="outline" size="icon">
-                  <Link href={appRoutes.home}>
-                    <ExternalLink/>
-                  </Link>
-                </Button>
-                {/* <Link
-                  href={appRoutes.home}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex size-7.5 shrink-0 items-center justify-center rounded-lg border border-border/40 text-muted-foreground transition-all hover:border-border hover:bg-muted/70 hover:text-foreground"
-                  aria-label="View Live Store"
-                >
-                  <ExternalLink className="size-3.5" />
-                </Link> */}
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                <p className="text-xs">View Live Store</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-
           {isMobile && (
             <Button
               type="button"

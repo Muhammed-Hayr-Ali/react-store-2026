@@ -8,13 +8,13 @@ export const appRoutes = {
     callback: "/auth/callback",
   },
   dashboard: {
-    home: "/dashboard",
+    home: "/dashboard/overview",
     account: "/dashboard/account",
     notifications: "/dashboard/notifications",
 
     // مسارات الإدارة المحمية والمموهة (Admin Panel)
     admin: {
-      home: "/dashboard/x9k2-panel",
+      home: "/dashboard/x9k2-panel/overview",
       products: "/dashboard/x9k2-panel/products",
       create_products: "/dashboard/x9k2-panel/products/create",
       flashSales: "/dashboard/x9k2-panel/flash-sales",

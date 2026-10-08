@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 import { NextResponse } from "next/server"
 
 
+// localhost:3000/api/user/getCurrentUser
 export async function GET() {
 
   // 1. استدعاء الدالة وحفظ النتيجة في متغير
