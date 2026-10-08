@@ -67,7 +67,7 @@ export async function handleRouteAccess({
 
   // 3. تم إيقاف فحص الأدوار (Role Guard) بناءً على طلبك،
   // مع الاكتفاء بطلب تسجيل الدخول فقط للمسارات التي تبدأ بـ /dashboard إذا أردت:
-  const isDashboardRoute = normalizedPath.startsWith(appRoutes.dashboard.home)
+  const isDashboardRoute = normalizedPath.startsWith(appRoutes.dashboard.user.overview)
   if (isDashboardRoute && !user) {
     return createRedirectResponse(appRoutes.auth.login, {
       redirect: pathname,
