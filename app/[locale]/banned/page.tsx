@@ -18,7 +18,7 @@ export default async function BannedPage() {
     redirect(appRoutes.home)
   }
 
-
+  // Handle sign out
   async function handleSignOut() {
     "use server"
     const result = await signOut()
