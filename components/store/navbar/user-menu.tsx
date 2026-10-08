@@ -51,10 +51,7 @@ export function UserProfileHeader({
     >
       <div className="flex min-w-0 items-center gap-3">
         <Avatar className="size-10 shrink-0">
-          <AvatarImage
-            src={user.avatar}
-            alt={user.name}
-          />
+          <AvatarImage src={user.avatar} alt={user.name} />
           <AvatarFallback className="p-1.5">
             <UserIcon className="size-full text-muted-foreground" />
           </AvatarFallback>
@@ -98,7 +95,7 @@ export default function UserMenu({
   initialUnreadCount,
 }: UserMenuProps) {
   const router = useRouter()
-  const { user } = useUser()
+  const { user, hasPermission } = useUser()
 
   if (!user) return null
 
@@ -113,6 +110,12 @@ export default function UserMenu({
       console.error("Error signing out:", error)
     }
   }
+
+  // فلترة عناصر القائمة بحسب الصلاحيات المطلوبة
+  const visibleUserMenuItems = storeNavConfig.userMenu.items.filter((item) => {
+    if (!item.requiredPermission) return true
+    return hasPermission(item.requiredPermission)
+  })
 
   return (
     <CustomPopover>
@@ -147,9 +150,9 @@ export default function UserMenu({
 
         <Separator />
         <div className="p-1.5">
-          {storeNavConfig.userMenu.items.map((item) => (
+          {visibleUserMenuItems.map((item) => (
             <Button
-              key={item.href}
+              key={item.key}
               size="sm"
               variant="ghost"
               className="h-8 w-full justify-start rounded-lg text-xs font-normal"
@@ -167,7 +170,7 @@ export default function UserMenu({
         <div className="p-1.5">
           {storeNavConfig.supportLinks.items.map((item) => (
             <Button
-              key={item.href}
+              key={item.key}
               size="sm"
               variant="ghost"
               className="h-8 w-full justify-start rounded-lg text-xs font-normal"

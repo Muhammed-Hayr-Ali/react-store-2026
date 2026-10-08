@@ -19,7 +19,7 @@ export async function generateMetadata() {
 }
 
 export default async function UserOverviewPage({ params }: PageProps) {
-  const canView = await hasPermission(PERMISSIONS.VIEW_DASHBOARD)
+  const canView = await hasPermission(PERMISSIONS.VIEW_USER_OVERVIEW)
   if (!canView) {
     notFound()
   }

@@ -15,7 +15,6 @@ import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 
 import { signOut } from "@/lib/actions/authentication/signOut"
-import { CurrentUser } from "@/lib/actions/utils/profile"
 import { appRoutes } from "@/lib/config/app-routes"
 import { storeNavConfig } from "./nav-config"
 import type { NotificationRecord } from "@/lib/actions/notifications/types"
@@ -27,17 +26,14 @@ import { CurrencyAccordion } from "./preferences/currency-accordion"
 import { useUser } from "@/lib/context/user-context"
 
 interface MobileNavProps {
-
   initialNotifications: NotificationRecord[]
   initialUnreadCount: number
 }
 
 export function MobileNav({
-
   initialNotifications,
   initialUnreadCount,
 }: MobileNavProps) {
-  
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -68,15 +64,15 @@ function MobileRightMenu({
   isOpen: boolean
   setIsOpen: (open: boolean) => void
 }) {
-
-  const { user } = useUser()
-
-
-
+  const { user, hasPermission } = useUser()
   const router = useRouter()
 
+  // فلترة الروابط بناءً على تسجيل الدخول وصلاحيات المستخدم
   const navLinks = user
-    ? storeNavConfig.userMenu.items
+    ? storeNavConfig.userMenu.items.filter((item) => {
+        if (!item.requiredPermission) return true
+        return hasPermission(item.requiredPermission)
+      })
     : storeNavConfig.guestMenu.items
 
   const handleClose = () => {
