@@ -3,7 +3,6 @@ import createMiddleware from "next-intl/middleware"
 import { routing } from "./i18n/routing"
 import { createMiddlewareSupabaseClient } from "./lib/middleware/supabase"
 import { handleBanCheck } from "./lib/middleware/ban-guard"
-import { handleRouteAccess } from "./lib/middleware/role-guard"
 
 const intlMiddleware = createMiddleware(routing)
 
@@ -23,28 +22,15 @@ export async function proxy(request: NextRequest) {
     response: supabaseResponse,
   })
 
-  // إذا كان المستخدم محظوراً يتم تحويله مباشرة لصفحة الحظر دون فحص الأدوار
+  // إذا كان المستخدم محظوراً يتم تحويله مباشرة لصفحة الحظر
   if (banRedirect) {
     return banRedirect
   }
 
-  // 3. التحقق من أذونات المسارات والأدوار (Role Guard)
-  const accessRedirect = await handleRouteAccess({
-    request,
-    supabase,
-    user,
-    response: supabaseResponse,
-  })
-
-  // إذا قرر فاحص الأدوار إعادة التوجيه (مثل الذهاب إلى /login) يتم التوجيه فوراً
-  if (accessRedirect) {
-    return accessRedirect
-  }
-
-  // 4. تشغيل وسيط التوجيه للغات (next-intl)
+  // 3. تشغيل وسيط التوجيه للغات (next-intl)
   const intlResponse = intlMiddleware(request)
 
-  // 5. دمج كوكيز الجلسة مع استجابة التدويل
+  // 4. دمج كوكيز الجلسة مع استجابة التدويل
   supabaseResponse.cookies.getAll().forEach((cookie) => {
     intlResponse.cookies.set(cookie.name, cookie.value)
   })
