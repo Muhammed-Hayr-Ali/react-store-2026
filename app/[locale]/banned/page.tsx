@@ -10,6 +10,17 @@ import { getCurrentUserStatus } from "@/lib/actions/users/queries/get-current-us
 import { ReportDialog } from "@/components/shared/report-dialog"
 import { signOut } from "@/lib/actions/authentication"
 import { appRoutes } from "@/lib/config/app-routes"
+import { appConfig } from "@/lib/config/app_config"
+import { createMetadata } from "@/lib/config/metadata_generator"
+
+export async function generateMetadata() {
+  return createMetadata({
+    siteName: appConfig.name,
+    title: "Account Suspended",
+    description:
+      "Your account access has been suspended. Review details or submit an appeal.",
+  })
+}
 
 export default async function BannedPage() {
   const { isAuthenticated, status, banReason } = await getCurrentUserStatus()
@@ -18,7 +29,6 @@ export default async function BannedPage() {
     redirect(appRoutes.home)
   }
 
-  // Handle sign out
   async function handleSignOut() {
     "use server"
     const result = await signOut()
@@ -56,6 +66,7 @@ export default async function BannedPage() {
         )}
 
         <div className="flex flex-col gap-2 pt-2">
+          {/* نموذج تقديم تظلم عبر نظام البلاغات */}
           <ReportDialog
             targetType="general"
             title="Appeal Account Suspension"
