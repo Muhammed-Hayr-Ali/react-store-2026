@@ -18,13 +18,11 @@ import type { CurrencyCode } from "@/lib/actions/currency/types"
 import { cn } from "@/lib/utils"
 
 interface PreferencesSubNavProps {
-  onSelect?: () => void
   itemClassName?: string
   subItemClassName?: string
 }
 
 export function PreferencesSubNav({
-  onSelect,
   itemClassName,
   subItemClassName,
 }: PreferencesSubNavProps) {
@@ -47,7 +45,7 @@ export function PreferencesSubNav({
     (_current, next: string) => next
   )
 
-  // حالات تحميل المظهر
+  // حالة تحميل المظهر
   const [isThemePending, setIsThemePending] = React.useState(false)
 
   React.useEffect(() => {
@@ -57,7 +55,7 @@ export function PreferencesSubNav({
     return () => cancelAnimationFrame(frame)
   }, [])
 
-  // 1. إدارة تغيير اللغة عبر router الخاص بـ next-intl دون إغلاق القائمة
+  // 1. تغيير اللغة عبر next-intl
   const handleLanguageChange = (e: React.MouseEvent, newLocale: string) => {
     e.preventDefault()
     e.stopPropagation()
@@ -66,12 +64,11 @@ export function PreferencesSubNav({
 
     startLangTransition(() => {
       setOptimisticLocale(newLocale)
-      // router.replace من next-intl يقبل { locale } مباشرة ويحدث المسار والاتجاه
       router.replace(pathname, { locale: newLocale })
     })
   }
 
-  // 2. إدارة تغيير المظهر مع تأخير إشارة الصح ومؤشر ترويسة فقط
+  // 2. تغيير المظهر مع تأخير بسيط لإظهار المؤشر
   const handleThemeChange = (e: React.MouseEvent, newTheme: string) => {
     e.preventDefault()
     e.stopPropagation()
@@ -86,7 +83,7 @@ export function PreferencesSubNav({
     }, 220)
   }
 
-  // 3. إدارة تغيير العملة عبر السياق دون إغلاق القائمة
+  // 3. تغيير العملة عبر السياق دون إغلاق القائمة
   const handleCurrencyChange = async (
     e: React.MouseEvent,
     newCurrency: CurrencyCode
