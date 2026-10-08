@@ -21,7 +21,7 @@ export type FormattedUser = {
   id: string
   name: string
   email: string
-  avatar: string
+  avatar: string | undefined
   role: string
 }
 
@@ -55,7 +55,7 @@ export function UserProvider({
       id: rawUser.id,
       name,
       email: rawUser.email || "you@domain.com",
-      avatar: rawUser.profile_image || "/images/avatar.jpg",
+      avatar: rawUser.profile_image || "images/user.png",
       role: rawUser.role,
     }
   }, [rawUser])

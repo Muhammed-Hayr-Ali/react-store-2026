@@ -68,21 +68,20 @@ export default function UserMenu({
         >
           <Avatar className="size-8 ring-2 ring-transparent transition-all hover:ring-primary/20">
             <AvatarImage src={user.avatar} />
-            <AvatarFallback className="p-1.5">
-              <UserIcon className="size-4 text-muted-foreground" />
-            </AvatarFallback>
           </Avatar>
         </button>
       </CustomPopoverTrigger>
 
       <CustomPopoverContent
         align="end"
-        className="w-max max-w-75 min-w-65 gap-0 rounded-xl p-0 shadow-lg"
+        className="w-72 gap-0 rounded-xl p-0 shadow-lg"
       >
         <CustomPopoverHeader className="px-3.5 py-3">
           <UserProfileHeader
             initialNotifications={initialNotifications}
             initialUnreadCount={initialUnreadCount}
+            showNotifications={false}
+            showAvatar={false}
           />
         </CustomPopoverHeader>
 

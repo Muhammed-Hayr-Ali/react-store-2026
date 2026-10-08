@@ -1,68 +1,84 @@
 "use client"
 
-import React from "react"
+import * as React from "react"
 import { UserIcon } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-
 import { useUser } from "@/lib/context/user-context"
 import type { NotificationRecord } from "@/lib/actions/notifications/types"
 import { cn } from "@/lib/utils"
 import { NotificationPopover } from "@/components/notifications/notification-popover.tsx"
 
+
 interface UserProfileHeaderProps {
   className?: string
-  initialNotifications: NotificationRecord[]
-  initialUnreadCount: number
+  initialNotifications?: NotificationRecord[]
+  initialUnreadCount?: number
+  showNotifications?: boolean
+  showAvatar?: boolean
 }
 
 export function UserProfileHeader({
   className,
-  initialNotifications,
-  initialUnreadCount,
+  initialNotifications = [],
+  initialUnreadCount = 0,
+  showNotifications = false,
+  showAvatar = true,
 }: UserProfileHeaderProps) {
   const { user } = useUser()
 
   if (!user) return null
 
-  return (
-    <div className={cn("flex w-full items-center justify-between gap-3", className)}>
-      <div className="flex min-w-0 items-center gap-3">
-        <Avatar className="size-10 shrink-0">
-          <AvatarImage src={user.avatar} alt={user.name} />
-          <AvatarFallback className="p-1.5">
-            <UserIcon className="size-full text-muted-foreground" />
-          </AvatarFallback>
-        </Avatar>
+  // استخراج المعرف من البريد
+  const username = user.email ? user.email.split("@")[0] : "user"
 
-        <div className="flex min-w-0 flex-col items-start justify-center">
+  // دمج المعرف مع الدور بصيغة @handle/ROLE
+  const handleWithRole = user.role
+    ? `@${username}/${user.role.toUpperCase()}`
+    : `@${username}`
+
+  return (
+    <div
+      className={cn(
+        "flex w-full items-center justify-between gap-3",
+        className
+      )}
+    >
+      <div className="flex min-w-0 items-center gap-3">
+        {/* إظهار الصورة إذا كانت مطلوبة فقط (في الموبايل مثلاً) */}
+        {showAvatar && (
+          <Avatar className="size-10 shrink-0 border-0 shadow-none ring-0">
+            <AvatarImage src={user.avatar} alt={user.name} />
+          </Avatar>
+        )}
+
+        {/* معلومات المستخدم */}
+        <div className="flex min-w-0 flex-col justify-center">
           <p
-            className="w-full truncate text-xs font-semibold text-foreground"
+            className="w-full truncate text-xs leading-tight font-semibold text-foreground"
             title={user.name}
           >
             {user.name}
           </p>
+
           <p
-            className="w-full truncate text-[11px] text-muted-foreground"
-            title={user.email}
+            className="mt-0.5 w-full truncate font-mono text-[11px] leading-tight text-muted-foreground"
+            title={handleWithRole}
           >
-            {user.email}
+            {handleWithRole}
           </p>
-          {user.role === "admin" && (
-            <span className="mt-0.5 inline-flex items-center rounded bg-primary/10 px-1.5 py-0.5 text-[9px] font-semibold text-primary">
-              Admin
-            </span>
-          )}
         </div>
       </div>
 
-      <div className="shrink-0 ps-1">
-        <NotificationPopover
-          initialNotifications={initialNotifications}
-          initialUnreadCount={initialUnreadCount}
-          currentUserId={user.id}
-        />
-      </div>
+      {showNotifications && (
+        <div className="shrink-0 ps-1">
+          <NotificationPopover
+            initialNotifications={initialNotifications}
+            initialUnreadCount={initialUnreadCount}
+            currentUserId={user.id}
+          />
+        </div>
+      )}
     </div>
   )
 }

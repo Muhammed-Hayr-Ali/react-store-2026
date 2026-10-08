@@ -7,7 +7,7 @@ import { SearchIcon, ShoppingCartIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { CurrencySwitcher } from "@/components/store/currency/CurrencySwitcher"
- 
+
 import { appRoutes } from "@/lib/config/app-routes"
 import { useUser } from "@/lib/context/user-context"
 import type { NotificationRecord } from "@/lib/actions/notifications/types"
@@ -49,7 +49,6 @@ export default function DesktopNav({
         <ShoppingCartIcon className="size-4" />
       </Button>
 
-      {/* إشعار الديسكتوب للمستخدم المسجل */}
       {user && (
         <NotificationPopover
           initialNotifications={initialNotifications}

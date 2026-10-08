@@ -86,6 +86,7 @@ function MobileRightMenu({
           <UserProfileHeader
             initialNotifications={initialNotifications}
             initialUnreadCount={initialUnreadCount}
+            showNotifications={true}
           />
         </MobileMenuHeader>
       )}

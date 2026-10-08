@@ -46,9 +46,6 @@ export function ReviewItem({
         <div className="flex items-center gap-2">
           <Avatar>
             <AvatarImage src={review.profile?.profile_image || undefined} />
-            <AvatarFallback className="p-2">
-              <User2Icon className="size-4" />
-            </AvatarFallback>
           </Avatar>
           <span className="text-sm font-medium text-foreground">
             {fullName}
