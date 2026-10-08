@@ -10,7 +10,6 @@ import {
   Monitor,
   Moon,
   Package,
-  ShieldAlert,
   ShieldCheck,
   Store,
   Sun,

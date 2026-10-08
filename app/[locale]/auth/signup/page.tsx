@@ -18,6 +18,8 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
+
+  
   const user = await getCurrentUser()
   if (user) {
     redirect(appRoutes.home)
