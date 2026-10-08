@@ -1,7 +1,12 @@
 // lib/context/currency-context.tsx
 "use client"
 
-import React, { createContext, useContext, useTransition } from "react"
+import React, {
+  createContext,
+  useContext,
+  useTransition,
+  useOptimistic,
+} from "react"
 import { useRouter } from "next/navigation"
 import { CurrencyCode } from "@/lib/actions/currency/types"
 import { formatPrice as formatPriceUtil } from "@/lib/actions/currency/utils"
@@ -18,7 +23,7 @@ interface CurrencyContextValue {
 const CurrencyContext = createContext<CurrencyContextValue | null>(null)
 
 export function CurrencyProvider({
-  currency,
+  currency: serverCurrency,
   rate,
   children,
 }: {
@@ -29,11 +34,19 @@ export function CurrencyProvider({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
+  // حالة متفائلة متوافقة مع قواعد React بالكامل وتلغي أي حاجة لـ useEffect
+  const [optimisticCurrency, setOptimisticCurrency] = useOptimistic(
+    serverCurrency,
+    (_current, next: CurrencyCode) => next
+  )
+
   const setCurrency = React.useCallback(
     async (newCurrency: CurrencyCode) => {
-      if (newCurrency === currency || isPending) return
+      if (newCurrency === optimisticCurrency || isPending) return
 
       startTransition(async () => {
+        // تحديث الواجهة فوراً
+        setOptimisticCurrency(newCurrency)
         try {
           await setUserCurrency(newCurrency)
           router.refresh()
@@ -42,18 +55,19 @@ export function CurrencyProvider({
         }
       })
     },
-    [currency, isPending, router]
+    [optimisticCurrency, isPending, router, setOptimisticCurrency]
   )
 
   const format = React.useCallback(
-    (priceInCents: number) => formatPriceUtil(priceInCents, currency, rate),
-    [currency, rate]
+    (priceInCents: number) =>
+      formatPriceUtil(priceInCents, optimisticCurrency, rate),
+    [optimisticCurrency, rate]
   )
 
   return (
     <CurrencyContext.Provider
       value={{
-        currency,
+        currency: optimisticCurrency,
         rate,
         isPending,
         setCurrency,

@@ -1,20 +1,24 @@
-import { NextRequest } from "next/server"
+// proxy.ts
+import { NextRequest, NextResponse } from "next/server"
 import createMiddleware from "next-intl/middleware"
-import { routing } from "./i18n/routing"
+import { routing } from "@/i18n/routing" // استخدام alias موحد للمسار
 import { createMiddlewareSupabaseClient } from "./lib/middleware/supabase"
 import { handleBanCheck } from "./lib/middleware/ban-guard"
 
 const intlMiddleware = createMiddleware(routing)
 
 export async function proxy(request: NextRequest) {
-  // 1. تحديث جلسة Supabase وجلب المستخدم
+  // 1. تشغيل وسيط التدويل أولاً لالتقاط مسار اللغة الجديد أو أي Redirect
+  const response = intlMiddleware(request)
+
+  // 2. تحديث جلسة Supabase مع تمرير نفس كائن الاستجابة لمزامنة الكوكيز
   const {
     supabase,
     user,
     response: supabaseResponse,
   } = await createMiddlewareSupabaseClient(request)
 
-  // 2. التحقق من حالة الحظر أولاً (Ban Guard)
+  // 3. التحقق من حالة الحظر (Ban Guard)
   const banRedirect = await handleBanCheck({
     request,
     supabase,
@@ -22,22 +26,19 @@ export async function proxy(request: NextRequest) {
     response: supabaseResponse,
   })
 
-  // إذا كان المستخدم محظوراً يتم تحويله مباشرة لصفحة الحظر
   if (banRedirect) {
     return banRedirect
   }
 
-  // 3. تشغيل وسيط التوجيه للغات (next-intl)
-  const intlResponse = intlMiddleware(request)
-
-  // 4. دمج كوكيز الجلسة مع استجابة التدويل
+  // 4. نسخ كوكيز جلسة Supabase إلى استجابة next-intl النهائية بأمان
   supabaseResponse.cookies.getAll().forEach((cookie) => {
-    intlResponse.cookies.set(cookie.name, cookie.value)
+    response.cookies.set(cookie.name, cookie.value)
   })
 
-  return intlResponse
+  return response
 }
 
 export const config = {
-  matcher: "/((?!api|trpc|_next|_vercel|.*\\..*).*)",
+  // مطابقة كافة المسارات باستثناء ملفات النظام والـ API
+  matcher: ["/", "/(ar|en)/:path*", "/((?!api|_next|_vercel|.*\\..*).*)"],
 }

@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { usePathname, useRouter } from "next/navigation"
+import { useLocale } from "next-intl"
+import { usePathname, useRouter } from "@/i18n/navigation"
 import { useTheme } from "next-themes"
 import { CheckIcon, ChevronRight, Loader2Icon } from "lucide-react"
 
@@ -29,6 +30,7 @@ export function PreferencesSubNav({
 }: PreferencesSubNavProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const currentLocale = useLocale()
   const { theme, setTheme } = useTheme()
   const {
     currency: currentCurrency,
@@ -37,13 +39,16 @@ export function PreferencesSubNav({
   } = useCurrency()
 
   const [mounted, setMounted] = React.useState(false)
+
+  // حالة اللغة المتفائلة عبر useOptimistic
   const [isLangPending, startLangTransition] = React.useTransition()
-  const [pendingLangKey, setPendingLangKey] = React.useState<string | null>(
-    null
+  const [optimisticLocale, setOptimisticLocale] = React.useOptimistic(
+    currentLocale,
+    (_current, next: string) => next
   )
-  const [targetCurrencyKey, setTargetCurrencyKey] = React.useState<
-    string | null
-  >(null)
+
+  // حالات تحميل المظهر
+  const [isThemePending, setIsThemePending] = React.useState(false)
 
   React.useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -52,50 +57,49 @@ export function PreferencesSubNav({
     return () => cancelAnimationFrame(frame)
   }, [])
 
-  // 1. تحديد اللغة الحالية
-  const segments = pathname.split("/").filter(Boolean)
-  const currentLocale =
-    segments.length > 0 && segments[0].length === 2 ? segments[0] : "en"
+  // 1. إدارة تغيير اللغة عبر router الخاص بـ next-intl دون إغلاق القائمة
+  const handleLanguageChange = (e: React.MouseEvent, newLocale: string) => {
+    e.preventDefault()
+    e.stopPropagation()
 
-  // 2. إدارة تغيير اللغة
-  const handleLanguageChange = (newLocale: string) => {
-    if (newLocale === currentLocale || isLangPending) {
-      onSelect?.()
-      return
-    }
+    if (newLocale === optimisticLocale || isLangPending) return
 
-    setPendingLangKey(newLocale)
     startLangTransition(() => {
-      const newPathname =
-        segments.length > 0 && segments[0].length === 2
-          ? `/${newLocale}/${segments.slice(1).join("/")}`
-          : `/${newLocale}${pathname}`
-
-      router.replace(newPathname)
-      router.refresh()
-      onSelect?.()
+      setOptimisticLocale(newLocale)
+      // router.replace من next-intl يقبل { locale } مباشرة ويحدث المسار والاتجاه
+      router.replace(pathname, { locale: newLocale })
     })
   }
 
-  // 3. إدارة تغيير المظهر
-  const handleThemeChange = (newTheme: string) => {
-    setTheme(newTheme)
-    onSelect?.()
+  // 2. إدارة تغيير المظهر مع تأخير إشارة الصح ومؤشر ترويسة فقط
+  const handleThemeChange = (e: React.MouseEvent, newTheme: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (newTheme === theme || isThemePending) return
+
+    setIsThemePending(true)
+
+    setTimeout(() => {
+      setTheme(newTheme)
+      setIsThemePending(false)
+    }, 220)
   }
 
-  // 4. إدارة تغيير العملة عبر دالة السياق
-  const handleCurrencyChange = async (newCurrency: CurrencyCode) => {
-    if (newCurrency === currentCurrency || isCurrencyPending) {
-      onSelect?.()
-      return
-    }
+  // 3. إدارة تغيير العملة عبر السياق دون إغلاق القائمة
+  const handleCurrencyChange = async (
+    e: React.MouseEvent,
+    newCurrency: CurrencyCode
+  ) => {
+    e.preventDefault()
+    e.stopPropagation()
 
-    setTargetCurrencyKey(newCurrency)
+    if (newCurrency === currentCurrency || isCurrencyPending) return
+
     try {
       await setCurrency(newCurrency)
-      onSelect?.()
-    } finally {
-      setTargetCurrencyKey(null)
+    } catch (error) {
+      console.error("Failed to update currency:", error)
     }
   }
 
@@ -120,10 +124,14 @@ export function PreferencesSubNav({
               <span>{language.name}</span>
             </div>
             <div className="flex items-center gap-1.5 text-muted-foreground">
-              {mounted && (
-                <span className="text-[11px] font-medium uppercase">
-                  {currentLocale}
-                </span>
+              {isLangPending ? (
+                <Loader2Icon className="size-3.5 animate-spin text-primary" />
+              ) : (
+                mounted && (
+                  <span className="text-[11px] font-medium uppercase">
+                    {optimisticLocale}
+                  </span>
+                )
               )}
               <ChevronRight className="size-3.5 transition-transform duration-200 group-data-[state=open]/pref-lang:rotate-90 rtl:rotate-180" />
             </div>
@@ -131,8 +139,7 @@ export function PreferencesSubNav({
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-0.5 ps-6 pt-0.5">
           {language.options.map((opt) => {
-            const isSelected = mounted && currentLocale === opt.value
-            const isItemLoading = isLangPending && pendingLangKey === opt.value
+            const isSelected = mounted && optimisticLocale === opt.value
 
             return (
               <Button
@@ -140,18 +147,16 @@ export function PreferencesSubNav({
                 variant="ghost"
                 size="sm"
                 disabled={isLangPending}
-                onClick={() => handleLanguageChange(opt.value)}
+                onClick={(e) => handleLanguageChange(e, opt.value)}
                 className={cn(
                   "flex h-8 w-full items-center justify-between text-xs font-normal",
-                  !isSelected && "text-muted-foreground",
+                  (!isSelected || isLangPending) && "text-muted-foreground",
                   subItemClassName
                 )}
               >
                 <span>{opt.label}</span>
                 <div className="flex items-center">
-                  {isItemLoading ? (
-                    <Loader2Icon className="size-3 animate-spin text-primary" />
-                  ) : isSelected ? (
+                  {isSelected && !isLangPending ? (
                     <CheckIcon className="size-3.5 text-primary" />
                   ) : (
                     <span className="size-3.5" aria-hidden="true" />
@@ -169,6 +174,7 @@ export function PreferencesSubNav({
           <Button
             variant="ghost"
             size="sm"
+            disabled={isThemePending}
             className={cn(
               "flex h-10 w-full items-center justify-between font-normal",
               itemClassName
@@ -179,10 +185,14 @@ export function PreferencesSubNav({
               <span>{appearance.name}</span>
             </div>
             <div className="flex items-center gap-1.5 text-muted-foreground">
-              {mounted && (
-                <span className="text-[11px] font-medium capitalize">
-                  {theme}
-                </span>
+              {isThemePending ? (
+                <Loader2Icon className="size-3.5 animate-spin text-primary" />
+              ) : (
+                mounted && (
+                  <span className="text-[11px] font-medium capitalize">
+                    {theme}
+                  </span>
+                )
               )}
               <ChevronRight className="size-3.5 transition-transform duration-200 group-data-[state=open]/pref-theme:rotate-90 rtl:rotate-180" />
             </div>
@@ -192,15 +202,17 @@ export function PreferencesSubNav({
           {appearance.options.map((opt) => {
             const isSelected = mounted && theme === opt.value
             const OptIcon = opt.icon
+
             return (
               <Button
                 key={opt.key}
                 variant="ghost"
                 size="sm"
-                onClick={() => handleThemeChange(opt.value)}
+                disabled={isThemePending}
+                onClick={(e) => handleThemeChange(e, opt.value)}
                 className={cn(
                   "flex h-8 w-full items-center justify-between text-xs font-normal",
-                  !isSelected && "text-muted-foreground",
+                  (!isSelected || isThemePending) && "text-muted-foreground",
                   subItemClassName
                 )}
               >
@@ -210,18 +222,20 @@ export function PreferencesSubNav({
                   )}
                   <span>{opt.label}</span>
                 </div>
-                {isSelected ? (
-                  <CheckIcon className="size-3.5 text-primary" />
-                ) : (
-                  <span className="size-3.5" aria-hidden="true" />
-                )}
+                <div className="flex items-center">
+                  {isSelected && !isThemePending ? (
+                    <CheckIcon className="size-3.5 text-primary" />
+                  ) : (
+                    <span className="size-3.5" aria-hidden="true" />
+                  )}
+                </div>
               </Button>
             )
           })}
         </CollapsibleContent>
       </Collapsible>
 
-      {/* --- 3. قائمة العملة باستخدام خطاف useCurrency --- */}
+      {/* --- 3. قائمة العملة --- */}
       <Collapsible className="group/pref-curr">
         <CollapsibleTrigger asChild>
           <Button
@@ -238,10 +252,14 @@ export function PreferencesSubNav({
               <span>{currency.name}</span>
             </div>
             <div className="flex items-center gap-1.5 text-muted-foreground">
-              {mounted && (
-                <span className="text-[11px] font-medium uppercase">
-                  {currentCurrency}
-                </span>
+              {isCurrencyPending ? (
+                <Loader2Icon className="size-3.5 animate-spin text-primary" />
+              ) : (
+                mounted && (
+                  <span className="text-[11px] font-medium uppercase">
+                    {currentCurrency}
+                  </span>
+                )
               )}
               <ChevronRight className="size-3.5 transition-transform duration-200 group-data-[state=open]/pref-curr:rotate-90 rtl:rotate-180" />
             </div>
@@ -250,8 +268,6 @@ export function PreferencesSubNav({
         <CollapsibleContent className="space-y-0.5 ps-6 pt-0.5">
           {currency.options.map((opt) => {
             const isSelected = mounted && currentCurrency === opt.value
-            const isItemLoading =
-              isCurrencyPending && targetCurrencyKey === opt.value
 
             return (
               <Button
@@ -259,18 +275,18 @@ export function PreferencesSubNav({
                 variant="ghost"
                 size="sm"
                 disabled={isCurrencyPending}
-                onClick={() => handleCurrencyChange(opt.value as CurrencyCode)}
+                onClick={(e) =>
+                  handleCurrencyChange(e, opt.value as CurrencyCode)
+                }
                 className={cn(
                   "flex h-8 w-full items-center justify-between text-xs font-normal",
-                  !isSelected && "text-muted-foreground",
+                  (!isSelected || isCurrencyPending) && "text-muted-foreground",
                   subItemClassName
                 )}
               >
                 <span>{opt.label}</span>
                 <div className="flex items-center">
-                  {isItemLoading ? (
-                    <Loader2Icon className="size-3 animate-spin text-primary" />
-                  ) : isSelected ? (
+                  {isSelected && !isCurrencyPending ? (
                     <CheckIcon className="size-3.5 text-primary" />
                   ) : (
                     <span className="size-3.5" aria-hidden="true" />
