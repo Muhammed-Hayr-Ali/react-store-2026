@@ -13,6 +13,10 @@ export const PERMISSIONS = {
   // --- 0. General & Dashboard Views (أذونات العرض القياسية) ---
   VIEW_USER_OVERVIEW: "view_user_overview",
   VIEW_ADMIN_OVERVIEW: "view_admin_overview",
+  VIEW_USER_ORDERS: "view_user_orders",
+  VIEW_USER_WISHLIST: "view_user_wishlist",
+  VIEW_USER_COUPONS: "view_user_coupons",
+
   VIEW_PRODUCTS: "view_products",
   VIEW_FLASH_SALES: "view_flash_sales",
   VIEW_USERS_MANAGEMENT: "view_users_management",

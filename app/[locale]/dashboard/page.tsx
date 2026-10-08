@@ -8,13 +8,13 @@ export default async function DashboardEntryPage() {
   )
 
   if (canViewAdminOverview) {
-    redirect(appRoutes.dashboard.admin.home)
+    redirect(appRoutes.dashboard.admin.overview)
   }
 
-  const canViewDashboard = await hasPermission(PERMISSIONS.VIEW_DASHBOARD)
+  const canViewDashboard = await hasPermission(PERMISSIONS.VIEW_USER_OVERVIEW)
 
   if (canViewDashboard) {
-    redirect(appRoutes.dashboard.home)
+    redirect(appRoutes.dashboard.user.overview)
   }
 
   redirect(appRoutes.auth.login)

@@ -8,6 +8,7 @@ export const appRoutes = {
     callback: "/auth/callback",
   },
   dashboard: {
+    root: "/dashboard",
     user: {
       overview: "/dashboard/overview",
       account: "/dashboard/account",

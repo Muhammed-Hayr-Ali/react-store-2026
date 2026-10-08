@@ -62,6 +62,22 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
         label: "View Notifications Management",
         description: "View platform notification logs and management page",
       },
+      {
+        key: PERMISSIONS.VIEW_USER_ORDERS,
+        label: "View Orders",
+        description: "Access and track customer purchase orders and shipments",
+      },
+      {
+        key: PERMISSIONS.VIEW_USER_WISHLIST,
+        label: "View Wishlist",
+        description: "Access and manage personal saved and favorite products",
+      },
+      {
+        key: PERMISSIONS.VIEW_USER_COUPONS,
+        label: "View Coupons",
+        description:
+          "Access available discount vouchers and claimed promotional coupons",
+      },
     ],
   },
 

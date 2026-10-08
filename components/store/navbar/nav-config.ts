@@ -10,6 +10,7 @@ import {
   Monitor,
   Moon,
   Package,
+  ShieldAlert,
   ShieldCheck,
   Store,
   Sun,
@@ -19,12 +20,15 @@ import {
   Undo2,
   type LucideIcon,
 } from "lucide-react"
+import { appRoutes } from "@/lib/config/app-routes"
+import { PERMISSIONS } from "@/lib/actions/role"
 
 export interface StoreNavItem {
   label: string
   key: string
   href: string
   icon: LucideIcon
+  requiredPermission?: string
 }
 
 export interface StoreNavSection {
@@ -34,13 +38,13 @@ export interface StoreNavSection {
 }
 
 export const storeNavConfig = {
-  // قائمة الزائر غير المسجل
+  // قائمة الزائر غير المسجل بدون طلاحيات
   guestMenu: {
     name: "Guest Menu",
     description: "Navigation items for unauthenticated visitors",
     items: [
-      { label: "Home", key: "home", href: "/", icon: House },
-      { label: "Store", key: "store", href: "/", icon: Store },
+      { label: "Home", key: "home", href: appRoutes.home, icon: House },
+      { label: "Store", key: "store", href: appRoutes.home, icon: Store },
       { label: "Products", key: "products", href: "/products", icon: Package },
     ],
   },
@@ -52,27 +56,38 @@ export const storeNavConfig = {
     items: [
       {
         label: "Dashboard",
-        key: "dashboard",
-        href: "/dashboard",
+        key: "user-dashboard",
+        href: appRoutes.dashboard.user.overview, // مسار لوحة العميل المباشر
         icon: LayoutDashboard,
+        requiredPermission: PERMISSIONS.VIEW_USER_OVERVIEW,
+      },
+      {
+        label: "Admin Panel", // أو "Admin Dashboard"
+        key: "admin-dashboard",
+        href: appRoutes.dashboard.admin.overview, // مسار لوحة الإدارة المباشر
+        icon: ShieldCheck, // أو LayoutDashboard
+        requiredPermission: PERMISSIONS.VIEW_ADMIN_OVERVIEW,
       },
       {
         label: "Orders",
         key: "orders",
-        href: "/dashboard/orders",
+        href: "appRoutes.dashboard.user.orders",
         icon: Package,
+        requiredPermission: PERMISSIONS.VIEW_USER_ORDERS,
       },
       {
         label: "Wishlist",
         key: "wishlist",
         href: "/wishlist",
         icon: Heart,
+        requiredPermission: PERMISSIONS.VIEW_USER_WISHLIST,
       },
       {
         label: "My Coupons",
         key: "coupons",
         href: "/coupons",
         icon: Ticket,
+        requiredPermission: PERMISSIONS.VIEW_USER_COUPONS,
       },
     ],
   },
@@ -82,7 +97,7 @@ export const storeNavConfig = {
     name: "Shopping",
     description: "Direct store shopping links",
     items: [
-      { label: "Store", key: "store", href: "/", icon: Store },
+      { label: "Store", key: "store", href: appRoutes.home, icon: Store },
       { label: "Products", key: "products", href: "/products", icon: Package },
     ],
   },
@@ -111,8 +126,8 @@ export const storeNavConfig = {
     name: "Main Navbar Menu",
     description: "Primary top bar navigation links",
     items: [
-      { label: "Home", key: "home", href: "/", icon: House },
-      { label: "Store", key: "store", href: "/", icon: Store },
+      { label: "Home", key: "home", href: appRoutes.home, icon: House },
+      { label: "Store", key: "store", href: appRoutes.home, icon: Store },
       { label: "Products", key: "products", href: "/products", icon: Package },
       { label: "About", key: "about", href: "/about", icon: Info },
     ],
