@@ -20,125 +20,158 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { appRoutes } from "@/lib/config/app-routes"
-import { PERMISSIONS } from "@/lib/actions/role"
+import { AppPermission, PERMISSIONS } from "@/lib/actions/role"
 
-export interface StoreNavItem {
+export const SUPPORTED_CURRENCIES = [
+  { code: "USD", key: "USD", locale: "en-US", symbol: "\$" },
+  { code: "SYP", key: "SYP", locale: "ar-SY", symbol: "ل.س" },
+  { code: "SAR", key: "SAR", locale: "ar-SA", symbol: "ر.س" },
+  { code: "EGP", key: "EGP", locale: "ar-EG", symbol: "ج.م" },
+  { code: "TRY", key: "TRY", locale: "tr-TR", symbol: "₺" },
+  { code: "EUR", key: "EUR", locale: "de-DE", symbol: "€" },
+  { code: "AED", key: "AED", locale: "ar-AE", symbol: "د.إ" },
+] as const
+
+export interface NavBarItem {
+  title: string
+  key: string
+  url: string
+  icon: LucideIcon
+  requiredPermission?: AppPermission
+  items?: {
+    title: string
+    url: string
+    requiredPermission?: AppPermission
+  }[]
+  hasSeparator?: boolean
+}
+
+export interface PreferenceOption {
   label: string
   key: string
-  href: string
-  icon: LucideIcon
-  requiredPermission?: string
+  value: string
+  icon?: LucideIcon
 }
 
-export interface StoreNavSection {
+export interface PreferenceSection {
   name: string
-  description?: string
-  items: readonly StoreNavItem[]
+  icon: LucideIcon
+  options: PreferenceOption[]
 }
 
-export const storeNavConfig = {
-  // قائمة الزائر غير المسجل بدون طلاحيات
-  guestMenu: {
-    name: "Guest Menu",
-    description: "Navigation items for unauthenticated visitors",
-    items: [
-      { label: "Home", key: "home", href: appRoutes.home, icon: House },
-      { label: "Store", key: "store", href: appRoutes.home, icon: Store },
-      { label: "Products", key: "products", href: "/products", icon: Package },
-    ],
-  },
+interface NavBarConfig {
+  navBarItems: NavBarItem[]
+  preferences: {
+    language: PreferenceSection
+    appearance: PreferenceSection
+    currency: PreferenceSection
+  }
+}
 
-  // قائمة حساب المستخدم
-  userMenu: {
-    name: "User Menu",
-    description: "Account and profile quick navigation",
-    items: [
-      {
-        label: "Dashboard",
-        key: "user-dashboard",
-        href: appRoutes.dashboard.user.overview, // مسار لوحة العميل المباشر
-        icon: LayoutDashboard,
-        requiredPermission: PERMISSIONS.VIEW_USER_OVERVIEW,
-      },
-      {
-        label: "Admin Panel", // أو "Admin Dashboard"
-        key: "admin-dashboard",
-        href: appRoutes.dashboard.admin.overview, // مسار لوحة الإدارة المباشر
-        icon: ShieldCheck, // أو LayoutDashboard
-        requiredPermission: PERMISSIONS.VIEW_ADMIN_OVERVIEW,
-      },
-      {
-        label: "Orders",
-        key: "orders",
-        href: "appRoutes.dashboard.user.orders",
-        icon: Package,
-        requiredPermission: PERMISSIONS.VIEW_USER_ORDERS,
-      },
-      {
-        label: "Wishlist",
-        key: "wishlist",
-        href: "/wishlist",
-        icon: Heart,
-        requiredPermission: PERMISSIONS.VIEW_USER_WISHLIST,
-      },
-      {
-        label: "My Coupons",
-        key: "coupons",
-        href: "/coupons",
-        icon: Ticket,
-        requiredPermission: PERMISSIONS.VIEW_USER_COUPONS,
-      },
-    ],
-  },
+export const sidebarConfig: NavBarConfig = {
+  navBarItems: [
+    // --- 1. الروابط العامة للمتجر ---
+    {
+      title: "Home",
+      key: "home",
+      url: appRoutes.home,
+      icon: House,
+    },
+    {
+      title: "Store",
+      key: "store",
+      url: appRoutes.home,
+      icon: Store,
+      hasSeparator: true,
+    },
 
-  // قائمة مشتريات المتجر
-  shoppingMenu: {
-    name: "Shopping",
-    description: "Direct store shopping links",
-    items: [
-      { label: "Store", key: "store", href: appRoutes.home, icon: Store },
-      { label: "Products", key: "products", href: "/products", icon: Package },
-    ],
-  },
+    // --- 2. روابط حساب المستخدم ونشاطه ---
+    {
+      title: "Dashboard",
+      key: "user-dashboard",
+      url: appRoutes.dashboard.user.overview,
+      icon: LayoutDashboard,
+      requiredPermission: PERMISSIONS.VIEW_USER_OVERVIEW,
+    },
+    {
+      title: "Orders",
+      key: "orders",
+      url: "#",
+      icon: Package,
+      requiredPermission: PERMISSIONS.VIEW_USER_ORDERS,
+    },
+    {
+      title: "Wishlist",
+      key: "wishlist",
+      url: "#",
+      icon: Heart,
+      requiredPermission: PERMISSIONS.VIEW_USER_WISHLIST,
+    },
+    {
+      title: "My Coupons",
+      key: "coupons",
+      url: "#",
+      icon: Ticket,
+      requiredPermission: PERMISSIONS.VIEW_USER_COUPONS,
+      hasSeparator: true,
+    },
 
-  // قائمة الدعم والمساعدة
-  supportLinks: {
-    name: "Support Links",
-    description: "Customer service and informational pages",
-    items: [
-      { label: "About", key: "about", href: "/about", icon: Info },
-      { label: "Contact", key: "contact", href: "/contact", icon: Mail },
-      { label: "Shipping", key: "shipping", href: "/shipping", icon: Truck },
-      { label: "Returns", key: "returns", href: "/returns", icon: Undo2 },
-      { label: "Faq", key: "faq", href: "/faq", icon: CircleQuestionMark },
-      {
-        label: "Terms & Privacy",
-        key: "terms-and-privacy",
-        href: "/terms-and-privacy",
-        icon: ShieldCheck,
-      },
-    ],
-  },
+    // --- 3. لوحة تحكم الإدارة ---
+    {
+      title: "Admin Dashboard",
+      key: "admin-dashboard",
+      url: appRoutes.dashboard.admin.overview,
+      icon: ShieldCheck,
+      requiredPermission: PERMISSIONS.VIEW_ADMIN_OVERVIEW,
+      hasSeparator: true,
+    },
 
-  // قائمة روابط الواجهة الرئيسية (Desktop)
-  mainNavbarMenu: {
-    name: "Main Navbar Menu",
-    description: "Primary top bar navigation links",
-    items: [
-      { label: "Home", key: "home", href: appRoutes.home, icon: House },
-      { label: "Store", key: "store", href: appRoutes.home, icon: Store },
-      { label: "Products", key: "products", href: "/products", icon: Package },
-      { label: "About", key: "about", href: "/about", icon: Info },
-    ],
-  },
+    // --- 4. الدعم والصفحات التعريفية ---
+    {
+      title: "About Us",
+      key: "about",
+      url: "#",
+      icon: Info,
+    },
+    {
+      title: "Contact",
+      key: "contact",
+      url: "#",
+      icon: Mail,
+    },
+    {
+      title: "Shipping Policy",
+      key: "shipping",
+      url: "#",
+      icon: Truck,
+    },
+    {
+      title: "Returns & Refund",
+      key: "returns",
+      url: "#",
+      icon: Undo2,
+    },
+    {
+      title: "FAQ",
+      key: "faq",
+      url: "#",
+      icon: CircleQuestionMark,
+    },
+    {
+      title: "Terms & Privacy",
+      key: "terms-and-privacy",
+      url: "#",
+      icon: ShieldCheck,
+    },
+  ],
 
-  // إعدادات وتفضيلات المستخدم المضمنة
+  // --- 5. التفضيلات الموحدة (لغة - ثيم - عملة) ---
   preferences: {
     language: {
       name: "Language",
       icon: Languages,
       options: [
-        { label: "عربي", key: "ar", value: "ar" },
+        { label: "العربية", key: "ar", value: "ar" },
         { label: "English", key: "en", value: "en" },
       ],
     },
@@ -154,8 +187,11 @@ export const storeNavConfig = {
     currency: {
       name: "Currency",
       icon: Coins,
+      options: SUPPORTED_CURRENCIES.map((c) => ({
+        label: `${c.code} (${c.symbol})`,
+        key: c.key,
+        value: c.code,
+      })),
     },
   },
-} as const
-
-export type StoreNavConfig = typeof storeNavConfig
+}

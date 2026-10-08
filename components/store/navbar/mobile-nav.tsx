@@ -3,6 +3,7 @@
 import React, { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { ChevronRight } from "lucide-react"
 
 import MenuButton from "@/components/ui/menu_button"
 import {
@@ -13,16 +14,19 @@ import {
 } from "@/components/ui/mobile-menu"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 
 import { signOut } from "@/lib/actions/authentication/signOut"
 import { appRoutes } from "@/lib/config/app-routes"
-import { storeNavConfig } from "./nav-config"
+import { sidebarConfig } from "./nav-config"
 import type { NotificationRecord } from "@/lib/actions/notifications/types"
 
 import { UserProfileHeader } from "./user-menu"
-import { LanguageAccordion } from "./preferences/language-accordion"
-import { ThemeAccordion } from "./preferences/theme-accordion"
-import { CurrencyAccordion } from "./preferences/currency-accordion"
+import { PreferencesSubNav } from "./preferences-sub-nav"
 import { useUser } from "@/lib/context/user-context"
 
 interface MobileNavProps {
@@ -67,14 +71,6 @@ function MobileRightMenu({
   const { user, hasPermission } = useUser()
   const router = useRouter()
 
-  // فلترة الروابط بناءً على تسجيل الدخول وصلاحيات المستخدم
-  const navLinks = user
-    ? storeNavConfig.userMenu.items.filter((item) => {
-        if (!item.requiredPermission) return true
-        return hasPermission(item.requiredPermission)
-      })
-    : storeNavConfig.guestMenu.items
-
   const handleClose = () => {
     setIsOpen(false)
   }
@@ -92,6 +88,27 @@ function MobileRightMenu({
     }
   }
 
+  const visibleNavItems = sidebarConfig.navBarItems
+    .filter((item) => {
+      if (!item.requiredPermission) return true
+      if (!user) return false
+      return hasPermission(item.requiredPermission)
+    })
+    .map((item) => {
+      if (item.items) {
+        return {
+          ...item,
+          items: item.items.filter((sub) => {
+            if (!sub.requiredPermission) return true
+            if (!user) return false
+            return hasPermission(sub.requiredPermission)
+          }),
+        }
+      }
+      return item
+    })
+    .filter((item) => !item.items || item.items.length > 0)
+
   return (
     <MobileMenu isOpen={isOpen} onOpenChange={setIsOpen}>
       {user && (
@@ -105,65 +122,70 @@ function MobileRightMenu({
 
       <MobileMenuBody className="px-2">
         <div className="flex flex-col">
-          {navLinks.map((link) => (
-            <Button
-              key={link.key}
-              variant="ghost"
-              className="flex h-10 items-center justify-start font-normal"
-              asChild
-            >
-              <Link href={link.href} onClick={handleClose}>
-                <link.icon className="me-2 size-4" />
-                {link.label}
-              </Link>
-            </Button>
-          ))}
+          {visibleNavItems.map((item) => {
+            const hasChildren = Boolean(item.items && item.items.length > 0)
+
+            return (
+              <React.Fragment key={item.key}>
+                {hasChildren ? (
+                  <Collapsible className="group/collapsible">
+                    <CollapsibleTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="flex h-10 w-full items-center justify-between font-normal"
+                      >
+                        <div className="flex items-center">
+                          <item.icon className="me-2 size-4" />
+                          <span>{item.title}</span>
+                        </div>
+                        <ChevronRight className="size-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180" />
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-1 ps-6 pt-1">
+                      {item.items?.map((subItem) => (
+                        <Button
+                          key={subItem.title}
+                          variant="ghost"
+                          size="sm"
+                          className="flex h-9 w-full items-center justify-start text-xs font-normal text-muted-foreground hover:text-foreground"
+                          asChild
+                        >
+                          <Link href={subItem.url} onClick={handleClose}>
+                            {subItem.title}
+                          </Link>
+                        </Button>
+                      ))}
+                    </CollapsibleContent>
+                  </Collapsible>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    className="flex h-10 items-center justify-start font-normal"
+                    asChild
+                  >
+                    <Link href={item.url} onClick={handleClose}>
+                      <item.icon className="me-2 size-4" />
+                      {item.title}
+                    </Link>
+                  </Button>
+                )}
+
+                {item.hasSeparator && (
+                  <div
+                    role="separator"
+                    aria-orientation="horizontal"
+                    className="my-2 h-px bg-border"
+                  />
+                )}
+              </React.Fragment>
+            )
+          })}
         </div>
 
-        <Separator />
+        <Separator className="my-2" />
 
-        {user && (
-          <div className="flex flex-col">
-            {storeNavConfig.shoppingMenu.items.map((link) => (
-              <Button
-                key={link.key}
-                variant="ghost"
-                className="flex h-10 items-center justify-start font-normal"
-                asChild
-              >
-                <Link href={link.href} onClick={handleClose}>
-                  <link.icon className="me-2 size-4" />
-                  {link.label}
-                </Link>
-              </Button>
-            ))}
-            <Separator />
-          </div>
-        )}
-
-        <div className="flex flex-col">
-          {storeNavConfig.supportLinks.items.map((link) => (
-            <Button
-              key={link.key}
-              variant="ghost"
-              className="flex h-10 items-center justify-start font-normal"
-              asChild
-            >
-              <Link href={link.href} onClick={handleClose}>
-                <link.icon className="me-2 size-4" />
-                {link.label}
-              </Link>
-            </Button>
-          ))}
-        </div>
-
-        <Separator />
-
-        <LanguageAccordion onSelect={handleClose} />
-        <Separator className="my-px" />
-        <CurrencyAccordion onSelect={handleClose} />
-        <Separator className="my-px" />
-        <ThemeAccordion onSelect={handleClose} />
+        {/* عرض التفضيلات بنفس أسلوب القوائم المنسدلة */}
+        <PreferencesSubNav onSelect={handleClose} />
       </MobileMenuBody>
 
       <MobileMenuFooter>

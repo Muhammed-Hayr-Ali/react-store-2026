@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { ChevronRight } from "lucide-react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
@@ -17,6 +18,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  SidebarSeparator,
   useSidebar,
 } from "@/components/ui/sidebar"
 import { sidebarConfig } from "./sidebar-config"
@@ -36,13 +38,11 @@ export function NavMain({ permissions = [] }: NavMainProps) {
     }
   }
 
-  // دالة فحص ما إذا كان المستخدم يملك الصلاحية المطلوبة
   const hasPermission = (requiredPerm?: string) => {
-    if (!requiredPerm) return true // إذا لم تكن هناك صلاحية مطلوبة، يظهر العنصر للجميع
+    if (!requiredPerm) return true
     return permissions.includes(requiredPerm)
   }
 
-  // فلترة العناصر الرئيسية والعناصر الفرعية بناءً على صلاحيات المستخدم الفعلية
   const filteredItems = sidebarConfig.navMain
     .filter((item) => hasPermission(item.requiredPermission))
     .map((item) => {
@@ -82,64 +82,69 @@ export function NavMain({ permissions = [] }: NavMainProps) {
           const IconComponent = item.icon
 
           return (
-            <Collapsible
-              key={item.title}
-              asChild
-              defaultOpen={hasActiveChild}
-              className="group/collapsible"
-            >
-              {hasChildren ? (
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
+            <React.Fragment key={item.title}>
+              <Collapsible
+                asChild
+                defaultOpen={hasActiveChild}
+                className="group/collapsible"
+              >
+                {hasChildren ? (
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton
+                        tooltip={item.title}
+                        isActive={false}
+                        className="font-medium data-[state=open]:text-foreground"
+                      >
+                        {IconComponent && <IconComponent />}
+                        <span>{item.title}</span>
+                        <ChevronRight className="ms-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {item.items?.map((subItem) => {
+                          const isSubActive = normalizedPath === subItem.url
+
+                          return (
+                            <SidebarMenuSubItem key={subItem.title}>
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={isSubActive}
+                              >
+                                <Link
+                                  href={subItem.url}
+                                  onClick={handleLinkClick}
+                                >
+                                  <span>{subItem.title}</span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          )
+                        })}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                ) : (
+                  <SidebarMenuItem>
                     <SidebarMenuButton
                       tooltip={item.title}
-                      isActive={false}
-                      className="font-medium data-[state=open]:text-foreground"
+                      asChild
+                      isActive={isSingleActive}
                     >
-                      {IconComponent && <IconComponent />}
-                      <span>{item.title}</span>
-                      <ChevronRight className="ms-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180" />
+                      <Link href={item.url} onClick={handleLinkClick}>
+                        {IconComponent && <IconComponent />}
+                        <span>{item.title}</span>
+                      </Link>
                     </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {item.items?.map((subItem) => {
-                        const isSubActive = normalizedPath === subItem.url
+                  </SidebarMenuItem>
+                )}
+              </Collapsible>
 
-                        return (
-                          <SidebarMenuSubItem key={subItem.title}>
-                            <SidebarMenuSubButton
-                              asChild
-                              isActive={isSubActive}
-                            >
-                              <Link
-                                href={subItem.url}
-                                onClick={handleLinkClick}
-                              >
-                                <span>{subItem.title}</span>
-                              </Link>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        )
-                      })}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              ) : (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    tooltip={item.title}
-                    asChild
-                    isActive={isSingleActive}
-                  >
-                    <Link href={item.url} onClick={handleLinkClick}>
-                      {IconComponent && <IconComponent />}
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+              {item.hasSeparator && (
+                <div className="my-2 h-px bg-border" />
               )}
-            </Collapsible>
+            </React.Fragment>
           )
         })}
       </SidebarMenu>
