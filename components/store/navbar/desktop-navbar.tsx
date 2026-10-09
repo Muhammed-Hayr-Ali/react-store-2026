@@ -13,20 +13,20 @@ import { useUser } from "@/lib/context/user-context"
 import type { NotificationRecord } from "@/lib/actions/notifications/types"
 import { cn } from "@/lib/utils"
 
-import UserMenu from "./user-menu"
+import UserProfilePopover from "./user-profile-popover"
 import { NotificationPopover } from "@/components/notifications/notification-popover.tsx"
 
-interface DesktopNavProps {
+interface DesktopNavbarProps {
   className?: string
   initialNotifications: NotificationRecord[]
   initialUnreadCount: number
 }
 
-export default function DesktopNav({
+export default function DesktopNavbar({
   className,
   initialNotifications,
   initialUnreadCount,
-}: DesktopNavProps) {
+}: DesktopNavbarProps) {
   const { user } = useUser()
 
   return (
@@ -62,7 +62,7 @@ export default function DesktopNav({
       {user ? (
         <>
           <Separator orientation="vertical" className="mx-1 h-5" />
-          <UserMenu
+          <UserProfilePopover
             initialNotifications={initialNotifications}
             initialUnreadCount={initialUnreadCount}
           />

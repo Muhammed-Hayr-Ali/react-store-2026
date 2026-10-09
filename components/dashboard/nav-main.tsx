@@ -18,14 +18,13 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  SidebarSeparator,
   useSidebar,
 } from "@/components/ui/sidebar"
 import { sidebarConfig } from "./sidebar-config"
 import { appRoutes } from "@/lib/config/app-routes"
 
 interface NavMainProps {
-  permissions?: string[] // مصفوفة الصلاحيات القادمة من بيانات المستخدم
+  permissions?: string[]
 }
 
 export function NavMain({ permissions = [] }: NavMainProps) {
@@ -67,7 +66,7 @@ export function NavMain({ permissions = [] }: NavMainProps) {
   return (
     <SidebarGroup>
       <SidebarMenu>
-        {filteredItems.map((item) => {
+        {filteredItems.map((item, index) => {
           const hasChildren = Boolean(item.items && item.items.length > 0)
           const hasActiveChild = item.items?.some(
             (sub) => normalizedPath === sub.url
@@ -80,6 +79,8 @@ export function NavMain({ permissions = [] }: NavMainProps) {
               : normalizedPath === item.url ||
                 normalizedPath.startsWith(`${item.url}/`))
           const IconComponent = item.icon
+
+          const isLastItem = index === filteredItems.length - 1
 
           return (
             <React.Fragment key={item.title}>
@@ -141,7 +142,8 @@ export function NavMain({ permissions = [] }: NavMainProps) {
                 )}
               </Collapsible>
 
-              {item.hasSeparator && (
+              {/* لن يظهر الخط الفاصل أبداً إذا كان العنصر في نهاية القائمة */}
+              {item.hasSeparator && !isLastItem && (
                 <div className="my-2 h-px bg-border" />
               )}
             </React.Fragment>
