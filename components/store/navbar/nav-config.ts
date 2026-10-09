@@ -67,13 +67,6 @@ export const NAV_LINKS: NavLinkItem[] = [
     icon: House,
   },
   {
-    title: "Store",
-    key: "store",
-    url: appRoutes.home,
-    icon: Store,
-    hasSeparator: true,
-  },
-  {
     title: "Dashboard",
     key: "user-dashboard",
     url: appRoutes.dashboard.user.overview,
@@ -102,14 +95,14 @@ export const NAV_LINKS: NavLinkItem[] = [
     requiredPermission: PERMISSIONS.VIEW_USER_COUPONS,
     hasSeparator: true,
   },
-  {
-    title: "Admin Dashboard",
-    key: "admin-dashboard",
-    url: appRoutes.dashboard.admin.overview,
-    icon: ShieldCheck,
-    requiredPermission: PERMISSIONS.VIEW_ADMIN_OVERVIEW,
-    hasSeparator: true,
-  },
+  // {
+  //   title: "Admin Dashboard",
+  //   key: "admin-dashboard",
+  //   url: appRoutes.dashboard.admin.overview,
+  //   icon: ShieldCheck,
+  //   requiredPermission: PERMISSIONS.VIEW_ADMIN_OVERVIEW,
+  //   hasSeparator: true,
+  // },
   {
     title: "About Us",
     key: "about",

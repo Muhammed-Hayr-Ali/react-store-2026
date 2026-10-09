@@ -190,7 +190,7 @@ export function NotificationPopover({
         </CustomPopoverHeader>
 
         {/* Notifications List */}
-        <div className="max-h-[380px] divide-y overflow-y-auto">
+        <div className="max-h-95 divide-y overflow-y-auto">
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
               <p className="text-sm">No notifications yet</p>

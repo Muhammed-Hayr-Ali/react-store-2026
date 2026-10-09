@@ -6,6 +6,8 @@
 // Queries
 export { getNotifications } from "./queries/get-notifications"
 export { getAdminNotifications } from "./queries/get-admin-notifications"
+export { getActiveNotificationChannels } from "./queries/get-active-channels"
+export { getUserChannelPreferences } from "./queries/get-user-channel-preferences"
 
 // Mutations
 export {
@@ -21,3 +23,5 @@ export {
   createNotification,
   broadcastNotification,
 } from "./mutations/create-notification"
+export { toggleChannelSubscription } from "./mutations/toggle-channel-subscription"
+export { createNotificationChannel } from "./mutations/create-channel"

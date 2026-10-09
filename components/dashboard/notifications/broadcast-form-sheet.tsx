@@ -6,7 +6,14 @@ import { Controller, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { MegaphoneIcon, XIcon, AlertCircleIcon, UsersIcon } from "lucide-react"
+import {
+  MegaphoneIcon,
+  XIcon,
+  AlertCircleIcon,
+  RadioIcon,
+  CheckIcon,
+  LockIcon,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -30,9 +37,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import { Badge } from "@/components/ui/badge"
 
 import { broadcastNotificationSchema } from "@/lib/actions/notifications/schemas"
 import { broadcastNotification } from "@/lib/actions/notifications/mutations/create-notification"
+import { getActiveNotificationChannels } from "@/lib/actions/notifications/queries/get-active-channels"
+import type { NotificationChannelRecord } from "@/lib/actions/notifications/types"
 
 type BroadcastFormValues = z.infer<typeof broadcastNotificationSchema>
 
@@ -48,7 +58,12 @@ export default function BroadcastForm({
   onSuccess,
 }: BroadcastFormProps) {
   const router = useRouter()
+
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
+  const [channels, setChannels] = React.useState<NotificationChannelRecord[]>(
+    []
+  )
+  const [isLoadingChannels, startTransition] = React.useTransition()
 
   const {
     register,
@@ -56,19 +71,37 @@ export default function BroadcastForm({
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm({
+  } = useForm<BroadcastFormValues>({
     resolver: zodResolver(broadcastNotificationSchema),
     defaultValues: {
       title: "",
       message: "",
-      type: "info" as const,
+      type: "info",
       link: "",
-      targetType: "all" as const,
-      roleName: "",
+      targetType: "all",
+      channelIds: [],
     },
   })
+
   const targetType = useWatch({ control, name: "targetType" })
   const messageValue = useWatch({ control, name: "message" }) || ""
+
+  React.useEffect(() => {
+    let isSubscribed = true
+
+    if (isOpen && channels.length === 0) {
+      startTransition(async () => {
+        const res = await getActiveNotificationChannels()
+        if (isSubscribed && res.success && res.data) {
+          setChannels(res.data)
+        }
+      })
+    }
+
+    return () => {
+      isSubscribed = false
+    }
+  }, [isOpen, channels.length])
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -87,8 +120,7 @@ export default function BroadcastForm({
       type: data.type,
       link: data.link ? data.link : null,
       targetType: data.targetType,
-      roleName:
-        data.targetType === "role" && data.roleName ? data.roleName : undefined,
+      channelIds: data.targetType === "channels" ? data.channelIds : [],
     }
 
     const result = await broadcastNotification(payload)
@@ -117,8 +149,8 @@ export default function BroadcastForm({
             Broadcast Notification
           </SheetTitle>
           <SheetDescription className="text-xs text-muted-foreground">
-            Send a mass alert announcement to all system users or specific
-            roles.
+            Send mass announcements to all users or target specific audience
+            channels.
           </SheetDescription>
         </SheetHeader>
 
@@ -147,9 +179,9 @@ export default function BroadcastForm({
 
             <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
-                <UsersIcon className="size-4 text-primary" />
+                <RadioIcon className="size-4 text-primary" />
                 <h2 className="text-sm font-semibold text-card-foreground">
-                  Audience & Classification
+                  Audience & Channels
                 </h2>
               </div>
 
@@ -179,10 +211,10 @@ export default function BroadcastForm({
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all" className="text-xs">
-                              All Users
+                              All Active Users
                             </SelectItem>
-                            <SelectItem value="role" className="text-xs">
-                              Specific Role
+                            <SelectItem value="channels" className="text-xs">
+                              Specific Channels
                             </SelectItem>
                           </SelectContent>
                         </Select>
@@ -241,23 +273,73 @@ export default function BroadcastForm({
                   />
                 </div>
 
-                {targetType === "role" && (
-                  <div className="space-y-1.5">
-                    <FieldLabel htmlFor="broadcast-role" className="text-xs">
-                      Role Name <span className="text-destructive">*</span>
-                    </FieldLabel>
-                    <Input
-                      id="broadcast-role"
-                      placeholder="e.g., admin, customer"
-                      {...register("roleName")}
-                      className="h-8 text-xs"
-                    />
-                    {errors.roleName && (
-                      <p className="text-[11px] text-destructive">
-                        {errors.roleName.message}
-                      </p>
-                    )}
-                  </div>
+                {targetType === "channels" && (
+                  <Controller
+                    name="channelIds"
+                    control={control}
+                    render={({ field }) => {
+                      const selectedIds = field.value || []
+
+                      const toggleChannel = (channelId: string) => {
+                        if (selectedIds.includes(channelId)) {
+                          field.onChange(
+                            selectedIds.filter((id) => id !== channelId)
+                          )
+                        } else {
+                          field.onChange([...selectedIds, channelId])
+                        }
+                      }
+
+                      return (
+                        <div className="space-y-2">
+                          <FieldLabel className="text-xs">
+                            Select Notification Channels{" "}
+                            <span className="text-destructive">*</span>
+                          </FieldLabel>
+
+                          {isLoadingChannels ? (
+                            <div className="flex items-center gap-2 py-2 text-xs text-muted-foreground">
+                              <Spinner className="size-3.5" />
+                              <span>Loading channels...</span>
+                            </div>
+                          ) : channels.length === 0 ? (
+                            <p className="text-xs text-muted-foreground">
+                              No active channels found.
+                            </p>
+                          ) : (
+                            <div className="flex flex-wrap gap-2 pt-1">
+                              {channels.map((channel) => {
+                                const isSelected = selectedIds.includes(
+                                  channel.id
+                                )
+                                return (
+                                  <Badge
+                                    key={channel.id}
+                                    variant={isSelected ? "default" : "outline"}
+                                    onClick={() => toggleChannel(channel.id)}
+                                    className="cursor-pointer gap-1.5 px-2.5 py-1.5 text-xs transition-all select-none"
+                                  >
+                                    {isSelected ? (
+                                      <CheckIcon className="size-3.5" />
+                                    ) : channel.is_mandatory ? (
+                                      <LockIcon className="size-3 text-muted-foreground" />
+                                    ) : null}
+                                    <span>{channel.name}</span>
+                                  </Badge>
+                                )
+                              })}
+                            </div>
+                          )}
+
+                          {errors.channelIds && (
+                            <p className="text-[11px] text-destructive">
+                              {errors.channelIds.message}
+                            </p>
+                          )}
+                        </div>
+                      )
+                    }}
+                  />
                 )}
               </FieldGroup>
             </div>
@@ -277,7 +359,7 @@ export default function BroadcastForm({
                   </FieldLabel>
                   <Input
                     id="broadcast-title"
-                    placeholder="e.g., System Maintenance Notice"
+                    placeholder="e.g., Weekend Deals and Offers"
                     {...register("title")}
                     className="h-8 text-xs"
                   />
@@ -300,7 +382,7 @@ export default function BroadcastForm({
                   <InputGroup className="bg-background">
                     <InputGroupTextarea
                       id="broadcast-msg"
-                      placeholder="Write broadcast notification details here..."
+                      placeholder="Write broadcast details here..."
                       rows={3}
                       {...register("message")}
                       className="resize-y text-xs"
@@ -319,7 +401,7 @@ export default function BroadcastForm({
                   </FieldLabel>
                   <Input
                     id="broadcast-link"
-                    placeholder="/dashboard"
+                    placeholder="/deals"
                     {...register("link")}
                     className="h-8 text-xs"
                   />

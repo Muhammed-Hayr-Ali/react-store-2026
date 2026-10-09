@@ -7,7 +7,7 @@ export const createNotificationSchema = z.object({
     .string()
     .min(1, "Message is required")
     .max(500, "Message is too long"),
-  type: z.enum(["info", "success", "warning", "error"]).default("info"),
+  type: z.enum(["info", "success", "warning", "error"]),
   link: z.string().optional().nullable(),
 })
 
@@ -18,23 +18,20 @@ export const broadcastNotificationSchema = z
       .string()
       .min(1, "Message is required")
       .max(500, "Message is too long"),
-    type: z.enum(["info", "success", "warning", "error"]).default("info"),
+    type: z.enum(["info", "success", "warning", "error"]),
     link: z.string().optional().nullable(),
-    targetType: z.enum(["all", "role"]).default("all"),
-    roleName: z.string().optional().nullable(),
+    targetType: z.enum(["all", "channels"]),
+    channelIds: z.array(z.string().uuid()),
   })
   .refine(
     (data) => {
-      if (
-        data.targetType === "role" &&
-        (!data.roleName || data.roleName.trim() === "")
-      ) {
+      if (data.targetType === "channels" && data.channelIds.length === 0) {
         return false
       }
       return true
     },
     {
-      message: "Role name is required when target type is role",
-      path: ["roleName"],
+      message: "Please select at least one channel",
+      path: ["channelIds"],
     }
   )

@@ -111,20 +111,27 @@ export async function broadcastNotification(
       }
     }
     targetUserIds = profiles?.map((p) => p.id) || []
-  } else if (safeData.targetType === "role" && safeData.roleName) {
-    const { data: roleMembers, error: roleError } = await supabase
-      .from("user_roles")
+  } else if (
+    safeData.targetType === "channels" &&
+    safeData.channelIds.length > 0
+  ) {
+    const { data: subscribers, error: subsError } = await supabase
+      .from("user_channel_subscriptions")
       .select("user_id")
-      .eq("role", safeData.roleName)
+      .in("channel_id", safeData.channelIds)
+      .eq("is_subscribed", true)
 
-    if (roleError) {
+    if (subsError) {
       return {
         success: false,
-        error: "FETCH_ROLE_USERS_ERROR",
-        details: { database: [roleError.message] },
+        error: "FETCH_CHANNEL_SUBSCRIBERS_ERROR",
+        details: { database: [subsError.message] },
       }
     }
-    targetUserIds = roleMembers?.map((r) => r.user_id) || []
+
+    targetUserIds = Array.from(
+      new Set(subscribers?.map((s) => s.user_id) || [])
+    )
   }
 
   if (targetUserIds.length === 0) {
