@@ -466,10 +466,10 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
 const sidebarMenuButtonVariants = cva(
   "peer/menu-button group/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-start text-xs ring-sidebar-ring outline-hidden transition-all duration-200 ease-out group-has-data-[sidebar=menu-action]/menu-item:pe-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 " +
     // النمط الطبيعي وحالة التمرير اللطيفة
-    "text-sidebar-foreground/80 hover:bg-muted/70 hover:text-foreground hover:shadow-xs " +
+    "text-sidebar-foreground/80 hover:bg-muted/70 hover:text-foreground hover:shadow-none " +
     // حالة العنصر المفتوح أو النشط
     "data-open:bg-muted/50 data-open:text-foreground " +
-    "data-active:bg-primary/10 data-active:font-semibold data-active:text-primary data-active:shadow-xs dark:data-active:bg-primary/15 " +
+    "data-active:bg-primary/10 data-active:font-semibold data-active:text-primary data-active:shadow-none dark:data-active:bg-primary/15 " +
     // تفاعل العنصر النشط عند وقوف الماوس فوقه (تعميق اللون بدلاً من إطفائه)
     "data-active:hover:bg-primary/16 dark:data-active:hover:bg-primary/22 " +
     // أيقونات الأزرار

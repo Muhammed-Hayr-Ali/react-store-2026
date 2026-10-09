@@ -95,7 +95,7 @@ export function NavMain({ permissions = [] }: NavMainProps) {
                       <SidebarMenuButton
                         tooltip={item.title}
                         isActive={false}
-                        className="font-medium data-[state=open]:text-foreground"
+                        className="data-[state=open]:bg-muted"
                       >
                         {IconComponent && <IconComponent />}
                         <span>{item.title}</span>

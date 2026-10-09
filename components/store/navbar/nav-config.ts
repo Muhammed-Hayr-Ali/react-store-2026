@@ -11,7 +11,6 @@ import {
   Moon,
   Package,
   ShieldCheck,
-  Store,
   Sun,
   SunMoon,
   Ticket,
@@ -68,10 +67,9 @@ export const NAV_LINKS: NavLinkItem[] = [
   },
   {
     title: "Dashboard",
-    key: "user-dashboard",
+    key: "overview",
     url: appRoutes.dashboard.user.overview,
     icon: LayoutDashboard,
-    requiredPermission: PERMISSIONS.VIEW_USER_OVERVIEW,
   },
   {
     title: "Orders",
@@ -95,14 +93,7 @@ export const NAV_LINKS: NavLinkItem[] = [
     requiredPermission: PERMISSIONS.VIEW_USER_COUPONS,
     hasSeparator: true,
   },
-  // {
-  //   title: "Admin Dashboard",
-  //   key: "admin-dashboard",
-  //   url: appRoutes.dashboard.admin.overview,
-  //   icon: ShieldCheck,
-  //   requiredPermission: PERMISSIONS.VIEW_ADMIN_OVERVIEW,
-  //   hasSeparator: true,
-  // },
+ 
   {
     title: "About Us",
     key: "about",
