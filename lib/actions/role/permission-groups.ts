@@ -60,7 +60,13 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       {
         key: PERMISSIONS.VIEW_NOTIFICATIONS_MANAGEMENT,
         label: "View Notifications Management",
-        description: "View platform notification logs and management page",
+        description: "View platform notification logs and mass broadcast page",
+      },
+      {
+        key: PERMISSIONS.VIEW_NOTIFICATION_CHANNELS_MANAGEMENT,
+        label: "View Channels Management",
+        description:
+          "Access and view the audience notification channels setup page",
       },
       {
         key: PERMISSIONS.VIEW_USER_ORDERS,
@@ -81,7 +87,54 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     ],
   },
 
-  // --- 2. مجموعات أذونات التحرير والإدارة (Mutations & Actions) ---
+  {
+    id: "notifications_control",
+    label: "Notifications & Broadcasts (Actions)",
+    permissions: [
+      {
+        key: PERMISSIONS.SEND_NOTIFICATION,
+        label: "Send Notification",
+        description:
+          "Send targeted direct alerts to individual customer accounts",
+      },
+      {
+        key: PERMISSIONS.BROADCAST_NOTIFICATION,
+        label: "Broadcast Notification",
+        description:
+          "Publish mass announcement alerts to all users or specific channels",
+      },
+      {
+        key: PERMISSIONS.DELETE_NOTIFICATION,
+        label: "Delete Notification",
+        description: "Delete obsolete system alerts or sent broadcasts",
+      },
+    ],
+  },
+
+  {
+    id: "notification_channels_control",
+    label: "Notification Channels (Actions)",
+    permissions: [
+      {
+        key: PERMISSIONS.CREATE_NOTIFICATION_CHANNEL,
+        label: "Create Channel",
+        description:
+          "Define new notification topics and mandatory audience channels",
+      },
+      {
+        key: PERMISSIONS.UPDATE_NOTIFICATION_CHANNEL,
+        label: "Update Channel",
+        description:
+          "Modify channel names, slugs, policies, and activation status",
+      },
+      {
+        key: PERMISSIONS.DELETE_NOTIFICATION_CHANNEL,
+        label: "Delete Channel",
+        description: "Permanently delete non-mandatory notification channels",
+      },
+    ],
+  },
+
   {
     id: "brands_management",
     label: "Brands Management (Actions)",
@@ -143,37 +196,6 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
         key: PERMISSIONS.DELETE_FLASH_SALE,
         label: "Delete Flash Sale",
         description: "Cancel active or upcoming flash sale campaigns",
-      },
-    ],
-  },
-  {
-    id: "notifications_control",
-    label: "Notifications Control (Actions)",
-    permissions: [
-      {
-        key: PERMISSIONS.CREATE_NOTIFICATION,
-        label: "Create Notification",
-        description: "Create new platform notifications",
-      },
-      {
-        key: PERMISSIONS.UPDATE_NOTIFICATION,
-        label: "Update Notification",
-        description: "Modify notification details and content",
-      },
-      {
-        key: PERMISSIONS.ASSIGN_NOTIFICATION,
-        label: "Assign Notification",
-        description: "Bind notifications to specific users",
-      },
-      {
-        key: PERMISSIONS.DELETE_NOTIFICATION,
-        label: "Remove Notification",
-        description: "Delete obsolete system notifications",
-      },
-      {
-        key: PERMISSIONS.SEND_NOTIFICATION,
-        label: "Send Notification",
-        description: "Send push alerts and platform-wide announcement messages",
       },
     ],
   },

@@ -1,5 +1,5 @@
 /**
- * @file lib/actions/notifications/mutations/delete.ts
+ * @file lib/actions/notifications/broadcasts/mutations/delete-notification.ts
  */
 
 "use server"
@@ -8,7 +8,7 @@ import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { hasRole, ROLES } from "../../role"
+import { hasRole, ROLES } from "../../../role"
 
 export async function deleteNotification(id: string): Promise<ApiResult<null>> {
   const idValidation = z.string().uuid("INVALID_ID").safeParse(id)

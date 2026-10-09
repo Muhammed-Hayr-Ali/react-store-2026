@@ -1,16 +1,14 @@
 /**
- * @file lib/actions/notifications/queries/get-notifications.ts
+ * @file lib/actions/notifications/broadcasts/queries/get-notifications.ts
  */
 
 "use server"
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { NotificationRecord } from "../types"
+import { NotificationRecord } from "../../types"
 
-export async function getNotifications(): Promise<
-  ApiResult<{ notifications: NotificationRecord[]; unreadCount: number }>
-> {
+export async function getNotifications(): Promise<ApiResult<NotificationRecord[]>> {
   const supabase = await createServerClient()
 
   const {
@@ -19,7 +17,7 @@ export async function getNotifications(): Promise<
   } = await supabase.auth.getUser()
 
   if (userError || !user) {
-    return { success: false, error: "UNAUTHORIZED_ACCESS" }
+    return { success: false, error: "UNAUTHORIZED" }
   }
 
   const { data, error } = await supabase
@@ -27,7 +25,6 @@ export async function getNotifications(): Promise<
     .select("*")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
-    .limit(30)
 
   if (error) {
     return {
@@ -37,14 +34,5 @@ export async function getNotifications(): Promise<
     }
   }
 
-  const notifications = (data as NotificationRecord[]) || []
-  const unreadCount = notifications.filter((n) => !n.is_read).length
-
-  return {
-    success: true,
-    data: {
-      notifications,
-      unreadCount,
-    },
-  }
+  return { success: true, data: data as NotificationRecord[] }
 }

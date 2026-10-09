@@ -1,6 +1,5 @@
 /**
- * @file lib/actions/notifications/mutations/mark-read.ts
- * @description Server Actions to mark notifications as read.
+ * @file lib/actions/notifications/broadcasts/mutations/mark-read.ts
  */
 
 "use server"

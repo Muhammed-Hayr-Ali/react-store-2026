@@ -97,11 +97,23 @@ export const sidebarConfig: SidebarConfig = {
       requiredPermission: PERMISSIONS.VIEW_STAFF_ACCESS,
     },
     {
-      title: "Notifications Management",
+      title: "Notifications",
       key: "notifications-management",
       url: appRoutes.dashboard.admin.notifications,
       icon: Bell,
       requiredPermission: PERMISSIONS.VIEW_NOTIFICATIONS_MANAGEMENT,
+      items: [
+        {
+          title: "Broadcasts & Logs",
+          url: appRoutes.dashboard.admin.notifications,
+          requiredPermission: PERMISSIONS.VIEW_NOTIFICATIONS_MANAGEMENT,
+        },
+        {
+          title: "Channels Setup",
+          url: appRoutes.dashboard.admin.notificationChannels,
+          requiredPermission: PERMISSIONS.VIEW_NOTIFICATION_CHANNELS_MANAGEMENT,
+        },
+      ],
     },
   ],
 }

@@ -1,12 +1,12 @@
 /**
- * @file lib/actions/notifications/queries/get-user-channel-preferences.ts
+ * @file lib/actions/notifications/channels/queries/get-user-preferences.ts
  */
 
 "use server"
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { UserChannelPreference } from "../types"
+import { UserChannelPreference } from "../../types"
 
 export async function getUserChannelPreferences(): Promise<
   ApiResult<UserChannelPreference[]>
@@ -22,12 +22,11 @@ export async function getUserChannelPreferences(): Promise<
     return { success: false, error: "UNAUTHORIZED" }
   }
 
-  // 1. جلب القنوات النشطة في المتجر
   const { data: channels, error: channelsError } = await supabase
     .from("notification_channels")
-    .select("*")
+    .select("id, name, name_ar, description, description_ar, is_mandatory, default_enabled")
     .eq("is_active", true)
-    .order("created_at", { ascending: true })
+    .order("is_mandatory", { ascending: false })
 
   if (channelsError) {
     return {
@@ -37,8 +36,7 @@ export async function getUserChannelPreferences(): Promise<
     }
   }
 
-  // 2. جلب اشتراكات المستخدم الحالية
-  const { data: subscriptions, error: subsError } = await supabase
+  const { data: subs, error: subsError } = await supabase
     .from("user_channel_subscriptions")
     .select("channel_id, is_subscribed")
     .eq("user_id", user.id)
@@ -51,21 +49,27 @@ export async function getUserChannelPreferences(): Promise<
     }
   }
 
-  const subMap = new Map<string, boolean>(
-    subscriptions?.map((s) => [s.channel_id, s.is_subscribed]) || []
-  )
+  const subsMap = new Map(subs.map((s) => [s.channel_id, s.is_subscribed]))
 
-  const preferences: UserChannelPreference[] = (channels || []).map((ch) => ({
-    ...ch,
-    is_subscribed: ch.is_mandatory
-      ? true
-      : subMap.has(ch.id)
-        ? Boolean(subMap.get(ch.id))
-        : ch.default_enabled,
-  }))
+  const preferences: UserChannelPreference[] = channels.map((c) => {
+    let isSubscribed = c.default_enabled
+    if (subsMap.has(c.id)) {
+      isSubscribed = subsMap.get(c.id)!
+    }
+    if (c.is_mandatory) {
+      isSubscribed = true
+    }
 
-  return {
-    success: true,
-    data: preferences,
-  }
+    return {
+      id: c.id,
+      name: c.name,
+      name_ar: c.name_ar,
+      description: c.description,
+      description_ar: c.description_ar,
+      is_mandatory: c.is_mandatory,
+      is_subscribed: isSubscribed,
+    }
+  })
+
+  return { success: true, data: preferences }
 }

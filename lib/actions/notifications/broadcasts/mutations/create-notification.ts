@@ -1,6 +1,5 @@
 /**
- * @file lib/actions/notifications/mutations/create-notification.ts
- * @description Server Actions to insert single and broadcast notifications into Supabase.
+ * @file lib/actions/notifications/broadcasts/mutations/create-notification.ts
  */
 
 "use server"
@@ -8,12 +7,12 @@
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { NotificationRecord } from "../types"
+import { NotificationRecord } from "../../types"
 import {
   createNotificationSchema,
   broadcastNotificationSchema,
-} from "../schemas"
-import { hasPermission, PERMISSIONS } from "../../role"
+} from "../../schemas"
+import { hasPermission, PERMISSIONS } from "../../../role"
 
 export async function createNotification(
   payload: unknown
@@ -35,8 +34,8 @@ export async function createNotification(
 
   const safeData = validation.data
 
-  const canSend = await hasPermission(PERMISSIONS.SEND_NOTIFICATION)
-  if (!canSend) {
+  const canBroadcast = await hasPermission(PERMISSIONS.BROADCAST_NOTIFICATION)
+  if (!canBroadcast) {
     return { success: false, error: "PERMISSION_DENIED" }
   }
 

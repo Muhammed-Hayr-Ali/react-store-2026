@@ -22,6 +22,7 @@ export const appRoutes = {
       flashSales: "/dashboard/x9k2-panel/flash-sales",
       create_flashSales: "/dashboard/x9k2-panel/flash-sales/create",
       notifications: "/dashboard/x9k2-panel/notifications",
+      notificationChannels: "/dashboard/x9k2-panel/notifications/channels", // المسار الجديد
       reports: "/dashboard/x9k2-panel/reports",
       roles: "/dashboard/x9k2-panel/roles",
       create_roles: "/dashboard/x9k2-panel/roles/create",

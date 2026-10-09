@@ -1,12 +1,12 @@
 /**
- * @file lib/actions/notifications/queries/get-active-channels.ts
+ * @file lib/actions/notifications/channels/queries/get-active-channels.ts
  */
 
 "use server"
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { NotificationChannelRecord } from "../types"
+import { NotificationChannelRecord } from "../../types"
 
 export async function getActiveNotificationChannels(): Promise<
   ApiResult<NotificationChannelRecord[]>
@@ -17,7 +17,8 @@ export async function getActiveNotificationChannels(): Promise<
     .from("notification_channels")
     .select("*")
     .eq("is_active", true)
-    .order("created_at", { ascending: true })
+    .order("is_mandatory", { ascending: false })
+    .order("name", { ascending: true })
 
   if (error) {
     return {
@@ -27,8 +28,5 @@ export async function getActiveNotificationChannels(): Promise<
     }
   }
 
-  return {
-    success: true,
-    data: (data || []) as NotificationChannelRecord[],
-  }
+  return { success: true, data: data as NotificationChannelRecord[] }
 }

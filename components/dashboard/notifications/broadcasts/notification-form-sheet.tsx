@@ -3,7 +3,6 @@
 import * as React from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm, useWatch } from "react-hook-form"
-import { z } from "zod"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import {
@@ -53,11 +52,12 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 
-import { createNotificationSchema } from "@/lib/actions/notifications/schemas"
-import { createNotification } from "@/lib/actions/notifications/mutations/create-notification"
+import {
+  createNotificationSchema,
+  type CreateNotificationInput,
+} from "@/lib/actions/notifications/schemas"
+import { createNotification } from "@/lib/actions/notifications"
 import { cn } from "@/lib/utils"
-
-type NotificationFormValues = z.infer<typeof createNotificationSchema>
 
 export interface FormUserOption {
   id: string
@@ -89,13 +89,13 @@ export default function NotificationForm({
     setValue,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm({
+  } = useForm<CreateNotificationInput>({
     resolver: zodResolver(createNotificationSchema),
     defaultValues: {
       userId: "",
       title: "",
       message: "",
-      type: "info" as const,
+      type: "info",
       link: "",
     },
   })
@@ -117,7 +117,7 @@ export default function NotificationForm({
     }
   }
 
-  async function onSubmit(data: NotificationFormValues) {
+  async function onSubmit(data: CreateNotificationInput) {
     setErrorMessage(null)
 
     const payload = {

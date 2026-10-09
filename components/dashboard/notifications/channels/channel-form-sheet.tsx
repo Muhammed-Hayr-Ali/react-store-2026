@@ -37,7 +37,11 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 
-import { createNotificationChannel } from "@/lib/actions/notifications"
+import {
+  createNotificationChannel,
+  updateNotificationChannel,
+} from "@/lib/actions/notifications"
+import type { NotificationChannelRecord } from "@/lib/actions/notifications/types"
 
 const channelSchema = z.object({
   slug: z.string().min(2, "Slug must be at least 2 characters").max(50),
@@ -47,6 +51,7 @@ const channelSchema = z.object({
   description_ar: z.string().optional().nullable(),
   isMandatory: z.boolean(),
   defaultEnabled: z.boolean(),
+  isActive: z.boolean(),
 })
 
 type ChannelFormValues = z.infer<typeof channelSchema>
@@ -61,16 +66,19 @@ function generateSlug(name: string): string {
 }
 
 interface ChannelFormSheetProps {
+  channel?: NotificationChannelRecord | null
   trigger?: React.ReactNode
   onSuccess?: () => void
 }
 
 export function ChannelFormSheet({
+  channel,
   trigger,
   onSuccess,
 }: ChannelFormSheetProps) {
   const [open, setOpen] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
+  const isEditing = Boolean(channel)
 
   const {
     register,
@@ -83,14 +91,15 @@ export function ChannelFormSheet({
   } = useForm<ChannelFormValues>({
     resolver: zodResolver(channelSchema),
     mode: "onChange",
-    defaultValues: {
-      slug: "",
-      name: "",
-      name_ar: "",
-      description: "",
-      description_ar: "",
-      isMandatory: false,
-      defaultEnabled: true,
+    values: {
+      slug: channel?.slug || "",
+      name: channel?.name || "",
+      name_ar: channel?.name_ar || "",
+      description: channel?.description || "",
+      description_ar: channel?.description_ar || "",
+      isMandatory: channel?.is_mandatory ?? false,
+      defaultEnabled: channel?.default_enabled ?? true,
+      isActive: channel?.is_active ?? true,
     },
   })
 
@@ -101,7 +110,7 @@ export function ChannelFormSheet({
     setOpen(isOpen)
     if (!isOpen) {
       setErrorMessage(null)
-      reset()
+      if (!isEditing) reset()
     }
   }
 
@@ -114,17 +123,23 @@ export function ChannelFormSheet({
       description_ar: data.description_ar === "" ? null : data.description_ar,
     }
 
-    const res = await createNotificationChannel(payload)
+    const res = isEditing
+      ? await updateNotificationChannel({ id: channel!.id, ...payload })
+      : await createNotificationChannel(payload)
 
     if (res.success) {
-      toast.success("Notification channel created successfully!")
+      toast.success(
+        isEditing
+          ? "Notification channel updated successfully!"
+          : "Notification channel created successfully!"
+      )
       onSuccess?.()
       handleOpenChange(false)
     } else {
       setErrorMessage(
         res.error === "SLUG_ALREADY_EXISTS"
           ? "Slug is already in use."
-          : res.error || "Failed to create notification channel."
+          : res.error || "Failed to save channel details."
       )
     }
   }
@@ -153,10 +168,12 @@ export function ChannelFormSheet({
       >
         <SheetHeader className="shrink-0 border-b bg-card px-5 py-4 sm:px-6">
           <SheetTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
-            Create Notification Channel
+            {isEditing ? "Edit Notification Channel" : "Create Notification Channel"}
           </SheetTitle>
           <SheetDescription className="text-xs text-muted-foreground">
-            Configure a topic channel for targeted notifications and user opt-in/opt-out preferences.
+            {isEditing
+              ? "Update delivery topic details, targeting preferences, and visibility."
+              : "Configure a topic channel for targeted notifications and audience preferences."}
           </SheetDescription>
         </SheetHeader>
 
@@ -183,7 +200,6 @@ export function ChannelFormSheet({
               </Alert>
             )}
 
-            {/* تفاصيل القناة والأسماء والسلوج التلقائي */}
             <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <HashIcon className="size-4 text-primary" />
@@ -210,7 +226,7 @@ export function ChannelFormSheet({
                           onChange={(e) => {
                             const newName = e.target.value
                             field.onChange(newName)
-                            if (!getFieldState("slug").isDirty) {
+                            if (!isEditing && !getFieldState("slug").isDirty) {
                               setValue("slug", generateSlug(newName), {
                                 shouldValidate: true,
                               })
@@ -311,12 +327,11 @@ export function ChannelFormSheet({
               </FieldGroup>
             </div>
 
-            {/* خيارات الاشتراك والسلوك الافتراضي */}
             <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <Settings2Icon className="size-4 text-primary" />
                 <h2 className="text-sm font-semibold text-card-foreground">
-                  Subscription Behavior
+                  Subscription & Status
                 </h2>
               </div>
 
@@ -327,7 +342,7 @@ export function ChannelFormSheet({
                       Default Enabled
                     </span>
                     <p className="text-[11px] text-muted-foreground leading-normal">
-                      Automatically subscribe all new and existing users to this channel upon creation.
+                      Automatically subscribe users to this channel upon creation.
                     </p>
                   </div>
                   <Controller
@@ -348,7 +363,7 @@ export function ChannelFormSheet({
                       Mandatory Channel
                     </span>
                     <p className="text-[11px] text-muted-foreground leading-normal">
-                      Users cannot opt-out or unsubscribe from this channel (e.g. order tracking or security).
+                      Users cannot opt-out of this channel (e.g. system or order tracking).
                     </p>
                   </div>
                   <Controller
@@ -361,6 +376,27 @@ export function ChannelFormSheet({
                           field.onChange(val)
                           if (val) setValue("defaultEnabled", true)
                         }}
+                      />
+                    )}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5 pe-3">
+                    <span className="text-xs font-medium text-foreground">
+                      Active Channel
+                    </span>
+                    <p className="text-[11px] text-muted-foreground leading-normal">
+                      Enable or disable this channel from appearing in user preferences and broadcast options.
+                    </p>
+                  </div>
+                  <Controller
+                    name="isActive"
+                    control={control}
+                    render={({ field }) => (
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
                       />
                     )}
                   />
@@ -391,8 +427,10 @@ export function ChannelFormSheet({
               {isSubmitting ? (
                 <>
                   <Spinner className="mr-2 size-3.5" />
-                  Creating...
+                  Saving...
                 </>
+              ) : isEditing ? (
+                "Save Changes"
               ) : (
                 "Save Channel"
               )}

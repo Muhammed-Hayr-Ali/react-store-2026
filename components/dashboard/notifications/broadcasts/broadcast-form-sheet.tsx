@@ -41,8 +41,10 @@ import {
 import { Badge } from "@/components/ui/badge"
 
 import { broadcastNotificationSchema } from "@/lib/actions/notifications/schemas"
-import { broadcastNotification } from "@/lib/actions/notifications/mutations/create-notification"
-import { getActiveNotificationChannels } from "@/lib/actions/notifications/queries/get-active-channels"
+import {
+  broadcastNotification,
+  getActiveNotificationChannels,
+} from "@/lib/actions/notifications"
 import type { NotificationChannelRecord } from "@/lib/actions/notifications/types"
 
 type BroadcastFormValues = z.infer<typeof broadcastNotificationSchema>

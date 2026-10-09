@@ -21,21 +21,23 @@ import {
 import {
   AlertCircleIcon,
   AlertTriangleIcon,
+  CalendarIcon,
   CheckCircle2Icon,
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronsLeftIcon,
   ChevronsRightIcon,
+  CircleCheckIcon,
+  CircleXIcon,
   Columns3Icon,
+  EllipsisVerticalIcon,
   ExternalLinkIcon,
   EyeIcon,
   FilterIcon,
   InfoIcon,
   LayersIcon,
   MegaphoneIcon,
-  MoreVerticalIcon,
   PlusIcon,
-  RadioTowerIcon,
   SearchIcon,
   Trash2Icon,
   UsersIcon,
@@ -50,6 +52,7 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Label } from "@/components/ui/label"
@@ -75,7 +78,6 @@ import DeleteNotificationDialog from "./delete-notification-dialog"
 import NotificationForm from "./notification-form-sheet"
 import BroadcastForm from "./broadcast-form-sheet"
 import { NotificationDetailsDialog } from "./notification-details-dialog"
-import { ChannelFormSheet } from "./channel-form-sheet"
 
 interface DisplayNotificationRecord extends AdminNotificationRecord {
   isBroadcastGroup?: boolean
@@ -101,7 +103,7 @@ const columnHelper = createColumnHelper<
 const HIDEABLE_COLUMNS = ["type", "is_read", "recipient", "created_at"]
 
 const columnLabelsMap: Record<string, string> = {
-  title: "Title",
+  title: "Notification",
   type: "Type",
   is_read: "Status",
   recipient: "Recipient",
@@ -111,26 +113,31 @@ const columnLabelsMap: Record<string, string> = {
 function formatDate(isoString: string): string {
   const d = new Date(isoString)
   if (isNaN(d.getTime())) return ""
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, "0")
+  const day = String(d.getDate()).padStart(2, "0")
+  return `${year}-${month}-${day}`
 }
 
 function formatTime(isoString: string): string {
   const d = new Date(isoString)
   if (isNaN(d.getTime())) return ""
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`
+  const hours = String(d.getHours()).padStart(2, "0")
+  const minutes = String(d.getMinutes()).padStart(2, "0")
+  return `${hours}:${minutes}`
 }
 
 function renderTypeIcon(type: string) {
   switch (type) {
     case "success":
-      return <CheckCircle2Icon className="size-4 shrink-0 text-emerald-500" />
+      return <CheckCircle2Icon className="size-3.5 text-emerald-500" />
     case "warning":
-      return <AlertTriangleIcon className="size-4 shrink-0 text-amber-500" />
+      return <AlertTriangleIcon className="size-3.5 text-amber-500" />
     case "error":
-      return <AlertCircleIcon className="size-4 shrink-0 text-rose-500" />
+      return <AlertCircleIcon className="size-3.5 text-rose-500" />
     case "info":
     default:
-      return <InfoIcon className="size-4 shrink-0 text-blue-500" />
+      return <InfoIcon className="size-3.5 text-blue-500" />
   }
 }
 
@@ -155,8 +162,7 @@ export function AdminNotificationsTable({
   )
   const [prevInitialData, setPrevInitialData] =
     React.useState<AdminNotificationRecord[]>(initialData)
-  const [currentTab] = React.useState<string>("all")
-  const [typeFilter, setTypeFilter] = React.useState<string>("all")
+  const [currentTab, setCurrentTab] = React.useState<string>("all")
   const [searchQuery, setSearchQuery] = React.useState("")
   const [isGrouped, setIsGrouped] = React.useState<boolean>(true)
 
@@ -226,10 +232,7 @@ export function AdminNotificationsTable({
     return processedData.filter((item) => {
       if (currentTab === "read" && !item.is_read) return false
       if (currentTab === "unread" && item.is_read) return false
-
-      if (typeFilter !== "all" && item.type !== typeFilter) {
-        return false
-      }
+      if (currentTab === "broadcast" && !item.isBroadcastGroup) return false
 
       if (!searchQuery.trim()) return true
       const q = searchQuery.toLowerCase().trim()
@@ -249,7 +252,21 @@ export function AdminNotificationsTable({
         email.includes(q)
       )
     })
-  }, [processedData, currentTab, typeFilter, searchQuery])
+  }, [processedData, currentTab, searchQuery])
+
+  // إحصائيات التابات بنمط العروضات
+  const unreadCount = React.useMemo(
+    () => processedData.filter((i) => !i.is_read && !i.isBroadcastGroup).length,
+    [processedData]
+  )
+  const readCount = React.useMemo(
+    () => processedData.filter((i) => i.is_read && !i.isBroadcastGroup).length,
+    [processedData]
+  )
+  const broadcastCount = React.useMemo(
+    () => processedData.filter((i) => i.isBroadcastGroup).length,
+    [processedData]
+  )
 
   const [columnVisibility, setColumnVisibility] =
     React.useState<ColumnVisibilityState>(() => {
@@ -297,65 +314,79 @@ export function AdminNotificationsTable({
       columnHelper.columns([
         columnHelper.accessor("title", {
           id: "title",
-          header: "Title",
+          header: "Notification",
           cell: ({ row }) => (
-            <NotificationDetailsDialog
-              notification={row.original}
-              trigger={
-                <div className="group flex max-w-xs min-w-0 cursor-pointer items-center gap-2.5 sm:max-w-sm md:max-w-md">
-                  <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted/60">
-                    {renderTypeIcon(row.original.type)}
-                  </div>
-                  <div className="flex items-center gap-1.5 truncate">
-                    <span className="truncate font-semibold text-foreground transition-colors group-hover:text-primary">
+            <div className="flex items-center gap-2.5">
+              <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-secondary text-foreground">
+                {renderTypeIcon(row.original.type)}
+              </div>
+              <div className="flex max-w-xs min-w-0 flex-col sm:max-w-md">
+                <NotificationDetailsDialog
+                  notification={row.original}
+                  trigger={
+                    <span className="truncate text-xs font-semibold text-foreground transition-colors hover:text-primary hover:underline cursor-pointer">
                       {row.original.title}
                     </span>
-                    {row.original.isBroadcastGroup && (
-                      <Badge
-                        variant="secondary"
-                        className="shrink-0 gap-1 px-1.5 py-0 text-[10px] font-normal"
-                      >
-                        <MegaphoneIcon className="size-2.5" />
-                        Broadcast
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              }
-            />
+                  }
+                />
+                <span className="truncate text-[11px] text-muted-foreground">
+                  {row.original.message}
+                </span>
+              </div>
+            </div>
           ),
           enableHiding: false,
         }),
 
         columnHelper.accessor("type", {
           id: "type",
-          header: "Type",
+          header: () => <div className="text-center">Type</div>,
           cell: ({ row }) => (
-            <Badge variant="outline" className="text-[10px] capitalize">
-              {row.original.type}
-            </Badge>
+            <div className="flex justify-center">
+              <Badge variant="outline" className="text-[10px] capitalize px-2 py-0.5">
+                {row.original.type}
+              </Badge>
+            </div>
           ),
         }),
 
         columnHelper.accessor("is_read", {
           id: "is_read",
-          header: "Status",
+          header: () => <div className="text-center">Status</div>,
           cell: ({ row }) => {
             if (row.original.isBroadcastGroup) {
               return (
-                <span className="text-xs text-muted-foreground">Grouped</span>
+                <div className="flex justify-center">
+                  <Badge
+                    variant="outline"
+                    className="gap-1 border-blue-500/30 px-2 py-0.5 text-xs text-blue-600 dark:text-blue-400"
+                  >
+                    <MegaphoneIcon className="size-3" />
+                    Broadcast
+                  </Badge>
+                </div>
               )
             }
             return (
-              <span
-                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-                  row.original.is_read
-                    ? "bg-muted text-muted-foreground"
-                    : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                }`}
-              >
-                {row.original.is_read ? "Read" : "Unread"}
-              </span>
+              <div className="flex justify-center">
+                {row.original.is_read ? (
+                  <Badge
+                    variant="outline"
+                    className="gap-1 px-2 py-0.5 text-xs text-muted-foreground"
+                  >
+                    <CircleCheckIcon className="size-3" />
+                    Read
+                  </Badge>
+                ) : (
+                  <Badge
+                    variant="outline"
+                    className="gap-1 border-emerald-500/30 px-2 py-0.5 text-xs text-emerald-600 dark:text-emerald-400"
+                  >
+                    <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
+                    Unread
+                  </Badge>
+                )}
+              </div>
             )
           },
         }),
@@ -367,10 +398,10 @@ export function AdminNotificationsTable({
             if (row.original.isBroadcastGroup) {
               return (
                 <div className="flex items-center gap-1.5 text-xs">
-                  <span className="inline-flex items-center gap-1 rounded-md bg-secondary/80 px-2 py-1 font-medium text-foreground">
+                  <Badge variant="secondary" className="gap-1 px-2 py-0.5 text-xs font-normal">
                     <UsersIcon className="size-3 text-primary" />
                     <span>{row.original.recipientCount} Recipients</span>
-                  </span>
+                  </Badge>
                 </div>
               )
             }
@@ -386,7 +417,7 @@ export function AdminNotificationsTable({
                 <div className="font-medium text-foreground">
                   {fullName || "User Account"}
                 </div>
-                <div className="text-[11px] text-muted-foreground">{email}</div>
+                <div className="font-mono text-[11px] text-muted-foreground">{email}</div>
               </div>
             )
           },
@@ -400,10 +431,11 @@ export function AdminNotificationsTable({
               className="text-xs text-muted-foreground"
               suppressHydrationWarning
             >
-              <div className="font-mono text-[11px]">
-                {formatDate(row.original.created_at)}
+              <div className="flex items-center gap-1 font-mono text-[11px]">
+                <CalendarIcon className="size-3 shrink-0 text-muted-foreground" />
+                <span>{formatDate(row.original.created_at)}</span>
               </div>
-              <div className="font-mono text-[10px] text-muted-foreground/70">
+              <div className="mt-0.5 font-mono text-[10px] text-muted-foreground/70">
                 {formatTime(row.original.created_at)}
               </div>
             </div>
@@ -419,9 +451,9 @@ export function AdminNotificationsTable({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-7 text-muted-foreground data-[state=open]:bg-muted"
+                    className="flex size-7 text-muted-foreground data-[state=open]:bg-muted"
                   >
-                    <MoreVerticalIcon className="size-4" />
+                    <EllipsisVerticalIcon className="size-4" />
                     <span className="sr-only">Actions</span>
                   </Button>
                 </DropdownMenuTrigger>
@@ -431,10 +463,10 @@ export function AdminNotificationsTable({
                     trigger={
                       <DropdownMenuItem
                         onSelect={(e) => e.preventDefault()}
-                        className="flex cursor-pointer items-center gap-2"
+                        className="flex cursor-pointer items-center"
                       >
-                        <EyeIcon className="size-3.5" />
-                        <span>View Details</span>
+                        <EyeIcon className="me-2 size-3.5" />
+                        View Details
                       </DropdownMenuItem>
                     }
                   />
@@ -444,13 +476,15 @@ export function AdminNotificationsTable({
                       <Link
                         href={row.original.link}
                         target="_blank"
-                        className="flex cursor-pointer items-center gap-2"
+                        className="flex cursor-pointer items-center"
                       >
-                        <ExternalLinkIcon className="size-3.5" />
-                        <span>Related Link</span>
+                        <ExternalLinkIcon className="me-2 size-3.5" />
+                        Related Link
                       </Link>
                     </DropdownMenuItem>
                   )}
+
+                  <DropdownMenuSeparator />
 
                   <DeleteNotificationDialog
                     item={row.original}
@@ -458,9 +492,9 @@ export function AdminNotificationsTable({
                     trigger={
                       <DropdownMenuItem
                         onSelect={(e) => e.preventDefault()}
-                        className="flex cursor-pointer items-center gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
+                        className="flex cursor-pointer items-center text-destructive focus:bg-destructive/10 focus:text-destructive"
                       >
-                        <Trash2Icon className="size-3.5" />
+                        <Trash2Icon className="me-2 size-3.5" />
                         <span>
                           {row.original.isBroadcastGroup
                             ? "Delete Broadcast"
@@ -499,7 +533,6 @@ export function AdminNotificationsTable({
   return (
     <div className="flex w-full flex-col justify-start gap-4">
       <div className="flex w-full items-center gap-2">
-        {/* حقل البحث */}
         <div className="relative min-w-0 flex-1">
           <SearchIcon className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -541,88 +574,160 @@ export function AdminNotificationsTable({
             </span>
           </Button>
 
-          {/* فلتر النوع */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-8"
-                title="Filter by Type"
-              >
-                <FilterIcon className="size-3.5" />
-                <span className="sr-only">Filter by Type</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40 text-xs">
-              <DropdownMenuItem
-                onClick={() => {
-                  setTypeFilter("all")
-                  table.setPageIndex(0)
-                }}
-                className="flex cursor-pointer items-center justify-between"
-              >
-                <span>All</span>
-                <Badge variant="secondary" className="px-1 py-0 text-[10px]">
-                  {processedData.length}
-                </Badge>
-              </DropdownMenuItem>
+          {/* منيو الموبايل للتابات */}
+          <div className="block sm:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="size-8"
+                  title="Filter"
+                >
+                  <FilterIcon className="size-3.5" />
+                  <span className="sr-only">Filter</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-36 text-xs">
+                <DropdownMenuItem
+                  onClick={() => {
+                    setCurrentTab("all")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between"
+                >
+                  <span>All</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {processedData.length}
+                  </Badge>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setCurrentTab("unread")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between"
+                >
+                  <span>Unread</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {unreadCount}
+                  </Badge>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setCurrentTab("read")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between"
+                >
+                  <span>Read</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {readCount}
+                  </Badge>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setCurrentTab("broadcast")
+                    table.setPageIndex(0)
+                  }}
+                  className="flex cursor-pointer items-center justify-between"
+                >
+                  <span>Broadcast</span>
+                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                    {broadcastCount}
+                  </Badge>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
-              <DropdownMenuItem
-                onClick={() => {
-                  setTypeFilter("info")
-                  table.setPageIndex(0)
-                }}
-                className="flex cursor-pointer items-center justify-between capitalize"
+          {/* التابات الديسكتوب المتناسقة كلياً مع الفلاش سيلز */}
+          <div className="hidden h-8 items-center overflow-hidden rounded-md border border-input bg-background p-0.5 sm:inline-flex">
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentTab("all")
+                table.setPageIndex(0)
+              }}
+              className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
+                currentTab === "all"
+                  ? "bg-muted font-semibold text-foreground"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              }`}
+            >
+              All
+              <Badge
+                variant="secondary"
+                className="ms-1.5 px-1.5 py-0 text-[10px]"
               >
-                <span>Info</span>
-                <Badge variant="secondary" className="px-1 py-0 text-[10px]">
-                  {processedData.filter((i) => i.type === "info").length}
-                </Badge>
-              </DropdownMenuItem>
+                {processedData.length}
+              </Badge>
+            </button>
 
-              <DropdownMenuItem
-                onClick={() => {
-                  setTypeFilter("success")
-                  table.setPageIndex(0)
-                }}
-                className="flex cursor-pointer items-center justify-between capitalize"
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentTab("unread")
+                table.setPageIndex(0)
+              }}
+              className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
+                currentTab === "unread"
+                  ? "bg-muted font-semibold text-foreground"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              }`}
+            >
+              Unread
+              <Badge
+                variant="secondary"
+                className="ms-1.5 px-1.5 py-0 text-[10px]"
               >
-                <span>Success</span>
-                <Badge variant="secondary" className="px-1 py-0 text-[10px]">
-                  {processedData.filter((i) => i.type === "success").length}
-                </Badge>
-              </DropdownMenuItem>
+                {unreadCount}
+              </Badge>
+            </button>
 
-              <DropdownMenuItem
-                onClick={() => {
-                  setTypeFilter("warning")
-                  table.setPageIndex(0)
-                }}
-                className="flex cursor-pointer items-center justify-between capitalize"
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentTab("read")
+                table.setPageIndex(0)
+              }}
+              className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
+                currentTab === "read"
+                  ? "bg-muted font-semibold text-foreground"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              }`}
+            >
+              Read
+              <Badge
+                variant="secondary"
+                className="ms-1.5 px-1.5 py-0 text-[10px]"
               >
-                <span>Warning</span>
-                <Badge variant="secondary" className="px-1 py-0 text-[10px]">
-                  {processedData.filter((i) => i.type === "warning").length}
-                </Badge>
-              </DropdownMenuItem>
+                {readCount}
+              </Badge>
+            </button>
 
-              <DropdownMenuItem
-                onClick={() => {
-                  setTypeFilter("error")
-                  table.setPageIndex(0)
-                }}
-                className="flex cursor-pointer items-center justify-between capitalize"
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentTab("broadcast")
+                table.setPageIndex(0)
+              }}
+              className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
+                currentTab === "broadcast"
+                  ? "bg-muted font-semibold text-foreground"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              }`}
+            >
+              Broadcast
+              <Badge
+                variant="secondary"
+                className="ms-1.5 px-1.5 py-0 text-[10px]"
               >
-                <span>Error</span>
-                <Badge variant="secondary" className="px-1 py-0 text-[10px]">
-                  {processedData.filter((i) => i.type === "error").length}
-                </Badge>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                {broadcastCount}
+              </Badge>
+            </button>
+          </div>
 
-          {/* زر إظهار/إخفاء الأعمدة */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -632,9 +737,10 @@ export function AdminNotificationsTable({
                 title="Toggle Columns"
               >
                 <Columns3Icon className="size-3.5" />
+                <span className="sr-only">Toggle Columns</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40 text-xs">
+            <DropdownMenuContent align="end" className="w-40">
               {table
                 .getAllColumns()
                 .filter(
@@ -653,28 +759,7 @@ export function AdminNotificationsTable({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* 1. شيت إضافة قناة جديدة */}
-          <div className="sm:hidden">
-            <ChannelFormSheet
-              trigger={
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className="size-8"
-                  title="Add Channel"
-                >
-                  <RadioTowerIcon className="size-3.5" />
-                  <span className="sr-only">Add Channel</span>
-                </Button>
-              }
-            />
-          </div>
-          <div className="hidden sm:inline-flex">
-            <ChannelFormSheet />
-          </div>
-
-          {/* 2. شيت إرسال البث */}
+          {/* زر شيت البث */}
           <div className="sm:hidden">
             <BroadcastForm
               trigger={
@@ -683,10 +768,10 @@ export function AdminNotificationsTable({
                   variant="outline"
                   size="icon"
                   className="size-8"
-                  title="Broadcast Notification"
+                  title="Broadcast"
                 >
                   <MegaphoneIcon className="size-3.5" />
-                  <span className="sr-only">Broadcast Notification</span>
+                  <span className="sr-only">Broadcast</span>
                 </Button>
               }
             />
@@ -695,7 +780,7 @@ export function AdminNotificationsTable({
             <BroadcastForm />
           </div>
 
-          {/* 3. شيت الإشعار الفردي */}
+          {/* زر إنشاء إشعار فردي بنمط Create Flash Sale المعتمد */}
           <div className="sm:hidden">
             <NotificationForm
               users={users}
@@ -714,12 +799,24 @@ export function AdminNotificationsTable({
             />
           </div>
           <div className="hidden sm:inline-flex">
-            <NotificationForm users={users} />
+            <NotificationForm
+              users={users}
+              trigger={
+                <Button
+                  type="button"
+                  variant="default"
+                  size="sm"
+                  className="h-8 gap-1.5 px-3 text-xs"
+                >
+                  <PlusIcon className="size-3.5" />
+                  <span>New Notification</span>
+                </Button>
+              }
+            />
           </div>
         </div>
       </div>
 
-      {/* عرض الجدول */}
       <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">
         <div className="overflow-x-auto">
           <Table className="w-full">
@@ -729,6 +826,7 @@ export function AdminNotificationsTable({
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
+                      colSpan={header.colSpan}
                       className="text-xs font-medium text-muted-foreground"
                     >
                       {header.isPlaceholder ? null : (
@@ -759,7 +857,7 @@ export function AdminNotificationsTable({
                     colSpan={columns.length}
                     className="h-24 text-center text-xs text-muted-foreground"
                   >
-                    No notifications found matching your criteria.
+                    No notifications found matching your search.
                   </TableCell>
                 </TableRow>
               )}
@@ -768,7 +866,6 @@ export function AdminNotificationsTable({
         </div>
       </div>
 
-      {/* الترقيم (Pagination) */}
       <div className="flex items-center justify-between px-1">
         <div className="flex w-full items-center gap-8 lg:w-fit">
           <div className="hidden items-center gap-2 lg:flex">

@@ -26,12 +26,12 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { InputGroup, InputGroupTextarea } from "@/components/ui/input-group"
 import { Progress } from "@/components/ui/progress"
 
-import { PERMISSION_GROUPS } from "@/components/dashboard/roles/permission-groups"
 import { createRole } from "@/lib/actions/role/mutations/create-role"
 import { updateRole } from "@/lib/actions/role/mutations/update-role"
 import { AppPermission } from "@/lib/actions/role/types"
 import { RoleRecord } from "@/lib/actions/role/mutations/create-role"
 import { appRoutes } from "@/lib/config/app-routes"
+import { PERMISSION_GROUPS } from "@/lib/actions/role/permission-groups"
 
 interface CreateRoleFormProps {
   initialData?: RoleRecord | null

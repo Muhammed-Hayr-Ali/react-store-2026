@@ -1,43 +1,27 @@
+import { notFound } from "next/navigation"
 import { BellIcon } from "lucide-react"
 
-import { getAdminNotifications } from "@/lib/actions/notifications/queries/get-admin-notifications"
+import { getAdminNotifications } from "@/lib/actions/notifications"
 import { getAdminUsersList } from "@/lib/actions/users/queries/get-admin-users"
-import { AdminNotificationsTable } from "@/components/dashboard/notifications/admin-notifications-table"
+import { AdminNotificationsTable } from "@/components/dashboard/notifications/broadcasts/admin-notifications-table"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { appConfig } from "@/lib/config/app_config"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-import { notFound } from "next/navigation"
-
-interface PageProps {
-  params: Promise<{
-    locale: string
-  }>
-  searchParams: Promise<{
-    type?: string
-    isRead?: string
-    limit?: string
-    offset?: string
-  }>
-}
 
 export async function generateMetadata() {
   return createMetadata({
     siteName: appConfig.name,
     title: "Notifications Management",
-    description: "Manage system notifications and broadcast alerts.",
+    description:
+      "Manage system notifications, user alerts, and mass broadcasts.",
   })
 }
 
-export default async function AdminNotificationsPage({
-  params,
-  searchParams,
-}: PageProps) {
+export default async function AdminNotificationsPage() {
   const canView = await hasPermission(PERMISSIONS.VIEW_NOTIFICATIONS_MANAGEMENT)
   if (!canView) {
     notFound()
-  }  
-  await params
-  await searchParams
+  }
 
   const [notificationsRes, usersRes] = await Promise.all([
     getAdminNotifications(),
@@ -68,11 +52,11 @@ export default async function AdminNotificationsPage({
               <BellIcon className="size-4 text-foreground" />
             </span>
             <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-              Notifications Management
+              Notifications & Broadcasts
             </h1>
           </div>
           <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-            Review and manage all user notifications and system alerts.
+            Review and manage all user notifications, logs, and system alerts.
           </p>
         </div>
       </div>
