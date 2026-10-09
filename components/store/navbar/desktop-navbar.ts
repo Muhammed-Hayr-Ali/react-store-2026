@@ -7,6 +7,7 @@ import { SearchIcon, ShoppingCartIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { CurrencySwitcher } from "@/components/store/currency/CurrencySwitcher"
+import { NotificationPopover } from "@/components/notifications/notification-popover"
 
 import { appRoutes } from "@/lib/config/app-routes"
 import { useUser } from "@/lib/context/user-context"
@@ -14,7 +15,6 @@ import type { NotificationRecord } from "@/lib/actions/notifications/types"
 import { cn } from "@/lib/utils"
 
 import UserProfilePopover from "./user-profile-popover"
-import { NotificationPopover } from "@/components/notifications/notification-popover.tsx"
 
 interface DesktopNavbarProps {
   className?: string

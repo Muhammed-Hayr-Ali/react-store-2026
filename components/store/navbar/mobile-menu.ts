@@ -15,11 +15,11 @@ import { Button } from "@/components/ui/button"
 
 import { appRoutes } from "@/lib/config/app-routes"
 import type { NotificationRecord } from "@/lib/actions/notifications/types"
+import { useUser } from "@/lib/context/user-context"
+import { LogoutDialog } from "./logout-dialog"
 import { UserProfileHeader } from "./user-profile-header"
 import { PreferencesSubNav } from "./preferences-sub-nav"
 import { NavItemsList } from "./nav-items-list"
-import { useUser } from "@/lib/context/user-context"
-import { LogoutDialog } from "./logout-dialog"
 
 interface MobileMenuProps {
   initialNotifications: NotificationRecord[]
