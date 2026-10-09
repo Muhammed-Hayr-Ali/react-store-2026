@@ -1,5 +1,129 @@
 {
-    "HomePage": {
-        "title": "أهلاً بالعالم!"
-    }
+  "HomePage": {
+    "TITLE": "مرحباً بالعالم!"
+  },
+  "AuthLayout": {
+    "BACK_TO_HOME_SR": "العودة إلى الصفحة الرئيسية",
+    "TERMS_PREFIX": "بالمتابعة، فإنك توافق على",
+    "TERMS_OF_SERVICE": "شروط الخدمة",
+    "TERMS_AND": "و",
+    "PRIVACY_POLICY": "سياسة الخصوصية",
+    "TERMS_SUFFIX": "."
+  },
+  "GoogleSignInButton": {
+    "CONTINUE_WITH_GOOGLE": "المتابعة باستخدام Google",
+    "CONNECTING": "جارٍ الاتصال بـ Google...",
+    "LAST_USED_BADGE": "آخر استخدام",
+    "SIGN_IN_FAILED_FALLBACK": "تعذر بدء تسجيل الدخول بواسطة Google.",
+    "UNEXPECTED_ERROR": "حدث خطأ غير متوقع أثناء تسجيل الدخول بواسطة Google."
+  },
+  "LoginPage": {
+    "META_TITLE": "تسجيل الدخول",
+    "META_DESCRIPTION": "سجّل الدخول إلى حسابك في ماركتنا للوصول إلى سلة التسوق وسجل الطلبات."
+  },
+  "LoginForm": {
+    "WELCOME_TITLE": "أهلاً بك مجدداً،",
+    "SIGN_IN_SUBTITLE": "سجّل الدخول للمتابعة إلى ماركتنا",
+    "SIGN_UP_LINK": "إنشاء حساب",
+    "ALERT_TITLE": "تنبيه مطلوب",
+    "DISMISS_ALERT_SR": "إغلاق التنبيه",
+    "EMAIL_LABEL": "البريد الإلكتروني",
+    "EMAIL_PLACEHOLDER": "you@domain.com",
+    "PASSWORD_LABEL": "كلمة المرور",
+    "PASSWORD_PLACEHOLDER": "••••••••",
+    "SHOW_PASSWORD_SR": "إظهار كلمة المرور",
+    "HIDE_PASSWORD_SR": "إخفاء كلمة المرور",
+    "FORGOT_PASSWORD_LINK": "نسيت كلمة المرور؟",
+    "LAST_USED_BADGE": "آخر استخدام",
+    "SIGN_IN_BUTTON": "تسجيل الدخول",
+    "SIGN_IN_SUBMITTING": "جارٍ تسجيل الدخول...",
+    "OR_DIVIDER": "أو",
+    "INVALID_CREDENTIALS_ERROR": "البريد الإلكتروني أو كلمة المرور غير صحيحة. يُرجى التحقق وإعادة المحاولة.",
+    "EMAIL_NOT_CONFIRMED_ERROR": "يرجى تأكيد بريدك الإلكتروني أولاً قبل تسجيل الدخول.",
+    "GENERIC_ERROR": "تعذر تسجيل الدخول حالياً. يُرجى إعادة المحاولة لاحقاً."
+  },
+  "SignUpPage": {
+    "META_TITLE": "إنشاء حساب جديد",
+    "META_DESCRIPTION": "انضم إلى ماركتنا للاستفادة من العروض المخصصة، وتتبع طلباتك بكل سهولة."
+  },
+  "SignUpForm": {
+    "TITLE": "إنشاء حساب جديد",
+    "SUBTITLE": "انضم إلى مجتمع ماركتنا بخطوات بسيطة",
+    "SIGN_IN_LINK": "تسجيل الدخول",
+    "ALERT_TITLE": "تنبيه مطلوب",
+    "DISMISS_ALERT_SR": "إغلاق التنبيه",
+    "NAME_LABEL": "الاسم الكامل",
+    "NAME_PLACEHOLDER": "أحمد محمد",
+    "EMAIL_LABEL": "البريد الإلكتروني",
+    "EMAIL_PLACEHOLDER": "you@domain.com",
+    "PASSWORD_LABEL": "كلمة المرور",
+    "PASSWORD_PLACEHOLDER": "••••••••",
+    "SHOW_PASSWORD_SR": "إظهار كلمة المرور",
+    "HIDE_PASSWORD_SR": "إخفاء كلمة المرور",
+    "SUBMIT_BUTTON": "إنشاء الحساب",
+    "SUBMITTING_BUTTON": "جارٍ إنشاء الحساب...",
+    "OR_DIVIDER": "أو",
+    "EMAIL_ALREADY_EXISTS_ERROR": "يوجد حساب مسجل بهذا البريد الإلكتروني مسبقاً.",
+    "GENERIC_ERROR": "حدث خطأ غير متوقع أثناء إنشاء الحساب. يُرجى إعادة المحاولة."
+  },
+  "ResetPasswordSuccess": {
+    "CHECK_EMAIL_TITLE": "تحقق من بريدك الإلكتروني",
+    "CHECK_EMAIL_DESCRIPTION": "لقد أرسلنا رابط استعادة كلمة المرور إلى بريدك الإلكتروني.",
+    "DIDNT_RECEIVE_TITLE": "لم يصلك البريد الإلكتروني؟",
+    "DIDNT_RECEIVE_PREFIX": "تأكد من مجلد الرسائل غير المرغوب فيها (Spam) أو",
+    "TRY_ANOTHER_EMAIL": "جرّب بريداً آخر",
+    "TOKEN_EXPIRATION_NOTICE": "صلاحية الرابط تنتهي خلال 15 دقيقة",
+    "BACK_TO_LOGIN_BUTTON": "العودة لتسجيل الدخول"
+  },
+  "ForgotPasswordForm": {
+    "TITLE": "نسيت كلمة المرور",
+    "SUBTITLE": "أدخل بريدك الإلكتروني لاستلام رابط استعادة الحساب",
+    "SIGN_IN_LINK": "تسجيل الدخول",
+    "ALERT_TITLE": "تنبيه مطلوب",
+    "DISMISS_ALERT_SR": "إغلاق التنبيه",
+    "EMAIL_LABEL": "البريد الإلكتروني",
+    "EMAIL_PLACEHOLDER": "you@domain.com",
+    "SUBMIT_BUTTON": "إرسال رابط الاستعادة",
+    "SUBMITTING_BUTTON": "جارٍ إرسال الرابط...",
+    "GENERIC_ERROR": "تعذر إرسال رابط استعادة كلمة المرور. يُرجى المحاولة لاحقاً."
+  },
+  "ForgotPasswordPage": {
+    "META_TITLE": "طلب استعادة كلمة المرور",
+    "META_DESCRIPTION": "اطلب رابطاً آمناً لاستعادة الوصول إلى حسابك في ماركتنا."
+  },
+  "ResetPasswordForm": {
+    "TITLE": "تعيين كلمة المرور",
+    "SUBTITLE": "أنشئ كلمة مرور جديدة وقوية لحسابك",
+    "SIGN_IN_LINK": "تسجيل الدخول",
+    "ALERT_TITLE": "تنبيه مطلوب",
+    "DISMISS_ALERT_SR": "إغلاق التنبيه",
+    "PASSWORD_LABEL": "كلمة المرور الجديدة",
+    "CONFIRM_PASSWORD_LABEL": "تأكيد كلمة المرور",
+    "PASSWORD_PLACEHOLDER": "••••••••",
+    "SHOW_PASSWORD_SR": "إظهار كلمة المرور",
+    "HIDE_PASSWORD_SR": "إخفاء كلمة المرور",
+    "SUBMIT_BUTTON": "تحديث كلمة المرور",
+    "SUBMITTING_BUTTON": "جارٍ تحديث كلمة المرور...",
+    "PASSWORD_UPDATED_TOAST": "تم تحديث كلمة المرور بنجاح. يُرجى تسجيل الدخول.",
+    "INVALID_OR_EXPIRED_TOKEN_ERROR": "رابط استعادة كلمة المرور غير صالح أو انتهت صلاحيته. يُرجى طلب رابط جديد.",
+    "GENERIC_ERROR": "تعذر تحديث كلمة المرور. يُرجى المحاولة لاحقاً."
+  },
+  "ResetPasswordPage": {
+    "META_TITLE": "تعيين كلمة المرور الجديدة",
+    "META_DESCRIPTION": "حدّث بيانات الدخول الخاصة بحسابك في ماركتنا بأمان.",
+    "MISSING_TOKEN_TITLE": "رابط الاستعادة غير صالح",
+    "MISSING_TOKEN_DESCRIPTION": "رابط استعادة كلمة المرور مفقود أو غير صالح. يُرجى طلب رابط جديد للمتابعة.",
+    "REQUEST_NEW_LINK_BUTTON": "طلب رابط جديد"
+  },
+  "OAuthCallback": {
+    "META_TITLE": "جارٍ التحقق...",
+    "META_DESCRIPTION": "جارٍ إتمام عملية التحقق من تسجيل الدخول الآمن.",
+    "PROCESSING_TITLE": "جارٍ التحقق من بيانات الدخول",
+    "PROCESSING_DESCRIPTION": "يرجى الانتظار بينما نتحقق من جلستك ونقوم بتسجيل دخولك...",
+    "FAILED_TITLE": "فشل تسجيل الدخول",
+    "DEFAULT_ERROR_DESCRIPTION": "تم إلغاء عملية تسجيل الدخول أو تم رفض منح الصلاحية.",
+    "RETURN_TO_LOGIN": "العودة لتسجيل الدخول",
+    "SIGN_IN_SUCCESS_TOAST": "تم تسجيل الدخول بنجاح!",
+    "EXCHANGE_FAILED": "فشلت عملية التحقق وتبادل بيانات الدخول."
+  }
 }

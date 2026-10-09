@@ -1,19 +1,22 @@
 /**
  * @file components/auth/signup-form.tsx
+ * @description Customer registration form with client validation,
+ * inline field bindings, and Section 12 destructive alert management.
  */
 
 "use client"
 
-import React from "react"
+import * as React from "react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import {
   EyeIcon,
-  EyeOff,
-  Lock,
-  Mail,
-  User,
+  EyeOffIcon,
+  LockIcon,
+  MailIcon,
+  UserIcon,
   AlertCircleIcon,
   XIcon,
 } from "lucide-react"
@@ -29,7 +32,7 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { CustomInput } from "@/components/ui/custom-input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AuthHeader } from "./header"
+import { AuthHeader } from "./auth-header"
 import { GoogleSignInButton } from "./google-sign-in-button"
 
 import {
@@ -40,7 +43,9 @@ import {
 import { appRoutes } from "@/lib/config/app-routes"
 
 export function SignUpForm() {
+  const t = useTranslations("SignUpForm")
   const router = useRouter()
+
   const [showPassword, setShowPassword] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
@@ -64,34 +69,54 @@ export function SignUpForm() {
     if (result.success) {
       router.refresh()
       router.replace(appRoutes.home)
+      return
+    }
+
+    // Intercept Server Action validation errors and bind directly to form fields
+    if (result.error === "VALIDATION_ERROR" && result.details) {
+      Object.entries(result.details).forEach(([field, msgs]) => {
+        form.setError(field as keyof SignUpWithPasswordInput, {
+          message: msgs[0],
+        })
+      })
+      return
+    }
+
+    // Handle duplicate account errors via Section 12 Alert
+    if (result.error === "EMAIL_ALREADY_EXISTS") {
+      setErrorMessage(t("EMAIL_ALREADY_EXISTS_ERROR"))
     } else {
-      setErrorMessage(result.error || "Signup failed. Please try again.")
+      setErrorMessage(result.error || t("GENERIC_ERROR"))
     }
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      <FieldGroup>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
+      <FieldGroup className="space-y-4">
         <AuthHeader
-          title="Sign Up"
-          description="Create an account"
-          linkText="Sign In"
+          title={t("TITLE")}
+          description={t("SUBTITLE")}
+          linkText={t("SIGN_IN_LINK")}
           linkHref={appRoutes.auth.login}
         />
 
+        {/* Section 12 Form-Level Server Error Alert */}
         {errorMessage && (
-          <Alert variant="destructive" className="relative pr-9">
-            <AlertCircleIcon className="size-4" />
-            <AlertTitle>Action Required</AlertTitle>
-            <AlertDescription className="text-xs">
+          <Alert variant="destructive" className="relative pe-9">
+            <AlertCircleIcon className="size-4 shrink-0" />
+            <AlertTitle className="text-xs font-semibold">
+              {t("ALERT_TITLE")}
+            </AlertTitle>
+            <AlertDescription className="text-xs text-destructive-foreground/90">
               {errorMessage}
             </AlertDescription>
             <button
               type="button"
               onClick={() => setErrorMessage(null)}
-              className="absolute top-3 right-3 cursor-pointer text-muted-foreground hover:text-foreground"
+              className="absolute top-3 inset-e-3 cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
             >
               <XIcon className="size-4" />
+              <span className="sr-only">{t("DISMISS_ALERT_SR")}</span>
             </button>
           </Alert>
         )}
@@ -102,15 +127,18 @@ export function SignUpForm() {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="name">Name</FieldLabel>
+              <FieldLabel htmlFor="name" className="text-xs">
+                {t("NAME_LABEL")}
+              </FieldLabel>
               <CustomInput
                 {...field}
                 id="name"
                 type="text"
-                placeholder="Your Name"
+                placeholder={t("NAME_PLACEHOLDER")}
                 aria-invalid={fieldState.invalid}
                 autoComplete="name"
-                prefixIcon={<User size="16" />}
+                className="h-9 text-xs"
+                prefixIcon={<UserIcon className="size-4 text-muted-foreground" />}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -123,15 +151,18 @@ export function SignUpForm() {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
+              <FieldLabel htmlFor="email" className="text-xs">
+                {t("EMAIL_LABEL")}
+              </FieldLabel>
               <CustomInput
                 {...field}
                 id="email"
                 type="email"
-                placeholder="you@domain.com"
+                placeholder={t("EMAIL_PLACEHOLDER")}
                 aria-invalid={fieldState.invalid}
                 autoComplete="email"
-                prefixIcon={<Mail size="16" />}
+                className="h-9 text-xs"
+                prefixIcon={<MailIcon className="size-4 text-muted-foreground" />}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -144,28 +175,36 @@ export function SignUpForm() {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="password">Password</FieldLabel>
+              <FieldLabel htmlFor="password" className="text-xs">
+                {t("PASSWORD_LABEL")}
+              </FieldLabel>
               <CustomInput
                 {...field}
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder={t("PASSWORD_PLACEHOLDER")}
                 aria-invalid={fieldState.invalid}
                 autoComplete="new-password"
-                prefixIcon={<Lock size="16" />}
+                className="h-9 text-xs"
+                prefixIcon={<LockIcon className="size-4 text-muted-foreground" />}
                 suffixIcon={
                   <Button
                     type="button"
                     variant="ghost"
-                    size="icon-sm"
+                    size="icon"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="hover:bg-transparent focus:outline-none"
+                    className="size-7 cursor-pointer text-muted-foreground hover:bg-transparent hover:text-foreground focus:outline-none"
                   >
                     {showPassword ? (
-                      <EyeIcon size="16" />
+                      <EyeIcon className="size-4" />
                     ) : (
-                      <EyeOff size="16" />
+                      <EyeOffIcon className="size-4" />
                     )}
+                    <span className="sr-only">
+                      {showPassword
+                        ? t("HIDE_PASSWORD_SR")
+                        : t("SHOW_PASSWORD_SR")}
+                    </span>
                   </Button>
                 }
               />
@@ -178,16 +217,31 @@ export function SignUpForm() {
           <FieldError errors={[{ message: errors.root.message }]} />
         )}
 
-        <Field>
-          <Button type="submit" disabled={isSubmitting} className="uppercase">
-            {isSubmitting ? <Spinner /> : "sign up"}
+        {/* Submit Action */}
+        <Field className="pt-1">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="h-9 w-full text-xs font-medium uppercase shadow-xs"
+          >
+            {isSubmitting ? (
+              <>
+                <Spinner className="size-3.5 me-2" />
+                <span>{t("SUBMITTING_BUTTON")}</span>
+              </>
+            ) : (
+              t("SUBMIT_BUTTON")
+            )}
           </Button>
         </Field>
 
-        <FieldSeparator className="my-1">Or</FieldSeparator>
+        <FieldSeparator className="my-1 text-xs">
+          {t("OR_DIVIDER")}
+        </FieldSeparator>
 
-        <Field className="grid gap-4 sm:grid-cols-1">
-          <GoogleSignInButton lastLoginMethod="" />
+        {/* OAuth Section */}
+        <Field>
+          <GoogleSignInButton />
         </Field>
       </FieldGroup>
     </form>

@@ -1,13 +1,15 @@
 /**
  * @file components/auth/forgot-password-form.tsx
+ * @description Accessible password reset request form adhering to Section 12 feedback standards.
  */
 
 "use client"
 
 import * as React from "react"
+import { useTranslations } from "next-intl"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
-import { Mail, AlertCircleIcon, XIcon } from "lucide-react"
+import { MailIcon, AlertCircleIcon, XIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -19,8 +21,8 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { CustomInput } from "@/components/ui/custom-input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AuthHeader } from "./header"
-import { IsSuccess } from "./request-is-success"
+import { AuthHeader } from "./auth-header"
+import { ResetPasswordSuccess } from "./reset-password-success"
 
 import {
   requestPasswordReset,
@@ -30,7 +32,8 @@ import {
 import { appRoutes } from "@/lib/config/app-routes"
 
 export function ForgotPasswordForm() {
-  const [isSuccess, setIsSuccess] = React.useState(false)
+  const t = useTranslations("ForgotPasswordForm")
+  const [submittedEmail, setSubmittedEmail] = React.useState<string | null>(null)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   const form = useForm<RequestPasswordResetInput>({
@@ -41,57 +44,69 @@ export function ForgotPasswordForm() {
   })
 
   const {
-    formState: { isSubmitting, errors },
+    formState: { isSubmitting },
   } = form
 
   async function onSubmit(data: RequestPasswordResetInput) {
     setErrorMessage(null)
     const result = await requestPasswordReset(data)
+
     if (result.success) {
-      setIsSuccess(true)
-    } else {
-      setErrorMessage(
-        result.error ||
-          "Failed to send password reset link. Please try again later."
-      )
+      setSubmittedEmail(data.email)
+      return
     }
+
+    if (result.error === "VALIDATION_ERROR" && result.details) {
+      Object.entries(result.details).forEach(([field, msgs]) => {
+        form.setError(field as keyof RequestPasswordResetInput, {
+          message: msgs[0],
+        })
+      })
+      return
+    }
+
+    setErrorMessage(result.error || t("GENERIC_ERROR"))
   }
 
-  if (isSuccess) {
+  if (submittedEmail) {
     return (
-      <IsSuccess
-        onClick={() => {
-          setIsSuccess(false)
+      <ResetPasswordSuccess
+        email={submittedEmail}
+        onRetry={() => {
+          setSubmittedEmail(null)
           form.reset()
         }}
-        email={form.getValues("email")}
       />
     )
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      <FieldGroup>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
+      <FieldGroup className="space-y-4">
         <AuthHeader
-          title="Forgot Password"
-          description="Enter your email to reset your password"
-          linkText="Sign In"
+          title={t("TITLE")}
+          description={t("SUBTITLE")}
+          linkText={t("SIGN_IN_LINK")}
           linkHref={appRoutes.auth.login}
         />
 
+        {/* Section 12 Form-Level Server Error Alert */}
         {errorMessage && (
-          <Alert variant="destructive" className="relative pr-9">
-            <AlertCircleIcon className="size-4" />
-            <AlertTitle>Action Required</AlertTitle>
-            <AlertDescription className="text-xs">
+          <Alert variant="destructive" className="relative pe-9">
+            <AlertCircleIcon className="size-4 shrink-0" />
+            <AlertTitle className="text-xs font-semibold">
+              {t("ALERT_TITLE")}
+            </AlertTitle>
+            <AlertDescription className="text-xs text-destructive-foreground/90">
               {errorMessage}
             </AlertDescription>
             <button
               type="button"
               onClick={() => setErrorMessage(null)}
-              className="absolute top-3 right-3 cursor-pointer text-muted-foreground hover:text-foreground"
+              className="absolute top-3 inset-e-3 cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
             >
               <XIcon className="size-4" />
+              <span className="sr-only">{t("DISMISS_ALERT_SR")}</span>
             </button>
           </Alert>
         )}
@@ -102,28 +117,39 @@ export function ForgotPasswordForm() {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
+              <FieldLabel htmlFor="email" className="text-xs">
+                {t("EMAIL_LABEL")}
+              </FieldLabel>
               <CustomInput
                 {...field}
                 id="email"
                 type="email"
-                placeholder="you@domain.com"
+                placeholder={t("EMAIL_PLACEHOLDER")}
                 aria-invalid={fieldState.invalid}
                 autoComplete="email"
-                prefixIcon={<Mail size="16" />}
+                className="h-9 text-xs"
+                prefixIcon={<MailIcon className="size-4 text-muted-foreground" />}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />
 
-        {errors.root && (
-          <FieldError errors={[{ message: errors.root.message }]} />
-        )}
-
-        <Field>
-          <Button type="submit" disabled={isSubmitting} className="uppercase">
-            {isSubmitting ? <Spinner /> : "request reset link"}
+        {/* Submit Action */}
+        <Field className="pt-1">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="h-9 w-full text-xs font-medium uppercase shadow-xs"
+          >
+            {isSubmitting ? (
+              <>
+                <Spinner className="size-3.5 me-2" />
+                <span>{t("SUBMITTING_BUTTON")}</span>
+              </>
+            ) : (
+              t("SUBMIT_BUTTON")
+            )}
           </Button>
         </Field>
       </FieldGroup>

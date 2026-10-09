@@ -1,27 +1,41 @@
-import { SignUpForm } from "@/components/auth/signup-form"
-import { appConfig } from "@/lib/config/app_config"
-import { createMetadata } from "@/lib/config/metadata_generator"
-import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
-import { getTranslations } from "next-intl/server"
-import { redirect } from "next/navigation"
-import { appRoutes } from "@/lib/config/app-routes"
+/**
+ * @file app/[locale]/(auth)/signup/page.tsx
+ * @description Server Component page for customer sign-up with active session guard
+ * and localized metadata generation.
+ */
 
-export async function generateMetadata() {
-  // const t = await getTranslations()
+import { redirect } from "next/navigation"
+import { getTranslations } from "next-intl/server"
+
+import { SignUpForm } from "@/components/auth/signup-form"
+import { getCurrentUser } from "@/lib/actions/authentication"
+import { appConfig } from "@/lib/config/app_config"
+import { appRoutes } from "@/lib/config/app-routes"
+import { createMetadata } from "@/lib/config/metadata_generator"
+
+interface SignUpPageProps {
+  params: Promise<{
+    locale: string
+  }>
+}
+
+export async function generateMetadata({ params }: SignUpPageProps) {
+  await params
+  const t = await getTranslations("SignUpPage")
 
   return createMetadata({
     siteName: appConfig.name,
-    title: "Sign Up",
-    description:
-      "Sign up for your Marketna account to access your personalized shopping experience, track orders, and manage your preferences.",
+    title: t("META_TITLE"),
+    description: t("META_DESCRIPTION"),
   })
 }
 
-export default async function Page() {
+export default async function SignUpPage({ params }: SignUpPageProps) {
+  await params
 
-  
-  const user = await getCurrentUser()
-  if (user) {
+  // Zero-Trust Session Check: Redirect active authenticated users
+  const userResult = await getCurrentUser()
+  if (userResult.success && userResult.data) {
     redirect(appRoutes.home)
   }
 

@@ -1,16 +1,24 @@
 /**
  * @file components/auth/reset-password-form.tsx
+ * @description Password update form verifying token credentials with Section 12 error handling.
  */
 
 "use client"
 
 import * as React from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
-import Link from "next/link"
-import { EyeIcon, EyeOff, Lock, AlertCircleIcon, XIcon } from "lucide-react"
+import { toast } from "sonner"
+import {
+  EyeIcon,
+  EyeOffIcon,
+  LockIcon,
+  AlertCircleIcon,
+  XIcon,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -19,11 +27,10 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
-import { AppLogo } from "@/components/ui/app-logo"
 import { Spinner } from "@/components/ui/spinner"
 import { CustomInput } from "@/components/ui/custom-input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AuthHeader } from "./header"
+import { AuthHeader } from "./auth-header"
 
 import {
   confirmPasswordReset,
@@ -34,10 +41,13 @@ import { appRoutes } from "@/lib/config/app-routes"
 const clientResetSchema = confirmPasswordResetSchema.omit({ token: true })
 type ClientResetFormValues = z.infer<typeof clientResetSchema>
 
-export function ResetPasswordForm() {
+interface ResetPasswordFormProps {
+  token: string
+}
+
+export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
+  const t = useTranslations("ResetPasswordForm")
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const token = searchParams.get("token")
 
   const [showPassword, setShowPassword] = React.useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
@@ -55,102 +65,105 @@ export function ResetPasswordForm() {
     formState: { isSubmitting },
   } = form
 
-  if (!token) {
-    return (
-      <div className="flex flex-col items-center gap-4 p-6 text-center">
-        <AppLogo size="xl" />
-        <h1 className="text-xl font-bold text-destructive">Error</h1>
-        <p className="text-sm text-muted-foreground">
-          Reset password link is missing or invalid. Please request a new link.
-        </p>
-
-        <Button variant="outline" className="mt-4" asChild>
-          <Link href={appRoutes.auth.forgotPassword}>Request New Link</Link>
-        </Button>
-      </div>
-    )
-  }
-
   async function onSubmit(data: ClientResetFormValues) {
     setErrorMessage(null)
+
     const result = await confirmPasswordReset({
-      token: token as string,
+      token,
       password: data.password,
       confirmPassword: data.confirmPassword,
     })
 
     if (result.success) {
+      toast.success(t("PASSWORD_UPDATED_TOAST"))
       router.refresh()
       router.replace(appRoutes.auth.login)
+      return
+    }
+
+    if (result.error === "VALIDATION_ERROR" && result.details) {
+      Object.entries(result.details).forEach(([field, msgs]) => {
+        form.setError(field as keyof ClientResetFormValues, {
+          message: msgs[0],
+        })
+      })
+      return
+    }
+
+    if (result.error === "VERIFY_RESET_TOKEN_ERROR") {
+      setErrorMessage(t("INVALID_OR_EXPIRED_TOKEN_ERROR"))
     } else {
-      if (result.error === "INVALID_OR_EXPIRED_TOKEN") {
-        setErrorMessage(
-          "Reset password link is invalid or has expired. Please request a new link."
-        )
-      } else {
-        setErrorMessage("Failed to update password. Please try again later.")
-      }
+      setErrorMessage(result.error || t("GENERIC_ERROR"))
     }
   }
 
   return (
-    <form
-      onSubmit={form.handleSubmit(onSubmit)}
-      className="mx-auto w-full max-w-md"
-    >
-      <FieldGroup>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
+      <FieldGroup className="space-y-4">
         <AuthHeader
-          title="Reset Password"
-          description="Enter your new password"
-          linkText="Sign In"
+          title={t("TITLE")}
+          description={t("SUBTITLE")}
+          linkText={t("SIGN_IN_LINK")}
           linkHref={appRoutes.auth.login}
         />
 
+        {/* Section 12 Form-Level Server Error Alert */}
         {errorMessage && (
-          <Alert variant="destructive" className="relative pr-9">
-            <AlertCircleIcon className="size-4" />
-            <AlertTitle>Action Required</AlertTitle>
-            <AlertDescription className="text-xs">
+          <Alert variant="destructive" className="relative pe-9">
+            <AlertCircleIcon className="size-4 shrink-0" />
+            <AlertTitle className="text-xs font-semibold">
+              {t("ALERT_TITLE")}
+            </AlertTitle>
+            <AlertDescription className="text-xs text-destructive-foreground/90">
               {errorMessage}
             </AlertDescription>
             <button
               type="button"
               onClick={() => setErrorMessage(null)}
-              className="absolute top-3 right-3 cursor-pointer text-muted-foreground hover:text-foreground"
+              className="absolute top-3 inset-e-3 cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
             >
               <XIcon className="size-4" />
+              <span className="sr-only">{t("DISMISS_ALERT_SR")}</span>
             </button>
           </Alert>
         )}
 
-        {/* حقل كلمة المرور الجديدة */}
+        {/* New Password Field */}
         <Controller
           name="password"
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="password">New Password</FieldLabel>
+              <FieldLabel htmlFor="password" className="text-xs">
+                {t("PASSWORD_LABEL")}
+              </FieldLabel>
               <CustomInput
                 {...field}
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder={t("PASSWORD_PLACEHOLDER")}
                 aria-invalid={fieldState.invalid}
                 autoComplete="new-password"
-                prefixIcon={<Lock size="16" />}
+                className="h-9 text-xs"
+                prefixIcon={<LockIcon className="size-4 text-muted-foreground" />}
                 suffixIcon={
                   <Button
                     type="button"
                     variant="ghost"
-                    size="icon-sm"
+                    size="icon"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="hover:bg-transparent focus:outline-none"
+                    className="size-7 cursor-pointer text-muted-foreground hover:bg-transparent hover:text-foreground focus:outline-none"
                   >
                     {showPassword ? (
-                      <EyeIcon size="16" />
+                      <EyeIcon className="size-4" />
                     ) : (
-                      <EyeOff size="16" />
+                      <EyeOffIcon className="size-4" />
                     )}
+                    <span className="sr-only">
+                      {showPassword
+                        ? t("HIDE_PASSWORD_SR")
+                        : t("SHOW_PASSWORD_SR")}
+                    </span>
                   </Button>
                 }
               />
@@ -159,36 +172,42 @@ export function ResetPasswordForm() {
           )}
         />
 
-        {/* حقل تأكيد كلمة المرور */}
+        {/* Confirm Password Field */}
         <Controller
           name="confirmPassword"
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="confirmPassword">
-                Confirm Password
+              <FieldLabel htmlFor="confirmPassword" className="text-xs">
+                {t("CONFIRM_PASSWORD_LABEL")}
               </FieldLabel>
               <CustomInput
                 {...field}
                 id="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder={t("PASSWORD_PLACEHOLDER")}
                 aria-invalid={fieldState.invalid}
                 autoComplete="new-password"
-                prefixIcon={<Lock size="16" />}
+                className="h-9 text-xs"
+                prefixIcon={<LockIcon className="size-4 text-muted-foreground" />}
                 suffixIcon={
                   <Button
                     type="button"
                     variant="ghost"
-                    size="icon-sm"
+                    size="icon"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="hover:bg-transparent focus:outline-none"
+                    className="size-7 cursor-pointer text-muted-foreground hover:bg-transparent hover:text-foreground focus:outline-none"
                   >
                     {showConfirmPassword ? (
-                      <EyeIcon size="16" />
+                      <EyeIcon className="size-4" />
                     ) : (
-                      <EyeOff size="16" />
+                      <EyeOffIcon className="size-4" />
                     )}
+                    <span className="sr-only">
+                      {showConfirmPassword
+                        ? t("HIDE_PASSWORD_SR")
+                        : t("SHOW_PASSWORD_SR")}
+                    </span>
                   </Button>
                 }
               />
@@ -197,10 +216,21 @@ export function ResetPasswordForm() {
           )}
         />
 
-        {/* زر الإرسال */}
-        <Field className="mt-4">
-          <Button type="submit" disabled={isSubmitting} className="uppercase">
-            {isSubmitting ? <Spinner /> : "update password"}
+        {/* Submit Action */}
+        <Field className="pt-1">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="h-9 w-full text-xs font-medium uppercase shadow-xs"
+          >
+            {isSubmitting ? (
+              <>
+                <Spinner className="size-3.5 me-2" />
+                <span>{t("SUBMITTING_BUTTON")}</span>
+              </>
+            ) : (
+              t("SUBMIT_BUTTON")
+            )}
           </Button>
         </Field>
       </FieldGroup>

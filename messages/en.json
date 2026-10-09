@@ -1,5 +1,129 @@
 {
-    "HomePage": {
-        "title": "Hello world!"
-    }
+  "HomePage": {
+    "TITLE": "Hello world!"
+  },
+  "AuthLayout": {
+    "BACK_TO_HOME_SR": "Return to homepage",
+    "TERMS_PREFIX": "By continuing, you agree to our",
+    "TERMS_OF_SERVICE": "Terms of Service",
+    "TERMS_AND": "and",
+    "PRIVACY_POLICY": "Privacy Policy",
+    "TERMS_SUFFIX": "."
+  },
+  "GoogleSignInButton": {
+    "CONTINUE_WITH_GOOGLE": "Continue with Google",
+    "CONNECTING": "Connecting to Google...",
+    "LAST_USED_BADGE": "Last used",
+    "SIGN_IN_FAILED_FALLBACK": "Failed to initiate Google sign in.",
+    "UNEXPECTED_ERROR": "An unexpected error occurred during Google sign in."
+  },
+  "LoginPage": {
+    "META_TITLE": "Sign In",
+    "META_DESCRIPTION": "Sign in to your Marketna account to access your shopping cart and order history."
+  },
+  "LoginForm": {
+    "WELCOME_TITLE": "Welcome back,",
+    "SIGN_IN_SUBTITLE": "Sign in to continue to Marketna",
+    "SIGN_UP_LINK": "Create Account",
+    "ALERT_TITLE": "Action Required",
+    "DISMISS_ALERT_SR": "Dismiss notification",
+    "EMAIL_LABEL": "Email Address",
+    "EMAIL_PLACEHOLDER": "you@domain.com",
+    "PASSWORD_LABEL": "Password",
+    "PASSWORD_PLACEHOLDER": "••••••••",
+    "SHOW_PASSWORD_SR": "Show password",
+    "HIDE_PASSWORD_SR": "Hide password",
+    "FORGOT_PASSWORD_LINK": "Forgot password?",
+    "LAST_USED_BADGE": "Last used",
+    "SIGN_IN_BUTTON": "Sign In",
+    "SIGN_IN_SUBMITTING": "Signing in...",
+    "OR_DIVIDER": "Or",
+    "INVALID_CREDENTIALS_ERROR": "Invalid email or password. Please verify your credentials.",
+    "EMAIL_NOT_CONFIRMED_ERROR": "Please verify your email address before signing in.",
+    "GENERIC_ERROR": "Unable to complete sign in. Please try again later."
+  },
+  "SignUpPage": {
+    "META_TITLE": "Create Account",
+    "META_DESCRIPTION": "Join Marketna to enjoy personalized deals, track deliveries, and manage your orders."
+  },
+  "SignUpForm": {
+    "TITLE": "Create Account",
+    "SUBTITLE": "Join Marketna in a few easy steps",
+    "SIGN_IN_LINK": "Sign In",
+    "ALERT_TITLE": "Action Required",
+    "DISMISS_ALERT_SR": "Dismiss notification",
+    "NAME_LABEL": "Full Name",
+    "NAME_PLACEHOLDER": "John Doe",
+    "EMAIL_LABEL": "Email Address",
+    "EMAIL_PLACEHOLDER": "you@domain.com",
+    "PASSWORD_LABEL": "Password",
+    "PASSWORD_PLACEHOLDER": "••••••••",
+    "SHOW_PASSWORD_SR": "Show password",
+    "HIDE_PASSWORD_SR": "Hide password",
+    "SUBMIT_BUTTON": "Create Account",
+    "SUBMITTING_BUTTON": "Creating account...",
+    "OR_DIVIDER": "Or",
+    "EMAIL_ALREADY_EXISTS_ERROR": "An account with this email address already exists.",
+    "GENERIC_ERROR": "An unexpected error occurred during signup. Please try again."
+  },
+  "ResetPasswordSuccess": {
+    "CHECK_EMAIL_TITLE": "Check your email",
+    "CHECK_EMAIL_DESCRIPTION": "We have dispatched a password reset link to your email address.",
+    "DIDNT_RECEIVE_TITLE": "Didn't receive the email?",
+    "DIDNT_RECEIVE_PREFIX": "Check your spam folder or",
+    "TRY_ANOTHER_EMAIL": "try another email",
+    "TOKEN_EXPIRATION_NOTICE": "The reset link expires in 15 minutes",
+    "BACK_TO_LOGIN_BUTTON": "Back to Sign In"
+  },
+  "ForgotPasswordForm": {
+    "TITLE": "Forgot Password",
+    "SUBTITLE": "Enter your email to receive a recovery link",
+    "SIGN_IN_LINK": "Sign In",
+    "ALERT_TITLE": "Action Required",
+    "DISMISS_ALERT_SR": "Dismiss notification",
+    "EMAIL_LABEL": "Email Address",
+    "EMAIL_PLACEHOLDER": "you@domain.com",
+    "SUBMIT_BUTTON": "Send Recovery Link",
+    "SUBMITTING_BUTTON": "Sending link...",
+    "GENERIC_ERROR": "Failed to send password reset link. Please try again later."
+  },
+  "ForgotPasswordPage": {
+    "META_TITLE": "Reset Password Request",
+    "META_DESCRIPTION": "Request a secure password recovery link for your Marketna account."
+  },
+  "ResetPasswordForm": {
+    "TITLE": "Reset Password",
+    "SUBTITLE": "Create a new secure password for your account",
+    "SIGN_IN_LINK": "Sign In",
+    "ALERT_TITLE": "Action Required",
+    "DISMISS_ALERT_SR": "Dismiss notification",
+    "PASSWORD_LABEL": "New Password",
+    "CONFIRM_PASSWORD_LABEL": "Confirm Password",
+    "PASSWORD_PLACEHOLDER": "••••••••",
+    "SHOW_PASSWORD_SR": "Show password",
+    "HIDE_PASSWORD_SR": "Hide password",
+    "SUBMIT_BUTTON": "Update Password",
+    "SUBMITTING_BUTTON": "Updating password...",
+    "PASSWORD_UPDATED_TOAST": "Password updated successfully. Please sign in.",
+    "INVALID_OR_EXPIRED_TOKEN_ERROR": "The reset link is invalid or has expired. Please request a new one.",
+    "GENERIC_ERROR": "Failed to update password. Please try again later."
+  },
+  "ResetPasswordPage": {
+    "META_TITLE": "Set New Password",
+    "META_DESCRIPTION": "Update your Marketna account credentials securely.",
+    "MISSING_TOKEN_TITLE": "Invalid Reset Link",
+    "MISSING_TOKEN_DESCRIPTION": "Your password reset link is invalid or has expired. Please request a new link to proceed.",
+    "REQUEST_NEW_LINK_BUTTON": "Request New Link"
+  },
+  "OAuthCallback": {
+    "META_TITLE": "Authenticating...",
+    "META_DESCRIPTION": "Completing secure sign-in verification.",
+    "PROCESSING_TITLE": "Verifying Authentication",
+    "PROCESSING_DESCRIPTION": "Please wait while we complete your session verification...",
+    "FAILED_TITLE": "Authentication Failed",
+    "DEFAULT_ERROR_DESCRIPTION": "The sign-in procedure was canceled or permission was denied.",
+    "RETURN_TO_LOGIN": "Return to Sign In",
+    "SIGN_IN_SUCCESS_TOAST": "Successfully signed in!",
+    "EXCHANGE_FAILED": "Failed to complete authentication exchange."
+  }
 }

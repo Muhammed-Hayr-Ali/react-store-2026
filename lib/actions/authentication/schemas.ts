@@ -1,48 +1,66 @@
 /**
  * @file lib/actions/authentication/schemas.ts
- * @description Zod validation schemas for authentication forms and server-side guards.
+ * @description Runtime Zod validation schemas for authentication forms and server-side guards.
  */
 
 import { z } from "zod"
 
 export const signInWithPasswordSchema = z.object({
   email: z
-    .string()
+    .string({ required_error: "EMAIL_REQUIRED" })
     .trim()
-    .min(1, "Email is required.")
-    .email("Please enter a valid email address."),
-  password: z.string().min(6, "Password must be at least 6 characters long."),
+    .min(1, "EMAIL_REQUIRED")
+    .email("INVALID_EMAIL"),
+  password: z
+    .string({ required_error: "PASSWORD_REQUIRED" })
+    .min(6, "PASSWORD_TOO_SHORT"),
 })
 
 export const signUpWithPasswordSchema = z.object({
-  name: z.string().trim().min(1, "Name is required."),
-  email: z
-    .string()
+  name: z
+    .string({ required_error: "NAME_REQUIRED" })
     .trim()
-    .min(1, "Email is required.")
-    .email("Please enter a valid email address."),
-  password: z.string().min(6, "Password must be at least 6 characters long."),
+    .min(2, "NAME_TOO_SHORT")
+    .max(100, "NAME_TOO_LONG"),
+  email: z
+    .string({ required_error: "EMAIL_REQUIRED" })
+    .trim()
+    .min(1, "EMAIL_REQUIRED")
+    .email("INVALID_EMAIL"),
+  password: z
+    .string({ required_error: "PASSWORD_REQUIRED" })
+    .min(6, "PASSWORD_TOO_SHORT"),
 })
 
 export const requestPasswordResetSchema = z.object({
   email: z
-    .string()
+    .string({ required_error: "EMAIL_REQUIRED" })
     .trim()
-    .min(1, "Email is required.")
-    .email("Please enter a valid email address."),
+    .min(1, "EMAIL_REQUIRED")
+    .email("INVALID_EMAIL"),
 })
 
 export const confirmPasswordResetSchema = z
   .object({
-    token: z.string().min(1, "Reset token is required."),
-    password: z.string().min(8, "Password must be at least 8 characters long."),
-    confirmPassword: z.string(),
+    token: z
+      .string({ required_error: "TOKEN_REQUIRED" })
+      .trim()
+      .min(1, "TOKEN_REQUIRED"),
+    password: z
+      .string({ required_error: "PASSWORD_REQUIRED" })
+      .min(8, "PASSWORD_TOO_SHORT"),
+    confirmPassword: z.string({
+      required_error: "CONFIRM_PASSWORD_REQUIRED",
+    }),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match.",
+    message: "PASSWORDS_DO_NOT_MATCH",
     path: ["confirmPassword"],
   })
 
 export const oauthCallbackSchema = z.object({
-  code: z.string().min(1, "Authorization code is required."),
+  code: z
+    .string({ required_error: "CODE_REQUIRED" })
+    .trim()
+    .min(1, "CODE_REQUIRED"),
 })

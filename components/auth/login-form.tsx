@@ -1,15 +1,25 @@
 /**
  * @file components/auth/login-form.tsx
+ * @description Accessible, client-side login form adhering to Section 12 Alert feedback standards,
+ * logical RTL layout tokens, and automated server validation binding.
  */
 
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
-import Link from "next/link"
-import { EyeIcon, EyeOff, Lock, Mail, AlertCircleIcon, XIcon } from "lucide-react"
+import {
+  EyeIcon,
+  EyeOffIcon,
+  LockIcon,
+  MailIcon,
+  AlertCircleIcon,
+  XIcon,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -23,7 +33,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { Badge } from "@/components/ui/badge"
 import { CustomInput } from "@/components/ui/custom-input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AuthHeader } from "./header"
+import { AuthHeader } from "./auth-header"
 import { GoogleSignInButton } from "./google-sign-in-button"
 
 import {
@@ -34,13 +44,15 @@ import {
 import { appRoutes } from "@/lib/config/app-routes"
 
 interface LoginFormProps {
-  lastLoginMethod: string | undefined
+  lastLoginMethod?: string | null
 }
 
 export function LoginForm({ lastLoginMethod }: LoginFormProps) {
+  const t = useTranslations("LoginForm")
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTarget = searchParams.get("redirect") || appRoutes.home
+
   const [showPassword, setShowPassword] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
@@ -63,34 +75,58 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
     if (result.success) {
       router.refresh()
       router.replace(redirectTarget)
+      return
+    }
+
+    // Intercept Server Action validation errors and bind directly to form fields
+    if (result.error === "VALIDATION_ERROR" && result.details) {
+      Object.entries(result.details).forEach(([field, msgs]) => {
+        form.setError(field as keyof SignInWithPasswordInput, {
+          message: msgs[0],
+        })
+      })
+      return
+    }
+
+    // Handle authentication failures via persistent Section 12 Alert
+    if (result.error === "INVALID_CREDENTIALS") {
+      setErrorMessage(t("INVALID_CREDENTIALS_ERROR"))
+    } else if (result.error === "EMAIL_NOT_CONFIRMED") {
+      setErrorMessage(t("EMAIL_NOT_CONFIRMED_ERROR"))
     } else {
-      setErrorMessage(result.error || "Invalid email or password.")
+      setErrorMessage(result.error || t("GENERIC_ERROR"))
     }
   }
 
+  const isEmailLastUsed = lastLoginMethod === "email"
+
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      <FieldGroup>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
+      <FieldGroup className="space-y-4">
         <AuthHeader
-          title="Welcome,"
-          description="Sign in to continue"
-          linkText="Sign Up"
+          title={t("WELCOME_TITLE")}
+          description={t("SIGN_IN_SUBTITLE")}
+          linkText={t("SIGN_UP_LINK")}
           linkHref={appRoutes.auth.signup}
         />
 
+        {/* Section 12 Form-Level Server Error Alert */}
         {errorMessage && (
-          <Alert variant="destructive" className="relative pr-9">
-            <AlertCircleIcon className="size-4" />
-            <AlertTitle>Action Required</AlertTitle>
-            <AlertDescription className="text-xs">
+          <Alert variant="destructive" className="relative pe-9">
+            <AlertCircleIcon className="size-4 shrink-0" />
+            <AlertTitle className="text-xs font-semibold">
+              {t("ALERT_TITLE")}
+            </AlertTitle>
+            <AlertDescription className="text-xs text-destructive-foreground/90">
               {errorMessage}
             </AlertDescription>
             <button
               type="button"
               onClick={() => setErrorMessage(null)}
-              className="absolute top-3 right-3 cursor-pointer text-muted-foreground hover:text-foreground"
+              className="absolute top-3 inset-e-3 cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
             >
               <XIcon className="size-4" />
+              <span className="sr-only">{t("DISMISS_ALERT_SR")}</span>
             </button>
           </Alert>
         )}
@@ -101,15 +137,18 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
+              <FieldLabel htmlFor="email" className="text-xs">
+                {t("EMAIL_LABEL")}
+              </FieldLabel>
               <CustomInput
                 {...field}
                 id="email"
                 type="email"
-                placeholder="you@domain.com"
+                placeholder={t("EMAIL_PLACEHOLDER")}
                 aria-invalid={fieldState.invalid}
                 autoComplete="email"
-                prefixIcon={<Mail size="16" />}
+                className="h-9 text-xs"
+                prefixIcon={<MailIcon className="size-4 text-muted-foreground" />}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -122,40 +161,48 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="password">Password</FieldLabel>
+              <div className="flex items-center justify-between">
+                <FieldLabel htmlFor="password" className="text-xs">
+                  {t("PASSWORD_LABEL")}
+                </FieldLabel>
+                <Link
+                  href={appRoutes.auth.forgotPassword}
+                  className="text-xs font-medium text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+                >
+                  {t("FORGOT_PASSWORD_LINK")}
+                </Link>
+              </div>
               <CustomInput
                 {...field}
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder={t("PASSWORD_PLACEHOLDER")}
                 aria-invalid={fieldState.invalid}
                 autoComplete="current-password"
-                prefixIcon={<Lock size="16" />}
+                className="h-9 text-xs"
+                prefixIcon={<LockIcon className="size-4 text-muted-foreground" />}
                 suffixIcon={
                   <Button
                     type="button"
                     variant="ghost"
-                    size="icon-sm"
+                    size="icon"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="hover:bg-transparent focus:outline-none"
+                    className="size-7 cursor-pointer text-muted-foreground hover:bg-transparent hover:text-foreground focus:outline-none"
                   >
                     {showPassword ? (
-                      <EyeIcon size="16" />
+                      <EyeIcon className="size-4" />
                     ) : (
-                      <EyeOff size="16" />
+                      <EyeOffIcon className="size-4" />
                     )}
+                    <span className="sr-only">
+                      {showPassword
+                        ? t("HIDE_PASSWORD_SR")
+                        : t("SHOW_PASSWORD_SR")}
+                    </span>
                   </Button>
                 }
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              <div className="mt-1 flex items-center justify-end">
-                <Link
-                  href={appRoutes.auth.forgotPassword}
-                  className="text-xs text-muted-foreground hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
             </Field>
           )}
         />
@@ -164,31 +211,42 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
           <FieldError errors={[{ message: errors.root.message }]} />
         )}
 
-        <Field>
+        {/* Submit Action */}
+        <Field className="pt-1">
           <div className="relative w-full">
-            {lastLoginMethod === "email" && (
-              <div className="absolute -top-2.5 -right-2.5 z-50 rtl:right-auto rtl:-left-2.5">
+            {isEmailLastUsed && (
+              <div className="pointer-events-none absolute -top-2.5 -inset-e-2.5 z-10">
                 <Badge
                   variant="secondary"
-                  className="h-4 border-muted-foreground/50 px-1.5 text-[10px] font-normal text-muted-foreground dark:border-muted-foreground/50 dark:text-muted-foreground/50"
+                  className="h-4 border border-border/80 bg-secondary px-1.5 text-[9px] font-medium tracking-wide text-foreground shadow-xs"
                 >
-                  Last used
+                  {t("LAST_USED_BADGE")}
                 </Badge>
               </div>
             )}
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full uppercase"
+              className="h-9 w-full text-xs font-medium uppercase shadow-xs"
             >
-              {isSubmitting ? <Spinner /> : "sign In"}
+              {isSubmitting ? (
+                <>
+                  <Spinner className="size-3.5 me-2" />
+                  <span>{t("SIGN_IN_SUBMITTING")}</span>
+                </>
+              ) : (
+                t("SIGN_IN_BUTTON")
+              )}
             </Button>
           </div>
         </Field>
 
-        <FieldSeparator className="my-1">Or</FieldSeparator>
+        <FieldSeparator className="my-1 text-xs">
+          {t("OR_DIVIDER")}
+        </FieldSeparator>
 
-        <Field className="grid gap-4 sm:grid-cols-1">
+        {/* OAuth Section */}
+        <Field>
           <GoogleSignInButton lastLoginMethod={lastLoginMethod} />
         </Field>
       </FieldGroup>
