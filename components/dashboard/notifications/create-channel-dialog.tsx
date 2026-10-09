@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { toast } from "sonner"
@@ -41,8 +41,8 @@ export function CreateChannelDialog({ onSuccess }: { onSuccess?: () => void }) {
   const {
     register,
     handleSubmit,
+    control,
     setValue,
-    watch,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ChannelFormValues>({
@@ -58,9 +58,8 @@ export function CreateChannelDialog({ onSuccess }: { onSuccess?: () => void }) {
     },
   })
 
-  const isMandatory = watch("isMandatory")
-  const defaultEnabled = watch("defaultEnabled")
 
+  
   async function onSubmit(data: ChannelFormValues) {
     const res = await createNotificationChannel(data)
 
@@ -147,9 +146,15 @@ export function CreateChannelDialog({ onSuccess }: { onSuccess?: () => void }) {
                 Auto-subscribe all new and existing users
               </p>
             </div>
-            <Switch
-              checked={defaultEnabled}
-              onCheckedChange={(val) => setValue("defaultEnabled", val)}
+            <Controller
+              name="defaultEnabled"
+              control={control}
+              render={({ field }) => (
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              )}
             />
           </div>
 
@@ -160,12 +165,18 @@ export function CreateChannelDialog({ onSuccess }: { onSuccess?: () => void }) {
                 Users cannot opt out (e.g. system or order updates)
               </p>
             </div>
-            <Switch
-              checked={isMandatory}
-              onCheckedChange={(val) => {
-                setValue("isMandatory", val)
-                if (val) setValue("defaultEnabled", true)
-              }}
+            <Controller
+              name="isMandatory"
+              control={control}
+              render={({ field }) => (
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={(val) => {
+                    field.onChange(val)
+                    if (val) setValue("defaultEnabled", true)
+                  }}
+                />
+              )}
             />
           </div>
 
