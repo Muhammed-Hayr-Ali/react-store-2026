@@ -14,7 +14,7 @@ import {
 import { LogOutIcon } from "lucide-react"
 import React from "react"
 import { Spinner } from "../ui/spinner"
-import { signOut } from "@/lib/actions/authentication/signOut"
+import { signOut } from "@/lib/actions/authentication/index.ts"
 import { appRoutes } from "@/lib/config/app-routes"
 import { useRouter } from "next/navigation"
 
@@ -56,17 +56,13 @@ export function LogoutAlertDialog({
             <LogOutIcon />
           </AlertDialogMedia>
 
-          <AlertDialogTitle>
-            Logout from your account
-          </AlertDialogTitle>
+          <AlertDialogTitle>Logout from your account</AlertDialogTitle>
           <AlertDialogDescription>
             Are you sure you want to logout from your account?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>
-            Cancel
-          </AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             variant="destructive"
             onClick={handleLogout}

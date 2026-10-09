@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Spinner } from "@/components/ui/spinner"
-import { signOut } from "@/lib/actions/authentication/signOut"
+import { signOut } from "@/lib/actions/authentication/index.ts"
 import { appRoutes } from "@/lib/config/app-routes"
 
 interface LogoutDialogProps {
