@@ -24,17 +24,19 @@ import { CheckCheckIcon, Trash2Icon, ExternalLinkIcon } from "lucide-react"
 interface NotificationPopoverProps {
   initialNotifications?: NotificationRecord[]
   initialUnreadCount?: number
+  currentUserId?: string
 }
 
 export function NotificationPopover({
   initialNotifications = [],
   initialUnreadCount = 0,
+  currentUserId,
 }: NotificationPopoverProps) {
   const router = useRouter()
   const params = useParams()
   const locale = (params?.locale as string) || "en"
 
-  // مزامنة الحالة مع الـ props بدون useEffect (نمط معتمد من React لتجنب Cascading Renders)
+  // مزامنة الحالة مع الـ props بدون useEffect لتجنب Cascading Renders
   const [data, setData] =
     React.useState<NotificationRecord[]>(initialNotifications)
   const [prevInitialNotifications, setPrevInitialNotifications] =
