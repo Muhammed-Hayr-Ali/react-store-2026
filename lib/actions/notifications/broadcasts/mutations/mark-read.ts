@@ -1,5 +1,7 @@
 /**
  * @file lib/actions/notifications/broadcasts/mutations/mark-read.ts
+ * @description Server Actions to mark specific or all notifications as read for current user.
+ * Enforces UUID format validation, user authentication, and cache revalidation.
  */
 
 "use server"
@@ -9,29 +11,43 @@ import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 
+// ============================================================================
+// Mark Single Notification As Read
+// ============================================================================
+
 export async function markNotificationAsRead(
   id: string
 ): Promise<ApiResult<null>> {
+  // 1. Validate UUID format
   const idValidation = z.string().uuid("INVALID_ID").safeParse(id)
   if (!idValidation.success) {
-    return { success: false, error: "INVALID_ID" }
+    return {
+      success: false,
+      error: "INVALID_ID",
+    }
   }
 
+  // 2. Initialize Supabase client
   const supabase = await createServerClient()
 
+  // 3. Authenticate current user session
   const {
     data: { user },
     error: userError,
   } = await supabase.auth.getUser()
 
   if (userError || !user) {
-    return { success: false, error: "UNAUTHORIZED" }
+    return {
+      success: false,
+      error: "UNAUTHORIZED_ACCESS",
+    }
   }
 
+  // 4. Update status in database
   const { error } = await supabase
     .from("notifications")
     .update({ is_read: true })
-    .eq("id", id)
+    .eq("id", idValidation.data)
     .eq("user_id", user.id)
 
   if (error) {
@@ -42,22 +58,37 @@ export async function markNotificationAsRead(
     }
   }
 
+  // 5. Invalidate stale cache paths
   revalidatePath("/", "layout")
-  return { success: true, data: null }
+
+  return {
+    success: true,
+    data: null,
+  }
 }
 
+// ============================================================================
+// Mark All Notifications As Read
+// ============================================================================
+
 export async function markAllNotificationsAsRead(): Promise<ApiResult<null>> {
+  // 1. Initialize Supabase client
   const supabase = await createServerClient()
 
+  // 2. Authenticate current user session
   const {
     data: { user },
     error: userError,
   } = await supabase.auth.getUser()
 
   if (userError || !user) {
-    return { success: false, error: "UNAUTHORIZED" }
+    return {
+      success: false,
+      error: "UNAUTHORIZED_ACCESS",
+    }
   }
 
+  // 3. Update status for all unread notifications
   const { error } = await supabase
     .from("notifications")
     .update({ is_read: true })
@@ -72,6 +103,11 @@ export async function markAllNotificationsAsRead(): Promise<ApiResult<null>> {
     }
   }
 
+  // 4. Invalidate stale cache paths
   revalidatePath("/", "layout")
-  return { success: true, data: null }
+
+  return {
+    success: true,
+    data: null,
+  }
 }

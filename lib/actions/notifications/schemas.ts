@@ -6,7 +6,7 @@
 import { z } from "zod"
 
 // ==========================================
-// 1. Notification Schemas (Single & Broadcast)
+// 1. Notification Schemas (Single, Broadcast & Record)
 // ==========================================
 
 export const createNotificationSchema = z.object({
@@ -32,8 +32,20 @@ export const broadcastNotificationSchema = z.object({
   channelIds: z.array(z.string().uuid()).default([]),
 })
 
+export const notificationRecordSchema = z.object({
+  id: z.string().uuid(),
+  user_id: z.string().uuid(),
+  title: z.string(),
+  message: z.string(),
+  type: z.enum(["info", "success", "warning", "error"]),
+  link: z.string().nullable(),
+  is_read: z.boolean(),
+  created_at: z.string(),
+})
+
 // ==========================================
-// 2. Channel Schemas (Create, Update & Subscription)
+// 2. Channel Schemas (Create, Update, Subscription & Record)
+// (دون أي تغيير على إعدادات القنوات)
 // ==========================================
 
 export const createChannelSchema = z.object({
@@ -63,7 +75,6 @@ export const toggleSubscriptionSchema = z.object({
   isSubscribed: z.boolean(),
 })
 
-// كيان قاعدة البيانات لمطابقة النتيجة المرجعة
 export const channelRecordSchema = z.object({
   id: z.string().uuid(),
   slug: z.string(),
@@ -100,4 +111,5 @@ export type UpdateChannelOutput = z.output<typeof updateChannelSchema>
 export type ToggleSubscriptionInput = z.input<typeof toggleSubscriptionSchema>
 export type ToggleSubscriptionOutput = z.output<typeof toggleSubscriptionSchema>
 
+export type NotificationRecordOutput = z.output<typeof notificationRecordSchema>
 export type ChannelRecordOutput = z.output<typeof channelRecordSchema>

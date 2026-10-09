@@ -34,7 +34,6 @@ export function NotificationPreferencesDialog({
   const [isPending, startTransition] = useTransition()
   const [isUpdating, startUpdateTransition] = useTransition()
 
-  // جلب البيانات استجابة لحدث فتح النافذة مباشرة دون الحاجة لـ useEffect
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen)
     if (isOpen) {
@@ -56,7 +55,7 @@ export function NotificationPreferencesDialog({
   const handleToggle = (channelId: string, currentSubscribed: boolean) => {
     const nextState = !currentSubscribed
 
-    // تحديث متفائل فوري للواجهة (Optimistic UI update)
+    // تحديث تفاؤلي فوري في الواجهة
     setChannels((prev) =>
       prev.map((c) =>
         c.id === channelId ? { ...c, is_subscribed: nextState } : c
@@ -64,9 +63,14 @@ export function NotificationPreferencesDialog({
     )
 
     startUpdateTransition(async () => {
-      const res = await toggleChannelSubscription(channelId, nextState)
+      // تمرير كائن Payload موحد يطابق toggleSubscriptionSchema
+      const res = await toggleChannelSubscription({
+        channelId,
+        isSubscribed: nextState,
+      })
+
       if (!res.success) {
-        // التراجع في حال حدوث خطأ
+        // التراجع عند الفشل
         setChannels((prev) =>
           prev.map((c) =>
             c.id === channelId ? { ...c, is_subscribed: currentSubscribed } : c
