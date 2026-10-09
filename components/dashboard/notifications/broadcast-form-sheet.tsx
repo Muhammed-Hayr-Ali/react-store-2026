@@ -36,6 +36,7 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
+  SheetTrigger,
 } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
 
@@ -47,22 +48,18 @@ import type { NotificationChannelRecord } from "@/lib/actions/notifications/type
 type BroadcastFormValues = z.infer<typeof broadcastNotificationSchema>
 
 interface BroadcastFormProps {
-  isOpen: boolean
-  onOpenChange: (open: boolean) => void
+  trigger?: React.ReactNode
   onSuccess?: () => void
 }
 
 export default function BroadcastForm({
-  isOpen,
-  onOpenChange,
+  trigger,
   onSuccess,
 }: BroadcastFormProps) {
   const router = useRouter()
-
+  const [open, setOpen] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
-  const [channels, setChannels] = React.useState<NotificationChannelRecord[]>(
-    []
-  )
+  const [channels, setChannels] = React.useState<NotificationChannelRecord[]>([])
   const [isLoadingChannels, startTransition] = React.useTransition()
 
   const {
@@ -89,7 +86,7 @@ export default function BroadcastForm({
   React.useEffect(() => {
     let isSubscribed = true
 
-    if (isOpen && channels.length === 0) {
+    if (open && channels.length === 0) {
       startTransition(async () => {
         const res = await getActiveNotificationChannels()
         if (isSubscribed && res.success && res.data) {
@@ -101,14 +98,14 @@ export default function BroadcastForm({
     return () => {
       isSubscribed = false
     }
-  }, [isOpen, channels.length])
+  }, [open, channels.length])
 
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen)
+    if (!isOpen) {
       setErrorMessage(null)
       reset()
     }
-    onOpenChange(open)
   }
 
   async function onSubmit(data: BroadcastFormValues) {
@@ -139,7 +136,22 @@ export default function BroadcastForm({
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={handleOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
+      <SheetTrigger asChild>
+        {trigger ? (
+          trigger
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 px-3 text-xs"
+          >
+            <MegaphoneIcon className="size-3.5" />
+            <span>Broadcast</span>
+          </Button>
+        )}
+      </SheetTrigger>
       <SheetContent
         side="right"
         className="flex w-full flex-col p-0 sm:max-w-xl"
@@ -149,8 +161,7 @@ export default function BroadcastForm({
             Broadcast Notification
           </SheetTitle>
           <SheetDescription className="text-xs text-muted-foreground">
-            Send mass announcements to all users or target specific audience
-            channels.
+            Send mass announcements to all users or target specific audience channels.
           </SheetDescription>
         </SheetHeader>
 

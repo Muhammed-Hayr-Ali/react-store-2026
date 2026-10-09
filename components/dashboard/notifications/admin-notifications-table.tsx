@@ -74,6 +74,7 @@ import DeleteNotificationDialog from "./delete-notification-dialog"
 import NotificationForm from "./notification-form-sheet"
 import BroadcastForm from "./broadcast-form-sheet"
 import { NotificationDetailsDialog } from "./notification-details-dialog"
+import { CreateChannelDialog } from "./create-channel-dialog"
 
 interface DisplayNotificationRecord extends AdminNotificationRecord {
   isBroadcastGroup?: boolean
@@ -153,22 +154,27 @@ export function AdminNotificationsTable({
   )
   const [prevInitialData, setPrevInitialData] =
     React.useState<AdminNotificationRecord[]>(initialData)
-  const [currentTab, setCurrentTab] = React.useState<string>("all")
+  const [currentTab] = React.useState<string>("all")
   const [typeFilter, setTypeFilter] = React.useState<string>("all")
   const [searchQuery, setSearchQuery] = React.useState("")
   const [isGrouped, setIsGrouped] = React.useState<boolean>(true)
-
-  const [itemToDelete, setItemToDelete] =
-    React.useState<DisplayNotificationRecord | null>(null)
-  const [selectedForDetails, setSelectedForDetails] =
-    React.useState<DisplayNotificationRecord | null>(null)
-  const [isIndividualOpen, setIsIndividualOpen] = React.useState(false)
-  const [isBroadcastOpen, setIsBroadcastOpen] = React.useState(false)
 
   if (initialData !== prevInitialData) {
     setPrevInitialData(initialData)
     setData(initialData)
   }
+
+  const handleDeleteSuccess = React.useCallback(
+    (deletedId: string, groupedIds?: string[]) => {
+      if (groupedIds && groupedIds.length > 0) {
+        const idsSet = new Set(groupedIds)
+        setData((prev) => prev.filter((item) => !idsSet.has(item.id)))
+      } else {
+        setData((prev) => prev.filter((item) => item.id !== deletedId))
+      }
+    },
+    []
+  )
 
   const processedData = React.useMemo<DisplayNotificationRecord[]>(() => {
     if (!isGrouped) {
@@ -244,15 +250,6 @@ export function AdminNotificationsTable({
     })
   }, [processedData, currentTab, typeFilter, searchQuery])
 
-  const unreadCount = React.useMemo(
-    () => data.filter((n) => !n.is_read).length,
-    [data]
-  )
-  const readCount = React.useMemo(
-    () => data.filter((n) => n.is_read).length,
-    [data]
-  )
-
   const [columnVisibility, setColumnVisibility] =
     React.useState<ColumnVisibilityState>(() => {
       const initial: ColumnVisibilityState = {}
@@ -301,28 +298,30 @@ export function AdminNotificationsTable({
           id: "title",
           header: "Title",
           cell: ({ row }) => (
-            <div
-              onClick={() => setSelectedForDetails(row.original)}
-              className="group flex max-w-xs min-w-0 cursor-pointer items-center gap-2.5 sm:max-w-sm md:max-w-md"
-            >
-              <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted/60">
-                {renderTypeIcon(row.original.type)}
-              </div>
-              <div className="flex items-center gap-1.5 truncate">
-                <span className="truncate font-semibold text-foreground transition-colors group-hover:text-primary">
-                  {row.original.title}
-                </span>
-                {row.original.isBroadcastGroup && (
-                  <Badge
-                    variant="secondary"
-                    className="shrink-0 gap-1 px-1.5 py-0 text-[10px] font-normal"
-                  >
-                    <MegaphoneIcon className="size-2.5" />
-                    Broadcast
-                  </Badge>
-                )}
-              </div>
-            </div>
+            <NotificationDetailsDialog
+              notification={row.original}
+              trigger={
+                <div className="group flex max-w-xs min-w-0 cursor-pointer items-center gap-2.5 sm:max-w-sm md:max-w-md">
+                  <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted/60">
+                    {renderTypeIcon(row.original.type)}
+                  </div>
+                  <div className="flex items-center gap-1.5 truncate">
+                    <span className="truncate font-semibold text-foreground transition-colors group-hover:text-primary">
+                      {row.original.title}
+                    </span>
+                    {row.original.isBroadcastGroup && (
+                      <Badge
+                        variant="secondary"
+                        className="shrink-0 gap-1 px-1.5 py-0 text-[10px] font-normal"
+                      >
+                        <MegaphoneIcon className="size-2.5" />
+                        Broadcast
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              }
+            />
           ),
           enableHiding: false,
         }),
@@ -426,13 +425,19 @@ export function AdminNotificationsTable({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-44 text-xs">
-                  <DropdownMenuItem
-                    onClick={() => setSelectedForDetails(row.original)}
-                    className="flex cursor-pointer items-center gap-2"
-                  >
-                    <EyeIcon className="size-3.5" />
-                    View Details
-                  </DropdownMenuItem>
+                  <NotificationDetailsDialog
+                    notification={row.original}
+                    trigger={
+                      <DropdownMenuItem
+                        onSelect={(e) => e.preventDefault()}
+                        className="flex cursor-pointer items-center gap-2"
+                      >
+                        <EyeIcon className="size-3.5" />
+                        <span>View Details</span>
+                      </DropdownMenuItem>
+                    }
+                  />
+
                   {row.original.link && (
                     <DropdownMenuItem asChild>
                       <Link
@@ -441,19 +446,28 @@ export function AdminNotificationsTable({
                         className="flex cursor-pointer items-center gap-2"
                       >
                         <ExternalLinkIcon className="size-3.5" />
-                        Related Link
+                        <span>Related Link</span>
                       </Link>
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem
-                    onClick={() => setItemToDelete(row.original)}
-                    className="flex cursor-pointer items-center gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
-                  >
-                    <Trash2Icon className="size-3.5" />
-                    {row.original.isBroadcastGroup
-                      ? "Delete Broadcast"
-                      : "Delete"}
-                  </DropdownMenuItem>
+
+                  <DeleteNotificationDialog
+                    item={row.original}
+                    onSuccess={handleDeleteSuccess}
+                    trigger={
+                      <DropdownMenuItem
+                        onSelect={(e) => e.preventDefault()}
+                        className="flex cursor-pointer items-center gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
+                      >
+                        <Trash2Icon className="size-3.5" />
+                        <span>
+                          {row.original.isBroadcastGroup
+                            ? "Delete Broadcast"
+                            : "Delete"}
+                        </span>
+                      </DropdownMenuItem>
+                    }
+                  />
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -461,7 +475,7 @@ export function AdminNotificationsTable({
           enableHiding: false,
         }),
       ]),
-    []
+    [handleDeleteSuccess]
   )
 
   const table = useTable({
@@ -482,374 +496,335 @@ export function AdminNotificationsTable({
   })
 
   return (
-    <>
-      <div className="flex w-full flex-col justify-start gap-4">
-        <div className="flex w-full items-center gap-2">
-          {/* حقل البحث */}
-          <div className="relative min-w-0 flex-1">
-            <SearchIcon className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search notifications..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value)
+    <div className="flex w-full flex-col justify-start gap-4">
+      <div className="flex w-full items-center gap-2">
+        {/* حقل البحث */}
+        <div className="relative min-w-0 flex-1">
+          <SearchIcon className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search notifications..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value)
+              table.setPageIndex(0)
+            }}
+            className="h-8 w-full ps-8 pe-8 text-xs"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery("")
                 table.setPageIndex(0)
               }}
-              className="h-8 w-full ps-8 pe-8 text-xs"
-            />
-            {searchQuery && (
-              <button
-                type="button"
+              className="absolute inset-e-2 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-foreground"
+            >
+              <XIcon className="size-3.5" />
+            </button>
+          )}
+        </div>
+
+        <div className="flex shrink-0 items-center gap-2">
+          {/* زر التجميع الذكي */}
+          <Button
+            type="button"
+            variant={isGrouped ? "secondary" : "outline"}
+            size="sm"
+            onClick={() => setIsGrouped((prev) => !prev)}
+            className="h-8 gap-1.5 text-xs"
+            title="Group broadcast notifications"
+          >
+            <LayersIcon className="size-3.5" />
+            <span className="hidden sm:inline">
+              {isGrouped ? "Grouped" : "Individual"}
+            </span>
+          </Button>
+
+          {/* فلتر النوع */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-8"
+                title="Filter by Type"
+              >
+                <FilterIcon className="size-3.5" />
+                <span className="sr-only">Filter by Type</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40 text-xs">
+              <DropdownMenuItem
                 onClick={() => {
-                  setSearchQuery("")
+                  setTypeFilter("all")
                   table.setPageIndex(0)
                 }}
-                className="absolute inset-e-2 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-foreground"
+                className="flex cursor-pointer items-center justify-between"
               >
-                <XIcon className="size-3.5" />
-              </button>
-            )}
-          </div>
+                <span>All</span>
+                <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                  {processedData.length}
+                </Badge>
+              </DropdownMenuItem>
 
-          <div className="flex shrink-0 items-center gap-2">
-            {/* زر التجميع الذكي */}
-            <Button
-              type="button"
-              variant={isGrouped ? "secondary" : "outline"}
-              size="sm"
-              onClick={() => setIsGrouped((prev) => !prev)}
-              className="h-8 gap-1.5 text-xs"
-              title="Group broadcast notifications"
-            >
-              <LayersIcon className="size-3.5" />
-              <span className="hidden sm:inline">
-                {isGrouped ? "Grouped" : "Individual"}
-              </span>
-            </Button>
+              <DropdownMenuItem
+                onClick={() => {
+                  setTypeFilter("info")
+                  table.setPageIndex(0)
+                }}
+                className="flex cursor-pointer items-center justify-between capitalize"
+              >
+                <span>Info</span>
+                <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                  {processedData.filter((i) => i.type === "info").length}
+                </Badge>
+              </DropdownMenuItem>
 
-            {/* فلتر النوع المنسدل مع العدّادات بنمط جدول المنتجات */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="size-8"
-                  title="Filter by Type"
-                >
-                  <FilterIcon className="size-3.5" />
-                  <span className="sr-only">Filter by Type</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40 text-xs">
-                <DropdownMenuItem
-                  onClick={() => {
-                    setTypeFilter("all")
-                    table.setPageIndex(0)
-                  }}
-                  className="flex cursor-pointer items-center justify-between"
-                >
-                  <span>All</span>
-                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
-                    {processedData.length}
-                  </Badge>
-                </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setTypeFilter("success")
+                  table.setPageIndex(0)
+                }}
+                className="flex cursor-pointer items-center justify-between capitalize"
+              >
+                <span>Success</span>
+                <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                  {processedData.filter((i) => i.type === "success").length}
+                </Badge>
+              </DropdownMenuItem>
 
-                <DropdownMenuItem
-                  onClick={() => {
-                    setTypeFilter("info")
-                    table.setPageIndex(0)
-                  }}
-                  className="flex cursor-pointer items-center justify-between capitalize"
-                >
-                  <span>Info</span>
-                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
-                    {processedData.filter((i) => i.type === "info").length}
-                  </Badge>
-                </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setTypeFilter("warning")
+                  table.setPageIndex(0)
+                }}
+                className="flex cursor-pointer items-center justify-between capitalize"
+              >
+                <span>Warning</span>
+                <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                  {processedData.filter((i) => i.type === "warning").length}
+                </Badge>
+              </DropdownMenuItem>
 
-                <DropdownMenuItem
-                  onClick={() => {
-                    setTypeFilter("success")
-                    table.setPageIndex(0)
-                  }}
-                  className="flex cursor-pointer items-center justify-between capitalize"
-                >
-                  <span>Success</span>
-                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
-                    {processedData.filter((i) => i.type === "success").length}
-                  </Badge>
-                </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setTypeFilter("error")
+                  table.setPageIndex(0)
+                }}
+                className="flex cursor-pointer items-center justify-between capitalize"
+              >
+                <span>Error</span>
+                <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                  {processedData.filter((i) => i.type === "error").length}
+                </Badge>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-                <DropdownMenuItem
-                  onClick={() => {
-                    setTypeFilter("warning")
-                    table.setPageIndex(0)
-                  }}
-                  className="flex cursor-pointer items-center justify-between capitalize"
-                >
-                  <span>Warning</span>
-                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
-                    {processedData.filter((i) => i.type === "warning").length}
-                  </Badge>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem
-                  onClick={() => {
-                    setTypeFilter("error")
-                    table.setPageIndex(0)
-                  }}
-                  className="flex cursor-pointer items-center justify-between capitalize"
-                >
-                  <span>Error</span>
-                  <Badge variant="secondary" className="px-1 py-0 text-[10px]">
-                    {processedData.filter((i) => i.type === "error").length}
-                  </Badge>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* زر إظهار/إخفاء الأعمدة */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="size-8"
-                  title="Toggle Columns"
-                >
-                  <Columns3Icon className="size-3.5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40 text-xs">
-                {table
-                  .getAllColumns()
-                  .filter(
-                    (col) =>
-                      typeof col.accessorFn !== "undefined" && col.getCanHide()
-                  )
-                  .map((col) => (
-                    <DropdownMenuCheckboxItem
-                      key={col.id}
-                      checked={col.getIsVisible()}
-                      onCheckedChange={(value) => col.toggleVisibility(!!value)}
-                    >
-                      {columnLabelsMap[col.id] || col.id}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* أزرار الإجراءات */}
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={() => setIsBroadcastOpen(true)}
-              className="size-8 sm:hidden"
-              title="Broadcast Notification"
-            >
-              <MegaphoneIcon className="size-3.5" />
-              <span className="sr-only">Broadcast Notification</span>
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setIsBroadcastOpen(true)}
-              className="hidden h-8 gap-1.5 px-3 text-xs sm:inline-flex"
-            >
-              <MegaphoneIcon className="size-3.5" />
-              <span>Broadcast</span>
-            </Button>
-
-            <Button
-              type="button"
-              variant="default"
-              size="icon"
-              onClick={() => setIsIndividualOpen(true)}
-              className="size-8 sm:hidden"
-              title="New Notification"
-            >
-              <PlusIcon className="size-3.5" />
-              <span className="sr-only">New Notification</span>
-            </Button>
-            <Button
-              type="button"
-              variant="default"
-              size="sm"
-              onClick={() => setIsIndividualOpen(true)}
-              className="hidden h-8 gap-1.5 px-3 text-xs sm:inline-flex"
-            >
-              <PlusIcon className="size-3.5" />
-              <span>New Notification</span>
-            </Button>
-          </div>
-        </div>
-
-        {/* عرض الجدول */}
-        <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">
-          <div className="overflow-x-auto">
-            <Table className="w-full">
-              <TableHeader className="bg-muted/40">
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <TableHead
-                        key={header.id}
-                        className="text-xs font-medium text-muted-foreground"
-                      >
-                        {header.isPlaceholder ? null : (
-                          <FlexRender header={header} />
-                        )}
-                      </TableHead>
-                    ))}
-                  </TableRow>
+          {/* زر إظهار/إخفاء الأعمدة */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-8"
+                title="Toggle Columns"
+              >
+                <Columns3Icon className="size-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40 text-xs">
+              {table
+                .getAllColumns()
+                .filter(
+                  (col) =>
+                    typeof col.accessorFn !== "undefined" && col.getCanHide()
+                )
+                .map((col) => (
+                  <DropdownMenuCheckboxItem
+                    key={col.id}
+                    checked={col.getIsVisible()}
+                    onCheckedChange={(value) => col.toggleVisibility(!!value)}
+                  >
+                    {columnLabelsMap[col.id] || col.id}
+                  </DropdownMenuCheckboxItem>
                 ))}
-              </TableHeader>
-              <TableBody>
-                {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      className="transition-colors hover:bg-muted/20"
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          <FlexRender cell={cell} />
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={columns.length}
-                      className="h-24 text-center text-xs text-muted-foreground"
-                    >
-                      No notifications found matching your criteria.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-        {/* الترقيم (Pagination) */}
-        <div className="flex items-center justify-between px-1">
-          <div className="flex w-full items-center gap-8 lg:w-fit">
-            <div className="hidden items-center gap-2 lg:flex">
-              <Label htmlFor="rows-per-page" className="text-xs font-medium">
-                Rows per page
-              </Label>
-              <Select
-                value={`${table.state.pagination.pageSize}`}
-                onValueChange={(value) => table.setPageSize(Number(value))}
-              >
-                <SelectTrigger
-                  size="sm"
-                  className="h-8 w-20 text-xs"
-                  id="rows-per-page"
+          {/* إضافة قناة جديدة */}
+          <CreateChannelDialog />
+
+          {/* إرسال البث */}
+          <div className="sm:hidden">
+            <BroadcastForm
+              trigger={
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="size-8"
+                  title="Broadcast Notification"
                 >
-                  <SelectValue placeholder={table.state.pagination.pageSize} />
-                </SelectTrigger>
-                <SelectContent side="top">
-                  <SelectGroup>
-                    {[10, 20, 30, 40, 50].map((pageSize) => (
-                      <SelectItem
-                        key={pageSize}
-                        value={`${pageSize}`}
-                        className="text-xs"
-                      >
-                        {pageSize}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="text-xs font-medium text-muted-foreground">
-              Page {table.state.pagination.pageIndex + 1} of{" "}
-              {table.getPageCount() || 1}
-            </div>
-            <div className="ms-auto flex items-center gap-2 lg:ms-0">
-              <Button
-                variant="outline"
-                className="hidden h-8 w-8 p-0 lg:flex"
-                onClick={() => table.setPageIndex(0)}
-                disabled={!table.getCanPreviousPage()}
-              >
-                <ChevronsLeftIcon className="size-4" />
-              </Button>
-              <Button
-                variant="outline"
-                className="size-8"
-                size="icon"
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-              >
-                <ChevronLeftIcon className="size-4" />
-              </Button>
-              <Button
-                variant="outline"
-                className="size-8"
-                size="icon"
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-              >
-                <ChevronRightIcon className="size-4" />
-              </Button>
-              <Button
-                variant="outline"
-                className="hidden size-8 lg:flex"
-                size="icon"
-                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                disabled={!table.getCanNextPage()}
-              >
-                <ChevronsRightIcon className="size-4" />
-              </Button>
-            </div>
+                  <MegaphoneIcon className="size-3.5" />
+                  <span className="sr-only">Broadcast Notification</span>
+                </Button>
+              }
+            />
+          </div>
+          <div className="hidden sm:inline-flex">
+            <BroadcastForm />
+          </div>
+
+          {/* إشعار فردي */}
+          <div className="sm:hidden">
+            <NotificationForm
+              users={users}
+              trigger={
+                <Button
+                  type="button"
+                  variant="default"
+                  size="icon"
+                  className="size-8"
+                  title="New Notification"
+                >
+                  <PlusIcon className="size-3.5" />
+                  <span className="sr-only">New Notification</span>
+                </Button>
+              }
+            />
+          </div>
+          <div className="hidden sm:inline-flex">
+            <NotificationForm users={users} />
           </div>
         </div>
       </div>
 
-      <NotificationDetailsDialog
-        isOpen={Boolean(selectedForDetails)}
-        onOpenChange={(open) => !open && setSelectedForDetails(null)}
-        notification={selectedForDetails}
-      />
+      {/* عرض الجدول */}
+      <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+        <div className="overflow-x-auto">
+          <Table className="w-full">
+            <TableHeader className="bg-muted/40">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead
+                      key={header.id}
+                      className="text-xs font-medium text-muted-foreground"
+                    >
+                      {header.isPlaceholder ? null : (
+                        <FlexRender header={header} />
+                      )}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    className="transition-colors hover:bg-muted/20"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        <FlexRender cell={cell} />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center text-xs text-muted-foreground"
+                  >
+                    No notifications found matching your criteria.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
 
-      <DeleteNotificationDialog
-        isOpen={Boolean(itemToDelete)}
-        onOpenChange={(open) => !open && setItemToDelete(null)}
-        item={itemToDelete}
-        onSuccess={(deletedId) => {
-          if (itemToDelete?.groupedIds && itemToDelete.groupedIds.length > 0) {
-            const idsToDelete = new Set(itemToDelete.groupedIds)
-            setData((prev) => prev.filter((item) => !idsToDelete.has(item.id)))
-          } else {
-            setData((prev) => prev.filter((item) => item.id !== deletedId))
-          }
-          setItemToDelete(null)
-        }}
-      />
-
-      <NotificationForm
-        isOpen={isIndividualOpen}
-        onOpenChange={setIsIndividualOpen}
-        users={users}
-        onSuccess={() => {
-          setIsIndividualOpen(false)
-        }}
-      />
-
-      <BroadcastForm
-        isOpen={isBroadcastOpen}
-        onOpenChange={setIsBroadcastOpen}
-        onSuccess={() => {
-          setIsBroadcastOpen(false)
-        }}
-      />
-    </>
+      {/* الترقيم (Pagination) */}
+      <div className="flex items-center justify-between px-1">
+        <div className="flex w-full items-center gap-8 lg:w-fit">
+          <div className="hidden items-center gap-2 lg:flex">
+            <Label htmlFor="rows-per-page" className="text-xs font-medium">
+              Rows per page
+            </Label>
+            <Select
+              value={`${table.state.pagination.pageSize}`}
+              onValueChange={(value) => table.setPageSize(Number(value))}
+            >
+              <SelectTrigger
+                size="sm"
+                className="h-8 w-20 text-xs"
+                id="rows-per-page"
+              >
+                <SelectValue placeholder={table.state.pagination.pageSize} />
+              </SelectTrigger>
+              <SelectContent side="top">
+                <SelectGroup>
+                  {[10, 20, 30, 40, 50].map((pageSize) => (
+                    <SelectItem
+                      key={pageSize}
+                      value={`${pageSize}`}
+                      className="text-xs"
+                    >
+                      {pageSize}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="text-xs font-medium text-muted-foreground">
+            Page {table.state.pagination.pageIndex + 1} of{" "}
+            {table.getPageCount() || 1}
+          </div>
+          <div className="ms-auto flex items-center gap-2 lg:ms-0">
+            <Button
+              variant="outline"
+              className="hidden h-8 w-8 p-0 lg:flex"
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <ChevronsLeftIcon className="size-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className="size-8"
+              size="icon"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <ChevronLeftIcon className="size-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className="size-8"
+              size="icon"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              <ChevronRightIcon className="size-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className="hidden size-8 lg:flex"
+              size="icon"
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage()}
+            >
+              <ChevronsRightIcon className="size-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

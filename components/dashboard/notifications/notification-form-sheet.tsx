@@ -13,6 +13,7 @@ import {
   XIcon,
   AlertCircleIcon,
   UserIcon,
+  PlusIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -49,6 +50,7 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
+  SheetTrigger,
 } from "@/components/ui/sheet"
 
 import { createNotificationSchema } from "@/lib/actions/notifications/schemas"
@@ -65,19 +67,18 @@ export interface FormUserOption {
 }
 
 interface NotificationFormProps {
-  isOpen: boolean
-  onOpenChange: (open: boolean) => void
+  trigger?: React.ReactNode
   users?: FormUserOption[]
   onSuccess?: () => void
 }
 
 export default function NotificationForm({
-  isOpen,
-  onOpenChange,
+  trigger,
   users = [],
   onSuccess,
 }: NotificationFormProps) {
   const router = useRouter()
+  const [open, setOpen] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
   const [userPickerOpen, setUserPickerOpen] = React.useState(false)
 
@@ -107,13 +108,13 @@ export default function NotificationForm({
     [users, selectedUserId]
   )
 
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen)
+    if (!isOpen) {
       setErrorMessage(null)
       setUserPickerOpen(false)
       reset()
     }
-    onOpenChange(open)
   }
 
   async function onSubmit(data: NotificationFormValues) {
@@ -142,7 +143,22 @@ export default function NotificationForm({
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={handleOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
+      <SheetTrigger asChild>
+        {trigger ? (
+          trigger
+        ) : (
+          <Button
+            type="button"
+            variant="default"
+            size="sm"
+            className="h-8 gap-1.5 px-3 text-xs"
+          >
+            <PlusIcon className="size-3.5" />
+            <span>New Notification</span>
+          </Button>
+        )}
+      </SheetTrigger>
       <SheetContent
         side="right"
         className="flex w-full flex-col p-0 sm:max-w-xl"

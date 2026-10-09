@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { toast } from "sonner"
-import { AlertTriangleIcon } from "lucide-react"
+import { AlertTriangleIcon, Trash2Icon } from "lucide-react"
 
 import {
   Dialog,
@@ -11,6 +11,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
@@ -21,8 +22,6 @@ import {
 } from "@/lib/actions/notifications/mutations/delete"
 
 interface DeleteNotificationDialogProps {
-  isOpen: boolean
-  onOpenChange: (open: boolean) => void
   item:
     | (AdminNotificationRecord & {
         isBroadcastGroup?: boolean
@@ -30,15 +29,16 @@ interface DeleteNotificationDialogProps {
         groupedIds?: string[]
       })
     | null
-  onSuccess: (deletedId: string) => void
+  trigger?: React.ReactNode
+  onSuccess: (deletedId: string, groupedIds?: string[]) => void
 }
 
 export default function DeleteNotificationDialog({
-  isOpen,
-  onOpenChange,
   item,
+  trigger,
   onSuccess,
 }: DeleteNotificationDialogProps) {
+  const [open, setOpen] = React.useState(false)
   const [isDeleting, setIsDeleting] = React.useState(false)
 
   if (!item) return null
@@ -51,7 +51,6 @@ export default function DeleteNotificationDialog({
 
     try {
       if (isBroadcast && item.groupedIds) {
-        // حذف جماعي لكافة السجلات المتطابقة
         const res = await deleteBatchNotifications(item.groupedIds)
         if (!res.success) {
           toast.error(res.error || "Failed to delete broadcast notifications")
@@ -61,7 +60,6 @@ export default function DeleteNotificationDialog({
           `Deleted broadcast notification for ${count} users successfully`
         )
       } else {
-        // حذف فردي
         const res = await deleteNotification(item.id)
         if (!res.success) {
           toast.error(res.error || "Failed to delete notification")
@@ -70,8 +68,8 @@ export default function DeleteNotificationDialog({
         toast.success("Notification deleted successfully")
       }
 
-      onSuccess(item.id)
-      onOpenChange(false)
+      onSuccess(item.id, item.groupedIds)
+      setOpen(false)
     } catch {
       toast.error("An unexpected error occurred while deleting")
     } finally {
@@ -80,7 +78,21 @@ export default function DeleteNotificationDialog({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {trigger ? (
+          trigger
+        ) : (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-xs text-destructive"
+          >
+            <Trash2Icon className="size-3.5" />
+            <span>Delete</span>
+          </Button>
+        )}
+      </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader className="gap-2">
           <div className="flex size-10 items-center justify-center rounded-full bg-destructive/10 text-destructive">
@@ -118,7 +130,7 @@ export default function DeleteNotificationDialog({
             type="button"
             variant="outline"
             disabled={isDeleting}
-            onClick={() => onOpenChange(false)}
+            onClick={() => setOpen(false)}
             className="text-xs"
           >
             Cancel
@@ -136,7 +148,7 @@ export default function DeleteNotificationDialog({
                 Deleting...
               </>
             ) : (
-              `Delete ${isBroadcast ? `(${count})` : ""}`
+              `Delete ${isBroadcast ? `(\${count})` : ""}`
             )}
           </Button>
         </DialogFooter>

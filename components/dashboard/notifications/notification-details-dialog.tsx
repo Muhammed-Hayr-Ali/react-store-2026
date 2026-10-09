@@ -7,6 +7,7 @@ import {
   AlertTriangleIcon,
   CheckCircle2Icon,
   ExternalLinkIcon,
+  EyeIcon,
   InfoIcon,
   MegaphoneIcon,
   UserIcon,
@@ -19,20 +20,20 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AdminNotificationRecord } from "@/lib/actions/notifications/types"
 
 interface NotificationDetailsDialogProps {
-  isOpen: boolean
-  onOpenChange: (open: boolean) => void
   notification:
     | (AdminNotificationRecord & {
         isBroadcastGroup?: boolean
         recipientCount?: number
       })
     | null
+  trigger?: React.ReactNode
 }
 
 function formatDate(isoString: string): string {
@@ -42,10 +43,11 @@ function formatDate(isoString: string): string {
 }
 
 export function NotificationDetailsDialog({
-  isOpen,
-  onOpenChange,
   notification,
+  trigger,
 }: NotificationDetailsDialogProps) {
+  const [open, setOpen] = React.useState(false)
+
   if (!notification) return null
 
   const getNotificationIcon = (type: string) => {
@@ -68,7 +70,17 @@ export function NotificationDetailsDialog({
     .join(" ")
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {trigger ? (
+          trigger
+        ) : (
+          <Button variant="ghost" size="sm" className="gap-1.5 text-xs">
+            <EyeIcon className="size-3.5" />
+            <span>View Details</span>
+          </Button>
+        )}
+      </DialogTrigger>
       <DialogContent className="max-w-md gap-4 p-5 sm:p-6">
         <DialogHeader className="gap-1.5 border-b pb-3">
           <div className="flex items-center gap-2">
@@ -93,7 +105,6 @@ export function NotificationDetailsDialog({
         </DialogHeader>
 
         <div className="space-y-4 text-xs">
-          {/* نص الرسالة كاملاً */}
           <div className="space-y-1.5 rounded-lg border bg-muted/30 p-3">
             <span className="font-semibold text-foreground">Message Body:</span>
             <p className="leading-relaxed whitespace-pre-wrap text-foreground/90">
@@ -101,7 +112,6 @@ export function NotificationDetailsDialog({
             </p>
           </div>
 
-          {/* معلومات المستلم */}
           <div className="space-y-1">
             <span className="font-semibold text-muted-foreground">
               Recipient:
@@ -126,7 +136,6 @@ export function NotificationDetailsDialog({
             )}
           </div>
 
-          {/* الرابط التفاعلي إن وجد */}
           {notification.link && (
             <div className="space-y-1">
               <span className="font-semibold text-muted-foreground">
@@ -151,7 +160,7 @@ export function NotificationDetailsDialog({
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => onOpenChange(false)}
+            onClick={() => setOpen(false)}
             className="w-full text-xs sm:w-auto"
           >
             Close
