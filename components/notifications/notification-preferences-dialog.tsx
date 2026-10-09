@@ -1,8 +1,9 @@
 "use client"
 
 import * as React from "react"
+import { useTransition } from "react"
 import { toast } from "sonner"
-import { BellIcon, LockIcon } from "lucide-react"
+import { SlidersHorizontalIcon, LockIcon } from "lucide-react"
 
 import {
   Dialog,
@@ -10,155 +11,151 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Spinner } from "@/components/ui/spinner"
-import { getUserChannelPreferences } from "@/lib/actions/notifications/queries/get-user-channel-preferences"
-import { toggleChannelSubscription } from "@/lib/actions/notifications/mutations/toggle-channel-subscription"
+import {
+  getUserChannelPreferences,
+  toggleChannelSubscription,
+} from "@/lib/actions/notifications"
 import type { UserChannelPreference } from "@/lib/actions/notifications/types"
 
 interface NotificationPreferencesDialogProps {
-  isOpen: boolean
-  onOpenChange: (open: boolean) => void
+  trigger?: React.ReactNode
 }
 
 export function NotificationPreferencesDialog({
-  isOpen,
-  onOpenChange,
+  trigger,
 }: NotificationPreferencesDialogProps) {
-  const [preferences, setPreferences] = React.useState<UserChannelPreference[]>(
-    []
-  )
-  const [isLoading, startLoadTransition] = React.useTransition()
-  const [togglingId, setTogglingId] = React.useState<string | null>(null)
+  const [open, setOpen] = React.useState(false)
+  const [channels, setChannels] = React.useState<UserChannelPreference[]>([])
+  const [isPending, startTransition] = useTransition()
+  const [isUpdating, startUpdateTransition] = useTransition()
 
-  React.useEffect(() => {
-    let isSubscribed = true
-
+  // جلب البيانات استجابة لحدث فتح النافذة مباشرة دون الحاجة لـ useEffect
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen)
     if (isOpen) {
-      startLoadTransition(async () => {
-        const res = await getUserChannelPreferences()
-        if (isSubscribed && res.success && res.data) {
-          setPreferences(res.data)
+      startTransition(async () => {
+        try {
+          const res = await getUserChannelPreferences()
+          if (res.success && res.data) {
+            setChannels(res.data)
+          } else {
+            toast.error("Failed to load notification preferences")
+          }
+        } catch {
+          toast.error("An error occurred while loading preferences")
         }
       })
     }
+  }
 
-    return () => {
-      isSubscribed = false
-    }
-  }, [isOpen])
+  const handleToggle = (channelId: string, currentSubscribed: boolean) => {
+    const nextState = !currentSubscribed
 
-  const handleToggle = async (channel: UserChannelPreference) => {
-    if (channel.is_mandatory) return
-
-    const nextState = !channel.is_subscribed
-    setTogglingId(channel.id)
-
-    // Optimistic UI update
-    setPreferences((prev) =>
-      prev.map((item) =>
-        item.id === channel.id ? { ...item, is_subscribed: nextState } : item
+    // تحديث متفائل فوري للواجهة (Optimistic UI update)
+    setChannels((prev) =>
+      prev.map((c) =>
+        c.id === channelId ? { ...c, is_subscribed: nextState } : c
       )
     )
 
-    try {
-      const res = await toggleChannelSubscription(channel.id, nextState)
+    startUpdateTransition(async () => {
+      const res = await toggleChannelSubscription(channelId, nextState)
       if (!res.success) {
-        // Rollback on failure
-        setPreferences((prev) =>
-          prev.map((item) =>
-            item.id === channel.id
-              ? { ...item, is_subscribed: !nextState }
-              : item
+        // التراجع في حال حدوث خطأ
+        setChannels((prev) =>
+          prev.map((c) =>
+            c.id === channelId ? { ...c, is_subscribed: currentSubscribed } : c
           )
         )
-        toast.error("Failed to update notification setting")
-      } else {
-        toast.success("Notification setting updated")
+        toast.error(res.error || "Failed to update channel preference")
       }
-    } catch {
-      // Rollback on error
-      setPreferences((prev) =>
-        prev.map((item) =>
-          item.id === channel.id ? { ...item, is_subscribed: !nextState } : item
-        )
-      )
-      toast.error("Failed to update notification setting")
-    } finally {
-      setTogglingId(null)
-    }
+    })
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md overflow-hidden p-0 sm:rounded-2xl">
-        <DialogHeader className="border-b bg-card px-5 py-4">
-          <div className="flex items-center gap-2">
-            <BellIcon className="size-4 text-primary" />
-            <DialogTitle className="text-base font-semibold">
-              Notification Channels
-            </DialogTitle>
-          </div>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        {trigger ? (
+          trigger
+        ) : (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 gap-1.5 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+          >
+            <SlidersHorizontalIcon className="size-3.5" />
+            <span>Preferences</span>
+          </Button>
+        )}
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-base font-semibold">
+            Notification Preferences
+          </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
-            Manage topics and updates you want to receive from our store.
+            Manage your topic subscriptions and decide which announcements you
+            receive.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="max-h-[60vh] overflow-y-auto p-5">
-          {isLoading ? (
+        <div className="space-y-3 py-2">
+          {isPending ? (
             <div className="flex flex-col items-center justify-center gap-2 py-8 text-muted-foreground">
               <Spinner className="size-5" />
               <span className="text-xs">Loading preferences...</span>
             </div>
-          ) : preferences.length === 0 ? (
+          ) : channels.length === 0 ? (
             <p className="py-6 text-center text-xs text-muted-foreground">
-              No channels available.
+              No subscription channels available.
             </p>
           ) : (
-            <div className="space-y-4">
-              {preferences.map((channel) => {
-                const isBusy = togglingId === channel.id
-
-                return (
-                  <div
-                    key={channel.id}
-                    className="flex items-start justify-between gap-4 rounded-xl border p-3.5 transition-colors hover:bg-muted/40"
-                  >
-                    <div className="min-w-0 space-y-1">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-semibold text-foreground">
-                          {channel.name}
-                        </span>
-                        {channel.is_mandatory && (
-                          <span
-                            title="Mandatory for system and order updates"
-                            className="inline-flex items-center rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
-                          >
-                            <LockIcon className="mr-1 size-2.5" />
-                            Required
-                          </span>
-                        )}
-                      </div>
-                      {channel.description && (
-                        <p className="text-[11px] leading-relaxed text-muted-foreground">
-                          {channel.description}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="shrink-0 pt-0.5">
-                      <Switch
-                        checked={channel.is_subscribed}
-                        disabled={channel.is_mandatory || isBusy}
-                        onCheckedChange={() => handleToggle(channel)}
-                        aria-label={`Toggle ${channel.name}`}
-                      />
-                    </div>
+            channels.map((channel) => (
+              <div
+                key={channel.id}
+                className="flex items-center justify-between gap-3 rounded-lg border p-3"
+              >
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-medium text-foreground">
+                      {channel.name}
+                    </span>
+                    {channel.name_ar && (
+                      <span
+                        className="text-[11px] text-muted-foreground"
+                        dir="rtl"
+                      >
+                        ({channel.name_ar})
+                      </span>
+                    )}
+                    {channel.is_mandatory && (
+                      <span title="Mandatory channel">
+                        <LockIcon className="size-3 text-muted-foreground" />
+                      </span>
+                    )}
                   </div>
-                )
-              })}
-            </div>
+                  {channel.description && (
+                    <p className="line-clamp-2 text-[11px] text-muted-foreground">
+                      {channel.description}
+                    </p>
+                  )}
+                </div>
+
+                <Switch
+                  checked={channel.is_subscribed}
+                  disabled={channel.is_mandatory || isUpdating}
+                  onCheckedChange={() =>
+                    handleToggle(channel.id, channel.is_subscribed)
+                  }
+                  aria-label={`Toggle subscription for ${channel.name}`}
+                />
+              </div>
+            ))
           )}
         </div>
       </DialogContent>
