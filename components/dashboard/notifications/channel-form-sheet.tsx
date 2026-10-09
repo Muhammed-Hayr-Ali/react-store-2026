@@ -5,6 +5,7 @@ import { Controller, useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { toast } from "sonner"
+import slugify from "slugify"
 import {
   RadioTowerIcon,
   XIcon,
@@ -17,7 +18,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
 import { InputGroup, InputGroupTextarea } from "@/components/ui/input-group"
 import { Switch } from "@/components/ui/switch"
 import {
@@ -34,9 +40,9 @@ import {
 import { createNotificationChannel } from "@/lib/actions/notifications"
 
 const channelSchema = z.object({
-  slug: z.string().min(2).max(50),
-  name: z.string().min(2).max(100),
-  name_ar: z.string().min(2).max(100),
+  slug: z.string().min(2, "Slug must be at least 2 characters").max(50),
+  name: z.string().min(2, "Name must be at least 2 characters").max(100),
+  name_ar: z.string().min(2, "Arabic name must be at least 2 characters").max(100),
   description: z.string().optional().nullable(),
   description_ar: z.string().optional().nullable(),
   isMandatory: z.boolean(),
@@ -44,6 +50,15 @@ const channelSchema = z.object({
 })
 
 type ChannelFormValues = z.infer<typeof channelSchema>
+
+function generateSlug(name: string): string {
+  return slugify(name, {
+    lower: true,
+    strict: true,
+    replacement: "-",
+    trim: true,
+  })
+}
 
 interface ChannelFormSheetProps {
   trigger?: React.ReactNode
@@ -62,10 +77,12 @@ export function ChannelFormSheet({
     handleSubmit,
     control,
     setValue,
+    getFieldState,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = useForm<ChannelFormValues>({
     resolver: zodResolver(channelSchema),
+    mode: "onChange",
     defaultValues: {
       slug: "",
       name: "",
@@ -77,8 +94,8 @@ export function ChannelFormSheet({
     },
   })
 
-  const isMandatory = useWatch({ control, name: "isMandatory" })
   const descValue = useWatch({ control, name: "description" }) || ""
+  const descArValue = useWatch({ control, name: "description_ar" }) || ""
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen)
@@ -91,14 +108,24 @@ export function ChannelFormSheet({
   async function onSubmit(data: ChannelFormValues) {
     setErrorMessage(null)
 
-    const res = await createNotificationChannel(data)
+    const payload = {
+      ...data,
+      description: data.description === "" ? null : data.description,
+      description_ar: data.description_ar === "" ? null : data.description_ar,
+    }
+
+    const res = await createNotificationChannel(payload)
 
     if (res.success) {
       toast.success("Notification channel created successfully!")
       onSuccess?.()
       handleOpenChange(false)
     } else {
-      setErrorMessage(res.error || "Failed to create notification channel.")
+      setErrorMessage(
+        res.error === "SLUG_ALREADY_EXISTS"
+          ? "Slug is already in use."
+          : res.error || "Failed to create notification channel."
+      )
     }
   }
 
@@ -156,7 +183,7 @@ export function ChannelFormSheet({
               </Alert>
             )}
 
-            {/* القسم الأول: المعرف والأسماء */}
+            {/* تفاصيل القناة والأسماء والسلوج التلقائي */}
             <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <HashIcon className="size-4 text-primary" />
@@ -166,64 +193,85 @@ export function ChannelFormSheet({
               </div>
 
               <FieldGroup className="space-y-4">
-                <div className="space-y-1.5">
-                  <FieldLabel htmlFor="channel-slug" className="text-xs">
-                    Slug Identifier <span className="text-destructive">*</span>
-                  </FieldLabel>
-                  <Input
-                    id="channel-slug"
-                    placeholder="e.g., flash-sales"
-                    {...register("slug")}
-                    className="h-8 text-xs font-mono"
-                  />
-                  {errors.slug && (
-                    <p className="text-[11px] text-destructive">
-                      {errors.slug.message}
-                    </p>
-                  )}
-                </div>
-
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <FieldLabel htmlFor="channel-name-en" className="text-xs">
-                      Name (English) <span className="text-destructive">*</span>
-                    </FieldLabel>
-                    <Input
-                      id="channel-name-en"
-                      placeholder="Flash Sales"
-                      {...register("name")}
-                      className="h-8 text-xs"
-                    />
-                    {errors.name && (
-                      <p className="text-[11px] text-destructive">
-                        {errors.name.message}
-                      </p>
+                  <Controller
+                    name="name"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor="channel-name-en" className="text-xs">
+                          Name (EN) <span className="text-destructive">*</span>
+                        </FieldLabel>
+                        <Input
+                          {...field}
+                          id="channel-name-en"
+                          placeholder="e.g., Flash Sales"
+                          className="h-8 text-xs"
+                          onChange={(e) => {
+                            const newName = e.target.value
+                            field.onChange(newName)
+                            if (!getFieldState("slug").isDirty) {
+                              setValue("slug", generateSlug(newName), {
+                                shouldValidate: true,
+                              })
+                            }
+                          }}
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
                     )}
-                  </div>
+                  />
 
-                  <div className="space-y-1.5">
-                    <FieldLabel htmlFor="channel-name-ar" className="text-xs">
-                      Name (Arabic) <span className="text-destructive">*</span>
-                    </FieldLabel>
-                    <Input
-                      id="channel-name-ar"
-                      placeholder="عروض الفلاش والتخفيضات"
-                      dir="rtl"
-                      {...register("name_ar")}
-                      className="h-8 text-xs"
-                    />
-                    {errors.name_ar && (
-                      <p className="text-[11px] text-destructive">
-                        {errors.name_ar.message}
-                      </p>
+                  <Controller
+                    name="name_ar"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor="channel-name-ar" className="text-xs">
+                          Name (AR) <span className="text-destructive">*</span>
+                        </FieldLabel>
+                        <Input
+                          {...field}
+                          id="channel-name-ar"
+                          placeholder="مثال: عروض الفلاش"
+                          dir="rtl"
+                          className="h-8 text-xs"
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
                     )}
-                  </div>
+                  />
                 </div>
+
+                <Controller
+                  name="slug"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="channel-slug" className="text-xs">
+                        Slug Identifier <span className="text-destructive">*</span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="channel-slug"
+                        placeholder="flash-sales"
+                        className="h-8 font-mono text-xs"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
 
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <FieldLabel htmlFor="channel-desc-en" className="text-xs">
-                      Description (English)
+                      Description (EN)
                     </FieldLabel>
                     <span className="text-[10px] text-muted-foreground tabular-nums">
                       {descValue.length}/200
@@ -241,9 +289,14 @@ export function ChannelFormSheet({
                 </div>
 
                 <div className="space-y-1.5">
-                  <FieldLabel htmlFor="channel-desc-ar" className="text-xs">
-                    Description (Arabic)
-                  </FieldLabel>
+                  <div className="flex items-center justify-between">
+                    <FieldLabel htmlFor="channel-desc-ar" className="text-xs">
+                      Description (AR)
+                    </FieldLabel>
+                    <span className="text-[10px] text-muted-foreground tabular-nums">
+                      {descArValue.length}/200
+                    </span>
+                  </div>
                   <InputGroup className="bg-background">
                     <InputGroupTextarea
                       id="channel-desc-ar"
@@ -258,7 +311,7 @@ export function ChannelFormSheet({
               </FieldGroup>
             </div>
 
-            {/* القسم الثاني: خيارات الاشتراك والسلوك الافتراضي */}
+            {/* خيارات الاشتراك والسلوك الافتراضي */}
             <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <Settings2Icon className="size-4 text-primary" />
