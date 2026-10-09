@@ -78,6 +78,7 @@ import DeleteNotificationDialog from "./delete-notification-dialog"
 import NotificationForm from "./notification-form-sheet"
 import BroadcastForm from "./broadcast-form-sheet"
 import { NotificationDetailsDialog } from "./notification-details-dialog"
+import { AdminChannelsDialog } from "../channels/admin-channels-dialog"
 
 interface DisplayNotificationRecord extends AdminNotificationRecord {
   isBroadcastGroup?: boolean
@@ -254,7 +255,6 @@ export function AdminNotificationsTable({
     })
   }, [processedData, currentTab, searchQuery])
 
-  // إحصائيات التابات بنمط العروضات
   const unreadCount = React.useMemo(
     () => processedData.filter((i) => !i.is_read && !i.isBroadcastGroup).length,
     [processedData]
@@ -324,7 +324,7 @@ export function AdminNotificationsTable({
                 <NotificationDetailsDialog
                   notification={row.original}
                   trigger={
-                    <span className="truncate text-xs font-semibold text-foreground transition-colors hover:text-primary hover:underline cursor-pointer">
+                    <span className="cursor-pointer truncate text-xs font-semibold text-foreground transition-colors hover:text-primary hover:underline">
                       {row.original.title}
                     </span>
                   }
@@ -343,7 +343,10 @@ export function AdminNotificationsTable({
           header: () => <div className="text-center">Type</div>,
           cell: ({ row }) => (
             <div className="flex justify-center">
-              <Badge variant="outline" className="text-[10px] capitalize px-2 py-0.5">
+              <Badge
+                variant="outline"
+                className="px-2 py-0.5 text-[10px] capitalize"
+              >
                 {row.original.type}
               </Badge>
             </div>
@@ -398,7 +401,10 @@ export function AdminNotificationsTable({
             if (row.original.isBroadcastGroup) {
               return (
                 <div className="flex items-center gap-1.5 text-xs">
-                  <Badge variant="secondary" className="gap-1 px-2 py-0.5 text-xs font-normal">
+                  <Badge
+                    variant="secondary"
+                    className="gap-1 px-2 py-0.5 text-xs font-normal"
+                  >
                     <UsersIcon className="size-3 text-primary" />
                     <span>{row.original.recipientCount} Recipients</span>
                   </Badge>
@@ -417,7 +423,9 @@ export function AdminNotificationsTable({
                 <div className="font-medium text-foreground">
                   {fullName || "User Account"}
                 </div>
-                <div className="font-mono text-[11px] text-muted-foreground">{email}</div>
+                <div className="font-mono text-[11px] text-muted-foreground">
+                  {email}
+                </div>
               </div>
             )
           },
@@ -574,6 +582,9 @@ export function AdminNotificationsTable({
             </span>
           </Button>
 
+          {/* زر قنوات الإشعارات السريع */}
+          <AdminChannelsDialog />
+
           {/* منيو الموبايل للتابات */}
           <div className="block sm:hidden">
             <DropdownMenu>
@@ -641,7 +652,7 @@ export function AdminNotificationsTable({
             </DropdownMenu>
           </div>
 
-          {/* التابات الديسكتوب المتناسقة كلياً مع الفلاش سيلز */}
+          {/* التابات الديسكتوب المتناسقة */}
           <div className="hidden h-8 items-center overflow-hidden rounded-md border border-input bg-background p-0.5 sm:inline-flex">
             <button
               type="button"
@@ -780,7 +791,7 @@ export function AdminNotificationsTable({
             <BroadcastForm />
           </div>
 
-          {/* زر إنشاء إشعار فردي بنمط Create Flash Sale المعتمد */}
+          {/* زر إنشاء إشعار فردي */}
           <div className="sm:hidden">
             <NotificationForm
               users={users}
