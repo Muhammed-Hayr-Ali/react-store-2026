@@ -33,7 +33,6 @@ import {
   PlusIcon,
   EllipsisVerticalIcon,
   LockIcon,
-  CheckCircle2Icon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -67,9 +66,12 @@ import {
 } from "@/components/ui/table"
 
 import { NotificationChannelRecord } from "@/lib/actions/notifications/types"
-import { updateNotificationChannel } from "@/lib/actions/notifications"
+import {
+  updateNotificationChannel,
+} from "@/lib/actions/notifications"
 import { ChannelFormSheet } from "./channel-form-sheet"
 import { DeleteChannelDialog } from "./delete-channel-dialog"
+import { getAllNotificationChannels } from "@/lib/actions/notifications/channels/queries/get-active-channels"
 
 const features = tableFeatures({
   columnFilteringFeature,
@@ -105,8 +107,11 @@ export function ChannelsTable({
   channels: initialData,
   initialIsMobile = false,
 }: ChannelsTableProps) {
-  const [data, setData] = React.useState(() => initialData)
-  const [prevInitialData, setPrevInitialData] = React.useState(initialData)
+  const [data, setData] = React.useState<NotificationChannelRecord[]>(
+    () => initialData
+  )
+  const [prevInitialData, setPrevInitialData] =
+    React.useState<NotificationChannelRecord[]>(initialData)
   const [currentTab, setCurrentTab] = React.useState<string>("all")
   const [searchQuery, setSearchQuery] = React.useState("")
   const [isPending, startTransition] = useTransition()
@@ -115,6 +120,15 @@ export function ChannelsTable({
     setPrevInitialData(initialData)
     setData(initialData)
   }
+
+  const refreshChannels = React.useCallback(() => {
+    startTransition(async () => {
+      const res = await getAllNotificationChannels()
+      if (res.success && res.data) {
+        setData(res.data)
+      }
+    })
+  }, [])
 
   const handleToggleActive = (id: string, currentActive: boolean) => {
     startTransition(async () => {
@@ -299,6 +313,7 @@ export function ChannelsTable({
                 <DropdownMenuContent align="end" className="w-44 text-xs">
                   <ChannelFormSheet
                     channel={row.original}
+                    onSuccess={refreshChannels}
                     trigger={
                       <DropdownMenuItem
                         onSelect={(e) => e.preventDefault()}
@@ -315,11 +330,7 @@ export function ChannelsTable({
                       <DropdownMenuSeparator />
                       <DeleteChannelDialog
                         channel={row.original}
-                        onSuccess={(deletedId) =>
-                          setData((prev) =>
-                            prev.filter((c) => c.id !== deletedId)
-                          )
-                        }
+                        onSuccess={refreshChannels}
                         trigger={
                           <DropdownMenuItem
                             onSelect={(e) => e.preventDefault()}
@@ -339,7 +350,7 @@ export function ChannelsTable({
           enableHiding: false,
         }),
       ]),
-    [isPending]
+    [isPending, refreshChannels]
   )
 
   const table = useTable({
@@ -388,7 +399,7 @@ export function ChannelsTable({
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          {/* منيو الموبايل */}
+          {/* منيو الموبايل للتابات */}
           <div className="block sm:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -573,28 +584,18 @@ export function ChannelsTable({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* زر إنشاء القناة بنمط زر Create Flash Sale */}
+          {/* زر متجاوب ونظيف يقبله SheetTrigger كعنصر DOM واحد دون Fragment */}
           <ChannelFormSheet
+            onSuccess={refreshChannels}
             trigger={
-              <>
-                <Button
-                  variant="default"
-                  size="icon"
-                  className="size-8 sm:hidden"
-                  title="Create Channel"
-                >
-                  <PlusIcon className="size-3.5" />
-                  <span className="sr-only">Create Channel</span>
-                </Button>
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="hidden h-8 gap-1.5 px-3 text-xs sm:inline-flex"
-                >
-                  <PlusIcon className="size-3.5" />
-                  <span>Create Channel</span>
-                </Button>
-              </>
+              <Button
+                variant="default"
+                size="sm"
+                className="h-8 gap-1.5 px-2.5 text-xs sm:px-3"
+              >
+                <PlusIcon className="size-3.5" />
+                <span className="hidden sm:inline">Create Channel</span>
+              </Button>
             }
           />
         </div>
