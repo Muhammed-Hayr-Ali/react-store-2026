@@ -25,7 +25,10 @@ export {
 // ==========================================
 // 2. Audience Channels & Subscriptions
 // ==========================================
-export { getActiveNotificationChannels } from "./channels/queries/get-active-channels"
+export {
+  getActiveNotificationChannels,
+  getAllNotificationChannels,
+} from "./channels/queries/get-active-channels"
 export { getUserChannelPreferences } from "./channels/queries/get-user-preferences"
 export { createNotificationChannel } from "./channels/mutations/create-channel"
 export { updateNotificationChannel } from "./channels/mutations/update-channel"

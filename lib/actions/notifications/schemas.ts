@@ -33,7 +33,7 @@ export const broadcastNotificationSchema = z.object({
 })
 
 // ==========================================
-// 2. Channel Schemas (Create & Update)
+// 2. Channel Schemas (Create, Update & Subscription)
 // ==========================================
 
 export const createChannelSchema = z.object({
@@ -56,8 +56,25 @@ export const createChannelSchema = z.object({
   isActive: z.boolean().default(true),
 })
 
-export const updateChannelSchema = createChannelSchema.partial().extend({
-  id: z.string().uuid("Invalid channel ID"),
+export const updateChannelSchema = createChannelSchema.partial()
+
+export const toggleSubscriptionSchema = z.object({
+  channelId: z.string().uuid("INVALID_CHANNEL_ID"),
+  isSubscribed: z.boolean(),
+})
+
+// كيان قاعدة البيانات لمطابقة النتيجة المرجعة
+export const channelRecordSchema = z.object({
+  id: z.string().uuid(),
+  slug: z.string(),
+  name: z.string(),
+  name_ar: z.string(),
+  description: z.string().nullable(),
+  description_ar: z.string().nullable(),
+  is_mandatory: z.boolean(),
+  default_enabled: z.boolean(),
+  is_active: z.boolean(),
+  created_at: z.string(),
 })
 
 // ==========================================
@@ -79,3 +96,8 @@ export type CreateChannelOutput = z.output<typeof createChannelSchema>
 
 export type UpdateChannelInput = z.input<typeof updateChannelSchema>
 export type UpdateChannelOutput = z.output<typeof updateChannelSchema>
+
+export type ToggleSubscriptionInput = z.input<typeof toggleSubscriptionSchema>
+export type ToggleSubscriptionOutput = z.output<typeof toggleSubscriptionSchema>
+
+export type ChannelRecordOutput = z.output<typeof channelRecordSchema>

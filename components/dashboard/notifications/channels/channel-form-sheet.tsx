@@ -46,7 +46,10 @@ import type { NotificationChannelRecord } from "@/lib/actions/notifications/type
 const channelSchema = z.object({
   slug: z.string().min(2, "Slug must be at least 2 characters").max(50),
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
-  name_ar: z.string().min(2, "Arabic name must be at least 2 characters").max(100),
+  name_ar: z
+    .string()
+    .min(2, "Arabic name must be at least 2 characters")
+    .max(100),
   description: z.string().optional().nullable(),
   description_ar: z.string().optional().nullable(),
   isMandatory: z.boolean(),
@@ -123,8 +126,9 @@ export function ChannelFormSheet({
       description_ar: data.description_ar === "" ? null : data.description_ar,
     }
 
+    // استدعاء مطابق لأسلوب categories (id, payload)
     const res = isEditing
-      ? await updateNotificationChannel({ id: channel!.id, ...payload })
+      ? await updateNotificationChannel(channel!.id, payload)
       : await createNotificationChannel(payload)
 
     if (res.success) {
@@ -136,11 +140,22 @@ export function ChannelFormSheet({
       onSuccess?.()
       handleOpenChange(false)
     } else {
-      setErrorMessage(
-        res.error === "SLUG_ALREADY_EXISTS"
-          ? "Slug is already in use."
-          : res.error || "Failed to save channel details."
-      )
+      let detailedMsg = res.error || "Failed to save channel details."
+
+      if (res.details) {
+        const firstDetailKey = Object.keys(res.details)[0]
+        if (firstDetailKey && res.details[firstDetailKey]?.[0]) {
+          detailedMsg = `${res.details[firstDetailKey][0]}`
+        }
+      }
+
+      if (res.error === "SLUG_ALREADY_EXISTS") {
+        detailedMsg = "Slug is already in use. Please enter a different slug."
+      } else if (res.error === "PERMISSION_DENIED") {
+        detailedMsg = "You do not have permission to perform this action."
+      }
+
+      setErrorMessage(detailedMsg)
     }
   }
 
@@ -168,7 +183,9 @@ export function ChannelFormSheet({
       >
         <SheetHeader className="shrink-0 border-b bg-card px-5 py-4 sm:px-6">
           <SheetTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
-            {isEditing ? "Edit Notification Channel" : "Create Notification Channel"}
+            {isEditing
+              ? "Edit Notification Channel"
+              : "Create Notification Channel"}
           </SheetTitle>
           <SheetDescription className="text-xs text-muted-foreground">
             {isEditing
@@ -215,7 +232,10 @@ export function ChannelFormSheet({
                     control={control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="channel-name-en" className="text-xs">
+                        <FieldLabel
+                          htmlFor="channel-name-en"
+                          className="text-xs"
+                        >
                           Name (EN) <span className="text-destructive">*</span>
                         </FieldLabel>
                         <Input
@@ -245,7 +265,10 @@ export function ChannelFormSheet({
                     control={control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="channel-name-ar" className="text-xs">
+                        <FieldLabel
+                          htmlFor="channel-name-ar"
+                          className="text-xs"
+                        >
                           Name (AR) <span className="text-destructive">*</span>
                         </FieldLabel>
                         <Input
@@ -269,7 +292,8 @@ export function ChannelFormSheet({
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor="channel-slug" className="text-xs">
-                        Slug Identifier <span className="text-destructive">*</span>
+                        Slug Identifier{" "}
+                        <span className="text-destructive">*</span>
                       </FieldLabel>
                       <Input
                         {...field}
@@ -331,7 +355,7 @@ export function ChannelFormSheet({
               <div className="mb-4 flex items-center gap-2 border-b pb-3">
                 <Settings2Icon className="size-4 text-primary" />
                 <h2 className="text-sm font-semibold text-card-foreground">
-                  Subscription & Status
+                  Subscription &amp; Status
                 </h2>
               </div>
 
@@ -341,8 +365,9 @@ export function ChannelFormSheet({
                     <span className="text-xs font-medium text-foreground">
                       Default Enabled
                     </span>
-                    <p className="text-[11px] text-muted-foreground leading-normal">
-                      Automatically subscribe users to this channel upon creation.
+                    <p className="text-[11px] leading-normal text-muted-foreground">
+                      Automatically subscribe users to this channel upon
+                      creation.
                     </p>
                   </div>
                   <Controller
@@ -362,8 +387,9 @@ export function ChannelFormSheet({
                     <span className="text-xs font-medium text-foreground">
                       Mandatory Channel
                     </span>
-                    <p className="text-[11px] text-muted-foreground leading-normal">
-                      Users cannot opt-out of this channel (e.g. system or order tracking).
+                    <p className="text-[11px] leading-normal text-muted-foreground">
+                      Users cannot opt-out of this channel (e.g. system or order
+                      tracking).
                     </p>
                   </div>
                   <Controller
@@ -386,8 +412,9 @@ export function ChannelFormSheet({
                     <span className="text-xs font-medium text-foreground">
                       Active Channel
                     </span>
-                    <p className="text-[11px] text-muted-foreground leading-normal">
-                      Enable or disable this channel from appearing in user preferences and broadcast options.
+                    <p className="text-[11px] leading-normal text-muted-foreground">
+                      Enable or disable this channel from appearing in user
+                      preferences and broadcast options.
                     </p>
                   </div>
                   <Controller

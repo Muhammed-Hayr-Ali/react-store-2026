@@ -27,7 +27,9 @@ import { DeleteChannelDialog } from "./delete-channel-dialog"
 
 export function AdminChannelsDialog() {
   const [open, setOpen] = React.useState(false)
-  const [channels, setChannels] = React.useState<NotificationChannelRecord[]>([])
+  const [channels, setChannels] = React.useState<NotificationChannelRecord[]>(
+    []
+  )
   const [isLoading, startTransition] = React.useTransition()
 
   const loadChannels = React.useCallback(() => {
@@ -59,7 +61,7 @@ export function AdminChannelsDialog() {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-lg p-0 overflow-hidden sm:rounded-2xl">
+      <DialogContent className="max-w-lg overflow-hidden p-0 sm:rounded-2xl">
         <DialogHeader className="border-b bg-card px-5 py-4">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
@@ -73,7 +75,7 @@ export function AdminChannelsDialog() {
             <ChannelFormSheet
               onSuccess={loadChannels}
               trigger={
-                <Button size="sm" className="h-7 gap-1 text-xs px-2.5">
+                <Button size="sm" className="h-7 gap-1 px-2.5 text-xs">
                   <PlusIcon className="size-3" />
                   <span>New</span>
                 </Button>
@@ -82,45 +84,48 @@ export function AdminChannelsDialog() {
           </div>
         </DialogHeader>
 
-        <div className="max-h-[60vh] overflow-y-auto p-4 space-y-2.5">
+        <div className="max-h-[60vh] space-y-2.5 overflow-y-auto p-4">
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground gap-2">
+            <div className="flex flex-col items-center justify-center gap-2 py-8 text-muted-foreground">
               <Spinner className="size-5" />
               <span className="text-xs">Loading channels...</span>
             </div>
           ) : channels.length === 0 ? (
-            <p className="text-center py-8 text-xs text-muted-foreground">
+            <p className="py-8 text-center text-xs text-muted-foreground">
               No channels created yet.
             </p>
           ) : (
             channels.map((channel) => (
               <div
                 key={channel.id}
-                className="flex items-center justify-between gap-3 rounded-lg border p-3 hover:bg-muted/20 transition-colors"
+                className="flex items-center justify-between gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/20"
               >
                 <div className="min-w-0 space-y-0.5">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-semibold text-foreground truncate">
+                    <span className="truncate text-xs font-semibold text-foreground">
                       {channel.name}
                     </span>
-                    <span className="text-[11px] text-muted-foreground font-mono">
+                    <span className="font-mono text-[11px] text-muted-foreground">
                       ({channel.slug})
                     </span>
                     {channel.is_mandatory && (
-                      <Badge variant="secondary" className="px-1 py-0 text-[10px] gap-1">
+                      <Badge
+                        variant="secondary"
+                        className="gap-1 px-1 py-0 text-[10px]"
+                      >
                         <LockIcon className="size-2.5" />
                         Mandatory
                       </Badge>
                     )}
                   </div>
                   {channel.description && (
-                    <p className="text-[11px] text-muted-foreground line-clamp-1">
+                    <p className="line-clamp-1 text-[11px] text-muted-foreground">
                       {channel.description}
                     </p>
                   )}
                 </div>
 
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex shrink-0 items-center gap-1">
                   <ChannelFormSheet
                     channel={channel}
                     onSuccess={loadChannels}

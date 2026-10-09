@@ -1,24 +1,25 @@
 /**
  * @file lib/actions/notifications/channels/mutations/toggle-subscription.ts
+ * @description Server Action to toggle a user's subscription preference for a specific notification channel.
+ * Enforces Zod schema parsing, authentication verification, mandatory guard checks, and cache revalidation.
  */
 
 "use server"
 
-import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
+import { toggleSubscriptionSchema } from "../../schemas"
 
-const toggleSubscriptionSchema = z.object({
-  channelId: z.string().uuid("INVALID_CHANNEL_ID"),
-  isSubscribed: z.boolean(),
-})
+// ============================================================================
+// Main Action Function
+// ============================================================================
 
 export async function toggleChannelSubscription(
-  channelId: string,
-  isSubscribed: boolean
+  payload: unknown
 ): Promise<ApiResult<boolean>> {
-  const validation = toggleSubscriptionSchema.safeParse({ channelId, isSubscribed })
+  // 1. Validate payload against Zod schema
+  const validation = toggleSubscriptionSchema.safeParse(payload)
   if (!validation.success) {
     const fieldErrors: Record<string, string[]> = {}
     for (const issue of validation.error.issues) {
@@ -33,38 +34,61 @@ export async function toggleChannelSubscription(
     }
   }
 
+  const { channelId, isSubscribed } = validation.data
+
+  // 2. Initialize Supabase client
   const supabase = await createServerClient()
 
+  // 3. Authenticate current user session
   const {
     data: { user },
     error: userError,
   } = await supabase.auth.getUser()
 
   if (userError || !user) {
-    return { success: false, error: "UNAUTHORIZED_ACCESS" }
+    return {
+      success: false,
+      error: "UNAUTHORIZED_ACCESS",
+    }
   }
 
+  // 4. Verify channel existence and validate mandatory rule
   const { data: channel, error: chError } = await supabase
     .from("notification_channels")
     .select("is_mandatory")
-    .eq("id", validation.data.channelId)
+    .eq("id", channelId)
     .single()
 
-  if (chError || !channel) {
-    return { success: false, error: "CHANNEL_NOT_FOUND" }
+  if (chError) {
+    if (chError.code === "PGRST116") {
+      return {
+        success: false,
+        error: "CHANNEL_NOT_FOUND",
+      }
+    }
+
+    return {
+      success: false,
+      error: "FETCH_CHANNEL_ERROR",
+      details: { database: [chError.message] },
+    }
   }
 
-  if (channel.is_mandatory && !validation.data.isSubscribed) {
-    return { success: false, error: "CANNOT_UNSUBSCRIBE_MANDATORY_CHANNEL" }
+  if (channel.is_mandatory && !isSubscribed) {
+    return {
+      success: false,
+      error: "CANNOT_UNSUBSCRIBE_MANDATORY_CHANNEL",
+    }
   }
 
+  // 5. Upsert subscription preference record
   const { error: upsertError } = await supabase
     .from("user_channel_subscriptions")
     .upsert(
       {
         user_id: user.id,
-        channel_id: validation.data.channelId,
-        is_subscribed: validation.data.isSubscribed,
+        channel_id: channelId,
+        is_subscribed: isSubscribed,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "user_id,channel_id" }
@@ -78,10 +102,11 @@ export async function toggleChannelSubscription(
     }
   }
 
+  // 6. Invalidate stale cache paths
   revalidatePath("/", "layout")
 
   return {
     success: true,
-    data: validation.data.isSubscribed,
+    data: isSubscribed,
   }
 }

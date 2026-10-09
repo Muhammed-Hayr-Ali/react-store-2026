@@ -85,7 +85,8 @@ export function DeleteChannelDialog({
             <span className="font-semibold text-foreground">
               {channel.name}
             </span>
-            &quot;? All user subscriptions to this topic will be permanently removed.
+            &quot;? All user subscriptions to this topic will be permanently
+            removed.
           </DialogDescription>
         </DialogHeader>
 

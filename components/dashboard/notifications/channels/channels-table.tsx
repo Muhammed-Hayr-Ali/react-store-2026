@@ -68,10 +68,10 @@ import {
 import { NotificationChannelRecord } from "@/lib/actions/notifications/types"
 import {
   updateNotificationChannel,
+  getAllNotificationChannels,
 } from "@/lib/actions/notifications"
 import { ChannelFormSheet } from "./channel-form-sheet"
 import { DeleteChannelDialog } from "./delete-channel-dialog"
-import { getAllNotificationChannels } from "@/lib/actions/notifications/channels/queries/get-active-channels"
 
 const features = tableFeatures({
   columnFilteringFeature,
@@ -132,7 +132,8 @@ export function ChannelsTable({
 
   const handleToggleActive = (id: string, currentActive: boolean) => {
     startTransition(async () => {
-      await updateNotificationChannel({ id, isActive: !currentActive })
+      // تمرير المعاملين (id, payload) ليتطابق مع دالة updateCategory
+      await updateNotificationChannel(id, { isActive: !currentActive })
       setData((prev) =>
         prev.map((item) =>
           item.id === id ? { ...item, is_active: !currentActive } : item
@@ -399,7 +400,7 @@ export function ChannelsTable({
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          {/* منيو الموبايل للتابات */}
+          {/* تابات الموبايل */}
           <div className="block sm:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -466,7 +467,7 @@ export function ChannelsTable({
             </DropdownMenu>
           </div>
 
-          {/* التابات الديسكتوب المطابقة للفلاش سيلز */}
+          {/* تابات الديسكتوب */}
           <div className="hidden h-8 items-center overflow-hidden rounded-md border border-input bg-background p-0.5 sm:inline-flex">
             <button
               type="button"
@@ -584,7 +585,6 @@ export function ChannelsTable({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* زر متجاوب ونظيف يقبله SheetTrigger كعنصر DOM واحد دون Fragment */}
           <ChannelFormSheet
             onSuccess={refreshChannels}
             trigger={
