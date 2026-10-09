@@ -32,13 +32,20 @@ import { CustomInput } from "@/components/ui/custom-input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AuthHeader } from "./auth-header"
 
-import {
-  confirmPasswordReset,
-  confirmPasswordResetSchema,
-} from "@/lib/actions/authentication"
+import { confirmPasswordReset } from "@/lib/actions/authentication"
 import { appRoutes } from "@/lib/config/app-routes"
 
-const clientResetSchema = confirmPasswordResetSchema.omit({ token: true })
+// تعريف المخطط محلياً بشكل مستقل لتجنب خطأ .omit() مع الـ refinement
+const clientResetSchema = z
+  .object({
+    password: z.string().min(6, "PASSWORD_TOO_SHORT"),
+    confirmPassword: z.string().min(1, "CONFIRM_PASSWORD_REQUIRED"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "PASSWORDS_DO_NOT_MATCH",
+    path: ["confirmPassword"],
+  })
+
 type ClientResetFormValues = z.infer<typeof clientResetSchema>
 
 interface ResetPasswordFormProps {
@@ -114,13 +121,13 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
             <AlertTitle className="text-xs font-semibold">
               {t("ALERT_TITLE")}
             </AlertTitle>
-            <AlertDescription className="text-xs text-destructive-foreground/90">
+            <AlertDescription className="text-destructive-foreground/90 text-xs">
               {errorMessage}
             </AlertDescription>
             <button
               type="button"
               onClick={() => setErrorMessage(null)}
-              className="absolute top-3 inset-e-3 cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
+              className="absolute inset-e-3 top-3 cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
             >
               <XIcon className="size-4" />
               <span className="sr-only">{t("DISMISS_ALERT_SR")}</span>
@@ -145,7 +152,9 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                 aria-invalid={fieldState.invalid}
                 autoComplete="new-password"
                 className="h-9 text-xs"
-                prefixIcon={<LockIcon className="size-4 text-muted-foreground" />}
+                prefixIcon={
+                  <LockIcon className="size-4 text-muted-foreground" />
+                }
                 suffixIcon={
                   <Button
                     type="button"
@@ -189,7 +198,9 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                 aria-invalid={fieldState.invalid}
                 autoComplete="new-password"
                 className="h-9 text-xs"
-                prefixIcon={<LockIcon className="size-4 text-muted-foreground" />}
+                prefixIcon={
+                  <LockIcon className="size-4 text-muted-foreground" />
+                }
                 suffixIcon={
                   <Button
                     type="button"
@@ -225,7 +236,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           >
             {isSubmitting ? (
               <>
-                <Spinner className="size-3.5 me-2" />
+                <Spinner className="me-2 size-3.5" />
                 <span>{t("SUBMITTING_BUTTON")}</span>
               </>
             ) : (

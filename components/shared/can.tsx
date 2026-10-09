@@ -1,15 +1,11 @@
-
-
-
-
 "use client"
 
+import * as React from "react"
 import { AppPermission } from "@/lib/actions/role"
 import { useUser } from "@/lib/context/user-context"
-import React from "react"
 
 interface CanProps {
-  permission: AppPermission
+  permission: AppPermission | AppPermission[]
   children: React.ReactNode
   fallback?: React.ReactNode
 }
@@ -17,12 +13,13 @@ interface CanProps {
 export function Can({ permission, children, fallback = null }: CanProps) {
   const { hasPermission } = useUser()
 
-  if (!hasPermission(permission)) {
+  const isAllowed = Array.isArray(permission)
+    ? permission.some((p) => hasPermission(p))
+    : hasPermission(permission)
+
+  if (!isAllowed) {
     return <>{fallback}</>
   }
+
   return <>{children}</>
 }
-
-
-
-

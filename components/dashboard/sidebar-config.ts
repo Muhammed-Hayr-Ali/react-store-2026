@@ -40,19 +40,10 @@ export const sidebarConfig: SidebarConfig = {
       icon: StoreIcon,
     },
     {
-      title: "Dashboard",
-      key: "user-dashboard",
+      title: "Overview",
+      key: "overview",
       url: appRoutes.dashboard.user.overview,
       icon: LayoutDashboard,
-      requiredPermission: PERMISSIONS.VIEW_USER_OVERVIEW,
-      hasSeparator: true,
-    },
-    {
-      title: "Admin Dashboard",
-      key: "admin-dashboard",
-      url: appRoutes.dashboard.admin.overview,
-      icon: ShieldCheck,
-      requiredPermission: PERMISSIONS.VIEW_ADMIN_OVERVIEW,
     },
     {
       title: "Products",
