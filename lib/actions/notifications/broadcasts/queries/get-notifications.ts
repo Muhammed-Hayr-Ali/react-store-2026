@@ -8,7 +8,14 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
 import { NotificationRecord } from "../../types"
 
-export async function getNotifications(): Promise<ApiResult<NotificationRecord[]>> {
+export interface UserNotificationsResult {
+  notifications: NotificationRecord[]
+  unreadCount: number
+}
+
+export async function getNotifications(): Promise<
+  ApiResult<UserNotificationsResult>
+> {
   const supabase = await createServerClient()
 
   const {
@@ -34,5 +41,14 @@ export async function getNotifications(): Promise<ApiResult<NotificationRecord[]
     }
   }
 
-  return { success: true, data: data as NotificationRecord[] }
+  const notifications = (data as NotificationRecord[]) || []
+  const unreadCount = notifications.filter((n) => !n.is_read).length
+
+  return {
+    success: true,
+    data: {
+      notifications,
+      unreadCount,
+    },
+  }
 }

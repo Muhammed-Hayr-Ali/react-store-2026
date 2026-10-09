@@ -1,10 +1,10 @@
 import Link from "next/link"
-import { getNotifications } from "@/lib/actions/notifications/queries/get-notifications"
 import { AppLogo } from "@/components/ui/app-logo"
 
 import DesktopNavbar from "./desktop-navbar"
 import { MobileMenu } from "./mobile-menu"
 import type { NotificationRecord } from "@/lib/actions/notifications/types"
+import { getNotifications } from "@/lib/actions/notifications"
 
 export default async function Navbar() {
   const notificationsRes = await getNotifications()
@@ -13,6 +13,7 @@ export default async function Navbar() {
     notificationsRes.success && notificationsRes.data
       ? notificationsRes.data.notifications
       : []
+
   const unreadCount =
     notificationsRes.success && notificationsRes.data
       ? notificationsRes.data.unreadCount
