@@ -35,6 +35,7 @@ import {
   MegaphoneIcon,
   MoreVerticalIcon,
   PlusIcon,
+  RadioTowerIcon,
   SearchIcon,
   Trash2Icon,
   UsersIcon,
@@ -74,7 +75,7 @@ import DeleteNotificationDialog from "./delete-notification-dialog"
 import NotificationForm from "./notification-form-sheet"
 import BroadcastForm from "./broadcast-form-sheet"
 import { NotificationDetailsDialog } from "./notification-details-dialog"
-import { CreateChannelDialog } from "./create-channel-dialog"
+import { ChannelFormSheet } from "./channel-form-sheet"
 
 interface DisplayNotificationRecord extends AdminNotificationRecord {
   isBroadcastGroup?: boolean
@@ -652,10 +653,28 @@ export function AdminNotificationsTable({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* إضافة قناة جديدة */}
-          <CreateChannelDialog />
+          {/* 1. شيت إضافة قناة جديدة */}
+          <div className="sm:hidden">
+            <ChannelFormSheet
+              trigger={
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="size-8"
+                  title="Add Channel"
+                >
+                  <RadioTowerIcon className="size-3.5" />
+                  <span className="sr-only">Add Channel</span>
+                </Button>
+              }
+            />
+          </div>
+          <div className="hidden sm:inline-flex">
+            <ChannelFormSheet />
+          </div>
 
-          {/* إرسال البث */}
+          {/* 2. شيت إرسال البث */}
           <div className="sm:hidden">
             <BroadcastForm
               trigger={
@@ -676,7 +695,7 @@ export function AdminNotificationsTable({
             <BroadcastForm />
           </div>
 
-          {/* إشعار فردي */}
+          {/* 3. شيت الإشعار الفردي */}
           <div className="sm:hidden">
             <NotificationForm
               users={users}
