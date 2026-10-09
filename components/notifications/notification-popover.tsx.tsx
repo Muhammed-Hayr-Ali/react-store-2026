@@ -1,301 +1,227 @@
 "use client"
 
-import { useState, useEffect, useTransition } from "react"
-import { CheckCheck, Trash2, ExternalLink, ArrowRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import {
-  CustomPopover,
-  CustomPopoverContent,
-  CustomPopoverHeader,
-  CustomPopoverTrigger,
-} from "@/components/ui/custom-popover"
-import { Badge } from "@/components/ui/badge"
-import { NotificationRecord } from "@/lib/actions/notifications/types"
-import { createClient } from "@/lib/database/supabase/client"
+import * as React from "react"
 import Link from "next/link"
 import { useRouter, useParams } from "next/navigation"
 import {
   markNotificationAsRead,
   markAllNotificationsAsRead,
-} from "@/lib/actions/notifications/mutations/mark-read"
-import {
   deleteNotification,
   deleteAllNotifications,
-} from "@/lib/actions/notifications/mutations/delete"
+} from "@/lib/actions/notifications"
 import { NotificationBell } from "./notification-bell"
 import { appRoutes } from "@/lib/config/app-routes"
+import type { NotificationRecord } from "@/lib/actions/notifications/types"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { CheckCheckIcon, Trash2Icon, ExternalLinkIcon } from "lucide-react"
 
 interface NotificationPopoverProps {
-  initialNotifications: NotificationRecord[]
-  initialUnreadCount: number
-  currentUserId: string
+  initialNotifications?: NotificationRecord[]
+  initialUnreadCount?: number
 }
 
 export function NotificationPopover({
-  initialNotifications,
-  initialUnreadCount,
-  currentUserId,
+  initialNotifications = [],
+  initialUnreadCount = 0,
 }: NotificationPopoverProps) {
-  const [notifications, setNotifications] =
-    useState<NotificationRecord[]>(initialNotifications)
-  const [unreadCount, setUnreadCount] = useState<number>(initialUnreadCount)
-  const [isOpen, setIsOpen] = useState(false)
-  const [isPending, startTransition] = useTransition()
   const router = useRouter()
   const params = useParams()
   const locale = (params?.locale as string) || "en"
-  const supabase = createClient()
 
-  // Setup Supabase Realtime subscription with a unique channel per component instance
-  useEffect(() => {
-    const channelName = `notifications:${currentUserId}:${Math.random().toString(36).substring(2, 9)}`
+  // مزامنة الحالة مع الـ props بدون useEffect (نمط معتمد من React لتجنب Cascading Renders)
+  const [data, setData] =
+    React.useState<NotificationRecord[]>(initialNotifications)
+  const [prevInitialNotifications, setPrevInitialNotifications] =
+    React.useState<NotificationRecord[]>(initialNotifications)
 
-    const channel = supabase
-      .channel(channelName)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "notifications",
-          filter: `user_id=eq.${currentUserId}`,
-        },
-        (payload) => {
-          const newNotification = payload.new as NotificationRecord
-          setNotifications((prev) => [newNotification, ...prev])
-          setUnreadCount((prev) => prev + 1)
-        }
-      )
-      .subscribe()
+  const [unreadCount, setUnreadCount] = React.useState(initialUnreadCount)
+  const [prevInitialUnreadCount, setPrevInitialUnreadCount] =
+    React.useState(initialUnreadCount)
 
-    return () => {
-      supabase.removeChannel(channel)
+  const [isOpen, setIsOpen] = React.useState(false)
+
+  if (initialNotifications !== prevInitialNotifications) {
+    setPrevInitialNotifications(initialNotifications)
+    setData(initialNotifications)
+  }
+
+  if (initialUnreadCount !== prevInitialUnreadCount) {
+    setPrevInitialUnreadCount(initialUnreadCount)
+    setUnreadCount(initialUnreadCount)
+  }
+
+  const handleMarkAsRead = async (id: string) => {
+    setData((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+    )
+    setUnreadCount((prev) => Math.max(0, prev - 1))
+    await markNotificationAsRead(id)
+    router.refresh()
+  }
+
+  const handleMarkAllAsRead = async () => {
+    setData((prev) => prev.map((n) => ({ ...n, is_read: true })))
+    setUnreadCount(0)
+    await markAllNotificationsAsRead()
+    router.refresh()
+  }
+
+  const handleDelete = async (id: string) => {
+    const target = data.find((n) => n.id === id)
+    if (target && !target.is_read) {
+      setUnreadCount((prev) => Math.max(0, prev - 1))
     }
-  }, [currentUserId, supabase])
-
-  const handleBellClick = (e: React.MouseEvent) => {
-    // التوجيه إلى صفحة الإشعارات الكاملة مباشرة على الجوال والشاشات الصغيرة
-    if (window.innerWidth < 768) {
-      e.preventDefault()
-      router.push(appRoutes.dashboard.admin.notifications)
-    }
+    setData((prev) => prev.filter((n) => n.id !== id))
+    await deleteNotification(id)
+    router.refresh()
   }
 
-  const handleMarkAsRead = (id: string, isRead: boolean) => {
-    if (isRead) return
-    startTransition(async () => {
-      const res = await markNotificationAsRead(id)
-      if (res.success) {
-        setNotifications((prev) =>
-          prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
-        )
-        setUnreadCount((prev) => Math.max(0, prev - 1))
-      }
-    })
-  }
-
-  const handleMarkAllAsRead = () => {
-    startTransition(async () => {
-      const res = await markAllNotificationsAsRead()
-      if (res.success) {
-        setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })))
-        setUnreadCount(0)
-      }
-    })
-  }
-
-  const handleDelete = (id: string, isRead: boolean) => {
-    startTransition(async () => {
-      const res = await deleteNotification(id)
-      if (res.success) {
-        setNotifications((prev) => prev.filter((n) => n.id !== id))
-        if (!isRead) {
-          setUnreadCount((prev) => Math.max(0, prev - 1))
-        }
-      }
-    })
-  }
-
-  const handleDeleteAll = () => {
-    startTransition(async () => {
-      const res = await deleteAllNotifications()
-      if (res.success) {
-        setNotifications([])
-        setUnreadCount(0)
-      }
-    })
-  }
-
-  // Helper for badge color based on notification type
-  const getTypeBadgeColor = (type: string) => {
-    switch (type) {
-      case "success":
-        return "bg-green-500/10 text-green-500 border-green-500/20"
-      case "warning":
-        return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
-      case "error":
-        return "bg-destructive/10 text-destructive border-destructive/20"
-      default:
-        return "bg-blue-500/10 text-blue-500 border-blue-500/20"
-    }
+  const handleDeleteAll = async () => {
+    setData([])
+    setUnreadCount(0)
+    await deleteAllNotifications()
+    router.refresh()
   }
 
   return (
-    <CustomPopover open={isOpen} onOpenChange={setIsOpen}>
-      <CustomPopoverTrigger asChild>
-        <div onClick={handleBellClick} className="inline-flex cursor-pointer">
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <div className="cursor-pointer">
           <NotificationBell unreadCount={unreadCount} />
         </div>
-      </CustomPopoverTrigger>
-
-      <CustomPopoverContent
-        align="end"
-        className="w-80 gap-0 rounded-xl p-0 shadow-lg sm:w-96"
-      >
-        {/* Header */}
-        <CustomPopoverHeader className="flex flex-row items-center justify-between border-b px-4 py-3">
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-80 p-0 sm:w-96">
+        <div className="flex items-center justify-between border-b px-4 py-3">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold">Notifications</h3>
+            <span className="text-sm font-semibold">Notifications</span>
             {unreadCount > 0 && (
-              <Badge variant="secondary" className="text-xs">
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
                 {unreadCount} new
-              </Badge>
+              </span>
             )}
           </div>
           <div className="flex items-center gap-1">
             {unreadCount > 0 && (
               <Button
                 variant="ghost"
-                size="sm"
-                className="h-auto px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
+                size="icon"
+                className="size-7 text-muted-foreground hover:text-foreground"
                 onClick={handleMarkAllAsRead}
-                disabled={isPending}
+                title="Mark all as read"
               >
-                <CheckCheck className="mr-1 size-3.5" />
-                Mark all read
+                <CheckCheckIcon className="size-3.5" />
               </Button>
             )}
-            {notifications.length > 0 && (
+            {data.length > 0 && (
               <Button
                 variant="ghost"
-                size="sm"
-                className="h-auto px-2 py-1 text-xs text-destructive hover:text-destructive"
+                size="icon"
+                className="size-7 text-muted-foreground hover:text-destructive"
                 onClick={handleDeleteAll}
-                disabled={isPending}
+                title="Clear all"
               >
-                <Trash2 className="size-3.5" />
+                <Trash2Icon className="size-3.5" />
               </Button>
             )}
           </div>
-        </CustomPopoverHeader>
+        </div>
 
-        {/* Notifications List */}
-        <div className="max-h-95 divide-y overflow-y-auto">
-          {notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
-              <p className="text-sm">No notifications yet</p>
+        <ScrollArea className="h-80">
+          {data.length === 0 ? (
+            <div className="flex h-40 flex-col items-center justify-center text-xs text-muted-foreground">
+              No notifications yet.
             </div>
           ) : (
-            notifications.map((notification) => (
-              <div
-                key={notification.id}
-                className={`flex flex-col p-3 transition-colors hover:bg-muted/50 ${
-                  !notification.is_read ? "bg-muted/30 font-medium" : ""
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`size-2 rounded-full ${!notification.is_read ? "bg-primary" : "bg-transparent"}`}
-                      />
-                      <span className="text-xs font-semibold">
-                        {notification.title}
-                      </span>
-                      <span
-                        className={`rounded-full border px-1.5 py-0.5 text-[10px] ${getTypeBadgeColor(notification.type)}`}
-                      >
-                        {notification.type}
-                      </span>
-                    </div>
-                    <p className="text-xs leading-relaxed text-muted-foreground">
-                      {notification.message}
-                    </p>
-                  </div>
-
-                  {/* Actions per notification */}
-                  <div className="flex items-center gap-1">
-                    {!notification.is_read && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-7 text-muted-foreground hover:text-foreground"
-                        onClick={() =>
-                          handleMarkAsRead(
-                            notification.id,
-                            notification.is_read
-                          )
-                        }
-                        title="Mark as read"
-                      >
-                        <CheckCheck className="size-3.5" />
-                      </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-7 text-muted-foreground hover:text-destructive"
-                      onClick={() =>
-                        handleDelete(notification.id, notification.is_read)
-                      }
+            <div className="divide-y">
+              {data.map((item) => (
+                <div
+                  key={item.id}
+                  className={`group relative flex flex-col gap-1 p-4 transition-colors hover:bg-muted/40 ${
+                    !item.is_read ? "bg-muted/20" : ""
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <span
+                      className={`text-xs font-medium ${
+                        !item.is_read
+                          ? "text-foreground"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      {item.title}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(item.id)}
+                      className="cursor-pointer text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive"
                       title="Delete"
                     >
-                      <Trash2 className="size-3.5" />
-                    </Button>
+                      <Trash2Icon className="size-3.5" />
+                    </button>
+                  </div>
+
+                  <p className="line-clamp-2 text-xs text-muted-foreground">
+                    {item.message}
+                  </p>
+
+                  <div className="mt-1 flex items-center justify-between">
+                    <span className="text-[10px] text-muted-foreground/70">
+                      {new Date(item.created_at).toLocaleDateString(locale, {
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+
+                    <div className="flex items-center gap-2">
+                      {item.link && (
+                        <Link
+                          href={item.link}
+                          onClick={() => {
+                            if (!item.is_read) handleMarkAsRead(item.id)
+                            setIsOpen(false)
+                          }}
+                          className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+                        >
+                          <span>View</span>
+                          <ExternalLinkIcon className="size-2.5" />
+                        </Link>
+                      )}
+
+                      {!item.is_read && (
+                        <button
+                          type="button"
+                          onClick={() => handleMarkAsRead(item.id)}
+                          className="cursor-pointer text-[11px] text-muted-foreground hover:text-foreground"
+                        >
+                          Mark as read
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-
-                {/* Footer link if available */}
-                {notification.link && (
-                  <div className="mt-2 flex items-center justify-between pt-1 text-[11px]">
-                    <Link
-                      href={notification.link}
-                      className="flex items-center gap-1 text-primary hover:underline"
-                      onClick={() => {
-                        handleMarkAsRead(notification.id, notification.is_read)
-                        setIsOpen(false)
-                      }}
-                    >
-                      View details <ExternalLink className="size-3" />
-                    </Link>
-                    <span className="text-[10px] text-muted-foreground">
-                      {new Date(notification.created_at).toLocaleTimeString(
-                        [],
-                        {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }
-                      )}
-                    </span>
-                  </div>
-                )}
-              </div>
-            ))
+              ))}
+            </div>
           )}
-        </div>
+        </ScrollArea>
 
-        {/* Footer Link to Full Page on PC */}
         <div className="border-t p-2 text-center">
           <Link
-            href={appRoutes.dashboard.admin.notifications}
+            href={`/${locale}${appRoutes.dashboard.user.notifications}`}
             onClick={() => setIsOpen(false)}
-            className="flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:underline"
+            className="text-xs text-primary hover:underline"
           >
-            <span>View all notifications</span>
-            <ArrowRight className="size-3.5" />
+            View all notifications
           </Link>
         </div>
-      </CustomPopoverContent>
-    </CustomPopover>
+      </PopoverContent>
+    </Popover>
   )
 }
