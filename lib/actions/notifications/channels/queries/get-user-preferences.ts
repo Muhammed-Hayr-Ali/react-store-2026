@@ -6,7 +6,7 @@
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/database/types/utils"
-import { UserChannelPreference } from "../../types"
+import { NotificationChannelRecord, UserChannelPreference } from "../../types"
 
 export async function getUserChannelPreferences(): Promise<
   ApiResult<UserChannelPreference[]>
@@ -22,9 +22,10 @@ export async function getUserChannelPreferences(): Promise<
     return { success: false, error: "UNAUTHORIZED" }
   }
 
+  // جلب كافة حقول القناة لتطابق واجهة NotificationChannelRecord
   const { data: channels, error: channelsError } = await supabase
     .from("notification_channels")
-    .select("id, name, name_ar, description, description_ar, is_mandatory, default_enabled")
+    .select("*")
     .eq("is_active", true)
     .order("is_mandatory", { ascending: false })
 
@@ -51,7 +52,9 @@ export async function getUserChannelPreferences(): Promise<
 
   const subsMap = new Map(subs.map((s) => [s.channel_id, s.is_subscribed]))
 
-  const preferences: UserChannelPreference[] = channels.map((c) => {
+  const rawChannels = (channels as NotificationChannelRecord[]) || []
+
+  const preferences: UserChannelPreference[] = rawChannels.map((c) => {
     let isSubscribed = c.default_enabled
     if (subsMap.has(c.id)) {
       isSubscribed = subsMap.get(c.id)!
@@ -61,12 +64,7 @@ export async function getUserChannelPreferences(): Promise<
     }
 
     return {
-      id: c.id,
-      name: c.name,
-      name_ar: c.name_ar,
-      description: c.description,
-      description_ar: c.description_ar,
-      is_mandatory: c.is_mandatory,
+      ...c,
       is_subscribed: isSubscribed,
     }
   })
