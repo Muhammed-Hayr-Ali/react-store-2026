@@ -14,7 +14,7 @@ import {
 import { LogOutIcon } from "lucide-react"
 import React from "react"
 import { Spinner } from "../ui/spinner"
-import { signOut } from "@/lib/actions/authentication/index.ts"
+import { signOut } from "@/lib/actions/authentication"
 import { appRoutes } from "@/lib/config/app-routes"
 import { useRouter } from "next/navigation"
 
