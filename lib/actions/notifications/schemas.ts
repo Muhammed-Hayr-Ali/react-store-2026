@@ -1,14 +1,6 @@
-/**
- * @file lib/actions/notifications/schemas.ts
- * @description Central Zod validation schemas for notifications and channels.
- */
-
 import { z } from "zod"
 
-// ==========================================
-// 1. Notification Schemas
-// ==========================================
-
+// مخطط الإشعار الفردي
 export const createNotificationSchema = z.object({
   userId: z.string().uuid("Invalid user ID"),
   title: z.string().min(1, "Title is required").max(120, "Title is too long"),
@@ -20,6 +12,7 @@ export const createNotificationSchema = z.object({
   link: z.string().optional().nullable(),
 })
 
+// مخطط إرسال البث
 export const broadcastNotificationSchema = z.object({
   title: z.string().min(1, "Title is required").max(120, "Title is too long"),
   message: z
@@ -32,41 +25,12 @@ export const broadcastNotificationSchema = z.object({
   channelIds: z.array(z.string().uuid()).default([]),
 })
 
-// ==========================================
-// 2. Channel Schemas
-// ==========================================
+export type CreateNotificationInput = z.input<typeof createNotificationSchema>
+export type CreateNotificationOutput = z.output<typeof createNotificationSchema>
 
-export const createChannelSchema = z.object({
-  slug: z
-    .string()
-    .min(2, "Slug must be at least 2 characters")
-    .max(50, "Slug cannot exceed 50 characters"),
-  name: z
-    .string()
-    .min(2, "Name must be at least 2 characters")
-    .max(100, "Name cannot exceed 100 characters"),
-  name_ar: z
-    .string()
-    .min(2, "Arabic name must be at least 2 characters")
-    .max(100, "Arabic name cannot exceed 100 characters"),
-  description: z.string().optional().nullable(),
-  description_ar: z.string().optional().nullable(),
-  isMandatory: z.boolean().default(false),
-  defaultEnabled: z.boolean().default(true),
-  isActive: z.boolean().default(true),
-})
-
-export const updateChannelSchema = createChannelSchema.partial().extend({
-  id: z.string().uuid("Invalid channel ID"),
-})
-
-// ==========================================
-// 3. Inferred Types
-// ==========================================
-
-export type CreateNotificationInput = z.infer<typeof createNotificationSchema>
-export type BroadcastNotificationInput = z.infer<
+export type BroadcastNotificationInput = z.input<
   typeof broadcastNotificationSchema
 >
-export type CreateChannelInput = z.infer<typeof createChannelSchema>
-export type UpdateChannelInput = z.infer<typeof updateChannelSchema>
+export type BroadcastNotificationOutput = z.output<
+  typeof broadcastNotificationSchema
+>

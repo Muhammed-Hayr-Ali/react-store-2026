@@ -47,7 +47,7 @@ import {
 } from "@/lib/actions/notifications"
 import type { NotificationChannelRecord } from "@/lib/actions/notifications/types"
 
-type BroadcastFormValues = z.infer<typeof broadcastNotificationSchema>
+type BroadcastFormValues = z.input<typeof broadcastNotificationSchema>
 
 interface BroadcastFormProps {
   trigger?: React.ReactNode
@@ -61,7 +61,9 @@ export default function BroadcastForm({
   const router = useRouter()
   const [open, setOpen] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
-  const [channels, setChannels] = React.useState<NotificationChannelRecord[]>([])
+  const [channels, setChannels] = React.useState<NotificationChannelRecord[]>(
+    []
+  )
   const [isLoadingChannels, startTransition] = React.useTransition()
 
   const {
@@ -116,10 +118,10 @@ export default function BroadcastForm({
     const payload = {
       title: data.title,
       message: data.message,
-      type: data.type,
+      type: data.type || "info",
       link: data.link ? data.link : null,
       targetType: data.targetType,
-      channelIds: data.targetType === "channels" ? data.channelIds : [],
+      channelIds: data.targetType === "channels" ? data.channelIds || [] : [],
     }
 
     const result = await broadcastNotification(payload)
@@ -163,7 +165,8 @@ export default function BroadcastForm({
             Broadcast Notification
           </SheetTitle>
           <SheetDescription className="text-xs text-muted-foreground">
-            Send mass announcements to all users or target specific audience channels.
+            Send mass announcements to all users or target specific audience
+            channels.
           </SheetDescription>
         </SheetHeader>
 
@@ -253,7 +256,7 @@ export default function BroadcastForm({
                         </FieldLabel>
                         <Select
                           onValueChange={field.onChange}
-                          value={field.value}
+                          value={field.value || "info"}
                         >
                           <SelectTrigger
                             id="broadcast-type"
