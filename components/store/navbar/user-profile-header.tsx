@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useUser } from "@/lib/context/user-context"
 import type { NotificationRecord } from "@/lib/actions/notifications/types"
 import { cn } from "@/lib/utils"
-import { NotificationPopover } from "@/components/notifications/notification-popover"
+import { NotificationPopover } from "@/components/notifications/notification-popover.tsx"
 
 interface UserProfileHeaderProps {
   className?: string
