@@ -49,7 +49,7 @@ Output Format for Phase 0:
 
 Standard Page Template:
 
-```tsx
+````tsx
 import { notFound } from "next/navigation"
 import { PackageIcon } from "lucide-react"
 import { getTranslations } from "next-intl/server"
@@ -889,6 +889,11 @@ TANSTACK TABLE & REACT COMPILER ESLINT SUPPRESSION STANDARD
 
 
 
+
+
+
+
+
 ================================================================================
 REACT COMPILER LOGS VS ESLint SUPPRESSION RULE
 ================================================================================
@@ -899,6 +904,6 @@ REACT COMPILER LOGS VS ESLint SUPPRESSION RULE
 
 2. Architectural Stance on "Compilation Skipped" Diagnostics:
    - For stateful external client primitives (e.g., TanStack Table's `useReactTable()`, React Hook Form subscriptions), automatic compilation skip is an intentional architectural safeguard.
-   - Do NOT try to silence compilation logs with synthetic ESLint comments or illegal `useMemo` wrappers. Let the component execute cleanly with its native React lifecycles.   
+   - Do NOT try to silence compilation logs with synthetic ESLint comments or illegal `useMemo` wrappers. Let the component execute cleanly with its native React lifecycles.
 
-```
+````
