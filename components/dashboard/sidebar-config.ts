@@ -45,6 +45,14 @@ export const sidebarConfig: SidebarConfig = {
       url: appRoutes.dashboard.user.overview,
       icon: LayoutDashboard,
     },
+    // app\[locale]\dashboard\x9k2-panel\categories\create\page.tsx
+    {
+      title: "Categories",
+      key: "categories",
+      url: appRoutes.dashboard.admin.categories,
+      icon: Package,
+      requiredPermission: PERMISSIONS.VIEW_CATEGORIES_MANAGEMENT,
+    },
     {
       title: "Products",
       key: "products",

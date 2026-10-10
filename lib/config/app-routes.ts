@@ -19,6 +19,7 @@ export const appRoutes = {
     // مسارات الإدارة المحمية والمموهة (Admin Panel)
     admin: {
       overview: "/dashboard/x9k2-panel/overview",
+      categories: "/dashboard/x9k2-panel/categories",
       products: "/dashboard/x9k2-panel/products",
       create_products: "/dashboard/x9k2-panel/products/create",
       flashSales: "/dashboard/x9k2-panel/flash-sales",
