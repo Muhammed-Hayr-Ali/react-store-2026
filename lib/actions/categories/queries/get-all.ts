@@ -1,72 +1,68 @@
 /**
  * @file lib/actions/categories/queries/get-all.ts
- * @description Query to retrieve categories supporting optional parent filtering and active status flags.
- * Results are ordered by sort_order ascending, followed by name ascending.
+ * @description Paginated categories query supporting search, filters, exact count, and view guards.
  */
 
 "use server"
 
 import { z } from "zod"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { ApiResult } from "@/lib/database/types/utils"
-import { Category } from "../types"
-import { categorySchema } from "../schemas"
+import { hasPermission } from "@/lib/actions/role/permission-checker"
+import { PERMISSIONS } from "@/lib/actions/role/types"
+import { categorySchema, getCategoriesFilterSchema } from "../schemas"
+import { ApiResult, Category, GetCategoriesFilterOptions } from "../types"
 
-// ============================================================================
-// Parameter Interfaces
-// ============================================================================
-
-export interface GetAllCategoriesOptions {
-  parentId?: string | null
-  activeOnly?: boolean
-}
-
-// ============================================================================
-// Main Query Function
-// ============================================================================
-
-export async function getAllCategories({
-  parentId,
-  activeOnly = true,
-}: GetAllCategoriesOptions = {}): Promise<ApiResult<Category[]>> {
-  // 1. Validate parentId if provided
-  if (parentId !== undefined && parentId !== null) {
-    const parentValidation = z
-      .string()
-      .uuid("INVALID_PARENT_ID")
-      .safeParse(parentId)
-    if (!parentValidation.success) {
-      return {
-        success: false,
-        error: "INVALID_PARENT_ID",
-      }
-    }
+export async function getAllCategories(
+  options: Partial<GetCategoriesFilterOptions> = {}
+): Promise<ApiResult<{ items: Category[]; total: number }>> {
+  // 1. Sanitize & validate filter inputs
+  const parsedFilter = getCategoriesFilterSchema.safeParse(options)
+  if (!parsedFilter.success) {
+    return { success: false, error: "INVALID_FILTER_OPTIONS" }
   }
 
-  // 2. Initialize Supabase client
+  const { search, parent_id, is_active, page, limit } = parsedFilter.data
+
+  // 2. Enforce VIEW permission guard
+  const canViewManagement = await hasPermission(
+    PERMISSIONS.VIEW_CATEGORIES_MANAGEMENT
+  )
+  if (!canViewManagement && is_active === false) {
+    return { success: false, error: "PERMISSION_DENIED" }
+  }
+
+  // 3. Initialize Supabase Client
   const supabase = await createServerClient()
 
-  // 3. Build query with ordering defaults
+  // 4. Build paginated query with exact count
+  const offset = (page - 1) * limit
   let query = supabase
     .from("categories")
-    .select("*")
+    .select("*", { count: "exact" })
     .order("sort_order", { ascending: true })
     .order("name", { ascending: true })
+    .range(offset, offset + limit - 1)
 
-  // 4. Apply optional filters
-  if (parentId !== undefined) {
-    if (parentId === null) {
-      query = query.is("parent_id", null)
-    } else {
-      query = query.eq("parent_id", parentId)
-    }
+  if (search) {
+    query = query.or(
+      `name.ilike.%${search}%,name_ar.ilike.%${search}%,slug.ilike.%${search}%`
+    )
   }
 
-  if (activeOnly) {
+  if (parent_id !== undefined) {
+    query = query.eq("parent_id", parent_id)
+  }
+
+  // If user has management access, obey filter; otherwise, strictly enforce is_active = true
+  if (canViewManagement) {
+    if (is_active !== undefined) {
+      query = query.eq("is_active", is_active)
+    }
+  } else {
     query = query.eq("is_active", true)
   }
 
-  const { data, error } = await query
+  const { data, count, error } = await query
 
   if (error) {
     return {
@@ -76,21 +72,21 @@ export async function getAllCategories({
     }
   }
 
-  // 5. Verify returned array against schema
-  const parsedData = z.array(categorySchema).safeParse(data ?? [])
-  if (!parsedData.success) {
+  // 5. Verify database response
+  const parsedItems = z.array(categorySchema).safeParse(data ?? [])
+  if (!parsedItems.success) {
     console.error(
       "Database schema mismatch in getAllCategories:",
-      parsedData.error
+      parsedItems.error
     )
-    return {
-      success: false,
-      error: "DATA_VALIDATION_ERROR",
-    }
+    return { success: false, error: "DATA_VALIDATION_ERROR" }
   }
 
   return {
     success: true,
-    data: parsedData.data,
+    data: {
+      items: parsedItems.data,
+      total: count ?? 0,
+    },
   }
 }

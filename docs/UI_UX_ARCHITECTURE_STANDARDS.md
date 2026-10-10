@@ -741,4 +741,164 @@ To maintain predictable UX and prevent cognitive disorientation, all system feed
      - Link generation / sharing events (`toast.info(t("LINK_COPIED"))`)
    - Rule: Toasts are strictly non-modal and auto-dismissing. They must never contain multi-line error traces or form validation lists.
 
+
+
+================================================================================
+SECTION 13: ADVANCED ARCHITECTURAL SAFEGUARDS & REACT 19 COMPILER PROTOCOL
+================================================================================
+
+1. CANONICAL ADMIN ROUTING & CACHE REVALIDATION
+--------------------------------------------------------------------------------
+- Directory Convention: All administrative modules MUST reside strictly under:
+    `app/[locale]/dashboard/x9k2-panel/[domain]/page.tsx`
+    `app/[locale]/dashboard/x9k2-panel/[domain]/loading.tsx`
+- Forbidden: NEVER inject hypothetical route groups like `(admin)` or `(dashboard)`.
+- Server Actions Revalidation Pair:
+    `revalidatePath("/dashboard/x9k2-panel/[domain]")`
+    `revalidatePath("/", "layout")`
+
+2. STRICT LOCALIZED METADATA STANDARD (ZERO HARDCODED STRINGS)
+--------------------------------------------------------------------------------
+- Async Route Params: Treat `params` as a Promise in Next.js App Router:
+    `const { locale } = await params`
+- Scoped Translation Fetching: Fetch metadata translations via `next-intl/server`:
+    `const t = await getTranslations({ locale, namespace: "[Domain]Management" })`
+- Keys: Strict UPPER_SNAKE_CASE:
+    `title: t("METADATA_TITLE")`
+    `description: t("METADATA_DESCRIPTION")`
+
+3. FORM DRAWER & MODAL NAMING SEMANTICS
+--------------------------------------------------------------------------------
+- Dedicated Drawer Forms: `[domain]-form-sheet.tsx` (Component: `[Domain]FormSheet`)
+- Dedicated Dialog Forms: `[domain]-form-dialog.tsx` (Component: `[Domain]FormDialog`)
+- Forbidden: Generic names like `[domain]-sheet.tsx` for forms bearing mutations.
+
+4. REACT 19 COMPILER (FORGET) WATCH PROTOCOL
+--------------------------------------------------------------------------------
+- Violation: Destructuring `const { watch } = useForm()` and calling `watch("field")` at the root component level disables compiler optimization (`Compilation Skipped: Use of incompatible library`).
+- Mandatory Standard: Use the standalone `useWatch` hook from `react-hook-form`:
+    ```tsx
+    import { useWatch } from "react-hook-form"
+    const watchedValue = useWatch({ control, name: "fieldName" })
+    ```
+
+5. STRICT TYPING FOR SERVER ACTION ERROR BINDING (ZERO ANY)
+--------------------------------------------------------------------------------
+- Violation: Casting field names as `as any` when setting form errors.
+- Mandatory Standard: Use `Path<TFormValues>`:
+    ```tsx
+    import type { Path } from "react-hook-form"
+
+    if (res.details) {
+      Object.entries(res.details).forEach(([field, msgs]) => {
+        setError(field as Path<FormValues>, { message: msgs[0] })
+      })
+    }
+    ```
+
+6. ZOD RESOLVER TYPE ALIGNMENT & .DEFAULT() PROHIBITION
+--------------------------------------------------------------------------------
+- Hazard A: Passing ternary partial schemas (`isEditing ? updateSchema : createSchema`) causes type collisions between optional (`string | undefined`) and required fields (`string`).
+- Hazard B: Using `.default(...)` in Zod schemas causes `z.input` (`T | undefined`) to diverge from `z.output` (`T`). Passing it into `zodResolver` triggers:
+    `Type 'undefined' is not assignable to type 'boolean | number'`
+- Mandatory Standard: Define a dedicated UI Form Schema where `z.input` and `z.output` are identical, relying entirely on `defaultValues` to supply concrete values:
+    ```tsx
+    export const entityFormSchema = createEntitySchema.extend({
+      is_active: z.boolean(),
+      sort_order: z.number().int().min(0),
+    })
+
+    export type EntityFormValues = z.infer<typeof entityFormSchema>
+
+    useForm<EntityFormValues>({
+      resolver: zodResolver(entityFormSchema),
+      defaultValues: { ... }
+    })
+    ```
+
+7. RENDER-TIME REF ACCESS SAFETY (REACT 19 COMPILER)
+--------------------------------------------------------------------------------
+- Violation: Passing a form submission callback that captures a ref directly during render:
+    `<form onSubmit={handleSubmit(onSubmit)}>`
+  Triggers: `Error: Cannot access refs during render: Passing a ref to a function may read its value during render` (because `onSubmit` calls `closeRef.current?.click()`).
+- Mandatory Standard: Encapsulate `handleSubmit` inside an explicit event handler function that runs strictly at event-time:
+    ```tsx
+    const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault()
+      void handleSubmit(onSubmit)(e)
+    }
+
+    // In JSX:
+    <form onSubmit={handleFormSubmit}>
+    ```
+
+
+================================================================================
+TANSTACK TABLE V8 CANONICAL STATE TYPE DEFINITIONS
+================================================================================
+When typing table state hooks in `@tanstack/react-table`, you MUST strictly use the library's exact canonical type names:
+
+1. Visibility State:
+   - FORBIDDEN: `ColumnVisibilityState`
+   - MANDATORY: `VisibilityState`
+     ```tsx
+     import type { VisibilityState } from "@tanstack/react-table"
+     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+     ```
+
+2. Standard Table State Types Reference:
+   - Visibility: `VisibilityState` (Record<string, boolean>)
+   - Sorting: `SortingState` (ColumnSort[])
+   - Column Filters: `ColumnFiltersState` (ColumnFilter[])
+   - Pagination: `PaginationState` ({ pageIndex: number; pageSize: number })
+   - Row Selection: `RowSelectionState` (Record<string, boolean>)
+   - Expanded: `ExpandedState` (true | Record<string, boolean>)
+
+
+
+
+
+
+
+
+
+
+
+   ================================================================================
+TANSTACK TABLE & REACT COMPILER ESLINT SUPPRESSION STANDARD
+================================================================================
+1. Nature of the Diagnostic:
+   - React Compiler's ESLint plugin (`eslint-plugin-react-compiler`) automatically skips components invoking `useReactTable()` by design (`Compilation Skipped: Use of incompatible library`).
+   - This diagnostic is NOT a runtime bug; it is an informational lint notice confirming that TanStack Table manages its own internal state machine.
+
+2. Mandatory Linter Suppression Rule:
+   - Directives like `"use no memo"` instruct the compiler backend, but `eslint-plugin-react-compiler` will still emit the diagnostic across AST scans unless explicitly suppressed.
+   - In all TanStack Table client components, you MUST explicitly suppress the compiler lint rule directly above the hook instantiation:
+     ```tsx
+     // eslint-disable-next-line react-compiler/react-compiler
+     const table = useReactTable({
+       data,
+       columns,
+       state: { columnVisibility },
+       onColumnVisibilityChange: setColumnVisibility,
+       getCoreRowModel: getCoreRowModel(),
+     })
+     ```
+   - Alternatively, add `/* eslint-disable react-compiler/react-compiler */` at the top of any dedicated `*-table.tsx` file.
+   - Rule: Never attempt to refactor `useReactTable()` into manual memoizations (`useMemo`) to satisfy the compiler; always apply the targeted ESLint suppression comment.
+
+
+
+================================================================================
+REACT COMPILER LOGS VS ESLint SUPPRESSION RULE
+================================================================================
+1. Distinction Between Compiler Logs and Linter Errors:
+   - Terminal warnings such as `Compilation Skipped: Use of incompatible library` are generated by Next.js React Compiler (Babel/Turbopack transform pipeline), NOT by ESLint.
+   - FORBIDDEN: NEVER inject arbitrary disable comments like `// eslint-disable-next-line react-compiler/react-compiler` unless the plugin `eslint-plugin-react-compiler` is explicitly installed and configured in the project's ESLint config. Doing so triggers:
+     `Definition for rule 'react-compiler/react-compiler' was not found.`
+
+2. Architectural Stance on "Compilation Skipped" Diagnostics:
+   - For stateful external client primitives (e.g., TanStack Table's `useReactTable()`, React Hook Form subscriptions), automatic compilation skip is an intentional architectural safeguard.
+   - Do NOT try to silence compilation logs with synthetic ESLint comments or illegal `useMemo` wrappers. Let the component execute cleanly with its native React lifecycles.   
+
 ```

@@ -1,70 +1,67 @@
 /**
  * @file lib/actions/categories/mutations/create.ts
- * @description Server Action to insert a new product category into Supabase.
- * Enforces Zod schema parsing, permission verification, duplicate slug detection, and cache revalidation.
+ * @description Server Action to insert a category enforcing the mandatory 6-step pattern.
  */
 
 "use server"
 
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { ApiResult } from "@/lib/database/types/utils"
-import { Category } from "../types"
+import { hasPermission } from "@/lib/actions/role/permission-checker"
+import { PERMISSIONS } from "@/lib/actions/role/types"
 import { categorySchema, createCategorySchema } from "../schemas"
-import { hasPermission, PERMISSIONS } from "../../role"
-
-// ============================================================================
-// Main Action Function
-// ============================================================================
+import { ApiResult, Category } from "../types"
 
 export async function createCategory(
   payload: unknown
 ): Promise<ApiResult<Category | null>> {
-  // 1. Validate payload against Zod schema
+  // Step 1: Input Validation
   const validation = createCategorySchema.safeParse(payload)
   if (!validation.success) {
-    const fieldErrors: Record<string, string[]> = {}
+    const details: Record<string, string[]> = {}
     for (const issue of validation.error.issues) {
       const path = issue.path.join(".")
-      if (!fieldErrors[path]) fieldErrors[path] = []
-      fieldErrors[path].push(issue.message)
+      if (!details[path]) details[path] = []
+      details[path].push(issue.message)
     }
-    return {
-      success: false,
-      error: "VALIDATION_ERROR",
-      details: fieldErrors,
-    }
+    return { success: false, error: "VALIDATION_ERROR", details }
   }
 
   const safeData = validation.data
 
-  // 2. Perform permission check
+  // Step 2: Permission Enforcement & Authentication
   const canCreate = await hasPermission(PERMISSIONS.CREATE_CATEGORY)
   if (!canCreate) {
-    return {
-      success: false,
-      error: "PERMISSION_DENIED",
-    }
+    return { success: false, error: "PERMISSION_DENIED" }
   }
 
-  // 3. Initialize Supabase client
+  // Step 3: Supabase Client Initialization
   const supabase = await createServerClient()
 
-  // 4. Insert category record into database
+  // Step 4: Database Execution & Scoping
   const { data: newCategory, error } = await supabase
     .from("categories")
-    .insert(safeData)
+    .insert({
+      name: safeData.name,
+      name_ar: safeData.name_ar || null,
+      slug: safeData.slug,
+      description: safeData.description || null,
+      parent_id: safeData.parent_id || null,
+      image_url: safeData.image_url || null,
+      image_alt: safeData.image_alt || null,
+      is_active: safeData.is_active ?? true,
+      sort_order: safeData.sort_order ?? 0,
+    })
     .select()
     .single()
 
   if (error) {
     if (error.code === "23505") {
-      return {
-        success: false,
-        error: "SLUG_ALREADY_EXISTS",
-      }
+      return { success: false, error: "SLUG_ALREADY_EXISTS" }
     }
-
+    if (error.code === "23503") {
+      return { success: false, error: "PARENT_RECORD_NOT_FOUND" }
+    }
     return {
       success: false,
       error: "CREATE_CATEGORY_ERROR",
@@ -72,24 +69,17 @@ export async function createCategory(
     }
   }
 
-  // 5. Verify database response matches entity schema
+  // Step 5: Runtime Entity Validation
   const parsedData = categorySchema.safeParse(newCategory)
   if (!parsedData.success) {
-    console.error(
-      "Database schema mismatch on createCategory:",
-      parsedData.error
-    )
-    return {
-      success: false,
-      error: "DATA_VALIDATION_ERROR",
-    }
+    console.error("Database schema mismatch on createCategory:", parsedData.error)
+    return { success: false, error: "DATA_VALIDATION_ERROR" }
   }
 
-  // 6. Invalidate stale cache paths
+  // Step 6: Cache Revalidation & Return Strategy
+  revalidatePath(`/category/${parsedData.data.slug}`)
+  revalidatePath("/dashboard/x9k2-panel/categories")
   revalidatePath("/", "layout")
 
-  return {
-    success: true,
-    data: parsedData.data,
-  }
+  return { success: true, data: parsedData.data }
 }

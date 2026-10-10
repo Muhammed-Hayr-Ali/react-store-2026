@@ -28,6 +28,12 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
           "Access store analytics, revenue reports, and management overview",
       },
       {
+        key: PERMISSIONS.VIEW_CATEGORIES_MANAGEMENT,
+        label: "View Categories Management",
+        description:
+          "Access and view the categories catalog and management dashboard page",
+      },
+      {
         key: PERMISSIONS.VIEW_PRODUCTS,
         label: "View Products",
         description: "Access and browse the product inventory catalog page",

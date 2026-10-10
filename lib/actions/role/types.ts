@@ -33,6 +33,8 @@ export const PERMISSIONS = {
   DELETE_BRAND: "delete_brand",
 
   // --- 2. Categories Management ---
+
+  VIEW_CATEGORIES_MANAGEMENT: "view_categories_management",
   CREATE_CATEGORY: "create_category",
   UPDATE_CATEGORY: "update_category",
   DELETE_CATEGORY: "delete_category",
