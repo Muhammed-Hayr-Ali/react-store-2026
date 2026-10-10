@@ -25,7 +25,7 @@ export default async function Page() {
   }
 
   const [resultCategories, resultBrands] = await Promise.all([
-    getAllCategories({ activeOnly: true }),
+    getAllCategories({ is_active: true }),
     getAllBrand(),
   ])
 
@@ -33,7 +33,7 @@ export default async function Page() {
   let brands: Brand[] = []
 
   if (resultCategories.success && resultCategories.data) {
-    categories = resultCategories.data
+    categories = resultCategories.data.items
   }
 
   if (resultBrands.success && resultBrands.data) {
