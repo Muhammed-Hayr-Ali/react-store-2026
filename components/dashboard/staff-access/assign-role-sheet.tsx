@@ -1,6 +1,14 @@
 "use client"
 
+/**
+ * @file components/dashboard/staff-access/assign-role-sheet.tsx
+ * @description Uncontrolled slide-over sheet for assigning access roles to staff users.
+ * Fully compliant with React 19 useTransition, lifecycle locking during mutations,
+ * idiomatic children triggers, RTL-first styling, and next-intl.
+ */
+
 import * as React from "react"
+import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import { ShieldPlusIcon } from "lucide-react"
 
@@ -22,91 +30,104 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
+  SheetTrigger,
 } from "@/components/ui/sheet"
-import { UserWithRoles } from "@/lib/actions/role/queries/get-users-with-roles"
-import { RoleRecord } from "@/lib/actions/role/mutations/create-role"
+
+import type { UserWithRoles } from "@/lib/actions/role/queries/get-users-with-roles"
+import type { RoleRecord } from "@/lib/actions/role/mutations/create-role"
 import { assignRoleToUser } from "@/lib/actions/role/mutations/assign-user-role"
 
-interface AssignRoleSheetProps {
-  isOpen: boolean
-  onOpenChange: (open: boolean) => void
-  user: UserWithRoles | null
+export interface AssignRoleSheetProps {
+  user: UserWithRoles
   availableRoles: RoleRecord[]
-  onSuccess: (userId: string, assignedRole: RoleRecord) => void
+  children?: React.ReactNode
+  onSuccess?: (userId: string, assignedRole: RoleRecord) => void
 }
 
-export default function AssignRoleSheet({
-  isOpen,
-  onOpenChange,
+export function AssignRoleSheet({
   user,
   availableRoles,
+  children,
   onSuccess,
 }: AssignRoleSheetProps) {
+  const t = useTranslations("StaffAccessManagement")
   const [selectedRoleId, setSelectedRoleId] = React.useState<string>("")
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
-
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      setSelectedRoleId("")
-    }
-    onOpenChange(open)
-  }
+  const [isPending, startTransition] = React.useTransition()
+  const closeRef = React.useRef<HTMLButtonElement>(null)
 
   const assignableRoles = React.useMemo(() => {
-    if (!user) return availableRoles
     const userRoleIds = new Set(user.roles.map((r) => r.id))
     return availableRoles.filter((r) => !userRoleIds.has(r.id))
   }, [user, availableRoles])
 
-  const handleAssign = async (e: React.FormEvent) => {
+  const handleAssign = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!user || !selectedRoleId) {
-      toast.error("Please select a role to assign")
+    if (!selectedRoleId) {
+      toast.error(t("SELECT_ROLE_VALIDATION_ERROR"))
       return
     }
 
     const roleToAssign = availableRoles.find((r) => r.id === selectedRoleId)
     if (!roleToAssign) return
 
-    setIsSubmitting(true)
-    try {
-      const res = await assignRoleToUser({
-        userId: user.id,
-        roleId: selectedRoleId,
-      })
+    startTransition(async () => {
+      try {
+        const res = await assignRoleToUser({
+          userId: user.id,
+          roleId: selectedRoleId,
+        })
 
-      if (res.success) {
-        toast.success(`Role "${roleToAssign.name}" assigned successfully.`)
-        onSuccess(user.id, roleToAssign)
-        handleOpenChange(false)
-      } else {
-        toast.error(res.error || "Failed to assign role.")
+        if (res.success) {
+          toast.success(t("ROLE_ASSIGNED_SUCCESS", { role: roleToAssign.name }))
+          onSuccess?.(user.id, roleToAssign)
+          setSelectedRoleId("")
+          closeRef.current?.click() // Programmatic uncontrolled dismissal
+        } else {
+          toast.error(res.error || t("FAILED_TO_ASSIGN_ROLE"))
+        }
+      } catch {
+        toast.error(t("UNEXPECTED_ASSIGN_ERROR"))
       }
-    } catch {
-      toast.error("An unexpected error occurred while assigning the role.")
-    } finally {
-      setIsSubmitting(false)
-    }
+    })
   }
 
-  const userDisplayName = user
-    ? [user.first_name, user.last_name].filter(Boolean).join(" ") ||
-      user.email ||
-      "User"
-    : ""
+  const userDisplayName =
+    [user.first_name, user.last_name].filter(Boolean).join(" ") ||
+    user.email ||
+    t("ANONYMOUS_USER")
 
   return (
-    <Sheet open={isOpen} onOpenChange={handleOpenChange}>
+    <Sheet>
+      <SheetTrigger asChild>
+        {children ?? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 px-3 text-xs"
+          >
+            <ShieldPlusIcon className="size-3.5 text-primary" />
+            <span>{t("ASSIGN_ROLE_BUTTON")}</span>
+          </Button>
+        )}
+      </SheetTrigger>
+
       <SheetContent
         side="right"
         className="flex w-full flex-col p-0 sm:max-w-md"
+        onInteractOutside={(e) => {
+          if (isPending) e.preventDefault()
+        }}
+        onEscapeKeyDown={(e) => {
+          if (isPending) e.preventDefault()
+        }}
       >
-        <SheetHeader className="shrink-0 border-b bg-card px-5 py-4 sm:px-6">
+        <SheetHeader className="shrink-0 border-b bg-card px-5 py-4 text-start sm:px-6">
           <SheetTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
-            Assign Access Role
+            {t("SHEET_TITLE")}
           </SheetTitle>
           <SheetDescription className="text-xs text-muted-foreground">
-            Grant a new security role to &quot;{userDisplayName}&quot;.
+            {t("SHEET_DESCRIPTION", { name: userDisplayName })}
           </SheetDescription>
         </SheetHeader>
 
@@ -116,27 +137,29 @@ export default function AssignRoleSheet({
             onSubmit={handleAssign}
             className="space-y-4"
           >
-            <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
-              <div className="mb-4 flex items-center gap-2 border-b pb-3">
+            <div className="rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+              <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
                 <ShieldPlusIcon className="size-4 text-primary" />
                 <h2 className="text-sm font-semibold text-card-foreground">
-                  Role Assignment
+                  {t("CARD_TITLE")}
                 </h2>
               </div>
 
               <Field>
                 <FieldLabel className="text-xs">
-                  Select Role <span className="text-destructive">*</span>
+                  {t("SELECT_ROLE_LABEL")}{" "}
+                  <span className="text-destructive">*</span>
                 </FieldLabel>
                 {assignableRoles.length > 0 ? (
                   <Select
                     value={selectedRoleId}
                     onValueChange={setSelectedRoleId}
+                    disabled={isPending}
                   >
                     <SelectTrigger className="h-9 text-xs">
-                      <SelectValue placeholder="Choose a role to grant..." />
+                      <SelectValue placeholder={t("CHOOSE_ROLE_PLACEHOLDER")} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="text-xs">
                       {assignableRoles.map((role) => (
                         <SelectItem
                           key={role.id}
@@ -156,8 +179,8 @@ export default function AssignRoleSheet({
                     </SelectContent>
                   </Select>
                 ) : (
-                  <p className="rounded-lg border border-dashed p-3 text-center text-xs text-muted-foreground">
-                    All defined roles are already assigned to this user.
+                  <p className="rounded-lg border border-dashed border-border p-3 text-center text-xs text-muted-foreground">
+                    {t("ALL_ROLES_ASSIGNED_MESSAGE")}
                   </p>
                 )}
               </Field>
@@ -171,32 +194,36 @@ export default function AssignRoleSheet({
               <Button
                 type="button"
                 variant="outline"
-                disabled={isSubmitting}
+                disabled={isPending}
                 className="w-full cursor-pointer text-xs sm:w-auto"
               >
-                Discard
+                {t("DISCARD_BUTTON")}
               </Button>
             </SheetClose>
             <Button
               type="submit"
               form="assign-role-form"
               disabled={
-                isSubmitting || !selectedRoleId || assignableRoles.length === 0
+                isPending || !selectedRoleId || assignableRoles.length === 0
               }
               className="w-full cursor-pointer text-xs shadow-xs sm:w-auto sm:min-w-28"
             >
-              {isSubmitting ? (
+              {isPending ? (
                 <>
-                  <Spinner className="mr-2 size-3.5" />
-                  Assigning...
+                  <Spinner className="me-2 size-3.5" />
+                  {t("ASSIGNING_BUTTON")}
                 </>
               ) : (
-                "Assign Role"
+                t("CONFIRM_ASSIGN_BUTTON")
               )}
             </Button>
+            {/* Programmatic close trigger */}
+            <SheetClose ref={closeRef} className="hidden" />
           </div>
         </SheetFooter>
       </SheetContent>
     </Sheet>
   )
 }
+
+export default AssignRoleSheet

@@ -1,19 +1,26 @@
 "use client"
 
+/**
+ * @file components/dashboard/users/user-status-dialog.tsx
+ * @description Uncontrolled dialog for updating account accessibility and moderation status.
+ * Compliant with React 19 useTransition, lifecycle locking, RTL-first layout, and next-intl.
+ */
+
 import * as React from "react"
+import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import { ShieldAlertIcon, CheckCircle2Icon } from "lucide-react"
 
 import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { Field, FieldLabel } from "@/components/ui/field"
@@ -25,163 +32,174 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { AdminUserSummary, UserStatus } from "@/lib/actions/users/types"
+import type { AdminUserSummary, UserStatus } from "@/lib/actions/users/types"
 import { updateUserStatus } from "@/lib/actions/users/mutations/update-user-status"
 
-interface UserStatusDialogProps {
-  isOpen: boolean
-  onOpenChange: (open: boolean) => void
-  user: AdminUserSummary | null
-  onSuccess: (userId: string, newStatus: UserStatus, banReason?: string) => void
-}
-
-interface UserStatusContentProps {
+export interface UserStatusDialogProps {
   user: AdminUserSummary
-  onOpenChange: (open: boolean) => void
-  onSuccess: (userId: string, newStatus: UserStatus, banReason?: string) => void
+  children?: React.ReactNode
+  onSuccess?: (
+    userId: string,
+    newStatus: UserStatus,
+    banReason?: string
+  ) => void
 }
 
-function UserStatusContent({
+export function UserStatusDialog({
   user,
-  onOpenChange,
+  children,
   onSuccess,
-}: UserStatusContentProps) {
-  // تهيئة الحالة الابتدائية مباشرة من user دون الحاجة إلى useEffect
+}: UserStatusDialogProps) {
+  const t = useTranslations("UsersManagement")
   const [status, setStatus] = React.useState<UserStatus>(user.status)
   const [banReason, setBanReason] = React.useState(user.ban_reason || "")
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const [isPending, startTransition] = React.useTransition()
+  const closeRef = React.useRef<HTMLButtonElement>(null)
 
-  const handleUpdate = async () => {
-    setIsSubmitting(true)
-    try {
-      const res = await updateUserStatus({
-        userId: user.id,
-        status,
-        banReason: status === "banned" ? banReason : undefined,
-      })
+  const handleUpdate = () => {
+    startTransition(async () => {
+      try {
+        const res = await updateUserStatus({
+          userId: user.id,
+          status,
+          banReason: status === "banned" ? banReason : undefined,
+        })
 
-      if (res.success) {
-        toast.success(`User status updated to "${status}"`)
-        onSuccess(user.id, status, banReason)
-        onOpenChange(false)
-      } else {
-        toast.error(res.error || "Failed to update status")
+        if (res.success) {
+          toast.success(t("STATUS_UPDATED_TOAST", { status }))
+          onSuccess?.(user.id, status, banReason)
+          closeRef.current?.click() // Programmatic uncontrolled dismissal
+        } else {
+          toast.error(res.error || t("FAILED_TO_UPDATE_STATUS"))
+        }
+      } catch {
+        toast.error(t("GENERIC_ERROR_TOAST"))
       }
-    } catch {
-      toast.error("An unexpected error occurred.")
-    } finally {
-      setIsSubmitting(false)
-    }
+    })
   }
 
   const userDisplayName =
     [user.first_name, user.last_name].filter(Boolean).join(" ") ||
     user.email ||
-    "User"
+    t("ANONYMOUS_USER")
 
   return (
-    <>
-      <AlertDialogHeader>
-        <AlertDialogMedia>
-          <ShieldAlertIcon className="size-5 text-amber-500" />
-        </AlertDialogMedia>
-        <AlertDialogTitle className="text-base font-bold text-foreground">
-          Update Account Status
-        </AlertDialogTitle>
-        <AlertDialogDescription className="text-xs leading-relaxed text-muted-foreground">
-          Manage account accessibility and status for{" "}
-          <span className="font-semibold text-foreground">
-            &quot;{userDisplayName}&quot;
-          </span>
-          .
-        </AlertDialogDescription>
-      </AlertDialogHeader>
-
-      <div className="space-y-3 py-2">
-        <Field>
-          <FieldLabel className="text-xs">Account Status</FieldLabel>
-          <Select
-            value={status}
-            onValueChange={(val) => setStatus(val as UserStatus)}
+    <Dialog>
+      <DialogTrigger asChild>
+        {children ?? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-xs"
           >
-            <SelectTrigger className="h-9 text-xs">
-              <SelectValue placeholder="Select status..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active" className="text-xs">
-                Active (Normal Access)
-              </SelectItem>
-              <SelectItem value="suspended" className="text-xs">
-                Suspended (Temporary Freeze)
-              </SelectItem>
-              <SelectItem value="banned" className="text-xs text-destructive">
-                Banned (Account Blocked)
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </Field>
+            <ShieldAlertIcon className="size-3.5 text-amber-500" />
+            <span>{t("CHANGE_STATUS_ACTION")}</span>
+          </Button>
+        )}
+      </DialogTrigger>
 
-        {status === "banned" && (
+      <DialogContent
+        className="max-w-md"
+        onInteractOutside={(e) => {
+          if (isPending) e.preventDefault()
+        }}
+        onEscapeKeyDown={(e) => {
+          if (isPending) e.preventDefault()
+        }}
+      >
+        <DialogHeader className="gap-2 text-start">
+          <div className="flex size-10 items-center justify-center rounded-full bg-amber-500/10 text-amber-500">
+            <ShieldAlertIcon className="size-5" />
+          </div>
+          <DialogTitle className="text-base font-bold text-foreground">
+            {t("STATUS_DIALOG_TITLE")}
+          </DialogTitle>
+          <DialogDescription className="text-xs leading-relaxed text-muted-foreground">
+            {t("STATUS_DIALOG_DESCRIPTION")}{" "}
+            <span className="font-semibold text-foreground">
+              &quot;{userDisplayName}&quot;
+            </span>
+            .
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3 py-2 text-start">
           <Field>
-            <FieldLabel className="text-xs">Ban Reason (Optional)</FieldLabel>
-            <Input
-              placeholder="e.g. Fraudulent behavior, terms violation..."
-              value={banReason}
-              onChange={(e) => setBanReason(e.target.value)}
-              className="h-9 text-xs"
-            />
+            <FieldLabel className="text-xs">
+              {t("ACCOUNT_STATUS_LABEL")}
+            </FieldLabel>
+            <Select
+              value={status}
+              onValueChange={(val) => setStatus(val as UserStatus)}
+              disabled={isPending}
+            >
+              <SelectTrigger className="h-9 text-xs">
+                <SelectValue placeholder={t("SELECT_STATUS_PLACEHOLDER")} />
+              </SelectTrigger>
+              <SelectContent className="text-xs">
+                <SelectItem value="active">{t("STATUS_ACTIVE_OPT")}</SelectItem>
+                <SelectItem value="suspended">
+                  {t("STATUS_SUSPENDED_OPT")}
+                </SelectItem>
+                <SelectItem value="banned" className="text-destructive">
+                  {t("STATUS_BANNED_OPT")}
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </Field>
-        )}
-      </div>
 
-      <AlertDialogFooter className="flex flex-col-reverse items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end">
-        <AlertDialogCancel
-          disabled={isSubmitting}
-          className="w-full text-xs sm:w-auto"
-        >
-          Cancel
-        </AlertDialogCancel>
-        <Button
-          type="button"
-          onClick={handleUpdate}
-          disabled={isSubmitting}
-          className="w-full cursor-pointer text-xs shadow-xs sm:w-auto sm:min-w-28"
-        >
-          {isSubmitting ? (
-            <>
-              <Spinner className="mr-1.5 size-3.5" />
-              Updating...
-            </>
-          ) : (
-            <>
-              <CheckCircle2Icon className="mr-1.5 size-3.5" />
-              Save Changes
-            </>
+          {status === "banned" && (
+            <Field>
+              <FieldLabel className="text-xs">
+                {t("BAN_REASON_LABEL")}
+              </FieldLabel>
+              <Input
+                placeholder={t("BAN_REASON_PLACEHOLDER")}
+                value={banReason}
+                onChange={(e) => setBanReason(e.target.value)}
+                disabled={isPending}
+                className="h-9 text-xs"
+              />
+            </Field>
           )}
-        </Button>
-      </AlertDialogFooter>
-    </>
+        </div>
+
+        <DialogFooter className="mt-4 gap-2 sm:gap-0">
+          <DialogClose asChild>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isPending}
+              className="text-xs"
+            >
+              {t("CANCEL_BUTTON")}
+            </Button>
+          </DialogClose>
+          <Button
+            type="button"
+            onClick={handleUpdate}
+            disabled={isPending}
+            className="text-xs shadow-xs"
+          >
+            {isPending ? (
+              <>
+                <Spinner className="me-1.5 size-3.5" />
+                {t("SAVING_BUTTON")}
+              </>
+            ) : (
+              <>
+                <CheckCircle2Icon className="me-1.5 size-3.5" />
+                {t("SAVE_CHANGES_BUTTON")}
+              </>
+            )}
+          </Button>
+          <DialogClose ref={closeRef} className="hidden" />
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 
-export function UserStatusDialog({
-  isOpen,
-  onOpenChange,
-  user,
-  onSuccess,
-}: UserStatusDialogProps) {
-  return (
-    <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-md">
-        {isOpen && user && (
-          <UserStatusContent
-            key={user.id}
-            user={user}
-            onOpenChange={onOpenChange}
-            onSuccess={onSuccess}
-          />
-        )}
-      </AlertDialogContent>
-    </AlertDialog>
-  )
-}
+export default UserStatusDialog

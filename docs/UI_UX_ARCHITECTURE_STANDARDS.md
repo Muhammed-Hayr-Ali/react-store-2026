@@ -906,4 +906,32 @@ REACT COMPILER LOGS VS ESLint SUPPRESSION RULE
    - For stateful external client primitives (e.g., TanStack Table's `useReactTable()`, React Hook Form subscriptions), automatic compilation skip is an intentional architectural safeguard.
    - Do NOT try to silence compilation logs with synthetic ESLint comments or illegal `useMemo` wrappers. Let the component execute cleanly with its native React lifecycles.
 
+
+
+
+================================================================================
+PROHIBITION OF SYNCHRONOUS SETSTATE IN USEEFFECT (PROPS-MIRRORING ANTI-PATTERN)
+================================================================================
+1. The Cascading Render Violation:
+   - FORBIDDEN:
+     ```tsx
+     const [items, setItems] = React.useState(initialItems)
+     React.useEffect(() => {
+       setItems(initialItems)
+     }, [initialItems])
+     ```
+   - Violation: Calling `setState` synchronously inside `useEffect` to mirror server props triggers cascading re-renders, degrades performance, and causes React Compiler diagnostics:
+     `Error: Calling setState synchronously within an effect can trigger cascading renders.`
+
+2. Single Source of Truth Standard:
+   - In Next.js App Router with Server Actions, mutations already trigger `router.refresh()`, causing the Server Component to supply fresh props down the tree.
+   - Do NOT duplicate props into a client state if the state is only mirroring them:
+     ```tsx
+     // Correct Pattern:
+     const itemsList = initialItems || []
+     ```
+   - If optimistic local mutations are strictly required, either use React 19's native `useOptimistic()` hook or derive state during render without `useEffect`.
+
+
+
 ````

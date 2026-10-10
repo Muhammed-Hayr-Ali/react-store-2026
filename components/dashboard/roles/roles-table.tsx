@@ -1,22 +1,26 @@
 "use client"
 
+/**
+ * @file components/dashboard/roles/roles-table.tsx
+ * @description Standard TanStack Table v8 data table for RBAC roles management.
+ * Fully compliant with React 19, strict VisibilityState, mobile column isolation,
+ * RTL-first layout, and permission gating via <Can />.
+ */
+
 import * as React from "react"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import {
-  columnFilteringFeature,
-  columnVisibilityFeature,
-  createColumnHelper,
-  createFilteredRowModel,
-  createPaginatedRowModel,
-  createSortedRowModel,
-  FlexRender,
-  rowPaginationFeature,
-  rowSortingFeature,
-  tableFeatures,
-  useTable,
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
   type ColumnFiltersState,
-  type ColumnVisibilityState,
   type SortingState,
+  type VisibilityState,
 } from "@tanstack/react-table"
 import {
   ShieldIcon,
@@ -25,7 +29,7 @@ import {
   SearchIcon,
   XIcon,
   Columns3Icon,
-  EllipsisVerticalIcon,
+  MoreHorizontalIcon,
   ChevronsLeftIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -61,48 +65,35 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { RoleRecord } from "@/lib/actions/role/mutations/create-role"
+import { Can } from "@/components/shared/can"
+import { PERMISSIONS } from "@/lib/actions/role"
+import { useIsMobile } from "@/hooks/use-mobile"
+import type { RoleRecord } from "@/lib/actions/role/mutations/create-role"
 import { appRoutes } from "@/lib/config/app-routes"
 
-const features = tableFeatures({
-  columnFilteringFeature,
-  columnVisibilityFeature,
-  rowPaginationFeature,
-  rowSortingFeature,
-  filteredRowModel: createFilteredRowModel(),
-  paginatedRowModel: createPaginatedRowModel(),
-  sortedRowModel: createSortedRowModel(),
-})
-
-const columnHelper = createColumnHelper<typeof features, RoleRecord>()
-
 const HIDEABLE_COLUMNS = ["permissions"]
-
-const columnLabelsMap: Record<string, string> = {
-  name: "Role",
-  permissions: "Permissions",
-}
 
 interface RolesTableProps {
   initialRoles: RoleRecord[]
   initialIsMobile?: boolean
 }
 
-export default function RolesTable({
+export function RolesTable({
   initialRoles,
   initialIsMobile = false,
 }: RolesTableProps) {
+  const t = useTranslations("RolesManagement")
+  const isMobile = useIsMobile()
+
   const [data, setData] = React.useState<RoleRecord[]>(() => initialRoles)
-  const [prevInitialData, setPrevInitialData] = React.useState(initialRoles)
   const [currentTab, setCurrentTab] = React.useState<
     "all" | "active" | "empty"
   >("all")
   const [searchQuery, setSearchQuery] = React.useState("")
 
-  if (initialRoles !== prevInitialData) {
-    setPrevInitialData(initialRoles)
+  React.useEffect(() => {
     setData(initialRoles)
-  }
+  }, [initialRoles])
 
   const filteredData = React.useMemo(() => {
     return data.filter((role) => {
@@ -129,8 +120,8 @@ export default function RolesTable({
   )
 
   const [columnVisibility, setColumnVisibility] =
-    React.useState<ColumnVisibilityState>(() => {
-      const initial: ColumnVisibilityState = {}
+    React.useState<VisibilityState>(() => {
+      const initial: VisibilityState = {}
       HIDEABLE_COLUMNS.forEach((colId) => {
         initial[colId] = !initialIsMobile
       })
@@ -143,110 +134,108 @@ export default function RolesTable({
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: initialIsMobile ? 9 : 10,
+    pageSize: initialIsMobile ? 20 : 10,
   })
 
   React.useEffect(() => {
-    const handleResize = () => {
-      const isMobile = window.innerWidth < 768
-      setPagination((prev) => {
-        const nextSize = isMobile ? 20 : 10
-        if (prev.pageSize === nextSize) return prev
-        return { ...prev, pageSize: nextSize, pageIndex: 0 }
+    setColumnVisibility((prev) => {
+      const nextVisibility: VisibilityState = { ...prev }
+      HIDEABLE_COLUMNS.forEach((colId) => {
+        nextVisibility[colId] = !isMobile
       })
+      return nextVisibility
+    })
 
-      setColumnVisibility((prev) => {
-        const nextVisibility: ColumnVisibilityState = { ...prev }
-        HIDEABLE_COLUMNS.forEach((colId) => {
-          nextVisibility[colId] = !isMobile
-        })
-        return nextVisibility
-      })
-    }
+    setPagination((prev) => ({
+      ...prev,
+      pageSize: isMobile ? 20 : 10,
+      pageIndex: 0,
+    }))
+  }, [isMobile])
 
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
-
-  const columns = React.useMemo(
-    () =>
-      columnHelper.columns([
-        columnHelper.accessor("name", {
-          id: "name",
-          header: "Role",
-          cell: ({ row }) => (
-            <div className="flex items-center gap-2.5">
-              <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-secondary text-foreground">
-                <ShieldIcon className="size-3.5 text-primary" />
-              </div>
-              <div className="flex max-w-xs min-w-0 flex-col sm:max-w-md">
-                <span className="truncate text-xs font-semibold text-foreground capitalize">
-                  {row.original.name}
-                </span>
-                <span className="max-w-3xs truncate text-[11px] text-muted-foreground">
-                  {row.original.description || "No description provided"}
-                </span>
-              </div>
+  const columns = React.useMemo<ColumnDef<RoleRecord>[]>(
+    () => [
+      // 1. First Column: Role Identifier (Pinned Visible)
+      {
+        id: "name",
+        accessorKey: "name",
+        enableHiding: false,
+        header: t("COLUMN_ROLE"),
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2.5">
+            <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-secondary text-foreground">
+              <ShieldIcon className="size-3.5 text-primary" />
             </div>
-          ),
-          enableHiding: false,
-        }),
-
-        columnHelper.display({
-          id: "permissions",
-          header: () => <div className="text-center">Permissions</div>,
-          cell: ({ row }) => (
-            <div className="flex justify-center">
-              <Badge
-                variant="outline"
-                className="gap-1 px-2 py-0.5 font-mono text-xs font-medium text-muted-foreground"
-              >
-                <LayersIcon className="size-3 opacity-70" />
-                <span>{row.original.permissions?.length || 0}</span>
-                <span className="text-[10px]">assigned</span>
-              </Badge>
+            <div className="flex max-w-xs min-w-0 flex-col sm:max-w-md">
+              <span className="truncate text-xs font-semibold text-foreground uppercase">
+                {row.original.name}
+              </span>
+              <span className="max-w-3xs truncate text-[11px] text-muted-foreground">
+                {row.original.description || t("NO_DESCRIPTION")}
+              </span>
             </div>
-          ),
-        }),
-
-        columnHelper.display({
-          id: "actions",
-          cell: ({ row }) => (
-            <div className="flex items-center justify-end">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-7 text-muted-foreground data-[state=open]:bg-muted"
-                  >
-                    <EllipsisVerticalIcon className="size-4" />
-                    <span className="sr-only">Actions</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40 text-xs">
+          </div>
+        ),
+      },
+      // 2. Permissions Count Badge (Hideable)
+      {
+        id: "permissions",
+        enableHiding: true,
+        header: () => (
+          <div className="text-center">{t("COLUMN_PERMISSIONS")}</div>
+        ),
+        cell: ({ row }) => (
+          <div className="flex justify-center">
+            <Badge
+              variant="outline"
+              className="gap-1 px-2 py-0.5 font-mono text-xs font-medium text-muted-foreground"
+            >
+              <LayersIcon className="size-3 opacity-70" />
+              <span>{row.original.permissions?.length || 0}</span>
+              <span className="text-[10px]">{t("ASSIGNED_LABEL")}</span>
+            </Badge>
+          </div>
+        ),
+      },
+      // 3. Last Column: Actions Dropdown (Pinned Visible)
+      {
+        id: "actions",
+        enableHiding: false,
+        cell: ({ row }) => (
+          <div className="flex items-center justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="flex size-7 text-muted-foreground data-[state=open]:bg-muted"
+                >
+                  <MoreHorizontalIcon className="size-4" />
+                  <span className="sr-only">{t("ACTIONS_LABEL")}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40 text-xs">
+                <Can permission={PERMISSIONS.UPDATE_ROLE}>
                   <DropdownMenuItem asChild>
                     <Link
                       href={`${appRoutes.dashboard.admin.roles}/${row.original.id}/edit`}
-                      className="flex cursor-pointer items-center gap-2"
+                      className="flex cursor-pointer items-center"
                     >
-                      <PencilIcon className="size-3.5" />
-                      Edit Role
+                      <PencilIcon className="me-2 size-3.5" />
+                      {t("EDIT_ROLE")}
                     </Link>
                   </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          ),
-          enableHiding: false,
-        }),
-      ]),
-    []
+                </Can>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ),
+      },
+    ],
+    [t]
   )
 
-  const table = useTable({
-    features,
+  const table = useReactTable({
     data: filteredData,
     columns,
     state: {
@@ -260,15 +249,26 @@ export default function RolesTable({
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange: setPagination,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   })
+
+  const columnLabelsMap: Record<string, string> = {
+    name: t("COLUMN_ROLE"),
+    permissions: t("COLUMN_PERMISSIONS"),
+  }
 
   return (
     <div className="flex w-full flex-col justify-start gap-4">
+      {/* Interactive Toolbar */}
       <div className="flex w-full items-center gap-2">
+        {/* Search Input */}
         <div className="relative min-w-0 flex-1">
           <SearchIcon className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search roles..."
+            placeholder={t("SEARCH_PLACEHOLDER")}
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value)
@@ -286,11 +286,13 @@ export default function RolesTable({
               className="absolute inset-e-2 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-foreground"
             >
               <XIcon className="size-3.5" />
+              <span className="sr-only">{t("CLEAR_SEARCH")}</span>
             </button>
           )}
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
+          {/* Mobile Filter Tabs */}
           <div className="block sm:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -298,10 +300,10 @@ export default function RolesTable({
                   variant="outline"
                   size="icon"
                   className="size-8"
-                  title="Filter"
+                  title={t("FILTER_BUTTON")}
                 >
                   <FilterIcon className="size-3.5" />
-                  <span className="sr-only">Filter</span>
+                  <span className="sr-only">{t("FILTER_BUTTON")}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-36 text-xs">
@@ -312,7 +314,7 @@ export default function RolesTable({
                   }}
                   className="flex cursor-pointer items-center justify-between"
                 >
-                  <span>All</span>
+                  <span>{t("FILTER_ALL")}</span>
                   <Badge variant="secondary" className="px-1 py-0 text-[10px]">
                     {data.length}
                   </Badge>
@@ -324,7 +326,7 @@ export default function RolesTable({
                   }}
                   className="flex cursor-pointer items-center justify-between"
                 >
-                  <span>Active</span>
+                  <span>{t("FILTER_ACTIVE")}</span>
                   <Badge variant="secondary" className="px-1 py-0 text-[10px]">
                     {activeCount}
                   </Badge>
@@ -336,7 +338,7 @@ export default function RolesTable({
                   }}
                   className="flex cursor-pointer items-center justify-between"
                 >
-                  <span>Empty</span>
+                  <span>{t("FILTER_EMPTY")}</span>
                   <Badge variant="secondary" className="px-1 py-0 text-[10px]">
                     {emptyCount}
                   </Badge>
@@ -345,6 +347,7 @@ export default function RolesTable({
             </DropdownMenu>
           </div>
 
+          {/* Desktop Filter Pills */}
           <div className="hidden h-8 items-center overflow-hidden rounded-md border border-input bg-background p-0.5 sm:inline-flex">
             <button
               type="button"
@@ -354,11 +357,11 @@ export default function RolesTable({
               }}
               className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
                 currentTab === "all"
-                  ? "bg-muted font-semibold text-foreground"
+                  ? "bg-muted font-semibold text-foreground shadow-xs"
                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
               }`}
             >
-              All
+              {t("FILTER_ALL")}
               <Badge
                 variant="secondary"
                 className="ms-1.5 px-1.5 py-0 text-[10px]"
@@ -375,11 +378,11 @@ export default function RolesTable({
               }}
               className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
                 currentTab === "active"
-                  ? "bg-muted font-semibold text-foreground"
+                  ? "bg-muted font-semibold text-foreground shadow-xs"
                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
               }`}
             >
-              Active
+              {t("FILTER_ACTIVE")}
               <Badge
                 variant="secondary"
                 className="ms-1.5 px-1.5 py-0 text-[10px]"
@@ -396,11 +399,11 @@ export default function RolesTable({
               }}
               className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
                 currentTab === "empty"
-                  ? "bg-muted font-semibold text-foreground"
+                  ? "bg-muted font-semibold text-foreground shadow-xs"
                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
               }`}
             >
-              Empty
+              {t("FILTER_EMPTY")}
               <Badge
                 variant="secondary"
                 className="ms-1.5 px-1.5 py-0 text-[10px]"
@@ -410,19 +413,20 @@ export default function RolesTable({
             </button>
           </div>
 
+          {/* Column Visibility Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
                 size="icon"
                 className="size-8"
-                title="Toggle Columns"
+                title={t("TOGGLE_COLUMNS")}
               >
                 <Columns3Icon className="size-3.5" />
-                <span className="sr-only">Toggle Columns</span>
+                <span className="sr-only">{t("TOGGLE_COLUMNS")}</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuContent align="end" className="w-40 text-xs">
               {table
                 .getAllColumns()
                 .filter(
@@ -433,7 +437,9 @@ export default function RolesTable({
                   <DropdownMenuCheckboxItem
                     key={col.id}
                     checked={col.getIsVisible()}
-                    onCheckedChange={(value) => col.toggleVisibility(!!value)}
+                    onCheckedChange={(value) =>
+                      col.toggleVisibility(Boolean(value))
+                    }
                   >
                     {columnLabelsMap[col.id] || col.id}
                   </DropdownMenuCheckboxItem>
@@ -441,28 +447,32 @@ export default function RolesTable({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Link href={appRoutes.dashboard.admin.create_roles}>
-            <Button
-              variant="default"
-              size="icon"
-              className="size-8 sm:hidden"
-              title="Create Role"
-            >
-              <PlusIcon className="size-3.5" />
-              <span className="sr-only">Create Role</span>
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              className="hidden h-8 gap-1.5 px-3 text-xs sm:inline-flex"
-            >
-              <PlusIcon className="size-3.5" />
-              <span>Create Role</span>
-            </Button>
-          </Link>
+          {/* Dual Responsive CTA Button */}
+          <Can permission={PERMISSIONS.CREATE_ROLE}>
+            <Link href={appRoutes.dashboard.admin.create_roles}>
+              <Button
+                variant="default"
+                size="icon"
+                className="size-8 sm:hidden"
+                title={t("CREATE_ROLE")}
+              >
+                <PlusIcon className="size-3.5" />
+                <span className="sr-only">{t("CREATE_ROLE")}</span>
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                className="hidden h-8 gap-1.5 px-3 text-xs sm:inline-flex"
+              >
+                <PlusIcon className="size-3.5" />
+                <span>{t("CREATE_ROLE")}</span>
+              </Button>
+            </Link>
+          </Can>
         </div>
       </div>
 
+      {/* Table Shell */}
       <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">
         <div className="overflow-x-auto">
           <Table className="w-full">
@@ -475,9 +485,12 @@ export default function RolesTable({
                       colSpan={header.colSpan}
                       className="text-xs font-medium text-muted-foreground"
                     >
-                      {header.isPlaceholder ? null : (
-                        <FlexRender header={header} />
-                      )}
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
                     </TableHead>
                   ))}
                 </TableRow>
@@ -491,8 +504,11 @@ export default function RolesTable({
                     className="transition-colors hover:bg-muted/20"
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        <FlexRender cell={cell} />
+                      <TableCell key={cell.id} className="py-2.5">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
                       </TableCell>
                     ))}
                   </TableRow>
@@ -503,7 +519,7 @@ export default function RolesTable({
                     colSpan={columns.length}
                     className="h-24 text-center text-xs text-muted-foreground"
                   >
-                    No roles found matching your search.
+                    {t("NO_ROLES_FOUND")}
                   </TableCell>
                 </TableRow>
               )}
@@ -512,81 +528,93 @@ export default function RolesTable({
         </div>
       </div>
 
-      <div className="flex items-center justify-between px-1">
-        <div className="flex w-full items-center gap-8 lg:w-fit">
-          <div className="hidden items-center gap-2 lg:flex">
-            <Label htmlFor="rows-per-page" className="text-xs font-medium">
-              Rows per page
-            </Label>
-            <Select
-              value={`${table.state.pagination.pageSize}`}
-              onValueChange={(value) => table.setPageSize(Number(value))}
+      {/* Standard Pagination Footer */}
+      <div className="flex flex-col items-center justify-between gap-3 px-1 sm:flex-row">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Label htmlFor="rows-per-page" className="text-xs font-medium">
+            {t("ROWS_PER_PAGE")}
+          </Label>
+          <Select
+            value={`${table.getState().pagination.pageSize}`}
+            onValueChange={(value) => table.setPageSize(Number(value))}
+          >
+            <SelectTrigger
+              size="sm"
+              className="h-8 w-18 text-xs"
+              id="rows-per-page"
             >
-              <SelectTrigger
-                size="sm"
-                className="h-8 w-20 text-xs"
-                id="rows-per-page"
-              >
-                <SelectValue placeholder={table.state.pagination.pageSize} />
-              </SelectTrigger>
-              <SelectContent side="top">
-                <SelectGroup>
-                  {[10, 20, 30, 40, 50].map((pageSize) => (
-                    <SelectItem
-                      key={pageSize}
-                      value={`${pageSize}`}
-                      className="text-xs"
-                    >
-                      {pageSize}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="text-xs font-medium text-muted-foreground">
-            Page {table.state.pagination.pageIndex + 1} of{" "}
-            {table.getPageCount() || 1}
-          </div>
-          <div className="ms-auto flex items-center gap-2 lg:ms-0">
-            <Button
-              variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex"
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <ChevronsLeftIcon className="size-4" />
-            </Button>
-            <Button
-              variant="outline"
-              className="size-8"
-              size="icon"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <ChevronLeftIcon className="size-4" />
-            </Button>
-            <Button
-              variant="outline"
-              className="size-8"
-              size="icon"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              <ChevronRightIcon className="size-4" />
-            </Button>
-            <Button
-              variant="outline"
-              className="hidden size-8 lg:flex"
-              size="icon"
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
-            >
-              <ChevronsRightIcon className="size-4" />
-            </Button>
-          </div>
+              <SelectValue placeholder={table.getState().pagination.pageSize} />
+            </SelectTrigger>
+            <SelectContent side="top" className="text-xs">
+              <SelectGroup>
+                {[10, 20, 30, 40, 50].map((pageSize) => (
+                  <SelectItem
+                    key={pageSize}
+                    value={`${pageSize}`}
+                    className="text-xs"
+                  >
+                    {pageSize}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <span className="ms-2">
+            {t("PAGE_COUNTER", {
+              page: table.getState().pagination.pageIndex + 1,
+              total: table.getPageCount() || 1,
+            })}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="outline"
+            className="hidden size-8 p-0 sm:flex"
+            onClick={() => table.setPageIndex(0)}
+            disabled={!table.getCanPreviousPage()}
+            title={t("FIRST_PAGE")}
+          >
+            <ChevronsLeftIcon className="size-4 rtl:rotate-180" />
+            <span className="sr-only">{t("FIRST_PAGE")}</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-8"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            title={t("PREVIOUS_PAGE")}
+          >
+            <ChevronLeftIcon className="size-4 rtl:rotate-180" />
+            <span className="sr-only">{t("PREVIOUS_PAGE")}</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-8"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            title={t("NEXT_PAGE")}
+          >
+            <ChevronRightIcon className="size-4 rtl:rotate-180" />
+            <span className="sr-only">{t("NEXT_PAGE")}</span>
+          </Button>
+          <Button
+            variant="outline"
+            className="hidden size-8 sm:flex"
+            size="icon"
+            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+            disabled={!table.getCanNextPage()}
+            title={t("LAST_PAGE")}
+          >
+            <ChevronsRightIcon className="size-4 rtl:rotate-180" />
+            <span className="sr-only">{t("LAST_PAGE")}</span>
+          </Button>
         </div>
       </div>
     </div>
   )
 }
+
+export default RolesTable

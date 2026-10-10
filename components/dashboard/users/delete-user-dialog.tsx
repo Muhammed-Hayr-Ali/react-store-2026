@@ -1,111 +1,142 @@
 "use client"
 
+/**
+ * @file components/dashboard/users/delete-user-dialog.tsx
+ * @description Uncontrolled deletion confirmation dialog for user accounts.
+ * Fully compliant with React 19 useTransition, lifecycle locking during mutations,
+ * RTL-first styling, and zero any typing.
+ */
+
 import * as React from "react"
+import { useTranslations } from "next-intl"
 import { toast } from "sonner"
-import { Trash2Icon } from "lucide-react"
+import { AlertTriangleIcon, Trash2Icon } from "lucide-react"
 
 import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
-import { AdminUserSummary } from "@/lib/actions/users/types"
 import { deleteUser } from "@/lib/actions/users/mutations/delete-user"
 
-interface DeleteUserDialogProps {
-  isOpen: boolean
-  onOpenChange: (open: boolean) => void
-  user: AdminUserSummary | null
-  onSuccess: (deletedId: string) => void
+export interface DeleteUserDialogProps {
+  userId: string
+  userName: string
+  children?: React.ReactNode
+  onDeleted?: (deletedId: string) => void
 }
 
 export function DeleteUserDialog({
-  isOpen,
-  onOpenChange,
-  user,
-  onSuccess,
+  userId,
+  userName,
+  children,
+  onDeleted,
 }: DeleteUserDialogProps) {
-  const [isDeleting, setIsDeleting] = React.useState(false)
+  const t = useTranslations("UsersManagement")
+  const [isPending, startTransition] = React.useTransition()
+  const closeRef = React.useRef<HTMLButtonElement>(null)
 
-  const handleDelete = async () => {
-    if (!user) return
-    setIsDeleting(true)
+  const handleDelete = () => {
+    startTransition(async () => {
+      try {
+        const res = await deleteUser(userId)
 
-    try {
-      const res = await deleteUser(user.id)
-
-      if (res.success) {
-        toast.success("User account deleted permanently.")
-        onSuccess(user.id)
-        onOpenChange(false)
-      } else {
-        toast.error(res.error || "Failed to delete user account.")
+        if (res.success) {
+          toast.success(t("DELETE_SUCCESS_TOAST", { name: userName }))
+          onDeleted?.(userId)
+          closeRef.current?.click() // Programmatic uncontrolled dismissal
+        } else {
+          toast.error(res.error || t("DELETE_ERROR_TOAST"))
+        }
+      } catch {
+        toast.error(t("GENERIC_ERROR_TOAST"))
       }
-    } catch {
-      toast.error("An unexpected error occurred.")
-    } finally {
-      setIsDeleting(false)
-    }
+    })
   }
 
-  const userDisplayName = user
-    ? [user.first_name, user.last_name].filter(Boolean).join(" ") ||
-      user.email ||
-      "User"
-    : ""
-
   return (
-    <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-md">
-        <AlertDialogHeader>
-          <AlertDialogMedia className="bg-destructive/10 text-destructive">
-            <Trash2Icon className="size-5" />
-          </AlertDialogMedia>
-          <AlertDialogTitle className="text-base font-bold text-foreground">
-            Delete User Account
-          </AlertDialogTitle>
-          <AlertDialogDescription className="text-xs leading-relaxed text-muted-foreground">
-            Are you sure you want to permanently delete the account for{" "}
-            <span className="font-semibold text-foreground">
-              &quot;{userDisplayName}&quot;
-            </span>
-            ? This action will completely remove the user from authentication
-            and database records.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-
-        <AlertDialogFooter className="flex flex-col-reverse items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end">
-          <AlertDialogCancel
-            disabled={isDeleting}
-            className="w-full text-xs sm:w-auto"
+    <Dialog>
+      <DialogTrigger asChild>
+        {children ?? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-xs text-destructive hover:bg-destructive/10"
           >
-            Cancel
-          </AlertDialogCancel>
+            <Trash2Icon className="size-3.5" />
+            <span>{t("DELETE_ACCOUNT")}</span>
+          </Button>
+        )}
+      </DialogTrigger>
+
+      <DialogContent
+        className="max-w-md"
+        onInteractOutside={(e) => {
+          if (isPending) e.preventDefault()
+        }}
+        onEscapeKeyDown={(e) => {
+          if (isPending) e.preventDefault()
+        }}
+      >
+        <DialogHeader className="gap-2 text-start">
+          <div className="flex size-10 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+            <AlertTriangleIcon className="size-5" />
+          </div>
+          <DialogTitle className="text-base font-semibold text-foreground">
+            {t("DELETE_DIALOG_TITLE")}
+          </DialogTitle>
+          <DialogDescription className="text-xs leading-relaxed text-muted-foreground">
+            {t("DELETE_DIALOG_DESCRIPTION")}{" "}
+            <span className="font-semibold wrap-break-word text-foreground">
+              &quot;{userName}&quot;
+            </span>
+            ؟ {t("DELETE_DIALOG_WARNING")}
+          </DialogDescription>
+        </DialogHeader>
+
+        <DialogFooter className="mt-4 gap-2 sm:gap-0">
+          <DialogClose asChild>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isPending}
+              className="text-xs"
+            >
+              {t("CANCEL_BUTTON")}
+            </Button>
+          </DialogClose>
           <Button
             type="button"
             variant="destructive"
+            size="sm"
             onClick={handleDelete}
-            disabled={isDeleting}
-            className="w-full cursor-pointer text-xs shadow-xs sm:w-auto sm:min-w-28"
+            disabled={isPending}
+            className="text-xs shadow-xs"
           >
-            {isDeleting ? (
+            {isPending ? (
               <>
-                <Spinner className="mr-1.5 size-3.5" />
-                Deleting...
+                <Spinner className="me-1.5 size-3.5" />
+                {t("DELETING_BUTTON")}
               </>
             ) : (
-              "Delete Account"
+              t("CONFIRM_DELETE_BUTTON")
             )}
           </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          {/* Programmatic close ref invoked strictly on successful deletion */}
+          <DialogClose ref={closeRef} className="hidden" />
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
+
+export default DeleteUserDialog

@@ -1,22 +1,26 @@
 "use client"
 
+/**
+ * @file components/dashboard/staff-access/staff-access-table.tsx
+ * @description Standard TanStack Table v8 implementation for staff authorization & RBAC access.
+ * Fully compliant with React 19, strict VisibilityState, uncontrolled role assignment sheets,
+ * mobile column isolation, RTL-first layout, and permission gating via <Can />.
+ */
+
 import * as React from "react"
+import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import {
-  columnFilteringFeature,
-  columnVisibilityFeature,
-  createColumnHelper,
-  createFilteredRowModel,
-  createPaginatedRowModel,
-  createSortedRowModel,
-  FlexRender,
-  rowPaginationFeature,
-  rowSortingFeature,
-  tableFeatures,
-  useTable,
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
   type ColumnFiltersState,
-  type ColumnVisibilityState,
   type SortingState,
+  type VisibilityState,
 } from "@tanstack/react-table"
 import {
   UserCheckIcon,
@@ -25,7 +29,7 @@ import {
   ShieldIcon,
   SearchIcon,
   Columns3Icon,
-  EllipsisVerticalIcon,
+  MoreHorizontalIcon,
   ChevronsLeftIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -60,30 +64,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Can } from "@/components/shared/can"
+import { PERMISSIONS } from "@/lib/actions/role"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 import AssignRoleSheet from "./assign-role-sheet"
-import { UserWithRoles } from "@/lib/actions/role/queries/get-users-with-roles"
-import { RoleRecord } from "@/lib/actions/role/mutations/create-role"
+import type { UserWithRoles } from "@/lib/actions/role/queries/get-users-with-roles"
+import type { RoleRecord } from "@/lib/actions/role/mutations/create-role"
 import { removeRoleFromUser } from "@/lib/actions/role/mutations/remove-user-role"
 
-const features = tableFeatures({
-  columnFilteringFeature,
-  columnVisibilityFeature,
-  rowPaginationFeature,
-  rowSortingFeature,
-  filteredRowModel: createFilteredRowModel(),
-  paginatedRowModel: createPaginatedRowModel(),
-  sortedRowModel: createSortedRowModel(),
-})
-
-const columnHelper = createColumnHelper<typeof features, UserWithRoles>()
-
 const HIDEABLE_COLUMNS = ["roles"]
-
-const columnLabelsMap: Record<string, string> = {
-  user: "User",
-  roles: "Assigned Roles",
-}
 
 interface StaffAccessTableProps {
   initialUsers: UserWithRoles[]
@@ -96,24 +86,21 @@ export function StaffAccessTable({
   availableRoles,
   initialIsMobile = false,
 }: StaffAccessTableProps) {
-  const [users, setUsers] = React.useState<UserWithRoles[]>(initialUsers)
-  const [prevInitialUsers, setPrevInitialUsers] = React.useState(initialUsers)
+  const t = useTranslations("StaffAccessManagement")
+  const isMobile = useIsMobile()
+
+  const [users, setUsers] = React.useState<UserWithRoles[]>(() => initialUsers)
   const [currentTab, setCurrentTab] = React.useState<
     "all" | "assigned" | "unassigned"
   >("all")
   const [searchQuery, setSearchQuery] = React.useState("")
-  const [selectedUser, setSelectedUser] = React.useState<UserWithRoles | null>(
-    null
-  )
-  const [isAssignOpen, setIsAssignOpen] = React.useState(false)
   const [revokingMap, setRevokingMap] = React.useState<Record<string, boolean>>(
     {}
   )
 
-  if (initialUsers !== prevInitialUsers) {
-    setPrevInitialUsers(initialUsers)
+  React.useEffect(() => {
     setUsers(initialUsers)
-  }
+  }, [initialUsers])
 
   const handleRevokeRole = async (
     userId: string,
@@ -126,7 +113,7 @@ export function StaffAccessTable({
     try {
       const res = await removeRoleFromUser({ userId, roleId })
       if (res.success) {
-        toast.success(`Role "${roleName}" removed successfully.`)
+        toast.success(t("ROLE_REVOKED_SUCCESS", { role: roleName }))
         setUsers((prev) =>
           prev.map((u) => {
             if (u.id !== userId) return u
@@ -137,10 +124,10 @@ export function StaffAccessTable({
           })
         )
       } else {
-        toast.error(res.error || "Failed to remove role.")
+        toast.error(res.error || t("FAILED_TO_REMOVE_ROLE"))
       }
     } catch {
-      toast.error("An unexpected error occurred.")
+      toast.error(t("UNEXPECTED_REVOKE_ERROR"))
     } finally {
       setRevokingMap((prev) => {
         const next = { ...prev }
@@ -180,10 +167,9 @@ export function StaffAccessTable({
     [users]
   )
 
-  // تهيئة الحالة الأولية بشكل متطابق 100% بين السيرفر والعميل
   const [columnVisibility, setColumnVisibility] =
-    React.useState<ColumnVisibilityState>(() => {
-      const initial: ColumnVisibilityState = {}
+    React.useState<VisibilityState>(() => {
+      const initial: VisibilityState = {}
       HIDEABLE_COLUMNS.forEach((colId) => {
         initial[colId] = !initialIsMobile
       })
@@ -196,91 +182,84 @@ export function StaffAccessTable({
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: initialIsMobile ? 9 : 10,
+    pageSize: initialIsMobile ? 20 : 10,
   })
 
   React.useEffect(() => {
-    const handleResize = () => {
-      const isMobile = window.innerWidth < 768
-      setPagination((prev) => {
-        const nextSize = isMobile ? 20 : 10
-        if (prev.pageSize === nextSize) return prev
-        return { ...prev, pageSize: nextSize, pageIndex: 0 }
+    setColumnVisibility((prev) => {
+      const nextVisibility: VisibilityState = { ...prev }
+      HIDEABLE_COLUMNS.forEach((colId) => {
+        nextVisibility[colId] = !isMobile
       })
+      return nextVisibility
+    })
 
-      setColumnVisibility((prev) => {
-        const nextVisibility: ColumnVisibilityState = { ...prev }
-        HIDEABLE_COLUMNS.forEach((colId) => {
-          nextVisibility[colId] = !isMobile
-        })
-        return nextVisibility
-      })
-    }
+    setPagination((prev) => ({
+      ...prev,
+      pageSize: isMobile ? 20 : 10,
+      pageIndex: 0,
+    }))
+  }, [isMobile])
 
-    // مزامنة الأبعاد بمجرد تحميل المكون في المتصفح بأمان
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
-
-  const columns = React.useMemo(
-    () =>
-      columnHelper.columns([
-        columnHelper.accessor(
-          (row) =>
-            [row.first_name, row.last_name].filter(Boolean).join(" ") ||
-            "Anonymous User",
-          {
-            id: "user",
-            header: "User",
-            cell: ({ row }) => {
-              const fullName = [row.original.first_name, row.original.last_name]
-                .filter(Boolean)
-                .join(" ")
-              return (
-                <div className="flex items-center gap-2.5">
-                  <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-bold text-foreground uppercase">
-                    {row.original.first_name ? (
-                      row.original.first_name[0]
-                    ) : (
-                      <UserCheckIcon className="size-3.5" />
-                    )}
-                  </div>
-                  <div className="flex max-w-xs min-w-0 flex-col">
-                    <span className="truncate text-xs font-semibold text-foreground">
-                      {fullName || "Anonymous User"}
-                    </span>
-                    <span className="truncate text-[11px] text-muted-foreground">
-                      {row.original.email || "No email available"}
-                    </span>
-                  </div>
-                </div>
-              )
-            },
-            enableHiding: false,
-          }
-        ),
-
-        columnHelper.accessor("roles", {
-          id: "roles",
-          header: "Assigned Roles",
-          cell: ({ row }) => {
-            const userRoles = row.original.roles || []
-            return (
-              <div className="flex flex-wrap items-center gap-1.5">
-                {userRoles.length > 0 ? (
-                  userRoles.map((role) => {
-                    const isRevoking = Boolean(
-                      revokingMap[`${row.original.id}-${role.id}`]
-                    )
-                    return (
-                      <Badge
-                        key={role.id}
-                        variant="secondary"
-                        className="gap-1 py-0.5 ps-2 pe-1 text-[11px] font-semibold uppercase"
-                      >
-                        <ShieldIcon className="size-3 text-primary opacity-70" />
-                        <span>{role.name}</span>
+  const columns = React.useMemo<ColumnDef<UserWithRoles>[]>(
+    () => [
+      // 1. First Column: User Identifier (Pinned Visible)
+      {
+        id: "user",
+        accessorFn: (row) =>
+          [row.first_name, row.last_name].filter(Boolean).join(" ") ||
+          t("ANONYMOUS_USER"),
+        header: t("COLUMN_USER"),
+        enableHiding: false,
+        cell: ({ row }) => {
+          const fullName = [row.original.first_name, row.original.last_name]
+            .filter(Boolean)
+            .join(" ")
+          return (
+            <div className="flex items-center gap-2.5">
+              <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-bold text-foreground uppercase">
+                {row.original.first_name ? (
+                  row.original.first_name[0]
+                ) : (
+                  <UserCheckIcon className="size-3.5" />
+                )}
+              </div>
+              <div className="flex max-w-xs min-w-0 flex-col">
+                <span className="truncate text-xs font-semibold text-foreground">
+                  {fullName || t("ANONYMOUS_USER")}
+                </span>
+                <span className="truncate font-mono text-[11px] text-muted-foreground">
+                  {row.original.email || t("NO_EMAIL")}
+                </span>
+              </div>
+            </div>
+          )
+        },
+      },
+      // 2. Assigned Roles Badges (Hideable)
+      {
+        id: "roles",
+        accessorKey: "roles",
+        header: t("COLUMN_ROLES"),
+        enableHiding: true,
+        cell: ({ row }) => {
+          const userRoles = row.original.roles || []
+          return (
+            <div className="flex flex-wrap items-center gap-1.5">
+              {userRoles.length > 0 ? (
+                userRoles.map((role) => {
+                  const isRevoking = Boolean(
+                    revokingMap[`${row.original.id}-${role.id}`]
+                  )
+                  return (
+                    <Badge
+                      key={role.id}
+                      variant="secondary"
+                      className="gap-1 py-0.5 ps-2 pe-1 text-[11px] font-semibold uppercase"
+                    >
+                      <ShieldIcon className="size-3 text-primary opacity-70" />
+                      <span>{role.name}</span>
+                      <Can permission={PERMISSIONS.ASSIGN_ROLE}>
                         <button
                           type="button"
                           disabled={isRevoking}
@@ -292,61 +271,77 @@ export function StaffAccessTable({
                             )
                           }
                           className="ms-0.5 cursor-pointer rounded-full p-0.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                          title={`Remove ${role.name}`}
+                          title={t("REMOVE_ROLE_TITLE", { role: role.name })}
                         >
                           <XIcon className="size-3" />
                         </button>
-                      </Badge>
-                    )
-                  })
-                ) : (
-                  <span className="text-[11px] text-muted-foreground italic">
-                    No roles assigned
-                  </span>
-                )}
-              </div>
-            )
-          },
-        }),
-
-        columnHelper.display({
-          id: "actions",
-          cell: ({ row }) => (
-            <div className="flex items-center justify-end">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-7 text-muted-foreground data-[state=open]:bg-muted"
-                  >
-                    <EllipsisVerticalIcon className="size-4" />
-                    <span className="sr-only">Actions</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40 text-xs">
-                  <DropdownMenuItem
-                    className="cursor-pointer gap-2"
-                    onClick={() => {
-                      setSelectedUser(row.original)
-                      setIsAssignOpen(true)
+                      </Can>
+                    </Badge>
+                  )
+                })
+              ) : (
+                <span className="text-[11px] text-muted-foreground italic">
+                  {t("NO_ROLES_ASSIGNED")}
+                </span>
+              )}
+            </div>
+          )
+        },
+      },
+      // 3. Last Column: Actions Dropdown (Pinned Visible)
+      {
+        id: "actions",
+        enableHiding: false,
+        cell: ({ row }) => (
+          <div className="flex items-center justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="flex size-7 text-muted-foreground data-[state=open]:bg-muted"
+                >
+                  <MoreHorizontalIcon className="size-4" />
+                  <span className="sr-only">{t("ACTIONS_LABEL")}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40 text-xs">
+                <Can permission={PERMISSIONS.ASSIGN_ROLE}>
+                  {/* Uncontrolled AssignRoleSheet Trigger with Radix Dropdown Safe Unmounting */}
+                  <AssignRoleSheet
+                    user={row.original}
+                    availableRoles={availableRoles}
+                    onSuccess={(userId, assignedRole) => {
+                      setUsers((prev) =>
+                        prev.map((u) => {
+                          if (u.id !== userId) return u
+                          return {
+                            ...u,
+                            roles: [...u.roles, assignedRole],
+                          }
+                        })
+                      )
                     }}
                   >
-                    <ShieldPlusIcon className="size-3.5 text-primary" />
-                    Assign Role
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          ),
-          enableHiding: false,
-        }),
-      ]),
-    [revokingMap]
+                    <DropdownMenuItem
+                      onSelect={(e) => e.preventDefault()}
+                      className="cursor-pointer gap-2"
+                    >
+                      <ShieldPlusIcon className="size-3.5 text-primary" />
+                      <span>{t("ASSIGN_ROLE_BUTTON")}</span>
+                    </DropdownMenuItem>
+                  </AssignRoleSheet>
+                </Can>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ),
+      },
+    ],
+    [t, revokingMap, availableRoles]
   )
 
-  const table = useTable({
-    features,
+  const table = useReactTable({
     data: filteredUsers,
     columns,
     state: {
@@ -360,15 +355,26 @@ export function StaffAccessTable({
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange: setPagination,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   })
+
+  const columnLabelsMap: Record<string, string> = {
+    user: t("COLUMN_USER"),
+    roles: t("COLUMN_ROLES"),
+  }
 
   return (
     <div className="flex w-full flex-col justify-start gap-4">
+      {/* Interactive Toolbar */}
       <div className="flex w-full items-center gap-2">
+        {/* Search Input */}
         <div className="relative min-w-0 flex-1">
           <SearchIcon className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search users..."
+            placeholder={t("SEARCH_PLACEHOLDER")}
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value)
@@ -386,11 +392,13 @@ export function StaffAccessTable({
               className="absolute inset-e-2 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-foreground"
             >
               <XIcon className="size-3.5" />
+              <span className="sr-only">{t("CLEAR_SEARCH")}</span>
             </button>
           )}
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
+          {/* Mobile Filter Tabs */}
           <div className="block sm:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -398,10 +406,10 @@ export function StaffAccessTable({
                   variant="outline"
                   size="icon"
                   className="size-8"
-                  title="Filter"
+                  title={t("FILTER_BUTTON")}
                 >
                   <FilterIcon className="size-3.5" />
-                  <span className="sr-only">Filter</span>
+                  <span className="sr-only">{t("FILTER_BUTTON")}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-36 text-xs">
@@ -412,7 +420,7 @@ export function StaffAccessTable({
                   }}
                   className="flex cursor-pointer items-center justify-between"
                 >
-                  <span>All</span>
+                  <span>{t("FILTER_ALL")}</span>
                   <Badge variant="secondary" className="px-1 py-0 text-[10px]">
                     {users.length}
                   </Badge>
@@ -424,7 +432,7 @@ export function StaffAccessTable({
                   }}
                   className="flex cursor-pointer items-center justify-between"
                 >
-                  <span>Assigned</span>
+                  <span>{t("FILTER_ASSIGNED")}</span>
                   <Badge variant="secondary" className="px-1 py-0 text-[10px]">
                     {assignedCount}
                   </Badge>
@@ -436,7 +444,7 @@ export function StaffAccessTable({
                   }}
                   className="flex cursor-pointer items-center justify-between"
                 >
-                  <span>Unassigned</span>
+                  <span>{t("FILTER_UNASSIGNED")}</span>
                   <Badge variant="secondary" className="px-1 py-0 text-[10px]">
                     {unassignedCount}
                   </Badge>
@@ -445,6 +453,7 @@ export function StaffAccessTable({
             </DropdownMenu>
           </div>
 
+          {/* Desktop Filter Pills */}
           <div className="hidden h-8 items-center overflow-hidden rounded-md border border-input bg-background p-0.5 sm:inline-flex">
             <button
               type="button"
@@ -454,11 +463,11 @@ export function StaffAccessTable({
               }}
               className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
                 currentTab === "all"
-                  ? "bg-muted font-semibold text-foreground"
+                  ? "bg-muted font-semibold text-foreground shadow-xs"
                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
               }`}
             >
-              All
+              {t("FILTER_ALL")}
               <Badge
                 variant="secondary"
                 className="ms-1.5 px-1.5 py-0 text-[10px]"
@@ -475,11 +484,11 @@ export function StaffAccessTable({
               }}
               className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
                 currentTab === "assigned"
-                  ? "bg-muted font-semibold text-foreground"
+                  ? "bg-muted font-semibold text-foreground shadow-xs"
                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
               }`}
             >
-              Assigned
+              {t("FILTER_ASSIGNED")}
               <Badge
                 variant="secondary"
                 className="ms-1.5 px-1.5 py-0 text-[10px]"
@@ -496,11 +505,11 @@ export function StaffAccessTable({
               }}
               className={`inline-flex h-full items-center justify-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
                 currentTab === "unassigned"
-                  ? "bg-muted font-semibold text-foreground"
+                  ? "bg-muted font-semibold text-foreground shadow-xs"
                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
               }`}
             >
-              Unassigned
+              {t("FILTER_UNASSIGNED")}
               <Badge
                 variant="secondary"
                 className="ms-1.5 px-1.5 py-0 text-[10px]"
@@ -510,19 +519,20 @@ export function StaffAccessTable({
             </button>
           </div>
 
+          {/* Column Visibility Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
                 size="icon"
                 className="size-8"
-                title="Toggle Columns"
+                title={t("TOGGLE_COLUMNS")}
               >
                 <Columns3Icon className="size-3.5" />
-                <span className="sr-only">Toggle Columns</span>
+                <span className="sr-only">{t("TOGGLE_COLUMNS")}</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuContent align="end" className="w-40 text-xs">
               {table
                 .getAllColumns()
                 .filter(
@@ -533,7 +543,9 @@ export function StaffAccessTable({
                   <DropdownMenuCheckboxItem
                     key={col.id}
                     checked={col.getIsVisible()}
-                    onCheckedChange={(value) => col.toggleVisibility(!!value)}
+                    onCheckedChange={(value) =>
+                      col.toggleVisibility(Boolean(value))
+                    }
                   >
                     {columnLabelsMap[col.id] || col.id}
                   </DropdownMenuCheckboxItem>
@@ -543,6 +555,7 @@ export function StaffAccessTable({
         </div>
       </div>
 
+      {/* Table Shell */}
       <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">
         <div className="overflow-x-auto">
           <Table className="w-full">
@@ -555,9 +568,12 @@ export function StaffAccessTable({
                       colSpan={header.colSpan}
                       className="text-xs font-medium text-muted-foreground"
                     >
-                      {header.isPlaceholder ? null : (
-                        <FlexRender header={header} />
-                      )}
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
                     </TableHead>
                   ))}
                 </TableRow>
@@ -571,8 +587,11 @@ export function StaffAccessTable({
                     className="transition-colors hover:bg-muted/20"
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        <FlexRender cell={cell} />
+                      <TableCell key={cell.id} className="py-2.5">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
                       </TableCell>
                     ))}
                   </TableRow>
@@ -583,7 +602,7 @@ export function StaffAccessTable({
                     colSpan={columns.length}
                     className="h-24 text-center text-xs text-muted-foreground"
                   >
-                    No users found matching your search.
+                    {t("NO_USERS_FOUND")}
                   </TableCell>
                 </TableRow>
               )}
@@ -592,102 +611,91 @@ export function StaffAccessTable({
         </div>
       </div>
 
-      <div className="flex items-center justify-between px-1">
-        <div className="flex w-full items-center gap-8 lg:w-fit">
-          <div className="hidden items-center gap-2 lg:flex">
-            <Label htmlFor="rows-per-page" className="text-xs font-medium">
-              Rows per page
-            </Label>
-            <Select
-              value={`${table.state.pagination.pageSize}`}
-              onValueChange={(value) => table.setPageSize(Number(value))}
+      {/* Standard Pagination Footer */}
+      <div className="flex flex-col items-center justify-between gap-3 px-1 sm:flex-row">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Label htmlFor="rows-per-page" className="text-xs font-medium">
+            {t("ROWS_PER_PAGE")}
+          </Label>
+          <Select
+            value={`${table.getState().pagination.pageSize}`}
+            onValueChange={(value) => table.setPageSize(Number(value))}
+          >
+            <SelectTrigger
+              size="sm"
+              className="h-8 w-18 text-xs"
+              id="rows-per-page"
             >
-              <SelectTrigger
-                size="sm"
-                className="h-8 w-20 text-xs"
-                id="rows-per-page"
-              >
-                <SelectValue placeholder={table.state.pagination.pageSize} />
-              </SelectTrigger>
-              <SelectContent side="top">
-                <SelectGroup>
-                  {[10, 20, 30, 40, 50].map((pageSize) => (
-                    <SelectItem
-                      key={pageSize}
-                      value={`${pageSize}`}
-                      className="text-xs"
-                    >
-                      {pageSize}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="text-xs font-medium text-muted-foreground">
-            Page {table.state.pagination.pageIndex + 1} of{" "}
-            {table.getPageCount() || 1}
-          </div>
-          <div className="ms-auto flex items-center gap-2 lg:ms-0">
-            <Button
-              variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex"
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <ChevronsLeftIcon className="size-4" />
-            </Button>
-            <Button
-              variant="outline"
-              className="size-8"
-              size="icon"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <ChevronLeftIcon className="size-4" />
-            </Button>
-            <Button
-              variant="outline"
-              className="size-8"
-              size="icon"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              <ChevronRightIcon className="size-4" />
-            </Button>
-            <Button
-              variant="outline"
-              className="hidden size-8 lg:flex"
-              size="icon"
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
-            >
-              <ChevronsRightIcon className="size-4" />
-            </Button>
-          </div>
+              <SelectValue placeholder={table.getState().pagination.pageSize} />
+            </SelectTrigger>
+            <SelectContent side="top" className="text-xs">
+              <SelectGroup>
+                {[10, 20, 30, 40, 50].map((pageSize) => (
+                  <SelectItem
+                    key={pageSize}
+                    value={`${pageSize}`}
+                    className="text-xs"
+                  >
+                    {pageSize}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <span className="ms-2">
+            {t("PAGE_COUNTER", {
+              page: table.getState().pagination.pageIndex + 1,
+              total: table.getPageCount() || 1,
+            })}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="outline"
+            className="hidden size-8 p-0 sm:flex"
+            onClick={() => table.setPageIndex(0)}
+            disabled={!table.getCanPreviousPage()}
+            title={t("FIRST_PAGE")}
+          >
+            <ChevronsLeftIcon className="size-4 rtl:rotate-180" />
+            <span className="sr-only">{t("FIRST_PAGE")}</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-8"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            title={t("PREVIOUS_PAGE")}
+          >
+            <ChevronLeftIcon className="size-4 rtl:rotate-180" />
+            <span className="sr-only">{t("PREVIOUS_PAGE")}</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-8"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            title={t("NEXT_PAGE")}
+          >
+            <ChevronRightIcon className="size-4 rtl:rotate-180" />
+            <span className="sr-only">{t("NEXT_PAGE")}</span>
+          </Button>
+          <Button
+            variant="outline"
+            className="hidden size-8 sm:flex"
+            size="icon"
+            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+            disabled={!table.getCanNextPage()}
+            title={t("LAST_PAGE")}
+          >
+            <ChevronsRightIcon className="size-4 rtl:rotate-180" />
+            <span className="sr-only">{t("LAST_PAGE")}</span>
+          </Button>
         </div>
       </div>
-
-      <AssignRoleSheet
-        isOpen={isAssignOpen}
-        onOpenChange={(open) => {
-          setIsAssignOpen(open)
-          if (!open) setSelectedUser(null)
-        }}
-        user={selectedUser}
-        availableRoles={availableRoles}
-        onSuccess={(userId, assignedRole) => {
-          setUsers((prev) =>
-            prev.map((u) => {
-              if (u.id !== userId) return u
-              return {
-                ...u,
-                roles: [...u.roles, assignedRole],
-              }
-            })
-          )
-        }}
-      />
     </div>
   )
 }

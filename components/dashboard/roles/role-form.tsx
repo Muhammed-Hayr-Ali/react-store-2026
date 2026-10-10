@@ -1,12 +1,14 @@
+"use client"
+
 /**
  * @file components/dashboard/roles/role-form.tsx
  * @description Form component for creating and updating access control roles.
+ * Compliant with React 19 useTransition, RTL-first layout, and next-intl.
  */
-
-"use client"
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import {
   ShieldIcon,
@@ -28,8 +30,8 @@ import { Progress } from "@/components/ui/progress"
 
 import { createRole } from "@/lib/actions/role/mutations/create-role"
 import { updateRole } from "@/lib/actions/role/mutations/update-role"
-import { AppPermission } from "@/lib/actions/role/types"
-import { RoleRecord } from "@/lib/actions/role/mutations/create-role"
+import type { AppPermission } from "@/lib/actions/role/types"
+import type { RoleRecord } from "@/lib/actions/role/mutations/create-role"
 import { appRoutes } from "@/lib/config/app-routes"
 import { PERMISSION_GROUPS } from "@/lib/actions/role/permission-groups"
 
@@ -42,11 +44,12 @@ export default function CreateRoleForm({
   initialData,
   roleId,
 }: CreateRoleFormProps) {
+  const t = useTranslations("RolesManagement")
   const router = useRouter()
 
   const isEditing = Boolean(roleId || initialData)
 
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const [isPending, startTransition] = React.useTransition()
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   const [name, setName] = React.useState(initialData?.name || "")
@@ -93,87 +96,89 @@ export default function CreateRoleForm({
     setSelectedPermissions([])
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setErrorMessage(null)
 
     if (!name.trim()) {
-      setErrorMessage("Role identifier is required.")
+      setErrorMessage(t("ROLE_IDENTIFIER_REQUIRED"))
       window.scrollTo({ top: 0, behavior: "smooth" })
       return
     }
 
     if (selectedPermissions.length === 0) {
-      setErrorMessage(
-        "Please select at least one permission from the matrix below."
-      )
+      setErrorMessage(t("SELECT_AT_LEAST_ONE_PERMISSION"))
       window.scrollTo({ top: 0, behavior: "smooth" })
       return
     }
 
-    setIsSubmitting(true)
-    try {
-      let res
-      if (isEditing && roleId) {
-        res = await updateRole({
-          roleId: String(roleId),
-          description: description.trim() || null,
-          permissions: selectedPermissions,
-        })
-      } else {
-        res = await createRole({
-          name: name.trim().toLowerCase(),
-          description: description.trim() || null,
-          permissions: selectedPermissions,
-        })
-      }
+    startTransition(async () => {
+      try {
+        let res
+        if (isEditing && roleId) {
+          res = await updateRole({
+            roleId: String(roleId),
+            description: description.trim() || null,
+            permissions: selectedPermissions,
+          })
+        } else {
+          res = await createRole({
+            name: name.trim().toLowerCase(),
+            description: description.trim() || null,
+            permissions: selectedPermissions,
+          })
+        }
 
-      if (res.success) {
-        toast.success(
-          isEditing
-            ? `Role updated successfully!`
-            : `Role "${res.data?.name}" created successfully!`
-        )
-        router.push(appRoutes.dashboard.admin.roles)
-        router.refresh()
-      } else {
-        setErrorMessage(
-          res.error ||
-            (isEditing ? "Failed to update role." : "Failed to create role.")
-        )
+        if (res.success) {
+          toast.success(
+            isEditing
+              ? t("ROLE_UPDATED_SUCCESS")
+              : t("ROLE_CREATED_SUCCESS", { name: res.data?.name ?? name })
+          )
+          router.push(appRoutes.dashboard.admin.roles)
+          router.refresh()
+        } else {
+          setErrorMessage(
+            res.error ||
+              (isEditing
+                ? t("FAILED_TO_UPDATE_ROLE")
+                : t("FAILED_TO_CREATE_ROLE"))
+          )
+          window.scrollTo({ top: 0, behavior: "smooth" })
+        }
+      } catch {
+        setErrorMessage(t("UNEXPECTED_ERROR"))
         window.scrollTo({ top: 0, behavior: "smooth" })
       }
-    } catch {
-      setErrorMessage("An unexpected error occurred while saving the role.")
-      window.scrollTo({ top: 0, behavior: "smooth" })
-    } finally {
-      setIsSubmitting(false)
-    }
+    })
   }
 
   return (
     <form noValidate onSubmit={handleSubmit} className="space-y-6">
       {errorMessage && (
-        <Alert variant="destructive" className="relative pr-9">
-          <AlertCircleIcon className="size-4" />
-          <AlertTitle>Action Required</AlertTitle>
-          <AlertDescription className="text-xs">
+        <Alert variant="destructive" className="relative pe-9">
+          <AlertCircleIcon className="size-4 shrink-0" />
+          <AlertTitle className="text-xs font-semibold">
+            {t("ALERT_TITLE")}
+          </AlertTitle>
+          <AlertDescription className="text-destructive-foreground/90 text-xs">
             {errorMessage}
           </AlertDescription>
           <button
             type="button"
             onClick={() => setErrorMessage(null)}
-            className="absolute top-3 right-3 cursor-pointer text-muted-foreground hover:text-foreground"
-            aria-label="Close error alert"
+            className="absolute inset-e-3 top-3 cursor-pointer text-muted-foreground hover:text-foreground"
+            aria-label={t("DISMISS_ALERT_SR")}
           >
             <XIcon className="size-4" />
+            <span className="sr-only">{t("DISMISS_ALERT_SR")}</span>
           </button>
         </Alert>
       )}
 
-      {/* على الجوال: flex-col للتحكم الدقيق بالترتيب | على الشاشات الكبيرة: grid 3 أعمدة كالسابق */}
+      {/* Split Grid: 2 Columns Main (Matrix) + 1 Column Sidebar */}
       <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3 lg:items-start">
-        {/* 1. Permissions Matrix (على الجوال يظهر ثانياً order-2 | على الشاشات الكبيرة بالعمودين الرئيسيين lg:order-1) */}
+        {/* Permissions Matrix */}
         <div className="order-2 min-w-0 lg:order-1 lg:col-span-2">
           <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
             <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
@@ -181,10 +186,10 @@ export default function CreateRoleForm({
                 <LayersIcon className="size-4 text-primary" />
                 <div>
                   <h2 className="text-sm font-semibold text-card-foreground">
-                    Permissions Matrix
+                    {t("MATRIX_TITLE")}
                   </h2>
                   <p className="text-xs text-muted-foreground">
-                    Assign granular feature and module capabilities
+                    {t("MATRIX_DESCRIPTION")}
                   </p>
                 </div>
               </div>
@@ -197,7 +202,7 @@ export default function CreateRoleForm({
                   onClick={selectAllPermissions}
                   className="h-8 cursor-pointer px-2.5 text-xs text-muted-foreground hover:text-foreground"
                 >
-                  Select All
+                  {t("SELECT_ALL")}
                 </Button>
                 <Button
                   type="button"
@@ -206,7 +211,7 @@ export default function CreateRoleForm({
                   onClick={clearAllPermissions}
                   className="h-8 cursor-pointer px-2.5 text-xs text-muted-foreground hover:text-foreground"
                 >
-                  Clear
+                  {t("CLEAR_ALL")}
                 </Button>
               </div>
             </div>
@@ -239,7 +244,9 @@ export default function CreateRoleForm({
                         ) : (
                           <SquareIcon className="size-3.5" />
                         )}
-                        {isGroupChecked ? "Unselect Group" : "Select Group"}
+                        {isGroupChecked
+                          ? t("UNSELECT_GROUP")
+                          : t("SELECT_GROUP")}
                       </Button>
                     </div>
 
@@ -281,18 +288,18 @@ export default function CreateRoleForm({
           </div>
         </div>
 
-        {/* الحاوية الجانبية: يتم فك تجميعها على الجوال عبر contents لإتاحة الترتيب الحر لكل بطاقة */}
+        {/* Sidebar Cards */}
         <div className="contents lg:order-2 lg:col-span-1 lg:flex lg:min-w-0 lg:flex-col lg:space-y-6">
-          {/* بطاقة Role Information (على الجوال تظهر أولاً order-1) */}
+          {/* Role Information Card */}
           <div className="order-1 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-0">
             <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
               <ShieldIcon className="size-4 text-primary" />
               <div>
                 <h2 className="text-sm font-semibold text-card-foreground">
-                  Role Information
+                  {t("ROLE_INFO_TITLE")}
                 </h2>
                 <p className="text-xs text-muted-foreground">
-                  Define authorization keys and role descriptions
+                  {t("ROLE_INFO_DESCRIPTION")}
                 </p>
               </div>
             </div>
@@ -300,14 +307,15 @@ export default function CreateRoleForm({
             <FieldGroup className="space-y-4">
               <Field>
                 <FieldLabel htmlFor="role-name" className="text-xs">
-                  Role Identifier <span className="text-destructive">*</span>
+                  {t("ROLE_IDENTIFIER_LABEL")}{" "}
+                  <span className="text-destructive">*</span>
                 </FieldLabel>
                 <Input
                   id="role-name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. editor, moderator"
-                  disabled={isSubmitting || isEditing}
+                  placeholder={t("ROLE_IDENTIFIER_PLACEHOLDER")}
+                  disabled={isPending || isEditing}
                   className="h-9 font-mono text-xs uppercase"
                 />
               </Field>
@@ -315,7 +323,7 @@ export default function CreateRoleForm({
               <Field>
                 <div className="flex items-center justify-between">
                   <FieldLabel htmlFor="role-description" className="text-xs">
-                    Description
+                    {t("ROLE_DESCRIPTION_LABEL")}
                   </FieldLabel>
                   <span className="text-[10px] text-muted-foreground tabular-nums">
                     {description.length}/300
@@ -326,9 +334,9 @@ export default function CreateRoleForm({
                     id="role-description"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Briefly describe the role scope and duties..."
+                    placeholder={t("ROLE_DESCRIPTION_PLACEHOLDER")}
                     rows={4}
-                    disabled={isSubmitting}
+                    disabled={isPending}
                     className="resize-y text-xs"
                   />
                 </InputGroup>
@@ -336,17 +344,17 @@ export default function CreateRoleForm({
             </FieldGroup>
           </div>
 
-          {/* بطاقة Coverage Summary (على الجوال تظهر ثالثاً order-3) */}
+          {/* Coverage Summary Card */}
           <div className="order-3 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-0">
             <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
               <div className="flex items-center gap-2">
                 <SparklesIcon className="size-4 text-primary" />
                 <div>
                   <h2 className="text-sm font-semibold text-card-foreground">
-                    Coverage Summary
+                    {t("COVERAGE_SUMMARY_TITLE")}
                   </h2>
                   <p className="text-xs text-muted-foreground">
-                    Assigned access proportion
+                    {t("COVERAGE_SUMMARY_DESCRIPTION")}
                   </p>
                 </div>
               </div>
@@ -364,40 +372,44 @@ export default function CreateRoleForm({
             />
           </div>
 
-          {/* بطاقة Actions (على الجوال تظهر رابعاً وأخيراً order-4) */}
+          {/* Actions Card */}
           <div className="order-4 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-0">
             <div className="mb-4 border-b border-border/60 pb-3">
               <h2 className="text-sm font-semibold text-card-foreground">
-                Actions
+                {t("ACTIONS_TITLE")}
               </h2>
               <p className="text-xs text-muted-foreground">
-                Commit or cancel ongoing modifications
+                {t("ACTIONS_DESCRIPTION")}
               </p>
             </div>
-            <div className="flex flex-col gap-2 sm:flex-col">
+            <div className="flex flex-col gap-2">
               <Button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isPending}
                 className="h-9 w-full cursor-pointer text-xs shadow-xs"
               >
-                {isSubmitting ? (
+                {isPending ? (
                   <>
-                    <Spinner className="mr-2 size-4" />
-                    Saving...
+                    <Spinner className="me-2 size-4" />
+                    {t("SAVING_BUTTON")}
                   </>
                 ) : (
-                  <>{isEditing ? "Update Role" : "Save Role"}</>
+                  <>
+                    {isEditing
+                      ? t("UPDATE_ROLE_BUTTON")
+                      : t("SAVE_ROLE_BUTTON")}
+                  </>
                 )}
               </Button>
 
               <Button
                 type="button"
                 variant="outline"
-                disabled={isSubmitting}
+                disabled={isPending}
                 onClick={() => router.back()}
                 className="h-9 w-full text-xs"
               >
-                Discard Changes
+                {t("DISCARD_CHANGES_BUTTON")}
               </Button>
             </div>
           </div>

@@ -1,10 +1,18 @@
 "use client"
 
+/**
+ * @file components/dashboard/users/user-form-sheet.tsx
+ * @description Uncontrolled slide-over sheet for creating and updating user accounts.
+ * Fully compliant with React 19 Compiler ref-safety protocol (Section 13.7),
+ * RHF + Zod schema resolution, RTL-first styling, and next-intl.
+ */
+
 import * as React from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import {
   UserPlusIcon,
@@ -12,6 +20,7 @@ import {
   Wand2Icon,
   AlertCircleIcon,
   ShieldIcon,
+  PencilIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -32,9 +41,10 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
+  SheetTrigger,
 } from "@/components/ui/sheet"
 
-import { AdminUserSummary } from "@/lib/actions/users/types"
+import type { AdminUserSummary } from "@/lib/actions/users/types"
 import { createUser } from "@/lib/actions/users/mutations/create-user"
 import { updateUser } from "@/lib/actions/users/mutations/update-user"
 import { createUserSchema, updateUserSchema } from "@/lib/actions/users/schemas"
@@ -43,24 +53,23 @@ type CreateFormValues = z.infer<typeof createUserSchema>
 type UpdateFormValues = z.infer<typeof updateUserSchema>
 type UserFormValues = CreateFormValues | UpdateFormValues
 
-interface UserFormSheetProps {
-  isOpen: string | null
-  onOpenChange: (open: boolean) => void
+export interface UserFormSheetProps {
   user?: AdminUserSummary | null
-  onSuccess: (user: AdminUserSummary, isEditing: boolean) => void
+  children?: React.ReactNode
+  onSuccess?: (user: AdminUserSummary, isEditing: boolean) => void
 }
 
 export function UserFormSheet({
-  isOpen,
-  onOpenChange,
   user,
+  children,
   onSuccess,
 }: UserFormSheetProps) {
+  const t = useTranslations("UsersManagement")
   const router = useRouter()
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
+  const closeRef = React.useRef<HTMLButtonElement>(null)
 
   const isEditing = Boolean(user)
-  const mode = isEditing ? "update" : "create"
 
   const form = useForm<UserFormValues>({
     resolver: zodResolver(isEditing ? updateUserSchema : createUserSchema),
@@ -88,14 +97,6 @@ export function UserFormSheet({
     reset,
   } = form
 
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      setErrorMessage(null)
-      if (!isEditing) reset()
-    }
-    onOpenChange(open)
-  }
-
   const handleGeneratePassword = () => {
     const chars =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*"
@@ -103,11 +104,11 @@ export function UserFormSheet({
     for (let i = 0; i < 10; i++) {
       pass += chars.charAt(Math.floor(Math.random() * chars.length))
     }
-    setValue("password", pass, {
+    setValue("password" as keyof UserFormValues, pass, {
       shouldValidate: true,
       shouldDirty: true,
     })
-    toast.success("Random password generated successfully")
+    toast.success(t("PASSWORD_GENERATED_SUCCESS"))
   }
 
   async function onSubmit(data: UserFormValues) {
@@ -135,10 +136,10 @@ export function UserFormSheet({
 
     if (result.success) {
       toast.success(
-        isEditing ? "User updated successfully!" : "User created successfully!"
+        isEditing ? t("USER_UPDATED_SUCCESS") : t("USER_CREATED_SUCCESS")
       )
       if (isEditing && user) {
-        onSuccess(
+        onSuccess?.(
           {
             ...user,
             first_name: (data as UpdateFormValues).firstName || null,
@@ -151,10 +152,10 @@ export function UserFormSheet({
         const resData = (result as { success: true; data?: AdminUserSummary })
           .data
         if (resData) {
-          onSuccess(resData, false)
+          onSuccess?.(resData, false)
         } else {
           const createData = data as CreateFormValues
-          onSuccess(
+          onSuccess?.(
             {
               id: "",
               email: createData.email,
@@ -172,65 +173,104 @@ export function UserFormSheet({
           )
         }
       }
-      handleOpenChange(false)
+      if (!isEditing) reset()
+      closeRef.current?.click() // Programmatic uncontrolled dismissal
       router.refresh()
     } else {
       const errorMsg =
         result.error === "PERMISSION_DENIED"
-          ? "Permission denied."
+          ? t("PERMISSION_DENIED_ERROR")
           : result.error ||
             (isEditing
-              ? "Failed to update user. Please try again."
-              : "Failed to create user. Please try again.")
+              ? t("FAILED_TO_UPDATE_USER")
+              : t("FAILED_TO_CREATE_USER"))
       setErrorMessage(errorMsg)
     }
   }
 
+  // ✅ Section 13.7 Standard: Event-time handler to prevent render-time ref capture
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    void form.handleSubmit(onSubmit)(e)
+  }
+
   return (
-    <Sheet open={isOpen === mode} onOpenChange={handleOpenChange}>
+    <Sheet>
+      <SheetTrigger asChild>
+        {children ?? (
+          <Button
+            type="button"
+            variant={isEditing ? "ghost" : "default"}
+            size="sm"
+            className="h-8 gap-1.5 px-3 text-xs"
+          >
+            {isEditing ? (
+              <>
+                <PencilIcon className="size-3.5" />
+                <span>{t("EDIT_USER_ACTION")}</span>
+              </>
+            ) : (
+              <>
+                <UserPlusIcon className="size-3.5" />
+                <span>{t("CREATE_USER_BUTTON")}</span>
+              </>
+            )}
+          </Button>
+        )}
+      </SheetTrigger>
+
       <SheetContent
         side="right"
         className="flex w-full flex-col p-0 sm:max-w-xl"
+        onInteractOutside={(e) => {
+          if (isSubmitting) e.preventDefault()
+        }}
+        onEscapeKeyDown={(e) => {
+          if (isSubmitting) e.preventDefault()
+        }}
       >
-        <SheetHeader className="shrink-0 border-b bg-card px-5 py-4 sm:px-6">
+        <SheetHeader className="shrink-0 border-b bg-card px-5 py-4 text-start sm:px-6">
           <SheetTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
-            {isEditing ? "Edit User Account" : "Create New User"}
+            {isEditing ? t("EDIT_USER_TITLE") : t("CREATE_USER_TITLE")}
           </SheetTitle>
           <SheetDescription className="text-xs text-muted-foreground">
             {isEditing
-              ? "Modify user profile information and details."
-              : "Fill in the details to register a new user in the system."}
+              ? t("EDIT_USER_DESCRIPTION")
+              : t("CREATE_USER_DESCRIPTION")}
           </SheetDescription>
         </SheetHeader>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6">
           <form
             id="user-form-element"
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={handleFormSubmit}
             className="space-y-5 pb-8"
           >
             {errorMessage && (
-              <Alert variant="destructive" className="relative pr-9">
-                <AlertCircleIcon className="size-4" />
-                <AlertTitle>Action Required</AlertTitle>
-                <AlertDescription className="text-xs">
+              <Alert variant="destructive" className="relative pe-9">
+                <AlertCircleIcon className="size-4 shrink-0" />
+                <AlertTitle className="text-xs font-semibold">
+                  {t("ALERT_TITLE")}
+                </AlertTitle>
+                <AlertDescription className="text-destructive-foreground/90 text-xs">
                   {errorMessage}
                 </AlertDescription>
                 <button
                   type="button"
                   onClick={() => setErrorMessage(null)}
-                  className="absolute top-3 right-3 cursor-pointer text-muted-foreground hover:text-foreground"
+                  className="absolute inset-e-3 top-3 cursor-pointer text-muted-foreground hover:text-foreground"
+                  aria-label={t("DISMISS_ALERT_SR")}
                 >
                   <XIcon className="size-4" />
                 </button>
               </Alert>
             )}
 
-            <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
-              <div className="mb-4 flex items-center gap-2 border-b pb-3">
+            <div className="rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+              <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
                 <UserPlusIcon className="size-4 text-primary" />
                 <h2 className="text-sm font-semibold text-card-foreground">
-                  Account Credentials
+                  {t("ACCOUNT_CREDENTIALS_TITLE")}
                 </h2>
               </div>
 
@@ -242,7 +282,7 @@ export function UserFormSheet({
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor="user-email" className="text-xs">
-                          Email Address{" "}
+                          {t("EMAIL_LABEL")}{" "}
                           <span className="text-destructive">*</span>
                         </FieldLabel>
                         <Input
@@ -268,14 +308,14 @@ export function UserFormSheet({
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor="user-password" className="text-xs">
-                          Password
+                          {t("PASSWORD_LABEL")}
                         </FieldLabel>
                         <div className="relative flex items-center">
                           <Input
                             {...field}
                             id="user-password"
                             type="text"
-                            placeholder="Leave blank to auto-generate"
+                            placeholder={t("PASSWORD_PLACEHOLDER")}
                             className="h-8 pe-8 font-mono text-xs"
                             value={(field.value as string) || ""}
                           />
@@ -284,7 +324,7 @@ export function UserFormSheet({
                             variant="ghost"
                             size="icon"
                             onClick={handleGeneratePassword}
-                            title="Generate Password"
+                            title={t("GENERATE_PASSWORD_TITLE")}
                             className="absolute inset-e-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
                           >
                             <Wand2Icon className="size-3.5" />
@@ -300,11 +340,11 @@ export function UserFormSheet({
               </FieldGroup>
             </div>
 
-            <div className="rounded-xl border bg-card p-4 shadow-xs sm:p-5">
-              <div className="mb-4 flex items-center gap-2 border-b pb-3">
+            <div className="rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+              <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
                 <ShieldIcon className="size-4 text-primary" />
                 <h2 className="text-sm font-semibold text-card-foreground">
-                  Personal Details
+                  {t("PERSONAL_DETAILS_TITLE")}
                 </h2>
               </div>
 
@@ -319,7 +359,7 @@ export function UserFormSheet({
                           htmlFor="user-firstname"
                           className="text-xs"
                         >
-                          First Name
+                          {t("FIRST_NAME_LABEL")}
                         </FieldLabel>
                         <Input
                           {...field}
@@ -341,7 +381,7 @@ export function UserFormSheet({
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor="user-lastname" className="text-xs">
-                          Last Name
+                          {t("LAST_NAME_LABEL")}
                         </FieldLabel>
                         <Input
                           {...field}
@@ -364,7 +404,7 @@ export function UserFormSheet({
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor="user-phone" className="text-xs">
-                        Phone Number
+                        {t("PHONE_NUMBER_LABEL")}
                       </FieldLabel>
                       <Input
                         {...field}
@@ -393,7 +433,7 @@ export function UserFormSheet({
                 disabled={isSubmitting}
                 className="w-full cursor-pointer text-xs sm:w-auto"
               >
-                Discard
+                {t("DISCARD_BUTTON")}
               </Button>
             </SheetClose>
             <Button
@@ -404,18 +444,21 @@ export function UserFormSheet({
             >
               {isSubmitting ? (
                 <>
-                  <Spinner className="mr-2 size-3.5" />
-                  Saving...
+                  <Spinner className="me-2 size-3.5" />
+                  {t("SAVING_BUTTON")}
                 </>
               ) : isEditing ? (
-                "Save Changes"
+                t("SAVE_CHANGES_BUTTON")
               ) : (
-                "Save User"
+                t("SAVE_USER_BUTTON")
               )}
             </Button>
+            <SheetClose ref={closeRef} className="hidden" />
           </div>
         </SheetFooter>
       </SheetContent>
     </Sheet>
   )
 }
+
+export default UserFormSheet

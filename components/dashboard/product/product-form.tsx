@@ -1,6 +1,7 @@
 /**
- * @file components/dashboard/products/product-form.tsx
+ * @file components/dashboard/product/product-form.tsx
  * @description Form component for creating and updating products, variants, and media.
+ * React 19 / Compiler compliant (Zero Cascading Renders, Single Source of Truth).
  */
 
 "use client"
@@ -62,8 +63,8 @@ import {
 import { Category } from "@/lib/actions/categories"
 import { Brand } from "@/lib/actions/brands"
 
-import CategoryForm from "@/components/dashboard/categories/category-form-sheet"
-import DeleteCategoryDialog from "@/components/dashboard/categories/delete-category"
+import { CategoryFormSheet } from "@/components/dashboard/categories/category-form-sheet"
+import { DeleteCategoryDialog } from "@/components/dashboard/categories/delete-category-dialog"
 
 import BrandForm from "@/components/dashboard/brand/brand-form-sheet"
 import DeleteBrandDialog from "../brand/delete-brand"
@@ -147,20 +148,10 @@ export default function ProductForm({
 
   const isEditing = Boolean(product)
 
-  const [categoriesList, setCategoriesList] = React.useState<Category[]>(
-    initialCategories || []
-  )
-  const [categoryModal, setCategoryModal] = React.useState<{
-    type: "create" | "update" | "delete" | null
-    data: Category | null
-  }>({
-    type: null,
-    data: null,
-  })
+  // Single Source of Truth: Derived directly from server props without state mirroring or useEffect
+  const categoriesList = initialCategories || []
+  const brandsList = initialBrands || []
 
-  const [brandsList, setBrandsList] = React.useState<Brand[]>(
-    initialBrands || []
-  )
   const [brandModal, setBrandModal] = React.useState<{
     type: "create" | "update" | "delete" | null
     data: Brand | null
@@ -708,49 +699,64 @@ export default function ProductForm({
                           </SelectContent>
                         </Select>
 
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() =>
-                            setCategoryModal({ type: "create", data: null })
-                          }
-                          title="Create Category"
-                          className="h-7 w-7 shrink-0 cursor-pointer p-0"
+                        {/* Uncontrolled CategoryFormSheet Trigger: Create */}
+                        <CategoryFormSheet
+                          parentOptions={categoriesList}
+                          onSuccess={() => router.refresh()}
                         >
-                          <PlusIcon className="size-3" />
-                        </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            title="Create Category"
+                            className="h-7 w-7 shrink-0 cursor-pointer p-0"
+                          >
+                            <PlusIcon className="size-3" />
+                          </Button>
+                        </CategoryFormSheet>
 
                         {selectedCategoryObject && (
                           <>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() =>
-                                setCategoryModal({
-                                  type: "update",
-                                  data: selectedCategoryObject,
-                                })
-                              }
-                              title="Edit selected category"
-                              className="h-7 w-7 shrink-0 cursor-pointer p-0 text-muted-foreground hover:text-foreground"
+                            {/* Uncontrolled CategoryFormSheet Trigger: Edit */}
+                            <CategoryFormSheet
+                              category={selectedCategoryObject}
+                              parentOptions={categoriesList}
+                              onSuccess={() => router.refresh()}
                             >
-                              <PencilIcon className="size-3" />
-                            </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                title="Edit selected category"
+                                className="h-7 w-7 shrink-0 cursor-pointer p-0 text-muted-foreground hover:text-foreground"
+                              >
+                                <PencilIcon className="size-3" />
+                              </Button>
+                            </CategoryFormSheet>
 
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() =>
-                                setCategoryModal({
-                                  type: "delete",
-                                  data: selectedCategoryObject,
-                                })
-                              }
-                              title="Delete selected category"
-                              className="h-7 w-7 shrink-0 cursor-pointer p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            {/* Uncontrolled DeleteCategoryDialog Trigger */}
+                            <DeleteCategoryDialog
+                              categoryId={selectedCategoryObject.id}
+                              categoryName={selectedCategoryObject.name}
+                              onDeleted={(deletedId) => {
+                                if (
+                                  form.getValues("category_id") === deletedId
+                                ) {
+                                  setValue("category_id", "", {
+                                    shouldValidate: true,
+                                    shouldDirty: true,
+                                  })
+                                }
+                                router.refresh()
+                              }}
                             >
-                              <Trash2Icon className="size-3" />
-                            </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                title="Delete selected category"
+                                className="h-7 w-7 shrink-0 cursor-pointer p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              >
+                                <Trash2Icon className="size-3" />
+                              </Button>
+                            </DeleteCategoryDialog>
                           </>
                         )}
                       </div>
@@ -977,47 +983,7 @@ export default function ProductForm({
         </div>
       </form>
 
-      {/* --- خارج الـ Form الأساسي بالكامل لمنع التداخل (Portal/Unnested) --- */}
-      <CategoryForm
-        isOpen={categoryModal.type === "create" ? "create" : null}
-        onOpenChange={(open) => {
-          if (!open) setCategoryModal({ type: null, data: null })
-        }}
-        items={categoriesList.filter(
-          (item) => item.parent_id === null && item.is_active === true
-        )}
-        onSuccess={(newCategory) => {
-          setCategoriesList((prev) => [newCategory, ...prev])
-          setValue("category_id", newCategory.id, {
-            shouldValidate: true,
-            shouldDirty: true,
-          })
-          setCategoryModal({ type: null, data: null })
-        }}
-      />
-
-      <CategoryForm
-        isOpen={categoryModal.type === "update" ? "update" : null}
-        onOpenChange={(open) => {
-          if (!open) setCategoryModal({ type: null, data: null })
-        }}
-        item={categoryModal.data}
-        items={categoriesList.filter(
-          (item) =>
-            item.parent_id === null &&
-            item.is_active === true &&
-            item.id !== categoryModal.data?.id
-        )}
-        onSuccess={(updatedCategory) => {
-          setCategoriesList((prev) =>
-            prev.map((item) =>
-              item.id === updatedCategory.id ? updatedCategory : item
-            )
-          )
-          setCategoryModal({ type: null, data: null })
-        }}
-      />
-
+      {/* Brand Modals */}
       <BrandForm
         isOpen={brandModal.type === "create" ? "create" : null}
         onOpenChange={(open) => {
@@ -1025,12 +991,12 @@ export default function ProductForm({
         }}
         item={null}
         onSuccess={(newBrand) => {
-          setBrandsList((prev) => [newBrand, ...prev])
           setValue("brand_id", newBrand.id, {
             shouldValidate: true,
             shouldDirty: true,
           })
           setBrandModal({ type: null, data: null })
+          router.refresh()
         }}
       />
 
@@ -1040,32 +1006,9 @@ export default function ProductForm({
           if (!open) setBrandModal({ type: null, data: null })
         }}
         item={brandModal.data}
-        onSuccess={(updatedBrand) => {
-          setBrandsList((prev) =>
-            prev.map((item) =>
-              item.id === updatedBrand.id ? updatedBrand : item
-            )
-          )
+        onSuccess={() => {
           setBrandModal({ type: null, data: null })
-        }}
-      />
-
-      <DeleteCategoryDialog
-        isOpen={categoryModal.type === "delete"}
-        onOpenChange={(open) => {
-          if (!open) setCategoryModal({ type: null, data: null })
-        }}
-        item={categoryModal.data}
-        onSuccess={(deletedId) => {
-          setCategoriesList((prev) => prev.filter((c) => c.id !== deletedId))
-          if (form.getValues("category_id") === deletedId) {
-            setValue("category_id", "", {
-              shouldValidate: true,
-              shouldDirty: true,
-            })
-          }
-          setCategoryModal({ type: null, data: null })
-          toast.success("Category deleted successfully!")
+          router.refresh()
         }}
       />
 
@@ -1076,7 +1019,6 @@ export default function ProductForm({
         }}
         item={brandModal.data}
         onSuccess={(deletedId) => {
-          setBrandsList((prev) => prev.filter((b) => b.id !== deletedId))
           if (form.getValues("brand_id") === deletedId) {
             setValue("brand_id", null, {
               shouldValidate: true,
@@ -1084,6 +1026,7 @@ export default function ProductForm({
             })
           }
           setBrandModal({ type: null, data: null })
+          router.refresh()
           toast.success("Brand deleted successfully!")
         }}
       />
@@ -1429,9 +1372,9 @@ function ImageCard({
                         : ""
 
                       const displayLabel = currentName
-                        ? `${currentName}${currentSku ? ` (${currentSku})` : ""}`
+                        ? `${currentName}${currentSku ? ` (\${currentSku})` : ""}`
                         : attrSummary
-                          ? `${attrSummary}${currentSku ? ` (${currentSku})` : ""}`
+                          ? `${attrSummary}${currentSku ? ` (\${currentSku})` : ""}`
                           : currentSku
                             ? `SKU: ${currentSku}`
                             : `Variant #${i + 1}`
