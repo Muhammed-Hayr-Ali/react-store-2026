@@ -41,7 +41,7 @@ export default async function Page({
 
   const [productResult, categoriesResult, brandsResult] = await Promise.all([
     getProductCompleteBySlug(slug, { activeOnly: false }),
-    getAllCategories({ activeOnly: true }),
+    getAllCategories({ is_active: true }),
     getAllBrand(),
   ])
 
@@ -49,11 +49,12 @@ export default async function Page({
     notFound()
   }
 
-  const categories: Category[] =
-    categoriesResult.success && categoriesResult.data
-      ? categoriesResult.data
-      : []
+const categories: Category[] =
+  categoriesResult.success && categoriesResult.data
+    ? categoriesResult.data.items
+    : []
 
+    
   const brands: Brand[] =
     brandsResult.success && brandsResult.data ? brandsResult.data : []
 
