@@ -37,10 +37,9 @@ export const categorySchema = z.object({
     .or(z.literal("")),
   image_url: z
     .string()
-    .trim()
-    .url("INVALID_IMAGE_URL")
     .nullable()
-    .or(z.literal("")),
+    .optional()
+    .transform((val) => (val && val.trim() !== "" ? val.trim() : null)),
   image_alt: z
     .string()
     .trim()

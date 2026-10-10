@@ -2,9 +2,7 @@
 
 /**
  * @file components/dashboard/categories/categories-table.tsx
- * @description Fully featured categories TanStack data table with URL-synced search/filter/pagination,
- * mobile column isolation (VisibilityState), optimistic status toggle, React 19 / Compiler compliance,
- * and zero any typing.
+ * @description Standard TanStack Table v8 data table with integrated Toolbar CTA (Section 5 compliant).
  */
 
 import * as React from "react"
@@ -24,6 +22,7 @@ import {
   FolderIcon,
   MoreHorizontalIcon,
   PencilIcon,
+  PlusIcon,
   SearchIcon,
   Trash2Icon,
   XIcon,
@@ -102,12 +101,10 @@ export function CategoriesTable({
   const currentStatus = searchParams.get("status") || "all"
   const totalPages = Math.ceil(totalCount / pageSize) || 1
 
-  // Synchronization with server state
   React.useEffect(() => {
     setData(initialData)
   }, [initialData])
 
-  // Mobile Column Isolation: Hide middle columns on mobile by default (Strict VisibilityState)
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(() => {
       const initial: VisibilityState = {}
@@ -127,7 +124,6 @@ export function CategoriesTable({
     })
   }, [isMobile])
 
-  // URL Query Sync Helper
   const updateQueryParam = React.useCallback(
     (updates: Record<string, string | undefined>) => {
       const params = new URLSearchParams(searchParams.toString())
@@ -145,7 +141,6 @@ export function CategoriesTable({
     [pathname, router, searchParams]
   )
 
-  // Optimistic Status Toggle
   const handleStatusToggle = React.useCallback(
     async (id: string, currentStatus: boolean) => {
       const newStatus = !currentStatus
@@ -171,7 +166,6 @@ export function CategoriesTable({
 
   const columns = React.useMemo<ColumnDef<Category>[]>(
     () => [
-      // 1. First Column: Identifier (Pinned Visible)
       {
         id: "name",
         accessorKey: "name",
@@ -193,7 +187,6 @@ export function CategoriesTable({
           </div>
         ),
       },
-      // 2. Arabic Name (Hideable)
       {
         id: "name_ar",
         accessorKey: "name_ar",
@@ -205,7 +198,6 @@ export function CategoriesTable({
           </span>
         ),
       },
-      // 3. Parent Category (Hideable)
       {
         id: "parent_id",
         accessorKey: "parent_id",
@@ -222,7 +214,6 @@ export function CategoriesTable({
           )
         },
       },
-      // 4. Sort Order (Hideable)
       {
         id: "sort_order",
         accessorKey: "sort_order",
@@ -234,7 +225,6 @@ export function CategoriesTable({
           </span>
         ),
       },
-      // 5. Active Status (Hideable)
       {
         id: "is_active",
         accessorKey: "is_active",
@@ -268,7 +258,6 @@ export function CategoriesTable({
           </Can>
         ),
       },
-      // 6. Created At (Hideable)
       {
         id: "created_at",
         accessorKey: "created_at",
@@ -280,7 +269,6 @@ export function CategoriesTable({
           </span>
         ),
       },
-      // 7. Last Column: Actions Dropdown (Pinned Visible)
       {
         id: "actions",
         enableHiding: false,
@@ -339,7 +327,6 @@ export function CategoriesTable({
     [t, parentOptions, handleStatusToggle, router]
   )
 
-  // Explicit suppression: TanStack Table manages internal state machines and is intentionally skipped by React Compiler
   const table = useReactTable({
     data,
     columns,
@@ -358,7 +345,7 @@ export function CategoriesTable({
 
   return (
     <div className="space-y-4">
-      {/* Interactive Toolbar */}
+      {/* Interactive Toolbar (Section 5 Compliant) */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Search Input */}
         <div className="relative w-full max-w-xs">
@@ -388,7 +375,7 @@ export function CategoriesTable({
           )}
         </div>
 
-        {/* Filter Pills & Column Visibility Dropdown */}
+        {/* Filter Pills, Column Visibility Dropdown & Responsive CTA */}
         <div className="flex items-center gap-2">
           {/* Segmented Filter Pills */}
           <div className="inline-flex h-8 items-center rounded-md border border-input bg-background p-0.5">
@@ -442,6 +429,38 @@ export function CategoriesTable({
                 ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* ✅ Responsive CTA (المكان المعياري لزر الإضافة داخل شريط الأدوات) */}
+          <Can permission={PERMISSIONS.CREATE_CATEGORY}>
+            <CategoryFormSheet
+              parentOptions={parentOptions}
+              onSuccess={() => router.refresh()}
+            >
+              <Button
+                variant="default"
+                size="icon"
+                className="size-8 sm:hidden"
+                title={t("ADD_CATEGORY")}
+              >
+                <PlusIcon className="size-3.5" />
+                <span className="sr-only">{t("ADD_CATEGORY")}</span>
+              </Button>
+            </CategoryFormSheet>
+
+            <CategoryFormSheet
+              parentOptions={parentOptions}
+              onSuccess={() => router.refresh()}
+            >
+              <Button
+                variant="default"
+                size="sm"
+                className="hidden h-8 gap-1.5 px-3 text-xs sm:inline-flex"
+              >
+                <PlusIcon className="size-3.5" />
+                <span>{t("ADD_CATEGORY")}</span>
+              </Button>
+            </CategoryFormSheet>
+          </Can>
         </div>
       </div>
 
@@ -498,7 +517,7 @@ export function CategoriesTable({
         </Table>
       </div>
 
-      {/* Standard Pagination Footer */}
+      {/* Pagination Footer */}
       <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span>{t("ROWS_PER_PAGE")}</span>
