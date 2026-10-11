@@ -68,7 +68,7 @@ export const NAV_LINKS: NavLinkItem[] = [
   {
     title: "Dashboard",
     key: "overview",
-    url: appRoutes.dashboard.user.overview,
+    url: appRoutes.dashboard.overview,
     icon: LayoutDashboard,
   },
   {
@@ -93,7 +93,7 @@ export const NAV_LINKS: NavLinkItem[] = [
     requiredPermission: PERMISSIONS.VIEW_USER_COUPONS,
     hasSeparator: true,
   },
- 
+
   {
     title: "About Us",
     key: "about",

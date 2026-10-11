@@ -6,10 +6,9 @@ import { Loader2, Send } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-import { CustomInput } from "@/components/ui/custom-input"
+import { IconInput } from "@/components/ui/icon-input"
 import { AppLogo } from "@/components/ui/app-logo"
 import { appConfig } from "@/lib/config/app_config"
-import { ReportDialog } from "@/components/shared/report-dialog"
 
 import { footerConfig } from "./footer-config"
 import { ThemeToggle } from "./theme-toggle"
@@ -80,20 +79,6 @@ export default function Footer() {
                   </Link>
                 </li>
               ))}
-              <li>
-                <ReportDialog
-                  targetType="technical_issue"
-                  title="Report a Problem"
-                  description="Encountered an issue or a bug while browsing? Let us know so we can fix it quickly."
-                >
-                  <button
-                    type="button"
-                    className="cursor-pointer text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:underline focus-visible:outline-none"
-                  >
-                    Report an Issue
-                  </button>
-                </ReportDialog>
-              </li>
             </ul>
           </FooterSection>
 
@@ -172,7 +157,7 @@ function NewsletterSection() {
 
       <form onSubmit={handleSubmit} className="flex items-center gap-1.5 pt-1">
         <div className="relative flex-1">
-          <CustomInput
+          <IconInput
             type="email"
             placeholder="you@domain.com"
             value={email}

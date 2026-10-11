@@ -6,26 +6,19 @@ import { SearchIcon, ShoppingCartIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { CurrencySwitcher } from "@/components/store/currency/CurrencySwitcher"
 
 import { appRoutes } from "@/lib/config/app-routes"
 import { useUser } from "@/lib/context/user-context"
-import type { NotificationRecord } from "@/lib/actions/notifications/types"
 import { cn } from "@/lib/utils"
 
 import UserProfilePopover from "./user-profile-popover"
-import { NotificationPopover } from "@/components/notifications/notification-popover.tsx"
 
 interface DesktopNavbarProps {
   className?: string
-  initialNotifications: NotificationRecord[]
-  initialUnreadCount: number
 }
 
 export default function DesktopNavbar({
   className,
-  initialNotifications,
-  initialUnreadCount,
 }: DesktopNavbarProps) {
   const { user } = useUser()
 
@@ -49,22 +42,13 @@ export default function DesktopNavbar({
         <ShoppingCartIcon className="size-4" />
       </Button>
 
-      {user && (
-        <NotificationPopover
-          initialNotifications={initialNotifications}
-          initialUnreadCount={initialUnreadCount}
-          currentUserId={user.id}
-        />
-      )}
+    
 
-      <CurrencySwitcher />
 
       {user ? (
         <>
           <Separator orientation="vertical" className="mx-1 h-5" />
           <UserProfilePopover
-            initialNotifications={initialNotifications}
-            initialUnreadCount={initialUnreadCount}
           />
         </>
       ) : (

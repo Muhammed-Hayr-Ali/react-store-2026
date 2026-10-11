@@ -218,7 +218,7 @@ export function RolesTable({
                 <Can permission={PERMISSIONS.UPDATE_ROLE}>
                   <DropdownMenuItem asChild>
                     <Link
-                      href={`${appRoutes.dashboard.admin.roles}/${row.original.id}/edit`}
+                      href={`${appRoutes.dashboard.team.roles}/${row.original.id}/edit`}
                       className="flex cursor-pointer items-center"
                     >
                       <PencilIcon className="me-2 size-3.5" />
@@ -449,7 +449,7 @@ export function RolesTable({
 
           {/* Dual Responsive CTA Button */}
           <Can permission={PERMISSIONS.CREATE_ROLE}>
-            <Link href={appRoutes.dashboard.admin.create_roles}>
+            <Link href={appRoutes.dashboard.team.create_roles}>
               <Button
                 variant="default"
                 size="icon"

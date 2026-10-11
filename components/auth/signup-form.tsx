@@ -30,7 +30,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
-import { CustomInput } from "@/components/ui/custom-input"
+import { IconInput } from "@/components/ui/icon-input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AuthHeader } from "./auth-header"
 import { GoogleSignInButton } from "./google-sign-in-button"
@@ -107,13 +107,13 @@ export function SignUpForm() {
             <AlertTitle className="text-xs font-semibold">
               {t("ALERT_TITLE")}
             </AlertTitle>
-            <AlertDescription className="text-xs text-destructive-foreground/90">
+            <AlertDescription className="text-destructive-foreground/90 text-xs">
               {errorMessage}
             </AlertDescription>
             <button
               type="button"
               onClick={() => setErrorMessage(null)}
-              className="absolute top-3 inset-e-3 cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
+              className="absolute inset-e-3 top-3 cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
             >
               <XIcon className="size-4" />
               <span className="sr-only">{t("DISMISS_ALERT_SR")}</span>
@@ -130,7 +130,7 @@ export function SignUpForm() {
               <FieldLabel htmlFor="name" className="text-xs">
                 {t("NAME_LABEL")}
               </FieldLabel>
-              <CustomInput
+              <IconInput
                 {...field}
                 id="name"
                 type="text"
@@ -138,7 +138,9 @@ export function SignUpForm() {
                 aria-invalid={fieldState.invalid}
                 autoComplete="name"
                 className="h-9 text-xs"
-                prefixIcon={<UserIcon className="size-4 text-muted-foreground" />}
+                prefixIcon={
+                  <UserIcon className="size-4 text-muted-foreground" />
+                }
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -154,7 +156,7 @@ export function SignUpForm() {
               <FieldLabel htmlFor="email" className="text-xs">
                 {t("EMAIL_LABEL")}
               </FieldLabel>
-              <CustomInput
+              <IconInput
                 {...field}
                 id="email"
                 type="email"
@@ -162,7 +164,9 @@ export function SignUpForm() {
                 aria-invalid={fieldState.invalid}
                 autoComplete="email"
                 className="h-9 text-xs"
-                prefixIcon={<MailIcon className="size-4 text-muted-foreground" />}
+                prefixIcon={
+                  <MailIcon className="size-4 text-muted-foreground" />
+                }
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -178,7 +182,7 @@ export function SignUpForm() {
               <FieldLabel htmlFor="password" className="text-xs">
                 {t("PASSWORD_LABEL")}
               </FieldLabel>
-              <CustomInput
+              <IconInput
                 {...field}
                 id="password"
                 type={showPassword ? "text" : "password"}
@@ -186,7 +190,9 @@ export function SignUpForm() {
                 aria-invalid={fieldState.invalid}
                 autoComplete="new-password"
                 className="h-9 text-xs"
-                prefixIcon={<LockIcon className="size-4 text-muted-foreground" />}
+                prefixIcon={
+                  <LockIcon className="size-4 text-muted-foreground" />
+                }
                 suffixIcon={
                   <Button
                     type="button"
@@ -226,7 +232,7 @@ export function SignUpForm() {
           >
             {isSubmitting ? (
               <>
-                <Spinner className="size-3.5 me-2" />
+                <Spinner className="me-2 size-3.5" />
                 <span>{t("SUBMITTING_BUTTON")}</span>
               </>
             ) : (

@@ -135,7 +135,7 @@ export default function CreateRoleForm({
               ? t("ROLE_UPDATED_SUCCESS")
               : t("ROLE_CREATED_SUCCESS", { name: res.data?.name ?? name })
           )
-          router.push(appRoutes.dashboard.admin.roles)
+          router.push(appRoutes.dashboard.team.roles)
           router.refresh()
         } else {
           setErrorMessage(

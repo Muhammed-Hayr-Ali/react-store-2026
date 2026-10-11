@@ -7,14 +7,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import {
-  CustomPopover,
-  CustomPopoverContent,
-  CustomPopoverHeader,
-  CustomPopoverTrigger,
-} from "@/components/ui/custom-popover"
+  Popover,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 import { cn } from "@/lib/utils"
-import type { NotificationRecord } from "@/lib/actions/notifications/types"
 import { useUser } from "@/lib/context/user-context"
 import { PreferencesSubNav } from "./preferences-sub-nav"
 import { UserProfileHeader } from "./user-profile-header"
@@ -23,14 +22,10 @@ import { LogoutDialog } from "./logout-dialog"
 
 interface UserProfilePopoverProps {
   className?: string
-  initialNotifications: NotificationRecord[]
-  initialUnreadCount: number
 }
 
 export default function UserProfilePopover({
   className,
-  initialNotifications,
-  initialUnreadCount,
 }: UserProfilePopoverProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [dialogStatus, setDialogStatus] = useState<string | null>(null)
@@ -47,8 +42,8 @@ export default function UserProfilePopover({
 
   return (
     <>
-      <CustomPopover open={isOpen} onOpenChange={setIsOpen}>
-        <CustomPopoverTrigger asChild>
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
           <button
             type="button"
             className={cn(
@@ -64,20 +59,15 @@ export default function UserProfilePopover({
               </AvatarFallback>
             </Avatar>
           </button>
-        </CustomPopoverTrigger>
+        </PopoverTrigger>
 
-        <CustomPopoverContent
+        <PopoverContent
           align="end"
           className="w-72 gap-0 rounded-xl p-0 shadow-lg"
         >
-          <CustomPopoverHeader className="px-3.5 py-3">
-            <UserProfileHeader
-              initialNotifications={initialNotifications}
-              initialUnreadCount={initialUnreadCount}
-              showNotifications={false}
-              showAvatar={false}
-            />
-          </CustomPopoverHeader>
+          <PopoverHeader className="px-3.5 py-3">
+            <UserProfileHeader showAvatar={false} />
+          </PopoverHeader>
 
           <Separator />
 
@@ -114,8 +104,8 @@ export default function UserProfilePopover({
               Logout
             </Button>
           </div>
-        </CustomPopoverContent>
-      </CustomPopover>
+        </PopoverContent>
+      </Popover>
 
       <LogoutDialog
         status={dialogStatus}

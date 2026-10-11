@@ -13,8 +13,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { PREFERENCES_CONFIG } from "./nav-config"
-import { useCurrency } from "@/lib/context/currency-context"
-import type { CurrencyCode } from "@/lib/actions/currency/types"
 import { cn } from "@/lib/utils"
 
 interface PreferencesSubNavProps {
@@ -30,12 +28,6 @@ export function PreferencesSubNav({
   const pathname = usePathname()
   const currentLocale = useLocale()
   const { theme, setTheme } = useTheme()
-  const {
-    currency: currentCurrency,
-    setCurrency,
-    isPending: isCurrencyPending,
-  } = useCurrency()
-
   const [isMounted, setIsMounted] = React.useState(false)
   const [isLangPending, startLangTransition] = React.useTransition()
   const [optimisticLocale, setOptimisticLocale] = React.useOptimistic(
@@ -72,20 +64,7 @@ export function PreferencesSubNav({
     }, 220)
   }
 
-  const handleCurrencyChange = async (
-    e: React.MouseEvent,
-    nextCurrency: CurrencyCode
-  ) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (nextCurrency === currentCurrency || isCurrencyPending) return
 
-    try {
-      await setCurrency(nextCurrency)
-    } catch (error) {
-      console.error("Failed to update currency:", error)
-    }
-  }
 
   const { language, appearance, currency } = PREFERENCES_CONFIG
 
@@ -211,65 +190,7 @@ export function PreferencesSubNav({
         </CollapsibleContent>
       </Collapsible>
 
-      {/* 3. العملة */}
-      <Collapsible className="group/curr">
-        <CollapsibleTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            disabled={isCurrencyPending}
-            className={cn(
-              "flex h-10 w-full items-center justify-between font-normal",
-              itemClassName
-            )}
-          >
-            <div className="flex items-center">
-              <currency.icon className="me-2 size-4 text-muted-foreground" />
-              <span>{currency.name}</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-muted-foreground">
-              {isCurrencyPending ? (
-                <Loader2Icon className="size-3.5 animate-spin text-primary" />
-              ) : (
-                isMounted && (
-                  <span className="text-[11px] font-medium uppercase">
-                    {currentCurrency}
-                  </span>
-                )
-              )}
-              <ChevronRight className="size-3.5 transition-transform duration-200 group-data-[state=open]/curr:rotate-90 rtl:rotate-180" />
-            </div>
-          </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-0.5 ps-6 pt-0.5">
-          {currency.options.map((opt) => {
-            const isSelected = isMounted && currentCurrency === opt.value
-            return (
-              <Button
-                key={opt.key}
-                variant="ghost"
-                size="sm"
-                disabled={isCurrencyPending}
-                onClick={(e) =>
-                  handleCurrencyChange(e, opt.value as CurrencyCode)
-                }
-                className={cn(
-                  "flex h-8 w-full items-center justify-between text-xs font-normal",
-                  (!isSelected || isCurrencyPending) && "text-muted-foreground",
-                  subItemClassName
-                )}
-              >
-                <span>{opt.label}</span>
-                {isSelected && !isCurrencyPending ? (
-                  <CheckIcon className="size-3.5 text-primary" />
-                ) : (
-                  <span className="size-3.5" aria-hidden="true" />
-                )}
-              </Button>
-            )
-          })}
-        </CollapsibleContent>
-      </Collapsible>
+
     </div>
   )
 }

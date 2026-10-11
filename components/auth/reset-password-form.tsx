@@ -28,12 +28,12 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
-import { CustomInput } from "@/components/ui/custom-input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AuthHeader } from "./auth-header"
 
 import { confirmPasswordReset } from "@/lib/actions/authentication"
 import { appRoutes } from "@/lib/config/app-routes"
+import { IconInput } from "@/components/ui/icon-input"
 
 // تعريف المخطط محلياً بشكل مستقل لتجنب خطأ .omit() مع الـ refinement
 const clientResetSchema = z
@@ -144,7 +144,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
               <FieldLabel htmlFor="password" className="text-xs">
                 {t("PASSWORD_LABEL")}
               </FieldLabel>
-              <CustomInput
+              <IconInput
                 {...field}
                 id="password"
                 type={showPassword ? "text" : "password"}
@@ -190,7 +190,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
               <FieldLabel htmlFor="confirmPassword" className="text-xs">
                 {t("CONFIRM_PASSWORD_LABEL")}
               </FieldLabel>
-              <CustomInput
+              <IconInput
                 {...field}
                 id="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}

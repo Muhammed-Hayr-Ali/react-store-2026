@@ -73,8 +73,7 @@ export function NavMain({ permissions = [] }: NavMainProps) {
           )
           const isSingleActive =
             !hasChildren &&
-            (item.url === appRoutes.dashboard.user.overview ||
-            item.url === appRoutes.dashboard.admin.overview
+            (item.url === appRoutes.dashboard.overview
               ? normalizedPath === item.url
               : normalizedPath === item.url ||
                 normalizedPath.startsWith(`${item.url}/`))

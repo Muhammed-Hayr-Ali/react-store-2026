@@ -14,22 +14,15 @@ import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 
 import { appRoutes } from "@/lib/config/app-routes"
-import type { NotificationRecord } from "@/lib/actions/notifications/types"
 import { useUser } from "@/lib/context/user-context"
 import { LogoutDialog } from "./logout-dialog"
 import { UserProfileHeader } from "./user-profile-header"
 import { PreferencesSubNav } from "./preferences-sub-nav"
 import { NavItemsList } from "./nav-items-list"
 
-interface MobileMenuProps {
-  initialNotifications: NotificationRecord[]
-  initialUnreadCount: number
-}
 
-export function MobileMenu({
-  initialNotifications,
-  initialUnreadCount,
-}: MobileMenuProps) {
+
+export function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -40,8 +33,6 @@ export function MobileMenu({
         onClick={() => setIsOpen(!isOpen)}
       />
       <MobileMenuDrawer
-        initialNotifications={initialNotifications}
-        initialUnreadCount={initialUnreadCount}
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
       />
@@ -50,13 +41,9 @@ export function MobileMenu({
 }
 
 function MobileMenuDrawer({
-  initialNotifications,
-  initialUnreadCount,
   isOpen,
   onClose,
 }: {
-  initialNotifications: NotificationRecord[]
-  initialUnreadCount: number
   isOpen: boolean
   onClose: () => void
 }) {
@@ -74,9 +61,6 @@ function MobileMenuDrawer({
         {user && (
           <MobileMenuHeader>
             <UserProfileHeader
-              initialNotifications={initialNotifications}
-              initialUnreadCount={initialUnreadCount}
-              showNotifications={true}
               showAvatar={true}
             />
           </MobileMenuHeader>

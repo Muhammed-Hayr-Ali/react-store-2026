@@ -61,7 +61,7 @@ export async function updateUserStatus(
       }
     }
 
-    revalidatePath(appRoutes.dashboard.admin.users)
+    revalidatePath(appRoutes.dashboard.users)
     return { success: true, data: null }
   } catch (err) {
     return { success: false, error: "UNEXPECTED_ERROR" }

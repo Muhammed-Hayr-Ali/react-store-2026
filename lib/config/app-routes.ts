@@ -11,26 +11,12 @@ export const appRoutes = {
   },
   dashboard: {
     root: "/dashboard",
-    user: {
-      overview: "/dashboard/overview",
-      account: "/dashboard/account",
-      notifications: "/dashboard/notifications",
+    overview: "/dashboard/overview",
+    team: {
+      roles: "/dashboard/team/roles",
+      create_roles: "/dashboard/team/roles/create",
+      staffAccess: "/dashboard/team/staff-access",
     },
-    // مسارات الإدارة المحمية والمموهة (Admin Panel)
-    admin: {
-      overview: "/dashboard/x9k2-panel/overview",
-      categories: "/dashboard/x9k2-panel/categories",
-      products: "/dashboard/x9k2-panel/products",
-      create_products: "/dashboard/x9k2-panel/products/create",
-      flashSales: "/dashboard/x9k2-panel/flash-sales",
-      create_flashSales: "/dashboard/x9k2-panel/flash-sales/create",
-      notifications: "/dashboard/x9k2-panel/notifications",
-      notificationChannels: "/dashboard/x9k2-panel/notifications/channels", // المسار الجديد
-      reports: "/dashboard/x9k2-panel/reports",
-      roles: "/dashboard/x9k2-panel/roles",
-      create_roles: "/dashboard/x9k2-panel/roles/create",
-      staffAccess: "/dashboard/x9k2-panel/staff-access",
-      users: "/dashboard/x9k2-panel/users",
-    },
+    users: "/dashboard/users",
   },
 } as const

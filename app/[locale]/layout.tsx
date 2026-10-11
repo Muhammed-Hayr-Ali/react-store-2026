@@ -13,9 +13,7 @@ import { Toaster } from "@/components/ui/sonner"
 import { DirectionProvider } from "@/components/ui/direction"
 import { ScrollToTop } from "@/components/shared/scroll-to-top"
 
-import { CurrencyProvider } from "@/lib/context/currency-context"
 import { UserProvider } from "@/lib/context/user-context"
-import { getCurrencyContext } from "@/lib/actions/currency/queries/get-currency-context"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 
 const inter = Inter({
@@ -62,10 +60,7 @@ export default async function RootLayout({
   const direction = locale === "ar" ? "rtl" : "ltr"
 
   // جلب سياق العملة والمستخدم الحالي بالتوازي لتحقيق أسرع استجابة خادمة
-  const [{ currency, rate }, currentUser] = await Promise.all([
-    getCurrencyContext(),
-    getCurrentUser(),
-  ])
+  const currentUser = await getCurrentUser()
 
   const permissions = currentUser?.permissions || []
 
@@ -88,11 +83,9 @@ export default async function RootLayout({
             <NextIntlClientProvider>
               <TooltipProvider>
                 <ScrollToTop />
-                <CurrencyProvider currency={currency} rate={rate}>
-                  <UserProvider user={currentUser} permissions={permissions}>
-                    {children}
-                  </UserProvider>
-                </CurrencyProvider>
+                <UserProvider user={currentUser} permissions={permissions}>
+                  {children}
+                </UserProvider>
               </TooltipProvider>
             </NextIntlClientProvider>
           </ThemeProvider>

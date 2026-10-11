@@ -5,23 +5,16 @@ import { UserIcon } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useUser } from "@/lib/context/user-context"
-import type { NotificationRecord } from "@/lib/actions/notifications/types"
 import { cn } from "@/lib/utils"
-import { NotificationPopover } from "@/components/notifications/notification-popover.tsx"
+
 
 interface UserProfileHeaderProps {
   className?: string
-  initialNotifications?: NotificationRecord[]
-  initialUnreadCount?: number
-  showNotifications?: boolean
   showAvatar?: boolean
 }
 
 export function UserProfileHeader({
   className,
-  initialNotifications = [],
-  initialUnreadCount = 0,
-  showNotifications = false,
   showAvatar = true,
 }: UserProfileHeaderProps) {
   const { user } = useUser()
@@ -67,15 +60,7 @@ export function UserProfileHeader({
         </div>
       </div>
 
-      {showNotifications && (
-        <div className="shrink-0 ps-1">
-          <NotificationPopover
-            initialNotifications={initialNotifications}
-            initialUnreadCount={initialUnreadCount}
-            currentUserId={user.id}
-          />
-        </div>
-      )}
+    
     </div>
   )
 }

@@ -48,7 +48,7 @@ export async function deleteUser(userId: string): Promise<ApiResult<null>> {
       console.error("Error deleting user profile:", profileError.message)
     }
 
-    revalidatePath(appRoutes.dashboard.admin.users)
+    revalidatePath(appRoutes.dashboard.users)
     return { success: true, data: null }
   } catch (err) {
     return { success: false, error: "UNEXPECTED_ERROR" }

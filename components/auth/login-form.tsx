@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { Badge } from "@/components/ui/badge"
-import { CustomInput } from "@/components/ui/custom-input"
+import { IconInput } from "@/components/ui/icon-input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AuthHeader } from "./auth-header"
 import { GoogleSignInButton } from "./google-sign-in-button"
@@ -117,13 +117,13 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
             <AlertTitle className="text-xs font-semibold">
               {t("ALERT_TITLE")}
             </AlertTitle>
-            <AlertDescription className="text-xs text-destructive-foreground/90">
+            <AlertDescription className="text-destructive-foreground/90 text-xs">
               {errorMessage}
             </AlertDescription>
             <button
               type="button"
               onClick={() => setErrorMessage(null)}
-              className="absolute top-3 inset-e-3 cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
+              className="absolute inset-e-3 top-3 cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
             >
               <XIcon className="size-4" />
               <span className="sr-only">{t("DISMISS_ALERT_SR")}</span>
@@ -140,7 +140,7 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
               <FieldLabel htmlFor="email" className="text-xs">
                 {t("EMAIL_LABEL")}
               </FieldLabel>
-              <CustomInput
+              <IconInput
                 {...field}
                 id="email"
                 type="email"
@@ -148,7 +148,9 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
                 aria-invalid={fieldState.invalid}
                 autoComplete="email"
                 className="h-9 text-xs"
-                prefixIcon={<MailIcon className="size-4 text-muted-foreground" />}
+                prefixIcon={
+                  <MailIcon className="size-4 text-muted-foreground" />
+                }
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -172,7 +174,7 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
                   {t("FORGOT_PASSWORD_LINK")}
                 </Link>
               </div>
-              <CustomInput
+              <IconInput
                 {...field}
                 id="password"
                 type={showPassword ? "text" : "password"}
@@ -180,7 +182,9 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
                 aria-invalid={fieldState.invalid}
                 autoComplete="current-password"
                 className="h-9 text-xs"
-                prefixIcon={<LockIcon className="size-4 text-muted-foreground" />}
+                prefixIcon={
+                  <LockIcon className="size-4 text-muted-foreground" />
+                }
                 suffixIcon={
                   <Button
                     type="button"
@@ -215,7 +219,7 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
         <Field className="pt-1">
           <div className="relative w-full">
             {isEmailLastUsed && (
-              <div className="pointer-events-none absolute -top-2.5 -inset-e-2.5 z-10">
+              <div className="pointer-events-none absolute -inset-e-2.5 -top-2.5 z-10">
                 <Badge
                   variant="secondary"
                   className="h-4 border border-border/80 bg-secondary px-1.5 text-[9px] font-medium tracking-wide text-foreground shadow-xs"
@@ -231,7 +235,7 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
             >
               {isSubmitting ? (
                 <>
-                  <Spinner className="size-3.5 me-2" />
+                  <Spinner className="me-2 size-3.5" />
                   <span>{t("SIGN_IN_SUBMITTING")}</span>
                 </>
               ) : (
