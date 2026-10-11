@@ -4,8 +4,8 @@
  */
 
 import { z } from "zod"
+import { Database } from "../types/database" // 👈 الربط المباشر مع قاعدة البيانات
 import {
-  categorySchema,
   createCategorySchema,
   updateCategorySchema,
   toggleCategoryStatusSchema,
@@ -14,13 +14,25 @@ import {
   deleteBatchCategoriesSchema,
 } from "./schemas"
 
-// Re-export or define ApiResult contract
+// ============================================================================
+// Shared API Result Contract
+// ============================================================================
 export type ApiResult<T> =
   | { success: true; data: T }
   | { success: false; error: string; details?: Record<string, string[]> }
 
-// Entity Types
-export type Category = z.infer<typeof categorySchema>
+// ============================================================================
+// Entity Types (Mapped 1:1 to Database)
+// ============================================================================
+export type CategoryRecord = Database["public"]["Tables"]["categories"]["Row"]
+export type CategoryInsert =
+  Database["public"]["Tables"]["categories"]["Insert"]
+export type CategoryUpdate =
+  Database["public"]["Tables"]["categories"]["Update"]
+
+// ============================================================================
+// Input Types (Inferred from Zod)
+// ============================================================================
 export type CreateCategoryInput = z.infer<typeof createCategorySchema>
 export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>
 export type ToggleCategoryStatusInput = z.infer<
@@ -34,8 +46,10 @@ export type DeleteBatchCategoriesInput = z.infer<
   typeof deleteBatchCategoriesSchema
 >
 
+// ============================================================================
 // Presentation & Relational Models
-export interface CategoryWithParent extends Category {
+// ============================================================================
+export interface CategoryWithParent extends CategoryRecord {
   parent?: {
     id: string
     name: string
@@ -44,7 +58,7 @@ export interface CategoryWithParent extends Category {
   } | null
 }
 
-export interface CategoryTreeNode extends Category {
+export interface CategoryTreeNode extends CategoryRecord {
   children: CategoryTreeNode[]
 }
 

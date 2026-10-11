@@ -6,106 +6,81 @@
 import { z } from "zod"
 
 // ============================================================================
-// Base Category Schema (Database Row Contract)
+// Mutation Schemas (Mapped to CategoryInsert / CategoryUpdate)
 // ============================================================================
 
-export const categorySchema = z.object({
-  id: z.string().uuid("INVALID_CATEGORY_ID"),
-  parent_id: z.string().uuid("INVALID_PARENT_ID").nullable(),
-  name: z
+export const createCategorySchema = z.object({
+  // حقول اختيارية
+  parent_id: z
     .string()
-    .trim()
-    .min(1, "CATEGORY_NAME_REQUIRED")
-    .max(100, "CATEGORY_NAME_TOO_LONG"),
+    .uuid("INVALID_PARENT_ID")
+    .nullable()
+    .optional()
+    .transform((val) => (!val || val === "" ? null : val)),
+
   name_ar: z
     .string()
     .trim()
     .max(100, "CATEGORY_NAME_AR_TOO_LONG")
     .nullable()
-    .or(z.literal("")),
+    .optional()
+    .transform((val) => (!val || val === "" ? null : val)),
+
+  description: z
+    .string()
+    .trim()
+    .max(500, "CATEGORY_DESCRIPTION_TOO_LONG")
+    .nullable()
+    .optional()
+    .transform((val) => (!val || val === "" ? null : val)),
+
+  image_url: z
+    .string()
+    .trim()
+    .url("INVALID_IMAGE_URL")
+    .nullable()
+    .optional()
+    .transform((val) => (!val || val === "" ? null : val)),
+
+  image_alt: z
+    .string()
+    .trim()
+    .max(200, "IMAGE_ALT_TOO_LONG")
+    .nullable()
+    .optional()
+    .transform((val) => (!val || val === "" ? null : val)),
+
+  is_active: z.boolean().optional().default(true),
+
+  sort_order: z.coerce
+    .number()
+    .int("SORT_ORDER_MUST_BE_INTEGER")
+    .min(0, "SORT_ORDER_MUST_BE_POSITIVE")
+    .optional()
+    .default(0),
+
+  // حقول إجبارية
+  name: z
+    .string()
+    .trim()
+    .min(1, "CATEGORY_NAME_REQUIRED")
+    .max(100, "CATEGORY_NAME_TOO_LONG"),
+
   slug: z
     .string()
     .trim()
     .min(1, "CATEGORY_SLUG_REQUIRED")
     .max(120, "CATEGORY_SLUG_TOO_LONG")
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "INVALID_SLUG_FORMAT"),
-  description: z
-    .string()
-    .trim()
-    .max(500, "CATEGORY_DESCRIPTION_TOO_LONG")
-    .nullable()
-    .or(z.literal("")),
-  image_url: z
-    .string()
-    .nullable()
-    .optional()
-    .transform((val) => (val && val.trim() !== "" ? val.trim() : null)),
-  image_alt: z
-    .string()
-    .trim()
-    .max(200, "IMAGE_ALT_TOO_LONG")
-    .nullable()
-    .or(z.literal("")),
-  is_active: z.boolean().default(true),
-  sort_order: z
-    .number()
-    .int("SORT_ORDER_MUST_BE_INTEGER")
-    .min(0, "SORT_ORDER_MUST_BE_POSITIVE")
-    .default(0),
-  created_at: z.string(),
-  updated_at: z.string(),
+})
+
+export const updateCategorySchema = createCategorySchema.partial().extend({
+  id: z.string().uuid("INVALID_CATEGORY_ID"), // الـ ID إجباري في التحديث
 })
 
 // ============================================================================
-// Mutation Schemas
+// Action Specific Schemas
 // ============================================================================
-
-export const createCategorySchema = categorySchema
-  .omit({
-    id: true,
-    created_at: true,
-    updated_at: true,
-  })
-  .extend({
-    parent_id: z.string().uuid("INVALID_PARENT_ID").nullable().optional(),
-    name_ar: z
-      .string()
-      .trim()
-      .max(100, "CATEGORY_NAME_AR_TOO_LONG")
-      .nullable()
-      .or(z.literal(""))
-      .optional(),
-    description: z
-      .string()
-      .trim()
-      .max(500, "CATEGORY_DESCRIPTION_TOO_LONG")
-      .nullable()
-      .or(z.literal(""))
-      .optional(),
-    image_url: z
-      .string()
-      .trim()
-      .url("INVALID_IMAGE_URL")
-      .nullable()
-      .or(z.literal(""))
-      .optional(),
-    image_alt: z
-      .string()
-      .trim()
-      .max(200, "IMAGE_ALT_TOO_LONG")
-      .nullable()
-      .or(z.literal(""))
-      .optional(),
-    is_active: z.boolean().optional().default(true),
-    sort_order: z
-      .number()
-      .int("SORT_ORDER_MUST_BE_INTEGER")
-      .min(0, "SORT_ORDER_MUST_BE_POSITIVE")
-      .optional()
-      .default(0),
-  })
-
-export const updateCategorySchema = createCategorySchema.partial()
 
 export const toggleCategoryStatusSchema = z.object({
   id: z.string().uuid("INVALID_CATEGORY_ID"),
@@ -117,7 +92,7 @@ export const reorderCategoriesSchema = z.object({
     .array(
       z.object({
         id: z.string().uuid("INVALID_CATEGORY_ID"),
-        sort_order: z
+        sort_order: z.coerce
           .number()
           .int("SORT_ORDER_MUST_BE_INTEGER")
           .min(0, "SORT_ORDER_MUST_BE_POSITIVE"),

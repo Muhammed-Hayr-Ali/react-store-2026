@@ -1,0 +1,113 @@
+# 📘 القاموس الموحد لأسماء الأعمدة (Unified Database Column Dictionary)
+
+هذا الملف يمثل **الدستور المعماري الصارم** لتسمية الحقول في جميع جداول النظام. الهدف من هذا الدستور هو القضاء التام على أخطاء عدم تطابق البيانات (Mapping Bugs) وتسهيل كتابة الكود.
+
+---
+
+## ⚖️ القاعدة الذهبية: قانون التطابق التام (Strict 1:1 Mapping Law)
+**اسم العمود في قاعدة البيانات `===` اسم الخاصية في واجهة الـ API `===` اسم الحقل في Zod `===` اسم الـ Type في TypeScript `===` حقل الإدخال في React Hook Form.**
+* **يُمنع منعاً باتاً** تحويل الأسماء بين الطبقات (مثال: يمنع تحويل `is_active` إلى `isActive` في الواجهة الأمامية).
+* **حالة الأحرف:** يتم استخدام `snake_case` دائماً لجميع الأسماء بدون استثناء.
+
+---
+
+## 1. المعرفات والعلاقات (Identifiers & Keys)
+
+| اسم الحقل القياسي | النوع في DB | النوع في TS | الغرض والاستخدام | الأسماء المحرمة (يُمنع استخدامها) |
+| :--- | :--- | :--- | :--- | :--- |
+| `id` | `UUID` | `string` | المعرف الأساسي للجدول (Primary Key). | `[table]_id`, `uid`, `uuid` |
+| `parent_id` | `UUID` | `string \| null` | يستخدم في العلاقات الهرمية (مثل تصنيف أب). | `parent`, `category_parent` |
+| `[entity]_id` | `UUID` | `string` | مفتاح أجنبي (Foreign Key). (مثال: `user_id`, `product_id`). | `userId`, `author`, `product` |
+| `slug` | `VARCHAR` | `string` | المعرف النصي الفريد المستخدم في الروابط. | `url_key`, `permalink`, `path` |
+
+---
+
+## 2. النصوص والتوطين (Text & Localization)
+*نعتمد الحقل المجرد للغة الأساسية (الإنجليزية/الافتراضية)، ونضيف اللاحقة `_ar` للغة العربية.*
+
+| اسم الحقل القياسي | النوع في DB | النوع في TS | الغرض والاستخدام | الأسماء المحرمة |
+| :--- | :--- | :--- | :--- | :--- |
+| `name` | `VARCHAR` | `string` | اسم الكيان (للكيانات البسيطة كالتصنيفات، العلامات التجارية). | `name_en`, `title` (إذا كان كياناً بسيطاً) |
+| `name_ar` | `VARCHAR` | `string \| null` | الاسم باللغة العربية. | `arabic_name`, `name_arabic` |
+| `title` | `VARCHAR` | `string` | عنوان الكيان (للكيانات المحتوية مثل المقالات، المهام). | `title_en`, `header` |
+| `title_ar` | `VARCHAR` | `string \| null` | العنوان باللغة العربية. | `arabic_title`, `title_arabic` |
+| `description` | `TEXT` | `string \| null` | الوصف أو الشرح الطويل. | `desc`, `info`, `details`, `summary` |
+| `description_ar` | `TEXT` | `string \| null` | الوصف باللغة العربية. | `desc_ar`, `arabic_desc` |
+| `content` | `TEXT` | `string \| null` | المحتوى الغني (HTML أو Markdown) للمدونات والصفحات. | `body`, `html_content` |
+
+---
+
+## 3. الحالات والمنطق التشغيلي (Status & Booleans)
+*أي حقل منطقي (Boolean) يجب أن يبدأ بأفعال الكينونة مثل `is_` أو `has_`.*
+
+| اسم الحقل القياسي | النوع في DB | النوع في TS | الغرض والاستخدام | الأسماء المحرمة |
+| :--- | :--- | :--- | :--- | :--- |
+| `status` | `VARCHAR` | `Union Type` | الحالة المتغيرة (`pending`, `completed`, `rejected` ...). | `state`, `current_status` |
+| `type` | `VARCHAR` | `Union Type` | نوع الكيان إذا كان الجدول يجمع عدة أنواع (`physical`, `digital`). | `kind`, `category_type` |
+| `is_active` | `BOOLEAN` | `boolean` | حالة التفعيل/التعطيل للكيان في النظام. | `active`, `isActive`, `status_active` |
+| `is_published` | `BOOLEAN` | `boolean` | حالة النشر للعامة. | `published`, `visible` |
+| `is_featured` | `BOOLEAN` | `boolean` | لتمييز السجل (مثل: منتج مميز). | `featured`, `star` |
+| `has_discount` | `BOOLEAN` | `boolean` | وجود خاصية فرعية مرتبطة. | `discounted` |
+
+---
+
+## 4. الأرقام والتسعير (Numbers, Pricing & Sorting)
+
+| اسم الحقل القياسي | النوع في DB | النوع في TS | الغرض والاستخدام | الأسماء المحرمة |
+| :--- | :--- | :--- | :--- | :--- |
+| `sort_order` | `INTEGER` | `number` | الترتيب اليدوي لعرض العناصر. | `order`, `position`, `index`, `sequence` |
+| `price` | `NUMERIC` | `number` | السعر الأساسي. | `amount`, `cost`, `regular_price` |
+| `discount_price` | `NUMERIC` | `number \| null` | السعر بعد التخفيض. | `sale_price`, `offer_price` |
+| `quantity` | `INTEGER` | `number` | الكمية في سلة أو طلب. | `qty`, `count` |
+| `stock` | `INTEGER` | `number` | المخزون المتاح من منتج. | `inventory`, `in_stock` |
+| `view_count` | `INTEGER` | `number` | عدد المشاهدات للتحليلات. | `views`, `hits` |
+
+---
+
+## 5. الوسائط والمرفقات (Media & Attachments)
+*يجب أن ينتهي أي حقل يحتوي على رابط بـ `_url`.*
+
+| اسم الحقل القياسي | النوع في DB | النوع في TS | الغرض والاستخدام | الأسماء المحرمة |
+| :--- | :--- | :--- | :--- | :--- |
+| `image_url` | `VARCHAR` | `string \| null` | الصورة الأساسية. | `image`, `img`, `picture`, `photo` |
+| `image_alt` | `VARCHAR` | `string \| null` | النص البديل للصورة الأساسية لدواعي الـ SEO والوصول. | `alt`, `alt_text`, `image_desc` |
+| `cover_url` | `VARCHAR` | `string \| null` | صورة الغلاف. | `cover`, `banner_image` |
+| `video_url` | `VARCHAR` | `string \| null` | رابط الفيديو. | `video`, `vid` |
+| `attachment_url` | `VARCHAR` | `string \| null` | رابط ملف أو وثيقة (PDF مثلاً). | `file`, `document` |
+
+---
+
+## 6. التواريخ والطوابع الزمنية (Dates & Timestamps)
+*تُخزن دائماً بنوع `TIMESTAMPTZ` ويجب أن تنتهي بـ `_at` للأحداث، أو `_date` للأيام المحددة.*
+
+| اسم الحقل القياسي | النوع في DB | النوع في TS | الغرض والاستخدام | الأسماء المحرمة |
+| :--- | :--- | :--- | :--- | :--- |
+| `created_at` | `TIMESTAMPTZ` | `string` | طابع إنشاء السجل. | `createdAt`, `date_added`, `inserted_at` |
+| `updated_at` | `TIMESTAMPTZ` | `string` | طابع آخر تعديل. | `updatedAt`, `modified_at` |
+| `deleted_at` | `TIMESTAMPTZ` | `string \| null` | يستخدم لتطبيق الحذف المؤقت (Soft Delete). | `deletedAt`, `trashed_at` |
+| `published_at` | `TIMESTAMPTZ` | `string \| null` | تاريخ ووقت نشر المحتوى. | `publish_date` |
+| `expires_at` | `TIMESTAMPTZ` | `string \| null` | تاريخ ووقت انتهاء الصلاحية (لكوبون مثلاً). | `expiry`, `valid_until` |
+| `due_date` | `TIMESTAMPTZ` | `string \| null` | تاريخ الاستحقاق (بدون وقت محدد بالضرورة). | `deadline`, `date_due` |
+
+---
+
+## 7. الـ SEO والبيانات المتقدمة (SEO & JSON)
+
+| اسم الحقل القياسي | النوع في DB | النوع في TS | الغرض والاستخدام | الأسماء المحرمة |
+| :--- | :--- | :--- | :--- | :--- |
+| `meta_title` | `VARCHAR` | `string \| null` | عنوان صفحة الويب في محركات البحث. | `seo_title`, `page_title` |
+| `meta_description`| `VARCHAR` | `string \| null` | الوصف المستخدم لمحركات البحث. | `seo_desc`, `seo_description` |
+| `metadata` | `JSONB` | `Record<string, any>` | كائن لتخزين معلومات إضافية مرنة غير مهيكلة. | `data`, `extra`, `json_data`, `properties` |
+| `settings` | `JSONB` | `Record<string, any>` | تخزين الإعدادات الخاصة بالكيان. | `config`, `options` |
+| `tags` | `TEXT[]` | `string[]` | مصفوفة لتخزين الوسوم البسيطة. | `keywords`, `labels` |
+
+---
+
+## 8. التدقيق الأمني (Audit Trail)
+*(في حال الرغبة بتتبع "من" قام بالفعل بالإضافة إلى "متى")*
+
+| اسم الحقل القياسي | النوع في DB | النوع في TS | الغرض والاستخدام | الأسماء المحرمة |
+| :--- | :--- | :--- | :--- | :--- |
+| `created_by` | `UUID` | `string \| null` | معرف المستخدم الإداري الذي أنشأ السجل. | `author_id`, `creator` |
+| `updated_by` | `UUID` | `string \| null` | معرف المستخدم الإداري الذي أجرى آخر تعديل. | `modifier`, `last_modified_by` |
+| `deleted_by` | `UUID` | `string \| null` | معرف المستخدم الإداري الذي قام بالحذف المؤقت. | `trashed_by` |
