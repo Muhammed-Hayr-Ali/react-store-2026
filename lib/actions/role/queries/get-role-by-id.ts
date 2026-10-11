@@ -7,7 +7,7 @@
 
 import { z } from "zod"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { ApiResult } from "@/lib/database/types/utils"
+import { ApiResult } from "@/lib/actions/types/utils"
 import { RoleRecord } from "../mutations/create-role"
 
 export async function getRoleById(

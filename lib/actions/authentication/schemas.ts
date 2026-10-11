@@ -8,7 +8,16 @@ export const signInWithPasswordSchema = z.object({
 })
 
 export const signUpWithPasswordSchema = z.object({
-  name: z.string().trim().min(1, "NAME_REQUIRED").min(2, "NAME_TOO_SHORT"),
+  firstName: z
+    .string()
+    .trim()
+    .min(1, "FIRST_NAME_REQUIRED")
+    .min(2, "NAME_TOO_SHORT"),
+  lastName: z
+    .string()
+    .trim()
+    .min(1, "LAST_NAME_REQUIRED")
+    .min(2, "NAME_TOO_SHORT"),
   email: z.string().trim().min(1, "EMAIL_REQUIRED").email("INVALID_EMAIL"),
   password: z.string().min(6, "PASSWORD_TOO_SHORT"),
 })

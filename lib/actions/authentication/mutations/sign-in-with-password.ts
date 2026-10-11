@@ -9,7 +9,7 @@ import { cookies } from "next/headers"
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { signInWithPasswordSchema } from "../schemas"
-import { ApiResult } from "../types"
+import { ApiResult } from "@/lib/actions/types/utils"
 
 export async function signInWithPassword(
   payload: unknown

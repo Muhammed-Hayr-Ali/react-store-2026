@@ -7,7 +7,7 @@
 
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { ApiResult } from "@/lib/database/types/utils"
+import { ApiResult } from "@/lib/actions/types/utils"
 import { hasPermission, PERMISSIONS } from "../../role"
 import { updateUserSchema, UpdateUserFormValues } from "../schemas"
 import { appRoutes } from "@/lib/config/app-routes"

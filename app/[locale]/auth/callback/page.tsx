@@ -5,7 +5,7 @@
 
 import { getTranslations } from "next-intl/server"
 
-import { OAuthCallbackView } from "@/components/auth/oauth-callback-view"
+import { OAuthCallbackView } from "@/components/authentication/oauth-callback-view"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 

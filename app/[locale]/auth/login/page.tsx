@@ -8,11 +8,11 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 
-import { LoginForm } from "@/components/auth/login-form"
-import { getCurrentUser } from "@/lib/actions/authentication"
+import { LoginForm } from "@/components/authentication/login-form"
 import { appConfig } from "@/lib/config/app_config"
 import { appRoutes } from "@/lib/config/app-routes"
 import { createMetadata } from "@/lib/config/metadata_generator"
+import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 
 interface LoginPageProps {
   params: Promise<{
@@ -35,8 +35,8 @@ export default async function LoginPage({ params }: LoginPageProps) {
   await params
 
   // Zero-Trust Session Check: Redirect active authenticated users
-  const userResult = await getCurrentUser()
-  if (userResult.success && userResult.data) {
+  const user = await getCurrentUser()
+  if (user) {
     redirect(appRoutes.home)
   }
 

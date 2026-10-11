@@ -7,9 +7,9 @@
 
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { ApiResult } from "@/lib/database/types/utils"
 import { hasPermission, PERMISSIONS } from "../index"
 import { assignUserRoleSchema, AssignUserRoleInput } from "../schemas"
+import { ApiResult } from "@/lib/actions/types/utils"
 
 export async function removeRoleFromUser(
   payload: AssignUserRoleInput

@@ -8,7 +8,7 @@
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { oauthCallbackSchema } from "../schemas"
-import { ApiResult } from "../types"
+import { ApiResult } from "@/lib/actions/types/utils"
 
 export async function handleCallback(payload: unknown): Promise<ApiResult<null>> {
   // Step 1: Input Validation

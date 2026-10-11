@@ -8,7 +8,7 @@
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { createAdminClient } from "@/lib/database/supabase/admin"
-import { ApiResult } from "@/lib/database/types/utils"
+import { ApiResult } from "@/lib/actions/types/utils"
 import { hasPermission, PERMISSIONS } from "../../role"
 import { appRoutes } from "@/lib/config/app-routes"
 

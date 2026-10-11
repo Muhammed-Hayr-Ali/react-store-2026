@@ -13,7 +13,7 @@ import { sendEmail } from "@/lib/services/email/send-email"
 import WelcomeEmail from "@/lib/services/email/templates/welcome-email"
 import { appRoutes } from "@/lib/config/app-routes"
 import { signUpWithPasswordSchema } from "../schemas"
-import { ApiResult } from "../types"
+import { ApiResult } from "@/lib/actions/types/utils"
 
 export async function signUpWithPassword(
   payload: unknown
@@ -34,7 +34,8 @@ export async function signUpWithPassword(
     }
   }
 
-  const { name, email, password } = validation.data
+  // تم التحديث هنا لاستخراج firstName و lastName بدلاً من name
+  const { firstName, lastName, email, password } = validation.data
 
   // Step 2: Client Initialization
   const supabase = await createServerClient()
@@ -44,7 +45,11 @@ export async function signUpWithPassword(
     email,
     password,
     options: {
-      data: { name },
+      // تم التحديث هنا لإرسال البيانات بالصيغة المتوقعة في الـ Trigger (handle_new_user)
+      data: {
+        first_name: firstName,
+        last_name: lastName,
+      },
     },
   })
 
@@ -68,7 +73,8 @@ export async function signUpWithPassword(
       to: email,
       subject: "مرحباً بك في Marketna",
       reactComponent: React.createElement(WelcomeEmail, {
-        userName: name,
+        // جمع الاسمين معاً لرسالة الترحيب
+        userName: `${firstName} ${lastName}`,
         loginUrl: `${baseUrl}${appRoutes.auth.login}`,
       }),
     })

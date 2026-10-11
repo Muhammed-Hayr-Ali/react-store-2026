@@ -8,7 +8,7 @@
 
 import { transporter } from "./mailer"
 import { render } from "@react-email/render"
-import { ApiResult } from "@/lib/database/types/utils"
+import { ApiResult } from "@/lib/actions/types/utils"
 import React from "react"
 
 // Defines the parameters required for the sendEmail function.

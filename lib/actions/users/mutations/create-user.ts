@@ -7,7 +7,7 @@
 
 import { revalidatePath } from "next/cache"
 import { createAdminClient } from "@/lib/database/supabase/admin"
-import { ApiResult } from "@/lib/database/types/utils"
+import { ApiResult } from "@/lib/actions/types/utils"
 import { AdminUserSummary } from "../types"
 import { createUserSchema, CreateUserFormValues } from "../schemas"
 import { hasPermission, PERMISSIONS } from "../../role"

@@ -7,7 +7,7 @@
 
 import { createAdminClient } from "@/lib/database/supabase/admin"
 import { confirmPasswordResetSchema } from "../schemas"
-import { ApiResult } from "../types"
+import { ApiResult } from "@/lib/actions/types/utils"
 
 export async function confirmPasswordReset(
   payload: unknown
