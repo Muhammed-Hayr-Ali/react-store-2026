@@ -6,11 +6,11 @@
 import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 
-import { ForgotPasswordForm } from "@/components/auth/forgot-password-form"
-import { getCurrentUser } from "@/lib/actions/authentication"
+import { ForgotPasswordForm } from "@/components/authentication/forgot-password-form"
 import { appConfig } from "@/lib/config/app_config"
 import { appRoutes } from "@/lib/config/app-routes"
 import { createMetadata } from "@/lib/config/metadata_generator"
+import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 
 interface ForgotPasswordPageProps {
   params: Promise<{
@@ -35,8 +35,8 @@ export default async function ForgotPasswordPage({
   await params
 
   // Zero-Trust Session Check: Redirect active authenticated users
-  const userResult = await getCurrentUser()
-  if (userResult.success && userResult.data) {
+  const user = await getCurrentUser()
+  if (user) {
     redirect(appRoutes.home)
   }
 

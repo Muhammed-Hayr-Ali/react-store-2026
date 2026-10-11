@@ -8,7 +8,7 @@ import { getTranslations } from "next-intl/server"
 import { AlertTriangleIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { ResetPasswordForm } from "@/components/auth/reset-password-form"
+import { ResetPasswordForm } from "@/components/authentication/reset-password-form"
 import { appConfig } from "@/lib/config/app_config"
 import { appRoutes } from "@/lib/config/app-routes"
 import { createMetadata } from "@/lib/config/metadata_generator"

@@ -7,7 +7,7 @@
 
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { ApiResult } from "@/lib/database/types/utils"
+import { ApiResult } from "@/lib/actions/types/utils"
 import { hasPermission, PERMISSIONS } from "../index"
 import {
   updateRolePermissionsSchema,
@@ -29,24 +29,23 @@ export async function updateRole(
 
   // 2. Validate input schema
   const validation = updateRolePermissionsSchema.safeParse(payload)
-if (!validation.success) {
-  // طريقة حديثة وآمنة لتجميع الأخطاء بدون استخدام الدوال الـ deprecated أو غير الموجودة
-  const fieldErrors: Record<string, string[]> = {}
-  for (const issue of validation.error.issues) {
-    const path = issue.path.join(".")
-    if (!fieldErrors[path]) {
-      fieldErrors[path] = []
+  if (!validation.success) {
+    // طريقة حديثة وآمنة لتجميع الأخطاء بدون استخدام الدوال الـ deprecated أو غير الموجودة
+    const fieldErrors: Record<string, string[]> = {}
+    for (const issue of validation.error.issues) {
+      const path = issue.path.join(".")
+      if (!fieldErrors[path]) {
+        fieldErrors[path] = []
+      }
+      fieldErrors[path].push(issue.message)
     }
-    fieldErrors[path].push(issue.message)
-  }
 
-
-  return {
-    success: false,
-    error: "VALIDATION_ERROR",
-    details: fieldErrors,
+    return {
+      success: false,
+      error: "VALIDATION_ERROR",
+      details: fieldErrors,
+    }
   }
-}
   const { roleId, description, permissions } = validation.data
   const supabase = await createServerClient()
 

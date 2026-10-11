@@ -11,6 +11,7 @@ import {
   confirmPasswordResetSchema,
   oauthCallbackSchema,
 } from "./schemas"
+import { Json } from "../types/database" // تأكد من صحة مسار الاستيراد لملف database.ts
 
 export type ApiResult<T> =
   | { success: true; data: T }
@@ -18,8 +19,12 @@ export type ApiResult<T> =
 
 export type SignInWithPasswordInput = z.infer<typeof signInWithPasswordSchema>
 export type SignUpWithPasswordInput = z.infer<typeof signUpWithPasswordSchema>
-export type RequestPasswordResetInput = z.infer<typeof requestPasswordResetSchema>
-export type ConfirmPasswordResetInput = z.infer<typeof confirmPasswordResetSchema>
+export type RequestPasswordResetInput = z.infer<
+  typeof requestPasswordResetSchema
+>
+export type ConfirmPasswordResetInput = z.infer<
+  typeof confirmPasswordResetSchema
+>
 export type OAuthCallbackInput = z.infer<typeof oauthCallbackSchema>
 
 export interface OAuthSignInResult {
@@ -29,6 +34,10 @@ export interface OAuthSignInResult {
 export interface AuthenticatedUser {
   id: string
   email: string
-  name: string | null
-  avatar_url: string | null
+  first_name: string | null
+  last_name: string | null
+  profile_image: string | null
+  // الحقول التالية تأتي من الـ raw_app_meta_data بفضل الـ Trigger الذي أنشأناه
+  role?: string
+  permissions?: Json
 }

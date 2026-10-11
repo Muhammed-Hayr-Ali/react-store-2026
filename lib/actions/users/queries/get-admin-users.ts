@@ -6,7 +6,7 @@
 "use server"
 
 import { createServerClient } from "@/lib/database/supabase/server"
-import { ApiResult } from "@/lib/database/types/utils"
+import { ApiResult } from "@/lib/actions/types/utils"
 import { AdminUserSummary, UserStatus } from "../types"
 
 interface GetAdminUsersParams {

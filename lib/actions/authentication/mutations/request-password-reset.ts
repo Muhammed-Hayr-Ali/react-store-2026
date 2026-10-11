@@ -11,7 +11,7 @@ import { sendEmail } from "@/lib/services/email/send-email"
 import ResetPasswordEmail from "@/lib/services/email/templates/reset-password-email"
 import { appRoutes } from "@/lib/config/app-routes"
 import { requestPasswordResetSchema } from "../schemas"
-import { ApiResult } from "../types"
+import { ApiResult } from "@/lib/actions/types/utils"
 
 export async function requestPasswordReset(
   payload: unknown

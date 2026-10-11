@@ -52,7 +52,8 @@ export function SignUpForm() {
   const form = useForm<SignUpWithPasswordInput>({
     resolver: zodResolver(signUpWithPasswordSchema),
     defaultValues: {
-      name: "",
+      firstName: "",
+      lastName: "",
       email: "",
       password: "",
     },
@@ -121,22 +122,22 @@ export function SignUpForm() {
           </Alert>
         )}
 
-        {/* Name Field */}
+        {/* firstName Field */}
         <Controller
-          name="name"
+          name="firstName"
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="name" className="text-xs">
-                {t("NAME_LABEL")}
+              <FieldLabel htmlFor="firstName" className="text-xs">
+                {t("FIRST_NAME_LABEL")}
               </FieldLabel>
               <IconInput
                 {...field}
-                id="name"
+                id="firstName"
                 type="text"
-                placeholder={t("NAME_PLACEHOLDER")}
+                placeholder={t("FIRST_NAME_PLACEHOLDER")}
                 aria-invalid={fieldState.invalid}
-                autoComplete="name"
+                autoComplete="given-name"
                 className="h-9 text-xs"
                 prefixIcon={
                   <UserIcon className="size-4 text-muted-foreground" />
@@ -147,6 +148,31 @@ export function SignUpForm() {
           )}
         />
 
+        {/* lastName Field */}
+        <Controller
+          name="lastName"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="lastName" className="text-xs">
+                {t("LAST_NAME_LABEL")}
+              </FieldLabel>
+              <IconInput
+                {...field}
+                id="lastName"
+                type="text"
+                placeholder={t("LAST_NAME_PLACEHOLDER")}
+                aria-invalid={fieldState.invalid}
+                autoComplete="family-name"
+                className="h-9 text-xs"
+                prefixIcon={
+                  <UserIcon className="size-4 text-muted-foreground" />
+                }
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
         {/* Email Field */}
         <Controller
           name="email"

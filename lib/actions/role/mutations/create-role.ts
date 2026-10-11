@@ -2,9 +2,10 @@
 
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { ApiResult } from "@/lib/database/types/utils"
 import { hasPermission, PERMISSIONS, AppPermission } from "../index"
 import { createRoleSchema, CreateRoleInput } from "../schemas"
+import { ApiResult } from "@/lib/actions/types/utils"
+
 
 export interface RoleRecord {
   id: string

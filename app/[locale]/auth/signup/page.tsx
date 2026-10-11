@@ -7,11 +7,11 @@
 import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 
-import { SignUpForm } from "@/components/auth/signup-form"
-import { getCurrentUser } from "@/lib/actions/authentication"
+import { SignUpForm } from "@/components/authentication/signup-form"
 import { appConfig } from "@/lib/config/app_config"
 import { appRoutes } from "@/lib/config/app-routes"
 import { createMetadata } from "@/lib/config/metadata_generator"
+import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 
 interface SignUpPageProps {
   params: Promise<{
@@ -34,8 +34,8 @@ export default async function SignUpPage({ params }: SignUpPageProps) {
   await params
 
   // Zero-Trust Session Check: Redirect active authenticated users
-  const userResult = await getCurrentUser()
-  if (userResult.success && userResult.data) {
+  const user = await getCurrentUser()
+  if (user) {
     redirect(appRoutes.home)
   }
 

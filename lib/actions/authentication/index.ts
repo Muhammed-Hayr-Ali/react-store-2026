@@ -9,9 +9,6 @@ export { requestPasswordReset } from "./mutations/request-password-reset"
 export { confirmPasswordReset } from "./mutations/confirm-password-reset"
 export { handleCallback } from "./mutations/handle-callback"
 
-// 2. Queries
-export { getCurrentUser } from "./queries/get-current-user"
-
 // 3. Schemas & Types
 export {
   signInWithPasswordSchema,
