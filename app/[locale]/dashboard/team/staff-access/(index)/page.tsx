@@ -7,16 +7,29 @@ import { getUsersWithRoles } from "@/lib/actions/role/queries/get-users-with-rol
 import StaffAccessTable from "@/components/dashboard/staff-access/staff-access-table"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { notFound } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 
-export async function generateMetadata() {
+interface PageProps {
+  params: Promise<{
+    locale: string
+  }>
+}
+
+export async function generateMetadata({ params }: PageProps) {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "StaffAccessManagement" })
+
   return createMetadata({
     siteName: appConfig.name,
-    title: "User Access & Roles",
-    description: "Manage system user roles and security privilege assignments.",
+    title: t("PAGE_META_TITLE"),
+    description: t("PAGE_META_DESCRIPTION"),
   })
 }
 
-export default async function Page() {
+export default async function Page({ params }: PageProps) {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "StaffAccessManagement" })
+
   const canView = await hasPermission(PERMISSIONS.VIEW_STAFF_ACCESS)
   if (!canView) {
     notFound()
@@ -40,12 +53,11 @@ export default async function Page() {
               <UsersIcon className="size-4 text-foreground" />
             </span>
             <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-              User Access Management
+              {t("PAGE_TITLE")}
             </h1>
           </div>
           <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-            Assign security roles and monitor authorization privileges granted
-            to platform users.
+            {t("PAGE_DESCRIPTION")}
           </p>
         </div>
       </div>

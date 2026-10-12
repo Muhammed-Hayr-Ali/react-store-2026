@@ -29,7 +29,7 @@ export function AuthHeader({
         {linkText && linkHref && (
           <Link
             href={linkHref}
-            className="text-xs font-semibold text-primary underline-offset-4 hover:underline"
+            className="text-xs font-semibold text-primary  uppercase  underline-offset-4 hover:underline"
           >
             {linkText}
           </Link>

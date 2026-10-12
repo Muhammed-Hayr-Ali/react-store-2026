@@ -118,16 +118,14 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         {errorMessage && (
           <Alert variant="destructive" className="relative pe-9">
             <AlertCircleIcon className="size-4 shrink-0" />
-            <AlertTitle className="text-xs font-semibold">
-              {t("ALERT_TITLE")}
-            </AlertTitle>
+
             <AlertDescription className="text-destructive-foreground/90 text-xs">
               {errorMessage}
             </AlertDescription>
             <button
               type="button"
               onClick={() => setErrorMessage(null)}
-              className="absolute inset-e-3 top-3 cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
+              className="absolute inset-e-3 top-1.5 cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
             >
               <XIcon className="size-4" />
               <span className="sr-only">{t("DISMISS_ALERT_SR")}</span>

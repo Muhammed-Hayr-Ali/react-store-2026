@@ -12,15 +12,15 @@ import { toast } from "sonner"
 import { ShieldAlertIcon, CheckCircle2Icon } from "lucide-react"
 
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { Field, FieldLabel } from "@/components/ui/field"
@@ -54,7 +54,7 @@ export function UserStatusDialog({
   const [status, setStatus] = React.useState<UserStatus>(user.status)
   const [banReason, setBanReason] = React.useState(user.ban_reason || "")
   const [isPending, startTransition] = React.useTransition()
-  const closeRef = React.useRef<HTMLButtonElement>(null)
+  const [isOpen, setIsOpen] = React.useState(false)
 
   const handleUpdate = () => {
     startTransition(async () => {
@@ -66,9 +66,9 @@ export function UserStatusDialog({
         })
 
         if (res.success) {
+          setIsOpen(false)
           toast.success(t("STATUS_UPDATED_TOAST", { status }))
           onSuccess?.(user.id, status, banReason)
-          closeRef.current?.click() // Programmatic uncontrolled dismissal
         } else {
           toast.error(res.error || t("FAILED_TO_UPDATE_STATUS"))
         }
@@ -84,8 +84,20 @@ export function UserStatusDialog({
     t("ANONYMOUS_USER")
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (open || !isPending) {
+          setIsOpen(open)
+          // إعادة ضبط الحالة عند فتح النافذة لضمان مزامنة البيانات
+          if (open) {
+            setStatus(user.status)
+            setBanReason(user.ban_reason || "")
+          }
+        }
+      }}
+    >
+      <AlertDialogTrigger asChild>
         {children ?? (
           <Button
             type="button"
@@ -97,32 +109,29 @@ export function UserStatusDialog({
             <span>{t("CHANGE_STATUS_ACTION")}</span>
           </Button>
         )}
-      </DialogTrigger>
+      </AlertDialogTrigger>
 
-      <DialogContent
+      <AlertDialogContent
         className="max-w-md"
-        onInteractOutside={(e) => {
-          if (isPending) e.preventDefault()
-        }}
         onEscapeKeyDown={(e) => {
           if (isPending) e.preventDefault()
         }}
       >
-        <DialogHeader className="gap-2 text-start">
+        <AlertDialogHeader className="gap-2 text-start">
           <div className="flex size-10 items-center justify-center rounded-full bg-amber-500/10 text-amber-500">
             <ShieldAlertIcon className="size-5" />
           </div>
-          <DialogTitle className="text-base font-bold text-foreground">
+          <AlertDialogTitle className="text-base font-bold text-foreground">
             {t("STATUS_DIALOG_TITLE")}
-          </DialogTitle>
-          <DialogDescription className="text-xs leading-relaxed text-muted-foreground">
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-xs leading-relaxed text-muted-foreground">
             {t("STATUS_DIALOG_DESCRIPTION")}{" "}
             <span className="font-semibold text-foreground">
               &quot;{userDisplayName}&quot;
             </span>
             .
-          </DialogDescription>
-        </DialogHeader>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
 
         <div className="space-y-3 py-2 text-start">
           <Field>
@@ -134,7 +143,7 @@ export function UserStatusDialog({
               onValueChange={(val) => setStatus(val as UserStatus)}
               disabled={isPending}
             >
-              <SelectTrigger className="h-9 text-xs">
+              <SelectTrigger className="h-12 text-xs">
                 <SelectValue placeholder={t("SELECT_STATUS_PLACEHOLDER")} />
               </SelectTrigger>
               <SelectContent className="text-xs">
@@ -165,18 +174,10 @@ export function UserStatusDialog({
           )}
         </div>
 
-        <DialogFooter className="mt-4 gap-2 sm:gap-0">
-          <DialogClose asChild>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={isPending}
-              className="text-xs"
-            >
-              {t("CANCEL_BUTTON")}
-            </Button>
-          </DialogClose>
+        <AlertDialogFooter className="mt-4 gap-2 sm:gap-0">
+          <AlertDialogCancel disabled={isPending} className="mt-0 text-xs">
+            {t("CANCEL_BUTTON")}
+          </AlertDialogCancel>
           <Button
             type="button"
             onClick={handleUpdate}
@@ -190,15 +191,13 @@ export function UserStatusDialog({
               </>
             ) : (
               <>
-                <CheckCircle2Icon className="me-1.5 size-3.5" />
                 {t("SAVE_CHANGES_BUTTON")}
               </>
             )}
           </Button>
-          <DialogClose ref={closeRef} className="hidden" />
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
 

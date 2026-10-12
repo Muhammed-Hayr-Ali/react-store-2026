@@ -235,7 +235,7 @@ export function UsersTable({
               ))
             ) : (
               <span className="text-xs text-muted-foreground">
-                {t("CUSTOMER_ROLE")}
+                {t("NO_ROLES")}
               </span>
             )}
           </div>
@@ -270,7 +270,15 @@ export function UsersTable({
                 {status === "banned" && (
                   <CircleXIcon className="size-3 fill-destructive text-background" />
                 )}
-                <span className="capitalize">{status}</span>
+                <span className="capitalize">
+                  {status === "active"
+                    ? t("STATUS_ACTIVE")
+                    : status === "suspended"
+                      ? t("STATUS_SUSPENDED")
+                      : status === "banned"
+                        ? t("STATUS_BANNED")
+                        : status}
+                </span>
               </Badge>
             </div>
           )
@@ -709,87 +717,99 @@ export function UsersTable({
         </div>
       </div>
 
-      {/* Standard Pagination Footer */}
-      <div className="flex flex-col items-center justify-between gap-3 px-1 sm:flex-row">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Label htmlFor="rows-per-page" className="text-xs font-medium">
-            {t("ROWS_PER_PAGE")}
-          </Label>
-          <Select
-            value={`${table.getState().pagination.pageSize}`}
-            onValueChange={(val) => table.setPageSize(Number(val))}
-          >
-            <SelectTrigger
-              size="sm"
-              className="h-8 w-18 text-xs"
-              id="rows-per-page"
+      {/* Standard Pagination Footer - يظهر فقط إذا كان عدد البيانات أكبر من 10 */}
+      {table.getFilteredRowModel().rows.length > 10 && (
+        <div className="flex w-full flex-row flex-wrap items-center justify-between gap-3 px-1 py-1 sm:flex-nowrap">
+          {/* Rows per page & Counter */}
+          <div className="flex flex-1 items-center gap-2 text-[11px] text-muted-foreground sm:text-xs">
+            <Label
+              htmlFor="rows-per-page"
+              className="text-[11px] font-medium whitespace-nowrap sm:text-xs"
             >
-              <SelectValue placeholder={table.getState().pagination.pageSize} />
-            </SelectTrigger>
-            <SelectContent side="top" className="text-xs">
-              <SelectGroup>
-                {[10, 20, 30, 50].map((size) => (
-                  <SelectItem key={size} value={`${size}`} className="text-xs">
-                    {size}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <span className="ms-2">
-            {t("PAGE_COUNTER", {
-              page: table.getState().pagination.pageIndex + 1,
-              total: table.getPageCount() || 1,
-            })}
-          </span>
-        </div>
+              {t("ROWS_PER_PAGE")}
+            </Label>
+            <Select
+              value={`${table.getState().pagination.pageSize}`}
+              onValueChange={(val) => table.setPageSize(Number(val))}
+            >
+              <SelectTrigger
+                size="sm"
+                className="h-7 w-[60px] px-2 text-xs sm:h-8 sm:w-18"
+                id="rows-per-page"
+              >
+                <SelectValue
+                  placeholder={table.getState().pagination.pageSize}
+                />
+              </SelectTrigger>
+              <SelectContent side="top" className="text-xs">
+                <SelectGroup>
+                  {[10, 20, 30, 50].map((size) => (
+                    <SelectItem
+                      key={size}
+                      value={`${size}`}
+                      className="text-xs"
+                    >
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <span className="ms-1.5 whitespace-nowrap">
+              {t("PAGE_COUNTER", {
+                page: table.getState().pagination.pageIndex + 1,
+                total: table.getPageCount() || 1,
+              })}
+            </span>
+          </div>
 
-        <div className="flex items-center gap-1.5">
-          <Button
-            variant="outline"
-            className="hidden size-8 p-0 sm:flex"
-            onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
-            title={t("FIRST_PAGE")}
-          >
-            <ChevronsLeftIcon className="size-4 rtl:rotate-180" />
-            <span className="sr-only">{t("FIRST_PAGE")}</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="size-8"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            title={t("PREVIOUS_PAGE")}
-          >
-            <ChevronLeftIcon className="size-4 rtl:rotate-180" />
-            <span className="sr-only">{t("PREVIOUS_PAGE")}</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="size-8"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            title={t("NEXT_PAGE")}
-          >
-            <ChevronRightIcon className="size-4 rtl:rotate-180" />
-            <span className="sr-only">{t("NEXT_PAGE")}</span>
-          </Button>
-          <Button
-            variant="outline"
-            className="hidden size-8 sm:flex"
-            size="icon"
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            disabled={!table.getCanNextPage()}
-            title={t("LAST_PAGE")}
-          >
-            <ChevronsRightIcon className="size-4 rtl:rotate-180" />
-            <span className="sr-only">{t("LAST_PAGE")}</span>
-          </Button>
+          {/* Navigation Buttons */}
+          <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
+            <Button
+              variant="outline"
+              className="hidden size-7 p-0 sm:flex sm:size-8"
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
+              title={t("FIRST_PAGE")}
+            >
+              <ChevronsLeftIcon className="size-3.5 sm:size-4 rtl:rotate-180" />
+              <span className="sr-only">{t("FIRST_PAGE")}</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-7 sm:size-8"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+              title={t("PREVIOUS_PAGE")}
+            >
+              <ChevronLeftIcon className="size-3.5 sm:size-4 rtl:rotate-180" />
+              <span className="sr-only">{t("PREVIOUS_PAGE")}</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-7 sm:size-8"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+              title={t("NEXT_PAGE")}
+            >
+              <ChevronRightIcon className="size-3.5 sm:size-4 rtl:rotate-180" />
+              <span className="sr-only">{t("NEXT_PAGE")}</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="hidden size-7 p-0 sm:flex sm:size-8"
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage()}
+              title={t("LAST_PAGE")}
+            >
+              <ChevronsRightIcon className="size-3.5 sm:size-4 rtl:rotate-180" />
+              <span className="sr-only">{t("LAST_PAGE")}</span>
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

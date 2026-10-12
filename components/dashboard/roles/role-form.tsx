@@ -230,7 +230,7 @@ export default function CreateRoleForm({
                   >
                     <div className="flex items-center justify-between border-b border-border/60 pb-2">
                       <span className="text-xs font-bold text-card-foreground">
-                        {group.label}
+                        {t(`PERMISSION_GROUPS.${group.id}`)}
                       </span>
                       <Button
                         type="button"
@@ -271,10 +271,10 @@ export default function CreateRoleForm({
                             />
                             <div className="space-y-0.5">
                               <p className="text-xs leading-none font-semibold text-foreground">
-                                {perm.label}
+                                {t(`PERMISSION_LABELS.${perm.key}`)}
                               </p>
                               <p className="text-[11px] leading-tight text-muted-foreground">
-                                {perm.description}
+                                {t(`PERMISSION_DESCRIPTIONS.${perm.key}`)}
                               </p>
                             </div>
                           </div>

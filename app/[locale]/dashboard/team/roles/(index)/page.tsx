@@ -7,16 +7,29 @@ import { getAllRoles } from "@/lib/actions/role/queries/get-all-roles"
 import RolesTable from "@/components/dashboard/roles/roles-table"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { notFound } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 
-export async function generateMetadata() {
+interface PageProps {
+  params: Promise<{
+    locale: string
+  }>
+}
+
+export async function generateMetadata({ params }: PageProps) {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "RolesManagement" })
+
   return createMetadata({
     siteName: appConfig.name,
-    title: "Roles & Permissions",
-    description: "Manage system access roles and granular permissions.",
+    title: t("PAGE_META_TITLE"),
+    description: t("PAGE_META_DESCRIPTION"),
   })
 }
 
-export default async function Page() {
+export default async function Page({ params }: PageProps) {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "RolesManagement" })
+
   const canView = await hasPermission(PERMISSIONS.VIEW_ROLES_MANAGEMENT)
   if (!canView) {
     notFound()
@@ -41,12 +54,11 @@ export default async function Page() {
               <ShieldCheckIcon className="size-4 text-foreground" />
             </span>
             <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-              Roles & Permissions
+              {t("PAGE_TITLE")}
             </h1>
           </div>
           <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-            Define system roles and configure granular permission access across
-            the platform.
+            {t("PAGE_DESCRIPTION")}
           </p>
         </div>
       </div>

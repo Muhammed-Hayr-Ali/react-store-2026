@@ -1,7 +1,6 @@
 import {
   LayoutDashboard,
   Users,
-  ShieldCheck,
   UserCog,
   type LucideIcon,
   StoreIcon,
@@ -10,13 +9,13 @@ import { appRoutes } from "@/lib/config/app-routes"
 import { PERMISSIONS, AppPermission } from "@/lib/actions/role"
 
 export interface SidebarItem {
-  title: string
+  titleKey: string
   key: string
   url: string
   icon: LucideIcon
   requiredPermission?: AppPermission
   items?: {
-    title: string
+    titleKey: string
     url: string
     requiredPermission?: AppPermission
   }[]
@@ -30,37 +29,37 @@ interface SidebarConfig {
 export const sidebarConfig: SidebarConfig = {
   navMain: [
     {
-      title: "Store",
+      titleKey: "STORE",
       key: "store",
       url: appRoutes.home,
       icon: StoreIcon,
     },
     {
-      title: "Overview",
+      titleKey: "OVERVIEW",
       key: "overview",
       url: appRoutes.dashboard.overview,
       icon: LayoutDashboard,
     },
     {
-      title: "Users Management",
+      titleKey: "USERS_MANAGEMENT",
       key: "users-management",
       url: appRoutes.dashboard.users,
       icon: Users,
       requiredPermission: PERMISSIONS.VIEW_USERS_MANAGEMENT,
     },
     {
-      title: "Team Management",
+      titleKey: "TEAM_MANAGEMENT",
       key: "team-management",
       url: "#",
       icon: UserCog,
       items: [
         {
-          title: "Roles & Permissions",
+          titleKey: "ROLES_AND_PERMISSIONS",
           url: appRoutes.dashboard.team.roles,
           requiredPermission: PERMISSIONS.VIEW_ROLES_MANAGEMENT,
         },
         {
-          title: "Staff Access",
+          titleKey: "STAFF_ACCESS",
           url: appRoutes.dashboard.team.staffAccess,
           requiredPermission: PERMISSIONS.VIEW_STAFF_ACCESS,
         },
