@@ -10,8 +10,7 @@ export const appRoutes = {
     callback: "/auth/callback",
   },
   dashboard: {
-    root: "/dashboard",
-    overview: "/dashboard/overview",
+    overview: "/dashboard",
     team: {
       roles: "/dashboard/team/roles",
       create_roles: "/dashboard/team/roles/create",

@@ -4,6 +4,7 @@ import * as React from "react"
 import { ChevronRight } from "lucide-react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 
 import {
   Collapsible,
@@ -28,6 +29,7 @@ interface NavMainProps {
 }
 
 export function NavMain({ permissions = [] }: NavMainProps) {
+  const t = useTranslations("DashboardSidebar")
   const pathname = usePathname()
   const { isMobile, setOpenMobile } = useSidebar()
 
@@ -82,7 +84,7 @@ export function NavMain({ permissions = [] }: NavMainProps) {
           const isLastItem = index === filteredItems.length - 1
 
           return (
-            <React.Fragment key={item.title}>
+            <React.Fragment key={item.key}>
               <Collapsible
                 asChild
                 defaultOpen={hasActiveChild}
@@ -92,13 +94,13 @@ export function NavMain({ permissions = [] }: NavMainProps) {
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
-                        tooltip={item.title}
+                        tooltip={t(item.titleKey)}
                         isActive={false}
                         className="data-[state=open]:bg-muted"
                       >
                         {IconComponent && <IconComponent />}
-                        <span>{item.title}</span>
-                        <ChevronRight className="ms-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180" />
+                        <span>{t(item.titleKey)}</span>
+                        <ChevronRight className="ms-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180 rtl:group-data-[state=open]/collapsible:rotate-90" />{" "}
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
@@ -107,7 +109,7 @@ export function NavMain({ permissions = [] }: NavMainProps) {
                           const isSubActive = normalizedPath === subItem.url
 
                           return (
-                            <SidebarMenuSubItem key={subItem.title}>
+                            <SidebarMenuSubItem key={subItem.titleKey}>
                               <SidebarMenuSubButton
                                 asChild
                                 isActive={isSubActive}
@@ -116,7 +118,7 @@ export function NavMain({ permissions = [] }: NavMainProps) {
                                   href={subItem.url}
                                   onClick={handleLinkClick}
                                 >
-                                  <span>{subItem.title}</span>
+                                  <span>{t(subItem.titleKey)}</span>
                                 </Link>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
@@ -128,13 +130,13 @@ export function NavMain({ permissions = [] }: NavMainProps) {
                 ) : (
                   <SidebarMenuItem>
                     <SidebarMenuButton
-                      tooltip={item.title}
+                      tooltip={t(item.titleKey)}
                       asChild
                       isActive={isSingleActive}
                     >
                       <Link href={item.url} onClick={handleLinkClick}>
                         {IconComponent && <IconComponent />}
-                        <span>{item.title}</span>
+                        <span>{t(item.titleKey)}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

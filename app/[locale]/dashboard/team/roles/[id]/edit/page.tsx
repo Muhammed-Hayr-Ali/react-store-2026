@@ -1,5 +1,6 @@
 import { ShieldCheckIcon } from "lucide-react"
 import { notFound } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import CreateRoleForm from "@/components/dashboard/roles/role-form"
@@ -11,12 +12,14 @@ import { getRoleById } from "@/lib/actions/role/queries/get-role-by-id"
 export const dynamic = 'force-dynamic'
 
 
-export async function generateMetadata() {
+export async function generateMetadata({ params }: EditRolePageProps) {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "RolesManagement" })
+
   return createMetadata({
     siteName: appConfig.name,
-    title: "Edit Role",
-    description:
-      "Modify role details and update associated access permissions.",
+    title: t("EDIT_PAGE_META_TITLE"),
+    description: t("EDIT_PAGE_META_DESCRIPTION"),
   })
 }
 
@@ -28,7 +31,8 @@ interface EditRolePageProps {
 }
 
 export default async function EditRolePage({ params }: EditRolePageProps) {
-  const { id } = await params
+  const { id, locale } = await params
+  const t = await getTranslations({ locale, namespace: "RolesManagement" })
   const canView = await hasPermission(PERMISSIONS.UPDATE_ROLE)
   if (!canView) {
     console.error("Permission denied for updating roles")
@@ -53,11 +57,12 @@ export default async function EditRolePage({ params }: EditRolePageProps) {
               <ShieldCheckIcon className="size-4 text-foreground" />
             </span>
             <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-              Edit Role: <span className="uppercase">{role.name}</span>
+              {t("EDIT_PAGE_TITLE")}{" "}
+              <span className="uppercase">{role.name}</span>
             </h1>
           </div>
           <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-            Modify role description and update system permission assignments.
+            {t("EDIT_PAGE_DESCRIPTION")}
           </p>
         </div>
       </div>

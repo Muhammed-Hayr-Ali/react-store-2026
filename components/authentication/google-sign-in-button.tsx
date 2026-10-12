@@ -69,7 +69,7 @@ export function GoogleSignInButton({
         variant="outline"
         onClick={handleGoogleSignIn}
         disabled={isPending}
-        className="relative flex h-9 w-full items-center justify-center gap-2 text-xs font-medium shadow-xs hover:bg-muted/50"
+        className="relative flex h-9 w-full items-center justify-center gap-2 text-xs font-medium hover:bg-muted/50"
       >
         {isPending ? (
           <>

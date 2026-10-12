@@ -10,7 +10,7 @@ export interface PermissionGroup {
   }[]
 }
 
-export const PERMISSION_GROUPS: PermissionGroup[] = [
+export const PERMISSION_GROUPS = [
   {
     id: "dashboard_views",
     label: "Dashboard & Page Views",
@@ -331,4 +331,4 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       },
     ],
   },
-]
+] as const satisfies PermissionGroup[]

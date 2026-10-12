@@ -266,79 +266,84 @@ export function UserFormSheet({
               </Alert>
             )}
 
-            <div className="rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
-              <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
-                <UserPlusIcon className="size-4 text-primary" />
-                <h2 className="text-sm font-semibold text-card-foreground">
-                  {t("ACCOUNT_CREDENTIALS_TITLE")}
-                </h2>
-              </div>
+            {!isEditing && (
+              <div className="rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
+                <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
+                  <UserPlusIcon className="size-4 text-primary" />
+                  <h2 className="text-sm font-semibold text-card-foreground">
+                    {t("ACCOUNT_CREDENTIALS_TITLE")}
+                  </h2>
+                </div>
 
-              <FieldGroup className="space-y-4">
-                {!isEditing && (
-                  <Controller
-                    name={"email" as keyof UserFormValues}
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="user-email" className="text-xs">
-                          {t("EMAIL_LABEL")}{" "}
-                          <span className="text-destructive">*</span>
-                        </FieldLabel>
-                        <Input
-                          {...field}
-                          id="user-email"
-                          type="email"
-                          placeholder="user@example.com"
-                          className="h-8 text-xs"
-                          value={(field.value as string) || ""}
-                        />
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
-                )}
-
-                {!isEditing && (
-                  <Controller
-                    name={"password" as keyof UserFormValues}
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="user-password" className="text-xs">
-                          {t("PASSWORD_LABEL")}
-                        </FieldLabel>
-                        <div className="relative flex items-center">
+                <FieldGroup className="space-y-4">
+                  {!isEditing && (
+                    <Controller
+                      name={"email" as keyof UserFormValues}
+                      control={control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor="user-email" className="text-xs">
+                            {t("EMAIL_LABEL")}{" "}
+                            <span className="text-destructive">*</span>
+                          </FieldLabel>
                           <Input
                             {...field}
-                            id="user-password"
-                            type="text"
-                            placeholder={t("PASSWORD_PLACEHOLDER")}
-                            className="h-8 pe-8 font-mono text-xs"
+                            id="user-email"
+                            type="email"
+                            placeholder="user@example.com"
+                            className="h-8 text-xs"
                             value={(field.value as string) || ""}
                           />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={handleGeneratePassword}
-                            title={t("GENERATE_PASSWORD_TITLE")}
-                            className="absolute inset-e-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                  )}
+
+                  {!isEditing && (
+                    <Controller
+                      name={"password" as keyof UserFormValues}
+                      control={control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel
+                            htmlFor="user-password"
+                            className="text-xs"
                           >
-                            <Wand2Icon className="size-3.5" />
-                          </Button>
-                        </div>
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
-                )}
-              </FieldGroup>
-            </div>
+                            {t("PASSWORD_LABEL")}
+                          </FieldLabel>
+                          <div className="relative flex items-center">
+                            <Input
+                              {...field}
+                              id="user-password"
+                              type="text"
+                              placeholder={t("PASSWORD_PLACEHOLDER")}
+                              className="h-8 pe-8 font-mono text-xs"
+                              value={(field.value as string) || ""}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={handleGeneratePassword}
+                              title={t("GENERATE_PASSWORD_TITLE")}
+                              className="absolute inset-e-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
+                            >
+                              <Wand2Icon className="size-3.5" />
+                            </Button>
+                          </div>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                  )}
+                </FieldGroup>
+              </div>
+            )}
 
             <div className="rounded-xl border border-border bg-card p-4 shadow-xs sm:p-5">
               <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">

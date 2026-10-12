@@ -105,16 +105,13 @@ export function SignUpForm() {
         {errorMessage && (
           <Alert variant="destructive" className="relative pe-9">
             <AlertCircleIcon className="size-4 shrink-0" />
-            <AlertTitle className="text-xs font-semibold">
-              {t("ALERT_TITLE")}
-            </AlertTitle>
             <AlertDescription className="text-destructive-foreground/90 text-xs">
               {errorMessage}
             </AlertDescription>
             <button
               type="button"
               onClick={() => setErrorMessage(null)}
-              className="absolute inset-e-3 top-3 cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
+              className="absolute inset-e-3 top-1.5 cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
             >
               <XIcon className="size-4" />
               <span className="sr-only">{t("DISMISS_ALERT_SR")}</span>
@@ -122,57 +119,62 @@ export function SignUpForm() {
           </Alert>
         )}
 
-        {/* firstName Field */}
-        <Controller
-          name="firstName"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="firstName" className="text-xs">
-                {t("FIRST_NAME_LABEL")}
-              </FieldLabel>
-              <IconInput
-                {...field}
-                id="firstName"
-                type="text"
-                placeholder={t("FIRST_NAME_PLACEHOLDER")}
-                aria-invalid={fieldState.invalid}
-                autoComplete="given-name"
-                className="h-9 text-xs"
-                prefixIcon={
-                  <UserIcon className="size-4 text-muted-foreground" />
-                }
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+        {/* Name Fields Row */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {/* firstName Field */}
+          <Controller
+            name="firstName"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="firstName" className="text-xs">
+                  {t("FIRST_NAME_LABEL")}
+                </FieldLabel>
+                <IconInput
+                  {...field}
+                  id="firstName"
+                  type="text"
+                  placeholder={t("FIRST_NAME_PLACEHOLDER")}
+                  aria-invalid={fieldState.invalid}
+                  autoComplete="given-name"
+                  className="h-9 text-xs"
+                  prefixIcon={
+                    <UserIcon className="size-4 text-muted-foreground" />
+                  }
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
 
-        {/* lastName Field */}
-        <Controller
-          name="lastName"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="lastName" className="text-xs">
-                {t("LAST_NAME_LABEL")}
-              </FieldLabel>
-              <IconInput
-                {...field}
-                id="lastName"
-                type="text"
-                placeholder={t("LAST_NAME_PLACEHOLDER")}
-                aria-invalid={fieldState.invalid}
-                autoComplete="family-name"
-                className="h-9 text-xs"
-                prefixIcon={
-                  <UserIcon className="size-4 text-muted-foreground" />
-                }
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+          {/* lastName Field */}
+          <Controller
+            name="lastName"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="lastName" className="text-xs">
+                  {t("LAST_NAME_LABEL")}
+                </FieldLabel>
+                <IconInput
+                  {...field}
+                  id="lastName"
+                  type="text"
+                  placeholder={t("LAST_NAME_PLACEHOLDER")}
+                  aria-invalid={fieldState.invalid}
+                  autoComplete="family-name"
+                  className="h-9 text-xs"
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+        </div>
+
         {/* Email Field */}
         <Controller
           name="email"

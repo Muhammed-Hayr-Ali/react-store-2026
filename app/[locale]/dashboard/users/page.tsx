@@ -1,4 +1,6 @@
 import { headers } from "next/headers"
+import { notFound } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 import { UsersIcon } from "lucide-react"
 
 import { appConfig } from "@/lib/config/app_config"
@@ -6,17 +8,28 @@ import { createMetadata } from "@/lib/config/metadata_generator"
 import { getAdminUsersList } from "@/lib/actions/users"
 import { DataTable } from "@/components/dashboard/users/users-table"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-import { notFound } from "next/navigation"
 
-export async function generateMetadata() {
+interface PageProps {
+  params: Promise<{
+    locale: string
+  }>
+}
+
+export async function generateMetadata({ params }: PageProps) {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "UsersManagement" })
+
   return createMetadata({
     siteName: appConfig.name,
-    title: "Users Management",
-    description: "Manage system users, access status, and roles.",
+    title: t("META_TITLE"),
+    description: t("META_DESCRIPTION"),
   })
 }
 
-export default async function Page() {
+export default async function Page({ params }: PageProps) {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "UsersManagement" })
+
   const canView = await hasPermission(PERMISSIONS.VIEW_USERS_MANAGEMENT)
   if (!canView) {
     notFound()
@@ -41,12 +54,11 @@ export default async function Page() {
               <UsersIcon className="size-4 text-foreground" />
             </span>
             <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-              Users Management
+              {t("PAGE_TITLE")}
             </h1>
           </div>
           <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-            Manage user accounts, monitor system access status, and control
-            permissions.
+            {t("PAGE_DESCRIPTION")}
           </p>
         </div>
       </div>

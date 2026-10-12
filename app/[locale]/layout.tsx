@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next"
 import { notFound } from "next/navigation"
-import { Geist_Mono, Inter, Rubik } from "next/font/google"
+import { Geist_Mono, Rubik } from "next/font/google"
 import { NextIntlClientProvider, hasLocale } from "next-intl"
 
 import "../globals.css"
@@ -16,19 +16,16 @@ import { ScrollToTop } from "@/components/shared/scroll-to-top"
 import { UserProvider } from "@/lib/context/user-context"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 
-const inter = Inter({
-  subsets: ["latin"],
+// إعداد خط Rubik مع دعم اللغة العربية وربطه بـ Tailwind
+const rubik = Rubik({
+  subsets: ["arabic", "latin"],
   variable: "--font-sans",
+  display: "swap",
 })
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
-})
-
-const rubik = Rubik({
-  subsets: ["latin"],
-  variable: "--font-rubik",
 })
 
 export const viewport: Viewport = {
@@ -69,13 +66,7 @@ export default async function RootLayout({
       lang={locale}
       dir={direction}
       suppressHydrationWarning
-      className={cn(
-        "antialiased",
-        rubik.className,
-        fontMono.variable,
-        inter.variable,
-        "font-sans"
-      )}
+      className={cn("antialiased", rubik.variable, fontMono.variable)}
     >
       <body className="min-h-screen bg-background font-sans text-foreground">
         <DirectionProvider dir={direction}>

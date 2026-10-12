@@ -13,16 +13,18 @@ import { toast } from "sonner"
 import { AlertTriangleIcon, Trash2Icon } from "lucide-react"
 
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { deleteUser } from "@/lib/actions/users/mutations/delete-user"
 
@@ -41,17 +43,20 @@ export function DeleteUserDialog({
 }: DeleteUserDialogProps) {
   const t = useTranslations("UsersManagement")
   const [isPending, startTransition] = React.useTransition()
-  const closeRef = React.useRef<HTMLButtonElement>(null)
+  const [isOpen, setIsOpen] = React.useState(false)
+  const [confirmName, setConfirmName] = React.useState("")
 
   const handleDelete = () => {
+    if (confirmName !== userName) return
+
     startTransition(async () => {
       try {
         const res = await deleteUser(userId)
 
         if (res.success) {
+          setIsOpen(false)
           toast.success(t("DELETE_SUCCESS_TOAST", { name: userName }))
           onDeleted?.(userId)
-          closeRef.current?.click() // Programmatic uncontrolled dismissal
         } else {
           toast.error(res.error || t("DELETE_ERROR_TOAST"))
         }
@@ -61,9 +66,23 @@ export function DeleteUserDialog({
     })
   }
 
+  // التحقق من تطابق الاسم لتفعيل زر الحذف
+  const isConfirmValid = confirmName === userName
+
   return (
-    <Dialog>
-      <DialogTrigger asChild>
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (open || !isPending) {
+          setIsOpen(open)
+          if (!open) {
+            // تفريغ الحقل بعد إغلاق النافذة بوقت قصير للحفاظ على الحركة بسلاسة
+            setTimeout(() => setConfirmName(""), 200)
+          }
+        }
+      }}
+    >
+      <AlertDialogTrigger asChild>
         {children ?? (
           <Button
             type="button"
@@ -75,51 +94,61 @@ export function DeleteUserDialog({
             <span>{t("DELETE_ACCOUNT")}</span>
           </Button>
         )}
-      </DialogTrigger>
+      </AlertDialogTrigger>
 
-      <DialogContent
+      <AlertDialogContent
         className="max-w-md"
-        onInteractOutside={(e) => {
-          if (isPending) e.preventDefault()
-        }}
         onEscapeKeyDown={(e) => {
           if (isPending) e.preventDefault()
         }}
       >
-        <DialogHeader className="gap-2 text-start">
+        <AlertDialogHeader className="gap-2 text-start">
           <div className="flex size-10 items-center justify-center rounded-full bg-destructive/10 text-destructive">
             <AlertTriangleIcon className="size-5" />
           </div>
-          <DialogTitle className="text-base font-semibold text-foreground">
+          <AlertDialogTitle className="text-base font-semibold text-foreground">
             {t("DELETE_DIALOG_TITLE")}
-          </DialogTitle>
-          <DialogDescription className="text-xs leading-relaxed text-muted-foreground">
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-xs leading-relaxed text-muted-foreground">
             {t("DELETE_DIALOG_DESCRIPTION")}{" "}
             <span className="font-semibold wrap-break-word text-foreground">
               &quot;{userName}&quot;
             </span>
             ؟ {t("DELETE_DIALOG_WARNING")}
-          </DialogDescription>
-        </DialogHeader>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
 
-        <DialogFooter className="mt-4 gap-2 sm:gap-0">
-          <DialogClose asChild>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={isPending}
-              className="text-xs"
-            >
-              {t("CANCEL_BUTTON")}
-            </Button>
-          </DialogClose>
+        {/* حقل تأكيد الحذف */}
+        <div className="mt-4 space-y-2">
+          <Label
+            htmlFor="confirm-name"
+            className="text-xs text-muted-foreground"
+          >
+            {t("TYPE_NAME_TO_CONFIRM")}{" "}
+            <span className="font-semibold text-foreground select-all">
+              {userName}
+            </span>
+          </Label>
+          <Input
+            id="confirm-name"
+            value={confirmName}
+            onChange={(e) => setConfirmName(e.target.value)}
+            disabled={isPending}
+            placeholder={t("CONFIRM_NAME_PLACEHOLDER")}
+            autoComplete="off"
+            className="h-9 text-xs"
+          />
+        </div>
+
+        <AlertDialogFooter className=" gap-2 sm:gap-0">
+          <AlertDialogCancel disabled={isPending} className="mt-0 text-xs">
+            {t("CANCEL_BUTTON")}
+          </AlertDialogCancel>
           <Button
             type="button"
             variant="destructive"
-            size="sm"
             onClick={handleDelete}
-            disabled={isPending}
+            disabled={isPending || !isConfirmValid}
             className="text-xs shadow-xs"
           >
             {isPending ? (
@@ -131,11 +160,9 @@ export function DeleteUserDialog({
               t("CONFIRM_DELETE_BUTTON")
             )}
           </Button>
-          {/* Programmatic close ref invoked strictly on successful deletion */}
-          <DialogClose ref={closeRef} className="hidden" />
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
 

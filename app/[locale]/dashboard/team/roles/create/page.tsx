@@ -5,17 +5,28 @@ import { createMetadata } from "@/lib/config/metadata_generator"
 import CreateRoleForm from "@/components/dashboard/roles/role-form"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { notFound } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 
-export async function generateMetadata() {
+interface PageProps {
+  params: Promise<{
+    locale: string
+  }>
+}
+
+export async function generateMetadata({ params }: PageProps) {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "RolesManagement" })
+
   return createMetadata({
     siteName: appConfig.name,
-    title: "Create New Role",
-    description:
-      "Define platform access role and configure fine-grained permissions.",
+    title: t("CREATE_PAGE_META_TITLE"),
+    description: t("CREATE_PAGE_META_DESCRIPTION"),
   })
 }
 
-export default async function Page() {
+export default async function Page({ params }: PageProps) {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "RolesManagement" })
   const canView = await hasPermission(PERMISSIONS.CREATE_ROLE)
   if (!canView) {
     notFound()
@@ -30,11 +41,11 @@ export default async function Page() {
               <ShieldCheckIcon className="size-4 text-foreground" />
             </span>
             <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-              Create Role
+              {t("CREATE_PAGE_TITLE")}
             </h1>
           </div>
           <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-            Define role identifier, description, and assign system permissions.
+            {t("CREATE_PAGE_DESCRIPTION")}
           </p>
         </div>
       </div>
