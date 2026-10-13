@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { deleteRole } from "@/lib/actions/role/mutations/delete-role"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 
 interface DeleteRoleDialogProps {
   roleId: string
@@ -39,6 +40,7 @@ export function DeleteRoleDialog({
 }: DeleteRoleDialogProps) {
   // Resolve translations and track dialog, confirmation, and pending states.
   const t = useTranslations("RolesManagement")
+  const tErrors = useTranslations("ActionErrors")
   const [isPending, startTransition] = React.useTransition()
   const [isOpen, setIsOpen] = React.useState(false)
   const [confirmName, setConfirmName] = React.useState("")
@@ -61,7 +63,7 @@ export function DeleteRoleDialog({
         toast.error(
           result.error === "ROLE_IN_USE"
             ? t("ROLE_IN_USE_ERROR")
-            : t("ROLE_DELETE_ERROR")
+            : tErrors(getActionErrorKey(result.error))
         )
       } catch {
         toast.error(t("ROLE_DELETE_ERROR"))

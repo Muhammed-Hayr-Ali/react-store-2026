@@ -11,6 +11,7 @@ import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { Spinner } from "@/components/ui/spinner"
 import { Badge } from "@/components/ui/badge"
 import { signInWithGoogle } from "@/lib/actions/authentication"
@@ -23,6 +24,7 @@ export function GoogleSignInButton({
   lastLoginMethod,
 }: GoogleSignInButtonProps) {
   const t = useTranslations("GoogleSignInButton")
+  const tErrors = useTranslations("ActionErrors")
 
   // Track the OAuth request while it is being dispatched.
   const [isPending, startTransition] = React.useTransition()
@@ -40,7 +42,7 @@ export function GoogleSignInButton({
 
         const errorMessage =
           !result.success && result.error
-            ? result.error
+            ? tErrors(getActionErrorKey(result.error))
             : t("SIGN_IN_FAILED_FALLBACK")
 
         toast.error(errorMessage)
@@ -58,7 +60,7 @@ export function GoogleSignInButton({
     <div className="relative w-full">
       {/* Logical RTL Placement: -inset-e-2.5 */}
       {isLastUsed && (
-        <div className="pointer-events-none absolute -top-2.5 -inset-e-2.5 z-10">
+        <div className="pointer-events-none absolute -inset-e-2.5 -top-2.5 z-10">
           <Badge
             variant="secondary"
             className="h-4 border border-border/80 bg-secondary px-1.5 text-[9px] font-medium tracking-wide text-foreground shadow-xs"

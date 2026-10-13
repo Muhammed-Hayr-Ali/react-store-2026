@@ -1,13 +1,17 @@
 /**
- * الحصول على الرابط العام المباشر لملف من حاوية site-assets
- * @param path مسار الملف داخل الحاوية أو رابط كامل أو null
+ * @file lib/database/supabase/storage.ts
+ * @description Resolves public URLs for files stored in the site-assets bucket.
+ */
+
+/**
+ * Returns a public URL for a site asset path or an existing absolute URL.
  */
 export function getSiteAssetUrl(
   path: string | null | undefined
 ): string | null {
   if (!path) return null
 
-  // إذا كان الرابط كاملاً بالفعل (http/https) يتم إرجاعه كما هو
+  // Preserve fully qualified URLs instead of treating them as storage paths.
   if (path.startsWith("http://") || path.startsWith("https://")) {
     return path
   }
@@ -15,7 +19,7 @@ export function getSiteAssetUrl(
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   if (!supabaseUrl) return path
 
-  // إزالة الشرطة المائلة الأولى إن وجدت لتفادي ازدواجية المسار
+  // Remove a leading slash to avoid a duplicate separator in the URL.
   const cleanPath = path.startsWith("/") ? path.slice(1) : path
 
   return `${supabaseUrl}/storage/v1/object/public/site-assets/${cleanPath}`

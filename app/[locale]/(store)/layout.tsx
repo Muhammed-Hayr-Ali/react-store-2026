@@ -8,7 +8,7 @@ export default async function MainLayout({
 }) {
   return (
     <div className="relative flex min-h-screen flex-col bg-background text-foreground">     
-     <Navbar />
+     {/* <Navbar /> */}
       <main className="flex-1 pt-14">{children}</main>
      {/* <Footer /> */}
     </div>

@@ -10,6 +10,7 @@
 import * as React from "react"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 import {
   ColumnDef,
   flexRender,
@@ -63,6 +64,11 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Can } from "@/components/shared/can"
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar"
 import { PERMISSIONS } from "@/lib/actions/role"
 import { useIsMobile } from "@/hooks/use-mobile"
 
@@ -86,6 +92,7 @@ export function StaffAccessTable({
 }: StaffAccessTableProps) {
   // Resolve translations and responsive table layout.
   const t = useTranslations("StaffAccessManagement")
+  const tErrors = useTranslations("ActionErrors")
   const isMobile = useIsMobile()
 
   // Track staff records, filters, search text, and role revocation requests.
@@ -123,7 +130,11 @@ export function StaffAccessTable({
             })
           )
         } else {
-          toast.error(res.error || t("FAILED_TO_REMOVE_ROLE"))
+          toast.error(
+            res.error
+              ? tErrors(getActionErrorKey(res.error))
+              : t("FAILED_TO_REMOVE_ROLE")
+          )
         }
       } catch {
         toast.error(t("UNEXPECTED_REVOKE_ERROR"))
@@ -135,7 +146,7 @@ export function StaffAccessTable({
         })
       }
     },
-    [t]
+    [t, tErrors]
   )
 
   // Filter staff by role assignment status and search text.
@@ -223,13 +234,22 @@ export function StaffAccessTable({
             .join(" ")
           return (
             <div className="flex items-center gap-2.5">
-              <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-bold text-foreground uppercase">
-                {row.original.first_name ? (
-                  row.original.first_name[0]
-                ) : (
-                  <UserCheckIcon className="size-3.5" />
+              <Avatar className="size-7 shrink-0 rounded-lg after:rounded-lg">
+                {row.original.profile_image && (
+                  <AvatarImage
+                    src={row.original.profile_image}
+                    alt={fullName || t("ANONYMOUS_USER")}
+                    className="rounded-lg"
+                  />
                 )}
-              </div>
+                <AvatarFallback className="rounded-lg bg-secondary text-xs font-bold text-foreground uppercase">
+                  {row.original.first_name ? (
+                    row.original.first_name[0]
+                  ) : (
+                    <UserCheckIcon className="size-3.5" />
+                  )}
+                </AvatarFallback>
+              </Avatar>
               <div className="flex max-w-xs min-w-0 flex-col">
                 <span className="truncate text-xs font-semibold text-foreground">
                   {fullName || t("ANONYMOUS_USER")}

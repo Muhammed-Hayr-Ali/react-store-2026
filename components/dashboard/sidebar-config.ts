@@ -4,6 +4,7 @@ import {
   UserCog,
   type LucideIcon,
   StoreIcon,
+  Tags,
 } from "lucide-react"
 import { appRoutes } from "@/lib/config/app-routes"
 import { PERMISSIONS, AppPermission } from "@/lib/actions/role"
@@ -44,12 +45,20 @@ export const sidebarConfig: SidebarConfig = {
       icon: LayoutDashboard,
     },
     {
+      titleKey: "CATEGORIES_MANAGEMENT",
+      key: "categories-management",
+      url: appRoutes.dashboard.categories,
+      icon: Tags,
+      requiredPermission: PERMISSIONS.VIEW_CATEGORIES_MANAGEMENT,
+    },
+    {
       titleKey: "USERS_MANAGEMENT",
       key: "users-management",
       url: appRoutes.dashboard.users,
       icon: Users,
       requiredPermission: PERMISSIONS.VIEW_USERS_MANAGEMENT,
     },
+
     {
       titleKey: "TEAM_MANAGEMENT",
       key: "team-management",

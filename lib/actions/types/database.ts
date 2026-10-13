@@ -16,49 +16,49 @@ export type Database = {
     Tables: {
       categories: {
         Row: {
-          created_at: string
+          created_at: string | null
           description: string | null
           description_ar: string | null
           id: string
           image_alt: string | null
           image_url: string | null
-          is_active: boolean
+          is_active: boolean | null
           name: string
           name_ar: string | null
           parent_id: string | null
           slug: string
-          sort_order: number
-          updated_at: string
+          sort_order: number | null
+          updated_at: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           description_ar?: string | null
           id?: string
           image_alt?: string | null
           image_url?: string | null
-          is_active?: boolean
+          is_active?: boolean | null
           name: string
           name_ar?: string | null
           parent_id?: string | null
           slug: string
-          sort_order?: number
-          updated_at?: string
+          sort_order?: number | null
+          updated_at?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           description_ar?: string | null
           id?: string
           image_alt?: string | null
           image_url?: string | null
-          is_active?: boolean
+          is_active?: boolean | null
           name?: string
           name_ar?: string | null
           parent_id?: string | null
           slug?: string
-          sort_order?: number
-          updated_at?: string
+          sort_order?: number | null
+          updated_at?: string | null
         }
         Relationships: [
           {

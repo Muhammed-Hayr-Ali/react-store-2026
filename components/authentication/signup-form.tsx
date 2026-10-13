@@ -22,16 +22,16 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { ActionFieldError } from "@/components/shared/action-field-error"
 import {
   Field,
-  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
 } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { IconInput } from "@/components/ui/icon-input"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AuthHeader } from "./auth-header"
 import { GoogleSignInButton } from "./google-sign-in-button"
 
@@ -41,10 +41,12 @@ import {
   type SignUpWithPasswordInput,
 } from "@/lib/actions/authentication"
 import { appRoutes } from "@/lib/config/app-routes"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 
 export function SignUpForm() {
   // Load translations and navigation for the registration flow.
   const t = useTranslations("SignUpForm")
+  const tErrors = useTranslations("ActionErrors")
   const router = useRouter()
 
   // Track password visibility and server-side errors.
@@ -91,7 +93,11 @@ export function SignUpForm() {
     if (result.error === "EMAIL_ALREADY_EXISTS") {
       setErrorMessage(t("EMAIL_ALREADY_EXISTS_ERROR"))
     } else {
-      setErrorMessage(result.error || t("GENERIC_ERROR"))
+      setErrorMessage(
+        result.error
+          ? tErrors(getActionErrorKey(result.error))
+          : t("GENERIC_ERROR")
+      )
     }
   }
 
@@ -148,7 +154,7 @@ export function SignUpForm() {
                   }
                 />
                 {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
+                  <ActionFieldError errors={[fieldState.error]} />
                 )}
               </Field>
             )}
@@ -173,7 +179,7 @@ export function SignUpForm() {
                   className="h-9 text-xs"
                 />
                 {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
+                  <ActionFieldError errors={[fieldState.error]} />
                 )}
               </Field>
             )}
@@ -201,7 +207,9 @@ export function SignUpForm() {
                   <MailIcon className="size-4 text-muted-foreground" />
                 }
               />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              {fieldState.invalid && (
+                <ActionFieldError errors={[fieldState.error]} />
+              )}
             </Field>
           )}
         />
@@ -247,13 +255,15 @@ export function SignUpForm() {
                   </Button>
                 }
               />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              {fieldState.invalid && (
+                <ActionFieldError errors={[fieldState.error]} />
+              )}
             </Field>
           )}
         />
 
         {errors.root && (
-          <FieldError errors={[{ message: errors.root.message }]} />
+          <ActionFieldError errors={[{ message: errors.root.message }]} />
         )}
 
         {/* Submit Action */}

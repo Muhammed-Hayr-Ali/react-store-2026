@@ -8,6 +8,7 @@
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { toast } from "sonner"
 import { ShieldAlertIcon } from "lucide-react"
 
@@ -52,6 +53,7 @@ export function UserStatusDialog({
 }: UserStatusDialogProps) {
   // Track the selected account status, ban reason, and dialog state.
   const t = useTranslations("UsersManagement")
+  const tErrors = useTranslations("ActionErrors")
   const [status, setStatus] = React.useState<UserStatus>(user.status)
   const [banReason, setBanReason] = React.useState(user.ban_reason || "")
   const [isPending, startTransition] = React.useTransition()
@@ -72,7 +74,11 @@ export function UserStatusDialog({
           toast.success(t("STATUS_UPDATED_TOAST", { status }))
           onSuccess?.(user.id, status, banReason)
         } else {
-          toast.error(res.error || t("FAILED_TO_UPDATE_STATUS"))
+          toast.error(
+            res.error
+              ? tErrors(getActionErrorKey(res.error))
+              : t("FAILED_TO_UPDATE_STATUS")
+          )
         }
       } catch {
         toast.error(t("GENERIC_ERROR_TOAST"))

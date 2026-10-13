@@ -27,6 +27,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { deleteUser } from "@/lib/actions/users/mutations/delete-user"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 
 export interface DeleteUserDialogProps {
   userId: string
@@ -43,6 +44,7 @@ export function DeleteUserDialog({
 }: DeleteUserDialogProps) {
   // Resolve translations and track dialog, confirmation, and pending states.
   const t = useTranslations("UsersManagement")
+  const tErrors = useTranslations("ActionErrors")
   const [isPending, startTransition] = React.useTransition()
   const [isOpen, setIsOpen] = React.useState(false)
   const [confirmName, setConfirmName] = React.useState("")
@@ -60,7 +62,11 @@ export function DeleteUserDialog({
           toast.success(t("DELETE_SUCCESS_TOAST", { name: userName }))
           onDeleted?.(userId)
         } else {
-          toast.error(res.error || t("DELETE_ERROR_TOAST"))
+          toast.error(
+            res.error
+              ? tErrors(getActionErrorKey(res.error))
+              : t("DELETE_ERROR_TOAST")
+          )
         }
       } catch {
         toast.error(t("GENERIC_ERROR_TOAST"))

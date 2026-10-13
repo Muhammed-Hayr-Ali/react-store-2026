@@ -33,7 +33,7 @@ export function AppSidebar({ side, ...props }: AppSidebarProps) {
         <NavMain permissions={permissions} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} />
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

@@ -1,26 +1,25 @@
 import { z } from "zod"
 
 export const createUserSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z
-    .string()
-    .min(6, "Password must be at least 6 characters")
-    .optional(),
+  email: z.string().email("INVALID_USER_EMAIL"),
+  password: z.string().min(6, "PASSWORD_TOO_SHORT_ERROR").optional(),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
   phoneNumber: z.string().optional(),
 })
 
 export const updateUserSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.string().uuid("INVALID_UUID_ERROR"),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
   phoneNumber: z.string().optional(),
 })
 
 export const updateUserStatusSchema = z.object({
-  userId: z.string().uuid(),
-  status: z.enum(["active", "suspended", "banned"]),
+  userId: z.string().uuid("INVALID_UUID_ERROR"),
+  status: z.enum(["active", "suspended", "banned"], {
+    error: "INVALID_ACCOUNT_STATUS",
+  }),
   banReason: z.string().optional(),
 })
 

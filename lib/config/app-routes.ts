@@ -16,6 +16,7 @@ export const appRoutes = {
       create_roles: "/dashboard/team/roles/create",
       staffAccess: "/dashboard/team/staff-access",
     },
+    categories: "/dashboard/categories",
     users: "/dashboard/users",
   },
 } as const

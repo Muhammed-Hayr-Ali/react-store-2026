@@ -22,9 +22,9 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { ActionFieldError } from "@/components/shared/action-field-error"
 import {
   Field,
-  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
@@ -32,7 +32,7 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { Badge } from "@/components/ui/badge"
 import { IconInput } from "@/components/ui/icon-input"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AuthHeader } from "./auth-header"
 import { GoogleSignInButton } from "./google-sign-in-button"
 
@@ -42,6 +42,7 @@ import {
   type SignInWithPasswordInput,
 } from "@/lib/actions/authentication"
 import { appRoutes } from "@/lib/config/app-routes"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 
 interface LoginFormProps {
   lastLoginMethod?: string | null
@@ -50,6 +51,7 @@ interface LoginFormProps {
 export function LoginForm({ lastLoginMethod }: LoginFormProps) {
   // Load translations and resolve the post-login destination.
   const t = useTranslations("LoginForm")
+  const tErrors = useTranslations("ActionErrors")
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTarget = searchParams.get("redirect") || appRoutes.home
@@ -98,7 +100,11 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
     } else if (result.error === "EMAIL_NOT_CONFIRMED") {
       setErrorMessage(t("EMAIL_NOT_CONFIRMED_ERROR"))
     } else {
-      setErrorMessage(result.error || t("GENERIC_ERROR"))
+      setErrorMessage(
+        result.error
+          ? tErrors(getActionErrorKey(result.error))
+          : t("GENERIC_ERROR")
+      )
     }
   }
 
@@ -155,7 +161,9 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
                   <MailIcon className="size-4 text-muted-foreground" />
                 }
               />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              {fieldState.invalid && (
+                <ActionFieldError errors={[fieldState.error]} />
+              )}
             </Field>
           )}
         />
@@ -209,13 +217,15 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
                   </Button>
                 }
               />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              {fieldState.invalid && (
+                <ActionFieldError errors={[fieldState.error]} />
+              )}
             </Field>
           )}
         />
 
         {errors.root && (
-          <FieldError errors={[{ message: errors.root.message }]} />
+          <ActionFieldError errors={[{ message: errors.root.message }]} />
         )}
 
         {/* Submit Action */}

@@ -21,19 +21,16 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field"
+import { ActionFieldError } from "@/components/shared/action-field-error"
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AuthHeader } from "./auth-header"
 
 import { confirmPasswordReset } from "@/lib/actions/authentication"
 import { appRoutes } from "@/lib/config/app-routes"
 import { IconInput } from "@/components/ui/icon-input"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 
 // Define the client-side schema separately because the shared schema uses a refinement.
 const clientResetSchema = z
@@ -55,6 +52,7 @@ interface ResetPasswordFormProps {
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   // Load translations and navigation for the reset flow.
   const t = useTranslations("ResetPasswordForm")
+  const tErrors = useTranslations("ActionErrors")
   const router = useRouter()
 
   // Track password visibility and server-side errors.
@@ -104,7 +102,11 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     if (result.error === "VERIFY_RESET_TOKEN_ERROR") {
       setErrorMessage(t("INVALID_OR_EXPIRED_TOKEN_ERROR"))
     } else {
-      setErrorMessage(result.error || t("GENERIC_ERROR"))
+      setErrorMessage(
+        result.error
+          ? tErrors(getActionErrorKey(result.error))
+          : t("GENERIC_ERROR")
+      )
     }
   }
 
@@ -179,7 +181,9 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                   </Button>
                 }
               />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              {fieldState.invalid && (
+                <ActionFieldError errors={[fieldState.error]} />
+              )}
             </Field>
           )}
         />
@@ -225,7 +229,9 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                   </Button>
                 }
               />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              {fieldState.invalid && (
+                <ActionFieldError errors={[fieldState.error]} />
+              )}
             </Field>
           )}
         />

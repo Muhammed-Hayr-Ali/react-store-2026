@@ -7,6 +7,7 @@
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { toast } from "sonner"
 import { MoreHorizontalIcon, ShieldPlusIcon } from "lucide-react"
 
@@ -56,6 +57,7 @@ export function AssignRoleDialog({
 }: AssignRoleDialogProps) {
   // Track the selected role, dialog visibility, and pending request.
   const t = useTranslations("StaffAccessManagement")
+  const tErrors = useTranslations("ActionErrors")
   const tUsers = useTranslations("UsersManagement")
   const [selectedRoleId, setSelectedRoleId] = React.useState<string>("")
   const [isPending, startTransition] = React.useTransition()
@@ -91,7 +93,11 @@ export function AssignRoleDialog({
           setSelectedRoleId("")
           setIsOpen(false)
         } else {
-          toast.error(res.error || t("FAILED_TO_ASSIGN_ROLE"))
+          toast.error(
+            res.error
+              ? tErrors(getActionErrorKey(res.error))
+              : t("FAILED_TO_ASSIGN_ROLE")
+          )
         }
       } catch {
         toast.error(t("UNEXPECTED_ASSIGN_ERROR"))
@@ -184,11 +190,9 @@ export function AssignRoleDialog({
                         className="truncate"
                         placeholder={t("CHOOSE_ROLE_PLACEHOLDER")}
                       >
-                        {
-                          assignableRoles.find(
-                            (role) => role.id === selectedRoleId
-                          )?.name.toUpperCase()
-                        }
+                        {assignableRoles
+                          .find((role) => role.id === selectedRoleId)
+                          ?.name.toUpperCase()}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent

@@ -1,8 +1,17 @@
 "use client"
 
+/**
+ * @file components/dashboard/logout-alert.tsx
+ * @description Confirms and performs the current user's sign-out action.
+ */
+
+import * as React from "react"
+import { useTranslations } from "next-intl"
+import { toast } from "sonner"
+import { LogOutIcon } from "lucide-react"
+
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -10,76 +19,86 @@ import {
   AlertDialogHeader,
   AlertDialogMedia,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { LogOutIcon } from "lucide-react"
-import React from "react"
+import { Button } from "@/components/ui/button"
 import { Spinner } from "../ui/spinner"
 import { signOut } from "@/lib/actions/authentication"
 import { appRoutes } from "@/lib/config/app-routes"
 import { useRouter } from "next/navigation"
 
 interface LogoutAlertDialogProps {
-  status: string | null
-  onOpenChange: (open: boolean) => void
+  children: React.ReactElement
 }
 
-export function LogoutAlertDialog({
-  status,
-  onOpenChange,
-}: LogoutAlertDialogProps) {
-  // Track the pending sign-out request and access client navigation.
-  const [isLoading, setIsLoading] = React.useState(false)
+export function LogoutAlertDialog({ children }: LogoutAlertDialogProps) {
+  const t = useTranslations("DashboardSidebar")
+  const [isOpen, setIsOpen] = React.useState(false)
+  const [isPending, startTransition] = React.useTransition()
   const router = useRouter()
 
-  // Sign out, close the dialog, and return to the storefront.
-  const handleLogout = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault() // Keep the dialog open until the sign-out request finishes.
-    setIsLoading(true)
+  const handleLogout = () => {
+    startTransition(async () => {
+      try {
+        const result = await signOut()
+        if (!result.success) {
+          toast.error(t("LOGOUT_ERROR"))
+          return
+        }
 
-    try {
-      const result = await signOut()
-      if (result.success) {
-        onOpenChange(false) // Close the dialog after a successful sign-out.
+        setIsOpen(false)
         router.replace(appRoutes.home)
         router.refresh()
+      } catch {
+        toast.error(t("LOGOUT_ERROR"))
       }
-    } catch (error) {
-      console.error("Error signing out:", error)
-    } finally {
-      setIsLoading(false)
-    }
+    })
   }
 
-  // Render the confirmation dialog and its pending or idle actions.
   return (
-    <AlertDialog open={status === "logout"} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogMedia>
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (open || !isPending) setIsOpen(open)
+      }}
+    >
+      <AlertDialogTrigger render={children} />
+      <AlertDialogContent
+        onEscapeKeyDown={(event) => {
+          if (isPending) event.preventDefault()
+        }}
+      >
+        <AlertDialogHeader className="text-start">
+          <AlertDialogMedia className="bg-destructive/10 text-destructive">
             <LogOutIcon />
           </AlertDialogMedia>
-
-          <AlertDialogTitle>Logout from your account</AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure you want to logout from your account?
+          <AlertDialogTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
+            {t("LOGOUT_DIALOG_TITLE")}
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-xs text-muted-foreground">
+            {t("LOGOUT_DIALOG_DESCRIPTION")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
+          <AlertDialogCancel disabled={isPending} className="mt-0 text-xs">
+            {t("CANCEL_BUTTON")}
+          </AlertDialogCancel>
+          <Button
+            type="button"
             variant="destructive"
             onClick={handleLogout}
-            disabled={isLoading}
+            disabled={isPending}
+            className="text-xs shadow-xs"
           >
-            {isLoading ? (
+            {isPending ? (
               <>
-                <Spinner className="mr-2 size-4" />
-                Logging out...
+                <Spinner className="me-1.5 size-3.5" />
+                {t("LOGGING_OUT")}
               </>
             ) : (
-              "Yes, Logout"
+              t("LOGOUT_CONFIRM")
             )}
-          </AlertDialogAction>
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

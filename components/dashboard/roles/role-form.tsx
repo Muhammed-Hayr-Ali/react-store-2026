@@ -21,6 +21,7 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -40,12 +41,10 @@ interface RoleFormProps {
   roleId?: string | number
 }
 
-export function RoleForm({
-  initialData,
-  roleId,
-}: RoleFormProps) {
+export function RoleForm({ initialData, roleId }: RoleFormProps) {
   // Resolve form translations and navigation after saving a role.
   const t = useTranslations("RolesManagement")
+  const tErrors = useTranslations("ActionErrors")
   const router = useRouter()
 
   const isEditing = Boolean(roleId || initialData)
@@ -142,11 +141,20 @@ export function RoleForm({
           router.push(appRoutes.dashboard.team.roles)
           router.refresh()
         } else {
+          const validationMessage =
+            res.error === "VALIDATION_ERROR" && res.details
+              ? Object.values(res.details)
+                  .flat()
+                  .map((error) => tErrors(getActionErrorKey(error)))
+                  .join(" ")
+              : ""
           setErrorMessage(
-            res.error ||
-              (isEditing
-                ? t("FAILED_TO_UPDATE_ROLE")
-                : t("FAILED_TO_CREATE_ROLE"))
+            validationMessage ||
+              (res.error
+                ? tErrors(getActionErrorKey(res.error))
+                : isEditing
+                  ? t("FAILED_TO_UPDATE_ROLE")
+                  : t("FAILED_TO_CREATE_ROLE"))
           )
           window.scrollTo({ top: 0, behavior: "smooth" })
         }

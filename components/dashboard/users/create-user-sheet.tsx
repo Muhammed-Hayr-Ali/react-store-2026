@@ -17,12 +17,8 @@ import {
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field"
+import { ActionFieldError } from "@/components/shared/action-field-error"
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import {
@@ -39,6 +35,7 @@ import {
 import type { AdminUserSummary } from "@/lib/actions/users/types"
 import { createUser } from "@/lib/actions/users/mutations/create-user"
 import { createUserSchema } from "@/lib/actions/users/schemas"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 
 type CreateUserFormValues = z.infer<typeof createUserSchema>
 
@@ -50,6 +47,7 @@ interface CreateUserSheetProps {
 export function CreateUserSheet({ children, onSuccess }: CreateUserSheetProps) {
   // Resolve translations and navigation for the account creation flow.
   const t = useTranslations("UsersManagement")
+  const tErrors = useTranslations("ActionErrors")
   const router = useRouter()
   const [isOpen, setIsOpen] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
@@ -116,10 +114,21 @@ export function CreateUserSheet({ children, onSuccess }: CreateUserSheetProps) {
       return
     }
 
+    if (result.error === "VALIDATION_ERROR" && result.details) {
+      Object.entries(result.details).forEach(([field, messages]) => {
+        form.setError(field as keyof CreateUserFormValues, {
+          message: messages[0],
+        })
+      })
+      return
+    }
+
     setErrorMessage(
       result.error === "PERMISSION_DENIED"
         ? t("PERMISSION_DENIED_ERROR")
-        : result.error || t("FAILED_TO_CREATE_USER")
+        : result.error
+          ? tErrors(getActionErrorKey(result.error))
+          : t("FAILED_TO_CREATE_USER")
     )
   }
 
@@ -229,7 +238,7 @@ export function CreateUserSheet({ children, onSuccess }: CreateUserSheetProps) {
                         className="h-8 text-xs"
                       />
                       {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
+                        <ActionFieldError errors={[fieldState.error]} />
                       )}
                     </Field>
                   )}
@@ -266,7 +275,7 @@ export function CreateUserSheet({ children, onSuccess }: CreateUserSheetProps) {
                         </Button>
                       </div>
                       {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
+                        <ActionFieldError errors={[fieldState.error]} />
                       )}
                     </Field>
                   )}
@@ -302,7 +311,7 @@ export function CreateUserSheet({ children, onSuccess }: CreateUserSheetProps) {
                           className="h-8 text-xs"
                         />
                         {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
+                          <ActionFieldError errors={[fieldState.error]} />
                         )}
                       </Field>
                     )}
@@ -326,7 +335,7 @@ export function CreateUserSheet({ children, onSuccess }: CreateUserSheetProps) {
                           className="h-8 text-xs"
                         />
                         {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
+                          <ActionFieldError errors={[fieldState.error]} />
                         )}
                       </Field>
                     )}
@@ -351,7 +360,7 @@ export function CreateUserSheet({ children, onSuccess }: CreateUserSheetProps) {
                         className="h-8 text-xs"
                       />
                       {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
+                        <ActionFieldError errors={[fieldState.error]} />
                       )}
                     </Field>
                   )}

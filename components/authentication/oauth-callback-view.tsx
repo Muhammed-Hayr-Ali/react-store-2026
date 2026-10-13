@@ -9,6 +9,7 @@ import * as React from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { XCircleIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -19,15 +20,11 @@ import { appRoutes } from "@/lib/config/app-routes"
 interface OAuthCallbackViewProps {
   code?: string
   error?: string
-  errorDescription?: string
 }
 
-export function OAuthCallbackView({
-  code,
-  error,
-  errorDescription,
-}: OAuthCallbackViewProps) {
+export function OAuthCallbackView({ code, error }: OAuthCallbackViewProps) {
   const t = useTranslations("OAuthCallback")
+  const tErrors = useTranslations("ActionErrors")
   const router = useRouter()
   const hasProcessed = React.useRef(false)
 
@@ -45,7 +42,11 @@ export function OAuthCallbackView({
             router.refresh()
             router.replace(appRoutes.home)
           } else {
-            toast.error(result.error || t("EXCHANGE_FAILED"))
+            toast.error(
+              result.error
+                ? tErrors(getActionErrorKey(result.error))
+                : t("EXCHANGE_FAILED")
+            )
             router.replace(appRoutes.auth.login)
           }
         } catch (err) {
@@ -57,7 +58,7 @@ export function OAuthCallbackView({
 
       processExchange()
     }
-  }, [code, router, t])
+  }, [code, router, t, tErrors])
 
   // Error view when OAuth provider returns an error parameter
   if (error) {
@@ -70,7 +71,7 @@ export function OAuthCallbackView({
           {t("FAILED_TITLE")}
         </h1>
         <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-          {errorDescription || t("DEFAULT_ERROR_DESCRIPTION")}
+          {tErrors(getActionErrorKey(error))}
         </p>
         <Button
           variant="outline"

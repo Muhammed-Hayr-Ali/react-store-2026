@@ -9,7 +9,7 @@ import {
   Sparkles,
 } from "lucide-react"
 
-import { Avatar,  AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,35 +25,21 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { LogoutAlertDialog } from "./logout-alert"
-import React from "react"
+import { useUser } from "@/lib/context/user-context"
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string
-    email: string
-    avatar: string
-  }
-}) {
-  // Use responsive menu placement and track the active user dialog.
+export function NavUser() {
+  // Use responsive menu placement and read the current dashboard user.
+  const { user } = useUser()
   const { isMobile } = useSidebar()
 
-    const [dialogState, setDialogState] = React.useState< string | null>(null)
+  if (!user) return null
 
-  // Clear the dialog selection when its dialog closes.
-    const handleDialogChange = (open: boolean) => {
-      if (!open) {
-        setDialogState(null)
-      }
-    }
+  const userHandle = user.email ? user.email.split("@")[0] : "user"
+  const userTag = user.role
+    ? `@${userHandle}/${user.role.toUpperCase()}`
+    : `@${userHandle}`
 
-  // Open the requested user dialog.
-    const openDialog = (dialogName: string) => {
-      setDialogState(dialogName)
-    }
-
-  // Render the user menu and its sign-out confirmation dialog.
+  // Render the user menu with the sign-out dialog's own trigger.
   return (
     <>
       <SidebarMenu>
@@ -68,9 +54,20 @@ export function NavUser({
                   <AvatarImage src={user.avatar} alt={user.name} />
                 </Avatar>
 
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
+                <div className="flex min-w-0 flex-col justify-center">
+                  <p
+                    className="w-full truncate text-xs leading-tight font-semibold text-foreground"
+                    title={user.name}
+                  >
+                    {user.name}
+                  </p>
+
+                  <p
+                    className="mt-0.5 w-full truncate font-mono text-[11px] leading-tight text-muted-foreground"
+                    title={userTag}
+                  >
+                    {userTag}
+                  </p>
                 </div>
                 <ChevronsUpDown className="ml-auto size-4" />
               </SidebarMenuButton>
@@ -103,21 +100,16 @@ export function NavUser({
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() => openDialog("logout")}
-              >
-                <LogOut />
-                Log out
-              </DropdownMenuItem>
+              <LogoutAlertDialog>
+                <DropdownMenuItem variant="destructive">
+                  <LogOut />
+                  Log out
+                </DropdownMenuItem>
+              </LogoutAlertDialog>
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
-      <LogoutAlertDialog
-        status={dialogState}
-        onOpenChange={handleDialogChange}
-      />
     </>
   )
 }

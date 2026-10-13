@@ -77,6 +77,11 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Can } from "@/components/shared/can"
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar"
 import { PERMISSIONS } from "@/lib/actions/role"
 import { useIsMobile } from "@/hooks/use-mobile"
 
@@ -201,13 +206,22 @@ export function UsersTable({
             .join(" ")
           return (
             <div className="flex items-center gap-2.5">
-              <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-bold text-foreground uppercase">
-                {row.original.first_name ? (
-                  row.original.first_name[0]
-                ) : (
-                  <UserCheckIcon className="size-3.5" />
+              <Avatar className="size-7 shrink-0 rounded-lg after:rounded-lg">
+                {row.original.profile_image && (
+                  <AvatarImage
+                    src={row.original.profile_image}
+                    alt={fullName || t("ANONYMOUS_USER")}
+                    className="rounded-lg"
+                  />
                 )}
-              </div>
+                <AvatarFallback className="rounded-lg bg-secondary text-xs font-bold text-foreground uppercase">
+                  {row.original.first_name ? (
+                    row.original.first_name[0]
+                  ) : (
+                    <UserCheckIcon className="size-3.5" />
+                  )}
+                </AvatarFallback>
+              </Avatar>
               <div className="flex flex-col">
                 <span className="text-xs font-semibold text-foreground">
                   {fullName || t("ANONYMOUS_USER")}

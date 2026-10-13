@@ -36,13 +36,7 @@ export default async function CallbackPage({
   searchParams,
 }: CallbackPageProps) {
   await params
-  const { code, error, error_description } = await searchParams
+  const { code, error } = await searchParams
 
-  return (
-    <OAuthCallbackView
-      code={code}
-      error={error}
-      errorDescription={error_description}
-    />
-  )
+  return <OAuthCallbackView code={code} error={error} />
 }

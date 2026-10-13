@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
+import { ActionFieldError } from "@/components/shared/action-field-error"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -21,18 +22,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field"
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { PencilIcon, ShieldIcon, XIcon } from "lucide-react"
 import { toast } from "sonner"
 
 import type { AdminUserSummary } from "@/lib/actions/users/types"
 import { updateUser } from "@/lib/actions/users/mutations/update-user"
 import { updateUserSchema } from "@/lib/actions/users/schemas"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 
 type EditUserFormValues = z.infer<typeof updateUserSchema>
 
@@ -49,6 +46,7 @@ export function EditUserDialog({
 }: EditUserDialogProps) {
   // Resolve translations and navigation for the edit flow.
   const t = useTranslations("UsersManagement")
+  const tErrors = useTranslations("ActionErrors")
   const router = useRouter()
   const [isOpen, setIsOpen] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
@@ -89,10 +87,21 @@ export function EditUserDialog({
       return
     }
 
+    if (result.error === "VALIDATION_ERROR" && result.details) {
+      Object.entries(result.details).forEach(([field, messages]) => {
+        form.setError(field as keyof EditUserFormValues, {
+          message: messages[0],
+        })
+      })
+      return
+    }
+
     setErrorMessage(
       result.error === "PERMISSION_DENIED"
         ? t("PERMISSION_DENIED_ERROR")
-        : result.error || t("FAILED_TO_UPDATE_USER")
+        : result.error
+          ? tErrors(getActionErrorKey(result.error))
+          : t("FAILED_TO_UPDATE_USER")
     )
   }
 
@@ -200,7 +209,7 @@ export function EditUserDialog({
                           value={field.value || ""}
                         />
                         {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
+                          <ActionFieldError errors={[fieldState.error]} />
                         )}
                       </Field>
                     )}
@@ -225,7 +234,7 @@ export function EditUserDialog({
                           value={field.value || ""}
                         />
                         {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
+                          <ActionFieldError errors={[fieldState.error]} />
                         )}
                       </Field>
                     )}
@@ -248,7 +257,7 @@ export function EditUserDialog({
                         value={field.value || ""}
                       />
                       {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
+                        <ActionFieldError errors={[fieldState.error]} />
                       )}
                     </Field>
                   )}

@@ -19,3 +19,6 @@ CREATE TABLE categories (
 CREATE INDEX idx_categories_parent_id ON categories(parent_id);
 CREATE INDEX idx_categories_slug ON categories(slug);
 CREATE INDEX idx_categories_sort_order ON categories(sort_order);
+
+-- Public storefront reads; category writes remain permission-gated.
+SELECT public.apply_table_rls('categories', 'category', true, false);

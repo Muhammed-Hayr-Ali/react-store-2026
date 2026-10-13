@@ -7,10 +7,7 @@ import { z } from "zod"
 
 export const categorySchema = z.object({
   id: z.string().uuid({ message: "INVALID_UUID_ERROR" }),
-  parent_id: z
-    .string()
-    .uuid({ message: "INVALID_PARENT_ID_ERROR" })
-    .nullable(),
+  parent_id: z.string().uuid({ message: "INVALID_PARENT_ID_ERROR" }).nullable(),
   name: z
     .string()
     .trim()
@@ -38,18 +35,29 @@ export const categorySchema = z.object({
     .string()
     .max(255, { message: "CATEGORY_IMAGE_ALT_TOO_LONG_ERROR" })
     .nullable(),
-  sort_order: z.number().int({ message: "INVALID_SORT_ORDER_ERROR" }).default(0),
-  is_active: z.boolean().default(true),
-  created_at: z.string(),
-  updated_at: z.string(),
+  sort_order: z
+    .number()
+    .int({ message: "INVALID_SORT_ORDER_ERROR" })
+    .nullable(),
+  is_active: z.boolean().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
 })
 
 /** Category fields accepted when creating or replacing a category. */
-export const categoryFormSchema = categorySchema.omit({
-  id: true,
-  created_at: true,
-  updated_at: true,
-})
+export const categoryFormSchema = categorySchema
+  .omit({
+    id: true,
+    created_at: true,
+    updated_at: true,
+  })
+  .extend({
+    sort_order: z
+      .number()
+      .int({ message: "INVALID_SORT_ORDER_ERROR" })
+      .default(0),
+    is_active: z.boolean().default(true),
+  })
 
 export const updateCategorySchema = categoryFormSchema.extend({
   id: z.string().uuid({ message: "INVALID_UUID_ERROR" }),

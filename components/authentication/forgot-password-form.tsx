@@ -12,15 +12,11 @@ import { Controller, useForm } from "react-hook-form"
 import { MailIcon, AlertCircleIcon, XIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field"
+import { ActionFieldError } from "@/components/shared/action-field-error"
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { IconInput } from "@/components/ui/icon-input"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AuthHeader } from "./auth-header"
 import { ResetPasswordSuccess } from "./reset-password-success"
 
@@ -30,9 +26,11 @@ import {
   type RequestPasswordResetInput,
 } from "@/lib/actions/authentication"
 import { appRoutes } from "@/lib/config/app-routes"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 
 export function ForgotPasswordForm() {
   const t = useTranslations("ForgotPasswordForm")
+  const tErrors = useTranslations("ActionErrors")
 
   // Track the request outcome and any server-side error.
   const [submittedEmail, setSubmittedEmail] = React.useState<string | null>(
@@ -71,7 +69,11 @@ export function ForgotPasswordForm() {
       return
     }
 
-    setErrorMessage(result.error || t("GENERIC_ERROR"))
+    setErrorMessage(
+      result.error
+        ? tErrors(getActionErrorKey(result.error))
+        : t("GENERIC_ERROR")
+    )
   }
 
   // Show delivery confirmation after a successful reset request.
@@ -138,7 +140,9 @@ export function ForgotPasswordForm() {
                   <MailIcon className="size-4 text-muted-foreground" />
                 }
               />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              {fieldState.invalid && (
+                <ActionFieldError errors={[fieldState.error]} />
+              )}
             </Field>
           )}
         />
