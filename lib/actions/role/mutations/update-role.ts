@@ -16,9 +16,8 @@ import {
 import { RoleRecord } from "./create-role"
 
 export async function updateRole(
-  payload: UpdateRolePermissionsInput
-): Promise<ApiResult<RoleRecord | null>> {
-  // 1. Permission check
+  input: UpdateRolePermissionsInput
+): Promise<ApiResult<RoleRecord>> {
   const canUpdate = await hasPermission(PERMISSIONS.UPDATE_ROLE)
   if (!canUpdate) {
     return {
@@ -27,10 +26,9 @@ export async function updateRole(
     }
   }
 
-  // 2. Validate input schema
-  const validation = updateRolePermissionsSchema.safeParse(payload)
+  const validation = updateRolePermissionsSchema.safeParse(input)
   if (!validation.success) {
-    // طريقة حديثة وآمنة لتجميع الأخطاء بدون استخدام الدوال الـ deprecated أو غير الموجودة
+    // Group validation issues by field for the action result.
     const fieldErrors: Record<string, string[]> = {}
     for (const issue of validation.error.issues) {
       const path = issue.path.join(".")
@@ -49,7 +47,6 @@ export async function updateRole(
   const { roleId, description, permissions } = validation.data
   const supabase = await createServerClient()
 
-  // 3. Update record in roles table
   const updatePayload: { permissions: string[]; description?: string | null } =
     {
       permissions,
@@ -73,7 +70,6 @@ export async function updateRole(
     }
   }
 
-  // 4. Invalidate global layout cache
   revalidatePath("/", "layout")
 
   return {

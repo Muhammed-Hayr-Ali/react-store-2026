@@ -1,6 +1,6 @@
 /**
  * @file lib/actions/role/queries/get-role-by-id.ts
- * @description Retrieve a single role by ID.
+ * @description Retrieves a role by ID.
  */
 
 "use server"
@@ -10,11 +10,14 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "@/lib/actions/types/utils"
 import { RoleRecord } from "../mutations/create-role"
 
-export async function getRoleById(
+interface GetRoleByIdInput {
   roleId: string
-): Promise<ApiResult<RoleRecord | null>> {
-  // التعديل هنا: التحقق من أن المعرّف هو UUID صالح
-  const idValidation = z.string().uuid().safeParse(roleId)
+}
+
+export async function getRoleById(
+  input: GetRoleByIdInput
+): Promise<ApiResult<RoleRecord>> {
+  const idValidation = z.string().uuid().safeParse(input.roleId)
   if (!idValidation.success) {
     return {
       success: false,
@@ -27,7 +30,7 @@ export async function getRoleById(
   const { data, error } = await supabase
     .from("roles")
     .select("id, name, description, permissions, created_at")
-    .eq("id", roleId)
+    .eq("id", input.roleId)
     .single()
 
   if (error) {

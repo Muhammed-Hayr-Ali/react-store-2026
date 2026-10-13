@@ -27,17 +27,19 @@ export function LogoutAlertDialog({
   status,
   onOpenChange,
 }: LogoutAlertDialogProps) {
+  // Track the pending sign-out request and access client navigation.
   const [isLoading, setIsLoading] = React.useState(false)
   const router = useRouter()
 
+  // Sign out, close the dialog, and return to the storefront.
   const handleLogout = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault() // لمنع إغلاق الدايلوج افتراضياً قبل انتهاء الطلب
+    e.preventDefault() // Keep the dialog open until the sign-out request finishes.
     setIsLoading(true)
 
     try {
       const result = await signOut()
       if (result.success) {
-        onOpenChange(false) // إغلاق الدايلوج يدوياً بعد النجاح
+        onOpenChange(false) // Close the dialog after a successful sign-out.
         router.replace(appRoutes.home)
         router.refresh()
       }
@@ -48,6 +50,7 @@ export function LogoutAlertDialog({
     }
   }
 
+  // Render the confirmation dialog and its pending or idle actions.
   return (
     <AlertDialog open={status === "logout"} onOpenChange={onOpenChange}>
       <AlertDialogContent>

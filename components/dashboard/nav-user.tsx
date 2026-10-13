@@ -36,22 +36,24 @@ export function NavUser({
     avatar: string
   }
 }) {
+  // Use responsive menu placement and track the active user dialog.
   const { isMobile } = useSidebar()
 
     const [dialogState, setDialogState] = React.useState< string | null>(null)
 
-  //   // دالة موحدة لإغلاق أي نافذة
+  // Clear the dialog selection when its dialog closes.
     const handleDialogChange = (open: boolean) => {
       if (!open) {
         setDialogState(null)
       }
     }
 
-  //   // دالة مساعدة لفتح النوافذ
+  // Open the requested user dialog.
     const openDialog = (dialogName: string) => {
       setDialogState(dialogName)
     }
 
+  // Render the user menu and its sign-out confirmation dialog.
   return (
     <>
       <SidebarMenu>

@@ -1,6 +1,6 @@
 // lib/actions/authentication/index.ts
 
-// 1. Mutations
+// Mutations
 export { signInWithPassword } from "./mutations/sign-in-with-password"
 export { signInWithGoogle } from "./mutations/sign-in-with-google"
 export { signUpWithPassword } from "./mutations/sign-up-with-password"
@@ -9,7 +9,7 @@ export { requestPasswordReset } from "./mutations/request-password-reset"
 export { confirmPasswordReset } from "./mutations/confirm-password-reset"
 export { handleCallback } from "./mutations/handle-callback"
 
-// 3. Schemas & Types
+// Schemas and types
 export {
   signInWithPasswordSchema,
   signUpWithPasswordSchema,

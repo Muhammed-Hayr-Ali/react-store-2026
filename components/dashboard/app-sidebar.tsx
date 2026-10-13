@@ -18,10 +18,12 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ side, ...props }: AppSidebarProps) {
+  // Read the signed-in user and permissions for the dashboard navigation.
   const { user, permissions } = useUser()
 
   if (!user) return null
 
+  // Compose the sidebar header, navigation, user menu, and collapse rail.
   return (
     <Sidebar collapsible="icon" {...props} side={side}>
       <SidebarHeader>

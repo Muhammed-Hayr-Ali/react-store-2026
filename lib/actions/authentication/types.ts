@@ -11,11 +11,9 @@ import {
   confirmPasswordResetSchema,
   oauthCallbackSchema,
 } from "./schemas"
-import { Json } from "../types/database" // تأكد من صحة مسار الاستيراد لملف database.ts
+import type { Json } from "../types/database"
 
-export type ApiResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string; details?: Record<string, string[]> }
+export type { ApiResult } from "../types/utils"
 
 export type SignInWithPasswordInput = z.infer<typeof signInWithPasswordSchema>
 export type SignUpWithPasswordInput = z.infer<typeof signUpWithPasswordSchema>
@@ -37,7 +35,7 @@ export interface AuthenticatedUser {
   first_name: string | null
   last_name: string | null
   profile_image: string | null
-  // الحقول التالية تأتي من الـ raw_app_meta_data بفضل الـ Trigger الذي أنشأناه
+  // These fields are populated from raw_app_meta_data by the database trigger.
   role?: string
   permissions?: Json
 }

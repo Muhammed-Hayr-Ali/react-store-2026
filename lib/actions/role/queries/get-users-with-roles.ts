@@ -26,7 +26,6 @@ interface UserRoleRow {
 export async function getUsersWithRoles(): Promise<ApiResult<UserWithRoles[]>> {
   const supabase = await createServerClient()
 
-  // 1. جلب الملفات الشخصية
   const { data: profiles, error: profilesError } = await supabase
     .from("profiles")
     .select("id, first_name, last_name, email, profile_image")
@@ -47,7 +46,6 @@ export async function getUsersWithRoles(): Promise<ApiResult<UserWithRoles[]>> {
     }
   }
 
-  // 2. جلب علاقات الأدوار مع تفاصيل كل دور
   const { data: userRolesData, error: rolesError } = await supabase
     .from("user_roles")
     .select(
@@ -71,7 +69,6 @@ export async function getUsersWithRoles(): Promise<ApiResult<UserWithRoles[]>> {
     }
   }
 
-  // 3. تجميع الأدوار بحسب user_id
   const rolesMap = new Map<string, RoleRecord[]>()
   const rawUserRoles = (userRolesData ?? []) as unknown as UserRoleRow[]
 
@@ -82,7 +79,6 @@ export async function getUsersWithRoles(): Promise<ApiResult<UserWithRoles[]>> {
     rolesMap.set(row.user_id, current)
   }
 
-  // 4. دمج الأدوار مع الحسابات الشخصية
   const formattedUsers: UserWithRoles[] = profiles.map((profile) => ({
     id: profile.id,
     first_name: profile.first_name,

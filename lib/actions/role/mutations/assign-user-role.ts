@@ -12,9 +12,8 @@ import { assignUserRoleSchema, AssignUserRoleInput } from "../schemas"
 import { ApiResult } from "@/lib/actions/types/utils"
 
 export async function assignRoleToUser(
-  payload: AssignUserRoleInput
+  input: AssignUserRoleInput
 ): Promise<ApiResult<null>> {
-  // 1. Permission check
   const canAssign = await hasPermission(PERMISSIONS.ASSIGN_ROLE)
   if (!canAssign) {
     return {
@@ -23,8 +22,7 @@ export async function assignRoleToUser(
     }
   }
 
-  // 2. Validate input schema
-  const validation = assignUserRoleSchema.safeParse(payload)
+  const validation = assignUserRoleSchema.safeParse(input)
   if (!validation.success) {
     const fieldErrors: Record<string, string[]> = {}
     for (const issue of validation.error.issues) {
@@ -35,14 +33,13 @@ export async function assignRoleToUser(
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: fieldErrors, // التعديل هنا
+      details: fieldErrors,
     }
   }
 
   const { userId, roleId } = validation.data
   const supabase = await createServerClient()
 
-  // 3. Check for existing assignment
   const { data: existingAssignment } = await supabase
     .from("user_roles")
     .select("id")
@@ -57,7 +54,6 @@ export async function assignRoleToUser(
     }
   }
 
-  // 4. Insert into user_roles
   const { error } = await supabase.from("user_roles").insert({
     user_id: userId,
     role_id: roleId,
@@ -71,7 +67,6 @@ export async function assignRoleToUser(
     }
   }
 
-  // 5. Invalidate global layout cache
   revalidatePath("/", "layout")
 
   return {

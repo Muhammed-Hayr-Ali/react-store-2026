@@ -13,16 +13,14 @@ import { updateUserStatusSchema, UpdateUserStatusFormValues } from "../schemas"
 import { appRoutes } from "@/lib/config/app-routes"
 
 export async function updateUserStatus(
-  payload: UpdateUserStatusFormValues
+  input: UpdateUserStatusFormValues
 ): Promise<ApiResult<null>> {
-  // 1. Permission check
   const canUpdate = await hasPermission(PERMISSIONS.UPDATE_USER)
   if (!canUpdate) {
     return { success: false, error: "PERMISSION_DENIED" }
   }
 
-  // 2. Validate input schema
-  const validation = updateUserStatusSchema.safeParse(payload)
+  const validation = updateUserStatusSchema.safeParse(input)
   if (!validation.success) {
     const fieldErrors: Record<string, string[]> = {}
     for (const issue of validation.error.issues) {
@@ -63,7 +61,7 @@ export async function updateUserStatus(
 
     revalidatePath(appRoutes.dashboard.users)
     return { success: true, data: null }
-  } catch (err) {
+  } catch {
     return { success: false, error: "UNEXPECTED_ERROR" }
   }
 }

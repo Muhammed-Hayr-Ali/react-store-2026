@@ -45,7 +45,7 @@ export default async function Page({ params }: PageProps) {
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
-      {/* الترويسة الموحدة */}
+      {/* Use the shared dashboard page header layout. */}
       <div className="flex items-center gap-3 border-b border-border/40 pb-4">
         <div>
           <div className="flex items-center gap-2">

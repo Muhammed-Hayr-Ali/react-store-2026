@@ -31,6 +31,7 @@ export function OAuthCallbackView({
   const router = useRouter()
   const hasProcessed = React.useRef(false)
 
+  // Exchange the OAuth code once, then redirect based on the result.
   React.useEffect(() => {
     if (hasProcessed.current) return
     hasProcessed.current = true

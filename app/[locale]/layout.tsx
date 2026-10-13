@@ -57,7 +57,10 @@ export default async function RootLayout({
   const direction = locale === "ar" ? "rtl" : "ltr"
 
   // جلب سياق العملة والمستخدم الحالي بالتوازي لتحقيق أسرع استجابة خادمة
-  const currentUser = await getCurrentUser()
+  const currentUserResult = await getCurrentUser()
+  const currentUser = currentUserResult.success
+    ? currentUserResult.data
+    : null
 
   const permissions = currentUser?.permissions || []
 

@@ -48,14 +48,17 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ lastLoginMethod }: LoginFormProps) {
+  // Load translations and resolve the post-login destination.
   const t = useTranslations("LoginForm")
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTarget = searchParams.get("redirect") || appRoutes.home
 
+  // Track password visibility and authentication errors.
   const [showPassword, setShowPassword] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
+  // Configure credential validation and initial form values.
   const form = useForm<SignInWithPasswordInput>({
     resolver: zodResolver(signInWithPasswordSchema),
     defaultValues: {
@@ -68,6 +71,7 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
     formState: { isSubmitting, errors },
   } = form
 
+  // Authenticate the user and display validation or sign-in errors.
   async function onSubmit(data: SignInWithPasswordInput) {
     setErrorMessage(null)
     const result = await signInWithPassword(data)
@@ -100,6 +104,7 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
 
   const isEmailLastUsed = lastLoginMethod === "email"
 
+  // Render credential fields, submit action, and OAuth alternative.
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
       <FieldGroup className="space-y-4">

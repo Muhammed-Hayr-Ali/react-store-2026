@@ -10,10 +10,9 @@ import { confirmPasswordResetSchema } from "../schemas"
 import { ApiResult } from "@/lib/actions/types/utils"
 
 export async function confirmPasswordReset(
-  payload: unknown
+  input: unknown
 ): Promise<ApiResult<null>> {
-  // Step 1: Input Validation
-  const validation = confirmPasswordResetSchema.safeParse(payload)
+  const validation = confirmPasswordResetSchema.safeParse(input)
   if (!validation.success) {
     const fieldErrors: Record<string, string[]> = {}
     for (const issue of validation.error.issues) {
@@ -31,10 +30,8 @@ export async function confirmPasswordReset(
   const { token, password } = validation.data
 
   try {
-    // Step 2: Supabase Admin Client Initialization
     const supabaseAdmin = createAdminClient()
 
-    // Step 3: Verify and consume reset token via RPC
     const { data: userId, error: verifyError } = await supabaseAdmin.rpc(
       "verify_and_use_reset_token",
       { p_token: token }
@@ -48,7 +45,6 @@ export async function confirmPasswordReset(
       }
     }
 
-    // Step 4: Update user credentials
     const { error: updateError } =
       await supabaseAdmin.auth.admin.updateUserById(userId, {
         password,

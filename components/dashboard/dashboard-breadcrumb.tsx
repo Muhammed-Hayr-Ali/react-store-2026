@@ -13,9 +13,10 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 
-// قائمة المسارات أو البوادئ البرمجية المخفية من شريط التنقل
+// Route segments omitted from the dashboard breadcrumb.
 const HIDDEN_SEGMENTS = new Set(["x9k2-panel", "team"])
 
+// Translation keys for known route segments.
 const routeLabelKeys: Record<string, string> = {
   dashboard: "DASHBOARD",
   products: "PRODUCTS",
@@ -32,12 +33,13 @@ const routeLabelKeys: Record<string, string> = {
 }
 
 export default function DashboardBreadcrumb() {
+  // Resolve the current route, locale, and translated labels.
   const t = useTranslations("DashboardBreadcrumb")
   const pathname = usePathname()
   const params = useParams()
   const locale = (params?.locale as string) || "en"
 
-  // تجريد المسار وحساب الروابط التراكمية مع استبعاد المسارات المخفية والمعرّفات (IDs)
+  // Build cumulative breadcrumb links while excluding hidden and ID segments.
   const visibleItems = React.useMemo(() => {
     const rawSegments = pathname
       .split("/")
@@ -47,16 +49,16 @@ export default function DashboardBreadcrumb() {
     const items: { segment: string; href: string }[] = []
 
     rawSegments.forEach((segment, idx) => {
-      // بناء المسار التراكمي الفعلي حتى لا تنكسر الروابط اللاحقة (حتى لو تم إخفاء العنصر)
+      // Preserve the full route path even when a segment is hidden from display.
       const fullHref = `/${locale}/${rawSegments.slice(0, idx + 1).join("/")}`
 
-      // فحص ما إذا كان الجزء الحالي عبارة عن UUID (معرّف قاعدة البيانات)
+      // Detect UUID segments used as database record identifiers.
       const isUUID =
         /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
           segment
         )
 
-      // استبعاد الأجزاء المخفية والمعرّفات
+      // Keep only route segments that should appear in the breadcrumb.
       if (!HIDDEN_SEGMENTS.has(segment) && !isUUID) {
         items.push({
           segment,
@@ -70,6 +72,7 @@ export default function DashboardBreadcrumb() {
 
   if (visibleItems.length === 0) return null
 
+  // Render linked ancestors and the current page label.
   return (
     <Breadcrumb>
       <BreadcrumbList>

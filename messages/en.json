@@ -175,6 +175,18 @@
     "ASSIGNED_LABEL": "assigned",
     "ACTIONS_LABEL": "Actions",
     "EDIT_ROLE": "Edit Role",
+    "DELETE_ROLE": "Delete Role",
+    "DELETE_ROLE_DIALOG_TITLE": "Delete Role",
+    "DELETE_ROLE_DIALOG_DESCRIPTION": "You are about to permanently delete the role",
+    "DELETE_ROLE_DIALOG_WARNING": "This action cannot be undone.",
+    "TYPE_ROLE_NAME_TO_CONFIRM": "Type this role name to confirm:",
+    "CONFIRM_ROLE_NAME_PLACEHOLDER": "Enter role name",
+    "CANCEL_BUTTON": "Cancel",
+    "DELETING_BUTTON": "Deleting...",
+    "CONFIRM_DELETE_BUTTON": "Delete",
+    "ROLE_DELETED_SUCCESS": "Role \"{name}\" deleted successfully.",
+    "ROLE_DELETE_ERROR": "Failed to delete the role.",
+    "ROLE_IN_USE_ERROR": "This role is assigned to users and cannot be deleted.",
     "SEARCH_PLACEHOLDER": "Search roles...",
     "CLEAR_SEARCH": "Clear search",
     "FILTER_BUTTON": "Filter",
@@ -292,7 +304,8 @@
       "update_role": "Update Role",
       "delete_role": "Delete Role",
       "manage_roles": "Manage Roles",
-      "assign_role": "Assign Role"
+      "assign_role": "Assign Role",
+      "remove_role": "Remove Role"
     },
     "PERMISSION_DESCRIPTIONS": {
       "view_user_overview": "Access personal account overview, recent orders, and activity",
@@ -342,7 +355,8 @@
       "update_role": "Modify role titles and assigned permission sets",
       "delete_role": "Delete obsolete system roles",
       "manage_roles": "Full administrative control over roles and permissions",
-      "assign_role": "Bind roles to specific staff users"
+      "assign_role": "Bind roles to specific staff users",
+      "remove_role": "Revoke roles from specific staff users"
     }
   },
   "StaffAccessManagement": {

@@ -24,6 +24,10 @@ export const updateRolePermissionsSchema = z.object({
     .min(1, "At least one permission is required"),
 })
 
+export const deleteRoleSchema = z.object({
+  roleId: z.string().uuid("Invalid role ID format"),
+})
+
 export const assignUserRoleSchema = z.object({
   userId: z.string().uuid("Invalid user ID format"),
   roleId: z.string().uuid("Invalid role ID format"),
@@ -33,5 +37,6 @@ export type CreateRoleInput = z.infer<typeof createRoleSchema>
 export type UpdateRolePermissionsInput = z.infer<
   typeof updateRolePermissionsSchema
 >
+export type DeleteRoleInput = z.infer<typeof deleteRoleSchema>
 export type AssignUserRoleInput = z.infer<typeof assignUserRoleSchema>
   

@@ -12,15 +12,19 @@ import { ApiResult } from "@/lib/actions/types/utils"
 import { hasPermission, PERMISSIONS } from "../../role"
 import { appRoutes } from "@/lib/config/app-routes"
 
-export async function deleteUser(userId: string): Promise<ApiResult<null>> {
-  // 1. Permission check
+interface DeleteUserInput {
+  userId: string
+}
+
+export async function deleteUser(
+  input: DeleteUserInput
+): Promise<ApiResult<null>> {
   const canDelete = await hasPermission(PERMISSIONS.DELETE_USER)
   if (!canDelete) {
     return { success: false, error: "PERMISSION_DENIED" }
   }
 
-  // 2. Validate input schema
-  const idValidation = z.string().uuid().safeParse(userId)
+  const idValidation = z.string().uuid().safeParse(input.userId)
   if (!idValidation.success) {
     return { success: false, error: "INVALID_USER_ID" }
   }
@@ -28,8 +32,9 @@ export async function deleteUser(userId: string): Promise<ApiResult<null>> {
   try {
     const supabase = await createAdminClient()
 
-    // 3. Delete from auth (Admin API)
-    const { error: authError } = await supabase.auth.admin.deleteUser(userId)
+    const { error: authError } = await supabase.auth.admin.deleteUser(
+      input.userId
+    )
     if (authError) {
       return {
         success: false,
@@ -38,11 +43,11 @@ export async function deleteUser(userId: string): Promise<ApiResult<null>> {
       }
     }
 
-    // 4. Delete profile (Cascade should handle this usually, but good for safety)
+    // Explicitly delete the profile as a safeguard if cascade cleanup fails.
     const { error: profileError } = await supabase
       .from("profiles")
       .delete()
-      .eq("id", userId)
+      .eq("id", input.userId)
 
     if (profileError) {
       console.error("Error deleting user profile:", profileError.message)
@@ -50,7 +55,7 @@ export async function deleteUser(userId: string): Promise<ApiResult<null>> {
 
     revalidatePath(appRoutes.dashboard.users)
     return { success: true, data: null }
-  } catch (err) {
+  } catch {
     return { success: false, error: "UNEXPECTED_ERROR" }
   }
 }

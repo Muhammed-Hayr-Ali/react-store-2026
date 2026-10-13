@@ -34,8 +34,8 @@ export default async function SignUpPage({ params }: SignUpPageProps) {
   await params
 
   // Zero-Trust Session Check: Redirect active authenticated users
-  const user = await getCurrentUser()
-  if (user) {
+  const userResult = await getCurrentUser()
+  if (userResult.success && userResult.data) {
     redirect(appRoutes.home)
   }
 

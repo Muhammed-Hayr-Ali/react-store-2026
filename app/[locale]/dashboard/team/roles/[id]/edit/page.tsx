@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import CreateRoleForm from "@/components/dashboard/roles/role-form"
+import { RoleForm } from "@/components/dashboard/roles/role-form"
 import { RoleRecord } from "@/lib/actions/role/mutations/create-role"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { getRoleById } from "@/lib/actions/role/queries/get-role-by-id"
@@ -39,7 +39,7 @@ export default async function EditRolePage({ params }: EditRolePageProps) {
     notFound()
   }
 
-  const res = await getRoleById(id)
+  const res = await getRoleById({ roleId: id })
 
   if (!res.success || !res.data) {
     console.error("Failed to fetch role by id:", res)
@@ -49,7 +49,7 @@ export default async function EditRolePage({ params }: EditRolePageProps) {
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
-      {/* الترويسة الموحدة مطابقة لصفحة الإنشاء */}
+      {/* Keep the edit page header consistent with the create page. */}
       <div className="flex items-center gap-3 border-b border-border/40 pb-4">
         <div>
           <div className="flex items-center gap-2">
@@ -67,7 +67,7 @@ export default async function EditRolePage({ params }: EditRolePageProps) {
         </div>
       </div>
 
-      <CreateRoleForm initialData={role as RoleRecord} roleId={role.id} />
+      <RoleForm initialData={role as RoleRecord} roleId={role.id} />
     </div>
   )
 }

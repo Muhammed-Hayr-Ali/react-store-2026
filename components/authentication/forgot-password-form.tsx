@@ -33,11 +33,14 @@ import { appRoutes } from "@/lib/config/app-routes"
 
 export function ForgotPasswordForm() {
   const t = useTranslations("ForgotPasswordForm")
+
+  // Track the request outcome and any server-side error.
   const [submittedEmail, setSubmittedEmail] = React.useState<string | null>(
     null
   )
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
+  // Configure email validation and the form's initial values.
   const form = useForm<RequestPasswordResetInput>({
     resolver: zodResolver(requestPasswordResetSchema),
     defaultValues: {
@@ -49,6 +52,7 @@ export function ForgotPasswordForm() {
     formState: { isSubmitting },
   } = form
 
+  // Send the reset request and map returned errors to the form.
   async function onSubmit(data: RequestPasswordResetInput) {
     setErrorMessage(null)
     const result = await requestPasswordReset(data)
@@ -70,6 +74,7 @@ export function ForgotPasswordForm() {
     setErrorMessage(result.error || t("GENERIC_ERROR"))
   }
 
+  // Show delivery confirmation after a successful reset request.
   if (submittedEmail) {
     return (
       <ResetPasswordSuccess
@@ -82,6 +87,7 @@ export function ForgotPasswordForm() {
     )
   }
 
+  // Render the email input, server-error alert, and submit action.
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
       <FieldGroup className="space-y-4">

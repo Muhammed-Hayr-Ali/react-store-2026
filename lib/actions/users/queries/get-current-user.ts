@@ -7,6 +7,7 @@
 
 import { cache } from "react"
 import { createServerClient } from "@/lib/database/supabase/server"
+import type { ApiResult } from "@/lib/actions/types/utils"
 
 export type CurrentUser = {
   id: string
@@ -23,23 +24,36 @@ export type CurrentUser = {
   permissions: string[]
 }
 
-/**
- * جلب ملخص المستخدم الحالي مع دور منفرد وصلاحيات مسطحة بطلب خادم واحد
- */
+/** Retrieves the current user's profile, role, and permissions. */
 export const getCurrentUser = cache(
-  async (): Promise<CurrentUser | null> => {
+  async (): Promise<ApiResult<CurrentUser | null>> => {
     try {
       const supabase = await createServerClient()
 
       const { data, error } = await supabase.rpc("get_current_user")
 
-      if (error || !data) {
-        return null
+      if (error) {
+        console.error("Error fetching current user:", error.message)
+        return {
+          success: false,
+          error: "GET_CURRENT_USER_ERROR",
+          details: { database: [error.message] },
+        }
       }
 
-      return data as CurrentUser
-    } catch {
-      return null
+      return {
+        success: true,
+        data: data ? (data as CurrentUser) : null,
+      }
+    } catch (error) {
+      console.error("Unexpected error fetching current user:", error)
+      return {
+        success: false,
+        error: "UNEXPECTED_ERROR",
+        details: {
+          system: [error instanceof Error ? error.message : "Unknown error"],
+        },
+      }
     }
   }
 )

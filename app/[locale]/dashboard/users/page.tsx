@@ -6,7 +6,7 @@ import { UsersIcon } from "lucide-react"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getAdminUsersList } from "@/lib/actions/users"
-import { DataTable } from "@/components/dashboard/users/users-table"
+import { UsersTable } from "@/components/dashboard/users/users-table"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 
 interface PageProps {
@@ -63,7 +63,7 @@ export default async function Page({ params }: PageProps) {
         </div>
       </div>
 
-      <DataTable data={users} initialIsMobile={isMobile} />
+      <UsersTable data={users} initialIsMobile={isMobile} />
     </div>
   )
 }

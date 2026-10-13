@@ -12,10 +12,9 @@ import { signInWithPasswordSchema } from "../schemas"
 import { ApiResult } from "@/lib/actions/types/utils"
 
 export async function signInWithPassword(
-  payload: unknown
+  input: unknown
 ): Promise<ApiResult<null>> {
-  // Step 1: Input Validation
-  const validation = signInWithPasswordSchema.safeParse(payload)
+  const validation = signInWithPasswordSchema.safeParse(input)
   if (!validation.success) {
     const fieldErrors: Record<string, string[]> = {}
     for (const issue of validation.error.issues) {
@@ -32,10 +31,8 @@ export async function signInWithPassword(
 
   const { email, password } = validation.data
 
-  // Step 2: Client Initialization
   const supabase = await createServerClient()
 
-  // Step 3: Auth Execution
   const { error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -56,7 +53,6 @@ export async function signInWithPassword(
     }
   }
 
-  // Step 4: Cookie Tracking
   const cookieStore = await cookies()
   cookieStore.set("login_method", "email", {
     path: "/",
@@ -65,7 +61,6 @@ export async function signInWithPassword(
     secure: process.env.NODE_ENV === "production",
   })
 
-  // Step 5: Global Layout Invalidation
   revalidatePath("/", "layout")
 
   return { success: true, data: null }

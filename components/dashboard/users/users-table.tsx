@@ -9,6 +9,8 @@
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
+
+// Table configuration, types, and rendering utilities.
 import {
   ColumnDef,
   flexRender,
@@ -21,6 +23,8 @@ import {
   type SortingState,
   type VisibilityState,
 } from "@tanstack/react-table"
+
+// Icons and notifications used by the table.
 import {
   CircleCheckIcon,
   CircleAlertIcon,
@@ -43,6 +47,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
+// Shared UI components.
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -75,13 +80,17 @@ import { Can } from "@/components/shared/can"
 import { PERMISSIONS } from "@/lib/actions/role"
 import { useIsMobile } from "@/hooks/use-mobile"
 
+// User types and account management dialogs.
 import type { AdminUserSummary, UserStatus } from "@/lib/actions/users/types"
 import { UserStatusDialog } from "./user-status-dialog"
 import { DeleteUserDialog } from "./delete-user-dialog"
-import { UserFormSheet } from "./user-form-sheet"
+import { CreateUserSheet } from "./create-user-sheet"
+import { EditUserDialog } from "./edit-user-dialog"
 
+// Columns that can be hidden from the table settings.
 const HIDEABLE_COLUMNS = ["phone_number", "roles", "status", "created_at"]
 
+// Initial data and options accepted by the table.
 interface UsersTableProps {
   data: AdminUserSummary[]
   initialIsMobile?: boolean
@@ -91,17 +100,21 @@ export function UsersTable({
   data: initialData,
   initialIsMobile = false,
 }: UsersTableProps) {
+  // Translations and mobile viewport state.
   const t = useTranslations("UsersManagement")
   const isMobile = useIsMobile()
 
+  // User data, search query, and selected status tab.
   const [data, setData] = React.useState<AdminUserSummary[]>(() => initialData)
   const [currentTab, setCurrentTab] = React.useState<"all" | UserStatus>("all")
   const [searchQuery, setSearchQuery] = React.useState("")
 
+  // Sync local data when updated data arrives from the parent.
   React.useEffect(() => {
     setData(initialData)
   }, [initialData])
 
+  // Filter users by status and search query.
   const filteredData = React.useMemo(() => {
     return data.filter((item) => {
       const matchesTab = currentTab === "all" || item.status === currentTab
@@ -125,6 +138,7 @@ export function UsersTable({
     })
   }, [data, currentTab, searchQuery])
 
+  // Count active and banned users for the filter badges.
   const activeCount = React.useMemo(
     () => data.filter((item) => item.status === "active").length,
     [data]
@@ -134,6 +148,7 @@ export function UsersTable({
     [data]
   )
 
+  // Column visibility, sorting, filtering, and pagination state.
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(() => {
       const initial: VisibilityState = {}
@@ -152,6 +167,7 @@ export function UsersTable({
     pageSize: initialIsMobile ? 20 : 10,
   })
 
+  // Adjust visible columns and page size when the viewport changes.
   React.useEffect(() => {
     setColumnVisibility((prev) => {
       const nextVisibility: VisibilityState = { ...prev }
@@ -168,6 +184,7 @@ export function UsersTable({
     }))
   }, [isMobile])
 
+  // Define columns, cell content, and user management actions.
   const columns = React.useMemo<ColumnDef<AdminUserSummary>[]>(
     () => [
       // 1. First Column: User Identity (Pinned Visible)
@@ -228,15 +245,18 @@ export function UsersTable({
                 <Badge
                   key={r}
                   variant="secondary"
-                  className="px-1.5 py-0.5 text-[10px] font-semibold uppercase"
+                  className="truncate px-1.5 py-0.5 font-mono text-[11px] leading-tight text-muted-foreground uppercase"
                 >
                   {r}
                 </Badge>
               ))
             ) : (
-              <span className="text-xs text-muted-foreground">
+              <Badge
+                variant="secondary"
+                className="truncate px-1.5 py-0.5 font-mono text-[11px] leading-tight text-muted-foreground uppercase"
+              >
                 {t("NO_ROLES")}
-              </span>
+              </Badge>
             )}
           </div>
         ),
@@ -253,7 +273,7 @@ export function UsersTable({
             <div className="flex justify-center">
               <Badge
                 variant="outline"
-                className={`gap-1 px-2 py-0.5 text-xs ${
+                className={`uppercase" gap-1 truncate px-1.5 py-0.5 font-mono text-[11px] leading-tight ${
                   status === "active"
                     ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                     : status === "suspended"
@@ -339,7 +359,7 @@ export function UsersTable({
                   </DropdownMenuItem>
 
                   <Can permission={PERMISSIONS.UPDATE_USER}>
-                    <UserFormSheet
+                    <EditUserDialog
                       user={row.original}
                       onSuccess={(updatedUser) => {
                         setData((prev) =>
@@ -356,7 +376,7 @@ export function UsersTable({
                         <PencilIcon className="me-2 size-3.5" />
                         {t("EDIT_USER_ACTION")}
                       </DropdownMenuItem>
-                    </UserFormSheet>
+                    </EditUserDialog>
                   </Can>
 
                   <Can permission={PERMISSIONS.UPDATE_USER}>
@@ -416,6 +436,7 @@ export function UsersTable({
     [t]
   )
 
+  // Create the table instance and connect it to state and handlers.
   const table = useReactTable({
     data: filteredData,
     columns,
@@ -431,6 +452,7 @@ export function UsersTable({
     getPaginationRowModel: getPaginationRowModel(),
   })
 
+  // Column labels shown in the visibility menu.
   const columnLabelsMap: Record<string, string> = {
     user: t("COLUMN_USER"),
     phone_number: t("COLUMN_PHONE"),
@@ -439,9 +461,10 @@ export function UsersTable({
     created_at: t("COLUMN_JOINED"),
   }
 
+  // Render search, filters, column settings, and user creation controls.
   return (
     <div className="flex w-full flex-col justify-start gap-4">
-      {/* Interactive Toolbar */}
+      {/* Search, filtering, column settings, and user creation controls */}
       <div className="flex w-full items-center gap-2">
         <div className="relative min-w-0 flex-1">
           <SearchIcon className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -470,7 +493,7 @@ export function UsersTable({
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          {/* Mobile Filter Tabs */}
+          {/* Filter menu on small screens */}
           <div className="block sm:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -525,7 +548,7 @@ export function UsersTable({
             </DropdownMenu>
           </div>
 
-          {/* Desktop Filter Pills */}
+          {/* Filter buttons on larger screens */}
           <div className="hidden h-8 items-center overflow-hidden rounded-md border border-input bg-background p-0.5 sm:inline-flex">
             <button
               type="button"
@@ -591,7 +614,7 @@ export function UsersTable({
             </button>
           </div>
 
-          {/* Column Visibility Dropdown */}
+          {/* Column visibility menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -625,9 +648,9 @@ export function UsersTable({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Dual Responsive Create User CTA */}
+          {/* Responsive user creation buttons */}
           <Can permission={PERMISSIONS.CREATE_USER}>
-            <UserFormSheet
+            <CreateUserSheet
               onSuccess={(newUser) => {
                 setData((prev) => [newUser, ...prev])
               }}
@@ -641,9 +664,9 @@ export function UsersTable({
                 <PlusIcon className="size-3.5" />
                 <span className="sr-only">{t("CREATE_USER_BUTTON")}</span>
               </Button>
-            </UserFormSheet>
+            </CreateUserSheet>
 
-            <UserFormSheet
+            <CreateUserSheet
               onSuccess={(newUser) => {
                 setData((prev) => [newUser, ...prev])
               }}
@@ -656,12 +679,12 @@ export function UsersTable({
                 <PlusIcon className="size-3.5" />
                 <span>{t("CREATE_USER_BUTTON")}</span>
               </Button>
-            </UserFormSheet>
+            </CreateUserSheet>
           </Can>
         </div>
       </div>
 
-      {/* Table Shell */}
+      {/* Table structure, column headers, and user rows */}
       <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">
         <div className="overflow-x-auto">
           <Table className="w-full">
@@ -717,10 +740,10 @@ export function UsersTable({
         </div>
       </div>
 
-      {/* Standard Pagination Footer - يظهر فقط إذا كان عدد البيانات أكبر من 10 */}
+      {/* Pagination controls, shown when there are more than ten results */}
       {table.getFilteredRowModel().rows.length > 10 && (
         <div className="flex w-full flex-row flex-wrap items-center justify-between gap-3 px-1 py-1 sm:flex-nowrap">
-          {/* Rows per page & Counter */}
+          {/* Page size selector and page counter */}
           <div className="flex flex-1 items-center gap-2 text-[11px] text-muted-foreground sm:text-xs">
             <Label
               htmlFor="rows-per-page"
@@ -734,7 +757,7 @@ export function UsersTable({
             >
               <SelectTrigger
                 size="sm"
-                className="h-7 w-[60px] px-2 text-xs sm:h-8 sm:w-18"
+                className="h-7 w-15 px-2 text-xs sm:h-8 sm:w-18"
                 id="rows-per-page"
               >
                 <SelectValue
@@ -763,7 +786,7 @@ export function UsersTable({
             </span>
           </div>
 
-          {/* Navigation Buttons */}
+          {/* Page navigation buttons */}
           <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
             <Button
               variant="outline"
@@ -814,5 +837,4 @@ export function UsersTable({
   )
 }
 
-export { UsersTable as DataTable }
 export default UsersTable

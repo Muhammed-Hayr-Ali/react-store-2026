@@ -35,20 +35,22 @@ import type { RoleRecord } from "@/lib/actions/role/mutations/create-role"
 import { appRoutes } from "@/lib/config/app-routes"
 import { PERMISSION_GROUPS } from "@/lib/actions/role/permission-groups"
 
-interface CreateRoleFormProps {
+interface RoleFormProps {
   initialData?: RoleRecord | null
   roleId?: string | number
 }
 
-export default function CreateRoleForm({
+export function RoleForm({
   initialData,
   roleId,
-}: CreateRoleFormProps) {
+}: RoleFormProps) {
+  // Resolve form translations and navigation after saving a role.
   const t = useTranslations("RolesManagement")
   const router = useRouter()
 
   const isEditing = Boolean(roleId || initialData)
 
+  // Track submission state, server errors, role details, and selected permissions.
   const [isPending, startTransition] = React.useTransition()
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
@@ -64,6 +66,7 @@ export default function CreateRoleForm({
     return PERMISSION_GROUPS.reduce((acc, g) => acc + g.permissions.length, 0)
   }, [])
 
+  // Update an individual permission or toggle every permission in a group.
   const togglePermission = (perm: AppPermission) => {
     setSelectedPermissions((prev) =>
       prev.includes(perm) ? prev.filter((p) => p !== perm) : [...prev, perm]
@@ -96,6 +99,7 @@ export default function CreateRoleForm({
     setSelectedPermissions([])
   }
 
+  // Validate and save the role, then report the result to the user.
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setErrorMessage(null)
@@ -153,6 +157,7 @@ export default function CreateRoleForm({
     })
   }
 
+  // Render the permission matrix, role details, coverage, and form actions.
   return (
     <form noValidate onSubmit={handleSubmit} className="space-y-6">
       {errorMessage && (
@@ -254,9 +259,8 @@ export default function CreateRoleForm({
                       {group.permissions.map((perm) => {
                         const isChecked = selectedPermissions.includes(perm.key)
                         return (
-                          <div
+                          <label
                             key={perm.key}
-                            onClick={() => togglePermission(perm.key)}
                             className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-2.5 transition-colors ${
                               isChecked
                                 ? "border-primary/40 bg-primary/5"
@@ -266,7 +270,7 @@ export default function CreateRoleForm({
                             <input
                               type="checkbox"
                               checked={isChecked}
-                              onChange={() => {}}
+                              onChange={() => togglePermission(perm.key)}
                               className="mt-0.5 rounded border-muted-foreground/30 accent-primary"
                             />
                             <div className="space-y-0.5">
@@ -277,7 +281,7 @@ export default function CreateRoleForm({
                                 {t(`PERMISSION_DESCRIPTIONS.${perm.key}`)}
                               </p>
                             </div>
-                          </div>
+                          </label>
                         )
                       })}
                     </div>
@@ -418,3 +422,5 @@ export default function CreateRoleForm({
     </form>
   )
 }
+
+export default RoleForm

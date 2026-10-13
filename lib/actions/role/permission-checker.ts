@@ -1,3 +1,8 @@
+/**
+ * @file lib/actions/role/permission-checker.ts
+ * @description Checks whether the current user has any requested permission.
+ */
+
 "use server"
 
 import { cache } from "react"
@@ -26,5 +31,3 @@ export const hasPermission = cache(
     return results.some(Boolean)
   }
 )
-
-

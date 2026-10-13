@@ -7,7 +7,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useUser } from "@/lib/context/user-context"
 import { cn } from "@/lib/utils"
 
-
 interface UserProfileHeaderProps {
   className?: string
   showAvatar?: boolean
@@ -37,15 +36,15 @@ export function UserProfileHeader({
         {showAvatar && (
           <Avatar className="size-10 shrink-0 border-0 shadow-none ring-0">
             <AvatarImage src={user.avatar} alt={user.name} />
-            <AvatarFallback className="bg-muted p-2">
-              <UserIcon className="size-full text-muted-foreground" />
+            <AvatarFallback className="text-[10px]">
+              {user.name.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
         )}
 
         <div className="flex min-w-0 flex-col justify-center">
           <p
-            className="w-full truncate text-xs font-semibold leading-tight text-foreground"
+            className="w-full truncate text-xs leading-tight font-semibold text-foreground"
             title={user.name}
           >
             {user.name}
@@ -59,8 +58,6 @@ export function UserProfileHeader({
           </p>
         </div>
       </div>
-
-    
     </div>
   )
 }

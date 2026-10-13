@@ -35,8 +35,8 @@ export default async function ForgotPasswordPage({
   await params
 
   // Zero-Trust Session Check: Redirect active authenticated users
-  const user = await getCurrentUser()
-  if (user) {
+  const userResult = await getCurrentUser()
+  if (userResult.success && userResult.data) {
     redirect(appRoutes.home)
   }
 

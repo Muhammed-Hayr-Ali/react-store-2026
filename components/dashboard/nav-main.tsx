@@ -29,21 +29,25 @@ interface NavMainProps {
 }
 
 export function NavMain({ permissions = [] }: NavMainProps) {
+  // Resolve the current route, responsive sidebar state, and labels.
   const t = useTranslations("DashboardSidebar")
   const pathname = usePathname()
   const { isMobile, setOpenMobile } = useSidebar()
 
+  // Close the mobile sidebar after selecting a navigation link.
   const handleLinkClick = () => {
     if (isMobile) {
       setOpenMobile(false)
     }
   }
 
+  // Check whether the current user can view a navigation entry.
   const hasPermission = (requiredPerm?: string) => {
     if (!requiredPerm) return true
     return permissions.includes(requiredPerm)
   }
 
+  // Filter navigation entries and nested links by permission.
   const filteredItems = sidebarConfig.navMain
     .filter((item) => hasPermission(item.requiredPermission))
     .map((item) => {
@@ -59,12 +63,14 @@ export function NavMain({ permissions = [] }: NavMainProps) {
     })
     .filter((item) => !item.items || item.items.length > 0)
 
+  // Remove the locale segment before comparing routes for active states.
   const segments = pathname.split("/").filter(Boolean)
   const hasLocale = segments.length > 0 && segments[0].length === 2
   const normalizedPath = hasLocale
     ? `/${segments.slice(1).join("/")}`
     : pathname
 
+  // Render permission-aware links and expandable navigation groups.
   return (
     <SidebarGroup>
       <SidebarMenu>
@@ -143,7 +149,7 @@ export function NavMain({ permissions = [] }: NavMainProps) {
                 )}
               </Collapsible>
 
-              {/* لن يظهر الخط الفاصل أبداً إذا كان العنصر في نهاية القائمة */}
+              {/* Show separators only when another navigation item follows. */}
               {item.hasSeparator && !isLastItem && (
                 <div className="my-2 h-px bg-border" />
               )}

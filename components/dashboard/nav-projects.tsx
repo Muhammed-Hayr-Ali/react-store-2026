@@ -34,8 +34,10 @@ export function NavProjects({
     icon: LucideIcon
   }[]
 }) {
+  // Choose dropdown placement based on the sidebar's responsive state.
   const { isMobile } = useSidebar()
 
+  // Render project links with a contextual action menu.
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Projects</SidebarGroupLabel>

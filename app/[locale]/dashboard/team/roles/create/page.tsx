@@ -2,7 +2,7 @@ import { ShieldCheckIcon } from "lucide-react"
 
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import CreateRoleForm from "@/components/dashboard/roles/role-form"
+import { RoleForm } from "@/components/dashboard/roles/role-form"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { notFound } from "next/navigation"
 import { getTranslations } from "next-intl/server"
@@ -50,7 +50,7 @@ export default async function Page({ params }: PageProps) {
         </div>
       </div>
 
-      <CreateRoleForm />
+      <RoleForm />
     </div>
   )
 }

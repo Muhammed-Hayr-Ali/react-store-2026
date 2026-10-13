@@ -3,7 +3,7 @@
 /**
  * @file components/dashboard/staff-access/staff-access-table.tsx
  * @description Standard TanStack Table v8 implementation for staff authorization & RBAC access.
- * Fully compliant with React 19, strict VisibilityState, uncontrolled role assignment sheets,
+ * Fully compliant with React 19, strict VisibilityState, role assignment dialogs,
  * mobile column isolation, RTL-first layout, and permission gating via <Can />.
  */
 
@@ -24,12 +24,10 @@ import {
 } from "@tanstack/react-table"
 import {
   UserCheckIcon,
-  ShieldPlusIcon,
   XIcon,
   ShieldIcon,
   SearchIcon,
   Columns3Icon,
-  MoreHorizontalIcon,
   ChevronsLeftIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -68,7 +66,7 @@ import { Can } from "@/components/shared/can"
 import { PERMISSIONS } from "@/lib/actions/role"
 import { useIsMobile } from "@/hooks/use-mobile"
 
-import AssignRoleSheet from "./assign-role-sheet"
+import AssignRoleDialog from "./assign-role-dialog"
 import type { UserWithRoles } from "@/lib/actions/role/queries/get-users-with-roles"
 import type { RoleRecord } from "@/lib/actions/role/mutations/create-role"
 import { removeRoleFromUser } from "@/lib/actions/role/mutations/remove-user-role"
@@ -86,9 +84,11 @@ export function StaffAccessTable({
   availableRoles,
   initialIsMobile = false,
 }: StaffAccessTableProps) {
+  // Resolve translations and responsive table layout.
   const t = useTranslations("StaffAccessManagement")
   const isMobile = useIsMobile()
 
+  // Track staff records, filters, search text, and role revocation requests.
   const [users, setUsers] = React.useState<UserWithRoles[]>(() => initialUsers)
   const [currentTab, setCurrentTab] = React.useState<
     "all" | "assigned" | "unassigned"
@@ -98,45 +98,47 @@ export function StaffAccessTable({
     {}
   )
 
+  // Sync local staff rows when the parent supplies updated data.
   React.useEffect(() => {
     setUsers(initialUsers)
   }, [initialUsers])
 
-  const handleRevokeRole = async (
-    userId: string,
-    roleId: string,
-    roleName: string
-  ) => {
-    const key = `${userId}-${roleId}`
-    setRevokingMap((prev) => ({ ...prev, [key]: true }))
+  // Remove a role from a user and update the local row after success.
+  const handleRevokeRole = React.useCallback(
+    async (userId: string, roleId: string, roleName: string) => {
+      const key = `${userId}-${roleId}`
+      setRevokingMap((prev) => ({ ...prev, [key]: true }))
 
-    try {
-      const res = await removeRoleFromUser({ userId, roleId })
-      if (res.success) {
-        toast.success(t("ROLE_REVOKED_SUCCESS", { role: roleName }))
-        setUsers((prev) =>
-          prev.map((u) => {
-            if (u.id !== userId) return u
-            return {
-              ...u,
-              roles: u.roles.filter((r) => r.id !== roleId),
-            }
-          })
-        )
-      } else {
-        toast.error(res.error || t("FAILED_TO_REMOVE_ROLE"))
+      try {
+        const res = await removeRoleFromUser({ userId, roleId })
+        if (res.success) {
+          toast.success(t("ROLE_REVOKED_SUCCESS", { role: roleName }))
+          setUsers((prev) =>
+            prev.map((u) => {
+              if (u.id !== userId) return u
+              return {
+                ...u,
+                roles: u.roles.filter((r) => r.id !== roleId),
+              }
+            })
+          )
+        } else {
+          toast.error(res.error || t("FAILED_TO_REMOVE_ROLE"))
+        }
+      } catch {
+        toast.error(t("UNEXPECTED_REVOKE_ERROR"))
+      } finally {
+        setRevokingMap((prev) => {
+          const next = { ...prev }
+          delete next[key]
+          return next
+        })
       }
-    } catch {
-      toast.error(t("UNEXPECTED_REVOKE_ERROR"))
-    } finally {
-      setRevokingMap((prev) => {
-        const next = { ...prev }
-        delete next[key]
-        return next
-      })
-    }
-  }
+    },
+    [t]
+  )
 
+  // Filter staff by role assignment status and search text.
   const filteredUsers = React.useMemo(() => {
     return users.filter((user) => {
       const rolesCount = user.roles.length
@@ -158,6 +160,7 @@ export function StaffAccessTable({
     })
   }, [users, currentTab, searchQuery])
 
+  // Count staff with and without assigned roles.
   const assignedCount = React.useMemo(
     () => users.filter((u) => u.roles.length > 0).length,
     [users]
@@ -167,6 +170,7 @@ export function StaffAccessTable({
     [users]
   )
 
+  // Track column visibility, filtering, sorting, and pagination.
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(() => {
       const initial: VisibilityState = {}
@@ -185,6 +189,7 @@ export function StaffAccessTable({
     pageSize: initialIsMobile ? 20 : 10,
   })
 
+  // Update visible columns and page size when the viewport changes.
   React.useEffect(() => {
     setColumnVisibility((prev) => {
       const nextVisibility: VisibilityState = { ...prev }
@@ -201,6 +206,7 @@ export function StaffAccessTable({
     }))
   }, [isMobile])
 
+  // Define staff identity, role badges, and assignment actions.
   const columns = React.useMemo<ColumnDef<UserWithRoles>[]>(
     () => [
       // 1. First Column: User Identifier (Pinned Visible)
@@ -255,11 +261,11 @@ export function StaffAccessTable({
                     <Badge
                       key={role.id}
                       variant="secondary"
-                      className="gap-1 py-0.5 ps-2 pe-1 text-[11px] font-semibold uppercase"
+                      className="gap-1 py-0.5 ps-2 pe-1 font-mono text-[11px] leading-tight text-muted-foreground uppercase"
                     >
                       <ShieldIcon className="size-3 text-primary opacity-70" />
                       <span>{role.name}</span>
-                      <Can permission={PERMISSIONS.ASSIGN_ROLE}>
+                      <Can permission={PERMISSIONS.REMOVE_ROLE}>
                         <button
                           type="button"
                           disabled={isRevoking}
@@ -280,9 +286,12 @@ export function StaffAccessTable({
                   )
                 })
               ) : (
-                <span className="text-[11px] text-muted-foreground italic">
-                  {t("NO_ROLES_ASSIGNED")}
-                </span>
+                <Badge
+                  variant="secondary"
+                  className="gap-1 py-0.5 ps-2 pe-1 font-mono text-[11px] leading-tight text-muted-foreground uppercase"
+                >
+                  <span>{t("NO_ROLES_ASSIGNED")}</span>
+                </Badge>
               )}
             </div>
           )
@@ -293,54 +302,28 @@ export function StaffAccessTable({
         id: "actions",
         enableHiding: false,
         cell: ({ row }) => (
-          <div className="flex items-center justify-end">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="flex size-7 text-muted-foreground data-[state=open]:bg-muted"
-                >
-                  <MoreHorizontalIcon className="size-4" />
-                  <span className="sr-only">{t("ACTIONS_LABEL")}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40 text-xs">
-                <Can permission={PERMISSIONS.ASSIGN_ROLE}>
-                  {/* Uncontrolled AssignRoleSheet Trigger with Radix Dropdown Safe Unmounting */}
-                  <AssignRoleSheet
-                    user={row.original}
-                    availableRoles={availableRoles}
-                    onSuccess={(userId, assignedRole) => {
-                      setUsers((prev) =>
-                        prev.map((u) => {
-                          if (u.id !== userId) return u
-                          return {
-                            ...u,
-                            roles: [...u.roles, assignedRole],
-                          }
-                        })
-                      )
-                    }}
-                  >
-                    <DropdownMenuItem
-                      onSelect={(e) => e.preventDefault()}
-                      className="cursor-pointer gap-2"
-                    >
-                      <ShieldPlusIcon className="size-3.5 text-primary" />
-                      <span>{t("ASSIGN_ROLE_BUTTON")}</span>
-                    </DropdownMenuItem>
-                  </AssignRoleSheet>
-                </Can>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          <AssignRoleDialog
+            user={row.original}
+            availableRoles={availableRoles}
+            onSuccess={(userId, assignedRole) => {
+              setUsers((prev) =>
+                prev.map((u) => {
+                  if (u.id !== userId) return u
+                  return {
+                    ...u,
+                    roles: [...u.roles, assignedRole],
+                  }
+                })
+              )
+            }}
+          />
         ),
       },
     ],
-    [t, revokingMap, availableRoles]
+    [t, revokingMap, availableRoles, handleRevokeRole]
   )
 
+  // Create the table instance and connect its controlled state.
   const table = useReactTable({
     data: filteredUsers,
     columns,
@@ -361,11 +344,13 @@ export function StaffAccessTable({
     getPaginationRowModel: getPaginationRowModel(),
   })
 
+  // Map table column IDs to translated labels.
   const columnLabelsMap: Record<string, string> = {
     user: t("COLUMN_USER"),
     roles: t("COLUMN_ROLES"),
   }
 
+  // Render staff filters, the access table, and pagination controls.
   return (
     <div className="flex w-full flex-col justify-start gap-4">
       {/* Interactive Toolbar */}

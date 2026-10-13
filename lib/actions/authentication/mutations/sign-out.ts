@@ -12,10 +12,8 @@ import { ApiResult } from "@/lib/actions/types/utils"
 
 export async function signOut(): Promise<ApiResult<null>> {
   try {
-    // Step 1: Client Initialization
     const supabase = await createServerClient()
 
-    // Step 2: Auth Signout Execution
     const { error } = await supabase.auth.signOut()
 
     if (error) {
@@ -26,11 +24,9 @@ export async function signOut(): Promise<ApiResult<null>> {
       }
     }
 
-    // Step 3: Cookie Cleanup
     const cookieStore = await cookies()
     cookieStore.delete("login_method")
 
-    // Step 4: Cache & Tree Revalidation
     revalidatePath("/", "layout")
 
     return { success: true, data: null }

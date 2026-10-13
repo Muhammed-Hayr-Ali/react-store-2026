@@ -329,6 +329,11 @@ export const PERMISSION_GROUPS = [
         label: "Assign Role",
         description: "Bind roles to specific staff users",
       },
+      {
+        key: PERMISSIONS.REMOVE_ROLE,
+        label: "Remove Role",
+        description: "Revoke roles from specific staff users",
+      },
     ],
   },
 ] as const satisfies PermissionGroup[]

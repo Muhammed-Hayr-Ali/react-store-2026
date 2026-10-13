@@ -13,16 +13,14 @@ import { updateUserSchema, UpdateUserFormValues } from "../schemas"
 import { appRoutes } from "@/lib/config/app-routes"
 
 export async function updateUser(
-  payload: UpdateUserFormValues
+  input: UpdateUserFormValues
 ): Promise<ApiResult<null>> {
-  // 1. Permission check
   const canUpdate = await hasPermission(PERMISSIONS.UPDATE_USER)
   if (!canUpdate) {
     return { success: false, error: "PERMISSION_DENIED" }
   }
 
-  // 2. Validate input schema
-  const validation = updateUserSchema.safeParse(payload)
+  const validation = updateUserSchema.safeParse(input)
   if (!validation.success) {
     const fieldErrors: Record<string, string[]> = {}
     for (const issue of validation.error.issues) {
@@ -33,21 +31,20 @@ export async function updateUser(
     return { success: false, error: "VALIDATION_ERROR", details: fieldErrors }
   }
 
-  const params = validation.data
+  const validatedInput = validation.data
 
   try {
     const supabase = await createServerClient()
 
-    // 3. Update profile
     const { error } = await supabase
       .from("profiles")
       .update({
-        first_name: params.firstName?.trim() || null,
-        last_name: params.lastName?.trim() || null,
-        phone_number: params.phoneNumber?.trim() || null,
+        first_name: validatedInput.firstName?.trim() || null,
+        last_name: validatedInput.lastName?.trim() || null,
+        phone_number: validatedInput.phoneNumber?.trim() || null,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", params.userId)
+      .eq("id", validatedInput.userId)
 
     if (error) {
       return {
@@ -59,7 +56,7 @@ export async function updateUser(
 
     revalidatePath(appRoutes.dashboard.users)
     return { success: true, data: null }
-  } catch (err) {
+  } catch {
     return { success: false, error: "UNEXPECTED_ERROR" }
   }
 }

@@ -6,6 +6,7 @@
 import * as React from "react"
 import { Link } from "@/i18n/navigation"
 
+// Define the title, description, and optional navigation link shown in the header.
 interface AuthHeaderProps {
   title: string
   description: string
@@ -19,6 +20,7 @@ export function AuthHeader({
   linkText,
   linkHref,
 }: AuthHeaderProps) {
+  // Render the shared heading and optional authentication link.
   return (
     <div className="flex flex-col space-y-1.5 pb-6 text-start">
       <div className="flex w-full items-center justify-between gap-3">

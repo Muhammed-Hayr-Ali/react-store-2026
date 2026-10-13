@@ -23,8 +23,11 @@ export function GoogleSignInButton({
   lastLoginMethod,
 }: GoogleSignInButtonProps) {
   const t = useTranslations("GoogleSignInButton")
+
+  // Track the OAuth request while it is being dispatched.
   const [isPending, startTransition] = React.useTransition()
 
+  // Start Google sign-in and report unsuccessful or unexpected responses.
   const handleGoogleSignIn = () => {
     startTransition(async () => {
       try {
@@ -50,6 +53,7 @@ export function GoogleSignInButton({
 
   const isLastUsed = lastLoginMethod === "google"
 
+  // Render the last-used indicator and the pending or idle button state.
   return (
     <div className="relative w-full">
       {/* Logical RTL Placement: -inset-e-2.5 */}

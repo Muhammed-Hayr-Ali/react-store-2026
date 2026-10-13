@@ -1,12 +1,11 @@
-type SuccessResult<T> = {
-  success: true
-  data?: T
-}
-
-type ErrorResult = {
-  success: false
-  error: string
-  details?: Record<string, string[]> // ✅ إضافة هذا السطر
-}
-
-export type ApiResult<T> = SuccessResult<T> | ErrorResult
+/** Shared discriminated result contract for action queries and mutations. */
+export type ApiResult<T> =
+  | {
+      success: true
+      data: T
+    }
+  | {
+      success: false
+      error: string
+      details?: Record<string, string[]>
+    }

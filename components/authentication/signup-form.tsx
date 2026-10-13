@@ -43,12 +43,15 @@ import {
 import { appRoutes } from "@/lib/config/app-routes"
 
 export function SignUpForm() {
+  // Load translations and navigation for the registration flow.
   const t = useTranslations("SignUpForm")
   const router = useRouter()
 
+  // Track password visibility and server-side errors.
   const [showPassword, setShowPassword] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
+  // Configure registration validation and initial form values.
   const form = useForm<SignUpWithPasswordInput>({
     resolver: zodResolver(signUpWithPasswordSchema),
     defaultValues: {
@@ -63,6 +66,7 @@ export function SignUpForm() {
     formState: { isSubmitting, errors },
   } = form
 
+  // Create the account and display field or account-level errors.
   async function onSubmit(data: SignUpWithPasswordInput) {
     setErrorMessage(null)
     const result = await signUpWithPassword(data)
@@ -91,6 +95,7 @@ export function SignUpForm() {
     }
   }
 
+  // Render registration fields, error feedback, and OAuth sign-up.
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
       <FieldGroup className="space-y-4">

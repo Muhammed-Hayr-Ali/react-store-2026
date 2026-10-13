@@ -21,9 +21,11 @@ import { appRoutes } from "@/lib/config/app-routes"
 import { AppLogo } from "../ui/app-logo"
 
 export function StoreSwitcher() {
+  // Read sidebar state to adapt the store header for mobile and collapsed views.
   const { isMobile, state, setOpenMobile } = useSidebar()
   const isCollapsed = state === "collapsed" && !isMobile
 
+  // Render the store identity and the mobile sidebar close action.
   return (
     <SidebarMenu>
       <SidebarMenuItem>

@@ -1,3 +1,8 @@
+/**
+ * @file lib/actions/role/mutations/create-role.ts
+ * @description Creates a role with its assigned permissions.
+ */
+
 "use server"
 
 import { revalidatePath } from "next/cache"
@@ -16,14 +21,14 @@ export interface RoleRecord {
 }
 
 export async function createRole(
-  payload: CreateRoleInput
-): Promise<ApiResult<RoleRecord | null>> {
+  input: CreateRoleInput
+): Promise<ApiResult<RoleRecord>> {
   const canCreate = await hasPermission(PERMISSIONS.CREATE_ROLE)
   if (!canCreate) {
     return { success: false, error: "PERMISSION_DENIED" }
   }
 
-  const validation = createRoleSchema.safeParse(payload)
+  const validation = createRoleSchema.safeParse(input)
   if (!validation.success) {
     const fieldErrors: Record<string, string[]> = {}
     for (const issue of validation.error.issues) {
@@ -37,7 +42,7 @@ export async function createRole(
   const { name, description, permissions } = validation.data
   const supabase = await createServerClient()
 
-  // Supabase يحول مصفوفة JavaScript تلقائياً إلى صيغة jsonb عند إرسالها لعمود من نوع jsonb
+  // Supabase serializes this array as JSON for the jsonb permissions column.
   const { data: newRole, error } = await supabase
     .from("roles")
     .insert({

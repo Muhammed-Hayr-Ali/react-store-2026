@@ -30,6 +30,7 @@ import {
   XIcon,
   Columns3Icon,
   MoreHorizontalIcon,
+  Trash2Icon,
   ChevronsLeftIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -39,6 +40,7 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import {
@@ -70,9 +72,71 @@ import { PERMISSIONS } from "@/lib/actions/role"
 import { useIsMobile } from "@/hooks/use-mobile"
 import type { RoleRecord } from "@/lib/actions/role/mutations/create-role"
 import { appRoutes } from "@/lib/config/app-routes"
+import { DeleteRoleDialog } from "./delete-role-dialog"
 
 const HIDEABLE_COLUMNS = ["permissions"]
 
+interface RoleRowActionsProps {
+  role: RoleRecord
+  onDeleted: (deletedId: string) => void
+}
+
+// Keep the role deletion dialog mounted independently from the closing menu.
+function RoleRowActions({ role, onDeleted }: RoleRowActionsProps) {
+  const t = useTranslations("RolesManagement")
+
+  return (
+    <DeleteRoleDialog
+      roleId={role.id}
+      roleName={role.name}
+      onDeleted={onDeleted}
+    >
+      <Can
+        permission={[PERMISSIONS.UPDATE_ROLE, PERMISSIONS.DELETE_ROLE]}
+      >
+        <div className="flex items-center justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="flex size-7 text-muted-foreground data-[state=open]:bg-muted"
+              >
+                <MoreHorizontalIcon className="size-4" />
+                <span className="sr-only">{t("ACTIONS_LABEL")}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40 text-xs">
+              <Can permission={PERMISSIONS.UPDATE_ROLE}>
+                <DropdownMenuItem asChild>
+                  <Link
+                    href={`${appRoutes.dashboard.team.roles}/${role.id}/edit`}
+                    className="flex cursor-pointer items-center"
+                  >
+                    <PencilIcon className="me-2 size-3.5" />
+                    {t("EDIT_ROLE")}
+                  </Link>
+                </DropdownMenuItem>
+              </Can>
+              <Can permission={PERMISSIONS.DELETE_ROLE}>
+                <AlertDialogTrigger
+                  render={
+                    <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive">
+                      <Trash2Icon className="me-2 size-3.5" />
+                      {t("DELETE_ROLE")}
+                    </DropdownMenuItem>
+                  }
+                />
+              </Can>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </Can>
+    </DeleteRoleDialog>
+  )
+}
+
+// Provide the initial role data and responsive visibility settings.
 interface RolesTableProps {
   initialRoles: RoleRecord[]
   initialIsMobile?: boolean
@@ -82,19 +146,23 @@ export function RolesTable({
   initialRoles,
   initialIsMobile = false,
 }: RolesTableProps) {
+  // Resolve translations and the current responsive layout.
   const t = useTranslations("RolesManagement")
   const isMobile = useIsMobile()
 
+  // Track role data, search, and the selected role filter.
   const [data, setData] = React.useState<RoleRecord[]>(() => initialRoles)
   const [currentTab, setCurrentTab] = React.useState<
     "all" | "active" | "empty"
   >("all")
   const [searchQuery, setSearchQuery] = React.useState("")
 
+  // Refresh local rows when the parent supplies updated role data.
   React.useEffect(() => {
     setData(initialRoles)
   }, [initialRoles])
 
+  // Filter roles by permission coverage and search text.
   const filteredData = React.useMemo(() => {
     return data.filter((role) => {
       const permCount = role.permissions?.length || 0
@@ -110,6 +178,7 @@ export function RolesTable({
     })
   }, [data, currentTab, searchQuery])
 
+  // Count roles with and without assigned permissions.
   const activeCount = React.useMemo(
     () => data.filter((r) => (r.permissions?.length || 0) > 0).length,
     [data]
@@ -119,6 +188,7 @@ export function RolesTable({
     [data]
   )
 
+  // Track table visibility, filtering, sorting, and pagination state.
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(() => {
       const initial: VisibilityState = {}
@@ -137,6 +207,7 @@ export function RolesTable({
     pageSize: initialIsMobile ? 20 : 10,
   })
 
+  // Adjust hidden columns and page size when the viewport changes.
   React.useEffect(() => {
     setColumnVisibility((prev) => {
       const nextVisibility: VisibilityState = { ...prev }
@@ -153,6 +224,7 @@ export function RolesTable({
     }))
   }, [isMobile])
 
+  // Define role details, permission counts, and available row actions.
   const columns = React.useMemo<ColumnDef<RoleRecord>[]>(
     () => [
       // 1. First Column: Role Identifier (Pinned Visible)
@@ -185,14 +257,14 @@ export function RolesTable({
           <div className="text-center">{t("COLUMN_PERMISSIONS")}</div>
         ),
         cell: ({ row }) => {
-          // حساب إجمالي عدد الصلاحيات المتاحة في النظام ديناميكياً
+          // Calculate the total number of permissions from the permission map.
           const totalPermissions = Object.keys(PERMISSIONS).length
 
           return (
             <div className="flex justify-center">
               <Badge
-                variant="outline"
-                className="gap-1.5 px-2.5 py-0.5 font-mono text-xs font-medium text-muted-foreground"
+                variant="secondary"
+                className="truncate px-1.5 py-0.5 font-mono text-[11px] leading-tight text-muted-foreground uppercase"
               >
                 <LayersIcon className="size-3 opacity-70" />
                 <span dir="ltr">
@@ -208,39 +280,32 @@ export function RolesTable({
         id: "actions",
         enableHiding: false,
         cell: ({ row }) => (
-          <div className="flex items-center justify-end">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="flex size-7 text-muted-foreground data-[state=open]:bg-muted"
-                >
-                  <MoreHorizontalIcon className="size-4" />
-                  <span className="sr-only">{t("ACTIONS_LABEL")}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40 text-xs">
-                <Can permission={PERMISSIONS.UPDATE_ROLE}>
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href={`${appRoutes.dashboard.team.roles}/${row.original.id}/edit`}
-                      className="flex cursor-pointer items-center"
-                    >
-                      <PencilIcon className="me-2 size-3.5" />
-                      {t("EDIT_ROLE")}
-                    </Link>
-                  </DropdownMenuItem>
-                </Can>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          <RoleRowActions
+            role={row.original}
+            onDeleted={(deletedId) => {
+              if (
+                pagination.pageIndex > 0 &&
+                filteredData.length -
+                  pagination.pageIndex * pagination.pageSize ===
+                  1
+              ) {
+                setPagination((current) => ({
+                  ...current,
+                  pageIndex: current.pageIndex - 1,
+                }))
+              }
+              setData((current) =>
+                current.filter((role) => role.id !== deletedId)
+              )
+            }}
+          />
         ),
       },
     ],
-    [t]
+    [filteredData.length, pagination.pageIndex, pagination.pageSize, t]
   )
 
+  // Create the table instance and connect its controlled state.
   const table = useReactTable({
     data: filteredData,
     columns,
@@ -261,12 +326,13 @@ export function RolesTable({
     getPaginationRowModel: getPaginationRowModel(),
   })
 
-  // قاموس الترجمة المخصص للأعمدة
+  // Map table column IDs to their translated labels.
   const columnLabelsMap: Record<string, string> = {
     name: t("COLUMN_ROLE"),
     permissions: t("COLUMN_PERMISSIONS"),
   }
 
+  // Render search, filters, role actions, the role table, and pagination.
   return (
     <div className="flex w-full flex-col justify-start gap-4">
       {/* Interactive Toolbar */}
@@ -436,7 +502,7 @@ export function RolesTable({
             <DropdownMenuContent align="end" className="w-40 text-xs">
               {table
                 .getAllColumns()
-                /* تم تصحيح الفلتر هنا ليعتمد فقط على قابلية العمود للإخفاء */
+                /* Include only columns that support hiding. */
                 .filter((col) => col.getCanHide())
                 .map((col) => (
                   <DropdownMenuCheckboxItem
@@ -533,7 +599,7 @@ export function RolesTable({
         </div>
       </div>
 
-      {/* Standard Pagination Footer - يظهر فقط إذا كان عدد البيانات أكثر من 10 */}
+      {/* Pagination controls appear only when more than ten results exist. */}
       {table.getFilteredRowModel().rows.length > 10 && (
         <div className="flex w-full flex-row flex-wrap items-center justify-between gap-3 px-1 py-1 sm:flex-nowrap">
           <div className="flex flex-1 items-center gap-2 text-[11px] text-muted-foreground sm:text-xs">

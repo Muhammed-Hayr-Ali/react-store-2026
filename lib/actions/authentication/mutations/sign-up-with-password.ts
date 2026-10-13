@@ -16,10 +16,9 @@ import { signUpWithPasswordSchema } from "../schemas"
 import { ApiResult } from "@/lib/actions/types/utils"
 
 export async function signUpWithPassword(
-  payload: unknown
+  input: unknown
 ): Promise<ApiResult<null>> {
-  // Step 1: Input Validation
-  const validation = signUpWithPasswordSchema.safeParse(payload)
+  const validation = signUpWithPasswordSchema.safeParse(input)
   if (!validation.success) {
     const fieldErrors: Record<string, string[]> = {}
     for (const issue of validation.error.issues) {
@@ -34,18 +33,14 @@ export async function signUpWithPassword(
     }
   }
 
-  // تم التحديث هنا لاستخراج firstName و lastName بدلاً من name
   const { firstName, lastName, email, password } = validation.data
 
-  // Step 2: Client Initialization
   const supabase = await createServerClient()
 
-  // Step 3: Auth Signup Operation
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      // تم التحديث هنا لإرسال البيانات بالصيغة المتوقعة في الـ Trigger (handle_new_user)
       data: {
         first_name: firstName,
         last_name: lastName,
@@ -66,14 +61,12 @@ export async function signUpWithPassword(
     }
   }
 
-  // Step 4: Non-blocking Notification Dispatch
   try {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
     await sendEmail({
       to: email,
       subject: "مرحباً بك في Marketna",
       reactComponent: React.createElement(WelcomeEmail, {
-        // جمع الاسمين معاً لرسالة الترحيب
         userName: `${firstName} ${lastName}`,
         loginUrl: `${baseUrl}${appRoutes.auth.login}`,
       }),
@@ -82,7 +75,6 @@ export async function signUpWithPassword(
     console.error("Non-blocking email delivery error:", emailError)
   }
 
-  // Step 5: Cookie Management
   const cookieStore = await cookies()
   cookieStore.set("login_method", "email", {
     path: "/",
@@ -91,7 +83,6 @@ export async function signUpWithPassword(
     secure: process.env.NODE_ENV === "production",
   })
 
-  // Step 6: Global Layout Invalidation
   revalidatePath("/", "layout")
 
   return { success: true, data: null }

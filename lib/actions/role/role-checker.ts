@@ -1,3 +1,8 @@
+/**
+ * @file lib/actions/role/role-checker.ts
+ * @description Checks whether the current user has a specified role.
+ */
+
 "use server"
 
 import { createServerClient } from "@/lib/database/supabase/server"

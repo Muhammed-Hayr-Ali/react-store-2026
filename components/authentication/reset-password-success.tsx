@@ -31,6 +31,7 @@ export function ResetPasswordSuccess({
 }: ResetPasswordSuccessProps) {
   const t = useTranslations("ResetPasswordSuccess")
 
+  // Render the request confirmation, retry guidance, and login link.
   return (
     <div className="flex w-full flex-col text-start">
       {/* Success Badge Icon */}

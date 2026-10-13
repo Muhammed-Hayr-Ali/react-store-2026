@@ -28,6 +28,7 @@ export function TeamSwitcher({
     plan: string
   }[]
 }) {
+  // Track the active team and adapt the menu placement for mobile.
   const { isMobile } = useSidebar()
   const [activeTeam, setActiveTeam] = React.useState(teams[0])
 
@@ -35,6 +36,7 @@ export function TeamSwitcher({
     return null
   }
 
+  // Render the active team selector and the available team actions.
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -55,7 +57,7 @@ export function TeamSwitcher({
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-[min(14rem,calc(100dvw-1rem))] rounded-lg"
             align="start"
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
@@ -72,7 +74,9 @@ export function TeamSwitcher({
                 <div className="flex size-6 items-center justify-center rounded-md border">
                   <team.logo className="size-3.5 shrink-0" />
                 </div>
-                {team.name}
+                <span className="min-w-0 flex-1 truncate" title={team.name}>
+                  {team.name}
+                </span>
                 <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
               </DropdownMenuItem>
             ))}

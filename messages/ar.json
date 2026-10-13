@@ -175,6 +175,18 @@
     "ASSIGNED_LABEL": "مُعيّنة",
     "ACTIONS_LABEL": "الإجراءات",
     "EDIT_ROLE": "تعديل الدور",
+    "DELETE_ROLE": "حذف الدور",
+    "DELETE_ROLE_DIALOG_TITLE": "حذف الدور",
+    "DELETE_ROLE_DIALOG_DESCRIPTION": "أنت على وشك حذف الدور نهائيًا",
+    "DELETE_ROLE_DIALOG_WARNING": "لا يمكن التراجع عن هذا الإجراء.",
+    "TYPE_ROLE_NAME_TO_CONFIRM": "اكتب اسم الدور لتأكيد الحذف:",
+    "CONFIRM_ROLE_NAME_PLACEHOLDER": "أدخل اسم الدور",
+    "CANCEL_BUTTON": "إلغاء",
+    "DELETING_BUTTON": "جارٍ الحذف...",
+    "CONFIRM_DELETE_BUTTON": "حذف",
+    "ROLE_DELETED_SUCCESS": "تم حذف الدور \"{name}\" بنجاح.",
+    "ROLE_DELETE_ERROR": "تعذّر حذف الدور.",
+    "ROLE_IN_USE_ERROR": "هذا الدور مُسنَد إلى مستخدمين ولا يمكن حذفه.",
     "SEARCH_PLACEHOLDER": "البحث في الأدوار...",
     "CLEAR_SEARCH": "مسح البحث",
     "FILTER_BUTTON": "تصفية",
@@ -292,7 +304,8 @@
       "update_role": "تحديث دور",
       "delete_role": "حذف دور",
       "manage_roles": "إدارة الأدوار",
-      "assign_role": "تعيين دور"
+      "assign_role": "تعيين دور",
+      "remove_role": "إزالة دور"
     },
     "PERMISSION_DESCRIPTIONS": {
       "view_user_overview": "الوصول إلى نظرة عامة على الحساب والطلبات الأخيرة والنشاط",
@@ -342,7 +355,8 @@
       "update_role": "تعديل مسميات الأدوار ومجموعات الصلاحيات المعيّنة",
       "delete_role": "حذف أدوار النظام القديمة",
       "manage_roles": "تحكم إداري كامل في الأدوار والصلاحيات",
-      "assign_role": "ربط الأدوار بموظفين محددين"
+      "assign_role": "ربط الأدوار بموظفين محددين",
+      "remove_role": "إلغاء الأدوار عن موظفين محددين"
     }
   },
   "StaffAccessManagement": {

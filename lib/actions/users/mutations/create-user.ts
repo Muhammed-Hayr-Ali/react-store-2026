@@ -13,16 +13,14 @@ import { createUserSchema, CreateUserFormValues } from "../schemas"
 import { hasPermission, PERMISSIONS } from "../../role"
 
 export async function createUser(
-  payload: CreateUserFormValues
-): Promise<ApiResult<AdminUserSummary | null>> {
-  // 1. Permission check
+  input: CreateUserFormValues
+): Promise<ApiResult<AdminUserSummary>> {
   const canCreate = await hasPermission(PERMISSIONS.CREATE_USER)
   if (!canCreate) {
     return { success: false, error: "PERMISSION_DENIED" }
   }
 
-  // 2. Validate input schema
-  const validation = createUserSchema.safeParse(payload)
+  const validation = createUserSchema.safeParse(input)
   if (!validation.success) {
     const fieldErrors: Record<string, string[]> = {}
     for (const issue of validation.error.issues) {
@@ -38,7 +36,6 @@ export async function createUser(
   try {
     const supabase = createAdminClient()
 
-    // 3. Create user via Admin API
     const { data: authData, error: authError } =
       await supabase.auth.admin.createUser({
         email: safeData.email,
@@ -68,7 +65,6 @@ export async function createUser(
 
     const userId = authData.user.id
 
-    // 4. Save profile to profiles table
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
       .upsert({
@@ -103,7 +99,7 @@ export async function createUser(
 
     revalidatePath("/", "layout")
     return { success: true, data: newUserSummary }
-  } catch (err) {
+  } catch {
     return {
       success: false,
       error: "UNEXPECTED_ERROR",

@@ -14,10 +14,9 @@ import { requestPasswordResetSchema } from "../schemas"
 import { ApiResult } from "@/lib/actions/types/utils"
 
 export async function requestPasswordReset(
-  payload: unknown
+  input: unknown
 ): Promise<ApiResult<null>> {
-  // Step 1: Input Validation
-  const validation = requestPasswordResetSchema.safeParse(payload)
+  const validation = requestPasswordResetSchema.safeParse(input)
   if (!validation.success) {
     const fieldErrors: Record<string, string[]> = {}
     for (const issue of validation.error.issues) {
@@ -35,10 +34,8 @@ export async function requestPasswordReset(
   const { email } = validation.data
 
   try {
-    // Step 2: Supabase Admin Client Initialization
     const supabaseAdmin = createAdminClient()
 
-    // Step 3: Lookup User Profile
     const { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
       .select("id, first_name, email")
@@ -50,7 +47,6 @@ export async function requestPasswordReset(
       return { success: true, data: null }
     }
 
-    // Step 4: Token Generation & Expiration Setup
     const token = crypto.randomUUID()
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000) // 15 minutes
 
@@ -70,7 +66,6 @@ export async function requestPasswordReset(
       }
     }
 
-    // Step 5: Deliver Reset Email
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
     const resetUrl = `${baseUrl}${appRoutes.auth.resetPassword}?token=${token}`
 

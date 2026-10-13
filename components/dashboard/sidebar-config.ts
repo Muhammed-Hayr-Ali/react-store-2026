@@ -8,6 +8,7 @@ import {
 import { appRoutes } from "@/lib/config/app-routes"
 import { PERMISSIONS, AppPermission } from "@/lib/actions/role"
 
+// Define the shape of a dashboard navigation entry and its nested links.
 export interface SidebarItem {
   titleKey: string
   key: string
@@ -22,10 +23,12 @@ export interface SidebarItem {
   hasSeparator?: boolean
 }
 
+// Group the sidebar's primary navigation entries.
 interface SidebarConfig {
   navMain: SidebarItem[]
 }
 
+// Configure the dashboard links and their access requirements.
 export const sidebarConfig: SidebarConfig = {
   navMain: [
     {

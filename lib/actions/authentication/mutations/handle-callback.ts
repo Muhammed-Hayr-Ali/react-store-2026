@@ -10,10 +10,9 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { oauthCallbackSchema } from "../schemas"
 import { ApiResult } from "@/lib/actions/types/utils"
 
-export async function handleCallback(payload: unknown): Promise<ApiResult<null>> {
-  // Step 1: Input Validation
+export async function handleCallback(input: unknown): Promise<ApiResult<null>> {
   const validation = oauthCallbackSchema.safeParse(
-    typeof payload === "string" ? { code: payload } : payload
+    typeof input === "string" ? { code: input } : input
   )
 
   if (!validation.success) {
@@ -31,10 +30,8 @@ export async function handleCallback(payload: unknown): Promise<ApiResult<null>>
   }
 
   try {
-    // Step 2: Client Initialization
     const supabase = await createServerClient()
 
-    // Step 3: Auth Code Exchange
     const { error } = await supabase.auth.exchangeCodeForSession(
       validation.data.code
     )
@@ -47,7 +44,6 @@ export async function handleCallback(payload: unknown): Promise<ApiResult<null>>
       }
     }
 
-    // Step 4: Layout & Root Tree Revalidation
     revalidatePath("/", "layout")
     return { success: true, data: null }
   } catch (error) {

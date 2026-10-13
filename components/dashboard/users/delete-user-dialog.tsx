@@ -10,7 +10,7 @@
 import * as React from "react"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
-import { AlertTriangleIcon, Trash2Icon } from "lucide-react"
+import { Trash2Icon } from "lucide-react"
 
 import {
   AlertDialog,
@@ -31,7 +31,7 @@ import { deleteUser } from "@/lib/actions/users/mutations/delete-user"
 export interface DeleteUserDialogProps {
   userId: string
   userName: string
-  children?: React.ReactNode
+  children?: React.ReactElement
   onDeleted?: (deletedId: string) => void
 }
 
@@ -41,17 +41,19 @@ export function DeleteUserDialog({
   children,
   onDeleted,
 }: DeleteUserDialogProps) {
+  // Resolve translations and track dialog, confirmation, and pending states.
   const t = useTranslations("UsersManagement")
   const [isPending, startTransition] = React.useTransition()
   const [isOpen, setIsOpen] = React.useState(false)
   const [confirmName, setConfirmName] = React.useState("")
 
+  // Delete the user after the entered name matches the account name.
   const handleDelete = () => {
     if (confirmName !== userName) return
 
     startTransition(async () => {
       try {
-        const res = await deleteUser(userId)
+        const res = await deleteUser({ userId })
 
         if (res.success) {
           setIsOpen(false)
@@ -66,9 +68,10 @@ export function DeleteUserDialog({
     })
   }
 
-  // التحقق من تطابق الاسم لتفعيل زر الحذف
+  // Enable deletion only when the confirmation name matches.
   const isConfirmValid = confirmName === userName
 
+  // Render the confirmation dialog and name-verification form.
   return (
     <AlertDialog
       open={isOpen}
@@ -76,40 +79,38 @@ export function DeleteUserDialog({
         if (open || !isPending) {
           setIsOpen(open)
           if (!open) {
-            // تفريغ الحقل بعد إغلاق النافذة بوقت قصير للحفاظ على الحركة بسلاسة
+            // Clear the confirmation field after the closing animation.
             setTimeout(() => setConfirmName(""), 200)
           }
         }
       }}
     >
-      <AlertDialogTrigger asChild>
-        {children ?? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="gap-1.5 text-xs text-destructive hover:bg-destructive/10"
-          >
-            <Trash2Icon className="size-3.5" />
-            <span>{t("DELETE_ACCOUNT")}</span>
-          </Button>
-        )}
-      </AlertDialogTrigger>
+      <AlertDialogTrigger
+        render={
+          children ?? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 text-xs text-destructive hover:bg-destructive/10"
+            >
+              <Trash2Icon className="size-3.5" />
+              <span>{t("DELETE_ACCOUNT")}</span>
+            </Button>
+          )
+        }
+      />
 
       <AlertDialogContent
-        className="max-w-md"
         onEscapeKeyDown={(e) => {
           if (isPending) e.preventDefault()
         }}
       >
-        <AlertDialogHeader className="gap-2 text-start">
-          <div className="flex size-10 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-            <AlertTriangleIcon className="size-5" />
-          </div>
-          <AlertDialogTitle className="text-base font-semibold text-foreground">
+        <AlertDialogHeader className="text-start">
+          <AlertDialogTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
             {t("DELETE_DIALOG_TITLE")}
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-xs leading-relaxed text-muted-foreground">
+          <AlertDialogDescription className="text-xs text-muted-foreground">
             {t("DELETE_DIALOG_DESCRIPTION")}{" "}
             <span className="font-semibold wrap-break-word text-foreground">
               &quot;{userName}&quot;
@@ -118,29 +119,31 @@ export function DeleteUserDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        {/* حقل تأكيد الحذف */}
-        <div className="mt-4 space-y-2">
-          <Label
-            htmlFor="confirm-name"
-            className="text-xs text-muted-foreground"
-          >
-            {t("TYPE_NAME_TO_CONFIRM")}{" "}
-            <span className="font-semibold text-foreground select-all">
-              {userName}
-            </span>
-          </Label>
-          <Input
-            id="confirm-name"
-            value={confirmName}
-            onChange={(e) => setConfirmName(e.target.value)}
-            disabled={isPending}
-            placeholder={t("CONFIRM_NAME_PLACEHOLDER")}
-            autoComplete="off"
-            className="h-9 text-xs"
-          />
+        {/* Account-name confirmation field */}
+        <div className="min-h-0 overflow-y-auto">
+          <div className="space-y-2 py-2">
+            <Label
+              htmlFor="confirm-name"
+              className="text-xs text-muted-foreground"
+            >
+              {t("TYPE_NAME_TO_CONFIRM")}{" "}
+              <span className="font-semibold text-foreground select-all">
+                {userName}
+              </span>
+            </Label>
+            <Input
+              id="confirm-name"
+              value={confirmName}
+              onChange={(e) => setConfirmName(e.target.value)}
+              disabled={isPending}
+              placeholder={t("CONFIRM_NAME_PLACEHOLDER")}
+              autoComplete="off"
+              className="h-9 text-xs"
+            />
+          </div>
         </div>
 
-        <AlertDialogFooter className=" gap-2 sm:gap-0">
+        <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending} className="mt-0 text-xs">
             {t("CANCEL_BUTTON")}
           </AlertDialogCancel>

@@ -6,23 +6,23 @@
 "use server"
 
 import { createServerClient } from "@/lib/database/supabase/server"
-import { ApiResult } from "@/lib/actions/types/utils"
-import { AdminUserSummary, UserStatus } from "../types"
+import type { ApiResult } from "@/lib/actions/types/utils"
+import type { AdminUserSummary, UserStatus } from "../types"
 
-interface GetAdminUsersParams {
+interface GetAdminUsersInput {
   search?: string
   status?: UserStatus
 }
 
 export async function getAdminUsersList(
-  params?: GetAdminUsersParams
+  input?: GetAdminUsersInput
 ): Promise<ApiResult<AdminUserSummary[]>> {
   try {
     const supabase = await createServerClient()
 
     const { data, error } = await supabase.rpc("get_admin_users_list", {
-      p_search: params?.search?.trim() || null,
-      p_status: params?.status || null,
+      p_search: input?.search?.trim() || null,
+      p_status: input?.status || null,
     })
 
     if (error) {
@@ -37,7 +37,7 @@ export async function getAdminUsersList(
       success: true,
       data: (data as AdminUserSummary[]) || [],
     }
-  } catch (err) {
+  } catch {
     return {
       success: false,
       error: "UNEXPECTED_ERROR",

@@ -35,7 +35,7 @@ import { confirmPasswordReset } from "@/lib/actions/authentication"
 import { appRoutes } from "@/lib/config/app-routes"
 import { IconInput } from "@/components/ui/icon-input"
 
-// تعريف المخطط محلياً بشكل مستقل لتجنب خطأ .omit() مع الـ refinement
+// Define the client-side schema separately because the shared schema uses a refinement.
 const clientResetSchema = z
   .object({
     password: z.string().min(6, "PASSWORD_TOO_SHORT"),
@@ -53,13 +53,16 @@ interface ResetPasswordFormProps {
 }
 
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
+  // Load translations and navigation for the reset flow.
   const t = useTranslations("ResetPasswordForm")
   const router = useRouter()
 
+  // Track password visibility and server-side errors.
   const [showPassword, setShowPassword] = React.useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
+  // Configure password validation and initial form values.
   const form = useForm<ClientResetFormValues>({
     resolver: zodResolver(clientResetSchema),
     defaultValues: {
@@ -72,6 +75,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     formState: { isSubmitting },
   } = form
 
+  // Submit the new password and handle validation or token errors.
   async function onSubmit(data: ClientResetFormValues) {
     setErrorMessage(null)
 
@@ -104,6 +108,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     }
   }
 
+  // Render password fields, error feedback, and the submit action.
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
       <FieldGroup className="space-y-4">
