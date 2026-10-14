@@ -11,7 +11,8 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { hasPermission, PERMISSIONS } from "../../role"
 import { updateCategorySchema, type UpdateCategoryInput } from "../schemas"
 import type { Category } from "../types"
-import { getValidationDetails, validateCategoryParent } from "../helpers"
+import { validateCategoryParent } from "../helpers"
+import { getValidationDetails } from "../../validation"
 
 export async function updateCategory(
   input: UpdateCategoryInput

@@ -6,24 +6,19 @@
 "use server"
 
 import { createAdminClient } from "@/lib/database/supabase/admin"
+import { getValidationDetails } from "../../validation"
 import { confirmPasswordResetSchema } from "../schemas"
-import { ApiResult } from "@/lib/actions/types/utils"
+import type { ApiResult } from "@/lib/actions/types/utils"
 
 export async function confirmPasswordReset(
   input: unknown
 ): Promise<ApiResult<null>> {
   const validation = confirmPasswordResetSchema.safeParse(input)
   if (!validation.success) {
-    const fieldErrors: Record<string, string[]> = {}
-    for (const issue of validation.error.issues) {
-      const path = issue.path.join(".")
-      if (!fieldErrors[path]) fieldErrors[path] = []
-      fieldErrors[path].push(issue.message)
-    }
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: fieldErrors,
+      details: getValidationDetails(validation.error),
     }
   }
 

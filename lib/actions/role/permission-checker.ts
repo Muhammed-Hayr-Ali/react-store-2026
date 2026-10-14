@@ -7,7 +7,7 @@
 
 import { cache } from "react"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { AppPermission } from "./types"
+import type { AppPermission } from "./types"
 
 export const hasPermission = cache(
   async (permission: AppPermission | AppPermission[]): Promise<boolean> => {

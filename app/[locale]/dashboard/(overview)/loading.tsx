@@ -14,7 +14,7 @@ export default function DashboardLoading() {
             key={i}
             className="flex aspect-video flex-col justify-between rounded-xl border border-border bg-card p-4 shadow-xs"
           >
-            <Skeleton className="h-4 w-32 max-w-full rounded-md" />
+            <Skeleton className="h-3 w-32 max-w-full rounded-md" />
             <Skeleton className="h-8 w-20 rounded-md" />
           </div>
         ))}

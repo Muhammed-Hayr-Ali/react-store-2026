@@ -1,3 +1,5 @@
+import { readdir } from "node:fs/promises"
+import path from "node:path"
 import { headers } from "next/headers"
 import { notFound } from "next/navigation"
 import { getTranslations } from "next-intl/server"
@@ -49,6 +51,24 @@ export default async function Page({ params }: PageProps) {
     throw new Error(tErrors(getActionErrorKey(result.error)))
   }
 
+  const categoryImageDirectory = path.join(
+    process.cwd(),
+    "public",
+    "site-assets",
+    "categories"
+  )
+  const categoryImages = (
+    await readdir(categoryImageDirectory, {
+      withFileTypes: true,
+    })
+  )
+    .filter(
+      (entry) =>
+        entry.isFile() && /\.(avif|gif|jpe?g|png|webp|svg)$/i.test(entry.name)
+    )
+    .map((entry) => entry.name)
+    .sort((left, right) => left.localeCompare(right))
+
   const headersList = await headers()
   const userAgent = headersList.get("user-agent") || ""
   const isMobile =
@@ -76,6 +96,7 @@ export default async function Page({ params }: PageProps) {
 
       <CategoriesTable
         initialCategories={result.data}
+        categoryImages={categoryImages}
         initialIsMobile={isMobile}
       />
     </div>

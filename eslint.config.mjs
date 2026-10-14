@@ -36,7 +36,12 @@ const eslintConfig = defineConfig([
         },
         // القواعد الأساسية لخصائص البيانات العادية
         {
-          "selector": ["property", "typeProperty"],
+          "selector": "property",
+          "format": ["snake_case", "camelCase", "UPPER_CASE"],
+          "leadingUnderscore": "allow"
+        },
+        {
+          "selector": "typeProperty",
           "format": ["snake_case", "camelCase"],
           "leadingUnderscore": "allow"
         },

@@ -600,6 +600,7 @@
     "PREVIOUS_PAGE": "Previous page",
     "NEXT_PAGE": "Next page",
     "LAST_PAGE": "Last page",
+    "ROWS_PER_PAGE": "Rows per page:",
     "PAGE_COUNTER": "Page {page} of {total}",
     "ACTIVE": "Active",
     "INACTIVE": "Inactive",

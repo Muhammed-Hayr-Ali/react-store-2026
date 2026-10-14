@@ -6,8 +6,8 @@
 "use server"
 
 import { createServerClient } from "@/lib/database/supabase/server"
-import { ApiResult } from "@/lib/actions/types/utils"
-import { RoleRecord } from "../mutations/create-role"
+import type { ApiResult } from "@/lib/actions/types/utils"
+import type { RoleRecord } from "../mutations/create-role"
 
 export async function getAllRoles(): Promise<ApiResult<RoleRecord[]>> {
   const supabase = await createServerClient()

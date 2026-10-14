@@ -64,11 +64,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Can } from "@/components/shared/can"
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { PERMISSIONS } from "@/lib/actions/role"
 import { useIsMobile } from "@/hooks/use-mobile"
 
@@ -617,9 +613,12 @@ export function StaffAccessTable({
       </div>
 
       {/* Standard Pagination Footer */}
-      <div className="flex flex-col items-center justify-between gap-3 px-1 sm:flex-row">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Label htmlFor="rows-per-page" className="text-xs font-medium">
+      <div className="flex w-full flex-nowrap items-center justify-between gap-2 px-1">
+        <div className="flex min-w-0 shrink items-center gap-1.5 text-[11px] text-muted-foreground sm:gap-2 sm:text-xs">
+          <Label
+            htmlFor="rows-per-page"
+            className="text-xs font-medium whitespace-nowrap max-sm:sr-only"
+          >
             {t("ROWS_PER_PAGE")}
           </Label>
           <Select
@@ -628,7 +627,7 @@ export function StaffAccessTable({
           >
             <SelectTrigger
               size="sm"
-              className="h-8 w-18 text-xs"
+              className="h-8 w-18 shrink-0 text-xs"
               id="rows-per-page"
             >
               <SelectValue placeholder={table.getState().pagination.pageSize} />
@@ -647,7 +646,7 @@ export function StaffAccessTable({
               </SelectGroup>
             </SelectContent>
           </Select>
-          <span className="ms-2">
+          <span className="ms-1.5 shrink-0 whitespace-nowrap sm:ms-2">
             {t("PAGE_COUNTER", {
               page: table.getState().pagination.pageIndex + 1,
               total: table.getPageCount() || 1,
@@ -655,7 +654,7 @@ export function StaffAccessTable({
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
           <Button
             variant="outline"
             className="hidden size-8 p-0 sm:flex"

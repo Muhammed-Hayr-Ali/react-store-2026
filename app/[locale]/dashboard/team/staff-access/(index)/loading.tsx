@@ -57,7 +57,7 @@ export default function Loading() {
                 <TableRow key={i}>
                   <TableCell className="py-2.5">
                     <div className="flex items-center gap-2.5">
-                      <Skeleton className="size-7 shrink-0 rounded-full" />
+                      <Skeleton className="size-7 shrink-0 rounded-lg" />
                       <div className="space-y-1">
                         <Skeleton className="h-3.5 w-28 rounded-md" />
                         <Skeleton className="h-3 w-36 max-w-full rounded-md" />
@@ -82,13 +82,13 @@ export default function Loading() {
         </div>
       </div>
 
-      <div className="flex flex-col items-center justify-between gap-3 px-1 sm:flex-row">
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-4 w-20 rounded-md" />
-          <Skeleton className="h-8 w-18 rounded-md" />
-          <Skeleton className="h-4 w-24 rounded-md" />
+      <div className="flex w-full flex-nowrap items-center justify-between gap-2 px-1">
+        <div className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2">
+          <Skeleton className="hidden h-4 w-20 rounded-md sm:block" />
+          <Skeleton className="h-8 w-18 shrink-0 rounded-md" />
+          <Skeleton className="ms-1.5 h-4 w-24 shrink-0 rounded-md sm:ms-2" />
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
           <Skeleton className="hidden size-8 rounded-md sm:block" />
           <Skeleton className="size-8 rounded-md" />
           <Skeleton className="size-8 rounded-md" />

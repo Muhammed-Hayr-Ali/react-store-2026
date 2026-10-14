@@ -7,8 +7,9 @@
 
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
+import { getValidationDetails } from "../../validation"
 import { oauthCallbackSchema } from "../schemas"
-import { ApiResult } from "@/lib/actions/types/utils"
+import type { ApiResult } from "@/lib/actions/types/utils"
 
 export async function handleCallback(input: unknown): Promise<ApiResult<null>> {
   const validation = oauthCallbackSchema.safeParse(
@@ -16,16 +17,10 @@ export async function handleCallback(input: unknown): Promise<ApiResult<null>> {
   )
 
   if (!validation.success) {
-    const fieldErrors: Record<string, string[]> = {}
-    for (const issue of validation.error.issues) {
-      const path = issue.path.join(".")
-      if (!fieldErrors[path]) fieldErrors[path] = []
-      fieldErrors[path].push(issue.message)
-    }
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: fieldErrors,
+      details: getValidationDetails(validation.error),
     }
   }
 

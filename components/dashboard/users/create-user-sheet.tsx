@@ -235,7 +235,7 @@ export function CreateUserSheet({ children, onSuccess }: CreateUserSheetProps) {
                         id="create-user-email"
                         type="email"
                         placeholder="user@example.com"
-                        className="h-8 text-xs"
+                        className="h-9 text-xs"
                       />
                       {fieldState.invalid && (
                         <ActionFieldError errors={[fieldState.error]} />
@@ -261,7 +261,7 @@ export function CreateUserSheet({ children, onSuccess }: CreateUserSheetProps) {
                           id="create-user-password"
                           type="text"
                           placeholder={t("PASSWORD_PLACEHOLDER")}
-                          className="h-8 pe-8 font-mono text-xs"
+                          className="h-9 pe-8 font-mono text-xs"
                         />
                         <Button
                           type="button"
@@ -308,7 +308,7 @@ export function CreateUserSheet({ children, onSuccess }: CreateUserSheetProps) {
                           {...field}
                           id="create-user-firstname"
                           placeholder="John"
-                          className="h-8 text-xs"
+                          className="h-9 text-xs"
                         />
                         {fieldState.invalid && (
                           <ActionFieldError errors={[fieldState.error]} />
@@ -332,7 +332,7 @@ export function CreateUserSheet({ children, onSuccess }: CreateUserSheetProps) {
                           {...field}
                           id="create-user-lastname"
                           placeholder="Doe"
-                          className="h-8 text-xs"
+                          className="h-9 text-xs"
                         />
                         {fieldState.invalid && (
                           <ActionFieldError errors={[fieldState.error]} />
@@ -357,7 +357,7 @@ export function CreateUserSheet({ children, onSuccess }: CreateUserSheetProps) {
                         {...field}
                         id="create-user-phone"
                         placeholder="+123456789"
-                        className="h-8 text-xs"
+                        className="h-9 text-xs"
                       />
                       {fieldState.invalid && (
                         <ActionFieldError errors={[fieldState.error]} />

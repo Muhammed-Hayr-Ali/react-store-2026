@@ -6,10 +6,11 @@
  */
 
 import { revalidatePath } from "next/cache"
-import { ApiResult } from "@/lib/actions/types/utils"
+import { getValidationDetails } from "../../validation"
+import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { hasPermission, PERMISSIONS } from "../index"
-import { deleteRoleSchema, DeleteRoleInput } from "../schemas"
+import { deleteRoleSchema, type DeleteRoleInput } from "../schemas"
 
 // Delete a role only when no user currently depends on it.
 export async function deleteRole(
@@ -24,13 +25,11 @@ export async function deleteRole(
   // Validate the role identifier before using it in database queries.
   const validation = deleteRoleSchema.safeParse(input)
   if (!validation.success) {
-    const fieldErrors: Record<string, string[]> = {}
-    for (const issue of validation.error.issues) {
-      const path = issue.path.join(".")
-      if (!fieldErrors[path]) fieldErrors[path] = []
-      fieldErrors[path].push(issue.message)
+    return {
+      success: false,
+      error: "VALIDATION_ERROR",
+      details: getValidationDetails(validation.error),
     }
-    return { success: false, error: "VALIDATION_ERROR", details: fieldErrors }
   }
 
   const supabase = await createServerClient()

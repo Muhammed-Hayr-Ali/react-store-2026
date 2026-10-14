@@ -12,24 +12,19 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { sendEmail } from "@/lib/services/email/send-email"
 import WelcomeEmail from "@/lib/services/email/templates/welcome-email"
 import { appRoutes } from "@/lib/config/app-routes"
+import { getValidationDetails } from "../../validation"
 import { signUpWithPasswordSchema } from "../schemas"
-import { ApiResult } from "@/lib/actions/types/utils"
+import type { ApiResult } from "@/lib/actions/types/utils"
 
 export async function signUpWithPassword(
   input: unknown
 ): Promise<ApiResult<null>> {
   const validation = signUpWithPasswordSchema.safeParse(input)
   if (!validation.success) {
-    const fieldErrors: Record<string, string[]> = {}
-    for (const issue of validation.error.issues) {
-      const path = issue.path.join(".")
-      if (!fieldErrors[path]) fieldErrors[path] = []
-      fieldErrors[path].push(issue.message)
-    }
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: fieldErrors,
+      details: getValidationDetails(validation.error),
     }
   }
 

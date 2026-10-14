@@ -6,14 +6,15 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { getValidationDetails } from "../../validation"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { ApiResult } from "@/lib/actions/types/utils"
+import type { ApiResult } from "@/lib/actions/types/utils"
 import { hasPermission, PERMISSIONS } from "../index"
 import {
   updateRolePermissionsSchema,
-  UpdateRolePermissionsInput,
+  type UpdateRolePermissionsInput,
 } from "../schemas"
-import { RoleRecord } from "./create-role"
+import type { RoleRecord } from "./create-role"
 
 export async function updateRole(
   input: UpdateRolePermissionsInput
@@ -28,20 +29,10 @@ export async function updateRole(
 
   const validation = updateRolePermissionsSchema.safeParse(input)
   if (!validation.success) {
-    // Group validation issues by field for the action result.
-    const fieldErrors: Record<string, string[]> = {}
-    for (const issue of validation.error.issues) {
-      const path = issue.path.join(".")
-      if (!fieldErrors[path]) {
-        fieldErrors[path] = []
-      }
-      fieldErrors[path].push(issue.message)
-    }
-
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: fieldErrors,
+      details: getValidationDetails(validation.error),
     }
   }
   const { roleId, description, permissions } = validation.data

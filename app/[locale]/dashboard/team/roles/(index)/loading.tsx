@@ -84,11 +84,11 @@ export default function Loading() {
         </div>
       </div>
 
-      <div className="flex w-full flex-row flex-wrap items-center justify-between gap-3 px-1 py-1 sm:flex-nowrap">
-        <div className="flex flex-1 items-center gap-2">
-          <Skeleton className="h-4 w-20 rounded-md" />
-          <Skeleton className="h-7 w-[60px] rounded-md sm:h-8 sm:w-18" />
-          <Skeleton className="h-4 w-24 rounded-md" />
+      <div className="flex w-full flex-nowrap items-center justify-between gap-2 px-1 py-1">
+        <div className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2">
+          <Skeleton className="hidden h-4 w-20 rounded-md sm:block" />
+          <Skeleton className="h-7 w-[60px] shrink-0 rounded-md sm:h-8 sm:w-18" />
+          <Skeleton className="ms-1.5 h-4 w-24 shrink-0 rounded-md sm:ms-2" />
         </div>
         <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
           <Skeleton className="hidden size-7 rounded-md sm:block sm:size-8" />

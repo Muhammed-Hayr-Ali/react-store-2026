@@ -3,23 +3,8 @@
  * @description Shares validation and hierarchy checks across category actions.
  */
 
-import type { ZodError } from "zod"
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
-
-export function getValidationDetails(
-  error: ZodError
-): Record<string, string[]> {
-  const details: Record<string, string[]> = {}
-
-  for (const issue of error.issues) {
-    const path = issue.path.join(".") || "input"
-    details[path] ??= []
-    details[path].push(issue.message)
-  }
-
-  return details
-}
 
 export async function validateCategoryParent(
   supabase: Awaited<ReturnType<typeof createServerClient>>,

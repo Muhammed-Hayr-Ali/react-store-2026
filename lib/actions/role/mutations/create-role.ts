@@ -6,11 +6,11 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { getValidationDetails } from "../../validation"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { hasPermission, PERMISSIONS, AppPermission } from "../index"
-import { createRoleSchema, CreateRoleInput } from "../schemas"
-import { ApiResult } from "@/lib/actions/types/utils"
-
+import { hasPermission, PERMISSIONS, type AppPermission } from "../index"
+import { createRoleSchema, type CreateRoleInput } from "../schemas"
+import type { ApiResult } from "@/lib/actions/types/utils"
 
 export interface RoleRecord {
   id: string
@@ -30,13 +30,11 @@ export async function createRole(
 
   const validation = createRoleSchema.safeParse(input)
   if (!validation.success) {
-    const fieldErrors: Record<string, string[]> = {}
-    for (const issue of validation.error.issues) {
-      const path = issue.path.join(".")
-      if (!fieldErrors[path]) fieldErrors[path] = []
-      fieldErrors[path].push(issue.message)
+    return {
+      success: false,
+      error: "VALIDATION_ERROR",
+      details: getValidationDetails(validation.error),
     }
-    return { success: false, error: "VALIDATION_ERROR", details: fieldErrors }
   }
 
   const { name, description, permissions } = validation.data

@@ -91,9 +91,7 @@ function RoleRowActions({ role, onDeleted }: RoleRowActionsProps) {
       roleName={role.name}
       onDeleted={onDeleted}
     >
-      <Can
-        permission={[PERMISSIONS.UPDATE_ROLE, PERMISSIONS.DELETE_ROLE]}
-      >
+      <Can permission={[PERMISSIONS.UPDATE_ROLE, PERMISSIONS.DELETE_ROLE]}>
         <div className="flex items-center justify-end">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -242,7 +240,7 @@ export function RolesTable({
               <span className="truncate text-xs font-semibold text-foreground uppercase">
                 {row.original.name}
               </span>
-              <span className="max-w-3xs truncate text-[11px] text-muted-foreground">
+              <span className="max-w-3xs truncate font-mono text-[11px] text-muted-foreground">
                 {row.original.description || t("NO_DESCRIPTION")}
               </span>
             </div>
@@ -599,97 +597,93 @@ export function RolesTable({
         </div>
       </div>
 
-      {/* Pagination controls appear only when more than ten results exist. */}
-      {table.getFilteredRowModel().rows.length > 10 && (
-        <div className="flex w-full flex-row flex-wrap items-center justify-between gap-3 px-1 py-1 sm:flex-nowrap">
-          <div className="flex flex-1 items-center gap-2 text-[11px] text-muted-foreground sm:text-xs">
-            <Label
-              htmlFor="rows-per-page"
-              className="text-[11px] font-medium whitespace-nowrap sm:text-xs"
+      {/* Standard pagination footer */}
+      <div className="flex w-full flex-nowrap items-center justify-between gap-2 px-1">
+        <div className="flex min-w-0 shrink items-center gap-1.5 text-[11px] text-muted-foreground sm:gap-2 sm:text-xs">
+          <Label
+            htmlFor="rows-per-page"
+            className="text-[11px] font-medium whitespace-nowrap max-sm:sr-only sm:text-xs"
+          >
+            {t("ROWS_PER_PAGE")}
+          </Label>
+          <Select
+            value={`${table.getState().pagination.pageSize}`}
+            onValueChange={(value) => table.setPageSize(Number(value))}
+          >
+            <SelectTrigger
+              size="sm"
+              className="h-7 w-[60px] shrink-0 px-2 text-xs sm:h-8 sm:w-18"
+              id="rows-per-page"
             >
-              {t("ROWS_PER_PAGE")}
-            </Label>
-            <Select
-              value={`${table.getState().pagination.pageSize}`}
-              onValueChange={(value) => table.setPageSize(Number(value))}
-            >
-              <SelectTrigger
-                size="sm"
-                className="h-7 w-[60px] px-2 text-xs sm:h-8 sm:w-18"
-                id="rows-per-page"
-              >
-                <SelectValue
-                  placeholder={table.getState().pagination.pageSize}
-                />
-              </SelectTrigger>
-              <SelectContent side="top" className="text-xs">
-                <SelectGroup>
-                  {[10, 20, 30, 40, 50].map((pageSize) => (
-                    <SelectItem
-                      key={pageSize}
-                      value={`${pageSize}`}
-                      className="text-xs"
-                    >
-                      {pageSize}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <span className="ms-1.5 whitespace-nowrap">
-              {t("PAGE_COUNTER", {
-                page: table.getState().pagination.pageIndex + 1,
-                total: table.getPageCount() || 1,
-              })}
-            </span>
-          </div>
-
-          <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
-            <Button
-              variant="outline"
-              className="hidden size-7 p-0 sm:flex sm:size-8"
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-              title={t("FIRST_PAGE")}
-            >
-              <ChevronsLeftIcon className="size-3.5 sm:size-4 rtl:rotate-180" />
-              <span className="sr-only">{t("FIRST_PAGE")}</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="size-7 sm:size-8"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-              title={t("PREVIOUS_PAGE")}
-            >
-              <ChevronLeftIcon className="size-3.5 sm:size-4 rtl:rotate-180" />
-              <span className="sr-only">{t("PREVIOUS_PAGE")}</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="size-7 sm:size-8"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-              title={t("NEXT_PAGE")}
-            >
-              <ChevronRightIcon className="size-3.5 sm:size-4 rtl:rotate-180" />
-              <span className="sr-only">{t("NEXT_PAGE")}</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="hidden size-7 p-0 sm:flex sm:size-8"
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
-              title={t("LAST_PAGE")}
-            >
-              <ChevronsRightIcon className="size-3.5 sm:size-4 rtl:rotate-180" />
-              <span className="sr-only">{t("LAST_PAGE")}</span>
-            </Button>
-          </div>
+              <SelectValue placeholder={table.getState().pagination.pageSize} />
+            </SelectTrigger>
+            <SelectContent side="top" className="text-xs">
+              <SelectGroup>
+                {[10, 20, 30, 40, 50].map((pageSize) => (
+                  <SelectItem
+                    key={pageSize}
+                    value={`${pageSize}`}
+                    className="text-xs"
+                  >
+                    {pageSize}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <span className="ms-1.5 shrink-0 whitespace-nowrap">
+            {t("PAGE_COUNTER", {
+              page: table.getState().pagination.pageIndex + 1,
+              total: table.getPageCount() || 1,
+            })}
+          </span>
         </div>
-      )}
+
+        <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
+          <Button
+            variant="outline"
+            className="hidden size-7 p-0 sm:flex sm:size-8"
+            onClick={() => table.setPageIndex(0)}
+            disabled={!table.getCanPreviousPage()}
+            title={t("FIRST_PAGE")}
+          >
+            <ChevronsLeftIcon className="size-3.5 sm:size-4 rtl:rotate-180" />
+            <span className="sr-only">{t("FIRST_PAGE")}</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-7 sm:size-8"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            title={t("PREVIOUS_PAGE")}
+          >
+            <ChevronLeftIcon className="size-3.5 sm:size-4 rtl:rotate-180" />
+            <span className="sr-only">{t("PREVIOUS_PAGE")}</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-7 sm:size-8"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            title={t("NEXT_PAGE")}
+          >
+            <ChevronRightIcon className="size-3.5 sm:size-4 rtl:rotate-180" />
+            <span className="sr-only">{t("NEXT_PAGE")}</span>
+          </Button>
+          <Button
+            variant="outline"
+            className="hidden size-7 p-0 sm:flex sm:size-8"
+            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+            disabled={!table.getCanNextPage()}
+            title={t("LAST_PAGE")}
+          >
+            <ChevronsRightIcon className="size-3.5 sm:size-4 rtl:rotate-180" />
+            <span className="sr-only">{t("LAST_PAGE")}</span>
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }

@@ -205,7 +205,7 @@ export function EditUserDialog({
                           {...field}
                           id="edit-user-firstname"
                           placeholder="John"
-                          className="h-8 text-xs"
+                          className="h-9 text-xs"
                           value={field.value || ""}
                         />
                         {fieldState.invalid && (
@@ -230,7 +230,7 @@ export function EditUserDialog({
                           {...field}
                           id="edit-user-lastname"
                           placeholder="Doe"
-                          className="h-8 text-xs"
+                          className="h-9 text-xs"
                           value={field.value || ""}
                         />
                         {fieldState.invalid && (
@@ -253,7 +253,7 @@ export function EditUserDialog({
                         {...field}
                         id="edit-user-phone"
                         placeholder="+123456789"
-                        className="h-8 text-xs"
+                        className="h-9 text-xs"
                         value={field.value || ""}
                       />
                       {fieldState.invalid && (

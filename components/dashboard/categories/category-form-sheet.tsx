@@ -24,6 +24,12 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import {
   Field,
   FieldError,
   FieldGroup,
@@ -60,6 +66,7 @@ interface CategoryFormSheetProps {
   open: boolean
   category: Category | null
   categories: Category[]
+  categoryImages: string[]
   onOpenChange: (open: boolean) => void
   onSaved: (category: Category) => void
   trigger?: React.ReactElement
@@ -91,27 +98,6 @@ const emptyFormState: CategoryFormState = {
   is_active: true,
 }
 
-const CATEGORY_IMAGE_OPTIONS = [
-  "17016590.png",
-  "baby-food.png",
-  "Beverages.png",
-  "breakfast-cereals.png",
-  "canned-goods.png",
-  "cleaning-supplies.png",
-  "dairy-eggs.png",
-  "frozen-foods.png",
-  "meat-seafood.png",
-  "nachos.png",
-  "oils-spices.png",
-  "personal-care.png",
-  "rice-pasta-grains.png",
-  "sweets-chocolate.png",
-].map((filename) => ({
-  filename,
-  label: filename.replace(/\.[^.]+$/, "").replaceAll("-", " "),
-  url: `/site-assets/categories/${filename}`,
-}))
-
 function makeFormState(category: Category | null): CategoryFormState {
   return {
     name: category?.name ?? "",
@@ -131,6 +117,7 @@ export function CategoryFormSheet({
   open,
   category,
   categories,
+  categoryImages,
   onOpenChange,
   onSaved,
   trigger,
@@ -184,6 +171,15 @@ export function CategoryFormSheet({
   const editedFields = React.useRef({ slug: false, imageAlt: false })
   const isEditing = Boolean(category)
   const imagePreviewUrl = getSiteAssetUrl(values.image_url)
+  const imageOptions = React.useMemo(
+    () =>
+      categoryImages.map((filename) => ({
+        filename,
+        label: filename.replace(/\.[^.]+$/, "").replaceAll("-", " "),
+        url: `/site-assets/categories/${encodeURIComponent(filename)}`,
+      })),
+    [categoryImages]
+  )
 
   React.useEffect(() => {
     if (!open) return
@@ -587,49 +583,63 @@ export function CategoryFormSheet({
                 </p>
               </div>
               <FieldGroup>
-                <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
-                  {CATEGORY_IMAGE_OPTIONS.map((image) => {
-                    const isSelected = values.image_url === image.url
+                <Accordion type="single" collapsible>
+                  <AccordionItem value="image-library">
+                    <AccordionTrigger className="items-center gap-2 px-3 py-2.5 text-muted-foreground hover:no-underline">
+                      <span className="flex items-center gap-2">
+                        <TagsIcon className="size-3.5 shrink-0 text-primary" />
+                        {t("IMAGE_DESCRIPTION")}
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-2">
+                      <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
+                        {imageOptions.map((image) => {
+                          const isSelected = values.image_url === image.url
 
-                    return (
-                      <Button
-                        key={image.filename}
-                        type="button"
-                        variant="outline"
-                        aria-label={image.label}
-                        aria-pressed={isSelected}
-                        disabled={isPending}
-                        onClick={() =>
-                          setValue("image_url", image.url, {
-                            shouldValidate: true,
-                            shouldDirty: true,
-                          })
-                        }
-                        className={`relative h-auto w-full flex-col gap-1.5 p-1.5 ${
-                          isSelected
-                            ? "border-primary ring-2 ring-primary/20"
-                            : ""
-                        }`}
-                      >
-                        <Avatar className="aspect-square size-full rounded-md after:rounded-md">
-                          <AvatarImage
-                            src={image.url}
-                            alt={image.label}
-                            className="rounded-md"
-                          />
-                          <AvatarFallback className="rounded-md bg-secondary">
-                            <TagsIcon className="size-4 text-primary" />
-                          </AvatarFallback>
-                        </Avatar>
-                        {isSelected && (
-                          <span className="absolute end-1 top-1 flex size-4 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                            <CheckIcon className="size-3" />
-                          </span>
-                        )}
-                      </Button>
-                    )
-                  })}
-                </div>
+                          return (
+                            <Button
+                              key={image.filename}
+                              type="button"
+                              variant="outline"
+                              aria-label={image.label}
+                              aria-pressed={isSelected}
+                              disabled={isPending}
+                              onClick={() =>
+                                setValue("image_url", image.url, {
+                                  shouldValidate: true,
+                                  shouldDirty: true,
+                                })
+                              }
+                              className={`relative h-auto w-full p-1 ${
+                                isSelected
+                                  ? "border-primary ring-2 ring-primary/20"
+                                  : ""
+                              }`}
+                            >
+                              <span className="relative block aspect-square w-full overflow-hidden rounded-md">
+                                <Avatar className="absolute inset-0 size-full rounded-md after:rounded-md">
+                                  <AvatarImage
+                                    src={image.url}
+                                    alt={image.label}
+                                    className="rounded-md"
+                                  />
+                                  <AvatarFallback className="rounded-md bg-secondary">
+                                    <TagsIcon className="size-4 text-primary" />
+                                  </AvatarFallback>
+                                </Avatar>
+                              </span>
+                              {isSelected && (
+                                <span className="absolute end-1 top-1 flex size-4 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                                  <CheckIcon className="size-3" />
+                                </span>
+                              )}
+                            </Button>
+                          )
+                        })}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
                 {imagePreviewUrl && (
                   <div className="flex items-center gap-3 rounded-lg border border-border/60 p-3">
                     <Avatar className="size-14 rounded-lg after:rounded-lg">

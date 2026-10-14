@@ -8,7 +8,7 @@
 import { cookies } from "next/headers"
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { ApiResult } from "@/lib/actions/types/utils"
+import type { ApiResult } from "@/lib/actions/types/utils"
 
 export async function signOut(): Promise<ApiResult<null>> {
   try {

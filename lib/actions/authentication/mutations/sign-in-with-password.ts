@@ -8,24 +8,19 @@
 import { cookies } from "next/headers"
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
+import { getValidationDetails } from "../../validation"
 import { signInWithPasswordSchema } from "../schemas"
-import { ApiResult } from "@/lib/actions/types/utils"
+import type { ApiResult } from "@/lib/actions/types/utils"
 
 export async function signInWithPassword(
   input: unknown
 ): Promise<ApiResult<null>> {
   const validation = signInWithPasswordSchema.safeParse(input)
   if (!validation.success) {
-    const fieldErrors: Record<string, string[]> = {}
-    for (const issue of validation.error.issues) {
-      const path = issue.path.join(".")
-      if (!fieldErrors[path]) fieldErrors[path] = []
-      fieldErrors[path].push(issue.message)
-    }
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: fieldErrors,
+      details: getValidationDetails(validation.error),
     }
   }
 
@@ -39,12 +34,11 @@ export async function signInWithPassword(
   })
 
   if (error) {
-    const errorCode =
-      error.message.includes("Invalid login credentials")
-        ? "INVALID_CREDENTIALS"
-        : error.message.includes("Email not confirmed")
-          ? "EMAIL_NOT_CONFIRMED"
-          : "SIGN_IN_USER_ERROR"
+    const errorCode = error.message.includes("Invalid login credentials")
+      ? "INVALID_CREDENTIALS"
+      : error.message.includes("Email not confirmed")
+        ? "EMAIL_NOT_CONFIRMED"
+        : "SIGN_IN_USER_ERROR"
 
     return {
       success: false,

@@ -600,6 +600,7 @@
     "PREVIOUS_PAGE": "الصفحة السابقة",
     "NEXT_PAGE": "الصفحة التالية",
     "LAST_PAGE": "الصفحة الأخيرة",
+    "ROWS_PER_PAGE": "الصفوف لكل صفحة:",
     "PAGE_COUNTER": "صفحة {page} من {total}",
     "ACTIVE": "نشط",
     "INACTIVE": "غير نشط",

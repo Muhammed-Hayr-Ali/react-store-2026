@@ -14,7 +14,7 @@ import {
   type ColumnDef,
   type VisibilityState,
 } from "@tanstack/react-table"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -38,6 +38,7 @@ import { Can } from "@/components/shared/can"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Label } from "@/components/ui/label"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -46,6 +47,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -66,6 +75,7 @@ const HIDEABLE_COLUMNS = ["slug", "sort_order", "status"]
 
 interface CategoriesTableProps {
   initialCategories: Category[]
+  categoryImages: string[]
   initialIsMobile?: boolean
 }
 
@@ -126,8 +136,10 @@ function CategoryRowActions({
 
 export function CategoriesTable({
   initialCategories,
+  categoryImages,
   initialIsMobile = false,
 }: CategoriesTableProps) {
+  const locale = useLocale()
   const t = useTranslations("CategoriesManagement")
   const isMobile = useIsMobile()
   const [categories, setCategories] =
@@ -171,11 +183,6 @@ export function CategoriesTable({
       pageIndex: 0,
     }))
   }, [isMobile])
-
-  const categoryById = React.useMemo(
-    () => new Map(categories.map((category) => [category.id, category])),
-    [categories]
-  )
 
   const activeCount = categories.filter(
     (category) => category.is_active === true
@@ -288,9 +295,6 @@ export function CategoriesTable({
         cell: ({ row }) => {
           const category = row.original
           const depth = categoryDepthById.get(category.id) ?? 0
-          const parent = category.parent_id
-            ? categoryById.get(category.parent_id)
-            : null
           const imageUrl = getSiteAssetUrl(category.image_url)
 
           return (
@@ -317,19 +321,19 @@ export function CategoriesTable({
                 </AvatarFallback>
               </Avatar>
               <div className="flex min-w-0 flex-col">
-                <span className="truncate text-xs font-semibold text-foreground">
-                  {category.name}
-                  {category.name_ar && (
-                    <span
-                      className="ms-1.5 font-normal text-muted-foreground"
-                      dir="rtl"
-                    >
-                      {category.name_ar}
-                    </span>
-                  )}
+                <span
+                  dir={locale === "ar" ? "rtl" : "ltr"}
+                  className="truncate text-xs font-semibold text-foreground"
+                >
+                  {locale === "ar"
+                    ? category.name_ar || category.name
+                    : category.name}
                 </span>
-                <span className="truncate text-[11px] text-muted-foreground">
-                  {parent?.name ?? t("NO_PARENT")}
+                <span
+                  dir="ltr"
+                  className="truncate font-mono text-[11px] text-muted-foreground"
+                >
+                  {category.slug}
                 </span>
               </div>
             </div>
@@ -374,7 +378,7 @@ export function CategoriesTable({
             // </Badge>
             <Badge
               variant="outline"
-              className={`uppercase" gap-1 truncate px-1.5 py-0.5 font-mono text-[11px] leading-tight ${
+              className={`gap-1 truncate px-1.5 py-0.5 font-mono text-[11px] leading-tight uppercase ${
                 isActive
                   ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                   : "border-amber-500/30 text-amber-600 dark:text-amber-400"
@@ -409,7 +413,7 @@ export function CategoriesTable({
         ),
       },
     ],
-    [categoryById, categoryDepthById, t]
+    [categoryDepthById, locale, t]
   )
 
   const table = useReactTable({
@@ -579,6 +583,7 @@ export function CategoriesTable({
             open={formOpen}
             category={editingCategory}
             categories={categories}
+            categoryImages={categoryImages}
             trigger={
               <Button
                 type="button"
@@ -664,61 +669,93 @@ export function CategoriesTable({
         </div>
       </div>
 
-      {filteredCategories.length > 10 && (
-        <div className="flex flex-wrap items-center justify-between gap-3 px-1 py-1">
-          <p className="text-xs text-muted-foreground">
-            {t("CATEGORY_COUNT", { count: filteredCategories.length })}
-          </p>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="outline"
-              size="icon"
-              className="size-7"
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-              aria-label={t("FIRST_PAGE")}
+      <div className="flex w-full flex-nowrap items-center justify-between gap-2 px-1">
+        <div className="flex min-w-0 shrink items-center gap-1.5 text-[11px] text-muted-foreground sm:gap-2 sm:text-xs">
+          <Label
+            htmlFor="category-rows-per-page"
+            className="text-xs font-medium whitespace-nowrap max-sm:sr-only"
+          >
+            {t("ROWS_PER_PAGE")}
+          </Label>
+          <Select
+            value={`${table.getState().pagination.pageSize}`}
+            onValueChange={(value) => table.setPageSize(Number(value))}
+          >
+            <SelectTrigger
+              size="sm"
+              className="h-8 w-18 shrink-0 text-xs"
+              id="category-rows-per-page"
             >
-              <ChevronsLeftIcon className="size-3.5 rtl:rotate-180" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="size-7"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-              aria-label={t("PREVIOUS_PAGE")}
-            >
-              <ChevronLeftIcon className="size-3.5 rtl:rotate-180" />
-            </Button>
-            <span className="px-2 text-[11px] text-muted-foreground">
-              {t("PAGE_COUNTER", {
-                page: table.getState().pagination.pageIndex + 1,
-                total: table.getPageCount(),
-              })}
-            </span>
-            <Button
-              variant="outline"
-              size="icon"
-              className="size-7"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-              aria-label={t("NEXT_PAGE")}
-            >
-              <ChevronRightIcon className="size-3.5 rtl:rotate-180" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="size-7"
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
-              aria-label={t("LAST_PAGE")}
-            >
-              <ChevronsRightIcon className="size-3.5 rtl:rotate-180" />
-            </Button>
-          </div>
+              <SelectValue placeholder={table.getState().pagination.pageSize} />
+            </SelectTrigger>
+            <SelectContent side="top" className="text-xs">
+              <SelectGroup>
+                {[10, 20, 30, 40, 50].map((pageSize) => (
+                  <SelectItem
+                    key={pageSize}
+                    value={`${pageSize}`}
+                    className="text-xs"
+                  >
+                    {pageSize}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <span className="ms-1.5 shrink-0 whitespace-nowrap sm:ms-2">
+            {t("PAGE_COUNTER", {
+              page: table.getState().pagination.pageIndex + 1,
+              total: table.getPageCount() || 1,
+            })}
+          </span>
         </div>
-      )}
+
+        <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
+          <Button
+            variant="outline"
+            className="hidden size-8 p-0 sm:flex"
+            onClick={() => table.setPageIndex(0)}
+            disabled={!table.getCanPreviousPage()}
+            title={t("FIRST_PAGE")}
+          >
+            <ChevronsLeftIcon className="size-4 rtl:rotate-180" />
+            <span className="sr-only">{t("FIRST_PAGE")}</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-8"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            title={t("PREVIOUS_PAGE")}
+          >
+            <ChevronLeftIcon className="size-4 rtl:rotate-180" />
+            <span className="sr-only">{t("PREVIOUS_PAGE")}</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-8"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            title={t("NEXT_PAGE")}
+          >
+            <ChevronRightIcon className="size-4 rtl:rotate-180" />
+            <span className="sr-only">{t("NEXT_PAGE")}</span>
+          </Button>
+          <Button
+            variant="outline"
+            className="hidden size-8 sm:flex"
+            size="icon"
+            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+            disabled={!table.getCanNextPage()}
+            title={t("LAST_PAGE")}
+          >
+            <ChevronsRightIcon className="size-4 rtl:rotate-180" />
+            <span className="sr-only">{t("LAST_PAGE")}</span>
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }

@@ -151,7 +151,7 @@ export function UserStatusDialog({
                 onValueChange={(val) => setStatus(val as UserStatus)}
                 disabled={isPending}
               >
-                <SelectTrigger className="h-12 text-xs">
+                <SelectTrigger className="h-9 text-xs">
                   <SelectValue placeholder={t("SELECT_STATUS_PLACEHOLDER")} />
                 </SelectTrigger>
                 <SelectContent className="text-xs">

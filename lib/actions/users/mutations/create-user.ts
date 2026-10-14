@@ -6,10 +6,11 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { getValidationDetails } from "../../validation"
 import { createAdminClient } from "@/lib/database/supabase/admin"
-import { ApiResult } from "@/lib/actions/types/utils"
-import { AdminUserSummary } from "../types"
-import { createUserSchema, CreateUserFormValues } from "../schemas"
+import type { ApiResult } from "@/lib/actions/types/utils"
+import type { AdminUserSummary } from "../types"
+import { createUserSchema, type CreateUserFormValues } from "../schemas"
 import { hasPermission, PERMISSIONS } from "../../role"
 
 export async function createUser(
@@ -22,13 +23,11 @@ export async function createUser(
 
   const validation = createUserSchema.safeParse(input)
   if (!validation.success) {
-    const fieldErrors: Record<string, string[]> = {}
-    for (const issue of validation.error.issues) {
-      const path = issue.path.join(".")
-      if (!fieldErrors[path]) fieldErrors[path] = []
-      fieldErrors[path].push(issue.message)
+    return {
+      success: false,
+      error: "VALIDATION_ERROR",
+      details: getValidationDetails(validation.error),
     }
-    return { success: false, error: "VALIDATION_ERROR", details: fieldErrors }
   }
 
   const safeData = validation.data

@@ -6,10 +6,11 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { getValidationDetails } from "../../validation"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { hasPermission, PERMISSIONS } from "../index"
-import { assignUserRoleSchema, AssignUserRoleInput } from "../schemas"
-import { ApiResult } from "@/lib/actions/types/utils"
+import { assignUserRoleSchema, type AssignUserRoleInput } from "../schemas"
+import type { ApiResult } from "@/lib/actions/types/utils"
 
 export async function assignRoleToUser(
   input: AssignUserRoleInput
@@ -24,16 +25,10 @@ export async function assignRoleToUser(
 
   const validation = assignUserRoleSchema.safeParse(input)
   if (!validation.success) {
-    const fieldErrors: Record<string, string[]> = {}
-    for (const issue of validation.error.issues) {
-      const path = issue.path.join(".")
-      if (!fieldErrors[path]) fieldErrors[path] = []
-      fieldErrors[path].push(issue.message)
-    }
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: fieldErrors,
+      details: getValidationDetails(validation.error),
     }
   }
 

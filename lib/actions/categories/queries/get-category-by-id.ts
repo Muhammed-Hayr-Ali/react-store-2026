@@ -10,7 +10,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { hasPermission, PERMISSIONS } from "../../role"
 import { categoryIdSchema, type CategoryIdInput } from "../schemas"
 import type { Category } from "../types"
-import { getValidationDetails } from "../helpers"
+import { getValidationDetails } from "../../validation"
 
 export async function getCategoryById(
   input: CategoryIdInput

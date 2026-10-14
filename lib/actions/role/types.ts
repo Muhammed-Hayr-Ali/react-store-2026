@@ -10,7 +10,7 @@ export const ROLES = {
 export type AppRole = (typeof ROLES)[keyof typeof ROLES]
 
 export const PERMISSIONS = {
-  // --- 0. General & Dashboard Views (أذونات العرض القياسية) ---
+  // --- 0. General & Dashboard Views ---
   VIEW_USER_OVERVIEW: "view_user_overview",
   VIEW_ADMIN_OVERVIEW: "view_admin_overview",
   VIEW_USER_ORDERS: "view_user_orders",
@@ -25,7 +25,7 @@ export const PERMISSIONS = {
   VIEW_STAFF_ACCESS: "view_staff_access",
   VIEW_NOTIFICATIONS_MANAGEMENT: "view_notifications_management",
   VIEW_NOTIFICATION_CHANNELS_MANAGEMENT:
-    "view_notification_channels_management", // صلاحية جديدة لعرض صفحة القنوات
+    "view_notification_channels_management", // View notification channels management.
 
   // --- 1. Brands Management ---
   CREATE_BRAND: "create_brand",
@@ -44,15 +44,15 @@ export const PERMISSIONS = {
   UPDATE_FLASH_SALE: "update_flash_sale",
   DELETE_FLASH_SALE: "delete_flash_sale",
 
-  // --- 4. Notifications & Broadcasts (الإشعارات والبث فقط) ---
+  // --- 4. Notifications & Broadcasts ---
   CREATE_NOTIFICATION: "create_notification",
   UPDATE_NOTIFICATION: "update_notification",
   ASSIGN_NOTIFICATION: "assign_notification",
   DELETE_NOTIFICATION: "delete_notification",
   SEND_NOTIFICATION: "send_notification",
-  BROADCAST_NOTIFICATION: "broadcast_notification", // صلاحية إرسال بث جماعي
+  BROADCAST_NOTIFICATION: "broadcast_notification", // Send a broadcast notification.
 
-  // --- 4.1 Notification Channels (إدارة قنوات الإشعارات) ---
+  // --- 4.1 Notification Channels ---
   CREATE_NOTIFICATION_CHANNEL: "create_notification_channel",
   UPDATE_NOTIFICATION_CHANNEL: "update_notification_channel",
   DELETE_NOTIFICATION_CHANNEL: "delete_notification_channel",

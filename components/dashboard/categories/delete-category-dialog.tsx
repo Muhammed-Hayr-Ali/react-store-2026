@@ -144,7 +144,7 @@ export function DeleteCategoryDialog({
             )}
           />
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending} className="text-xs">
+            <AlertDialogCancel disabled={isPending} className="mt-0 text-xs">
               {t("CANCEL_BUTTON")}
             </AlertDialogCancel>
             <Button
