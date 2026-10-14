@@ -16,6 +16,7 @@ import {
   Layers3Icon,
   LoaderCircleIcon,
   PackageOpenIcon,
+  CheckIcon,
   TagsIcon,
 } from "lucide-react"
 
@@ -47,7 +48,11 @@ import {
 } from "@/components/ui/sheet"
 import { Textarea } from "@/components/ui/textarea"
 import { createCategory, updateCategory } from "@/lib/actions/categories"
-import type { Category, CategoryInput } from "@/lib/actions/categories"
+import type { Category } from "@/lib/actions/categories"
+import {
+  isValidCategoryImageUrl,
+  type CategoryInput,
+} from "@/lib/actions/categories/schemas"
 import { getSiteAssetUrl } from "@/lib/database/supabase/storage"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 
@@ -85,6 +90,27 @@ const emptyFormState: CategoryFormState = {
   sort_order: "0",
   is_active: true,
 }
+
+const CATEGORY_IMAGE_OPTIONS = [
+  "17016590.png",
+  "baby-food.png",
+  "Beverages.png",
+  "breakfast-cereals.png",
+  "canned-goods.png",
+  "cleaning-supplies.png",
+  "dairy-eggs.png",
+  "frozen-foods.png",
+  "meat-seafood.png",
+  "nachos.png",
+  "oils-spices.png",
+  "personal-care.png",
+  "rice-pasta-grains.png",
+  "sweets-chocolate.png",
+].map((filename) => ({
+  filename,
+  label: filename.replace(/\.[^.]+$/, "").replaceAll("-", " "),
+  url: `/site-assets/categories/${filename}`,
+}))
 
 function makeFormState(category: Category | null): CategoryFormState {
   return {
@@ -133,15 +159,10 @@ export function CategoryFormSheet({
           .string()
           .trim()
           .max(508, t("INVALID_IMAGE_URL_ERROR"))
-          .refine((value) => {
-            if (!value) return true
-            try {
-              new URL(value)
-              return true
-            } catch {
-              return false
-            }
-          }, t("INVALID_IMAGE_URL_ERROR")),
+          .refine(
+            (value) => !value || isValidCategoryImageUrl(value),
+            t("INVALID_IMAGE_URL_ERROR")
+          ),
         image_alt: z.string().max(255, t("CATEGORY_IMAGE_ALT_TOO_LONG_ERROR")),
         sort_order: z
           .string()
@@ -566,6 +587,49 @@ export function CategoryFormSheet({
                 </p>
               </div>
               <FieldGroup>
+                <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
+                  {CATEGORY_IMAGE_OPTIONS.map((image) => {
+                    const isSelected = values.image_url === image.url
+
+                    return (
+                      <Button
+                        key={image.filename}
+                        type="button"
+                        variant="outline"
+                        aria-label={image.label}
+                        aria-pressed={isSelected}
+                        disabled={isPending}
+                        onClick={() =>
+                          setValue("image_url", image.url, {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          })
+                        }
+                        className={`relative h-auto w-full flex-col gap-1.5 p-1.5 ${
+                          isSelected
+                            ? "border-primary ring-2 ring-primary/20"
+                            : ""
+                        }`}
+                      >
+                        <Avatar className="aspect-square size-full rounded-md after:rounded-md">
+                          <AvatarImage
+                            src={image.url}
+                            alt={image.label}
+                            className="rounded-md"
+                          />
+                          <AvatarFallback className="rounded-md bg-secondary">
+                            <TagsIcon className="size-4 text-primary" />
+                          </AvatarFallback>
+                        </Avatar>
+                        {isSelected && (
+                          <span className="absolute end-1 top-1 flex size-4 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                            <CheckIcon className="size-3" />
+                          </span>
+                        )}
+                      </Button>
+                    )
+                  })}
+                </div>
                 {imagePreviewUrl && (
                   <div className="flex items-center gap-3 rounded-lg border border-border/60 p-3">
                     <Avatar className="size-14 rounded-lg after:rounded-lg">
@@ -597,7 +661,6 @@ export function CategoryFormSheet({
                       <Input
                         {...field}
                         id="category-image-url"
-                        type="url"
                         dir="ltr"
                         placeholder={t("IMAGE_URL_PLACEHOLDER")}
                         disabled={isPending}

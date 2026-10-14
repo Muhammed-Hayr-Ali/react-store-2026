@@ -11,6 +11,10 @@ export function getSiteAssetUrl(
 ): string | null {
   if (!path) return null
 
+  if (path.startsWith("/site-assets/")) {
+    return path
+  }
+
   // Preserve fully qualified URLs instead of treating them as storage paths.
   if (path.startsWith("http://") || path.startsWith("https://")) {
     return path

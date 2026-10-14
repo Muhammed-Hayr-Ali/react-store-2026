@@ -636,7 +636,7 @@
     "SORT_ORDER_PLACEHOLDER": "0",
     "ACTIVE_LABEL": "Visible in storefront",
     "IMAGE_SECTION": "Category image",
-    "IMAGE_DESCRIPTION": "Optional image and accessible alternative text.",
+    "IMAGE_DESCRIPTION": "Choose an image from the library or enter an image URL.",
     "IMAGE_URL_LABEL": "Image URL",
     "IMAGE_URL_PLACEHOLDER": "https://example.com/category.jpg",
     "IMAGE_PREVIEW_LABEL": "Image preview",

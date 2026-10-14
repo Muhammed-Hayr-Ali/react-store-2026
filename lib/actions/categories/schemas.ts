@@ -5,6 +5,17 @@
 
 import { z } from "zod"
 
+export function isValidCategoryImageUrl(value: string): boolean {
+  if (value.startsWith("/") && !value.startsWith("//")) return true
+
+  try {
+    const url = new URL(value)
+    return url.protocol === "http:" || url.protocol === "https:"
+  } catch {
+    return false
+  }
+}
+
 export const categorySchema = z.object({
   id: z.string().uuid({ message: "INVALID_UUID_ERROR" }),
   parent_id: z.string().uuid({ message: "INVALID_PARENT_ID_ERROR" }).nullable(),
@@ -27,8 +38,11 @@ export const categorySchema = z.object({
   description_ar: z.string().nullable(),
   image_url: z
     .string()
-    .url({ message: "INVALID_IMAGE_URL_ERROR" })
+    .trim()
     .max(508, { message: "INVALID_IMAGE_URL_ERROR" })
+    .refine(isValidCategoryImageUrl, {
+      message: "INVALID_IMAGE_URL_ERROR",
+    })
     .nullable()
     .or(z.literal("")),
   image_alt: z

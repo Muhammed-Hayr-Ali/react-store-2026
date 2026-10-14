@@ -10,10 +10,8 @@ import {
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
-  getSortedRowModel,
   useReactTable,
   type ColumnDef,
-  type SortingState,
   type VisibilityState,
 } from "@tanstack/react-table"
 import { useTranslations } from "next-intl"
@@ -22,7 +20,10 @@ import {
   ChevronRightIcon,
   ChevronsLeftIcon,
   ChevronsRightIcon,
+  CircleAlertIcon,
+  CircleCheckIcon,
   Columns3Icon,
+  CornerDownRightIcon,
   FilterIcon,
   MoreHorizontalIcon,
   PencilIcon,
@@ -133,9 +134,6 @@ export function CategoriesTable({
     React.useState<Category[]>(initialCategories)
   const [search, setSearch] = React.useState("")
   const [filter, setFilter] = React.useState<CategoryFilter>("all")
-  const [sorting, setSorting] = React.useState<SortingState>([
-    { id: "sort_order", desc: false },
-  ])
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(() => {
       const initial: VisibilityState = {}
@@ -199,6 +197,64 @@ export function CategoriesTable({
     })
   }, [categories, filter, search])
 
+  const categoryTree = React.useMemo(() => {
+    const visibleIds = new Set(
+      filteredCategories.map((category) => category.id)
+    )
+    const childrenByParent = new Map<string | null, Category[]>()
+
+    for (const category of filteredCategories) {
+      const parentId =
+        category.parent_id && visibleIds.has(category.parent_id)
+          ? category.parent_id
+          : null
+      const siblings = childrenByParent.get(parentId) ?? []
+      siblings.push(category)
+      childrenByParent.set(parentId, siblings)
+    }
+
+    const sortSiblings = (siblings: Category[]) =>
+      siblings.sort(
+        (left, right) =>
+          (left.sort_order ?? 0) - (right.sort_order ?? 0) ||
+          left.name.localeCompare(right.name)
+      )
+    const rows: { category: Category; depth: number }[] = []
+    const visited = new Set<string>()
+
+    const addBranch = (category: Category, depth: number) => {
+      if (visited.has(category.id)) return
+      visited.add(category.id)
+      rows.push({ category, depth })
+
+      for (const child of sortSiblings(
+        childrenByParent.get(category.id) ?? []
+      )) {
+        addBranch(child, depth + 1)
+      }
+    }
+
+    for (const root of sortSiblings(childrenByParent.get(null) ?? [])) {
+      addBranch(root, 0)
+    }
+
+    for (const category of filteredCategories) {
+      addBranch(category, 0)
+    }
+
+    return rows
+  }, [filteredCategories])
+
+  const categoryDepthById = React.useMemo(
+    () =>
+      new Map(categoryTree.map(({ category, depth }) => [category.id, depth])),
+    [categoryTree]
+  )
+  const tableData = React.useMemo(
+    () => categoryTree.map(({ category }) => category),
+    [categoryTree]
+  )
+
   const handleSaved = (savedCategory: Category) => {
     setCategories((current) => {
       const exists = current.some(
@@ -231,13 +287,23 @@ export function CategoriesTable({
         enableHiding: false,
         cell: ({ row }) => {
           const category = row.original
+          const depth = categoryDepthById.get(category.id) ?? 0
           const parent = category.parent_id
             ? categoryById.get(category.parent_id)
             : null
           const imageUrl = getSiteAssetUrl(category.image_url)
 
           return (
-            <div className="flex min-w-0 items-center gap-2.5">
+            <div
+              className="flex min-w-0 items-center gap-2.5"
+              style={{ paddingInlineStart: `${depth * 16}px` }}
+            >
+              {depth > 0 && (
+                <CornerDownRightIcon
+                  aria-hidden="true"
+                  className="size-3.5 shrink-0 text-muted-foreground"
+                />
+              )}
               <Avatar className="size-7 shrink-0 rounded-lg after:rounded-lg">
                 {imageUrl && (
                   <AvatarImage
@@ -300,11 +366,28 @@ export function CategoriesTable({
         cell: ({ row }) => {
           const isActive = row.original.is_active === true
           return (
+            // <Badge
+            //   variant={isActive ? "secondary" : "outline"}
+            //   className="px-1.5 py-0.5 text-[10px] font-medium"
+            // >
+            //   {t(isActive ? "ACTIVE" : "INACTIVE")}
+            // </Badge>
             <Badge
-              variant={isActive ? "secondary" : "outline"}
-              className="px-1.5 py-0.5 text-[10px] font-medium"
+              variant="outline"
+              className={`uppercase" gap-1 truncate px-1.5 py-0.5 font-mono text-[11px] leading-tight ${
+                isActive
+                  ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                  : "border-amber-500/30 text-amber-600 dark:text-amber-400"
+              }`}
             >
-              {t(isActive ? "ACTIVE" : "INACTIVE")}
+              {isActive ? (
+                <CircleCheckIcon className="size-3 fill-emerald-500 text-background" />
+              ) : (
+                <CircleAlertIcon className="size-3 fill-amber-500 text-background" />
+              )}
+              <span className="capitalize">
+                {t(isActive ? "ACTIVE" : "INACTIVE")}
+              </span>
             </Badge>
           )
         },
@@ -326,19 +409,17 @@ export function CategoriesTable({
         ),
       },
     ],
-    [categoryById, t]
+    [categoryById, categoryDepthById, t]
   )
 
   const table = useReactTable({
-    data: filteredCategories,
+    data: tableData,
     columns,
-    state: { sorting, columnVisibility, pagination },
-    onSortingChange: setSorting,
+    state: { columnVisibility, pagination },
     onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange: setPagination,
     getRowId: (category) => category.id,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   })
 
@@ -360,8 +441,6 @@ export function CategoriesTable({
 
   return (
     <div className="space-y-4">
- 
-
       <div className="flex flex-nowrap items-center gap-2">
         <div className="relative min-w-0 flex-1">
           <SearchIcon className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />

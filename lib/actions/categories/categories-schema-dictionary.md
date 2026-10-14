@@ -15,7 +15,7 @@
 | `slug` | `VARCHAR(255)` | `string` | `z.string().min(1)` | المعرف النصي الفريد المستعمل في روابط المتجر (URLs). |
 | `description` | `TEXT` | `string \| null` | `z.string().nullable()` | الوصف التفصيلي باللغة الإنجليزية. |
 | `description_ar` | `TEXT` | `string \| null` | `z.string().nullable()` | الوصف التفصيلي باللغة العربية. |
-| `image_url` | `VARCHAR(508)` | `string \| null` | `z.string().url().nullable()` | رابط صورة التصنيف الأساسية. |
+| `image_url` | `VARCHAR(508)` | `string \| null` | رابط مطلق بـ HTTP(S) أو مسار يبدأ بشرطة مائلة واحدة، مثل `/categories/Snacks.png`. |
 | `image_alt` | `VARCHAR(255)` | `string \| null` | `z.string().nullable()` | النص البديل للصورة لأغراض محركات البحث والوصول (SEO). |
 | `sort_order` | `INTEGER` | `number` | `z.number().int().default(0)` | حقل رقمي للتحكم بترتيب عرض التصنيفات يدوياً. |
 | `is_active` | `BOOLEAN` | `boolean` | `z.boolean().default(true)` | حالة تفعيل أو إيقاف عرض التصنيف في المتجر. |
