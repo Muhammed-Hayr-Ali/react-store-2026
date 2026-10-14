@@ -1,12 +1,13 @@
 /**
  * @file lib/actions/role/queries/get-users-with-roles.ts
- * @description Retrieve users with their assigned roles from profiles and user_roles tables.
+ * @description Retrieves users with their assigned roles.
  */
 
 "use server"
 
-import { createServerClient } from "@/lib/database/supabase/server"
 import type { ApiResult } from "@/lib/actions/types/utils"
+import { createServerClient } from "@/lib/database/supabase/server"
+
 import type { RoleRecord } from "../mutations/create-role"
 
 export interface UserWithRoles {

@@ -1,17 +1,19 @@
 /**
  * @file lib/actions/users/mutations/update-user.ts
- * @description Server Action to update user profile information.
+ * @description Updates a user's profile information.
  */
 
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { getValidationDetails } from "../../validation"
-import { createServerClient } from "@/lib/database/supabase/server"
+
 import type { ApiResult } from "@/lib/actions/types/utils"
-import { hasPermission, PERMISSIONS } from "../../role"
-import { updateUserSchema, type UpdateUserFormValues } from "../schemas"
 import { appRoutes } from "@/lib/config/app-routes"
+import { createServerClient } from "@/lib/database/supabase/server"
+
+import { hasPermission, PERMISSIONS } from "../../role"
+import { getValidationDetails } from "../../validation"
+import { updateUserSchema, type UpdateUserFormValues } from "../schemas"
 
 export async function updateUser(
   input: UpdateUserFormValues

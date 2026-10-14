@@ -1,20 +1,22 @@
 /**
  * @file lib/actions/users/mutations/update-user-status.ts
- * @description Server Action to change a user's status (active, suspended, banned).
+ * @description Updates a user's account status.
  */
 
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { getValidationDetails } from "../../validation"
-import { createServerClient } from "@/lib/database/supabase/server"
+
 import type { ApiResult } from "@/lib/actions/types/utils"
+import { appRoutes } from "@/lib/config/app-routes"
+import { createServerClient } from "@/lib/database/supabase/server"
+
 import { hasPermission, PERMISSIONS } from "../../role"
+import { getValidationDetails } from "../../validation"
 import {
   updateUserStatusSchema,
   type UpdateUserStatusFormValues,
 } from "../schemas"
-import { appRoutes } from "@/lib/config/app-routes"
 
 export async function updateUserStatus(
   input: UpdateUserStatusFormValues

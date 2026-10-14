@@ -1,12 +1,13 @@
 /**
  * @file lib/actions/role/queries/get-all-roles.ts
- * @description Fetch all system roles and their permissions.
+ * @description Retrieves all system roles and their permissions.
  */
 
 "use server"
 
-import { createServerClient } from "@/lib/database/supabase/server"
 import type { ApiResult } from "@/lib/actions/types/utils"
+import { createServerClient } from "@/lib/database/supabase/server"
+
 import type { RoleRecord } from "../mutations/create-role"
 
 export async function getAllRoles(): Promise<ApiResult<RoleRecord[]>> {

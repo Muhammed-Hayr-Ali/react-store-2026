@@ -5,16 +5,18 @@
 
 "use server"
 
-import React from "react"
-import { cookies } from "next/headers"
 import { revalidatePath } from "next/cache"
+import { cookies } from "next/headers"
+import React from "react"
+
+import type { ApiResult } from "@/lib/actions/types/utils"
+import { appRoutes } from "@/lib/config/app-routes"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { sendEmail } from "@/lib/services/email/send-email"
 import WelcomeEmail from "@/lib/services/email/templates/welcome-email"
-import { appRoutes } from "@/lib/config/app-routes"
+
 import { getValidationDetails } from "../../validation"
 import { signUpWithPasswordSchema } from "../schemas"
-import type { ApiResult } from "@/lib/actions/types/utils"
 
 export async function signUpWithPassword(
   input: unknown

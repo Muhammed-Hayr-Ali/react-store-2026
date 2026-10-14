@@ -5,9 +5,10 @@
 
 "use server"
 
-import { createClient } from "@/lib/database/supabase/server"
-import type { UserStatus } from "../types"
 import type { ApiResult } from "@/lib/actions/types/utils"
+import { createClient } from "@/lib/database/supabase/server"
+
+import type { UserStatus } from "../types"
 
 interface CurrentUserStatus {
   isAuthenticated: boolean

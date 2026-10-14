@@ -1,28 +1,27 @@
-"use server"
-
 /**
  * @file lib/actions/role/mutations/delete-role.ts
- * @description Server Action to delete a role that has no user assignments.
+ * @description Deletes a role that has no user assignments.
  */
 
+"use server"
+
 import { revalidatePath } from "next/cache"
-import { getValidationDetails } from "../../validation"
+
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
+
+import { getValidationDetails } from "../../validation"
 import { hasPermission, PERMISSIONS } from "../index"
 import { deleteRoleSchema, type DeleteRoleInput } from "../schemas"
 
-// Delete a role only when no user currently depends on it.
 export async function deleteRole(
   input: DeleteRoleInput
 ): Promise<ApiResult<null>> {
-  // Require deletion permission before validating or accessing role data.
   const canDelete = await hasPermission(PERMISSIONS.DELETE_ROLE)
   if (!canDelete) {
     return { success: false, error: "PERMISSION_DENIED" }
   }
 
-  // Validate the role identifier before using it in database queries.
   const validation = deleteRoleSchema.safeParse(input)
   if (!validation.success) {
     return {
@@ -33,7 +32,6 @@ export async function deleteRole(
   }
 
   const supabase = await createServerClient()
-  // Block deletion before reaching the role foreign-key constraint.
   const { count, error: assignmentsError } = await supabase
     .from("user_roles")
     .select("role_id", { count: "exact", head: true })
@@ -51,7 +49,7 @@ export async function deleteRole(
     return { success: false, error: "ROLE_IN_USE" }
   }
 
-  // Recheck through the delete itself to handle assignments added concurrently.
+  // The delete also catches assignments created after the initial count check.
   const { data: deletedRole, error } = await supabase
     .from("roles")
     .delete()

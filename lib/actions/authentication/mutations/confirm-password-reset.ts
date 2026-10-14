@@ -5,10 +5,11 @@
 
 "use server"
 
+import type { ApiResult } from "@/lib/actions/types/utils"
 import { createAdminClient } from "@/lib/database/supabase/admin"
+
 import { getValidationDetails } from "../../validation"
 import { confirmPasswordResetSchema } from "../schemas"
-import type { ApiResult } from "@/lib/actions/types/utils"
 
 export async function confirmPasswordReset(
   input: unknown

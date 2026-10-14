@@ -6,18 +6,21 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
+
 import { hasPermission, PERMISSIONS } from "../../role"
+import { getValidationDetails } from "../../validation"
+import { validateCategoryParent } from "../helpers"
 import { updateCategorySchema, type UpdateCategoryInput } from "../schemas"
 import type { Category } from "../types"
-import { validateCategoryParent } from "../helpers"
-import { getValidationDetails } from "../../validation"
 
 export async function updateCategory(
   input: UpdateCategoryInput
 ): Promise<ApiResult<Category>> {
-  if (!(await hasPermission(PERMISSIONS.UPDATE_CATEGORY))) {
+  const canUpdate = await hasPermission(PERMISSIONS.UPDATE_CATEGORY)
+  if (!canUpdate) {
     return { success: false, error: "PERMISSION_DENIED" }
   }
 
@@ -52,13 +55,20 @@ export async function updateCategory(
     .maybeSingle()
 
   if (error) {
-    const isSlugConflict =
-      error.code === "23505" && error.message.toLowerCase().includes("slug")
+    if (
+      error.code === "23505" &&
+      error.message.toLowerCase().includes("slug")
+    ) {
+      return {
+        success: false,
+        error: "CATEGORY_SLUG_ALREADY_EXISTS",
+        details: { database: [error.message] },
+      }
+    }
+
     return {
       success: false,
-      error: isSlugConflict
-        ? "CATEGORY_SLUG_ALREADY_EXISTS"
-        : "UPDATE_CATEGORY_ERROR",
+      error: "UPDATE_CATEGORY_ERROR",
       details: { database: [error.message] },
     }
   }

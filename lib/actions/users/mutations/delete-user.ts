@@ -1,16 +1,18 @@
 /**
  * @file lib/actions/users/mutations/delete-user.ts
- * @description Server Action to completely delete a user from auth and profiles.
+ * @description Deletes a user account and its profile.
  */
 
 "use server"
 
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
-import { createAdminClient } from "@/lib/database/supabase/admin"
+
 import type { ApiResult } from "@/lib/actions/types/utils"
-import { hasPermission, PERMISSIONS } from "../../role"
 import { appRoutes } from "@/lib/config/app-routes"
+import { createAdminClient } from "@/lib/database/supabase/admin"
+
+import { hasPermission, PERMISSIONS } from "../../role"
 
 interface DeleteUserInput {
   userId: string

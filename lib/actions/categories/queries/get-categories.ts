@@ -7,10 +7,11 @@
 
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
+
 import { hasPermission, PERMISSIONS } from "../../role"
+import { getValidationDetails } from "../../validation"
 import { getCategoriesSchema, type GetCategoriesInput } from "../schemas"
 import type { Category } from "../types"
-import { getValidationDetails } from "../../validation"
 
 export async function getCategories(
   input: GetCategoriesInput = {}
@@ -25,11 +26,13 @@ export async function getCategories(
   }
 
   const { includeInactive, parentId } = validation.data
-  if (
-    includeInactive &&
-    !(await hasPermission(PERMISSIONS.VIEW_CATEGORIES_MANAGEMENT))
-  ) {
-    return { success: false, error: "PERMISSION_DENIED" }
+  if (includeInactive) {
+    const canViewManagement = await hasPermission(
+      PERMISSIONS.VIEW_CATEGORIES_MANAGEMENT
+    )
+    if (!canViewManagement) {
+      return { success: false, error: "PERMISSION_DENIED" }
+    }
   }
 
   const supabase = await createServerClient()

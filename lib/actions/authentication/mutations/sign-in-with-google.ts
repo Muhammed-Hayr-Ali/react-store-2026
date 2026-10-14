@@ -6,10 +6,14 @@
 "use server"
 
 import { cookies } from "next/headers"
+
 import { createServerClient } from "@/lib/database/supabase/server"
+
 import type { ApiResult, OAuthSignInResult } from "../types"
 
-export async function signInWithGoogle(): Promise<ApiResult<OAuthSignInResult>> {
+export async function signInWithGoogle(): Promise<
+  ApiResult<OAuthSignInResult>
+> {
   const supabase = await createServerClient()
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
 

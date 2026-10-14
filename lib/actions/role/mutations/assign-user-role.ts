@@ -1,16 +1,18 @@
 /**
  * @file lib/actions/role/mutations/assign-user-role.ts
- * @description Server Action to associate a role with a user in user_roles.
+ * @description Assigns a role to a user.
  */
 
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { getValidationDetails } from "../../validation"
+
+import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
+
+import { getValidationDetails } from "../../validation"
 import { hasPermission, PERMISSIONS } from "../index"
 import { assignUserRoleSchema, type AssignUserRoleInput } from "../schemas"
-import type { ApiResult } from "@/lib/actions/types/utils"
 
 export async function assignRoleToUser(
   input: AssignUserRoleInput

@@ -1,17 +1,19 @@
 /**
  * @file lib/actions/users/mutations/create-user.ts
- * @description Server Action to create a new user via Supabase Admin API.
+ * @description Creates a user account and its profile using the Supabase Admin API.
  */
 
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { getValidationDetails } from "../../validation"
-import { createAdminClient } from "@/lib/database/supabase/admin"
+
 import type { ApiResult } from "@/lib/actions/types/utils"
-import type { AdminUserSummary } from "../types"
-import { createUserSchema, type CreateUserFormValues } from "../schemas"
+import { createAdminClient } from "@/lib/database/supabase/admin"
+
 import { hasPermission, PERMISSIONS } from "../../role"
+import { getValidationDetails } from "../../validation"
+import { createUserSchema, type CreateUserFormValues } from "../schemas"
+import type { AdminUserSummary } from "../types"
 
 export async function createUser(
   input: CreateUserFormValues

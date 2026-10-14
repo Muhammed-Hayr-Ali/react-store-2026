@@ -4,7 +4,7 @@ CREATE TABLE categories (
     parent_id UUID REFERENCES categories(id) ON DELETE SET NULL,
     name VARCHAR(255) NOT NULL,
     name_ar VARCHAR(255),
-    slug VARCHAR(255) UNIQUE NOT NULL,
+    slug VARCHAR(255) NOT NULL,
     description TEXT,
     description_ar TEXT,
     image_url VARCHAR(508),
@@ -12,7 +12,8 @@ CREATE TABLE categories (
     sort_order INTEGER DEFAULT 0,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    CONSTRAINT categories_slug_key UNIQUE (slug)
 );
 
 -- الفهارس لتحسين أداء الاستعلامات والبحث

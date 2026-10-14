@@ -1,12 +1,13 @@
 /**
  * @file lib/actions/users/queries/get-admin-users.ts
- * @description Fetches the list of all users for the admin dashboard via Supabase RPC.
+ * @description Retrieves users for the admin dashboard through Supabase RPC.
  */
 
 "use server"
 
-import { createServerClient } from "@/lib/database/supabase/server"
 import type { ApiResult } from "@/lib/actions/types/utils"
+import { createServerClient } from "@/lib/database/supabase/server"
+
 import type { AdminUserSummary, UserStatus } from "../types"
 
 interface GetAdminUsersInput {

@@ -6,7 +6,9 @@
 "use server"
 
 import { cache } from "react"
+
 import { createServerClient } from "@/lib/database/supabase/server"
+
 import type { AppPermission } from "./types"
 
 export const hasPermission = cache(

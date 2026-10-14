@@ -1,13 +1,14 @@
 /**
  * @file lib/actions/users/queries/get-current-user.ts
- * @description Fetches simplified current user profile, single role, and flat permissions array via Supabase RPC.
+ * @description Retrieves the current user's profile, role, and permissions.
  */
 
 "use server"
 
 import { cache } from "react"
-import { createServerClient } from "@/lib/database/supabase/server"
+
 import type { ApiResult } from "@/lib/actions/types/utils"
+import { createServerClient } from "@/lib/database/supabase/server"
 
 export type CurrentUser = {
   id: string
@@ -24,7 +25,6 @@ export type CurrentUser = {
   permissions: string[]
 }
 
-/** Retrieves the current user's profile, role, and permissions. */
 export const getCurrentUser = cache(
   async (): Promise<ApiResult<CurrentUser | null>> => {
     try {

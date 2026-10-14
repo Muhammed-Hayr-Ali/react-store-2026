@@ -1,14 +1,16 @@
 /**
  * @file lib/actions/role/mutations/update-role.ts
- * @description Server Action to update an existing role's permissions or description.
+ * @description Updates a role's permissions or description.
  */
 
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { getValidationDetails } from "../../validation"
-import { createServerClient } from "@/lib/database/supabase/server"
+
 import type { ApiResult } from "@/lib/actions/types/utils"
+import { createServerClient } from "@/lib/database/supabase/server"
+
+import { getValidationDetails } from "../../validation"
 import { hasPermission, PERMISSIONS } from "../index"
 import {
   updateRolePermissionsSchema,

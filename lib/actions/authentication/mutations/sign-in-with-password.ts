@@ -5,12 +5,14 @@
 
 "use server"
 
-import { cookies } from "next/headers"
 import { revalidatePath } from "next/cache"
+import { cookies } from "next/headers"
+
+import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
+
 import { getValidationDetails } from "../../validation"
 import { signInWithPasswordSchema } from "../schemas"
-import type { ApiResult } from "@/lib/actions/types/utils"
 
 export async function signInWithPassword(
   input: unknown

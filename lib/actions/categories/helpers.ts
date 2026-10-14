@@ -1,6 +1,6 @@
 /**
  * @file lib/actions/categories/helpers.ts
- * @description Shares validation and hierarchy checks across category actions.
+ * @description Validates category parent relationships for category actions.
  */
 
 import type { ApiResult } from "@/lib/actions/types/utils"

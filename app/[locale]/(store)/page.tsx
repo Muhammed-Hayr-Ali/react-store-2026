@@ -14,8 +14,8 @@ export async function generateMetadata() {
 export default function Page() {
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center space-y-6 px-4 text-center">
-      <div className="rounded-full bg-muted p-6">
-        <Wrench className="h-12 w-12 text-muted-foreground" />
+      <div className="flex size-32 items-center justify-center rounded-[50%] bg-muted corner-squircle p-6">
+        <Wrench className="size-full text-muted-foreground" />
       </div>
 
       <div className="space-y-2">
@@ -24,7 +24,8 @@ export default function Page() {
         </h1>
         <p className="max-w-125 text-lg text-muted-foreground">
           We are currently performing scheduled maintenance to improve your
-          experience. We&apos;ll be back online shortly. Thank you for your patience!
+          experience. We&apos;ll be back online shortly. Thank you for your
+          patience!
         </p>
       </div>
     </div>

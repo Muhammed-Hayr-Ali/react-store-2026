@@ -7,9 +7,10 @@
 
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
+
+import { getValidationDetails } from "../../validation"
 import { categorySlugSchema, type CategorySlugInput } from "../schemas"
 import type { Category } from "../types"
-import { getValidationDetails } from "../../validation"
 
 export async function getCategoryBySlug(
   input: CategorySlugInput

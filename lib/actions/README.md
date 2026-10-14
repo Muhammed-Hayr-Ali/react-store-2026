@@ -33,12 +33,22 @@ export async function getRoleById(
 
 - Use a concise English file header in the established JSDoc form: `@file` followed by a one-sentence present-tense `@description`.
 - Add function-level JSDoc when input semantics, return meaning, or a non-obvious behavior needs clarification.
+- Keep the file header before `"use server"` in server-action modules.
 - Prefer comments that explain why a decision exists. Avoid line-by-line narration, redundant numbered steps, outdated notes, and comments that merely restate the code.
+
+## Consistent implementation style
+
+- Keep action files in the same overall shape: file header, `"use server"` when needed, grouped imports, local types, exported action, then guard clauses and clearly separated validation, data access, and result handling.
+- Group imports consistently: framework and third-party imports first, project-alias imports next, then relative imports. Keep type-only imports explicit.
+- Use the repository Prettier configuration for whitespace, wrapping, quotes, semicolons, and trailing commas.
+- Prefer early returns for failure cases and keep one blank line between distinct logical sections. Do not add comments to narrate these sections.
+- Preserve intentional differences in authorization, validation order, exception handling, and return contracts when normalizing style; consistency must not change behavior.
 
 ## Implementation shape
 
 - Keep permission checks and input validation before the database mutation.
 - Return the same `ApiResult` shape from validation, expected database failures, and success paths.
 - Preserve explicit logging or diagnostics for unexpected failures according to the surrounding module's error-handling pattern.
+- When a database error has a specific expected mapping (such as a unique-key conflict), handle that case in its own nested branch, then return the operation's general error result for remaining failures. Keep this structure consistent across queries and mutations.
 - Use type-only imports for types when appropriate and keep barrel exports limited to the public surface.
 - Keep query and mutation files in their existing subdirectories and expose them through the relevant module barrel when needed.

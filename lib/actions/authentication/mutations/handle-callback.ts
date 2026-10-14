@@ -6,10 +6,12 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+
+import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
+
 import { getValidationDetails } from "../../validation"
 import { oauthCallbackSchema } from "../schemas"
-import type { ApiResult } from "@/lib/actions/types/utils"
 
 export async function handleCallback(input: unknown): Promise<ApiResult<null>> {
   const validation = oauthCallbackSchema.safeParse(

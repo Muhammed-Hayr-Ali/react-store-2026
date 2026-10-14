@@ -1,16 +1,18 @@
 /**
  * @file lib/actions/role/mutations/remove-user-role.ts
- * @description Server Action to revoke a specific role from a user.
+ * @description Removes a role from a user.
  */
 
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { getValidationDetails } from "../../validation"
+
+import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
+
+import { getValidationDetails } from "../../validation"
 import { hasPermission, PERMISSIONS } from "../index"
 import { assignUserRoleSchema, type AssignUserRoleInput } from "../schemas"
-import type { ApiResult } from "@/lib/actions/types/utils"
 
 export async function removeRoleFromUser(
   input: AssignUserRoleInput

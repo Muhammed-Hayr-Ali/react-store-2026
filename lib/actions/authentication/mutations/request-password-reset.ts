@@ -6,13 +6,15 @@
 "use server"
 
 import React from "react"
+
+import type { ApiResult } from "@/lib/actions/types/utils"
+import { appRoutes } from "@/lib/config/app-routes"
 import { createAdminClient } from "@/lib/database/supabase/admin"
 import { sendEmail } from "@/lib/services/email/send-email"
 import ResetPasswordEmail from "@/lib/services/email/templates/reset-password-email"
-import { appRoutes } from "@/lib/config/app-routes"
+
 import { getValidationDetails } from "../../validation"
 import { requestPasswordResetSchema } from "../schemas"
-import type { ApiResult } from "@/lib/actions/types/utils"
 
 export async function requestPasswordReset(
   input: unknown

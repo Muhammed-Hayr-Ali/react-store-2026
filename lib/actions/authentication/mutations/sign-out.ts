@@ -5,10 +5,11 @@
 
 "use server"
 
-import { cookies } from "next/headers"
 import { revalidatePath } from "next/cache"
-import { createServerClient } from "@/lib/database/supabase/server"
+import { cookies } from "next/headers"
+
 import type { ApiResult } from "@/lib/actions/types/utils"
+import { createServerClient } from "@/lib/database/supabase/server"
 
 export async function signOut(): Promise<ApiResult<null>> {
   try {

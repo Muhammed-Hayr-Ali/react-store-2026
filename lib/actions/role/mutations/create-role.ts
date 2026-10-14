@@ -6,11 +6,13 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { getValidationDetails } from "../../validation"
+
+import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
+
+import { getValidationDetails } from "../../validation"
 import { hasPermission, PERMISSIONS, type AppPermission } from "../index"
 import { createRoleSchema, type CreateRoleInput } from "../schemas"
-import type { ApiResult } from "@/lib/actions/types/utils"
 
 export interface RoleRecord {
   id: string
@@ -52,9 +54,17 @@ export async function createRole(
     .single()
 
   if (error) {
-    if (error.code === "23505") {
-      return { success: false, error: "ROLE_ALREADY_EXISTS" }
+    if (
+      error.code === "23505" &&
+      error.message.toLowerCase().includes("roles_name_key")
+    ) {
+      return {
+        success: false,
+        error: "ROLE_ALREADY_EXISTS",
+        details: { database: [error.message] },
+      }
     }
+
     return {
       success: false,
       error: "CREATE_ROLE_ERROR",

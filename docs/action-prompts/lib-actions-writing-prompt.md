@@ -4,19 +4,19 @@ Use this prompt when creating or updating queries and mutations under `lib/actio
 
 ---
 
-You are working in the Marketna codebase. Implement the requested server action by following the structure and conventions of the closest existing actions in the same module. Do not introduce a parallel style: inspect neighboring query and mutation files, their callers, schemas, permissions, and barrel exports before editing.
+You are working in the Marketna codebase. Implement the requested server action using the shared code and comment style described in `lib/actions/README.md`. Inspect the module's actions, schemas, types, helpers, barrel, and callers before editing. Preserve intentional behavioral differences between modules; consistent style must not change authorization, validation order, exception handling, or public contracts.
 
 ## Before implementation
 
-- Read the relevant action files and shared conventions in `lib/actions/README.md`.
-- Check the database schema and generated Supabase types before composing queries.
-- Find the existing permission constant and use the established `hasPermission` helper for protected operations.
-- Inspect callers to preserve the public input shape, result contract, and expected error identifiers.
-- Keep the change focused. Reuse existing schemas and helpers where suitable; do not create duplicate validation, result, or error-handling utilities.
+- Read `lib/actions/README.md` and, when present, the module's own documentation.
+- Inspect neighboring query and mutation files, the module's schemas and types, its `index.ts`, and the action's callers. Preserve their public input shape, result contract, and expected error identifiers.
+- Check the database schema and generated Supabase types before composing queries or RPC calls. Prefer existing helpers and shared schemas over duplicating their logic.
+- Identify whether the operation is public, authenticated, or permission-protected. Find the existing permission constant and use `hasPermission` for protected operations; UI checks are not authorization.
+- Choose the Supabase client based on the operation and local convention. Use the server client for ordinary user-scoped access. Use the admin client only for an established privileged flow that requires it, and preserve its authorization and security boundaries.
 
 ## File and function structure
 
-- Keep query and mutation modules in their existing subdirectories and export their public functions through the module barrel when applicable.
+- Keep query and mutation modules in their existing subdirectories. Export public functions and types through the module barrel when that is the module's pattern.
 - Follow the established file header:
 
   ```ts
@@ -26,34 +26,39 @@ You are working in the Marketna codebase. Implement the requested server action 
    */
   ```
 
-- Put `"use server"` at the top of server-action modules, following the order used by neighboring files.
+- Put `"use server"` at the top of server-action modules, following neighboring files.
+- Put the file JSDoc header before `"use server"` and use a concise, present-tense description without prefixing it with “Server Action”.
 - Use descriptive verb-first function names (`get...`, `create...`, `update...`, `delete...`).
-- Accept related arguments as one named input object. Name the parameter `input` and use a corresponding Zod schema and named input type.
-- Use type-only imports for types when appropriate and preserve the existing import ordering and formatting.
+- Accept related arguments, including identifiers, as one named input object when that matches the module's API. Name the parameter `input`; keep optional query filters optional where callers rely on that behavior.
+- Define input schemas and named input types alongside the module's schemas and types. Keep schema and type names aligned with local conventions.
+- Account for Zod defaults and transformations: use `z.input` for the value accepted from a caller and `z.output` for the parsed value when those types differ.
+- Use type-only imports for types when appropriate. Group imports consistently: framework and third-party imports first, project-alias imports next, then relative imports. Follow the repository Prettier configuration.
 
 ## Validation and authorization
 
-- Treat every action argument as untrusted. Validate it at the action boundary with the relevant Zod schema before using it in a query or mutation.
-- Use `safeParse` and return the established `VALIDATION_ERROR` result with field-keyed issue messages. Reuse the module's validation helper when one exists.
-- Check the relevant permission before accessing or changing protected data. Use the existing permission constants; do not duplicate permission strings or rely on the UI to enforce authorization.
-- For public reads, keep public access behavior intentional. Require management-view permission when exposing inactive or otherwise restricted records.
-- Validate relational invariants that are not guaranteed by the schema alone, such as a parent record existing or a hierarchy not containing a cycle.
+- Treat server-action arguments as untrusted. Validate them at the action boundary with the relevant Zod schema before using them in database queries or mutations. Use `safeParse` and the shared `getValidationDetails` helper from `lib/actions/validation.ts` when returning field-level validation details.
+- Keep validation messages as stable translation keys consistent with the module's schemas and message catalogs.
+- Apply authorization to every protected operation before privileged data access or mutation. Reuse permission constants and `hasPermission`; do not duplicate permission strings. Do not add needless permission checks to intentional public/authentication flows.
+- For public reads, make access intentional. Require the established management-view permission when exposing inactive or otherwise restricted records.
+- Validate relational invariants not guaranteed by the input schema alone, such as a referenced parent existing or a hierarchy not containing a cycle. Reuse module helpers for these checks.
 
 ## Queries and mutations
 
-- Use the typed server Supabase client and the existing generated database types.
-- Select only the fields needed by the action where practical. Use `.maybeSingle()` when absence is an expected outcome and return a stable not-found error; use `.single()` when exactly one row must be returned.
-- Check Supabase's returned `error` explicitly. Map expected database conditions to stable action error identifiers and include diagnostic messages in `details.database`.
-- Normalize form values to database values at the persistence boundary when needed (for example, convert an empty optional URL to `null`).
-- After successful mutations, invalidate the relevant route or layout using the project's existing `revalidatePath` pattern.
+- Use the project's typed Supabase clients and generated database types. Prefer selecting only fields the action needs when compatible with the existing contract.
+- Use `.maybeSingle()` when absence is an expected outcome and map it to the module's stable not-found result. Use `.single()` when exactly one row must be returned. Preserve established empty-list behavior for queries.
+- For public-facing entities with direct routes (such as products, categories, and offers), use the required unique `slug` at the public URL/read boundary and resolve to the stable `id` for internal relations and writes. Do not add `slug` to internal or join tables.
+- Check Supabase's returned `error` explicitly, including errors returned by RPC and Auth calls. Map expected conditions (such as conflicts or missing records) to stable action error identifiers and put diagnostic messages under `details` (for example, `details.database` or `details.auth`).
+- When mapping a specific expected database error, handle it in its own nested branch inside `if (error)`, then return the general operation error for remaining failures. Keep this structure consistent across actions.
+- Normalize form values at the persistence boundary where needed (for example, convert an empty optional URL to `null`).
+- After successful mutations, invalidate the relevant route or layout using the project's existing `revalidatePath` pattern. Prefer the specific route constant when the neighboring action uses one.
 - Do not report success when a requested row was not found or a database operation failed.
 
-## Error handling and `try/catch`
+## Error handling
 
-- Match the surrounding actions' error-handling structure. Existing modules may handle returned Supabase errors directly without `try/catch`, while another established flow may use a `try/catch`; do not add or remove one solely for stylistic preference.
-- Supabase query failures are returned as `{ data, error }` and must be handled explicitly in either structure.
-- Do not add a broad `try/catch` that silently converts unexpected exceptions into a generic result. If a catch is justified by the local pattern or a specific recoverable boundary, log the unexpected error using the established logging convention and return a stable failure result.
-- Keep validation errors, permission denials, not-found cases, expected database conflicts, and unexpected failures distinguishable.
+- Match the surrounding module's handling style. Handle returned Supabase errors explicitly whether or not a local flow uses `try/catch`.
+- Add `try/catch` only for a concrete throwing boundary or when required by the established flow; do not wrap every action automatically. Do not silently convert unexpected exceptions into success-shaped or generic results. Log unexpected errors using the local convention and return a stable failure result.
+- Keep validation failures, permission denials, not-found cases, expected conflicts, and unexpected failures distinguishable.
+- Use stable, translation-friendly error keys as the main `error` value; never expose raw database or provider messages as the error identifier. When adding a key, update `lib/actions/error-keys.ts` and the relevant message catalogs if the key is represented there.
 
 ## Return contract
 
@@ -66,12 +71,10 @@ You are working in the Marketna codebase. Implement the requested server action 
   { success: false, error: "STABLE_ERROR_KEY", details? }
   ```
 
-- Use stable, translation-friendly error keys. Put diagnostic details under `details`; do not expose raw database messages as the main error identifier.
-- Preserve intentional specialized contracts already used by callers, such as permission checks returning `boolean`.
+- Keep intentional specialized contracts already used by callers, such as permission checks returning `boolean`; do not change a public result contract without updating and verifying all callers.
 
 ## Comments and completion
 
-- Write concise English comments only when they explain a non-obvious constraint or decision. Do not narrate straightforward steps.
-- Keep comments aligned with the implementation and avoid stale or duplicated documentation.
+- Write concise English comments only when they explain a non-obvious constraint or decision. Keep the established JSDoc file header accurate; add function-level documentation only when semantics need clarification. Do not narrate straightforward steps or duplicate information already in the header.
 - Update directly related documentation when the action changes a shared convention or public behavior.
-- Run the smallest relevant type-check, lint, or test command. Review the final diff and verify that existing callers and neighboring action behavior remain compatible.
+- Run the smallest relevant type-check, lint, or test command. Review the final diff and verify existing callers and neighboring action behavior remain compatible.

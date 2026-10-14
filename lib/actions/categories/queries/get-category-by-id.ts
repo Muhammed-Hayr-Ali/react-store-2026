@@ -7,15 +7,19 @@
 
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
+
 import { hasPermission, PERMISSIONS } from "../../role"
+import { getValidationDetails } from "../../validation"
 import { categoryIdSchema, type CategoryIdInput } from "../schemas"
 import type { Category } from "../types"
-import { getValidationDetails } from "../../validation"
 
 export async function getCategoryById(
   input: CategoryIdInput
 ): Promise<ApiResult<Category>> {
-  if (!(await hasPermission(PERMISSIONS.VIEW_CATEGORIES_MANAGEMENT))) {
+  const canViewManagement = await hasPermission(
+    PERMISSIONS.VIEW_CATEGORIES_MANAGEMENT
+  )
+  if (!canViewManagement) {
     return { success: false, error: "PERMISSION_DENIED" }
   }
 
