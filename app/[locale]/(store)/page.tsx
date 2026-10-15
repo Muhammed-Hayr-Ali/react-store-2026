@@ -14,7 +14,7 @@ export async function generateMetadata() {
 export default function Page() {
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center space-y-6 px-4 text-center">
-      <div className="flex size-32 items-center justify-center rounded-[50%] bg-muted corner-squircle p-6">
+      <div className="flex size-32 items-center justify-center rounded-[50%] corner-squircle bg-muted p-6">
         <Wrench className="size-full text-muted-foreground" />
       </div>
 

@@ -13,13 +13,15 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { appRoutes } from "@/lib/config/app-routes"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { sendEmail } from "@/lib/services/email/send-email"
+import { resolveEmailLocale } from "@/lib/services/email/locale"
 import WelcomeEmail from "@/lib/services/email/templates/welcome-email"
 
 import { getValidationDetails } from "../../validation"
 import { signUpWithPasswordSchema } from "../schemas"
 
 export async function signUpWithPassword(
-  input: unknown
+  input: unknown,
+  locale?: string
 ): Promise<ApiResult<null>> {
   const validation = signUpWithPasswordSchema.safeParse(input)
   if (!validation.success) {
@@ -60,10 +62,15 @@ export async function signUpWithPassword(
 
   try {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+    const emailLocale = resolveEmailLocale(locale)
     await sendEmail({
       to: email,
-      subject: "مرحباً بك في Marketna",
+      subject:
+        emailLocale === "ar"
+          ? "أهلاً بك في عائلة Marketna! 🎉"
+          : "Welcome to the Marketna family! 🎉",
       reactComponent: React.createElement(WelcomeEmail, {
+        locale: emailLocale,
         userName: `${firstName} ${lastName}`,
         loginUrl: `${baseUrl}${appRoutes.auth.login}`,
       }),

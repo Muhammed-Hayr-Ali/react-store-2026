@@ -11,13 +11,15 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { appRoutes } from "@/lib/config/app-routes"
 import { createAdminClient } from "@/lib/database/supabase/admin"
 import { sendEmail } from "@/lib/services/email/send-email"
+import { resolveEmailLocale } from "@/lib/services/email/locale"
 import ResetPasswordEmail from "@/lib/services/email/templates/reset-password-email"
 
 import { getValidationDetails } from "../../validation"
 import { requestPasswordResetSchema } from "../schemas"
 
 export async function requestPasswordReset(
-  input: unknown
+  input: unknown,
+  locale?: string
 ): Promise<ApiResult<null>> {
   const validation = requestPasswordResetSchema.safeParse(input)
   if (!validation.success) {
@@ -65,12 +67,19 @@ export async function requestPasswordReset(
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
     const resetUrl = `${baseUrl}${appRoutes.auth.resetPassword}?token=${token}`
+    const emailLocale = resolveEmailLocale(locale)
 
     await sendEmail({
       to: email,
-      subject: "Password Reset Request - Marketna",
+      subject:
+        emailLocale === "ar"
+          ? "استعادة كلمة المرور 🔒"
+          : "Reset your password 🔒",
       reactComponent: React.createElement(ResetPasswordEmail, {
-        firstName: profile.first_name || "Customer",
+        locale: emailLocale,
+        firstName:
+          profile.first_name ||
+          (emailLocale === "ar" ? "عميلنا" : "Customer"),
         resetUrl: resetUrl,
       }),
     })

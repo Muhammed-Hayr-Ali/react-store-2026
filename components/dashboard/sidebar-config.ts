@@ -5,6 +5,7 @@ import {
   type LucideIcon,
   StoreIcon,
   Tags,
+  Mail,
 } from "lucide-react"
 import { appRoutes } from "@/lib/config/app-routes"
 import { PERMISSIONS, AppPermission } from "@/lib/actions/role"
@@ -57,6 +58,13 @@ export const sidebarConfig: SidebarConfig = {
       url: appRoutes.dashboard.users,
       icon: Users,
       requiredPermission: PERMISSIONS.VIEW_USERS_MANAGEMENT,
+    },
+    {
+      titleKey: "NEWSLETTER_SUBSCRIBERS",
+      key: "newsletter-subscribers",
+      url: appRoutes.dashboard.newsletterSubscribers,
+      icon: Mail,
+      requiredPermission: PERMISSIONS.VIEW_NEWSLETTER_SUBSCRIBERS,
     },
 
     {

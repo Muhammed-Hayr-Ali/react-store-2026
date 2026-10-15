@@ -75,6 +75,12 @@ export const PERMISSION_GROUPS = [
           "Access and view the audience notification channels setup page",
       },
       {
+        key: PERMISSIONS.VIEW_NEWSLETTER_SUBSCRIBERS,
+        label: "View Newsletter Subscribers",
+        description:
+          "Access and view the newsletter subscribers management list",
+      },
+      {
         key: PERMISSIONS.VIEW_USER_ORDERS,
         label: "View Orders",
         description: "Access and track customer purchase orders and shipments",
@@ -181,6 +187,28 @@ export const PERMISSION_GROUPS = [
         key: PERMISSIONS.DELETE_CATEGORY,
         label: "Delete Category",
         description: "Remove obsolete categories from the storefront",
+      },
+    ],
+  },
+  {
+    id: "newsletter_subscribers_management",
+    label: "Newsletter Subscribers Management (Actions)",
+    permissions: [
+      {
+        key: PERMISSIONS.UPDATE_NEWSLETTER_SUBSCRIBER,
+        label: "Update Newsletter Subscriber",
+        description: "Change a newsletter subscriber's subscription status",
+      },
+      {
+        key: PERMISSIONS.DELETE_NEWSLETTER_SUBSCRIBER,
+        label: "Delete Newsletter Subscriber",
+        description: "Remove an email address from the newsletter list",
+      },
+      {
+        key: PERMISSIONS.SEND_NEWSLETTER_EMAIL,
+        label: "Send Newsletter Email",
+        description:
+          "Send individual or batch email messages to active newsletter subscribers",
       },
     ],
   },

@@ -2,16 +2,14 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Loader2, Send } from "lucide-react"
-import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-import { IconInput } from "@/components/ui/icon-input"
 import { AppLogo } from "@/components/ui/app-logo"
 import { appConfig } from "@/lib/config/app_config"
 
 import { footerConfig } from "./footer-config"
 import { ThemeToggle } from "./theme-toggle"
+import { NewsletterSection } from "./newsletter-section"
 
 export default function Footer() {
   return (
@@ -33,7 +31,6 @@ export default function Footer() {
                   key={item.label}
                   variant="secondary"
                   size="icon"
-                  className="size-8 rounded-lg text-muted-foreground shadow-none hover:text-foreground"
                   asChild
                 >
                   <Link
@@ -116,75 +113,6 @@ function FooterSection({
         {title}
       </h4>
       {children}
-    </div>
-  )
-}
-
-function NewsletterSection() {
-  const [email, setEmail] = React.useState("")
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!email || !email.includes("@")) {
-      toast.error("Please enter a valid email address")
-      return
-    }
-
-    setIsSubmitting(true)
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 600))
-      toast.success("Thanks for subscribing! 🎉")
-      setEmail("")
-    } catch {
-      toast.error("Failed to subscribe. Please try again.")
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  return (
-    <div className="flex flex-col gap-3 sm:col-span-2 lg:col-span-1">
-      <div className="space-y-1">
-        <h4 className="text-sm font-semibold tracking-tight text-foreground">
-          Subscribe to our newsletter
-        </h4>
-        <p className="text-xs leading-relaxed text-muted-foreground">
-          Stay updated on new releases, features, and guides.
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="flex items-center gap-1.5 pt-1">
-        <div className="relative flex-1">
-          <IconInput
-            type="email"
-            placeholder="you@domain.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-            disabled={isSubmitting}
-            required
-            className="h-9 rounded-lg border border-border/60 bg-muted/30 px-3 text-xs shadow-none placeholder:text-muted-foreground/60 focus-visible:ring-1 focus-visible:ring-ring"
-          />
-        </div>
-
-        <Button
-          type="submit"
-          variant="secondary"
-          size="icon"
-          disabled={isSubmitting}
-          className="size-9 shrink-0 cursor-pointer rounded-lg shadow-none"
-          aria-label="Subscribe to newsletter"
-        >
-          {isSubmitting ? (
-            <Loader2 className="size-4 animate-spin text-muted-foreground" />
-          ) : (
-            <Send className="size-4 text-foreground" />
-          )}
-          <span className="sr-only">Subscribe</span>
-        </Button>
-      </form>
     </div>
   )
 }

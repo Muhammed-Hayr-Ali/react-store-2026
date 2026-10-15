@@ -8,7 +8,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import {
@@ -47,6 +47,7 @@ export function SignUpForm() {
   // Load translations and navigation for the registration flow.
   const t = useTranslations("SignUpForm")
   const tErrors = useTranslations("ActionErrors")
+  const locale = useLocale()
   const router = useRouter()
 
   // Track password visibility and server-side errors.
@@ -71,7 +72,7 @@ export function SignUpForm() {
   // Create the account and display field or account-level errors.
   async function onSubmit(data: SignUpWithPasswordInput) {
     setErrorMessage(null)
-    const result = await signUpWithPassword(data)
+    const result = await signUpWithPassword(data, locale)
 
     if (result.success) {
       router.refresh()

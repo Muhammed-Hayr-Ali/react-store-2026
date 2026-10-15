@@ -10,20 +10,30 @@ import {
   Hr,
 } from "@react-email/components"
 import React from "react"
+import type { AppLocale } from "@/i18n/routing"
 
 interface EmailLayoutProps {
   children: React.ReactNode
+  locale: AppLocale
   title: string
+  footerContent?: React.ReactNode
 }
 
-export default function EmailLayout({ children, title }: EmailLayoutProps) {
+export default function EmailLayout({
+  children,
+  locale,
+  title,
+  footerContent,
+}: EmailLayoutProps) {
+  const isArabic = locale === "ar"
+
   return (
-    <Html lang="ar" dir="rtl">
+    <Html lang={locale} dir={isArabic ? "rtl" : "ltr"}>
       <Tailwind>
         <Body className="bg-gray-50 font-sans">
           <Container className="mx-auto my-8 max-w-xl overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm">
-            {/* الشريط العلوي باللون المفضل لديك */}
-            <Section className="bg-black p-4 text-center">
+            {/* Brand header */}
+            <Section className="bg-green-700 p-4 text-center">
               <Heading className="m-0 text-2xl font-bold text-white">
                 Marketna
               </Heading>
@@ -31,10 +41,14 @@ export default function EmailLayout({ children, title }: EmailLayoutProps) {
 
             {/* محتوى الرسالة المتغير */}
             <Section className="p-8">
-              <Heading className="mb-4 text-right text-xl font-bold text-gray-800">
+              <Heading
+                className={`mb-4 text-xl font-bold text-gray-800 ${isArabic ? "text-right" : "text-left"}`}
+              >
                 {title}
               </Heading>
-              <div className="text-right text-base leading-relaxed text-gray-600">
+              <div
+                className={`text-base leading-relaxed text-gray-600 ${isArabic ? "text-right" : "text-left"}`}
+              >
                 {children}
               </div>
             </Section>
@@ -43,11 +57,16 @@ export default function EmailLayout({ children, title }: EmailLayoutProps) {
             <Hr className="my-0 border-gray-200" />
             <Section className="bg-gray-50 p-6 text-center">
               <Text className="m-0 text-sm text-gray-500">
-                © {new Date().getFullYear()} متجر Marketna. جميع الحقوق محفوظة.
+                {isArabic
+                  ? `© ${new Date().getFullYear()} متجر Marketna. جميع الحقوق محفوظة.`
+                  : `© ${new Date().getFullYear()} Marketna. All rights reserved.`}
               </Text>
               <Text className="mt-2 text-xs text-gray-400">
-                هذه رسالة تلقائية، يرجى عدم الرد عليها.
+                {isArabic
+                  ? "هذه رسالة تلقائية، يرجى عدم الرد عليها."
+                  : "This is an automated message. Please do not reply."}
               </Text>
+              {footerContent}
             </Section>
           </Container>
         </Body>

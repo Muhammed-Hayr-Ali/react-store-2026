@@ -6,7 +6,7 @@
 "use client"
 
 import * as React from "react"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import { MailIcon, AlertCircleIcon, XIcon } from "lucide-react"
@@ -31,6 +31,7 @@ import { getActionErrorKey } from "@/lib/actions/error-keys"
 export function ForgotPasswordForm() {
   const t = useTranslations("ForgotPasswordForm")
   const tErrors = useTranslations("ActionErrors")
+  const locale = useLocale()
 
   // Track the request outcome and any server-side error.
   const [submittedEmail, setSubmittedEmail] = React.useState<string | null>(
@@ -53,7 +54,7 @@ export function ForgotPasswordForm() {
   // Send the reset request and map returned errors to the form.
   async function onSubmit(data: RequestPasswordResetInput) {
     setErrorMessage(null)
-    const result = await requestPasswordReset(data)
+    const result = await requestPasswordReset(data, locale)
 
     if (result.success) {
       setSubmittedEmail(data.email)

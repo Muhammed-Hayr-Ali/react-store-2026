@@ -17,53 +17,40 @@ interface DesktopNavbarProps {
   className?: string
 }
 
-export default function DesktopNavbar({
-  className,
-}: DesktopNavbarProps) {
+export default function DesktopNavbar({ className }: DesktopNavbarProps) {
   const { user } = useUser()
 
   return (
     <div className={cn("hidden items-center gap-3 md:flex", className)}>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="size-8 rounded-lg text-muted-foreground hover:text-foreground"
-        aria-label="Search"
-      >
-        <SearchIcon className="size-4" />
+      <Button variant="secondary" size="icon" aria-label="Search">
+        <SearchIcon />
       </Button>
 
-      <Button
-        variant="ghost"
-        size="icon"
-        className="relative size-8 rounded-lg text-muted-foreground hover:text-foreground"
-        aria-label="Shopping Cart"
-      >
-        <ShoppingCartIcon className="size-4" />
+      <Button variant="secondary" size="icon" aria-label="Shopping Cart">
+        <ShoppingCartIcon />
       </Button>
-
-    
-
 
       {user ? (
         <>
           <Separator orientation="vertical" className="mx-1 h-5" />
-          <UserProfilePopover
-          />
+          <UserProfilePopover />
         </>
       ) : (
         <div className="ms-1 flex items-center gap-2 border-s border-border/50 ps-3">
           <Button
-            size="sm"
-            variant="outline"
-            className="h-8 rounded-lg text-xs font-normal"
+            size="default"
+            variant="secondary"
+            className="rounded-xl text-xs font-normal"
+            aria-label="Login"
             asChild
           >
             <Link href={appRoutes.auth.login}>Login</Link>
           </Button>
           <Button
-            size="sm"
-            className="h-8 rounded-lg text-xs font-normal"
+            size="default"
+            variant="default"
+            className="rounded-xl text-xs font-normal"
+            aria-label="Get Started"
             asChild
           >
             <Link href={appRoutes.auth.signup}>Get Started</Link>

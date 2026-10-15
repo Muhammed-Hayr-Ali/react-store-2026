@@ -9,3 +9,5 @@ export const routing = defineRouting({
 
   localePrefix: "never",
 })
+
+export type AppLocale = (typeof routing.locales)[number]

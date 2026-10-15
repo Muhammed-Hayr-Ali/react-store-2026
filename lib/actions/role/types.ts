@@ -26,6 +26,7 @@ export const PERMISSIONS = {
   VIEW_NOTIFICATIONS_MANAGEMENT: "view_notifications_management",
   VIEW_NOTIFICATION_CHANNELS_MANAGEMENT:
     "view_notification_channels_management", // View notification channels management.
+  VIEW_NEWSLETTER_SUBSCRIBERS: "view_newsletter_subscribers",
 
   // --- 1. Brands Management ---
   CREATE_BRAND: "create_brand",
@@ -38,6 +39,11 @@ export const PERMISSIONS = {
   CREATE_CATEGORY: "create_category",
   UPDATE_CATEGORY: "update_category",
   DELETE_CATEGORY: "delete_category",
+
+  // --- 2.1 Newsletter Subscribers Management ---
+  UPDATE_NEWSLETTER_SUBSCRIBER: "update_newsletter_subscriber",
+  DELETE_NEWSLETTER_SUBSCRIBER: "delete_newsletter_subscriber",
+  SEND_NEWSLETTER_EMAIL: "send_newsletter_email",
 
   // --- 3. Marketing, Coupons & Discounts ---
   CREATE_FLASH_SALE: "create_flash_sale",

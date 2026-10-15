@@ -28,6 +28,7 @@ const routeLabelKeys: Record<string, string> = {
   "flash-sales": "FLASH_SALES",
   reports: "REPORTS",
   users: "USERS",
+  "newsletter-subscribers": "NEWSLETTER_SUBSCRIBERS",
   create: "CREATE",
   edit: "EDIT",
 }

@@ -2,6 +2,7 @@ export const appRoutes = {
   home: "/",
   terms: "/terms",
   privacy: "/privacy",
+  newsletterUnsubscribe: "/unsubscribe",
   auth: {
     login: "/auth/login",
     signup: "/auth/signup",
@@ -18,5 +19,6 @@ export const appRoutes = {
     },
     categories: "/dashboard/categories",
     users: "/dashboard/users",
+    newsletterSubscribers: "/dashboard/newsletter-subscribers",
   },
 } as const
