@@ -1,3 +1,4 @@
+import { headers } from "next/headers"
 import { notFound } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { MailIcon } from "lucide-react"
@@ -46,6 +47,13 @@ export default async function Page({ params }: PageProps) {
     throw new Error(tErrors(getActionErrorKey(result.error)))
   }
 
+  const headersList = await headers()
+  const userAgent = headersList.get("user-agent") || ""
+  const isMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      userAgent
+    )
+
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
       <div className="flex flex-col gap-3 border-b border-border/40 pb-4 sm:flex-row sm:items-center sm:justify-between">
@@ -67,6 +75,7 @@ export default async function Page({ params }: PageProps) {
       <NewsletterSubscribersTable
         initialSubscribers={result.data}
         locale={locale === "ar" ? "ar" : "en"}
+        initialIsMobile={isMobile}
       />
     </div>
   )

@@ -45,6 +45,7 @@ export function UserProfileHeader({
         <div className="flex min-w-0 flex-col justify-center">
           <p
             className="w-full truncate text-xs leading-tight font-semibold text-foreground"
+
             title={user.name}
           >
             {user.name}

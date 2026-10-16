@@ -639,6 +639,8 @@
     "UNSUBSCRIBED_COUNT": "ألغوا الاشتراك",
     "SEARCH_PLACEHOLDER": "ابحث بالبريد أو سبب الإلغاء...",
     "CLEAR_SEARCH": "مسح البحث",
+    "FILTER_BUTTON": "تصفية المشتركين",
+    "TOGGLE_COLUMNS": "تبديل رؤية الأعمدة",
     "FILTER_ALL": "الكل",
     "FILTER_ACTIVE": "نشط",
     "FILTER_UNSUBSCRIBED": "ملغي",
@@ -685,7 +687,10 @@
     "REACTIVATED_TOAST": "تمت إعادة تفعيل الاشتراك.",
     "DELETE_SUCCESS_TOAST": "تم حذف المشترك.",
     "DELETE_DIALOG_TITLE": "حذف المشترك",
-    "DELETE_DIALOG_DESCRIPTION": "هل تريد حذف هذا البريد الإلكتروني نهائيًا من القائمة؟",
+    "DELETE_DIALOG_DESCRIPTION": "سيتم حذف عنوان البريد الإلكتروني نهائيًا من القائمة:",
+    "DELETE_DIALOG_WARNING": "لا يمكن التراجع عن هذا الإجراء.",
+    "TYPE_EMAIL_TO_CONFIRM": "للتأكيد، يرجى كتابة عنوان البريد الإلكتروني:",
+    "CONFIRM_EMAIL_PLACEHOLDER": "اكتب عنوان البريد الإلكتروني هنا...",
     "DELETING_BUTTON": "جارٍ الحذف..."
   },
   "CategoriesManagement": {

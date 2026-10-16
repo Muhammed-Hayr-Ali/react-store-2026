@@ -7,29 +7,32 @@ import {
   ChevronRightIcon,
   ChevronsLeftIcon,
   ChevronsRightIcon,
+  Columns3Icon,
+  FilterIcon,
   MailIcon,
+  MoreHorizontalIcon,
   SearchIcon,
   Trash2Icon,
+  UserCheckIcon,
   UserRoundCheckIcon,
   UsersIcon,
+  UserXIcon,
   XIcon,
 } from "lucide-react"
 import { toast } from "sonner"
 
 import { Can } from "@/components/shared/can"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   Dialog,
   DialogContent,
@@ -40,6 +43,14 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Spinner } from "@/components/ui/spinner"
 import {
   Table,
@@ -50,6 +61,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
+
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { deleteNewsletterSubscriber } from "@/lib/actions/newsletter_subscribers/mutations/delete-newsletter-subscriber"
 import { sendNewsletterEmail } from "@/lib/actions/newsletter_subscribers/mutations/send-newsletter-email"
@@ -61,17 +73,23 @@ import {
 import type { NewsletterSubscriber } from "@/lib/actions/newsletter_subscribers/types"
 import { PERMISSIONS } from "@/lib/actions/role"
 import type { AppLocale } from "@/i18n/routing"
+import { DeleteSubscriberDialog } from "./delete-subscriber-dialog"
 
 type StatusFilter = "all" | NewsletterStatus
+type HideableColumn = "status" | "joined" | "reason"
+
+const HIDEABLE_COLUMNS: HideableColumn[] = ["status", "joined", "reason"]
 
 interface NewsletterSubscribersTableProps {
   initialSubscribers: NewsletterSubscriber[]
   locale: AppLocale
+  initialIsMobile?: boolean
 }
 
 export function NewsletterSubscribersTable({
   initialSubscribers,
   locale,
+  initialIsMobile = false,
 }: NewsletterSubscribersTableProps) {
   const t = useTranslations("NewsletterSubscribersManagement")
   const tErrors = useTranslations("ActionErrors")
@@ -79,9 +97,16 @@ export function NewsletterSubscribersTable({
   const [subscribers, setSubscribers] = React.useState(initialSubscribers)
   const [query, setQuery] = React.useState("")
   const [statusFilter, setStatusFilter] = React.useState<StatusFilter>("all")
+  const [columnVisibility, setColumnVisibility] = React.useState<
+    Record<HideableColumn, boolean>
+  >(() => ({
+    status: !initialIsMobile,
+    joined: !initialIsMobile,
+    reason: !initialIsMobile,
+  }))
   const [selectedIds, setSelectedIds] = React.useState<string[]>([])
   const [pageIndex, setPageIndex] = React.useState(0)
-  const [pageSize, setPageSize] = React.useState(10)
+  const [pageSize, setPageSize] = React.useState(initialIsMobile ? 20 : 10)
   const [composeOpen, setComposeOpen] = React.useState(false)
   const [recipientIds, setRecipientIds] = React.useState<string[]>([])
   const [emailLocale, setEmailLocale] = React.useState<AppLocale>(locale)
@@ -90,8 +115,24 @@ export function NewsletterSubscribersTable({
   const [isSending, startSending] = React.useTransition()
   const [isUpdating, startUpdating] = React.useTransition()
   const [isDeleting, startDeleting] = React.useTransition()
-  const [subscriberToDelete, setSubscriberToDelete] =
-    React.useState<NewsletterSubscriber | null>(null)
+
+  React.useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 767px)")
+    const handleBreakpointChange = () => {
+      const mobile = mediaQuery.matches
+      setColumnVisibility({
+        status: !mobile,
+        joined: !mobile,
+        reason: !mobile,
+      })
+      setPageSize(mobile ? 20 : 10)
+      setPageIndex(0)
+    }
+
+    mediaQuery.addEventListener("change", handleBreakpointChange)
+    return () =>
+      mediaQuery.removeEventListener("change", handleBreakpointChange)
+  }, [])
 
   const activeCount = subscribers.filter(
     (subscriber) => subscriber.status === "active"
@@ -278,28 +319,6 @@ export function NewsletterSubscribersTable({
     })
   }
 
-  function handleDelete() {
-    if (!subscriberToDelete) return
-    const deletedId = subscriberToDelete.id
-    startDeleting(async () => {
-      try {
-        const result = await deleteNewsletterSubscriber({ id: deletedId })
-        if (!result.success) {
-          toast.error(tErrors(getActionErrorKey(result.error)))
-          return
-        }
-        setSubscribers((current) =>
-          current.filter((item) => item.id !== deletedId)
-        )
-        setSelectedIds((current) => current.filter((id) => id !== deletedId))
-        setSubscriberToDelete(null)
-        toast.success(t("DELETE_SUCCESS_TOAST"))
-      } catch {
-        toast.error(tErrors("UNEXPECTED_ERROR"))
-      }
-    })
-  }
-
   return (
     <div className="space-y-5">
       <div className="grid gap-3 sm:grid-cols-3">
@@ -322,8 +341,8 @@ export function NewsletterSubscribersTable({
         />
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:max-w-xs">
+      <div className="flex w-full min-w-0 items-center gap-2">
+        <div className="relative min-w-0 flex-1">
           <SearchIcon className="pointer-events-none absolute start-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={query}
@@ -340,7 +359,10 @@ export function NewsletterSubscribersTable({
               variant="ghost"
               size="icon-xs"
               className="absolute end-1 top-1/2 -translate-y-1/2"
-              onClick={() => setQuery("")}
+              onClick={() => {
+                setQuery("")
+                setPageIndex(0)
+              }}
               aria-label={t("CLEAR_SEARCH")}
             >
               <XIcon />
@@ -348,8 +370,48 @@ export function NewsletterSubscribersTable({
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex h-8 items-center rounded-md border border-border bg-background p-0.5">
+        <div className="flex shrink-0 items-center gap-1.5">
+          <div className="sm:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="size-8"
+                  title={t("FILTER_BUTTON")}
+                >
+                  <FilterIcon className="size-3.5" />
+                  <span className="sr-only">{t("FILTER_BUTTON")}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40 text-xs">
+                {(["all", "active", "unsubscribed"] as const).map((filter) => (
+                  <DropdownMenuItem
+                    key={filter}
+                    onClick={() => {
+                      setStatusFilter(filter)
+                      setPageIndex(0)
+                    }}
+                    className="flex cursor-pointer items-center justify-between"
+                  >
+                    <span>{t(`FILTER_${filter.toUpperCase()}`)}</span>
+                    <Badge
+                      variant="secondary"
+                      className="px-1 py-0 text-[10px]"
+                    >
+                      {filter === "all"
+                        ? subscribers.length
+                        : filter === "active"
+                          ? activeCount
+                          : unsubscribedCount}
+                    </Badge>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          <div className="hidden h-8 items-center overflow-hidden rounded-md border border-input bg-background p-0.5 sm:inline-flex">
             {(["all", "active", "unsubscribed"] as const).map((filter) => (
               <button
                 key={filter}
@@ -358,14 +420,17 @@ export function NewsletterSubscribersTable({
                   setStatusFilter(filter)
                   setPageIndex(0)
                 }}
-                className={`inline-flex h-full items-center gap-1 rounded-sm px-2 text-[11px] transition-colors ${
+                className={`inline-flex h-full items-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
                   statusFilter === filter
-                    ? "bg-muted font-semibold text-foreground"
-                    : "text-muted-foreground hover:bg-muted/50"
+                    ? "bg-muted font-semibold text-foreground shadow-xs"
+                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                 }`}
               >
                 {t(`FILTER_${filter.toUpperCase()}`)}
-                <Badge variant="secondary" className="px-1 py-0 text-[10px]">
+                <Badge
+                  variant="secondary"
+                  className="ms-1.5 px-1.5 py-0 text-[10px]"
+                >
                   {filter === "all"
                     ? subscribers.length
                     : filter === "active"
@@ -380,14 +445,54 @@ export function NewsletterSubscribersTable({
             <Button
               type="button"
               size="sm"
-              className="h-8 gap-1.5 text-xs"
+              className="h-8 shrink-0 gap-1.5 px-2 text-xs sm:px-3"
               disabled={selectedIds.length === 0}
               onClick={() => openComposer(selectedIds)}
+              title={t("SEND_SELECTED", { count: selectedIds.length })}
             >
               <MailIcon className="size-3.5" />
-              {t("SEND_SELECTED", { count: selectedIds.length })}
+              <span className="hidden sm:inline">
+                {t("SEND_SELECTED", { count: selectedIds.length })}
+              </span>
+              <span className="sm:hidden">{selectedIds.length}</span>
             </Button>
           </Can>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-8 shrink-0"
+                title={t("TOGGLE_COLUMNS")}
+              >
+                <Columns3Icon className="size-3.5" />
+                <span className="sr-only">{t("TOGGLE_COLUMNS")}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44 text-xs">
+              {HIDEABLE_COLUMNS.map((column) => (
+                <DropdownMenuCheckboxItem
+                  key={column}
+                  checked={columnVisibility[column]}
+                  onCheckedChange={(visible) =>
+                    setColumnVisibility((current) => ({
+                      ...current,
+                      [column]: Boolean(visible),
+                    }))
+                  }
+                >
+                  {t(
+                    column === "status"
+                      ? "COLUMN_STATUS"
+                      : column === "joined"
+                        ? "COLUMN_JOINED"
+                        : "COLUMN_REASON"
+                  )}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -431,9 +536,21 @@ export function NewsletterSubscribersTable({
                   </Can>
                 </TableHead>
                 <TableHead className="text-xs">{t("COLUMN_EMAIL")}</TableHead>
-                <TableHead className="text-xs">{t("COLUMN_STATUS")}</TableHead>
-                <TableHead className="text-xs">{t("COLUMN_JOINED")}</TableHead>
-                <TableHead className="text-xs">{t("COLUMN_REASON")}</TableHead>
+                {columnVisibility.status && (
+                  <TableHead className="text-xs">
+                    {t("COLUMN_STATUS")}
+                  </TableHead>
+                )}
+                {columnVisibility.joined && (
+                  <TableHead className="text-xs">
+                    {t("COLUMN_JOINED")}
+                  </TableHead>
+                )}
+                {columnVisibility.reason && (
+                  <TableHead className="text-xs">
+                    {t("COLUMN_REASON")}
+                  </TableHead>
+                )}
                 <TableHead className="text-end text-xs">
                   {t("ACTIONS_LABEL")}
                 </TableHead>
@@ -472,79 +589,168 @@ export function NewsletterSubscribersTable({
                           {subscriber.email}
                         </span>
                       </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={
-                            isActive
-                              ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
-                              : "border-muted-foreground/30 text-muted-foreground"
-                          }
-                        >
-                          {t(
-                            isActive ? "STATUS_ACTIVE" : "STATUS_UNSUBSCRIBED"
-                          )}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-xs whitespace-nowrap text-muted-foreground">
-                        {new Date(subscriber.created_at).toLocaleDateString(
-                          displayLocale
-                        )}
-                      </TableCell>
-                      <TableCell className="max-w-52 truncate text-xs text-muted-foreground">
-                        {subscriber.unsubscribe_reason || "—"}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex justify-end gap-1">
-                          {isActive && (
-                            <Can permission={PERMISSIONS.SEND_NEWSLETTER_EMAIL}>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon-sm"
-                                aria-label={t("SEND_INDIVIDUAL")}
-                                title={t("SEND_INDIVIDUAL")}
-                                onClick={() => openComposer([subscriber.id])}
-                              >
-                                <MailIcon className="size-3.5" />
-                              </Button>
-                            </Can>
-                          )}
-                          <Can
-                            permission={
-                              PERMISSIONS.UPDATE_NEWSLETTER_SUBSCRIBER
-                            }
-                          >
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              disabled={isUpdating}
-                              className="h-7 px-2 text-[11px]"
-                              onClick={() => handleStatusChange(subscriber)}
-                            >
-                              {t(
+                      {columnVisibility.status && (
+                        <TableCell>
+                          <div className="flex justify-center">
+                            <Badge
+                              variant="outline"
+                              className={`gap-1 truncate px-1.5 py-0.5 font-mono text-[11px] leading-tight uppercase ${
                                 isActive
-                                  ? "UNSUBSCRIBE_ACTION"
-                                  : "REACTIVATE_ACTION"
-                              )}
-                            </Button>
-                          </Can>
-                          <Can
-                            permission={
-                              PERMISSIONS.DELETE_NEWSLETTER_SUBSCRIBER
-                            }
-                          >
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon-sm"
-                              aria-label={t("DELETE_ACTION")}
-                              title={t("DELETE_ACTION")}
-                              onClick={() => setSubscriberToDelete(subscriber)}
+                                  ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                                  : "border-muted-foreground/30 text-muted-foreground"
+                              }`}
                             >
-                              <Trash2Icon className="size-3.5 text-destructive" />
-                            </Button>
+                              {isActive ? (
+                                <UserCheckIcon className="size-3" />
+                              ) : (
+                                <UserXIcon className="size-3" />
+                              )}
+                              <span>
+                                {t(
+                                  isActive
+                                    ? "STATUS_ACTIVE"
+                                    : "STATUS_UNSUBSCRIBED"
+                                )}
+                              </span>
+                            </Badge>
+                          </div>
+                        </TableCell>
+                      )}
+                      {columnVisibility.joined && (
+                        <TableCell className="text-xs whitespace-nowrap text-muted-foreground">
+                          {new Date(subscriber.created_at).toLocaleDateString(
+                            displayLocale
+                          )}
+                        </TableCell>
+                      )}
+                      {columnVisibility.reason && (
+                        <TableCell className="max-w-52 truncate text-xs text-muted-foreground">
+                          {subscriber.unsubscribe_reason || "—"}
+                        </TableCell>
+                      )}
+                      <TableCell>
+                        <div className="flex justify-end">
+                          <Can
+                            permission={[
+                              PERMISSIONS.SEND_NEWSLETTER_EMAIL,
+                              PERMISSIONS.UPDATE_NEWSLETTER_SUBSCRIBER,
+                              PERMISSIONS.DELETE_NEWSLETTER_SUBSCRIBER,
+                            ]}
+                          >
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-7 text-muted-foreground data-[state=open]:bg-muted"
+                                  aria-label={t("ACTIONS_LABEL")}
+                                >
+                                  <MoreHorizontalIcon className="size-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent
+                                align="end"
+                                className="w-44 text-xs"
+                              >
+                                {isActive && (
+                                  <Can
+                                    permission={
+                                      PERMISSIONS.SEND_NEWSLETTER_EMAIL
+                                    }
+                                  >
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        openComposer([subscriber.id])
+                                      }
+                                      className="cursor-pointer"
+                                    >
+                                      <MailIcon className="me-2 size-3.5" />
+                                      {t("SEND_INDIVIDUAL")}
+                                    </DropdownMenuItem>
+                                  </Can>
+                                )}
+                                <Can
+                                  permission={
+                                    PERMISSIONS.UPDATE_NEWSLETTER_SUBSCRIBER
+                                  }
+                                >
+                                  <DropdownMenuItem
+                                    disabled={isUpdating}
+                                    onClick={() =>
+                                      handleStatusChange(subscriber)
+                                    }
+                                    className="cursor-pointer"
+                                  >
+                                    {isActive ? (
+                                      <UserXIcon className="me-2 size-3.5 text-muted-foreground" />
+                                    ) : (
+                                      <UserCheckIcon className="me-2 size-3.5 text-emerald-600 dark:text-emerald-400" />
+                                    )}
+                                    {t(
+                                      isActive
+                                        ? "UNSUBSCRIBE_ACTION"
+                                        : "REACTIVATE_ACTION"
+                                    )}
+                                  </DropdownMenuItem>
+                                </Can>
+                                <Can
+                                  permission={
+                                    PERMISSIONS.DELETE_NEWSLETTER_SUBSCRIBER
+                                  }
+                                >
+                                  <DeleteSubscriberDialog
+                                    subscriber={subscriber}
+                                    isDeleting={isDeleting}
+                                    onDelete={(deletedId) => {
+                                      startDeleting(async () => {
+                                        try {
+                                          const result =
+                                            await deleteNewsletterSubscriber({
+                                              id: deletedId,
+                                            })
+                                          if (!result.success) {
+                                            toast.error(
+                                              tErrors(
+                                                getActionErrorKey(result.error)
+                                              )
+                                            )
+                                            return
+                                          }
+                                          setSubscribers((current) =>
+                                            current.filter(
+                                              (item) => item.id !== deletedId
+                                            )
+                                          )
+                                          setSelectedIds((current) =>
+                                            current.filter(
+                                              (id) => id !== deletedId
+                                            )
+                                          )
+                                          toast.success(
+                                            t("DELETE_SUCCESS_TOAST")
+                                          )
+                                        } catch {
+                                          toast.error(
+                                            tErrors("UNEXPECTED_ERROR")
+                                          )
+                                        }
+                                      })
+                                    }}
+                                    trigger={
+                                      <DropdownMenuItem
+                                        onSelect={(event) =>
+                                          event.preventDefault()
+                                        }
+                                        className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
+                                      >
+                                        <Trash2Icon className="me-2 size-3.5" />
+                                        {t("DELETE_ACTION")}
+                                      </DropdownMenuItem>
+                                    }
+                                  />
+                                </Can>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </Can>
                         </div>
                       </TableCell>
@@ -554,7 +760,12 @@ export function NewsletterSubscribersTable({
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={6}
+                    colSpan={
+                      3 +
+                      HIDEABLE_COLUMNS.filter(
+                        (column) => columnVisibility[column]
+                      ).length
+                    }
                     className="h-24 text-center text-xs text-muted-foreground"
                   >
                     {t("NO_SUBSCRIBERS_FOUND")}
@@ -571,21 +782,30 @@ export function NewsletterSubscribersTable({
           <Label htmlFor="newsletter-page-size" className="text-xs">
             {t("ROWS_PER_PAGE")}
           </Label>
-          <select
-            id="newsletter-page-size"
-            value={pageSize}
-            onChange={(event) => {
-              setPageSize(Number(event.target.value))
+          <Select
+            value={`${pageSize}`}
+            onValueChange={(value) => {
+              setPageSize(Number(value))
               setPageIndex(0)
             }}
-            className="h-8 rounded-md border border-input bg-background px-2 text-xs"
           >
-            {[10, 20, 50].map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger
+              size="sm"
+              className="h-8 w-18 shrink-0 text-xs"
+              id="newsletter-page-size"
+            >
+              <SelectValue placeholder={pageSize} />
+            </SelectTrigger>
+            <SelectContent side="top" className="text-xs">
+              <SelectGroup>
+                {[10, 20, 50].map((size) => (
+                  <SelectItem key={size} value={`${size}`}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
           <span>
             {t("PAGE_COUNTER", {
               page: effectivePageIndex + 1,
@@ -736,45 +956,6 @@ export function NewsletterSubscribersTable({
           </form>
         </DialogContent>
       </Dialog>
-
-      <AlertDialog
-        open={subscriberToDelete !== null}
-        onOpenChange={(open) => {
-          if (!open && !isDeleting) setSubscriberToDelete(null)
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader className="text-start">
-            <AlertDialogTitle>{t("DELETE_DIALOG_TITLE")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("DELETE_DIALOG_DESCRIPTION")}{" "}
-              <span className="font-semibold text-foreground">
-                {subscriberToDelete?.email}
-              </span>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>
-              {t("CANCEL_BUTTON")}
-            </AlertDialogCancel>
-            <Button
-              type="button"
-              variant="destructive"
-              disabled={isDeleting}
-              onClick={handleDelete}
-            >
-              {isDeleting ? (
-                <>
-                  <Spinner className="me-1.5 size-3.5" />
-                  {t("DELETING_BUTTON")}
-                </>
-              ) : (
-                t("DELETE_ACTION")
-              )}
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   )
 }

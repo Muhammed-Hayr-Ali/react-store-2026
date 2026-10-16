@@ -639,6 +639,8 @@
     "UNSUBSCRIBED_COUNT": "Unsubscribed",
     "SEARCH_PLACEHOLDER": "Search by email or unsubscribe reason...",
     "CLEAR_SEARCH": "Clear search",
+    "FILTER_BUTTON": "Filter subscribers",
+    "TOGGLE_COLUMNS": "Toggle columns",
     "FILTER_ALL": "All",
     "FILTER_ACTIVE": "Active",
     "FILTER_UNSUBSCRIBED": "Unsubscribed",
@@ -685,7 +687,10 @@
     "REACTIVATED_TOAST": "Subscription reactivated.",
     "DELETE_SUCCESS_TOAST": "Subscriber deleted.",
     "DELETE_DIALOG_TITLE": "Delete subscriber",
-    "DELETE_DIALOG_DESCRIPTION": "Permanently remove this email address from the list?",
+    "DELETE_DIALOG_DESCRIPTION": "Permanently remove this email address from the list:",
+    "DELETE_DIALOG_WARNING": "This action cannot be undone.",
+    "TYPE_EMAIL_TO_CONFIRM": "To confirm, please type this email address:",
+    "CONFIRM_EMAIL_PLACEHOLDER": "Type the email address here...",
     "DELETING_BUTTON": "Deleting..."
   },
   "CategoriesManagement": {
