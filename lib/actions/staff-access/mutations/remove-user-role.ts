@@ -1,6 +1,6 @@
 /**
- * @file lib/actions/role/mutations/remove-user-role.ts
- * @description Removes a role from a user.
+ * @file lib/actions/staff-access/mutations/remove-user-role.ts
+ * @description Removes a role from a staff user.
  */
 
 "use server"
@@ -11,7 +11,7 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
 import { getValidationDetails } from "../../validation"
-import { hasPermission, PERMISSIONS } from "../index"
+import { hasPermission, PERMISSIONS } from "../../role/index"
 import { assignUserRoleSchema, type AssignUserRoleInput } from "../schemas"
 
 export async function removeRoleFromUser(
@@ -19,10 +19,7 @@ export async function removeRoleFromUser(
 ): Promise<ApiResult<null>> {
   const canRemove = await hasPermission(PERMISSIONS.REMOVE_ROLE)
   if (!canRemove) {
-    return {
-      success: false,
-      error: "PERMISSION_DENIED",
-    }
+    return { success: false, error: "PERMISSION_DENIED" }
   }
 
   const validation = assignUserRoleSchema.safeParse(input)
@@ -36,7 +33,6 @@ export async function removeRoleFromUser(
 
   const { userId, roleId } = validation.data
   const supabase = await createServerClient()
-
   const { error } = await supabase
     .from("user_roles")
     .delete()
@@ -52,9 +48,5 @@ export async function removeRoleFromUser(
   }
 
   revalidatePath("/", "layout")
-
-  return {
-    success: true,
-    data: null,
-  }
+  return { success: true, data: null }
 }

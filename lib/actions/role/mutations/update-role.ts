@@ -16,7 +16,7 @@ import {
   updateRolePermissionsSchema,
   type UpdateRolePermissionsInput,
 } from "../schemas"
-import type { RoleRecord } from "./create-role"
+import type { RoleRecord } from "../types"
 
 export async function updateRole(
   input: UpdateRolePermissionsInput

@@ -70,7 +70,7 @@ import {
 import { Can } from "@/components/shared/can"
 import { PERMISSIONS } from "@/lib/actions/role"
 import { useIsMobile } from "@/hooks/use-mobile"
-import type { RoleRecord } from "@/lib/actions/role/mutations/create-role"
+import type { RoleRecord } from "@/lib/actions/role/types"
 import { appRoutes } from "@/lib/config/app-routes"
 import { DeleteRoleDialog } from "./delete-role-dialog"
 

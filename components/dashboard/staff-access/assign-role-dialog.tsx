@@ -40,14 +40,13 @@ import {
 } from "@/components/ui/select"
 
 import { PERMISSIONS } from "@/lib/actions/role"
-import type { UserWithRoles } from "@/lib/actions/role/queries/get-users-with-roles"
-import type { RoleRecord } from "@/lib/actions/role/mutations/create-role"
-import { assignRoleToUser } from "@/lib/actions/role/mutations/assign-user-role"
+import type { StaffAccessRole, UserWithRoles } from "@/lib/actions/staff-access/types"
+import { assignRoleToUser } from "@/lib/actions/staff-access/mutations/assign-user-role"
 
 export interface AssignRoleDialogProps {
   user: UserWithRoles
-  availableRoles: RoleRecord[]
-  onSuccess?: (userId: string, assignedRole: RoleRecord) => void
+  availableRoles: StaffAccessRole[]
+  onSuccess?: (userId: string, assignedRole: StaffAccessRole) => void
 }
 
 export function AssignRoleDialog({

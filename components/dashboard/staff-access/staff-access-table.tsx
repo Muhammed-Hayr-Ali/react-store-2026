@@ -69,15 +69,17 @@ import { PERMISSIONS } from "@/lib/actions/role"
 import { useIsMobile } from "@/hooks/use-mobile"
 
 import AssignRoleDialog from "./assign-role-dialog"
-import type { UserWithRoles } from "@/lib/actions/role/queries/get-users-with-roles"
-import type { RoleRecord } from "@/lib/actions/role/mutations/create-role"
-import { removeRoleFromUser } from "@/lib/actions/role/mutations/remove-user-role"
+import type {
+  StaffAccessRole,
+  UserWithRoles,
+} from "@/lib/actions/staff-access/types"
+import { removeRoleFromUser } from "@/lib/actions/staff-access/mutations/remove-user-role"
 
 const HIDEABLE_COLUMNS = ["roles"]
 
 interface StaffAccessTableProps {
   initialUsers: UserWithRoles[]
-  availableRoles: RoleRecord[]
+  availableRoles: StaffAccessRole[]
   initialIsMobile?: boolean
 }
 

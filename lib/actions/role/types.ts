@@ -96,6 +96,14 @@ export const PERMISSIONS = {
 
 export type AppPermission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]
 
+export interface RoleRecord {
+  id: string
+  name: string
+  description: string | null
+  permissions: AppPermission[]
+  created_at: string
+}
+
 export const roleSchema = z.object({
   role: z.string(),
   permissions: z.array(z.string()),

@@ -1,5 +1,5 @@
 /**
- * @file lib/actions/role/mutations/assign-user-role.ts
+ * @file lib/actions/staff-access/mutations/assign-user-role.ts
  * @description Assigns a role to a user.
  */
 
@@ -11,7 +11,7 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
 import { getValidationDetails } from "../../validation"
-import { hasPermission, PERMISSIONS } from "../index"
+import { hasPermission, PERMISSIONS } from "../../role/index"
 import { assignUserRoleSchema, type AssignUserRoleInput } from "../schemas"
 
 export async function assignRoleToUser(

@@ -1,42 +1,12 @@
 /*
- * @file lib/actions/staff_access/queries/get-staff-access-page-data.ts
- * @description Handles staff access data fetching, summary calculations, and mobile detection with strict type safety.
+ * @file lib/actions/staff-access/queries/get-staff-access-page-data.ts
+ * @description Loads staff access data and calculates its summary.
  */
 
 import { headers } from "next/headers"
-import { getUsersWithRoles } from "@/lib/actions/role/queries/get-users-with-roles"
-import { getAllRoles } from "@/lib/actions/role/queries/get-all-roles"
-
-type UserItem =
-  Awaited<ReturnType<typeof getUsersWithRoles>> extends {
-    success: true
-    data: infer T
-  }
-    ? T extends (infer U)[]
-      ? U
-      : never
-    : never
-
-type RoleItem =
-  Awaited<ReturnType<typeof getAllRoles>> extends {
-    success: true
-    data: infer T
-  }
-    ? T extends (infer U)[]
-      ? U
-      : never
-    : never
-
-export interface StaffAccessPageData {
-  users: UserItem[]
-  roles: RoleItem[]
-  summary: {
-    total: number
-    assigned: number
-    unassigned: number
-  }
-  isMobile: boolean
-}
+import type { StaffAccessPageData } from "../types"
+import { getUsersWithRoles } from "./get-users-with-roles"
+import { getStaffAccessRoles } from "./get-staff-access-roles"
 
 export async function getStaffAccessPageData(): Promise<{
   success: boolean
@@ -45,7 +15,7 @@ export async function getStaffAccessPageData(): Promise<{
 }> {
   const [usersResult, rolesResult] = await Promise.all([
     getUsersWithRoles(),
-    getAllRoles(),
+    getStaffAccessRoles(),
   ])
 
   if (!usersResult.success || !usersResult.data) {
@@ -58,10 +28,10 @@ export async function getStaffAccessPageData(): Promise<{
     }
   }
 
-  const users = usersResult.data as UserItem[]
+  const users = usersResult.data
   const roles =
     rolesResult.success && rolesResult.data
-      ? (rolesResult.data as RoleItem[])
+      ? rolesResult.data
       : []
 
   // حساب الملخص برمجياً (فصل المنطق عن العرض)

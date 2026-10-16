@@ -5,11 +5,13 @@ import { UsersIcon } from "lucide-react"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 
+import { getStaffAccessPageData } from "@/lib/actions/staff-access/queries/get-staff-access-page-data"
+
+
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import StaffAccessTable from "@/components/dashboard/staff-access/staff-access-table"
 import { StaffAccessSummary } from "@/components/dashboard/staff-access/staff-access-summary"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-import { getStaffAccessPageData } from "@/lib/actions/users/queries/get-staff-access-page-data"
 
 interface PageProps {
   params: Promise<{

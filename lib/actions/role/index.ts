@@ -11,4 +11,5 @@ export {
   roleSchema,
   type AppRole,
   type AppPermission,
+  type RoleRecord,
 } from "./types"

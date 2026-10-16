@@ -1,5 +1,5 @@
 /**
- * @file lib/actions/role/queries/get-users-with-roles.ts
+ * @file lib/actions/staff-access/queries/get-users-with-roles.ts
  * @description Retrieves users with their assigned roles.
  */
 
@@ -8,20 +8,11 @@
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
-import type { RoleRecord } from "../mutations/create-role"
-
-export interface UserWithRoles {
-  id: string
-  first_name: string | null
-  last_name: string | null
-  email: string | null
-  profile_image: string | null
-  roles: RoleRecord[]
-}
+import type { StaffAccessRole, UserWithRoles } from "../types"
 
 interface UserRoleRow {
   user_id: string
-  roles: RoleRecord | null
+  roles: StaffAccessRole | null
 }
 
 export async function getUsersWithRoles(): Promise<ApiResult<UserWithRoles[]>> {
@@ -70,7 +61,7 @@ export async function getUsersWithRoles(): Promise<ApiResult<UserWithRoles[]>> {
     }
   }
 
-  const rolesMap = new Map<string, RoleRecord[]>()
+  const rolesMap = new Map<string, StaffAccessRole[]>()
   const rawUserRoles = (userRolesData ?? []) as unknown as UserRoleRow[]
 
   for (const row of rawUserRoles) {

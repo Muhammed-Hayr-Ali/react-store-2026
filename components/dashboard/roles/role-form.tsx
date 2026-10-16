@@ -32,7 +32,7 @@ import { Progress } from "@/components/ui/progress"
 import { createRole } from "@/lib/actions/role/mutations/create-role"
 import { updateRole } from "@/lib/actions/role/mutations/update-role"
 import type { AppPermission } from "@/lib/actions/role/types"
-import type { RoleRecord } from "@/lib/actions/role/mutations/create-role"
+import type { RoleRecord } from "@/lib/actions/role/types"
 import { appRoutes } from "@/lib/config/app-routes"
 import { PERMISSION_GROUPS } from "@/lib/actions/role/permission-groups"
 

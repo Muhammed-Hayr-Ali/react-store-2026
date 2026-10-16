@@ -11,16 +11,9 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
 import { getValidationDetails } from "../../validation"
-import { hasPermission, PERMISSIONS, type AppPermission } from "../index"
+import { hasPermission, PERMISSIONS } from "../index"
+import type { RoleRecord } from "../types"
 import { createRoleSchema, type CreateRoleInput } from "../schemas"
-
-export interface RoleRecord {
-  id: string
-  name: string
-  description: string | null
-  permissions: AppPermission[]
-  created_at: string
-}
 
 export async function createRole(
   input: CreateRoleInput

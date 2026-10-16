@@ -30,14 +30,8 @@ export const deleteRoleSchema = z.object({
   roleId: z.string().uuid("INVALID_ROLE_ID"),
 })
 
-export const assignUserRoleSchema = z.object({
-  userId: z.string().uuid("INVALID_UUID_ERROR"),
-  roleId: z.string().uuid("INVALID_ROLE_ID"),
-})
-
 export type CreateRoleInput = z.infer<typeof createRoleSchema>
 export type UpdateRolePermissionsInput = z.infer<
   typeof updateRolePermissionsSchema
 >
 export type DeleteRoleInput = z.infer<typeof deleteRoleSchema>
-export type AssignUserRoleInput = z.infer<typeof assignUserRoleSchema>
