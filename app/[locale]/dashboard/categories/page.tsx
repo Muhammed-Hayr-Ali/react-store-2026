@@ -1,13 +1,11 @@
-import { readdir } from "node:fs/promises"
-import path from "node:path"
-import { headers } from "next/headers"
 import { notFound } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { TagsIcon } from "lucide-react"
 
 import { CategoriesTable } from "@/components/dashboard/categories/categories-table"
+import { CategoriesSummary } from "@/components/dashboard/categories/categories-summary"
+import { getCategoriesPageData } from "@/lib/actions/categories/queries/get-categories-page-data"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
-import { getCategories } from "@/lib/actions/categories"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
@@ -42,39 +40,18 @@ export default async function Page({ params }: PageProps) {
     namespace: "ActionErrors",
   })
 
+  // Check administrative permissions
   if (!(await hasPermission(PERMISSIONS.VIEW_CATEGORIES_MANAGEMENT))) {
     notFound()
   }
 
-  const result = await getCategories({ includeInactive: true })
-  if (!result.success) {
-    throw new Error(tErrors(getActionErrorKey(result.error)))
+  // Fetch pre-processed page data and business logic
+  const pageDataResult = await getCategoriesPageData()
+  if (!pageDataResult.success || !pageDataResult.data) {
+    throw new Error(tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR")))
   }
 
-  const categoryImageDirectory = path.join(
-    process.cwd(),
-    "public",
-    "site-assets",
-    "categories"
-  )
-  const categoryImages = (
-    await readdir(categoryImageDirectory, {
-      withFileTypes: true,
-    })
-  )
-    .filter(
-      (entry) =>
-        entry.isFile() && /\.(avif|gif|jpe?g|png|webp|svg)$/i.test(entry.name)
-    )
-    .map((entry) => entry.name)
-    .sort((left, right) => left.localeCompare(right))
-
-  const headersList = await headers()
-  const userAgent = headersList.get("user-agent") || ""
-  const isMobile =
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      userAgent
-    )
+  const { categories, summary, categoryImages, isMobile } = pageDataResult.data
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
@@ -94,8 +71,17 @@ export default async function Page({ params }: PageProps) {
         </div>
       </div>
 
+      <CategoriesSummary
+        totalCount={summary.total}
+        activeCount={summary.active}
+        inactiveCount={summary.inactive}
+        totalLabel={t("TOTAL_COUNT")}
+        activeLabel={t("ACTIVE_COUNT")}
+        inactiveLabel={t("INACTIVE_COUNT")}
+      />
+
       <CategoriesTable
-        initialCategories={result.data}
+        initialCategories={categories}
         categoryImages={categoryImages}
         initialIsMobile={isMobile}
       />

@@ -14,8 +14,6 @@ import {
   SearchIcon,
   Trash2Icon,
   UserCheckIcon,
-  UserRoundCheckIcon,
-  UsersIcon,
   UserXIcon,
   XIcon,
 } from "lucide-react"
@@ -321,29 +319,9 @@ export function NewsletterSubscribersTable({
 
   return (
     <div className="space-y-5">
-      <div className="grid gap-3 sm:grid-cols-3">
-        <SummaryCard
-          icon={<UsersIcon className="size-4" />}
-          label={t("TOTAL_COUNT")}
-          value={subscribers.length}
-        />
-        <SummaryCard
-          icon={<UserRoundCheckIcon className="size-4" />}
-          label={t("ACTIVE_COUNT")}
-          value={activeCount}
-          accent="text-emerald-600 dark:text-emerald-400"
-        />
-        <SummaryCard
-          icon={<XIcon className="size-4" />}
-          label={t("UNSUBSCRIBED_COUNT")}
-          value={unsubscribedCount}
-          accent="text-muted-foreground"
-        />
-      </div>
-
       <div className="flex w-full min-w-0 items-center gap-2">
         <div className="relative min-w-0 flex-1">
-          <SearchIcon className="pointer-events-none absolute start-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <SearchIcon className="pointer-events-none absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={query}
             onChange={(event) => {
@@ -358,7 +336,7 @@ export function NewsletterSubscribersTable({
               type="button"
               variant="ghost"
               size="icon-xs"
-              className="absolute end-1 top-1/2 -translate-y-1/2"
+              className="absolute inset-e-1 top-1/2 -translate-y-1/2"
               onClick={() => {
                 setQuery("")
                 setPageIndex(0)
@@ -441,23 +419,7 @@ export function NewsletterSubscribersTable({
             ))}
           </div>
 
-          <Can permission={PERMISSIONS.SEND_NEWSLETTER_EMAIL}>
-            <Button
-              type="button"
-              size="sm"
-              className="h-8 shrink-0 gap-1.5 px-2 text-xs sm:px-3"
-              disabled={selectedIds.length === 0}
-              onClick={() => openComposer(selectedIds)}
-              title={t("SEND_SELECTED", { count: selectedIds.length })}
-            >
-              <MailIcon className="size-3.5" />
-              <span className="hidden sm:inline">
-                {t("SEND_SELECTED", { count: selectedIds.length })}
-              </span>
-              <span className="sm:hidden">{selectedIds.length}</span>
-            </Button>
-          </Can>
-
+         
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -493,6 +455,27 @@ export function NewsletterSubscribersTable({
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+
+ <Can permission={PERMISSIONS.SEND_NEWSLETTER_EMAIL}>
+            <Button
+              type="button"
+              size="sm"
+              className="h-8 shrink-0 gap-1.5 px-2 text-xs sm:px-3"
+              disabled={selectedIds.length === 0}
+              onClick={() => openComposer(selectedIds)}
+              title={t("SEND_SELECTED", { count: selectedIds.length })}
+            >
+              <MailIcon className="size-3.5" />
+              <span className="hidden sm:inline">
+                {t("SEND_SELECTED", { count: selectedIds.length })}
+              </span>
+              <span className="sm:hidden">{selectedIds.length}</span>
+            </Button>
+          </Can>
+
+
+
         </div>
       </div>
 
@@ -956,32 +939,6 @@ export function NewsletterSubscribersTable({
           </form>
         </DialogContent>
       </Dialog>
-    </div>
-  )
-}
-
-function SummaryCard({
-  icon,
-  label,
-  value,
-  accent = "text-foreground",
-}: {
-  icon: React.ReactNode
-  label: string
-  value: number
-  accent?: string
-}) {
-  return (
-    <div className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 shadow-xs">
-      <div className="space-y-1">
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className={`text-xl font-bold tabular-nums ${accent}`}>{value}</p>
-      </div>
-      <span
-        className={`flex size-8 items-center justify-center rounded-lg bg-secondary ${accent}`}
-      >
-        {icon}
-      </span>
     </div>
   )
 }

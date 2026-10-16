@@ -4,11 +4,12 @@ import { getTranslations } from "next-intl/server"
 import { MailIcon } from "lucide-react"
 
 import { NewsletterSubscribersTable } from "@/components/dashboard/newsletter-subscribers/newsletter-subscribers-table"
+import { getSubscribersPageData } from "@/lib/actions/newsletter_subscribers/queries/get-subscribers-page-data"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
-import { getNewsletterSubscribers } from "@/lib/actions/newsletter_subscribers/queries/get-newsletter-subscribers"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
+import { SubscribersSummary } from "@/components/dashboard/newsletter-subscribers/subscribers-summary"
 
 interface PageProps {
   params: Promise<{ locale: string }>
@@ -42,17 +43,12 @@ export default async function Page({ params }: PageProps) {
     notFound()
   }
 
-  const result = await getNewsletterSubscribers()
-  if (!result.success) {
-    throw new Error(tErrors(getActionErrorKey(result.error)))
+  const pageDataResult = await getSubscribersPageData()
+  if (!pageDataResult.success || !pageDataResult.data) {
+    throw new Error(tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR")))
   }
 
-  const headersList = await headers()
-  const userAgent = headersList.get("user-agent") || ""
-  const isMobile =
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      userAgent
-    )
+  const { subscribers, summary, isMobile } = pageDataResult.data
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
@@ -72,8 +68,17 @@ export default async function Page({ params }: PageProps) {
         </div>
       </div>
 
+      <SubscribersSummary
+        totalCount={summary.total}
+        activeCount={summary.active}
+        unsubscribedCount={summary.unsubscribed}
+        totalLabel={t("TOTAL_COUNT")}
+        activeLabel={t("ACTIVE_COUNT")}
+        unsubscribedLabel={t("UNSUBSCRIBED_COUNT")}
+      />
+
       <NewsletterSubscribersTable
-        initialSubscribers={result.data}
+        initialSubscribers={subscribers}
         locale={locale === "ar" ? "ar" : "en"}
         initialIsMobile={isMobile}
       />

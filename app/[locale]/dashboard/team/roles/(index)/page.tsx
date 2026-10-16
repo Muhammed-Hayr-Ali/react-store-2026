@@ -1,13 +1,19 @@
-import { headers } from "next/headers"
+/**
+ * @file app/[locale]/dashboard/roles/page.tsx
+ * @description Roles and permissions management dashboard page.
+ */
+
+import { notFound } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 import { ShieldCheckIcon } from "lucide-react"
 
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import { getAllRoles } from "@/lib/actions/role/queries/get-all-roles"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 import RolesTable from "@/components/dashboard/roles/roles-table"
+import { RolesSummary } from "@/components/dashboard/roles/roles-summary"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-import { notFound } from "next/navigation"
-import { getTranslations } from "next-intl/server"
+import { getRolesPageData } from "@/lib/actions/role/queries/get-roles-page-data"
 
 interface PageProps {
   params: Promise<{
@@ -29,21 +35,22 @@ export async function generateMetadata({ params }: PageProps) {
 export default async function Page({ params }: PageProps) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "RolesManagement" })
+  const tErrors = await getTranslations({ locale, namespace: "ActionErrors" })
 
   const canView = await hasPermission(PERMISSIONS.VIEW_ROLES_MANAGEMENT)
   if (!canView) {
     notFound()
   }
 
-  const headersList = await headers()
-  const userAgent = headersList.get("user-agent") || ""
-  const isMobile =
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      userAgent
+  // استدعاء دالة جلب البيانات والمعالجة المستقلة
+  const pageDataResult = await getRolesPageData()
+  if (!pageDataResult.success || !pageDataResult.data) {
+    throw new Error(
+      tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
     )
+  }
 
-  const result = await getAllRoles()
-  const roles = result.success && result.data ? result.data : []
+  const { roles, summary, isMobile } = pageDataResult.data
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
@@ -62,6 +69,16 @@ export default async function Page({ params }: PageProps) {
           </p>
         </div>
       </div>
+
+      {/* مكون الملخص الإحصائي الجديد للأدوار */}
+      <RolesSummary
+        totalCount={summary.total}
+        activeCount={summary.active}
+        emptyCount={summary.empty}
+        totalLabel={t("TOTAL_ROLES_COUNT")}
+        activeLabel={t("ACTIVE_ROLES_COUNT")}
+        emptyLabel={t("EMPTY_ROLES_COUNT")}
+      />
 
       <RolesTable initialRoles={roles} initialIsMobile={isMobile} />
     </div>

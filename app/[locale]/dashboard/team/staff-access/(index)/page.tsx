@@ -1,13 +1,15 @@
+import { notFound } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 import { UsersIcon } from "lucide-react"
 
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import { getAllRoles } from "@/lib/actions/role/queries/get-all-roles"
-import { getUsersWithRoles } from "@/lib/actions/role/queries/get-users-with-roles"
+
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 import StaffAccessTable from "@/components/dashboard/staff-access/staff-access-table"
+import { StaffAccessSummary } from "@/components/dashboard/staff-access/staff-access-summary"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-import { notFound } from "next/navigation"
-import { getTranslations } from "next-intl/server"
+import { getStaffAccessPageData } from "@/lib/actions/users/queries/get-staff-access-page-data"
 
 interface PageProps {
   params: Promise<{
@@ -17,7 +19,10 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps) {
   const { locale } = await params
-  const t = await getTranslations({ locale, namespace: "StaffAccessManagement" })
+  const t = await getTranslations({
+    locale,
+    namespace: "StaffAccessManagement",
+  })
 
   return createMetadata({
     siteName: appConfig.name,
@@ -28,25 +33,29 @@ export async function generateMetadata({ params }: PageProps) {
 
 export default async function Page({ params }: PageProps) {
   const { locale } = await params
-  const t = await getTranslations({ locale, namespace: "StaffAccessManagement" })
+  const t = await getTranslations({
+    locale,
+    namespace: "StaffAccessManagement",
+  })
+  const tErrors = await getTranslations({ locale, namespace: "ActionErrors" })
 
   const canView = await hasPermission(PERMISSIONS.VIEW_STAFF_ACCESS)
   if (!canView) {
     notFound()
   }
 
-  const [usersResult, rolesResult] = await Promise.all([
-    getUsersWithRoles(),
-    getAllRoles(),
-  ])
+  const pageDataResult = await getStaffAccessPageData()
+  if (!pageDataResult.success || !pageDataResult.data) {
+    throw new Error(
+      tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
+    )
+  }
 
-  const users = usersResult.success && usersResult.data ? usersResult.data : []
-  const roles = rolesResult.success && rolesResult.data ? rolesResult.data : []
+  const { users, roles, summary } = pageDataResult.data
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
-      {/* Use the shared dashboard page header layout. */}
-      <div className="flex items-center gap-3 border-b border-border/40 pb-4">
+      <div className="flex flex-col gap-3 border-b border-border/40 pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
             <span className="flex size-7 items-center justify-center rounded-lg bg-secondary shadow-xs">
@@ -61,6 +70,15 @@ export default async function Page({ params }: PageProps) {
           </p>
         </div>
       </div>
+
+      <StaffAccessSummary
+        totalCount={summary.total}
+        assignedCount={summary.assigned}
+        unassignedCount={summary.unassigned}
+        totalLabel={t("TOTAL_STAFF_COUNT")}
+        assignedLabel={t("ASSIGNED_STAFF_COUNT")}
+        unassignedLabel={t("UNASSIGNED_STAFF_COUNT")}
+      />
 
       <StaffAccessTable initialUsers={users} availableRoles={roles} />
     </div>

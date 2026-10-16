@@ -1,12 +1,13 @@
-import { headers } from "next/headers"
 import { notFound } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { UsersIcon } from "lucide-react"
 
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import { getAdminUsersList } from "@/lib/actions/users"
+import { getUsersPageData } from "@/lib/actions/users/queries/get-users-page-data"
 import { UsersTable } from "@/components/dashboard/users/users-table"
+import { UsersSummary } from "@/components/dashboard/users/users-summary"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 
 interface PageProps {
@@ -29,21 +30,19 @@ export async function generateMetadata({ params }: PageProps) {
 export default async function Page({ params }: PageProps) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "UsersManagement" })
+  const tErrors = await getTranslations({ locale, namespace: "ActionErrors" })
 
   const canView = await hasPermission(PERMISSIONS.VIEW_USERS_MANAGEMENT)
   if (!canView) {
     notFound()
   }
 
-  const headersList = await headers()
-  const userAgent = headersList.get("user-agent") || ""
-  const isMobile =
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      userAgent
-    )
+  const pageDataResult = await getUsersPageData()
+  if (!pageDataResult.success || !pageDataResult.data) {
+    throw new Error(tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR")))
+  }
 
-  const result = await getAdminUsersList()
-  const users = result.success && result.data ? result.data : []
+  const { users, summary, isMobile } = pageDataResult.data
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
@@ -62,6 +61,15 @@ export default async function Page({ params }: PageProps) {
           </p>
         </div>
       </div>
+
+      <UsersSummary
+        totalCount={summary.total}
+        activeCount={summary.active}
+        bannedCount={summary.banned}
+        totalLabel={t("TOTAL_COUNT")}
+        activeLabel={t("ACTIVE_COUNT")}
+        bannedLabel={t("BANNED_COUNT")}
+      />
 
       <UsersTable data={users} initialIsMobile={isMobile} />
     </div>
