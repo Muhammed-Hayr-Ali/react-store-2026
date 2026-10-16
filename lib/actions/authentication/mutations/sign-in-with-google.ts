@@ -11,6 +11,9 @@ import { createServerClient } from "@/lib/database/supabase/server"
 
 import type { ApiResult, OAuthSignInResult } from "../types"
 
+/**
+ * تبدأ تسجيل الدخول عبر Google OAuth.
+ */
 export async function signInWithGoogle(): Promise<
   ApiResult<OAuthSignInResult>
 > {

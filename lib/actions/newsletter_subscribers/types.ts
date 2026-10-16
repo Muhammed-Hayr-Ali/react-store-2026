@@ -15,7 +15,10 @@ export interface NewsletterSubscriber {
   unsubscribe_reason: string | null
 }
 
-export type NewsletterSubscriberInsert = NewsletterSubscriberInput & {
+export type NewsletterSubscriberInsert = Pick<
+  NewsletterSubscriberInput,
+  "email"
+> & {
   status?: NewsletterStatus
 }
 

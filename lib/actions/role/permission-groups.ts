@@ -1,5 +1,10 @@
 import { PERMISSIONS, AppPermission } from "@/lib/actions/role"
 
+/**
+ * @file lib/actions/role/permission-groups.ts
+ * @description تصنيف الصلاحيات إلى مجموعات لعرضها في واجهة الإدارة.
+ */
+
 export interface PermissionGroup {
   id: string
   label: string

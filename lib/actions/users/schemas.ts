@@ -1,3 +1,8 @@
+/**
+ * @file lib/actions/users/schemas.ts
+ * @description مخططات التحقق من مدخلات إدارة المستخدمين.
+ */
+
 import { z } from "zod"
 
 export const createUserSchema = z.object({
@@ -23,6 +28,12 @@ export const updateUserStatusSchema = z.object({
   banReason: z.string().optional(),
 })
 
+export const getAdminUsersSchema = z.object({
+  search: z.string().trim().optional(),
+  status: z.enum(["active", "suspended", "banned"]).optional(),
+})
+
 export type CreateUserFormValues = z.infer<typeof createUserSchema>
 export type UpdateUserFormValues = z.infer<typeof updateUserSchema>
 export type UpdateUserStatusFormValues = z.infer<typeof updateUserStatusSchema>
+export type GetAdminUsersInput = z.infer<typeof getAdminUsersSchema>

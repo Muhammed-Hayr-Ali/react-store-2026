@@ -1,4 +1,3 @@
-import { headers } from "next/headers"
 import { notFound } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { MailIcon } from "lucide-react"
@@ -44,8 +43,10 @@ export default async function Page({ params }: PageProps) {
   }
 
   const pageDataResult = await getSubscribersPageData()
-  if (!pageDataResult.success || !pageDataResult.data) {
-    throw new Error(tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR")))
+  if (!pageDataResult.success) {
+    throw new Error(
+      tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
+    )
   }
 
   const { subscribers, summary, isMobile } = pageDataResult.data

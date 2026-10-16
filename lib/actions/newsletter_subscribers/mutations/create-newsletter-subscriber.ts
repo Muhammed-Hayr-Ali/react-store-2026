@@ -24,9 +24,11 @@ import type { NewsletterSubscriber } from "../types"
 import { createAdminClient } from "@/lib/database/supabase/admin"
 import React from "react"
 
+/**
+ * تسجل عنوان بريد في النشرة وترسل رسالة تأكيد الاشتراك.
+ */
 export async function createNewsletterSubscriber(
-  input: NewsletterSubscriberInput,
-  locale?: string
+  input: NewsletterSubscriberInput
 ): Promise<ApiResult<NewsletterSubscriber>> {
   const validation = newsletterSubscriberSchema.safeParse(input)
   if (!validation.success) {
@@ -61,7 +63,7 @@ export async function createNewsletterSubscriber(
         details: { database: [error.message] },
       }
     }
-    const emailLocale = resolveEmailLocale(locale)
+    const emailLocale = resolveEmailLocale(validation.data.locale)
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
     const unsubscribeUrl = new URL(appRoutes.newsletterUnsubscribe, baseUrl)
     unsubscribeUrl.searchParams.set("token", token)

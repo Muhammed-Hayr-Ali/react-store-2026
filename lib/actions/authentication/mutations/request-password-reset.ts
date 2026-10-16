@@ -17,9 +17,11 @@ import ResetPasswordEmail from "@/lib/services/email/templates/reset-password-em
 import { getValidationDetails } from "../../validation"
 import { requestPasswordResetSchema } from "../schemas"
 
+/**
+ * تنشئ رمز استعادة كلمة المرور وترسل رابط الاستعادة بالبريد.
+ */
 export async function requestPasswordReset(
-  input: unknown,
-  locale?: string
+  input: unknown
 ): Promise<ApiResult<null>> {
   const validation = requestPasswordResetSchema.safeParse(input)
   if (!validation.success) {
@@ -67,7 +69,7 @@ export async function requestPasswordReset(
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
     const resetUrl = `${baseUrl}${appRoutes.auth.resetPassword}?token=${token}`
-    const emailLocale = resolveEmailLocale(locale)
+    const emailLocale = resolveEmailLocale(validation.data.locale)
 
     await sendEmail({
       to: email,
@@ -78,8 +80,7 @@ export async function requestPasswordReset(
       reactComponent: React.createElement(ResetPasswordEmail, {
         locale: emailLocale,
         firstName:
-          profile.first_name ||
-          (emailLocale === "ar" ? "عميلنا" : "Customer"),
+          profile.first_name || (emailLocale === "ar" ? "عميلنا" : "Customer"),
         resetUrl: resetUrl,
       }),
     })

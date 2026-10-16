@@ -18,6 +18,9 @@ import {
   type UpdateUserStatusFormValues,
 } from "../schemas"
 
+/**
+ * تغير حالة حساب المستخدم وسبب الحظر عند الحاجة.
+ */
 export async function updateUserStatus(
   input: UpdateUserStatusFormValues
 ): Promise<ApiResult<null>> {

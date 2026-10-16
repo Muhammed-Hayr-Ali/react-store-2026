@@ -287,10 +287,10 @@ export function NewsletterSubscribersTable({
       subscriber.status === "active" ? "unsubscribed" : "active"
     startUpdating(async () => {
       try {
-        const result = await updateNewsletterSubscriberStatus(
-          subscriber.id,
-          nextStatus
-        )
+        const result = await updateNewsletterSubscriberStatus({
+          id: subscriber.id,
+          status: nextStatus,
+        })
         if (!result.success) {
           toast.error(tErrors(getActionErrorKey(result.error)))
           return
@@ -419,7 +419,6 @@ export function NewsletterSubscribersTable({
             ))}
           </div>
 
-         
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -456,8 +455,7 @@ export function NewsletterSubscribersTable({
             </DropdownMenuContent>
           </DropdownMenu>
 
-
- <Can permission={PERMISSIONS.SEND_NEWSLETTER_EMAIL}>
+          <Can permission={PERMISSIONS.SEND_NEWSLETTER_EMAIL}>
             <Button
               type="button"
               size="sm"
@@ -473,9 +471,6 @@ export function NewsletterSubscribersTable({
               <span className="sm:hidden">{selectedIds.length}</span>
             </Button>
           </Can>
-
-
-
         </div>
       </div>
 

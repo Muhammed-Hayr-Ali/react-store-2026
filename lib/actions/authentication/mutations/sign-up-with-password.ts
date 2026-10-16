@@ -19,9 +19,11 @@ import WelcomeEmail from "@/lib/services/email/templates/welcome-email"
 import { getValidationDetails } from "../../validation"
 import { signUpWithPasswordSchema } from "../schemas"
 
+/**
+ * تنشئ حسابًا جديدًا بالبريد الإلكتروني وكلمة المرور.
+ */
 export async function signUpWithPassword(
-  input: unknown,
-  locale?: string
+  input: unknown
 ): Promise<ApiResult<null>> {
   const validation = signUpWithPasswordSchema.safeParse(input)
   if (!validation.success) {
@@ -62,7 +64,7 @@ export async function signUpWithPassword(
 
   try {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-    const emailLocale = resolveEmailLocale(locale)
+    const emailLocale = resolveEmailLocale(validation.data.locale)
     await sendEmail({
       to: email,
       subject:

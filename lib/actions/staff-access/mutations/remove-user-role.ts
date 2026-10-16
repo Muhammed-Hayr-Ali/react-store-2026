@@ -14,6 +14,9 @@ import { getValidationDetails } from "../../validation"
 import { hasPermission, PERMISSIONS } from "../../role/index"
 import { assignUserRoleSchema, type AssignUserRoleInput } from "../schemas"
 
+/**
+ * تزيل دورًا من مستخدم بعد التحقق من الصلاحية والمدخلات.
+ */
 export async function removeRoleFromUser(
   input: AssignUserRoleInput
 ): Promise<ApiResult<null>> {

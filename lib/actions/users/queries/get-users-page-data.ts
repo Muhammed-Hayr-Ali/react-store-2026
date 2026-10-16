@@ -4,9 +4,9 @@
  */
 
 import { headers } from "next/headers"
-import { getAdminUsersList } from "@/lib/actions/users"
-// استيراد النوع الحقيقي مباشرة من ملف الأنواع أو المجلد الخاص به
-import type { AdminUserSummary } from "@/lib/actions/users/types" // استبدل المسار بما يعادل ملف الأنواع لديك
+import type { ApiResult } from "@/lib/actions/types/utils"
+import { getAdminUsers } from "./get-admin-users"
+import type { AdminUserSummary } from "../types"
 
 export interface UsersPageData {
   users: AdminUserSummary[]
@@ -18,42 +18,26 @@ export interface UsersPageData {
   isMobile: boolean
 }
 
-export async function getUsersPageData(): Promise<{
-  success: boolean
-  data?: UsersPageData
-  error?: string
-}> {
-  const result = await getAdminUsersList()
+/**
+ * تجهز بيانات المستخدمين وملخص الحالات ومؤشر عرض الهاتف.
+ */
+export async function getUsersPageData(): Promise<ApiResult<UsersPageData>> {
+  const result = await getAdminUsers()
 
-  if (!result.success || !result.data) {
+  if (!result.success) {
     return {
       success: false,
-      error:
-        "error" in result && typeof result.error === "string"
-          ? result.error
-          : "GET_USERS_ERROR",
+      error: result.error,
+      details: result.details,
     }
   }
 
-  const users = result.data as AdminUserSummary[]
+  const users = result.data
 
   // حساب الملخص بشكل آمن
   const total = users.length
-  const active = users.filter(
-    (user) =>
-      (user as { status?: string }).status === "active" ||
-      (user as { account_status?: string }).account_status === "active"
-  ).length
-  const banned = users.filter((user) => {
-    const status = (user as { status?: string }).status
-    const accountStatus = (user as { account_status?: string }).account_status
-    return (
-      status === "banned" ||
-      status === "suspended" ||
-      accountStatus === "banned" ||
-      accountStatus === "suspended"
-    )
-  }).length
+  const active = users.filter((user) => user.status === "active").length
+  const banned = users.filter((user) => user.status !== "active").length
 
   const headersList = await headers()
   const userAgent = headersList.get("user-agent") || ""

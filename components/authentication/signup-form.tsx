@@ -72,7 +72,7 @@ export function SignUpForm() {
   // Create the account and display field or account-level errors.
   async function onSubmit(data: SignUpWithPasswordInput) {
     setErrorMessage(null)
-    const result = await signUpWithPassword(data, locale)
+    const result = await signUpWithPassword({ ...data, locale })
 
     if (result.success) {
       router.refresh()

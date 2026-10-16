@@ -1,3 +1,8 @@
+/**
+ * @file lib/actions/staff-access/schemas.ts
+ * @description مخططات التحقق من عمليات إسناد الأدوار للموظفين.
+ */
+
 import { z } from "zod"
 
 export const assignUserRoleSchema = z.object({

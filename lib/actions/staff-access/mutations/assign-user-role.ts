@@ -14,6 +14,9 @@ import { getValidationDetails } from "../../validation"
 import { hasPermission, PERMISSIONS } from "../../role/index"
 import { assignUserRoleSchema, type AssignUserRoleInput } from "../schemas"
 
+/**
+ * تسند دورًا إلى مستخدم بعد التحقق من الصلاحية والمدخلات.
+ */
 export async function assignRoleToUser(
   input: AssignUserRoleInput
 ): Promise<ApiResult<null>> {

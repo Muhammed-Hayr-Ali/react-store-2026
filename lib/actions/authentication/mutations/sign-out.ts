@@ -11,6 +11,9 @@ import { cookies } from "next/headers"
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
+/**
+ * تنهي جلسة المستخدم وتحذف ملف تعريف طريقة تسجيل الدخول.
+ */
 export async function signOut(): Promise<ApiResult<null>> {
   try {
     const supabase = await createServerClient()

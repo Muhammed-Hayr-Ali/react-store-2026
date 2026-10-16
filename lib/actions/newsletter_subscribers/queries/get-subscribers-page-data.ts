@@ -4,8 +4,10 @@
  */
 
 import { headers } from "next/headers"
-import { getNewsletterSubscribers } from "@/lib/actions/newsletter_subscribers/queries/get-newsletter-subscribers"
-import type { NewsletterSubscriber } from "@/lib/actions/newsletter_subscribers/types"
+
+import type { ApiResult } from "@/lib/actions/types/utils"
+import { getNewsletterSubscribers } from "./get-newsletter-subscribers"
+import type { NewsletterSubscriber } from "../types"
 
 export interface SubscribersPageData {
   subscribers: NewsletterSubscriber[]
@@ -17,23 +19,24 @@ export interface SubscribersPageData {
   isMobile: boolean
 }
 
-export async function getSubscribersPageData(): Promise<{
-  success: boolean
-  data?: SubscribersPageData
-  error?: string
-}> {
+/**
+ * تجهز المشتركين وملخص حالات الاشتراك ومؤشر عرض الهاتف.
+ */
+export async function getSubscribersPageData(): Promise<
+  ApiResult<SubscribersPageData>
+> {
   const result = await getNewsletterSubscribers()
 
-  if (!result.success || !result.data) {
+  if (!result.success) {
     return {
       success: false,
-      error: "error" in result && typeof result.error === "string" ? result.error : "GET_NEWSLETTER_SUBSCRIBERS_ERROR",
+      error: result.error,
+      details: result.details,
     }
   }
 
-  const subscribers = result.data as NewsletterSubscriber[]
+  const subscribers = result.data
 
-  // Calculate summary metrics (Separation of Concerns)
   const total = subscribers.length
   const active = subscribers.filter((sub) => sub.status === "active").length
   const unsubscribed = total - active

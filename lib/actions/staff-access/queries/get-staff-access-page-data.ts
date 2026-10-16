@@ -4,44 +4,45 @@
  */
 
 import { headers } from "next/headers"
+
+import type { ApiResult } from "@/lib/actions/types/utils"
 import type { StaffAccessPageData } from "../types"
-import { getUsersWithRoles } from "./get-users-with-roles"
+import { getStaffAccessUsersWithRoles } from "./get-staff-access-users-with-roles"
 import { getStaffAccessRoles } from "./get-staff-access-roles"
 
-export async function getStaffAccessPageData(): Promise<{
-  success: boolean
-  data?: StaffAccessPageData
-  error?: string
-}> {
+/**
+ * تجهز المستخدمين والأدوار وملخص إسناد الأدوار لشاشة الوصول.
+ */
+export async function getStaffAccessPageData(): Promise<
+  ApiResult<StaffAccessPageData>
+> {
   const [usersResult, rolesResult] = await Promise.all([
-    getUsersWithRoles(),
+    getStaffAccessUsersWithRoles(),
     getStaffAccessRoles(),
   ])
 
-  if (!usersResult.success || !usersResult.data) {
+  if (!usersResult.success) {
     return {
       success: false,
-      error:
-        "error" in usersResult && typeof usersResult.error === "string"
-          ? usersResult.error
-          : "GET_USERS_ERROR",
+      error: usersResult.error,
+      details: usersResult.details,
+    }
+  }
+
+  if (!rolesResult.success) {
+    return {
+      success: false,
+      error: rolesResult.error,
+      details: rolesResult.details,
     }
   }
 
   const users = usersResult.data
-  const roles =
-    rolesResult.success && rolesResult.data
-      ? rolesResult.data
-      : []
+  const roles = rolesResult.data
 
   // حساب الملخص برمجياً (فصل المنطق عن العرض)
   const total = users.length
-  const assigned = users.filter((user) => {
-    const assignedRoles = (user as { roles?: unknown[] }).roles
-    return (
-      assignedRoles && Array.isArray(assignedRoles) && assignedRoles.length > 0
-    )
-  }).length
+  const assigned = users.filter((user) => user.roles.length > 0).length
   const unassigned = total - assigned
 
   const headersList = await headers()

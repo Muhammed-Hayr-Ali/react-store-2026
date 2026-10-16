@@ -5,6 +5,9 @@
 
 import { z } from "zod"
 
+/**
+ * تتحقق من أن رابط صورة التصنيف محلي أو يستخدم HTTP أو HTTPS.
+ */
 export function isValidCategoryImageUrl(value: string): boolean {
   if (value.startsWith("/") && !value.startsWith("//")) return true
 

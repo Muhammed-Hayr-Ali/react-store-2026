@@ -14,6 +14,9 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { getValidationDetails } from "../../validation"
 import { signInWithPasswordSchema } from "../schemas"
 
+/**
+ * تسجل دخول المستخدم بالبريد الإلكتروني وكلمة المرور.
+ */
 export async function signInWithPassword(
   input: unknown
 ): Promise<ApiResult<null>> {

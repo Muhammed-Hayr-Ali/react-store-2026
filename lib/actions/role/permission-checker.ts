@@ -11,6 +11,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 
 import type { AppPermission } from "./types"
 
+/** تتحقق من امتلاك المستخدم الحالي لصلاحية واحدة أو أكثر. */
 export const hasPermission = cache(
   async (permission: AppPermission | AppPermission[]): Promise<boolean> => {
     const permissions = Array.isArray(permission) ? permission : [permission]

@@ -1,5 +1,13 @@
+/**
+ * @file lib/actions/validation.ts
+ * @description تنسيق تفاصيل أخطاء التحقق الناتجة عن مخططات الإدخال.
+ */
+
 import type { ZodError } from "zod"
 
+/**
+ * تحول أخطاء التحقق إلى تفاصيل مناسبة لنتائج الأكشن.
+ */
 export function getValidationDetails(
   error: ZodError
 ): Record<string, string[]> {

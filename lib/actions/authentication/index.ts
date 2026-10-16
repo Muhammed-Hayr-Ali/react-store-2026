@@ -1,4 +1,4 @@
-// lib/actions/authentication/index.ts
+/** @file lib/actions/authentication/index.ts واجهة التصدير العامة لأكشنات المصادقة. */
 
 // Mutations
 export { signInWithPassword } from "./mutations/sign-in-with-password"
@@ -7,7 +7,7 @@ export { signUpWithPassword } from "./mutations/sign-up-with-password"
 export { signOut } from "./mutations/sign-out"
 export { requestPasswordReset } from "./mutations/request-password-reset"
 export { confirmPasswordReset } from "./mutations/confirm-password-reset"
-export { handleCallback } from "./mutations/handle-callback"
+export { handleOAuthCallback } from "./mutations/handle-oauth-callback"
 
 // Schemas and types
 export {

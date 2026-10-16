@@ -29,11 +29,11 @@ export async function getRoleById(
 - Keep error identifiers stable and suitable for translation at the UI boundary. Put diagnostic details in `details` rather than replacing the stable error identifier.
 - Keep specialized return contracts only where they are meaningful and already consumed as such, such as boolean permission checks.
 
-## Comments
+## Documentation
 
-- Use a concise English file header in the established JSDoc form: `@file` followed by a one-sentence present-tense `@description`.
-- Add function-level JSDoc when input semantics, return meaning, or a non-obvious behavior needs clarification.
+- Give every exported function a concise Arabic JSDoc description that explains its responsibility.
 - Keep the file header before `"use server"` in server-action modules.
+- Add a longer function-level note only when input semantics, return meaning, or non-obvious behavior needs clarification.
 - Prefer comments that explain why a decision exists. Avoid line-by-line narration, redundant numbered steps, outdated notes, and comments that merely restate the code.
 
 ## Consistent implementation style

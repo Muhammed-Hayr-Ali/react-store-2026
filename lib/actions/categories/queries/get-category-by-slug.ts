@@ -12,6 +12,9 @@ import { getValidationDetails } from "../../validation"
 import { categorySlugSchema, type CategorySlugInput } from "../schemas"
 import type { Category } from "../types"
 
+/**
+ * تجلب تصنيفًا نشطًا باستخدام رابطه العام.
+ */
 export async function getCategoryBySlug(
   input: CategorySlugInput
 ): Promise<ApiResult<Category>> {

@@ -8,9 +8,18 @@
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
+import { hasPermission, PERMISSIONS } from "../../role"
 import type { RoleRecord } from "../types"
 
+/**
+ * تجلب جميع الأدوار مرتبة حسب تاريخ الإنشاء.
+ */
 export async function getAllRoles(): Promise<ApiResult<RoleRecord[]>> {
+  const canViewRoles = await hasPermission(PERMISSIONS.VIEW_ROLES_MANAGEMENT)
+  if (!canViewRoles) {
+    return { success: false, error: "PERMISSION_DENIED" }
+  }
+
   const supabase = await createServerClient()
 
   const { data, error } = await supabase

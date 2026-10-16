@@ -9,6 +9,9 @@ import { createServerClient } from "@/lib/database/supabase/server"
 
 import type { AppRole } from "./types"
 
+/**
+ * تتحقق مما إذا كان المستخدم الحالي يحمل الدور المحدد.
+ */
 export async function hasRole(roleName: AppRole): Promise<boolean> {
   const supabase = await createServerClient()
   const { data, error } = await supabase.rpc("check_user_role", {

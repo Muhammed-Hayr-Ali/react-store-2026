@@ -1,23 +1,16 @@
 /**
- * @file lib/actions/roles/queries/get-roles-page-data.ts
+ * @file lib/actions/role/queries/get-roles-page-data.ts
  * @description Handles roles fetching, summary calculations, and mobile detection with strict type safety.
  */
 
 import { headers } from "next/headers"
-import { getAllRoles } from "./get-all-roles"
 
-// استنباط نوع الدور بدقة من مخرجات الدالة لضمان تجنب أي استخدام لـ any
-type RoleItem = Awaited<ReturnType<typeof getAllRoles>> extends {
-  success: true
-  data: infer T
-}
-  ? T extends (infer U)[]
-    ? U
-    : never
-  : never
+import type { ApiResult } from "@/lib/actions/types/utils"
+import { getAllRoles } from "./get-all-roles"
+import type { RoleRecord } from "../types"
 
 export interface RolesPageData {
-  roles: RoleItem[]
+  roles: RoleRecord[]
   summary: {
     total: number
     active: number
@@ -26,28 +19,25 @@ export interface RolesPageData {
   isMobile: boolean
 }
 
-export async function getRolesPageData(): Promise<{
-  success: boolean
-  data?: RolesPageData
-  error?: string
-}> {
+/**
+ * تجهز الأدوار وملخص الصلاحيات ومؤشر عرض الهاتف.
+ */
+export async function getRolesPageData(): Promise<ApiResult<RolesPageData>> {
   const result = await getAllRoles()
 
-  if (!result || !result.success || !result.data) {
+  if (!result.success) {
     return {
       success: false,
-      error: "error" in result && typeof result.error === "string" ? result.error : "GET_ALL_ROLES_ERROR",
+      error: result.error,
+      details: result.details,
     }
   }
 
-  const roles = result.data as RoleItem[]
+  const roles = result.data
 
   // حساب الملخص برمجياً (فصل المنطق عن العرض) مع فحص آمن للخصائص
   const total = roles.length
-  const active = roles.filter((role) => {
-    const permissions = (role as { permissions?: Record<string, unknown> }).permissions
-    return permissions && Object.keys(permissions).length > 0
-  }).length
+  const active = roles.filter((role) => role.permissions.length > 0).length
   const empty = total - active
 
   const headersList = await headers()

@@ -1,3 +1,8 @@
+/**
+ * @file lib/actions/error-keys.ts
+ * @description قائمة مفاتيح الأخطاء المعتمدة وتحويل القيم إلى مفاتيح ترجمة.
+ */
+
 export const ACTION_ERROR_KEYS = [
   "ASSIGN_ROLE_ERROR",
   "CATEGORY_IMAGE_ALT_TOO_LONG_ERROR",
@@ -96,6 +101,9 @@ export type ActionErrorKey = (typeof ACTION_ERROR_KEYS)[number]
 
 const actionErrorKeySet: ReadonlySet<string> = new Set(ACTION_ERROR_KEYS)
 
+/**
+ * تعيد مفتاح الترجمة المعروف لخطأ الأكشن.
+ */
 export function getActionErrorKey(
   error: string | null | undefined
 ): ActionErrorKey {

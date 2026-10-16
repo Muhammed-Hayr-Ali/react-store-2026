@@ -11,6 +11,9 @@ import { createAdminClient } from "@/lib/database/supabase/admin"
 import { getValidationDetails } from "../../validation"
 import { confirmPasswordResetSchema } from "../schemas"
 
+/**
+ * تتحقق من رمز استعادة كلمة المرور وتحدث كلمة مرور المستخدم.
+ */
 export async function confirmPasswordReset(
   input: unknown
 ): Promise<ApiResult<null>> {

@@ -16,6 +16,9 @@ import { validateCategoryParent } from "../helpers"
 import { updateCategorySchema, type UpdateCategoryInput } from "../schemas"
 import type { Category } from "../types"
 
+/**
+ * تحدث بيانات تصنيف بعد التحقق من الصلاحية وعلاقة الأب.
+ */
 export async function updateCategory(
   input: UpdateCategoryInput
 ): Promise<ApiResult<Category>> {

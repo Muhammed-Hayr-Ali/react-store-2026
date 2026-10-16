@@ -15,6 +15,9 @@ import { getValidationDetails } from "../../validation"
 import { createUserSchema, type CreateUserFormValues } from "../schemas"
 import type { AdminUserSummary } from "../types"
 
+/**
+ * تنشئ حساب مستخدم وملفه الشخصي من لوحة الإدارة.
+ */
 export async function createUser(
   input: CreateUserFormValues
 ): Promise<ApiResult<AdminUserSummary>> {

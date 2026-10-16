@@ -1,3 +1,8 @@
+/**
+ * @file lib/actions/newsletter_subscribers/unsubscribe-token.ts
+ * @description إنشاء رموز إلغاء الاشتراك المشفرة وقراءتها والتحقق منها.
+ */
+
 import "server-only"
 
 import {
@@ -35,6 +40,9 @@ function getEncryptionKey() {
   return createHash("sha256").update(secret).digest()
 }
 
+/**
+ * تنشئ رمز إلغاء اشتراك مشفرًا ومحدود الصلاحية.
+ */
 export function createNewsletterUnsubscribeToken(
   email: string,
   issuedAt = Date.now()
@@ -53,6 +61,9 @@ export function createNewsletterUnsubscribeToken(
   ].join(".")
 }
 
+/**
+ * تفك رمز إلغاء الاشتراك وتتحقق من سلامته وصلاحيته.
+ */
 export function readNewsletterUnsubscribeToken(
   token: string,
   now = Date.now()

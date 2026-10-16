@@ -11,6 +11,9 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { hasPermission, PERMISSIONS } from "../../role"
 import type { NewsletterSubscriber } from "../types"
 
+/**
+ * تجلب مشتركي النشرة البريدية للمستخدمين المخولين.
+ */
 export async function getNewsletterSubscribers(): Promise<
   ApiResult<NewsletterSubscriber[]>
 > {

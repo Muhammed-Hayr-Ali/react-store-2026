@@ -6,6 +6,9 @@
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
+/**
+ * تتحقق من وجود أب التصنيف وخلو سلسلة الآباء من الدورات.
+ */
 export async function validateCategoryParent(
   supabase: Awaited<ReturnType<typeof createServerClient>>,
   parentId: string | null,

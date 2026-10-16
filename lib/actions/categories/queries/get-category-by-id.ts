@@ -13,6 +13,9 @@ import { getValidationDetails } from "../../validation"
 import { categoryIdSchema, type CategoryIdInput } from "../schemas"
 import type { Category } from "../types"
 
+/**
+ * تجلب تصنيفًا واحدًا لإدارة التصنيفات بعد التحقق من الصلاحية.
+ */
 export async function getCategoryById(
   input: CategoryIdInput
 ): Promise<ApiResult<Category>> {

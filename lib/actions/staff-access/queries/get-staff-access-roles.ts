@@ -7,11 +7,21 @@
 
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
+
+import { hasPermission, PERMISSIONS } from "../../role"
 import type { StaffAccessRole } from "../types"
 
+/**
+ * تجلب الأدوار المتاحة في شاشة إدارة وصول الموظفين.
+ */
 export async function getStaffAccessRoles(): Promise<
   ApiResult<StaffAccessRole[]>
 > {
+  const canViewStaffAccess = await hasPermission(PERMISSIONS.VIEW_STAFF_ACCESS)
+  if (!canViewStaffAccess) {
+    return { success: false, error: "PERMISSION_DENIED" }
+  }
+
   const supabase = await createServerClient()
   const { data, error } = await supabase
     .from("roles")

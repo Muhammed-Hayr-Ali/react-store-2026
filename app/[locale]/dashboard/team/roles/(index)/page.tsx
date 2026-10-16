@@ -44,7 +44,7 @@ export default async function Page({ params }: PageProps) {
 
   // استدعاء دالة جلب البيانات والمعالجة المستقلة
   const pageDataResult = await getRolesPageData()
-  if (!pageDataResult.success || !pageDataResult.data) {
+  if (!pageDataResult.success) {
     throw new Error(
       tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
     )

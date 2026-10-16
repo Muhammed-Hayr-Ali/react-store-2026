@@ -1,3 +1,8 @@
+/**
+ * @file lib/actions/role/schemas.ts
+ * @description مخططات التحقق من مدخلات إدارة الأدوار.
+ */
+
 import { z } from "zod"
 import { PERMISSIONS } from "./types"
 
@@ -26,12 +31,15 @@ export const updateRolePermissionsSchema = z.object({
     .min(1, "ROLE_PERMISSION_REQUIRED"),
 })
 
-export const deleteRoleSchema = z.object({
+export const roleIdSchema = z.object({
   roleId: z.string().uuid("INVALID_ROLE_ID"),
 })
+
+export const deleteRoleSchema = roleIdSchema
 
 export type CreateRoleInput = z.infer<typeof createRoleSchema>
 export type UpdateRolePermissionsInput = z.infer<
   typeof updateRolePermissionsSchema
 >
 export type DeleteRoleInput = z.infer<typeof deleteRoleSchema>
+export type RoleIdInput = z.infer<typeof roleIdSchema>

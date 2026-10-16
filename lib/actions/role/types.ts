@@ -1,3 +1,8 @@
+/**
+ * @file lib/actions/role/types.ts
+ * @description أنواع الأدوار والصلاحيات المستخدمة في النظام.
+ */
+
 import * as z from "zod"
 
 export const ROLES = {

@@ -8,6 +8,7 @@
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
+import { hasPermission, PERMISSIONS } from "../../role"
 import type { StaffAccessRole, UserWithRoles } from "../types"
 
 interface UserRoleRow {
@@ -15,7 +16,17 @@ interface UserRoleRow {
   roles: StaffAccessRole | null
 }
 
-export async function getUsersWithRoles(): Promise<ApiResult<UserWithRoles[]>> {
+/**
+ * تجلب المستخدمين مع الأدوار المسندة إليهم لإدارة الوصول.
+ */
+export async function getStaffAccessUsersWithRoles(): Promise<
+  ApiResult<UserWithRoles[]>
+> {
+  const canViewStaffAccess = await hasPermission(PERMISSIONS.VIEW_STAFF_ACCESS)
+  if (!canViewStaffAccess) {
+    return { success: false, error: "PERMISSION_DENIED" }
+  }
+
   const supabase = await createServerClient()
 
   const { data: profiles, error: profilesError } = await supabase

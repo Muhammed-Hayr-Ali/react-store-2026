@@ -9,6 +9,7 @@ export const NEWSLETTER_EMAIL_BATCH_LIMIT = 50
 
 export const newsletterSubscriberSchema = z.object({
   email: z.string().trim().email({ message: "INVALID_EMAIL" }),
+  locale: z.string().optional(),
 })
 
 export const newsletterSubscriberIdSchema = z.object({

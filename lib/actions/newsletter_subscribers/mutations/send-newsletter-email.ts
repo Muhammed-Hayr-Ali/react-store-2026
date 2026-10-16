@@ -1,3 +1,8 @@
+/**
+ * @file lib/actions/newsletter_subscribers/mutations/send-newsletter-email.ts
+ * @description إرسال رسالة النشرة البريدية إلى المشتركين المحددين.
+ */
+
 "use server"
 
 import React from "react"
@@ -29,6 +34,9 @@ type NewsletterEmailSendResult =
       missingSubscriberIds?: string[]
     }
 
+/**
+ * ترسل رسالة النشرة إلى مجموعة المشتركين المحددة.
+ */
 export async function sendNewsletterEmail(
   input: unknown
 ): Promise<NewsletterEmailSendResult> {

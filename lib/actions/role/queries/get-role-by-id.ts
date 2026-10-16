@@ -5,25 +5,31 @@
 
 "use server"
 
-import { z } from "zod"
-
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
+import { hasPermission, PERMISSIONS } from "../../role"
+import { getValidationDetails } from "../../validation"
+import { roleIdSchema, type RoleIdInput } from "../schemas"
 
 import type { RoleRecord } from "../types"
 
-interface GetRoleByIdInput {
-  roleId: string
-}
-
+/**
+ * تجلب دورًا واحدًا باستخدام معرّفه.
+ */
 export async function getRoleById(
-  input: GetRoleByIdInput
+  input: RoleIdInput
 ): Promise<ApiResult<RoleRecord>> {
-  const idValidation = z.string().uuid().safeParse(input.roleId)
-  if (!idValidation.success) {
+  const canViewRoles = await hasPermission(PERMISSIONS.VIEW_ROLES_MANAGEMENT)
+  if (!canViewRoles) {
+    return { success: false, error: "PERMISSION_DENIED" }
+  }
+
+  const validation = roleIdSchema.safeParse(input)
+  if (!validation.success) {
     return {
       success: false,
-      error: "INVALID_ROLE_ID",
+      error: "VALIDATION_ERROR",
+      details: getValidationDetails(validation.error),
     }
   }
 
@@ -32,7 +38,7 @@ export async function getRoleById(
   const { data, error } = await supabase
     .from("roles")
     .select("id, name, description, permissions, created_at")
-    .eq("id", input.roleId)
+    .eq("id", validation.data.roleId)
     .single()
 
   if (error) {

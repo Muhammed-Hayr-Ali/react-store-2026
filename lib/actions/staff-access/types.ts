@@ -1,3 +1,8 @@
+/**
+ * @file lib/actions/staff-access/types.ts
+ * @description أنواع بيانات إدارة وصول الموظفين.
+ */
+
 export interface StaffAccessRole {
   id: string
   name: string

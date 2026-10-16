@@ -1,3 +1,5 @@
+/** @file lib/actions/users/index.ts واجهة التصدير العامة لأكشنات المستخدمين. */
+
 // Types
 export * from "./types"
 
@@ -5,8 +7,7 @@ export * from "./types"
 export * from "./schemas"
 
 // Queries
-export { getAdminUsersList } from "./queries/get-admin-users"
-export { getCurrentUserStatus } from "./queries/get-current-user-status"
+export { getAdminUsers } from "./queries/get-admin-users"
 
 // Mutations
 export { createUser } from "./mutations/create-user"

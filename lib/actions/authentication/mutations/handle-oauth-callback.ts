@@ -1,5 +1,5 @@
 /**
- * @file lib/actions/authentication/mutations/handle-callback.ts
+ * @file lib/actions/authentication/mutations/handle-oauth-callback.ts
  * @description Exchanges an OAuth authorization code for an active user session.
  */
 
@@ -11,12 +11,16 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
 import { getValidationDetails } from "../../validation"
+import type { OAuthCallbackInput } from "../types"
 import { oauthCallbackSchema } from "../schemas"
 
-export async function handleCallback(input: unknown): Promise<ApiResult<null>> {
-  const validation = oauthCallbackSchema.safeParse(
-    typeof input === "string" ? { code: input } : input
-  )
+/**
+ * تستبدل رمز OAuth بجلسة مستخدم نشطة.
+ */
+export async function handleOAuthCallback(
+  input: OAuthCallbackInput
+): Promise<ApiResult<null>> {
+  const validation = oauthCallbackSchema.safeParse(input)
 
   if (!validation.success) {
     return {

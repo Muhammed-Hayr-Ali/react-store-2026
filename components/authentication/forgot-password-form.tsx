@@ -54,7 +54,7 @@ export function ForgotPasswordForm() {
   // Send the reset request and map returned errors to the form.
   async function onSubmit(data: RequestPasswordResetInput) {
     setErrorMessage(null)
-    const result = await requestPasswordReset(data, locale)
+    const result = await requestPasswordReset({ ...data, locale })
 
     if (result.success) {
       setSubmittedEmail(data.email)

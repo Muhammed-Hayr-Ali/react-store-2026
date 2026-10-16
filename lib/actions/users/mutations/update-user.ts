@@ -15,6 +15,9 @@ import { hasPermission, PERMISSIONS } from "../../role"
 import { getValidationDetails } from "../../validation"
 import { updateUserSchema, type UpdateUserFormValues } from "../schemas"
 
+/**
+ * تحدث بيانات الملف الشخصي للمستخدم.
+ */
 export async function updateUser(
   input: UpdateUserFormValues
 ): Promise<ApiResult<null>> {

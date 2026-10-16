@@ -18,6 +18,9 @@ interface DeleteUserInput {
   userId: string
 }
 
+/**
+ * تحذف حساب المستخدم وملفه الشخصي.
+ */
 export async function deleteUser(
   input: DeleteUserInput
 ): Promise<ApiResult<null>> {

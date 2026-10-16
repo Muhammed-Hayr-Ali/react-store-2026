@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-import { IconInput } from "@/components/ui/icon-input"
 import { Spinner } from "@/components/ui/spinner"
 import { createNewsletterSubscriber } from "@/lib/actions/newsletter_subscribers/mutations/create-newsletter-subscriber"
 import {
@@ -30,7 +29,7 @@ export function NewsletterSection() {
 
   async function onSubmit(data: NewsletterSubscriberInput) {
     try {
-      const result = await createNewsletterSubscriber(data, locale)
+      const result = await createNewsletterSubscriber({ ...data, locale })
 
       if (result.success) {
         toast.success(t("SUBSCRIBE_SUCCESS"))

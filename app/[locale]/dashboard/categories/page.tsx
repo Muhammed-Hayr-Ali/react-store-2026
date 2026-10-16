@@ -47,8 +47,10 @@ export default async function Page({ params }: PageProps) {
 
   // Fetch pre-processed page data and business logic
   const pageDataResult = await getCategoriesPageData()
-  if (!pageDataResult.success || !pageDataResult.data) {
-    throw new Error(tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR")))
+  if (!pageDataResult.success) {
+    throw new Error(
+      tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
+    )
   }
 
   const { categories, summary, categoryImages, isMobile } = pageDataResult.data

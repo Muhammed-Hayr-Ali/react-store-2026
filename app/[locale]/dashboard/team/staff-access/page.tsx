@@ -7,7 +7,6 @@ import { createMetadata } from "@/lib/config/metadata_generator"
 
 import { getStaffAccessPageData } from "@/lib/actions/staff-access/queries/get-staff-access-page-data"
 
-
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import StaffAccessTable from "@/components/dashboard/staff-access/staff-access-table"
 import { StaffAccessSummary } from "@/components/dashboard/staff-access/staff-access-summary"
@@ -47,7 +46,7 @@ export default async function Page({ params }: PageProps) {
   }
 
   const pageDataResult = await getStaffAccessPageData()
-  if (!pageDataResult.success || !pageDataResult.data) {
+  if (!pageDataResult.success) {
     throw new Error(
       tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
     )

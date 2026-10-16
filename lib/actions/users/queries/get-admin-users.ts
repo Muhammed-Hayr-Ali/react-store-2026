@@ -8,22 +8,37 @@
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
-import type { AdminUserSummary, UserStatus } from "../types"
+import { hasPermission, PERMISSIONS } from "../../role"
+import { getValidationDetails } from "../../validation"
+import { getAdminUsersSchema, type GetAdminUsersInput } from "../schemas"
+import type { AdminUserSummary } from "../types"
 
-interface GetAdminUsersInput {
-  search?: string
-  status?: UserStatus
-}
-
-export async function getAdminUsersList(
+/**
+ * تجلب قائمة المستخدمين الإدارية مع مرشحات البحث والحالة.
+ */
+export async function getAdminUsers(
   input?: GetAdminUsersInput
 ): Promise<ApiResult<AdminUserSummary[]>> {
+  const canViewUsers = await hasPermission(PERMISSIONS.VIEW_USERS_MANAGEMENT)
+  if (!canViewUsers) {
+    return { success: false, error: "PERMISSION_DENIED" }
+  }
+
+  const validation = getAdminUsersSchema.safeParse(input ?? {})
+  if (!validation.success) {
+    return {
+      success: false,
+      error: "VALIDATION_ERROR",
+      details: getValidationDetails(validation.error),
+    }
+  }
+
   try {
     const supabase = await createServerClient()
 
     const { data, error } = await supabase.rpc("get_admin_users_list", {
-      p_search: input?.search?.trim() || null,
-      p_status: input?.status || null,
+      p_search: validation.data.search || null,
+      p_status: validation.data.status || null,
     })
 
     if (error) {
@@ -38,10 +53,13 @@ export async function getAdminUsersList(
       success: true,
       data: (data as AdminUserSummary[]) || [],
     }
-  } catch {
+  } catch (error) {
     return {
       success: false,
       error: "UNEXPECTED_ERROR",
+      details: {
+        system: [error instanceof Error ? error.message : "Unknown error"],
+      },
     }
   }
 }

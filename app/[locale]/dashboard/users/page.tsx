@@ -38,8 +38,10 @@ export default async function Page({ params }: PageProps) {
   }
 
   const pageDataResult = await getUsersPageData()
-  if (!pageDataResult.success || !pageDataResult.data) {
-    throw new Error(tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR")))
+  if (!pageDataResult.success) {
+    throw new Error(
+      tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
+    )
   }
 
   const { users, summary, isMobile } = pageDataResult.data

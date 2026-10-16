@@ -12,13 +12,15 @@ import { hasPermission, PERMISSIONS } from "../../role"
 import { getValidationDetails } from "../../validation"
 import {
   updateNewsletterSubscriberStatusSchema,
-  type NewsletterStatus,
+  type UpdateNewsletterSubscriberStatusInput,
 } from "../schemas"
 import type { NewsletterSubscriber } from "../types"
 
+/**
+ * تحدث حالة اشتراك البريد وتزيل سبب إلغاء الاشتراك عند إعادة التفعيل.
+ */
 export async function updateNewsletterSubscriberStatus(
-  id: string,
-  status: NewsletterStatus
+  input: UpdateNewsletterSubscriberStatusInput
 ): Promise<ApiResult<NewsletterSubscriber>> {
   const canUpdate = await hasPermission(
     PERMISSIONS.UPDATE_NEWSLETTER_SUBSCRIBER
@@ -27,10 +29,7 @@ export async function updateNewsletterSubscriberStatus(
     return { success: false, error: "PERMISSION_DENIED" }
   }
 
-  const validation = updateNewsletterSubscriberStatusSchema.safeParse({
-    id,
-    status,
-  })
+  const validation = updateNewsletterSubscriberStatusSchema.safeParse(input)
   if (!validation.success) {
     return {
       success: false,

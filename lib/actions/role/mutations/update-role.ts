@@ -18,6 +18,9 @@ import {
 } from "../schemas"
 import type { RoleRecord } from "../types"
 
+/**
+ * تحدث وصف الدور وصلاحياته.
+ */
 export async function updateRole(
   input: UpdateRolePermissionsInput
 ): Promise<ApiResult<RoleRecord>> {

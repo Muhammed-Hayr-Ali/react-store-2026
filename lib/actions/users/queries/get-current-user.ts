@@ -25,6 +25,7 @@ export type CurrentUser = {
   permissions: string[]
 }
 
+/** ترجع ملف المستخدم الحالي وصلاحياته مرة واحدة ضمن الطلب نفسه. */
 export const getCurrentUser = cache(
   async (): Promise<ApiResult<CurrentUser | null>> => {
     try {

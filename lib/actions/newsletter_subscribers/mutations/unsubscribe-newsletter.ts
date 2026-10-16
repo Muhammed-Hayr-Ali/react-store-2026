@@ -1,3 +1,8 @@
+/**
+ * @file lib/actions/newsletter_subscribers/mutations/unsubscribe-newsletter.ts
+ * @description إلغاء اشتراك عنوان بريد باستخدام رابط آمن.
+ */
+
 "use server"
 
 import type { ApiResult } from "@/lib/actions/types/utils"
@@ -7,6 +12,9 @@ import { getValidationDetails } from "../../validation"
 import { unsubscribeNewsletterSchema } from "../schemas"
 import { readNewsletterUnsubscribeToken } from "../unsubscribe-token"
 
+/**
+ * تلغي الاشتراك باستخدام رمز صالح وتحفظ أسباب الإلغاء.
+ */
 export async function unsubscribeNewsletter(
   input: unknown
 ): Promise<ApiResult<null>> {

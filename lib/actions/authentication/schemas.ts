@@ -1,4 +1,7 @@
-// lib/actions/authentication/schemas.ts
+/**
+ * @file lib/actions/authentication/schemas.ts
+ * @description مخططات التحقق من مدخلات المصادقة واستعادة كلمة المرور.
+ */
 
 import { z } from "zod"
 
@@ -20,10 +23,12 @@ export const signUpWithPasswordSchema = z.object({
     .min(2, "NAME_TOO_SHORT"),
   email: z.string().trim().min(1, "EMAIL_REQUIRED").email("INVALID_EMAIL"),
   password: z.string().min(6, "PASSWORD_TOO_SHORT"),
+  locale: z.string().optional(),
 })
 
 export const requestPasswordResetSchema = z.object({
   email: z.string().trim().min(1, "EMAIL_REQUIRED").email("INVALID_EMAIL"),
+  locale: z.string().optional(),
 })
 
 export const confirmPasswordResetSchema = z

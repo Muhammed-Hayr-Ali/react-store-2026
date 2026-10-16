@@ -14,7 +14,7 @@ import { XCircleIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
-import { handleCallback } from "@/lib/actions/authentication"
+import { handleOAuthCallback } from "@/lib/actions/authentication"
 import { appRoutes } from "@/lib/config/app-routes"
 
 interface OAuthCallbackViewProps {
@@ -36,7 +36,7 @@ export function OAuthCallbackView({ code, error }: OAuthCallbackViewProps) {
     if (code) {
       const processExchange = async () => {
         try {
-          const result = await handleCallback({ code })
+          const result = await handleOAuthCallback({ code })
           if (result.success) {
             toast.success(t("SIGN_IN_SUCCESS_TOAST"))
             router.refresh()
