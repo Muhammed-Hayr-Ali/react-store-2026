@@ -18,6 +18,7 @@ export const appRoutes = {
       staffAccess: "/dashboard/team/staff-access",
     },
     categories: "/dashboard/categories",
+    brands: "/dashboard/brands",
     users: "/dashboard/users",
     newsletterSubscribers: "/dashboard/newsletter-subscribers",
   },

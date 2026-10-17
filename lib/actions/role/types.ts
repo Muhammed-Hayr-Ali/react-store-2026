@@ -34,6 +34,7 @@ export const PERMISSIONS = {
   VIEW_NEWSLETTER_SUBSCRIBERS: "view_newsletter_subscribers",
 
   // --- 1. Brands Management ---
+  VIEW_BRANDS_MANAGEMENT: "view_brands_management",
   CREATE_BRAND: "create_brand",
   UPDATE_BRAND: "update_brand",
   DELETE_BRAND: "delete_brand",

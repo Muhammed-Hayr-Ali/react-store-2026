@@ -53,6 +53,13 @@ export const sidebarConfig: SidebarConfig = {
       requiredPermission: PERMISSIONS.VIEW_CATEGORIES_MANAGEMENT,
     },
     {
+      titleKey: "BRANDS_MANAGEMENT",
+      key: "brands-management",
+      url: appRoutes.dashboard.brands,
+      icon: Tags,
+      requiredPermission: PERMISSIONS.VIEW_BRANDS_MANAGEMENT,
+    },
+    {
       titleKey: "USERS_MANAGEMENT",
       key: "users-management",
       url: appRoutes.dashboard.users,

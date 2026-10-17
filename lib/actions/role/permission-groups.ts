@@ -39,6 +39,11 @@ export const PERMISSION_GROUPS = [
           "Access and view the categories catalog and management dashboard page",
       },
       {
+        key: PERMISSIONS.VIEW_BRANDS_MANAGEMENT,
+        label: "View Brands Management",
+        description: "Access and view the brands catalog and management page",
+      },
+      {
         key: PERMISSIONS.VIEW_PRODUCTS,
         label: "View Products",
         description: "Access and browse the product inventory catalog page",
