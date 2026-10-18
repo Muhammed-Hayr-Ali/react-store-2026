@@ -2,9 +2,8 @@ import { PackageIcon } from "lucide-react"
 
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import { Category, getAllCategories } from "@/lib/actions/categories"
-import { getAllBrand } from "@/lib/actions/brands/queries/get-all"
-import { Brand } from "@/lib/actions/brands"
+import { getCategories, type Category } from "@/lib/actions/categories"
+import { getBrands, type BrandRecord } from "@/lib/actions/brands"
 import ProductForm from "@/components/dashboard/product/product-form"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { notFound } from "next/navigation"
@@ -25,15 +24,15 @@ export default async function Page() {
   }
 
   const [resultCategories, resultBrands] = await Promise.all([
-    getAllCategories({ is_active: true }),
-    getAllBrand(),
+    getCategories(),
+    getBrands(),
   ])
 
   let categories: Category[] = []
-  let brands: Brand[] = []
+  let brands: BrandRecord[] = []
 
   if (resultCategories.success && resultCategories.data) {
-    categories = resultCategories.data.items
+    categories = resultCategories.data
   }
 
   if (resultBrands.success && resultBrands.data) {
