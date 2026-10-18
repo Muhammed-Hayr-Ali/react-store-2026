@@ -1,66 +1,22 @@
 /**
  * @file lib/actions/products/types.ts
  * @description Pure TypeScript type definitions and interfaces for the products domain.
- * Safe for direct import across both Client and Server Components.
  */
 
-import { z } from "zod"
-import {
-  productSchema,
-  variantSchema,
-  imageSchema,
-  createProductCompleteSchema,
-  adminProductSummarySchema,
-  getLatestProductsSchema,
-  getProductsByCategorySchema,
-  getProductsByBrandSchema,
-  getFlashSaleProductsSchema,
+// ============================================================================
+// 1 & 2. أنواع الإدخال الرئيسية (Create & Update)
+// ============================================================================
+export type {
+  CreateProductInput,
+  UpdateProductInput,
+  GetProductsQueryOptions,
+  GetLatestProductsOptions,
+  GetProductsByCategoryOptions,
+  GetProductsByBrandOptions,
 } from "./schemas"
 
 // ============================================================================
-// Entity & Inferred Types
-// ============================================================================
-
-export type Product = z.infer<typeof productSchema>
-export type VariantInput = z.infer<typeof variantSchema>
-export type ImageInput = z.infer<typeof imageSchema>
-export type CreateProductCompleteInput = z.infer<
-  typeof createProductCompleteSchema
->
-export type AdminProductSummary = z.infer<typeof adminProductSummarySchema>
-export type GetLatestProductsOptions = z.infer<typeof getLatestProductsSchema>
-export type GetProductsByCategoryOptions = z.infer<
-  typeof getProductsByCategorySchema
->
-export type GetProductsByBrandOptions = z.infer<typeof getProductsByBrandSchema>
-export type GetFlashSaleProductsOptions = z.infer<
-  typeof getFlashSaleProductsSchema
->
-
-export interface CreatedVariant {
-  id: string
-  sku: string
-}
-
-// ============================================================================
-// Flash Sale Types
-// ============================================================================
-
-export interface ProductFlashSaleDeal {
-  id: string
-  title: string
-  title_ar?: string | null
-  slug: string
-  discount_type: "percentage" | "fixed" | "fixed_price" | string
-  discount_value: number
-  calculated_percentage: number
-  end_time: string
-  quantity_limit: number | null
-  sold_count: number
-}
-
-// ============================================================================
-// Relational Entity Types
+// Relational Entity Types (للاستخدام في الواجهات والمكونات Client/Server)
 // ============================================================================
 
 export interface ProductVariantItem {
@@ -82,8 +38,20 @@ export interface ProductImageItem {
   url: string
   alt_text: string | null
   is_primary: boolean
-  sort_order: number
-  variant_id: string | null
+  variant_sku: string | null
+}
+
+export interface ProductFlashSaleDeal {
+  id: string
+  title: string
+  title_ar?: string | null
+  slug: string
+  discount_type: string
+  discount_value: number
+  calculated_percentage: number
+  end_time: string
+  quantity_limit: number | null
+  sold_count: number
 }
 
 export interface ProductWithRelations {
@@ -118,10 +86,23 @@ export interface ProductWithRelations {
   flash_sale_deal?: ProductFlashSaleDeal | null
 }
 
-// ============================================================================
-// Storefront Feeds Interfaces
-// ============================================================================
+/** Lightweight product data returned to the dashboard products table. */
+export interface AdminProductSummary {
+  id: string
+  name: string
+  slug: string
+  is_active: boolean
+  is_featured: boolean
+  created_at: string
+  category_name: string | null
+  brand_name: string | null
+  variants_count: number
+  total_stock: number
+  min_price: number
+  max_price: number
+}
 
+/** Product fields formatted for featured product carousel slides. */
 export interface FeaturedProductSlide {
   id: string
   name: string
@@ -146,39 +127,15 @@ export interface LatestProductItem {
   min_price: number
 }
 
-export interface CategoryProductItem {
-  id: string
-  name: string
-  slug: string
-  description: string | null
+export interface CategoryProductItem extends Omit<LatestProductItem, "brand_slug"> {
   is_featured: boolean
-  created_at: string
-  brand_name: string | null
   brand_slug?: string | null
-  category_name: string | null
-  category_slug: string | null
-  primary_image_url: string | null
-  min_price: number
 }
 
-export interface BrandProductItem {
-  id: string
-  name: string
-  slug: string
-  description: string | null
+export interface BrandProductItem extends LatestProductItem {
   is_featured: boolean
-  created_at: string
-  brand_name: string | null
   brand_slug: string | null
-  category_name: string | null
-  category_slug: string | null
-  primary_image_url: string | null
-  min_price: number
 }
-
-// ============================================================================
-// Raw Database Query Types
-// ============================================================================
 
 export interface RawBrand {
   name: string
@@ -217,28 +174,10 @@ export interface RawLatestProductQueryResult {
   product_images: RawProductImage[] | null
 }
 
-export interface RawCategoryProductQueryResult {
-  id: string
-  name: string
-  slug: string
-  description: string | null
+export interface RawCategoryProductQueryResult
+  extends Omit<RawLatestProductQueryResult, "created_at"> {
   is_featured: boolean
   created_at: string
-  brand: RawBrand | null
-  category: RawCategory | null
-  product_variants: RawProductVariant[] | null
-  product_images: RawProductImage[] | null
 }
 
-export interface RawBrandProductQueryResult {
-  id: string
-  name: string
-  slug: string
-  description: string | null
-  is_featured: boolean
-  created_at: string
-  brand: RawBrand | null
-  category: RawCategory | null
-  product_variants: RawProductVariant[] | null
-  product_images: RawProductImage[] | null
-}
+export type RawBrandProductQueryResult = RawCategoryProductQueryResult

@@ -1,172 +1,125 @@
-/**
- * @file lib/actions/products/mutations/create.ts
- * @description Server Action to create a complete product with variants and images transactionally.
- * Performs permission verification, uniqueness validation, and rollback operations upon sub-insert failure.
- */
-
 "use server"
+
+/**
+ * @file lib/actions/products/create.ts
+ * @description Server action for creating a new product with its variants and images.
+ * Ensures atomicity (All-or-Nothing) using cascading rollbacks if any step fails.
+ */
 
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { ApiResult } from "../../types/utils"
-import { Product, CreateProductCompleteInput, CreatedVariant } from "../types"
-import { createProductCompleteSchema } from "../schemas"
-import { hasPermission, PERMISSIONS } from "../../role"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
+import { createProductSchema, type CreateProductInput } from "../schemas"
+import type { ProductWithRelations } from "../types"
 
-// ============================================================================
-// Main Action Function
-// ============================================================================
+export type CreateProductResult =
+  | { success: true; data: ProductWithRelations }
+  | { success: false; error: string }
 
 export async function createProduct(
-  data: CreateProductCompleteInput
-): Promise<ApiResult<Product | null>> {
-  // 1. Permission check
-  const canCreate = await hasPermission(PERMISSIONS.CREATE_PRODUCT)
-  if (!canCreate) {
-    return {
-      success: false,
-      error: "PERMISSION_DENIED",
+  input: CreateProductInput
+): Promise<CreateProductResult> {
+  try {
+    // 1. التحقق من الصلاحيات
+    const canCreate = await hasPermission(PERMISSIONS.CREATE_PRODUCT)
+    if (!canCreate) {
+      return { success: false, error: "PERMISSION_DENIED" }
     }
-  }
 
-  // 2. Validate payload against Zod schema
-  const validation = createProductCompleteSchema.safeParse(data)
-  if (!validation.success) {
-    const fieldErrors: Record<string, string[]> = {}
-    for (const issue of validation.error.issues) {
-      const path = issue.path.join(".")
-      if (!fieldErrors[path]) fieldErrors[path] = []
-      fieldErrors[path].push(issue.message)
+    // 2. التحقق من صحة البيانات (Zod Validation)
+    const validation = createProductSchema.safeParse(input)
+    if (!validation.success) {
+      return { success: false, error: "VALIDATION_ERROR" }
     }
-    return {
-      success: false,
-      error: "VALIDATION_ERROR",
-      details: fieldErrors,
+
+    const { variants, images, ...productData } = validation.data
+    const supabase = await createServerClient()
+
+    // 3. التحقق من عدم تكرار الـ Slug
+    const { count: slugCount, error: slugError } = await supabase
+      .from("products")
+      .select("id", { count: "exact", head: true })
+      .eq("slug", productData.slug)
+
+    if (slugError) {
+      return { success: false, error: "DATABASE_ERROR" }
     }
-  }
 
-  const supabase = await createServerClient()
-  const { variants, images, ...productOnlyData } = validation.data
-
-  const cleanProductData = {
-    ...productOnlyData,
-    slug: productOnlyData.slug.trim().toLowerCase(),
-    brand_id: productOnlyData.brand_id || null,
-    description: productOnlyData.description || null,
-    meta_title: productOnlyData.meta_title || null,
-    meta_description: productOnlyData.meta_description || null,
-  }
-
-  // 3. Insert primary product record
-  const { data: newProduct, error: productError } = await supabase
-    .from("products")
-    .insert(cleanProductData)
-    .select()
-    .single()
-
-  if (productError) {
-    if (productError.code === "23505") {
-      return { success: false, error: "SLUG_ALREADY_EXISTS" }
+    if (slugCount && slugCount > 0) {
+      return { success: false, error: "PRODUCT_SLUG_ALREADY_EXISTS" }
     }
-    return {
-      success: false,
-      error: "CREATE_PRODUCT_ERROR",
-      details: { database: [productError.message] },
+
+    // 4. إدخال المنتج الأساسي
+    const { data: newProduct, error: productInsertError } = await supabase
+      .from("products")
+      .insert(productData)
+      .select()
+      .single()
+
+    if (productInsertError || !newProduct) {
+      return { success: false, error: "CREATE_PRODUCT_FAILED" }
     }
-  }
 
-  const productId = newProduct.id
-
-  // Helper rollback function to cleanup primary record if children fail
-  const rollbackAll = async () => {
-    await supabase.from("products").delete().eq("id", productId)
-  }
-
-  let createdVariants: CreatedVariant[] = []
-
-  // 4. Insert variants
-  if (variants.length > 0) {
-    const variantsPayload = variants.map((v, idx) => ({
-      product_id: productId,
-      sku: v.sku.trim(),
-      name: v.name?.trim() || null,
-      attributes:
-        v.attributes && Object.keys(v.attributes).length > 0
-          ? v.attributes
-          : {},
-      price: Math.round(Number(v.price) * 100),
-      compare_at_price: v.compare_at_price
-        ? Math.round(Number(v.compare_at_price) * 100)
-        : null,
-      stock_quantity: Number(v.stock_quantity),
-      track_inventory: Boolean(v.track_inventory),
-      low_stock_threshold: Number(v.low_stock_threshold),
-      is_active: Boolean(v.is_active),
-      sort_order: v.sort_order ?? idx + 1,
+    // 5. إدخال المتغيرات (Variants) وتطبيق الحذف التلقائي في حال الفشل
+    const variantsToInsert = variants.map((variant) => ({
+      ...variant,
+      product_id: newProduct.id,
     }))
 
-    const { data: variantsData, error: variantsError } = await supabase
+    const { error: variantsError } = await supabase
       .from("product_variants")
-      .insert(variantsPayload)
-      .select("id, sku")
+      .insert(variantsToInsert)
 
     if (variantsError) {
-      await rollbackAll()
-      if (variantsError.code === "23505") {
-        return { success: false, error: "SKU_ALREADY_EXISTS" }
-      }
-      return {
-        success: false,
-        error: "CREATE_VARIANTS_ERROR",
-        details: { database: [variantsError.message] },
-      }
+      // عملية تراجع (Rollback): نحذف المنتج، وقاعدة البيانات ستحذف كل متعلقاته بفضل CASCADE
+      await supabase.from("products").delete().eq("id", newProduct.id)
+      return { success: false, error: "CREATE_VARIANTS_FAILED" }
     }
 
-    createdVariants = (variantsData || []) as CreatedVariant[]
-  }
-
-  // 5. Insert images
-  if (images.length > 0) {
-    const imagesPayload = images.map((img) => {
-      let targetVariantId: string | null = null
-
-      if (img.variant_sku?.trim()) {
-        const cleanSku = img.variant_sku.trim().toLowerCase()
-        const matchedVariant = createdVariants.find(
-          (v) => v.sku.trim().toLowerCase() === cleanSku
-        )
-        if (matchedVariant) targetVariantId = matchedVariant.id
-      }
-
-      return {
-        product_id: productId,
-        variant_id: targetVariantId,
-        url: img.url.trim(),
-        alt_text: img.alt_text?.trim() || null,
-        is_primary: Boolean(img.is_primary),
-        sort_order: 0,
-      }
-    })
+    // 6. إدخال الصور (Images) وتطبيق الحذف التلقائي في حال الفشل
+    const imagesToInsert = images.map((img, index) => ({
+      ...img,
+      product_id: newProduct.id,
+      sort_order: index, // لضمان الترتيب كما جاء من الواجهة
+    }))
 
     const { error: imagesError } = await supabase
       .from("product_images")
-      .insert(imagesPayload)
+      .insert(imagesToInsert)
 
     if (imagesError) {
-      await rollbackAll()
-      return {
-        success: false,
-        error: "CREATE_IMAGES_ERROR",
-        details: { database: [imagesError.message] },
-      }
+      // عملية تراجع (Rollback)
+      await supabase.from("products").delete().eq("id", newProduct.id)
+      return { success: false, error: "CREATE_IMAGES_FAILED" }
     }
-  }
 
-  // 6. Revalidate routes
-  revalidatePath("/", "layout")
+    // 7. جلب المنتج النهائي مع علاقاته لإرجاعه للواجهة
+    const { data: finalProduct, error: fetchError } = await supabase
+      .from("products")
+      .select(`
+        *,
+        category:categories(id, name, name_ar, slug, parent_id),
+        brand:brands(id, name, name_ar, slug, logo_url),
+        product_variants(*),
+        product_images(*)
+      `)
+      .eq("id", newProduct.id)
+      .single()
 
-  return {
-    success: true,
-    data: newProduct as Product,
+    if (fetchError || !finalProduct) {
+      return { success: false, error: "FETCH_CREATED_PRODUCT_FAILED" }
+    }
+
+    // تحديث الكاش (Revalidation) للصفحات المتأثرة
+    revalidatePath("/dashboard/products")
+    revalidatePath("/products")
+
+    return {
+      success: true,
+      data: finalProduct as unknown as ProductWithRelations,
+    }
+  } catch (error) {
+    console.error("[createProduct] Unexpected error:", error)
+    return { success: false, error: "UNEXPECTED_ERROR" }
   }
 }

@@ -1,180 +1,161 @@
-/**
- * @file lib/actions/products/mutations/duplicate.ts
- * @description Server Action to clone an existing product, re-generating unique SKUs and slugs.
- */
-
 "use server"
 
-import { z } from "zod"
+/**
+ * @file lib/actions/products/duplicate.ts
+ * @description Server action for duplicating an existing product along with its variants and images.
+ * Generates unique slugs and SKUs for the new copy and correctly remaps image-to-variant relationships.
+ */
+
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { ApiResult } from "../../types/utils"
-import { Product, ProductWithRelations } from "../types"
-import { hasPermission, PERMISSIONS } from "../../role"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
+import type { 
+  ProductWithRelations, 
+  ProductVariantItem, 
+  ProductImageItem 
+} from "../types"
 
-// ============================================================================
-// Main Action Function
-// ============================================================================
+export type DuplicateProductResult =
+  | { success: true; data: ProductWithRelations }
+  | { success: false; error: string }
 
 export async function duplicateProduct(
   productId: string
-): Promise<ApiResult<Product | null>> {
-  // 1. Validate Product ID
-  const idValidation = z
-    .string()
-    .uuid("INVALID_PRODUCT_ID")
-    .safeParse(productId)
-  if (!idValidation.success) {
-    return { success: false, error: "INVALID_PRODUCT_ID" }
-  }
-  const validProductId = idValidation.data
-
-  // 2. Permission check
-  const canCreate = await hasPermission(PERMISSIONS.CREATE_PRODUCT)
-  if (!canCreate) {
-    return {
-      success: false,
-      error: "PERMISSION_DENIED",
+): Promise<DuplicateProductResult> {
+  try {
+    // 1. التحقق من الصلاحيات
+    const canCreate = await hasPermission(PERMISSIONS.CREATE_PRODUCT)
+    if (!canCreate) {
+      return { success: false, error: "PERMISSION_DENIED" }
     }
-  }
 
-  const supabase = await createServerClient()
+    const supabase = await createServerClient()
 
-  // 3. Fetch original product with relations
-  const { data: originalProduct, error: fetchError } = await supabase
-    .from("products")
-    .select(
-      `
-      *,
-      product_variants (*),
-      product_images (*)
-    `
-    )
-    .eq("id", validProductId)
-    .single()
+    // 2. جلب المنتج الأصلي مع كامل علاقاته
+    const { data: originalProduct, error: fetchError } = await supabase
+      .from("products")
+      .select(`
+        *,
+        product_variants(*),
+        product_images(*)
+      `)
+      .eq("id", productId)
+      .single()
 
-  if (fetchError || !originalProduct) {
-    return {
-      success: false,
-      error: "PRODUCT_NOT_FOUND",
-      details: { database: [fetchError?.message || "Product not found"] },
+    if (fetchError || !originalProduct) {
+      return { success: false, error: "FETCH_ORIGINAL_PRODUCT_FAILED" }
     }
-  }
 
-  const orig = originalProduct as ProductWithRelations
-
-  // 4. Prepare duplicated copy payload
-  const randomSuffix = Math.random().toString(36).substring(2, 6)
-  const newName = `${orig.name} (Copy)`
-  const newSlug = `${orig.slug}-copy-${randomSuffix}`
-
-  const newProductPayload = {
-    name: newName,
-    slug: newSlug,
-    category_id: orig.category_id,
-    brand_id: orig.brand_id,
-    description: orig.description,
-    meta_title: orig.meta_title ? `${orig.meta_title} (Copy)` : null,
-    meta_description: orig.meta_description,
-    is_active: false,
-    is_featured: false,
-  }
-
-  // 5. Insert duplicated root product
-  const { data: duplicatedProduct, error: insertError } = await supabase
-    .from("products")
-    .insert(newProductPayload)
-    .select()
-    .single()
-
-  if (insertError || !duplicatedProduct) {
-    return {
-      success: false,
-      error: "DUPLICATE_PRODUCT_ERROR",
-      details: {
-        database: [insertError?.message || "Failed to insert product"],
-      },
+    // 3. تجهيز بيانات المنتج الجديد (بناء الكائن صراحة لتجنب المتغيرات المهملة)
+    const uniqueSuffix = Math.floor(1000 + Math.random() * 9000).toString()
+    
+    const newProductData = {
+      brand_id: originalProduct.brand_id,
+      category_id: originalProduct.category_id,
+      name: `${originalProduct.name} (نسخة)`,
+      slug: `${originalProduct.slug}-copy-${uniqueSuffix}`,
+      description: originalProduct.description,
+      meta_title: originalProduct.meta_title,
+      meta_description: originalProduct.meta_description,
+      is_active: false, // مسودة افتراضياً
+      is_featured: false,
     }
-  }
 
-  const newProductId = duplicatedProduct.id
+    // 4. إدخال المنتج الجديد
+    const { data: newProduct, error: insertProductError } = await supabase
+      .from("products")
+      .insert(newProductData)
+      .select()
+      .single()
 
-  const rollback = async () => {
-    await supabase.from("products").delete().eq("id", newProductId)
-  }
+    if (insertProductError || !newProduct) {
+      return { success: false, error: "DUPLICATE_PRODUCT_FAILED" }
+    }
 
-  const oldVariantIdToNewIdMap = new Map<string, string>()
+    // 5. تجهيز وإدخال المتغيرات 
+    const skuMapping: Record<string, string> = {}
+    const typedVariants = originalProduct.product_variants as ProductVariantItem[] | undefined
+    
+    if (typedVariants && typedVariants.length > 0) {
+      const variantsToInsert = typedVariants.map((variant) => {
+        const newSku = `${variant.sku}-COPY-${uniqueSuffix}`
+        skuMapping[variant.sku] = newSku // لحفظ العلاقة للصور لاحقاً
 
-  // 6. Clone variants with distinct SKUs
-  if (orig.product_variants && orig.product_variants.length > 0) {
-    const variantsPayload = orig.product_variants.map((v, idx) => ({
-      product_id: newProductId,
-      sku: `${v.sku}-COPY-${Math.random().toString(36).substring(2, 5).toUpperCase()}`,
-      name: v.name,
-      attributes: v.attributes || {},
-      price: v.price,
-      compare_at_price: v.compare_at_price,
-      stock_quantity: v.stock_quantity,
-      track_inventory: v.track_inventory,
-      low_stock_threshold: v.low_stock_threshold,
-      is_active: v.is_active,
-      sort_order: v.sort_order ?? idx + 1,
-    }))
+        return {
+          product_id: newProduct.id,
+          sku: newSku,
+          name: variant.name,
+          attributes: variant.attributes,
+          price: variant.price,
+          compare_at_price: variant.compare_at_price,
+          stock_quantity: variant.stock_quantity,
+          track_inventory: variant.track_inventory,
+          low_stock_threshold: variant.low_stock_threshold,
+          is_active: variant.is_active,
+          sort_order: variant.sort_order,
+        }
+      })
 
-    const { data: insertedVariants, error: variantsError } = await supabase
-      .from("product_variants")
-      .insert(variantsPayload)
-      .select("id, sku")
+      const { error: variantsError } = await supabase
+        .from("product_variants")
+        .insert(variantsToInsert)
 
-    if (variantsError || !insertedVariants) {
-      await rollback()
-      return {
-        success: false,
-        error: "DUPLICATE_VARIANTS_ERROR",
-        details: {
-          database: [variantsError?.message || "Failed to insert variants"],
-        },
+      if (variantsError) {
+        await supabase.from("products").delete().eq("id", newProduct.id)
+        return { success: false, error: "DUPLICATE_VARIANTS_FAILED" }
       }
     }
 
-    orig.product_variants.forEach((v, index) => {
-      if (insertedVariants[index]) {
-        oldVariantIdToNewIdMap.set(v.id, insertedVariants[index].id)
-      }
-    })
-  }
+    // 6. تجهيز وإدخال الصور 
+    const typedImages = originalProduct.product_images as ProductImageItem[] | undefined
 
-  // 7. Clone images and map to newly created variants
-  if (orig.product_images && orig.product_images.length > 0) {
-    const imagesPayload = orig.product_images.map((img) => ({
-      product_id: newProductId,
-      variant_id: img.variant_id
-        ? oldVariantIdToNewIdMap.get(img.variant_id) || null
-        : null,
-      url: img.url,
-      alt_text: img.alt_text ? `${img.alt_text} (Copy)` : null,
-      is_primary: img.is_primary,
-      sort_order: img.sort_order ?? 0,
-    }))
+    if (typedImages && typedImages.length > 0) {
+      const imagesToInsert = typedImages.map((img) => {
+        return {
+          product_id: newProduct.id,
+          url: img.url,
+          alt_text: img.alt_text,
+          is_primary: img.is_primary,
+          // توجيه الصورة للـ SKU الجديد إذا كانت مرتبطة بمتغير
+          variant_sku: img.variant_sku ? skuMapping[img.variant_sku] : null,
+        }
+      })
 
-    const { error: imagesError } = await supabase
-      .from("product_images")
-      .insert(imagesPayload)
+      const { error: imagesError } = await supabase
+        .from("product_images")
+        .insert(imagesToInsert)
 
-    if (imagesError) {
-      await rollback()
-      return {
-        success: false,
-        error: "DUPLICATE_IMAGES_ERROR",
-        details: { database: [imagesError.message] },
+      if (imagesError) {
+        await supabase.from("products").delete().eq("id", newProduct.id)
+        return { success: false, error: "DUPLICATE_IMAGES_FAILED" }
       }
     }
-  }
 
-  revalidatePath("/", "layout")
+    // 7. جلب النسخة النهائية 
+    const { data: finalProduct, error: finalFetchError } = await supabase
+      .from("products")
+      .select(`
+        *,
+        category:categories(id, name, name_ar, slug, parent_id),
+        brand:brands(id, name, name_ar, slug, logo_url),
+        product_variants(*),
+        product_images(*)
+      `)
+      .eq("id", newProduct.id)
+      .single()
 
-  return {
-    success: true,
-    data: duplicatedProduct as Product,
+    if (finalFetchError || !finalProduct) {
+      return { success: false, error: "FETCH_DUPLICATED_PRODUCT_FAILED" }
+    }
+
+    revalidatePath("/dashboard/products")
+
+    return {
+      success: true,
+      data: finalProduct as unknown as ProductWithRelations,
+    }
+  } catch (error) {
+    console.error("[duplicateProduct] Unexpected error:", error)
+    return { success: false, error: "UNEXPECTED_ERROR" }
   }
 }

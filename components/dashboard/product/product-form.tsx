@@ -56,12 +56,17 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+// استيراد دوال السيرفر
 import { createProduct } from "@/lib/actions/products/mutations/create"
 import { updateProduct } from "@/lib/actions/products/mutations/update"
-import {
-  CreateProductCompleteInput,
+
+// استيراد الأنواع والمخططات المحدثة
+import type {
+  CreateProductInput,
   ProductWithRelations,
 } from "@/lib/actions/products/types"
+import { createProductSchema } from "@/lib/actions/products/schemas"
+
 import { Category } from "@/lib/actions/categories"
 import type { BrandRecord } from "@/lib/actions/brands/types"
 
@@ -70,9 +75,8 @@ import { DeleteCategoryDialog } from "@/components/dashboard/categories/delete-c
 import { BrandFormSheet } from "@/components/dashboard/brands/brand-form-sheet"
 import { DeleteBrandDialog } from "@/components/dashboard/brands/delete-brand-dialog"
 
-import { createProductCompleteSchema } from "@/lib/actions/products"
-
-type FormValues = CreateProductCompleteInput
+// الاعتماد على النوع الجديد
+type FormValues = CreateProductInput
 
 function ProductFieldError({ error }: { error?: RHFFieldError }) {
   const t = useTranslations("ProductForm")
@@ -162,17 +166,18 @@ export default function ProductForm({
 
   const isEditing = Boolean(product)
 
-  // Single Source of Truth: Derived directly from server props without state mirroring or useEffect
-  const categoriesList = initialCategories || []
-  const brandsList = initialBrands || []
+  // Single Source of Truth
+  const categoriesList = React.useMemo(
+    () => initialCategories ?? [],
+    [initialCategories]
+  )
+  const brandsList = React.useMemo(() => initialBrands ?? [], [initialBrands])
 
   const [brandModal, setBrandModal] = React.useState<{
     type: "create" | "update" | "delete" | null
     data: BrandRecord | null
-  }>({
-    type: null,
-    data: null,
-  })
+  }>({ type: null, data: null })
+
   const [categoryModal, setCategoryModal] = React.useState<{
     type: "create" | "update" | "delete" | null
     data: Category | null
@@ -183,14 +188,11 @@ export default function ProductForm({
       return [DEFAULT_IMAGE]
     }
     return product.product_images.map((img) => {
-      const linkedVariant = product.product_variants.find(
-        (v) => v.id === img.variant_id
-      )
       return {
         url: img.url,
         alt_text: img.alt_text || "",
         is_primary: img.is_primary,
-        variant_sku: linkedVariant?.sku || "",
+        variant_sku: img.variant_sku || "",
       }
     })
   }, [product])
@@ -203,8 +205,9 @@ export default function ProductForm({
       sku: v.sku,
       name: v.name || "",
       attributes: v.attributes || {},
-      price: v.price / 100,
-      compare_at_price: v.compare_at_price ? v.compare_at_price / 100 : null,
+      // جلب السعر بالسنت من قاعدة البيانات وتحويله لعرضه كدولار
+      price: Number(v.price) / 100,
+      compare_at_price: v.compare_at_price ? Number(v.compare_at_price) / 100 : null,
       stock_quantity: v.stock_quantity,
       track_inventory: v.track_inventory,
       low_stock_threshold: v.low_stock_threshold,
@@ -214,7 +217,7 @@ export default function ProductForm({
   }, [product])
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(createProductCompleteSchema),
+    resolver: zodResolver(createProductSchema), // استخدام المخطط الجديد
     mode: "onChange",
     shouldFocusError: false,
     defaultValues: {
@@ -322,7 +325,7 @@ export default function ProductForm({
   async function onSubmit(data: FormValues) {
     setErrorMessage(null)
 
-    const payload: CreateProductCompleteInput = {
+    const payload: CreateProductInput = {
       ...data,
       brand_id: data.brand_id || null,
       description: data.description || null,
@@ -333,9 +336,11 @@ export default function ProductForm({
         name: v.name || "",
         attributes: v.attributes || {},
         sort_order: idx + 1,
+        // تحويل السعر من الواجهة (دولار) للحفظ في قاعدة البيانات (سنت)
+        price: Math.round(Number(v.price) * 100),
         compare_at_price:
           v.compare_at_price !== null && v.compare_at_price !== undefined
-            ? Number(v.compare_at_price)
+            ? Math.round(Number(v.compare_at_price) * 100)
             : null,
       })),
       images: data.images.map((img) => ({
@@ -347,7 +352,8 @@ export default function ProductForm({
 
     let result
     if (isEditing && product) {
-      result = await updateProduct(product.id, payload)
+      // تعديل استدعاء تحديث المنتج ليشمل الـ id داخل كائن البيانات
+      result = await updateProduct({ ...payload, id: product.id })
     } else {
       result = await createProduct(payload)
     }
@@ -368,9 +374,7 @@ export default function ProductForm({
   }
 
   const onInvalid = () => {
-    setErrorMessage(
-      t("FORM_VALIDATION_ERROR")
-    )
+    setErrorMessage(t("FORM_VALIDATION_ERROR"))
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
@@ -606,10 +610,10 @@ export default function ProductForm({
                 <SparklesIcon className="size-4 text-primary" />
                 <div>
                   <h2 className="text-sm font-semibold text-card-foreground">
-                      {t("PRODUCT_STATUS")}
+                    {t("PRODUCT_STATUS")}
                   </h2>
                   <p className="text-xs text-muted-foreground">
-                      {t("PRODUCT_STATUS_DESCRIPTION")}
+                    {t("PRODUCT_STATUS_DESCRIPTION")}
                   </p>
                 </div>
               </div>

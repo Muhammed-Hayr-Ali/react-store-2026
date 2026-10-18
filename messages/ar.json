@@ -148,7 +148,19 @@
     "SLUG_ALREADY_EXISTS": "رابط المنتج مستخدم بالفعل. اختر رابطًا آخر.",
     "UPDATE_IMAGES_ERROR": "تعذر تحديث صور المنتج. حاول مجددًا.",
     "UPDATE_PRODUCT_ERROR": "تعذر تحديث المنتج. حاول مجددًا.",
-    "UPDATE_VARIANTS_ERROR": "تعذر تحديث متغيرات المنتج. حاول مجددًا."
+    "UPDATE_VARIANTS_ERROR": "تعذر تحديث متغيرات المنتج. حاول مجددًا.",
+    "PRODUCT_SLUG_ALREADY_EXISTS": "يوجد منتج آخر يستخدم هذا الرابط المختصر.",
+    "CREATE_PRODUCT_FAILED": "تعذر إنشاء المنتج. حاول مجددًا.",
+    "CREATE_VARIANTS_FAILED": "تعذر حفظ متغيرات المنتج. حاول مجددًا.",
+    "CREATE_IMAGES_FAILED": "تعذر حفظ صور المنتج. حاول مجددًا.",
+    "FETCH_CREATED_PRODUCT_FAILED": "تم إنشاء المنتج، لكن تعذر تحميل تفاصيله.",
+    "DATABASE_ERROR": "حدث خطأ في قاعدة البيانات. حاول مجددًا.",
+    "UPDATE_PRODUCT_FAILED": "تعذر تحديث المنتج. حاول مجددًا.",
+    "SYNC_VARIANTS_FAILED": "تعذرت مزامنة متغيرات المنتج. حاول مجددًا.",
+    "UPDATE_VARIANTS_FAILED": "تعذر تحديث متغيرات المنتج. حاول مجددًا.",
+    "SYNC_IMAGES_FAILED": "تعذرت مزامنة صور المنتج. حاول مجددًا.",
+    "UPDATE_IMAGES_FAILED": "تعذر تحديث صور المنتج. حاول مجددًا.",
+    "FETCH_UPDATED_PRODUCT_FAILED": "تم تحديث المنتج، لكن تعذر تحميل تفاصيله."
   },
   "AuthLayout": {
     "BACK_TO_HOME_SR": "العودة إلى الصفحة الرئيسية",

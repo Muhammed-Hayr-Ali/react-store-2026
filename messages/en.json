@@ -148,7 +148,19 @@
     "SLUG_ALREADY_EXISTS": "This product URL is already in use. Choose another URL.",
     "UPDATE_IMAGES_ERROR": "Could not update product images. Please try again.",
     "UPDATE_PRODUCT_ERROR": "Could not update the product. Please try again.",
-    "UPDATE_VARIANTS_ERROR": "Could not update product variants. Please try again."
+    "UPDATE_VARIANTS_ERROR": "Could not update product variants. Please try again.",
+    "PRODUCT_SLUG_ALREADY_EXISTS": "A product with this URL slug already exists.",
+    "CREATE_PRODUCT_FAILED": "Could not create the product. Please try again.",
+    "CREATE_VARIANTS_FAILED": "Could not save product variants. Please try again.",
+    "CREATE_IMAGES_FAILED": "Could not save product images. Please try again.",
+    "FETCH_CREATED_PRODUCT_FAILED": "The product was created, but its details could not be loaded.",
+    "DATABASE_ERROR": "A database error occurred. Please try again.",
+    "UPDATE_PRODUCT_FAILED": "Could not update the product. Please try again.",
+    "SYNC_VARIANTS_FAILED": "Could not synchronize product variants. Please try again.",
+    "UPDATE_VARIANTS_FAILED": "Could not update product variants. Please try again.",
+    "SYNC_IMAGES_FAILED": "Could not synchronize product images. Please try again.",
+    "UPDATE_IMAGES_FAILED": "Could not update product images. Please try again.",
+    "FETCH_UPDATED_PRODUCT_FAILED": "The product was updated, but its details could not be loaded."
   },
   "AuthLayout": {
     "BACK_TO_HOME_SR": "Return to homepage",
