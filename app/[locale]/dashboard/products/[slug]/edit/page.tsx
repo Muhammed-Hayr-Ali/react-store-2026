@@ -8,7 +8,7 @@ import { Category, getCategories,  } from "@/lib/actions/categories"
 import ProductForm from "@/components/dashboard/product/product-form"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { getBrands } from "@/lib/actions/brands"
-import { BrandFormValues } from "@/lib/actions/brands/schemas"
+import type { BrandRecord } from "@/lib/actions/brands/types"
 
 export async function generateMetadata({
   params,
@@ -55,7 +55,7 @@ const categories: Category[] =
     : []
 
     
-  const brands: BrandFormValues[] =
+  const brands: BrandRecord[] =
     brandsResult.success && brandsResult.data ? brandsResult.data : []
 
   return (
