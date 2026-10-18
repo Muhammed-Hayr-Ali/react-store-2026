@@ -12,6 +12,7 @@ export const appRoutes = {
   },
   dashboard: {
     overview: "/dashboard",
+    products: "/dashboard/products",
     team: {
       roles: "/dashboard/team/roles",
       create_roles: "/dashboard/team/roles/create",

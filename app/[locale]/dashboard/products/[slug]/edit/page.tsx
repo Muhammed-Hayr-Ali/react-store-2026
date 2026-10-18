@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 import { PackageIcon } from "lucide-react"
 
 import { appConfig } from "@/lib/config/app_config"
@@ -13,31 +14,33 @@ import type { BrandRecord } from "@/lib/actions/brands/types"
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string; locale: string }>
 }) {
-  const { slug } = await params
+  const { slug, locale } = await params
+  const t = await getTranslations({ locale, namespace: "ProductsManagement" })
   const result = await getProductCompleteBySlug(slug)
 
   const productName =
-    result.success && result.data ? result.data.name : "Update Product"
+    result.success && result.data ? result.data.name : t("UPDATE_PAGE_TITLE")
 
   return createMetadata({
     siteName: appConfig.name,
-    title: `Update ${productName} - Dashboard`,
-    description: `Update specifications, variants, media, and inventory for ${productName}.`,
+    title: t("UPDATE_PAGE_META_TITLE", { name: productName }),
+    description: t("UPDATE_PAGE_META_DESCRIPTION", { name: productName }),
   })
 }
 
 export default async function Page({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string; locale: string }>
 }) {
+  const { slug, locale } = await params
+  const t = await getTranslations({ locale, namespace: "ProductsManagement" })
   const canView = await hasPermission(PERMISSIONS.UPDATE_PRODUCT)
   if (!canView) {
     notFound()
   }
-  const { slug } = await params
 
   const [productResult, categoriesResult, brandsResult] = await Promise.all([
     getProductCompleteBySlug(slug, { activeOnly: false }),
@@ -67,11 +70,11 @@ const categories: Category[] =
               <PackageIcon className="size-4 text-foreground" />
             </span>
             <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-              Update Product
+              {t("UPDATE_PAGE_TITLE")}
             </h1>
           </div>
           <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-            Modify product specifications, variants, pricing, and media gallery.
+            {t("UPDATE_PAGE_DESCRIPTION")}
           </p>
         </div>
       </div>

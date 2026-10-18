@@ -18,6 +18,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
@@ -32,6 +33,7 @@ interface DeleteCategoryDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onDeleted: (category: Category) => void
+  children?: React.ReactNode
 }
 
 interface DeleteCategoryFormValues {
@@ -43,6 +45,7 @@ export function DeleteCategoryDialog({
   open,
   onOpenChange,
   onDeleted,
+  children,
 }: DeleteCategoryDialogProps) {
   const t = useTranslations("CategoriesManagement")
   const tErrors = useTranslations("ActionErrors")
@@ -90,6 +93,7 @@ export function DeleteCategoryDialog({
         if (open || !isPending) handleOpenChange(open)
       }}
     >
+      {children && <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>}
       {category && (
         <AlertDialogContent
           onEscapeKeyDown={(event) => {

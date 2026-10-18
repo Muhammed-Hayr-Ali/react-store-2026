@@ -6,6 +6,7 @@ import {
   StoreIcon,
   Tags,
   Mail,
+  PackageIcon,
 } from "lucide-react"
 import { appRoutes } from "@/lib/config/app-routes"
 import { PERMISSIONS, AppPermission } from "@/lib/actions/role"
@@ -58,6 +59,13 @@ export const sidebarConfig: SidebarConfig = {
       url: appRoutes.dashboard.brands,
       icon: Tags,
       requiredPermission: PERMISSIONS.VIEW_BRANDS_MANAGEMENT,
+    },
+    {
+      titleKey: "PRODUCTS_MANAGEMENT",
+      key: "products-management",
+      url: appRoutes.dashboard.products,
+      icon: PackageIcon,
+      requiredPermission: PERMISSIONS.VIEW_PRODUCTS,
     },
     {
       titleKey: "USERS_MANAGEMENT",

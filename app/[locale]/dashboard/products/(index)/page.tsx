@@ -9,17 +9,21 @@ import {} from "@/lib/config/app-routes"
 import { DataTable } from "@/components/dashboard/product/products-table"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { notFound } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 
-export async function generateMetadata() {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "ProductsManagement" })
   return createMetadata({
     siteName: appConfig.name,
-    title: "Products Management",
-    description:
-      "Manage store inventory, monitor stock levels, view variants, and control product pricing.",
+    title: t("PAGE_TITLE"),
+    description: t("PAGE_DESCRIPTION"),
   })
 }
 
-export default async function Page() {
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "ProductsManagement" })
   const canView = await hasPermission(PERMISSIONS.VIEW_PRODUCTS)
   if (!canView) {
     notFound()
@@ -45,12 +49,11 @@ export default async function Page() {
               <PackageIcon className="size-4 text-foreground" />
             </span>
             <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-              Products
+              {t("PAGE_TITLE")}
             </h1>
           </div>
           <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-            Manage your product inventory, monitor stock levels, and configure
-            pricing.
+            {t("PAGE_DESCRIPTION")}
           </p>
         </div>
       </div>

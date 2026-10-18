@@ -18,6 +18,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
@@ -32,6 +33,7 @@ interface DeleteBrandDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onDeleted: (brand: BrandRecord) => void
+  children?: React.ReactNode
 }
 
 interface DeleteBrandFormValues {
@@ -43,11 +45,12 @@ export function DeleteBrandDialog({
   open,
   onOpenChange,
   onDeleted,
+  children,
 }: DeleteBrandDialogProps) {
   const t = useTranslations("BrandsManagement")
   const tErrors = useTranslations("ActionErrors")
   const [isPending, startTransition] = React.useTransition()
-  
+
   const form = useForm<DeleteBrandFormValues>({
     defaultValues: { confirmName: "" },
     mode: "onChange",
@@ -65,7 +68,7 @@ export function DeleteBrandDialog({
     startTransition(async () => {
       try {
         const result = await deleteBrand({ id: brand.id })
-        
+
         if (!result.success) {
           toast.error(
             result.error
@@ -92,6 +95,7 @@ export function DeleteBrandDialog({
         if (open || !isPending) handleOpenChange(open)
       }}
     >
+      {children && <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>}
       {brand && (
         <AlertDialogContent
           onEscapeKeyDown={(event) => {
@@ -116,8 +120,7 @@ export function DeleteBrandDialog({
             rules={{
               required: t("BRAND_NAME_CONFIRMATION_REQUIRED"),
               validate: (value) =>
-                value === brand.name ||
-                t("BRAND_NAME_CONFIRMATION_MISMATCH"),
+                value === brand.name || t("BRAND_NAME_CONFIRMATION_MISMATCH"),
             }}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>

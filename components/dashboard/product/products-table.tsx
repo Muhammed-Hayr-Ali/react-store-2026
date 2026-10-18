@@ -665,7 +665,7 @@ export function ProductsTable({
 
           {/* Dual Responsive CTA Button */}
           <Can permission={PERMISSIONS.CREATE_PRODUCT}>
-            <Link href="/dashboard/products/create">
+              <Link href="/dashboard/products/create">
               <Button
                 variant="default"
                 size="icon"

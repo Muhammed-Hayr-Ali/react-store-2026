@@ -15,9 +15,11 @@ import {
   Control,
   useWatch,
   UseFormSetValue,
+  FieldError as RHFFieldError,
 } from "react-hook-form"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { useLocale, useTranslations } from "next-intl"
 import slugify from "slugify"
 import {
   PlusIcon,
@@ -71,6 +73,16 @@ import { DeleteBrandDialog } from "@/components/dashboard/brands/delete-brand-di
 import { createProductCompleteSchema } from "@/lib/actions/products"
 
 type FormValues = CreateProductCompleteInput
+
+function ProductFieldError({ error }: { error?: RHFFieldError }) {
+  const t = useTranslations("ProductForm")
+  const message = error?.message ?? ""
+  const translatedMessage = t.has(message) ? t(message as never) : message
+
+  if (!error) return null
+
+  return <FieldError errors={[{ ...error, message: translatedMessage }]} />
+}
 
 const DEFAULT_VARIANT = {
   sku: "",
@@ -143,6 +155,9 @@ export default function ProductForm({
   brands: initialBrands,
 }: ProductFormProps) {
   const router = useRouter()
+  const locale = useLocale()
+  const t = useTranslations("ProductForm")
+  const tErrors = useTranslations("ActionErrors")
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   const isEditing = Boolean(product)
@@ -257,9 +272,7 @@ export default function ProductForm({
 
   const handleGenerateAllSeo = () => {
     if (!currentProductName.trim()) {
-      setErrorMessage(
-        "Please enter a product name before generating SEO details."
-      )
+      setErrorMessage(t("ENTER_NAME_FOR_SEO_ERROR"))
       window.scrollTo({ top: 0, behavior: "smooth" })
       return
     }
@@ -287,7 +300,9 @@ export default function ProductForm({
         ? ` by ${selectedBrandObject.name}`
         : ""
       generatedDescription =
-        `Shop ${currentProductName.trim()}${brandPart}${categoryPart}. High quality at the best prices with fast and reliable delivery.`.slice(
+        (locale === "ar"
+          ? `تسوق ${currentProductName.trim()}${brandPart}${categoryPart}. جودة عالية وأسعار مناسبة مع توصيل سريع وموثوق.`
+          : `Shop ${currentProductName.trim()}${brandPart}${categoryPart}. High quality at the best prices with fast and reliable delivery.`).slice(
           0,
           160
         )
@@ -301,7 +316,7 @@ export default function ProductForm({
       shouldValidate: true,
       shouldDirty: true,
     })
-    toast.success("SEO details generated successfully!")
+    toast.success(t("SEO_GENERATED_SUCCESS"))
   }
 
   async function onSubmit(data: FormValues) {
@@ -338,26 +353,14 @@ export default function ProductForm({
     }
 
     if (result.success) {
-      toast.success(
-        isEditing
-          ? "Product updated successfully!"
-          : "Product created successfully!"
-      )
+      toast.success(t(isEditing ? "UPDATE_SUCCESS" : "CREATE_SUCCESS"))
       router.push("/dashboard/products")
       router.refresh()
     } else {
       console.error("Submission Error:", result)
-      const errorMsg =
-        result.error === "VALIDATION_ERROR"
-          ? "Please check the form for invalid inputs."
-          : result.error === "SLUG_ALREADY_EXISTS"
-            ? "The URL slug is already taken. Please choose another one."
-            : result.error === "SKU_ALREADY_EXISTS"
-              ? "One or more SKUs are already in use. Please generate or enter unique SKUs."
-              : result.error ||
-                (isEditing
-                  ? "Failed to update product."
-                  : "Failed to create product.")
+      const errorMsg = result.error
+        ? tErrors(result.error)
+        : t(isEditing ? "UPDATE_ERROR" : "CREATE_ERROR")
 
       setErrorMessage(errorMsg)
       window.scrollTo({ top: 0, behavior: "smooth" })
@@ -366,7 +369,7 @@ export default function ProductForm({
 
   const onInvalid = () => {
     setErrorMessage(
-      "Please complete all required fields and resolve the errors below before submitting."
+      t("FORM_VALIDATION_ERROR")
     )
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
@@ -381,7 +384,7 @@ export default function ProductForm({
         {errorMessage && (
           <Alert variant="destructive" className="relative pr-9">
             <AlertCircleIcon className="size-4" />
-            <AlertTitle>Action Required</AlertTitle>
+            <AlertTitle>{t("ALERT_TITLE")}</AlertTitle>
             <AlertDescription className="text-xs">
               {errorMessage}
             </AlertDescription>
@@ -389,7 +392,7 @@ export default function ProductForm({
               type="button"
               onClick={() => setErrorMessage(null)}
               className="absolute top-3 right-3 cursor-pointer text-muted-foreground hover:text-foreground"
-              aria-label="Close error alert"
+              aria-label={t("CLOSE_ERROR_ALERT")}
             >
               <XIcon className="size-4" />
             </button>
@@ -404,11 +407,10 @@ export default function ProductForm({
                 <PackageIcon className="size-4 text-primary" />
                 <div>
                   <h2 className="text-sm font-semibold text-card-foreground">
-                    Basic Information
+                    {t("BASIC_INFORMATION")}
                   </h2>
                   <p className="text-xs text-muted-foreground">
-                    Define primary product identity and general presentation
-                    details
+                    {t("BASIC_INFORMATION_DESCRIPTION")}
                   </p>
                 </div>
               </div>
@@ -421,13 +423,13 @@ export default function ProductForm({
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor="product-name" className="text-xs">
-                          Product Name{" "}
+                          {t("PRODUCT_NAME")}{" "}
                           <span className="text-destructive">*</span>
                         </FieldLabel>
                         <Input
                           {...field}
                           id="product-name"
-                          placeholder="e.g., Premium Oxford Cotton Shirt"
+                          placeholder={t("PRODUCT_NAME_PLACEHOLDER")}
                           className="h-9 text-xs"
                           onChange={(e) => {
                             field.onChange(e)
@@ -440,7 +442,7 @@ export default function ProductForm({
                           }}
                         />
                         {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
+                          <ProductFieldError error={fieldState.error} />
                         )}
                       </Field>
                     )}
@@ -452,7 +454,7 @@ export default function ProductForm({
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor="product-slug" className="text-xs">
-                          URL Slug <span className="text-destructive">*</span>
+                          {t("URL_SLUG")} <span className="text-destructive">*</span>
                         </FieldLabel>
                         <Input
                           {...field}
@@ -461,7 +463,7 @@ export default function ProductForm({
                           className="h-9 font-mono text-xs"
                         />
                         {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
+                          <ProductFieldError error={fieldState.error} />
                         )}
                       </Field>
                     )}
@@ -478,7 +480,7 @@ export default function ProductForm({
                           htmlFor="product-description"
                           className="text-xs"
                         >
-                          Description
+                          {t("DESCRIPTION")}
                         </FieldLabel>
                         <span className="text-[10px] text-muted-foreground tabular-nums">
                           {descriptionValue.length}/500
@@ -492,13 +494,13 @@ export default function ProductForm({
                           onChange={(e) =>
                             field.onChange(e.target.value || null)
                           }
-                          placeholder="Provide a detailed description of the product features..."
+                          placeholder={t("DESCRIPTION_PLACEHOLDER")}
                           rows={4}
                           className="resize-y text-xs"
                         />
                       </InputGroup>
                       {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
+                        <ProductFieldError error={fieldState.error} />
                       )}
                     </Field>
                   )}
@@ -513,10 +515,10 @@ export default function ProductForm({
                   <LayersIcon className="size-4 text-primary" />
                   <div>
                     <h2 className="text-sm font-semibold text-card-foreground">
-                      Variants & Pricing
+                      {t("VARIANTS_PRICING")}
                     </h2>
                     <p className="text-xs text-muted-foreground">
-                      Manage prices, SKUs, and stock quantities
+                      {t("VARIANTS_DESCRIPTION")}
                     </p>
                   </div>
                 </div>
@@ -534,7 +536,7 @@ export default function ProductForm({
                   className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
                 >
                   <PlusIcon className="size-3.5" />
-                  Add Variant
+                  {t("ADD_VARIANT")}
                 </Button>
               </div>
 
@@ -559,10 +561,10 @@ export default function ProductForm({
                   <ImageIcon className="size-4 text-primary" />
                   <div>
                     <h2 className="text-sm font-semibold text-card-foreground">
-                      Media Gallery
+                      {t("MEDIA_GALLERY")}
                     </h2>
                     <p className="text-xs text-muted-foreground">
-                      Link images to variants or set primary image
+                      {t("MEDIA_DESCRIPTION")}
                     </p>
                   </div>
                 </div>
@@ -577,7 +579,7 @@ export default function ProductForm({
                   className="h-8 cursor-pointer gap-1.5 text-xs font-medium"
                 >
                   <PlusIcon className="size-3.5" />
-                  Add Image
+                  {t("ADD_IMAGE")}
                 </Button>
               </div>
 
@@ -604,10 +606,10 @@ export default function ProductForm({
                 <SparklesIcon className="size-4 text-primary" />
                 <div>
                   <h2 className="text-sm font-semibold text-card-foreground">
-                    Product Status
+                      {t("PRODUCT_STATUS")}
                   </h2>
                   <p className="text-xs text-muted-foreground">
-                    Store availability and visibility state
+                      {t("PRODUCT_STATUS_DESCRIPTION")}
                   </p>
                 </div>
               </div>
@@ -619,9 +621,9 @@ export default function ProductForm({
                   render={({ field }) => (
                     <div className="flex items-center justify-between rounded-lg border border-border bg-muted/15 p-3">
                       <div className="space-y-0.5">
-                        <span className="text-xs font-semibold">Active</span>
+                        <span className="text-xs font-semibold">{t("ACTIVE")}</span>
                         <p className="text-[11px] text-muted-foreground">
-                          Visible and available for purchase
+                          {t("VISIBLE_FOR_PURCHASE")}
                         </p>
                       </div>
                       <Switch
@@ -638,9 +640,9 @@ export default function ProductForm({
                   render={({ field }) => (
                     <div className="flex items-center justify-between rounded-lg border border-border bg-muted/15 p-3">
                       <div className="space-y-0.5">
-                        <span className="text-xs font-semibold">Featured</span>
+                        <span className="text-xs font-semibold">{t("FEATURED")}</span>
                         <p className="text-[11px] text-muted-foreground">
-                          Showcase in store highlights
+                          {t("FEATURED_DESCRIPTION")}
                         </p>
                       </div>
                       <Switch
@@ -659,10 +661,10 @@ export default function ProductForm({
                 <TagIcon className="size-4 text-primary" />
                 <div>
                   <h2 className="text-sm font-semibold text-card-foreground">
-                    Organization
+                    {t("ORGANIZATION")}
                   </h2>
                   <p className="text-xs text-muted-foreground">
-                    Structure catalog taxonomy and branding
+                    {t("ORGANIZATION_DESCRIPTION")}
                   </p>
                 </div>
               </div>
@@ -674,7 +676,7 @@ export default function ProductForm({
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel className="text-xs">
-                        Category <span className="text-destructive">*</span>
+                        {t("CATEGORY")} <span className="text-destructive">*</span>
                       </FieldLabel>
 
                       <div className="flex items-center gap-1.5">
@@ -688,11 +690,11 @@ export default function ProductForm({
                             aria-invalid={fieldState.invalid}
                             className="h-8 flex-1 text-xs"
                           >
-                            <SelectValue placeholder="Select a category" />
+                            <SelectValue placeholder={t("SELECT_CATEGORY")} />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="none">
-                              -- Select category --
+                              {t("SELECT_CATEGORY")}
                             </SelectItem>
                             {categoriesList.map((cat) => (
                               <SelectItem key={cat.id} value={cat.id}>
@@ -702,44 +704,117 @@ export default function ProductForm({
                           </SelectContent>
                         </Select>
 
-                        <Button
-                          type="button"
-                          variant="outline"
-                          title="Create Category"
-                          onClick={() => setCategoryModal({ type: "create", data: null })}
-                          className="h-7 w-7 shrink-0 cursor-pointer p-0"
-                        >
-                          <PlusIcon className="size-3" />
-                        </Button>
+                        <CategoryFormSheet
+                          open={categoryModal.type === "create"}
+                          category={null}
+                          categories={categoriesList}
+                          categoryImages={[]}
+                          onOpenChange={(open) =>
+                            setCategoryModal(
+                              open
+                                ? { type: "create", data: null }
+                                : { type: null, data: null }
+                            )
+                          }
+                          onSaved={() => {
+                            setCategoryModal({ type: null, data: null })
+                            router.refresh()
+                          }}
+                          trigger={
+                            <Button
+                              type="button"
+                              variant="outline"
+                              title={t("CREATE_CATEGORY")}
+                              className="h-9 w-9 shrink-0 cursor-pointer p-0"
+                            >
+                              <PlusIcon className="size-3.5" />
+                            </Button>
+                          }
+                        />
 
                         {selectedCategoryObject && (
                           <>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              title="Edit selected category"
-                              onClick={() => setCategoryModal({ type: "update", data: selectedCategoryObject })}
-                              className="h-7 w-7 shrink-0 cursor-pointer p-0 text-muted-foreground hover:text-foreground"
-                            >
-                              <PencilIcon className="size-3" />
-                            </Button>
+                            <CategoryFormSheet
+                              open={
+                                categoryModal.type === "update" &&
+                                categoryModal.data?.id ===
+                                  selectedCategoryObject.id
+                              }
+                              category={selectedCategoryObject}
+                              categories={categoriesList}
+                              categoryImages={[]}
+                              onOpenChange={(open) =>
+                                setCategoryModal(
+                                  open
+                                    ? {
+                                        type: "update",
+                                        data: selectedCategoryObject,
+                                      }
+                                    : { type: null, data: null }
+                                )
+                              }
+                              onSaved={() => {
+                                setCategoryModal({ type: null, data: null })
+                                router.refresh()
+                              }}
+                              trigger={
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  title={t("EDIT_CATEGORY")}
+                                  className="h-9 w-9 shrink-0 cursor-pointer p-0 text-muted-foreground hover:text-foreground"
+                                >
+                                  <PencilIcon className="size-3.5" />
+                                </Button>
+                              }
+                            />
 
-                            {/* Uncontrolled DeleteCategoryDialog Trigger */}
-                            <Button
-                              type="button"
-                              variant="outline"
-                              title="Delete selected category"
-                              onClick={() => setCategoryModal({ type: "delete", data: selectedCategoryObject })}
-                              className="h-7 w-7 shrink-0 cursor-pointer p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            <DeleteCategoryDialog
+                              category={selectedCategoryObject}
+                              open={
+                                categoryModal.type === "delete" &&
+                                categoryModal.data?.id ===
+                                  selectedCategoryObject.id
+                              }
+                              onOpenChange={(open) =>
+                                setCategoryModal(
+                                  open
+                                    ? {
+                                        type: "delete",
+                                        data: selectedCategoryObject,
+                                      }
+                                    : { type: null, data: null }
+                                )
+                              }
+                              onDeleted={(deletedCategory) => {
+                                if (
+                                  form.getValues("category_id") ===
+                                  deletedCategory.id
+                                ) {
+                                  setValue("category_id", "", {
+                                    shouldValidate: true,
+                                    shouldDirty: true,
+                                  })
+                                }
+                                setCategoryModal({ type: null, data: null })
+                                router.refresh()
+                              }}
                             >
-                              <Trash2Icon className="size-3" />
-                            </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                title={t("DELETE_CATEGORY")}
+                                className="h-9 w-9 shrink-0 cursor-pointer p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              >
+                                <Trash2Icon className="size-3.5" />
+                              </Button>
+                            </DeleteCategoryDialog>
                           </>
                         )}
                       </div>
 
                       {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
+                        <ProductFieldError error={fieldState.error} />
                       )}
                     </Field>
                   )}
@@ -751,7 +826,7 @@ export default function ProductForm({
                   render={({ field }) => (
                     <Field>
                       <FieldLabel className="text-xs">
-                        Brand (Optional)
+                        {t("BRAND_OPTIONAL")}
                       </FieldLabel>
 
                       <div className="flex items-center gap-1.5">
@@ -762,10 +837,10 @@ export default function ProductForm({
                           value={field.value ?? "none"}
                         >
                           <SelectTrigger className="h-8 flex-1 text-xs">
-                            <SelectValue placeholder="Select a brand" />
+                            <SelectValue placeholder={t("SELECT_BRAND")} />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="none">-- No brand --</SelectItem>
+                            <SelectItem value="none">{t("NO_BRAND")}</SelectItem>
                             {brandsList.map((brand) => (
                               <SelectItem key={brand.id} value={brand.id}>
                                 {brand.name}
@@ -774,49 +849,110 @@ export default function ProductForm({
                           </SelectContent>
                         </Select>
 
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() =>
-                            setBrandModal({ type: "create", data: null })
+                        <BrandFormSheet
+                          open={brandModal.type === "create"}
+                          brand={null}
+                          brandImages={[]}
+                          onOpenChange={(open) =>
+                            setBrandModal(
+                              open
+                                ? { type: "create", data: null }
+                                : { type: null, data: null }
+                            )
                           }
-                          title="Create Brand"
-                          className="h-7 w-7 shrink-0 cursor-pointer p-0"
-                        >
-                          <PlusIcon className="size-3" />
-                        </Button>
+                          onSaved={(savedBrand) => {
+                            setValue("brand_id", savedBrand.id, {
+                              shouldValidate: true,
+                              shouldDirty: true,
+                            })
+                            setBrandModal({ type: null, data: null })
+                            router.refresh()
+                          }}
+                          trigger={
+                            <Button
+                              type="button"
+                              variant="outline"
+                              title={t("CREATE_BRAND")}
+                              className="h-9 w-9 shrink-0 cursor-pointer p-0"
+                            >
+                              <PlusIcon className="size-3.5" />
+                            </Button>
+                          }
+                        />
 
                         {selectedBrandObject && (
                           <>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() =>
-                                setBrandModal({
-                                  type: "update",
-                                  data: selectedBrandObject,
-                                })
+                            <BrandFormSheet
+                              open={
+                                brandModal.type === "update" &&
+                                brandModal.data?.id === selectedBrandObject.id
                               }
-                              title="Edit selected brand"
-                              className="h-7 w-7 shrink-0 cursor-pointer p-0 text-muted-foreground hover:text-foreground"
-                            >
-                              <PencilIcon className="size-3" />
-                            </Button>
+                              brand={selectedBrandObject}
+                              brandImages={[]}
+                              onOpenChange={(open) =>
+                                setBrandModal(
+                                  open
+                                    ? {
+                                        type: "update",
+                                        data: selectedBrandObject,
+                                      }
+                                    : { type: null, data: null }
+                                )
+                              }
+                              onSaved={() => {
+                                setBrandModal({ type: null, data: null })
+                                router.refresh()
+                              }}
+                              trigger={
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  title={t("EDIT_BRAND")}
+                                  className="h-9 w-9 shrink-0 cursor-pointer p-0 text-muted-foreground hover:text-foreground"
+                                >
+                                  <PencilIcon className="size-3.5" />
+                                </Button>
+                              }
+                            />
 
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() =>
-                                setBrandModal({
-                                  type: "delete",
-                                  data: selectedBrandObject,
-                                })
+                            <DeleteBrandDialog
+                              brand={selectedBrandObject}
+                              open={
+                                brandModal.type === "delete" &&
+                                brandModal.data?.id === selectedBrandObject.id
                               }
-                              title="Delete selected brand"
-                              className="h-7 w-7 shrink-0 cursor-pointer p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              onOpenChange={(open) =>
+                                setBrandModal(
+                                  open
+                                    ? {
+                                        type: "delete",
+                                        data: selectedBrandObject,
+                                      }
+                                    : { type: null, data: null }
+                                )
+                              }
+                              onDeleted={(deletedBrand) => {
+                                if (
+                                  form.getValues("brand_id") === deletedBrand.id
+                                ) {
+                                  setValue("brand_id", null, {
+                                    shouldValidate: true,
+                                    shouldDirty: true,
+                                  })
+                                }
+                                setBrandModal({ type: null, data: null })
+                                router.refresh()
+                              }}
                             >
-                              <Trash2Icon className="size-3" />
-                            </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                title={t("DELETE_BRAND")}
+                                className="h-9 w-9 shrink-0 cursor-pointer p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              >
+                                <Trash2Icon className="size-3.5" />
+                              </Button>
+                            </DeleteBrandDialog>
                           </>
                         )}
                       </div>
@@ -833,10 +969,10 @@ export default function ProductForm({
                   <GlobeIcon className="size-4 text-primary" />
                   <div>
                     <h2 className="text-sm font-semibold text-card-foreground">
-                      SEO Details
+                    {t("SEO_DETAILS")}
                     </h2>
                     <p className="text-xs text-muted-foreground">
-                      Search engine listing previews
+                    {t("SEO_DESCRIPTION")}
                     </p>
                   </div>
                 </div>
@@ -849,7 +985,7 @@ export default function ProductForm({
                   className="h-8 cursor-pointer gap-1.5 px-2.5 text-[11px] font-medium text-primary hover:text-primary"
                 >
                   <Wand2Icon className="size-3" />
-                  Generate SEO
+                  {t("GENERATE_SEO")}
                 </Button>
               </div>
 
@@ -861,7 +997,7 @@ export default function ProductForm({
                     <Field data-invalid={fieldState.invalid}>
                       <div className="flex items-center justify-between">
                         <FieldLabel htmlFor="meta-title" className="text-xs">
-                          Meta Title
+                        {t("META_TITLE")}
                         </FieldLabel>
                         <span className="text-[10px] text-muted-foreground tabular-nums">
                           {(field.value ?? "").length}/70
@@ -871,11 +1007,11 @@ export default function ProductForm({
                         {...field}
                         id="meta-title"
                         value={field.value ?? ""}
-                        placeholder="Page title in search results"
+                          placeholder={t("META_TITLE_PLACEHOLDER")}
                         className="h-9 text-xs"
                       />
                       {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
+                        <ProductFieldError error={fieldState.error} />
                       )}
                     </Field>
                   )}
@@ -891,7 +1027,7 @@ export default function ProductForm({
                           htmlFor="meta-description"
                           className="text-xs"
                         >
-                          Meta Description
+                          {t("META_DESCRIPTION")}
                         </FieldLabel>
                         <span className="text-[10px] text-muted-foreground tabular-nums">
                           {(field.value ?? "").length}/160
@@ -905,13 +1041,13 @@ export default function ProductForm({
                           onChange={(e) =>
                             field.onChange(e.target.value || null)
                           }
-                          placeholder="Brief summary for search engines..."
+                          placeholder={t("META_DESCRIPTION_PLACEHOLDER")}
                           rows={3}
                           className="resize-y text-xs"
                         />
                       </InputGroup>
                       {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
+                        <ProductFieldError error={fieldState.error} />
                       )}
                     </Field>
                   )}
@@ -923,10 +1059,10 @@ export default function ProductForm({
             <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
               <div className="mb-4 border-b border-border/60 pb-3">
                 <h2 className="text-sm font-semibold text-card-foreground">
-                  Actions
+                  {t("ACTIONS")}
                 </h2>
                 <p className="text-xs text-muted-foreground">
-                  Commit or cancel ongoing modifications
+                  {t("ACTIONS_DESCRIPTION")}
                 </p>
               </div>
               <div className="flex flex-col gap-2 sm:flex-col">
@@ -938,7 +1074,7 @@ export default function ProductForm({
                   {isSubmitting ? (
                     <>
                       <Spinner className="mr-2 size-4" />
-                      Saving...
+                    {t("SAVING")}
                     </>
                   ) : (
                     <>{isEditing ? "Update Product" : "Save Product"}</>
@@ -952,83 +1088,13 @@ export default function ProductForm({
                   onClick={() => router.back()}
                   className="h-9 w-full text-xs"
                 >
-                  Discard Changes
+                  {t("DISCARD_CHANGES")}
                 </Button>
               </div>
             </div>
           </div>
         </div>
       </form>
-
-      {/* Brand Modals */}
-      <CategoryFormSheet
-        open={categoryModal.type === "create" || categoryModal.type === "update"}
-        category={categoryModal.type === "update" ? categoryModal.data : null}
-        categories={categoriesList}
-        categoryImages={[]}
-        onOpenChange={(open) => {
-          if (!open) setCategoryModal({ type: null, data: null })
-        }}
-        onSaved={() => {
-          setCategoryModal({ type: null, data: null })
-          router.refresh()
-        }}
-      />
-
-      <DeleteCategoryDialog
-        category={categoryModal.type === "delete" ? categoryModal.data : null}
-        open={categoryModal.type === "delete"}
-        onOpenChange={(open) => {
-          if (!open) setCategoryModal({ type: null, data: null })
-        }}
-        onDeleted={(deletedCategory) => {
-          if (form.getValues("category_id") === deletedCategory.id) {
-            setValue("category_id", "", {
-              shouldValidate: true,
-              shouldDirty: true,
-            })
-          }
-          setCategoryModal({ type: null, data: null })
-          router.refresh()
-        }}
-      />
-
-      <BrandFormSheet
-        open={brandModal.type === "create" || brandModal.type === "update"}
-        brand={brandModal.type === "update" ? brandModal.data : null}
-        brandImages={[]}
-        onOpenChange={(open) => {
-          if (!open) setBrandModal({ type: null, data: null })
-        }}
-        onSaved={(savedBrand) => {
-          if (brandModal.type === "create") {
-            setValue("brand_id", savedBrand.id, {
-              shouldValidate: true,
-              shouldDirty: true,
-            })
-          }
-          setBrandModal({ type: null, data: null })
-          router.refresh()
-        }}
-      />
-
-      <DeleteBrandDialog
-        open={brandModal.type === "delete"}
-        onOpenChange={(open) => {
-          if (!open) setBrandModal({ type: null, data: null })
-        }}
-        brand={brandModal.type === "delete" ? brandModal.data : null}
-        onDeleted={(deletedBrand) => {
-          if (form.getValues("brand_id") === deletedBrand.id) {
-            setValue("brand_id", null, {
-              shouldValidate: true,
-              shouldDirty: true,
-            })
-          }
-          setBrandModal({ type: null, data: null })
-          router.refresh()
-        }}
-      />
     </>
   )
 }
@@ -1048,6 +1114,7 @@ function VariantCard({
   totalVariants,
   onRemove,
 }: VariantCardProps) {
+  const t = useTranslations("ProductForm")
   const variantName = useWatch({ control, name: `variants.${index}.name` })
   const productName = useWatch({ control, name: "name" })
 
@@ -1067,7 +1134,7 @@ function VariantCard({
             {index + 1}
           </span>
           <span className="text-xs font-semibold">
-            {variantName || `Variant #${index + 1}`}
+            {variantName || t("VARIANT_NUMBER", { number: index + 1 })}
           </span>
         </div>
 
@@ -1090,12 +1157,12 @@ function VariantCard({
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel className="text-xs">
-                SKU Code <span className="text-destructive">*</span>
+                {t("SKU_CODE")} <span className="text-destructive">*</span>
               </FieldLabel>
               <div className="relative flex items-center">
                 <Input
                   {...field}
-                  placeholder="e.g., SHIRT-WHT-MD"
+                  placeholder={t("SKU_PLACEHOLDER")}
                   className="h-8 pe-8 text-xs uppercase"
                 />
                 <Button
@@ -1103,13 +1170,13 @@ function VariantCard({
                   variant="ghost"
                   size="icon"
                   onClick={handleGenerateSku}
-                  title="Generate SKU"
+                  title={t("GENERATE_SKU")}
                   className="absolute inset-e-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
                 >
                   <Wand2Icon className="size-3.5" />
                 </Button>
               </div>
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              {fieldState.invalid && <ProductFieldError error={fieldState.error} />}
             </Field>
           )}
         />
@@ -1120,15 +1187,15 @@ function VariantCard({
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel className="text-xs">
-                Variant Name (Optional)
+                {t("VARIANT_NAME_OPTIONAL")}
               </FieldLabel>
               <Input
                 {...field}
                 value={field.value ?? ""}
-                placeholder="e.g., White / Medium"
+                placeholder={t("VARIANT_NAME_PLACEHOLDER")}
                 className="h-8 text-xs"
               />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              {fieldState.invalid && <ProductFieldError error={fieldState.error} />}
             </Field>
           )}
         />
@@ -1141,7 +1208,7 @@ function VariantCard({
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel className="text-xs">
-                Price <span className="text-destructive">*</span>
+                {t("PRICE")} <span className="text-destructive">*</span>
               </FieldLabel>
               <Input
                 {...field}
@@ -1151,7 +1218,7 @@ function VariantCard({
                 className="h-8 text-xs"
                 onChange={(e) => field.onChange(Number(e.target.value))}
               />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              {fieldState.invalid && <ProductFieldError error={fieldState.error} />}
             </Field>
           )}
         />
@@ -1161,14 +1228,14 @@ function VariantCard({
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel className="text-xs">Compare-at Price</FieldLabel>
+              <FieldLabel className="text-xs">{t("COMPARE_AT_PRICE")}</FieldLabel>
               <Input
                 {...field}
                 value={field.value ?? ""}
                 type="number"
                 step="0.01"
                 min="0"
-                placeholder="Optional"
+                placeholder={t("OPTIONAL")}
                 className="h-8 text-xs"
                 onChange={(e) =>
                   field.onChange(
@@ -1176,7 +1243,7 @@ function VariantCard({
                   )
                 }
               />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              {fieldState.invalid && <ProductFieldError error={fieldState.error} />}
             </Field>
           )}
         />
@@ -1187,7 +1254,7 @@ function VariantCard({
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel className="text-xs">
-                Stock Quantity <span className="text-destructive">*</span>
+                {t("STOCK_QUANTITY")} <span className="text-destructive">*</span>
               </FieldLabel>
               <Input
                 {...field}
@@ -1196,7 +1263,7 @@ function VariantCard({
                 className="h-8 text-xs"
                 onChange={(e) => field.onChange(Number(e.target.value))}
               />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              {fieldState.invalid && <ProductFieldError error={fieldState.error} />}
             </Field>
           )}
         />
@@ -1233,6 +1300,8 @@ function ImageCard({
   totalImages,
   onRemove,
 }: ImageCardProps) {
+  const locale = useLocale()
+  const t = useTranslations("ProductForm")
   const currentUrl = useWatch({ control, name: `images.${index}.url` })
   const variants = useWatch({ control, name: "variants" }) || []
   const productName = useWatch({ control, name: "name" }) || ""
@@ -1243,7 +1312,7 @@ function ImageCard({
 
   const handleGenerateImageAlt = () => {
     if (!productName.trim()) {
-      toast.error("Please enter the product name first")
+      toast.error(t("SKU_NAME_REQUIRED"))
       return
     }
 
@@ -1253,7 +1322,10 @@ function ImageCard({
     const variantSuffix = matchedVariant?.name
       ? ` - ${matchedVariant.name}`
       : ""
-    const generatedAlt = `${productName.trim()}${variantSuffix} photo showcase ${index + 1}`
+    const generatedAlt =
+      locale === "ar"
+        ? `صورة ${productName.trim()}${variantSuffix} رقم ${index + 1}`
+        : `${productName.trim()}${variantSuffix} photo showcase ${index + 1}`
 
     setValue(`images.${index}.alt_text`, generatedAlt, {
       shouldValidate: true,
@@ -1267,7 +1339,7 @@ function ImageCard({
         {currentUrl ? (
           <img
             src={currentUrl}
-            alt="Preview"
+            alt={t("IMAGE_PREVIEW")}
             className="size-full object-cover"
             onError={(e) => {
               e.currentTarget.style.display = "none"
@@ -1280,7 +1352,7 @@ function ImageCard({
 
       <div className="min-w-0 flex-1 space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold">Image #{index + 1}</span>
+          <span className="text-xs font-semibold">{t("IMAGE_NUMBER", { number: index + 1 })}</span>
           <Button
             type="button"
             variant="ghost"
@@ -1304,7 +1376,7 @@ function ImageCard({
                 placeholder="https://example.com/images/product.jpg"
                 className="h-8 text-xs"
               />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              {fieldState.invalid && <ProductFieldError error={fieldState.error} />}
             </Field>
           )}
         />
@@ -1316,13 +1388,13 @@ function ImageCard({
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel className="text-xs">
-                  Alt Text (accessibility)
+                  {t("IMAGE_ALT_TEXT")}
                 </FieldLabel>
                 <div className="relative flex items-center">
                   <Input
                     {...field}
                     value={field.value ?? ""}
-                    placeholder="Alt Text (accessibility)"
+                placeholder={t("IMAGE_ALT_TEXT")}
                     className="h-8 pe-8 text-xs"
                   />
                   <Button
@@ -1330,14 +1402,14 @@ function ImageCard({
                     variant="ghost"
                     size="icon"
                     onClick={handleGenerateImageAlt}
-                    title="Generate Alt Text"
+                    title={t("GENERATE_ALT_TEXT")}
                     className="absolute inset-e-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
                   >
                     <Wand2Icon className="size-3.5" />
                   </Button>
                 </div>
                 {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
+                  <ProductFieldError error={fieldState.error} />
                 )}
               </Field>
             )}
@@ -1348,7 +1420,7 @@ function ImageCard({
             control={control}
             render={({ field }) => (
               <Field>
-                <FieldLabel className="text-xs">Link to Variant</FieldLabel>
+                <FieldLabel className="text-xs">{t("LINK_TO_VARIANT")}</FieldLabel>
                 <Select
                   onValueChange={(val) =>
                     field.onChange(val === "none" ? "" : val)
@@ -1356,10 +1428,10 @@ function ImageCard({
                   value={field.value || "none"}
                 >
                   <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder="Link to variant" />
+                    <SelectValue placeholder={t("LINK_TO_VARIANT")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">All Variants (General)</SelectItem>
+                    <SelectItem value="none">{t("ALL_VARIANTS_GENERAL")}</SelectItem>
                     {variants.map((v, i) => {
                       const currentSku = v?.sku?.trim()
                       const currentName = v?.name?.trim()
@@ -1408,7 +1480,7 @@ function ImageCard({
                 htmlFor={`primary-${index}`}
                 className="cursor-pointer text-xs font-medium text-foreground"
               >
-                Set as primary product thumbnail
+                {t("SET_PRIMARY_IMAGE")}
               </label>
             </div>
           )}
@@ -1425,15 +1497,12 @@ function VariantAttributesManager({
   attributes: Record<string, string>
   onChange: (attrs: Record<string, string>) => void
 }) {
+  const t = useTranslations("ProductForm")
   const [selectedKeyType, setSelectedKeyType] = React.useState<string>("color")
   const [customKey, setCustomKey] = React.useState("")
   const [attrVal, setAttrVal] = React.useState("")
 
   const isCustom = selectedKeyType === "custom"
-  const currentPreset = PRESET_ATTRIBUTE_KEYS.find(
-    (item) => item.value === selectedKeyType
-  )
-
   const addAttribute = () => {
     const finalKey = isCustom ? customKey.trim().toLowerCase() : selectedKeyType
     const finalVal = attrVal.trim()
@@ -1459,10 +1528,10 @@ function VariantAttributesManager({
     <div className="space-y-2.5 rounded-lg border border-border bg-muted/15 p-3">
       <div className="flex items-center justify-between">
         <FieldLabel className="text-xs font-semibold text-foreground">
-          Variant Attributes (e.g., Color, Size, Weight)
+          {t("VARIANT_ATTRIBUTES")}
         </FieldLabel>
         <span className="text-[11px] text-muted-foreground">
-          {Object.keys(attributes || {}).length} added
+          {t("ATTRIBUTES_ADDED", { count: Object.keys(attributes || {}).length })}
         </span>
       </div>
 
@@ -1495,7 +1564,7 @@ function VariantAttributesManager({
           }}
         >
           <SelectTrigger className="h-8 w-36 bg-background text-xs">
-            <SelectValue placeholder="Select attribute" />
+            <SelectValue placeholder={t("SELECT_ATTRIBUTE")} />
           </SelectTrigger>
           <SelectContent>
             {PRESET_ATTRIBUTE_KEYS.map((item) => (
@@ -1504,21 +1573,21 @@ function VariantAttributesManager({
                 value={item.value}
                 className="text-xs"
               >
-                {item.label}
+              {t(`ATTRIBUTE_${item.value.toUpperCase()}`)}
               </SelectItem>
             ))}
             <SelectItem
               value="custom"
               className="text-xs font-medium text-primary"
             >
-              + Custom...
+              {t("CUSTOM_ATTRIBUTE")}
             </SelectItem>
           </SelectContent>
         </Select>
 
         {isCustom && (
           <Input
-            placeholder="Attribute name..."
+            placeholder={t("ATTRIBUTE_NAME_PLACEHOLDER")}
             value={customKey}
             onChange={(e) => setCustomKey(e.target.value)}
             className="h-8 w-32 bg-background text-xs"
@@ -1527,7 +1596,7 @@ function VariantAttributesManager({
         )}
 
         <Input
-          placeholder={currentPreset ? currentPreset.placeholder : "Value..."}
+          placeholder={t("ATTRIBUTE_VALUE_PLACEHOLDER")}
           value={attrVal}
           onChange={(e) => setAttrVal(e.target.value)}
           onKeyDown={(e) => {
@@ -1547,7 +1616,7 @@ function VariantAttributesManager({
           className="h-8 shrink-0 cursor-pointer px-3 text-xs"
         >
           <PlusIcon className="mr-1 size-3.5" />
-          Add
+          {t("ADD")}
         </Button>
       </div>
     </div>

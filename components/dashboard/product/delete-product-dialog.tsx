@@ -25,6 +25,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { deleteProduct } from "@/lib/actions/products/mutations/delete"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 
 export interface DeleteProductDialogProps {
   productId: string
@@ -40,6 +41,7 @@ export function DeleteProductDialog({
   onDeleted,
 }: DeleteProductDialogProps) {
   const t = useTranslations("ProductsManagement")
+  const tErrors = useTranslations("ActionErrors")
   const [isPending, startTransition] = React.useTransition()
   const closeRef = React.useRef<HTMLButtonElement>(null)
 
@@ -52,7 +54,7 @@ export function DeleteProductDialog({
           onDeleted?.(productId)
           closeRef.current?.click() // Programmatic uncontrolled dismissal on success
         } else {
-          toast.error(res.error || t("DELETE_ERROR_TOAST"))
+          toast.error(res.error ? tErrors(getActionErrorKey(res.error)) : t("DELETE_ERROR_TOAST"))
         }
       } catch {
         toast.error(t("GENERIC_ERROR_TOAST"))
