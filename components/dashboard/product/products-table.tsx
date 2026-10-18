@@ -11,6 +11,7 @@ import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
+import { differenceInCalendarDays, parseISO } from "date-fns"
 import {
   ColumnDef,
   flexRender,
@@ -203,14 +204,14 @@ export function ProductsTable({
                 <Can
                   permission={PERMISSIONS.UPDATE_PRODUCT}
                   fallback={
-                    <span className="truncate text-xs font-semibold text-foreground">
+                    <span className="truncate text-sm font-normal text-foreground">
                       {product.name}
                     </span>
                   }
                 >
                   <Link
                     href={`/dashboard/products/${product.slug}/edit`}
-                    className="truncate text-xs font-semibold text-foreground transition-colors hover:text-primary hover:underline"
+                    className="truncate text-sm font-normal text-foreground transition-colors hover:text-primary hover:underline"
                   >
                     {product.name}
                   </Link>
@@ -232,7 +233,7 @@ export function ProductsTable({
         cell: ({ row }) => (
           <Badge
             variant="outline"
-            className="px-2 py-0.5 text-xs text-muted-foreground"
+            className="px-2 py-0.5 text-sm font-normal text-muted-foreground"
           >
             {row.original.category_name || "—"}
           </Badge>
@@ -245,7 +246,7 @@ export function ProductsTable({
         enableHiding: true,
         header: t("COLUMN_BRAND"),
         cell: ({ row }) => (
-          <span className="text-xs font-medium text-foreground">
+          <span className="text-sm font-normal text-foreground">
             {row.original.brand_name || "—"}
           </span>
         ),
@@ -281,9 +282,29 @@ export function ProductsTable({
             timeZone: "UTC",
           }).format(new Date(`${expirationDate}T00:00:00.000Z`))
 
+          const daysUntilExpiration = differenceInCalendarDays(
+            parseISO(expirationDate),
+            new Date()
+          )
+          const expirationBadgeClass =
+            daysUntilExpiration < 0
+              ? "border-destructive/40 bg-destructive/10 text-destructive dark:text-red-400"
+              : daysUntilExpiration <= 7
+                ? "border-red-500/40 bg-red-500/10 text-red-600 dark:text-red-400"
+                : daysUntilExpiration <= 30
+                  ? "border-orange-500/40 bg-orange-500/10 text-orange-600 dark:text-orange-400"
+                  : daysUntilExpiration <= 90
+                    ? "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                    : "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+
           return (
-            <div className="text-center text-xs tabular-nums">
-              <time dateTime={expirationDate}>{formattedDate}</time>
+            <div className="flex justify-center text-sm tabular-nums">
+              <Badge
+                variant="outline"
+                className={`text-sm font-normal ${expirationBadgeClass}`}
+              >
+                <time dateTime={expirationDate}>{formattedDate}</time>
+              </Badge>
             </div>
           )
         },
@@ -300,7 +321,7 @@ export function ProductsTable({
           return (
             <div className="text-center tabular-nums">
               <span
-                className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                className={`inline-flex rounded-full px-2.5 py-0.5 text-sm font-normal ${
                   isLow
                     ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
                     : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
@@ -324,7 +345,7 @@ export function ProductsTable({
             row.original.min_price === row.original.max_price
 
           return (
-            <div className="flex items-center gap-1 text-xs font-semibold tabular-nums">
+            <div className="flex items-center gap-1 text-sm font-normal tabular-nums">
               <span>${min}</span>
               {!isSinglePrice && (
                 <>
@@ -347,7 +368,7 @@ export function ProductsTable({
           return (
             <Badge
               variant="outline"
-              className={`gap-1 truncate px-1.5 py-0.5 font-mono text-[11px] leading-tight uppercase ${
+              className={`gap-1 truncate px-1.5 py-0.5 text-sm font-normal leading-tight ${
                 isActive
                   ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                   : "border-amber-500/30 text-amber-600 dark:text-amber-400"

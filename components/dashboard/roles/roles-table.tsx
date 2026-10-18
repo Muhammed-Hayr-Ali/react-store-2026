@@ -237,10 +237,10 @@ export function RolesTable({
               <ShieldIcon className="size-3.5 text-primary" />
             </div>
             <div className="flex max-w-xs min-w-0 flex-col sm:max-w-md">
-              <span className="truncate text-xs font-semibold text-foreground uppercase">
+              <span className="truncate text-sm font-normal text-foreground">
                 {row.original.name}
               </span>
-              <span className="max-w-3xs truncate font-mono text-[11px] text-muted-foreground">
+              <span className="max-w-3xs truncate text-sm font-normal text-muted-foreground">
                 {row.original.description || t("NO_DESCRIPTION")}
               </span>
             </div>
@@ -262,7 +262,7 @@ export function RolesTable({
             <div className="flex justify-center">
               <Badge
                 variant="secondary"
-                className="truncate px-1.5 py-0.5 font-mono text-[11px] leading-tight text-muted-foreground uppercase"
+                className="truncate px-1.5 py-0.5 text-sm font-normal leading-tight text-muted-foreground"
               >
                 <LayersIcon className="size-3 opacity-70" />
                 <span dir="ltr">

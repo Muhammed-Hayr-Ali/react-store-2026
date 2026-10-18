@@ -249,10 +249,10 @@ export function StaffAccessTable({
                 </AvatarFallback>
               </Avatar>
               <div className="flex max-w-xs min-w-0 flex-col">
-                <span className="truncate text-xs font-semibold text-foreground">
+                <span className="truncate text-sm font-normal text-foreground">
                   {fullName || t("ANONYMOUS_USER")}
                 </span>
-                <span className="truncate font-mono text-[11px] text-muted-foreground">
+                <span className="truncate text-sm font-normal text-muted-foreground">
                   {row.original.email || t("NO_EMAIL")}
                 </span>
               </div>
@@ -279,7 +279,7 @@ export function StaffAccessTable({
                     <Badge
                       key={role.id}
                       variant="secondary"
-                      className="gap-1 py-0.5 ps-2 pe-1 font-mono text-[11px] leading-tight text-muted-foreground uppercase"
+                      className="gap-1 py-0.5 ps-2 pe-1 text-sm font-normal leading-tight text-muted-foreground"
                     >
                       <ShieldIcon className="size-3 text-primary opacity-70" />
                       <span>{role.name}</span>
@@ -306,7 +306,7 @@ export function StaffAccessTable({
               ) : (
                 <Badge
                   variant="secondary"
-                  className="gap-1 py-0.5 ps-2 pe-1 font-mono text-[11px] leading-tight text-muted-foreground uppercase"
+                      className="gap-1 py-0.5 ps-2 pe-1 text-sm font-normal leading-tight text-muted-foreground"
                 >
                   <span>{t("NO_ROLES_ASSIGNED")}</span>
                 </Badge>

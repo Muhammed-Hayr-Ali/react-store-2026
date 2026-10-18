@@ -71,7 +71,7 @@ import { CategoryFormSheet } from "./category-form-sheet"
 import { DeleteCategoryDialog } from "./delete-category-dialog"
 
 type CategoryFilter = "all" | "active" | "inactive"
-const HIDEABLE_COLUMNS = ["slug", "sort_order", "status"]
+const HIDEABLE_COLUMNS = ["sort_order", "status"]
 
 interface CategoriesTableProps {
   initialCategories: Category[]
@@ -320,10 +320,10 @@ export function CategoriesTable({
                   <TagsIcon className="size-3.5 text-primary" />
                 </AvatarFallback>
               </Avatar>
-              <div className="flex min-w-0 flex-col">
+              <div className="flex min-w-0 flex-col items-start">
                 <span
                   dir={locale === "ar" ? "rtl" : "ltr"}
-                  className="truncate text-xs font-semibold text-foreground"
+                  className="truncate text-sm font-normal text-foreground"
                 >
                   {locale === "ar"
                     ? category.name_ar || category.name
@@ -331,7 +331,7 @@ export function CategoriesTable({
                 </span>
                 <span
                   dir="ltr"
-                  className="truncate font-mono text-[11px] text-muted-foreground"
+                  className="self-start truncate text-start font-mono text-[11px] text-muted-foreground"
                 >
                   {category.slug}
                 </span>
@@ -341,24 +341,11 @@ export function CategoriesTable({
         },
       },
       {
-        id: "slug",
-        accessorKey: "slug",
-        header: t("COLUMN_SLUG"),
-        cell: ({ row }) => (
-          <span
-            dir="ltr"
-            className="font-mono text-[11px] text-muted-foreground"
-          >
-            {row.original.slug}
-          </span>
-        ),
-      },
-      {
         id: "sort_order",
         accessorFn: (category) => category.sort_order ?? 0,
         header: t("COLUMN_SORT_ORDER"),
         cell: ({ row }) => (
-          <span className="text-xs text-muted-foreground tabular-nums">
+          <span className="text-sm text-muted-foreground tabular-nums">
             {row.original.sort_order ?? 0}
           </span>
         ),
@@ -378,7 +365,7 @@ export function CategoriesTable({
             // </Badge>
             <Badge
               variant="outline"
-              className={`gap-1 truncate px-1.5 py-0.5 font-mono text-[11px] leading-tight uppercase ${
+              className={`gap-1 truncate px-1.5 py-0.5 text-sm font-normal leading-tight ${
                 isActive
                   ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                   : "border-amber-500/30 text-amber-600 dark:text-amber-400"
@@ -438,7 +425,6 @@ export function CategoriesTable({
 
   const noCategories = categories.length === 0
   const columnLabels: Record<string, string> = {
-    slug: t("COLUMN_SLUG"),
     sort_order: t("COLUMN_SORT_ORDER"),
     status: t("COLUMN_STATUS"),
   }

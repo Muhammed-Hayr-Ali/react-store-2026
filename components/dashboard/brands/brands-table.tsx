@@ -241,7 +241,7 @@ export function BrandsTable({
               <div className="flex min-w-0 flex-col">
                 <span
                   dir={locale === "ar" ? "rtl" : "ltr"}
-                  className="truncate text-xs font-semibold text-foreground"
+                  className="truncate text-sm font-normal text-foreground"
                 >
                   {locale === "ar" ? brand.name_ar || brand.name : brand.name}
                 </span>
@@ -274,7 +274,7 @@ export function BrandsTable({
         accessorFn: (brand) => brand.sort_order ?? 0,
         header: t("COLUMN_SORT_ORDER"),
         cell: ({ row }) => (
-          <span className="text-xs text-muted-foreground tabular-nums">
+          <span className="text-sm text-muted-foreground tabular-nums">
             {row.original.sort_order ?? 0}
           </span>
         ),
@@ -288,7 +288,7 @@ export function BrandsTable({
           return (
             <Badge
               variant="outline"
-              className={`gap-1 truncate px-1.5 py-0.5 font-mono text-[11px] leading-tight uppercase ${
+              className={`gap-1 truncate px-1.5 py-0.5 text-sm font-normal leading-tight ${
                 isActive
                   ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                   : "border-amber-500/30 text-amber-600 dark:text-amber-400"

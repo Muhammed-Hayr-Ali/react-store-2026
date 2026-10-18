@@ -20,7 +20,7 @@ import {
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
-import { format, parseISO } from "date-fns"
+import { addYears, format, parseISO, startOfToday } from "date-fns"
 import { ar as arabicDateLocale, enUS } from "date-fns/locale"
 import slugify from "slugify"
 import {
@@ -217,7 +217,9 @@ export default function ProductForm({
       attributes: v.attributes || {},
       // جلب السعر بالسنت من قاعدة البيانات وتحويله لعرضه كدولار
       price: Number(v.price) / 100,
-      compare_at_price: v.compare_at_price ? Number(v.compare_at_price) / 100 : null,
+      compare_at_price: v.compare_at_price
+        ? Number(v.compare_at_price) / 100
+        : null,
       stock_quantity: v.stock_quantity,
       track_inventory: v.track_inventory,
       low_stock_threshold: v.low_stock_threshold,
@@ -313,13 +315,11 @@ export default function ProductForm({
       const brandPart = selectedBrandObject
         ? ` by ${selectedBrandObject.name}`
         : ""
-      generatedDescription =
-        (locale === "ar"
+      generatedDescription = (
+        locale === "ar"
           ? `تسوق ${currentProductName.trim()}${brandPart}${categoryPart}. جودة عالية وأسعار مناسبة مع توصيل سريع وموثوق.`
-          : `Shop ${currentProductName.trim()}${brandPart}${categoryPart}. High quality at the best prices with fast and reliable delivery.`).slice(
-          0,
-          160
-        )
+          : `Shop ${currentProductName.trim()}${brandPart}${categoryPart}. High quality at the best prices with fast and reliable delivery.`
+      ).slice(0, 160)
     }
 
     setValue("meta_title", generatedTitle, {
@@ -470,7 +470,8 @@ export default function ProductForm({
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor="product-slug" className="text-xs">
-                          {t("URL_SLUG")} <span className="text-destructive">*</span>
+                          {t("URL_SLUG")}{" "}
+                          <span className="text-destructive">*</span>
                         </FieldLabel>
                         <Input
                           {...field}
@@ -637,7 +638,9 @@ export default function ProductForm({
                   render={({ field }) => (
                     <div className="flex items-center justify-between rounded-lg border border-border bg-muted/15 p-3">
                       <div className="space-y-0.5">
-                        <span className="text-xs font-semibold">{t("ACTIVE")}</span>
+                        <span className="text-xs font-semibold">
+                          {t("ACTIVE")}
+                        </span>
                         <p className="text-[11px] text-muted-foreground">
                           {t("VISIBLE_FOR_PURCHASE")}
                         </p>
@@ -656,7 +659,9 @@ export default function ProductForm({
                   render={({ field }) => (
                     <div className="flex items-center justify-between rounded-lg border border-border bg-muted/15 p-3">
                       <div className="space-y-0.5">
-                        <span className="text-xs font-semibold">{t("FEATURED")}</span>
+                        <span className="text-xs font-semibold">
+                          {t("FEATURED")}
+                        </span>
                         <p className="text-[11px] text-muted-foreground">
                           {t("FEATURED_DESCRIPTION")}
                         </p>
@@ -692,7 +697,8 @@ export default function ProductForm({
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel className="text-xs">
-                        {t("CATEGORY")} <span className="text-destructive">*</span>
+                        {t("CATEGORY")}{" "}
+                        <span className="text-destructive">*</span>
                       </FieldLabel>
 
                       <div className="flex items-center gap-1.5">
@@ -856,7 +862,9 @@ export default function ProductForm({
                             <SelectValue placeholder={t("SELECT_BRAND")} />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="none">{t("NO_BRAND")}</SelectItem>
+                            <SelectItem value="none">
+                              {t("NO_BRAND")}
+                            </SelectItem>
                             {brandsList.map((brand) => (
                               <SelectItem key={brand.id} value={brand.id}>
                                 {brand.name}
@@ -985,10 +993,10 @@ export default function ProductForm({
                   <GlobeIcon className="size-4 text-primary" />
                   <div>
                     <h2 className="text-sm font-semibold text-card-foreground">
-                    {t("SEO_DETAILS")}
+                      {t("SEO_DETAILS")}
                     </h2>
                     <p className="text-xs text-muted-foreground">
-                    {t("SEO_DESCRIPTION")}
+                      {t("SEO_DESCRIPTION")}
                     </p>
                   </div>
                 </div>
@@ -1013,7 +1021,7 @@ export default function ProductForm({
                     <Field data-invalid={fieldState.invalid}>
                       <div className="flex items-center justify-between">
                         <FieldLabel htmlFor="meta-title" className="text-xs">
-                        {t("META_TITLE")}
+                          {t("META_TITLE")}
                         </FieldLabel>
                         <span className="text-[10px] text-muted-foreground tabular-nums">
                           {(field.value ?? "").length}/70
@@ -1023,7 +1031,7 @@ export default function ProductForm({
                         {...field}
                         id="meta-title"
                         value={field.value ?? ""}
-                          placeholder={t("META_TITLE_PLACEHOLDER")}
+                        placeholder={t("META_TITLE_PLACEHOLDER")}
                         className="h-9 text-xs"
                       />
                       {fieldState.invalid && (
@@ -1090,7 +1098,7 @@ export default function ProductForm({
                   {isSubmitting ? (
                     <>
                       <Spinner className="mr-2 size-4" />
-                    {t("SAVING")}
+                      {t("SAVING")}
                     </>
                   ) : (
                     <>{isEditing ? "Update Product" : "Save Product"}</>
@@ -1132,7 +1140,13 @@ function VariantCard({
 }: VariantCardProps) {
   const t = useTranslations("ProductForm")
   const locale = useLocale()
-  const [isExpirationPickerOpen, setIsExpirationPickerOpen] = React.useState(false)
+  const [isExpirationPickerOpen, setIsExpirationPickerOpen] =
+    React.useState(false)
+  const expirationMinDate = React.useMemo(() => startOfToday(), [])
+  const expirationMaxDate = React.useMemo(
+    () => addYears(expirationMinDate, 10),
+    [expirationMinDate]
+  )
   const variantName = useWatch({ control, name: `variants.${index}.name` })
   const productName = useWatch({ control, name: "name" })
 
@@ -1194,7 +1208,9 @@ function VariantCard({
                   <Wand2Icon className="size-3.5" />
                 </Button>
               </div>
-              {fieldState.invalid && <ProductFieldError error={fieldState.error} />}
+              {fieldState.invalid && (
+                <ProductFieldError error={fieldState.error} />
+              )}
             </Field>
           )}
         />
@@ -1213,7 +1229,9 @@ function VariantCard({
                 placeholder={t("VARIANT_NAME_PLACEHOLDER")}
                 className="h-8 text-xs"
               />
-              {fieldState.invalid && <ProductFieldError error={fieldState.error} />}
+              {fieldState.invalid && (
+                <ProductFieldError error={fieldState.error} />
+              )}
             </Field>
           )}
         />
@@ -1236,7 +1254,9 @@ function VariantCard({
                 className="h-8 text-xs"
                 onChange={(e) => field.onChange(Number(e.target.value))}
               />
-              {fieldState.invalid && <ProductFieldError error={fieldState.error} />}
+              {fieldState.invalid && (
+                <ProductFieldError error={fieldState.error} />
+              )}
             </Field>
           )}
         />
@@ -1246,7 +1266,9 @@ function VariantCard({
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel className="text-xs">{t("COMPARE_AT_PRICE")}</FieldLabel>
+              <FieldLabel className="text-xs">
+                {t("COMPARE_AT_PRICE")}
+              </FieldLabel>
               <Input
                 {...field}
                 value={field.value ?? ""}
@@ -1261,11 +1283,12 @@ function VariantCard({
                   )
                 }
               />
-              {fieldState.invalid && <ProductFieldError error={fieldState.error} />}
+              {fieldState.invalid && (
+                <ProductFieldError error={fieldState.error} />
+              )}
             </Field>
           )}
         />
-
       </div>
 
       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -1275,7 +1298,8 @@ function VariantCard({
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel className="text-xs">
-                {t("STOCK_QUANTITY")} <span className="text-destructive">*</span>
+                {t("STOCK_QUANTITY")}{" "}
+                <span className="text-destructive">*</span>
               </FieldLabel>
               <Input
                 {...field}
@@ -1284,7 +1308,9 @@ function VariantCard({
                 className="h-8 text-xs"
                 onChange={(e) => field.onChange(Number(e.target.value))}
               />
-              {fieldState.invalid && <ProductFieldError error={fieldState.error} />}
+              {fieldState.invalid && (
+                <ProductFieldError error={fieldState.error} />
+              )}
             </Field>
           )}
         />
@@ -1300,29 +1326,50 @@ function VariantCard({
               <Popover
                 open={isExpirationPickerOpen}
                 onOpenChange={setIsExpirationPickerOpen}
-                dir={locale === "ar" ? "rtl" : "ltr"}
               >
-                <PopoverTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    aria-invalid={fieldState.invalid}
-                    className={`h-8 w-full justify-start gap-2 px-2 text-xs font-normal ${
-                      field.value ? "" : "text-muted-foreground"
-                    }`}
-                  >
-                    <CalendarIcon className="size-3.5 shrink-0" />
-                    {field.value
-                      ? format(parseISO(field.value), "PPP", {
-                          locale:
-                            locale === "ar" ? arabicDateLocale : enUS,
-                        })
-                      : t("OPTIONAL")}
-                  </Button>
-                </PopoverTrigger>
+                <div className="relative">
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      aria-invalid={fieldState.invalid}
+                      className={`h-8 w-full justify-start gap-2 px-2 text-xs font-normal ${
+                        field.value ? "pe-8" : "text-muted-foreground"
+                      }`}
+                    >
+                      <CalendarIcon className="size-3.5 shrink-0" />
+                      {field.value
+                        ? format(parseISO(field.value), "d/M/yyyy")
+                        : t("OPTIONAL")}
+                    </Button>
+                  </PopoverTrigger>
+                  {field.value && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label={t("CLEAR_DATE")}
+                      className="absolute inset-e-1 top-1/2 z-10 size-6 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        field.onChange("")
+                        setIsExpirationPickerOpen(false)
+                      }}
+                    >
+                      <XIcon className="size-3.5" />
+                    </Button>
+                  )}
+                </div>
                 <PopoverContent align="start" className="w-auto p-0">
                   <Calendar
                     mode="single"
+                    captionLayout="dropdown"
+                    startMonth={expirationMinDate}
+                    endMonth={expirationMaxDate}
+                    disabled={[
+                      { before: expirationMinDate },
+                      { after: expirationMaxDate },
+                    ]}
                     selected={field.value ? parseISO(field.value) : undefined}
                     onSelect={(date) => {
                       field.onChange(date ? format(date, "yyyy-MM-dd") : "")
@@ -1331,21 +1378,6 @@ function VariantCard({
                     locale={locale === "ar" ? arabicDateLocale : enUS}
                     dir={locale === "ar" ? "rtl" : "ltr"}
                   />
-                  {field.value && (
-                    <div className="flex justify-end border-t border-border/60 p-2">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          field.onChange("")
-                          setIsExpirationPickerOpen(false)
-                        }}
-                      >
-                        {t("CLEAR_DATE")}
-                      </Button>
-                    </div>
-                  )}
                 </PopoverContent>
               </Popover>
               {fieldState.invalid && (
@@ -1439,7 +1471,9 @@ function ImageCard({
 
       <div className="min-w-0 flex-1 space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold">{t("IMAGE_NUMBER", { number: index + 1 })}</span>
+          <span className="text-xs font-semibold">
+            {t("IMAGE_NUMBER", { number: index + 1 })}
+          </span>
           <Button
             type="button"
             variant="ghost"
@@ -1463,7 +1497,9 @@ function ImageCard({
                 placeholder="https://example.com/images/product.jpg"
                 className="h-8 text-xs"
               />
-              {fieldState.invalid && <ProductFieldError error={fieldState.error} />}
+              {fieldState.invalid && (
+                <ProductFieldError error={fieldState.error} />
+              )}
             </Field>
           )}
         />
@@ -1481,7 +1517,7 @@ function ImageCard({
                   <Input
                     {...field}
                     value={field.value ?? ""}
-                placeholder={t("IMAGE_ALT_TEXT")}
+                    placeholder={t("IMAGE_ALT_TEXT")}
                     className="h-8 pe-8 text-xs"
                   />
                   <Button
@@ -1507,7 +1543,9 @@ function ImageCard({
             control={control}
             render={({ field }) => (
               <Field>
-                <FieldLabel className="text-xs">{t("LINK_TO_VARIANT")}</FieldLabel>
+                <FieldLabel className="text-xs">
+                  {t("LINK_TO_VARIANT")}
+                </FieldLabel>
                 <Select
                   onValueChange={(val) =>
                     field.onChange(val === "none" ? "" : val)
@@ -1518,7 +1556,9 @@ function ImageCard({
                     <SelectValue placeholder={t("LINK_TO_VARIANT")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">{t("ALL_VARIANTS_GENERAL")}</SelectItem>
+                    <SelectItem value="none">
+                      {t("ALL_VARIANTS_GENERAL")}
+                    </SelectItem>
                     {variants.map((v, i) => {
                       const currentSku = v?.sku?.trim()
                       const currentName = v?.name?.trim()
@@ -1618,7 +1658,9 @@ function VariantAttributesManager({
           {t("VARIANT_ATTRIBUTES")}
         </FieldLabel>
         <span className="text-[11px] text-muted-foreground">
-          {t("ATTRIBUTES_ADDED", { count: Object.keys(attributes || {}).length })}
+          {t("ATTRIBUTES_ADDED", {
+            count: Object.keys(attributes || {}).length,
+          })}
         </span>
       </div>
 
@@ -1660,7 +1702,7 @@ function VariantAttributesManager({
                 value={item.value}
                 className="text-xs"
               >
-              {t(`ATTRIBUTE_${item.value.toUpperCase()}`)}
+                {t(`ATTRIBUTE_${item.value.toUpperCase()}`)}
               </SelectItem>
             ))}
             <SelectItem
