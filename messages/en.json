@@ -936,6 +936,9 @@
   "ProductsManagement": {
     "PAGE_TITLE": "Products Management",
     "PAGE_DESCRIPTION": "Manage store inventory, monitor stock levels, view variants, and control product pricing.",
+    "ACTIVE_COUNT": "Active products",
+    "LOW_STOCK_COUNT": "Low stock",
+    "EXPIRING_SOON_COUNT": "Expiring soon",
     "CREATE_PAGE_TITLE": "Create New Product",
     "CREATE_PAGE_DESCRIPTION": "Configure product details, variants, media, and inventory settings.",
     "UPDATE_PAGE_TITLE": "Update Product",

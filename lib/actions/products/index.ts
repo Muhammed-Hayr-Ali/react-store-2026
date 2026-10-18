@@ -22,4 +22,5 @@ export { duplicateProduct } from "./mutations/duplicate"
 // Queries
 // ============================================================================
 export { getAdminProductsList } from "./queries/get-admin-products-list"
+export { getAdminProductsSummary } from "./queries/get-admin-products-summary"
 export { getProductForEditBySlug } from "./queries/get-product-for-edit-by-slug"

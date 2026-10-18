@@ -70,7 +70,7 @@ import { BrandFormSheet } from "./brand-form-sheet"
 import { DeleteBrandDialog } from "./delete-brand-dialog"
 
 type BrandFilter = "all" | "active" | "inactive"
-const HIDEABLE_COLUMNS = ["slug", "sort_order", "status"]
+const HIDEABLE_COLUMNS = ["sort_order", "status"]
 
 interface BrandsTableProps {
   initialBrands: BrandRecord[]
@@ -238,18 +238,15 @@ export function BrandsTable({
                   <TagsIcon className="size-3.5 text-primary" />
                 </AvatarFallback>
               </Avatar>
-              <div className="flex min-w-0 flex-col">
+              <div className="flex min-w-0 flex-col items-start">
                 <span
                   dir={locale === "ar" ? "rtl" : "ltr"}
                   className="truncate text-sm font-normal text-foreground"
                 >
                   {locale === "ar" ? brand.name_ar || brand.name : brand.name}
                 </span>
-                <span
-                  dir="ltr"
-                  className="truncate font-mono text-[11px] text-muted-foreground"
-                >
-                  {brand.slug}
+               <span className="truncate font-mono text-[11px] text-muted-foreground">
+                  /{brand.slug}
                 </span>
               </div>
             </div>
@@ -257,24 +254,11 @@ export function BrandsTable({
         },
       },
       {
-        id: "slug",
-        accessorKey: "slug",
-        header: t("COLUMN_SLUG"),
-        cell: ({ row }) => (
-          <span
-            dir="ltr"
-            className="font-mono text-[11px] text-muted-foreground"
-          >
-            {row.original.slug}
-          </span>
-        ),
-      },
-      {
         id: "sort_order",
         accessorFn: (brand) => brand.sort_order ?? 0,
         header: t("COLUMN_SORT_ORDER"),
         cell: ({ row }) => (
-          <span className="text-sm text-muted-foreground tabular-nums">
+          <span className="text-xs text-muted-foreground tabular-nums">
             {row.original.sort_order ?? 0}
           </span>
         ),
@@ -288,7 +272,7 @@ export function BrandsTable({
           return (
             <Badge
               variant="outline"
-              className={`gap-1 truncate px-1.5 py-0.5 text-sm font-normal leading-tight ${
+              className={`gap-1 truncate px-1.5 py-0.5 text-xs font-normal leading-tight ${
                 isActive
                   ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                   : "border-amber-500/30 text-amber-600 dark:text-amber-400"
@@ -348,7 +332,6 @@ export function BrandsTable({
 
   const noBrands = brands.length === 0
   const columnLabels: Record<string, string> = {
-    slug: t("COLUMN_SLUG"),
     sort_order: t("COLUMN_SORT_ORDER"),
     status: t("COLUMN_STATUS"),
   }

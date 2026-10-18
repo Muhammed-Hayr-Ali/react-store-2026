@@ -240,7 +240,7 @@ export function RolesTable({
               <span className="truncate text-sm font-normal text-foreground">
                 {row.original.name}
               </span>
-              <span className="max-w-3xs truncate text-sm font-normal text-muted-foreground">
+              <span className="truncate font-mono text-[11px] text-muted-foreground">
                 {row.original.description || t("NO_DESCRIPTION")}
               </span>
             </div>
@@ -262,7 +262,7 @@ export function RolesTable({
             <div className="flex justify-center">
               <Badge
                 variant="secondary"
-                className="truncate px-1.5 py-0.5 text-sm font-normal leading-tight text-muted-foreground"
+                className="truncate px-1.5 py-0.5 text-xs leading-tight font-normal text-muted-foreground"
               >
                 <LayersIcon className="size-3 opacity-70" />
                 <span dir="ltr">
@@ -612,7 +612,7 @@ export function RolesTable({
           >
             <SelectTrigger
               size="sm"
-              className="h-7 w-[60px] shrink-0 px-2 text-xs sm:h-8 sm:w-18"
+              className="h-7 w-15 shrink-0 px-2 text-xs sm:h-8 sm:w-18"
               id="rows-per-page"
             >
               <SelectValue placeholder={table.getState().pagination.pageSize} />

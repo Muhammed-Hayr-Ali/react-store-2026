@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server"
 import { TagsIcon } from "lucide-react"
 import { BrandsManagement } from "@/components/dashboard/brands/brands-management"
 import { getBrandsPageData } from "@/lib/actions/brands"
+import { getBrandsSummary } from "@/lib/actions/brands"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { appConfig } from "@/lib/config/app_config"
@@ -27,12 +28,22 @@ export default async function Page({ params }: PageProps) {
   const t = await getTranslations({ locale, namespace: "BrandsManagement" })
   const errors = await getTranslations({ locale, namespace: "ActionErrors" })
   if (!(await hasPermission(PERMISSIONS.VIEW_BRANDS_MANAGEMENT))) notFound()
-  const result = await getBrandsPageData()
-  if (!result.success)
+  const [pageDataResult, summaryResult] = await Promise.all([
+    getBrandsPageData(),
+    getBrandsSummary(),
+  ])
+
+  if (!pageDataResult.success)
     throw new Error(
-      errors(getActionErrorKey(result.error ?? "UNEXPECTED_ERROR"))
+      errors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
     )
-  const { brands, summary, brandImages, isMobile } = result.data
+
+  if (!summaryResult.success)
+    throw new Error(
+      errors(getActionErrorKey(summaryResult.error ?? "UNEXPECTED_ERROR"))
+    )
+
+  const { brands, brandImages, isMobile } = pageDataResult.data
   return (
     <main className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
       <header className="flex items-center gap-2 border-b border-border/40 pb-4">
@@ -50,7 +61,7 @@ export default async function Page({ params }: PageProps) {
       </header>
       <BrandsManagement
         brands={brands}
-        summary={summary}
+        summary={summaryResult.data}
         brandImages={brandImages}
         initialIsMobile={isMobile}
       />

@@ -4,6 +4,7 @@ import { MailIcon } from "lucide-react"
 
 import { NewsletterSubscribersTable } from "@/components/dashboard/newsletter-subscribers/newsletter-subscribers-table"
 import { getSubscribersPageData } from "@/lib/actions/newsletter_subscribers/queries/get-subscribers-page-data"
+import { getNewsletterSubscribersSummary } from "@/lib/actions/newsletter_subscribers/queries/get-newsletter-subscribers-summary"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { appConfig } from "@/lib/config/app_config"
@@ -42,14 +43,23 @@ export default async function Page({ params }: PageProps) {
     notFound()
   }
 
-  const pageDataResult = await getSubscribersPageData()
+  const [pageDataResult, summaryResult] = await Promise.all([
+    getSubscribersPageData(),
+    getNewsletterSubscribersSummary(),
+  ])
   if (!pageDataResult.success) {
     throw new Error(
       tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
     )
   }
 
-  const { subscribers, summary, isMobile } = pageDataResult.data
+  if (!summaryResult.success) {
+    throw new Error(
+      tErrors(getActionErrorKey(summaryResult.error ?? "UNEXPECTED_ERROR"))
+    )
+  }
+
+  const { subscribers, isMobile } = pageDataResult.data
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
@@ -70,9 +80,9 @@ export default async function Page({ params }: PageProps) {
       </div>
 
       <SubscribersSummary
-        totalCount={summary.total}
-        activeCount={summary.active}
-        unsubscribedCount={summary.unsubscribed}
+        totalCount={summaryResult.data.total}
+        activeCount={summaryResult.data.active}
+        unsubscribedCount={summaryResult.data.unsubscribed}
         totalLabel={t("TOTAL_COUNT")}
         activeLabel={t("ACTIVE_COUNT")}
         unsubscribedLabel={t("UNSUBSCRIBED_COUNT")}

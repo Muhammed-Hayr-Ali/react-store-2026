@@ -23,3 +23,9 @@ export type CategorySummary = Pick<
   | "sort_order"
   | "is_active"
 >
+
+export interface CategoriesSummary {
+  total: number
+  active: number
+  inactive: number
+}

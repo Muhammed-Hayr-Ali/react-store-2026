@@ -11,13 +11,11 @@ import {
 export default function Loading() {
   return (
     <div className="mx-auto w-full max-w-7xl animate-pulse space-y-6 px-2 py-4 md:px-4 md:py-6">
-      <div className="flex flex-col gap-3 border-b border-border/40 pb-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center gap-2 border-b border-border/40 pb-4">
+        <Skeleton className="size-7 rounded-lg" />
         <div>
-          <div className="flex items-center gap-2">
-            <Skeleton className="size-7 rounded-lg" />
-            <Skeleton className="h-7 w-40 rounded-md sm:h-8" />
-          </div>
-          <Skeleton className="mt-2 h-4 w-80 max-w-full rounded-md" />
+          <Skeleton className="h-7 w-40 rounded-md sm:h-8" />
+          <Skeleton className="mt-1 h-4 w-80 max-w-full rounded-md" />
         </div>
       </div>
 
@@ -59,13 +57,10 @@ export default function Loading() {
                 <TableHead className="w-[40%]">
                   <Skeleton className="h-4 w-24 rounded-md" />
                 </TableHead>
-                <TableHead className="hidden md:table-cell">
-                  <Skeleton className="h-4 w-16 rounded-md" />
-                </TableHead>
-                <TableHead className="hidden md:table-cell">
+                <TableHead>
                   <Skeleton className="h-4 w-12 rounded-md" />
                 </TableHead>
-                <TableHead className="hidden text-center md:table-cell">
+                <TableHead className="text-center">
                   <div className="flex justify-center">
                     <Skeleton className="h-4 w-16 rounded-md" />
                   </div>
@@ -89,13 +84,10 @@ export default function Loading() {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="hidden py-2.5 md:table-cell">
-                    <Skeleton className="h-4 w-24 rounded-md" />
-                  </TableCell>
-                  <TableCell className="hidden py-2.5 md:table-cell">
+                  <TableCell className="py-2.5">
                     <Skeleton className="h-4 w-8 rounded-md" />
                   </TableCell>
-                  <TableCell className="hidden py-2.5 md:table-cell">
+                  <TableCell className="py-2.5">
                     <div className="flex justify-center">
                       <Skeleton className="h-5 w-16 rounded-full" />
                     </div>

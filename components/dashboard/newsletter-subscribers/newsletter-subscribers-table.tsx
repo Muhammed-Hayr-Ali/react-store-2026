@@ -572,7 +572,7 @@ export function NewsletterSubscribersTable({
                           <div className="flex justify-center">
                             <Badge
                               variant="outline"
-                              className={`gap-1 truncate px-1.5 py-0.5 text-sm font-normal leading-tight ${
+                              className={`gap-1 truncate px-1.5 py-0.5 text-xs font-normal leading-tight ${
                                 isActive
                                   ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                                   : "border-muted-foreground/30 text-muted-foreground"
@@ -602,7 +602,7 @@ export function NewsletterSubscribersTable({
                         </TableCell>
                       )}
                       {columnVisibility.reason && (
-                        <TableCell className="max-w-52 truncate text-sm text-muted-foreground">
+                        <TableCell className="max-w-52 truncate text-xs text-muted-foreground">
                           {subscriber.unsubscribe_reason || "—"}
                         </TableCell>
                       )}

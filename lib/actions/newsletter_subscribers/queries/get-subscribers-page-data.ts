@@ -1,6 +1,6 @@
 /**
  * @file lib/actions/newsletter_subscribers/queries/get-subscribers-page-data.ts
- * @description Handles newsletter subscribers fetching, summary calculations, and mobile detection.
+ * @description Loads newsletter subscribers and page-specific device information.
  */
 
 import { headers } from "next/headers"
@@ -11,11 +11,6 @@ import type { NewsletterSubscriber } from "../types"
 
 export interface SubscribersPageData {
   subscribers: NewsletterSubscriber[]
-  summary: {
-    total: number
-    active: number
-    unsubscribed: number
-  }
   isMobile: boolean
 }
 
@@ -37,10 +32,6 @@ export async function getSubscribersPageData(): Promise<
 
   const subscribers = result.data
 
-  const total = subscribers.length
-  const active = subscribers.filter((sub) => sub.status === "active").length
-  const unsubscribed = total - active
-
   const headersList = await headers()
   const userAgent = headersList.get("user-agent") || ""
   const isMobile =
@@ -52,7 +43,6 @@ export async function getSubscribersPageData(): Promise<
     success: true,
     data: {
       subscribers,
-      summary: { total, active, unsubscribed },
       isMobile,
     },
   }

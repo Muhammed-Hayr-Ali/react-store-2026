@@ -59,13 +59,10 @@ export default function Loading() {
                 <TableHead className="w-[40%]">
                   <Skeleton className="h-4 w-24 rounded-md" />
                 </TableHead>
-                <TableHead className="hidden md:table-cell">
-                  <Skeleton className="h-4 w-16 rounded-md" />
-                </TableHead>
-                <TableHead className="hidden md:table-cell">
+                <TableHead>
                   <Skeleton className="h-4 w-12 rounded-md" />
                 </TableHead>
-                <TableHead className="hidden text-center md:table-cell">
+                <TableHead className="text-center">
                   <div className="flex justify-center">
                     <Skeleton className="h-4 w-16 rounded-md" />
                   </div>
@@ -89,13 +86,10 @@ export default function Loading() {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="hidden py-2.5 md:table-cell">
-                    <Skeleton className="h-4 w-24 rounded-md" />
-                  </TableCell>
-                  <TableCell className="hidden py-2.5 md:table-cell">
+                  <TableCell className="py-2.5">
                     <Skeleton className="h-4 w-8 rounded-md" />
                   </TableCell>
-                  <TableCell className="hidden py-2.5 md:table-cell">
+                  <TableCell className="py-2.5">
                     <div className="flex justify-center">
                       <Skeleton className="h-5 w-16 rounded-full" />
                     </div>

@@ -7,8 +7,7 @@ export { createBrand } from "./mutations/create-brand"
 export { deleteBrand } from "./mutations/delete-brand"
 export { updateBrand } from "./mutations/update-brand"
 export { getBrands } from "./queries/get-brands"
-export { getBrandById } from "./queries/get-brand-by-id"
-export { getBrandBySlug } from "./queries/get-brand-by-slug"
+export { getBrandsSummary } from "./queries/get-brands-summary"
 export { getBrandsPageData } from "./queries/get-brands-page-data"
 
 // قم بتصدير الأنواع (Types) التي قمنا بتعريفها في ملفات schemas و types

@@ -252,7 +252,7 @@ export function StaffAccessTable({
                 <span className="truncate text-sm font-normal text-foreground">
                   {fullName || t("ANONYMOUS_USER")}
                 </span>
-                <span className="truncate text-sm font-normal text-muted-foreground">
+                <span className="truncate font-mono text-[11px] text-muted-foreground">
                   {row.original.email || t("NO_EMAIL")}
                 </span>
               </div>
@@ -279,7 +279,7 @@ export function StaffAccessTable({
                     <Badge
                       key={role.id}
                       variant="secondary"
-                      className="gap-1 py-0.5 ps-2 pe-1 text-sm font-normal leading-tight text-muted-foreground"
+                      className="gap-1 py-0.5 ps-2 pe-1 text-xs leading-tight font-normal text-muted-foreground"
                     >
                       <ShieldIcon className="size-3 text-primary opacity-70" />
                       <span>{role.name}</span>
@@ -306,7 +306,7 @@ export function StaffAccessTable({
               ) : (
                 <Badge
                   variant="secondary"
-                      className="gap-1 py-0.5 ps-2 pe-1 text-sm font-normal leading-tight text-muted-foreground"
+                      className="gap-1 py-0.5 ps-2 pe-1 text-xs leading-tight font-normal text-muted-foreground"
                 >
                   <span>{t("NO_ROLES_ASSIGNED")}</span>
                 </Badge>

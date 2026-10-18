@@ -1,6 +1,6 @@
 /**
  * @file lib/actions/brands/queries/get-brands-page-data.ts
- * @description Handles all business logic, data fetching, summary calculations, and environment checks for the brands page.
+ * @description Loads brand rows and page-specific assets for the brands page.
  */
 
 "use server"
@@ -15,11 +15,6 @@ import type { BrandRecord } from "../types"
 
 export interface BrandsPageData {
   brands: BrandRecord[]
-  summary: {
-    total: number
-    active: number
-    inactive: number
-  }
   brandImages: string[]
   isMobile: boolean
 }
@@ -41,10 +36,6 @@ export async function getBrandsPageData(): Promise<
   }
 
   const brands = result.data || []
-
-  const total = brands.length
-  const active = brands.filter((b) => b.is_active === true).length
-  const inactive = total - active
 
   const brandImageDirectory = path.join(
     process.cwd(),
@@ -80,7 +71,6 @@ export async function getBrandsPageData(): Promise<
     success: true,
     data: {
       brands,
-      summary: { total, active, inactive },
       brandImages,
       isMobile,
     },

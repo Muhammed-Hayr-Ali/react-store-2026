@@ -222,8 +222,8 @@ export function UsersTable({
                 <span className="text-sm font-normal text-foreground">
                   {fullName || t("ANONYMOUS_USER")}
                 </span>
-                <span className="truncate text-sm font-normal text-muted-foreground">
-                  {row.original.email}
+                 <span className="truncate font-mono text-[11px] text-muted-foreground">
+                  /{row.original.email}
                 </span>
               </div>
             </div>
@@ -237,7 +237,7 @@ export function UsersTable({
         header: t("COLUMN_PHONE"),
         enableHiding: true,
         cell: ({ row }) => (
-          <span className="text-sm text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             {row.original.phone_number || "—"}
           </span>
         ),
@@ -255,7 +255,7 @@ export function UsersTable({
                 <Badge
                   key={r}
                   variant="secondary"
-                  className="truncate px-1.5 py-0.5 text-sm font-normal leading-tight text-muted-foreground"
+                  className="truncate px-1.5 py-0.5 text-xs font-normal leading-tight text-muted-foreground"
                 >
                   {r}
                 </Badge>
@@ -263,7 +263,7 @@ export function UsersTable({
             ) : (
               <Badge
                 variant="secondary"
-                className="truncate px-1.5 py-0.5 text-sm font-normal leading-tight text-muted-foreground"
+                className="truncate px-1.5 py-0.5 text-xs font-normal leading-tight text-muted-foreground"
               >
                 {t("NO_ROLES")}
               </Badge>
@@ -283,7 +283,7 @@ export function UsersTable({
             <div className="flex justify-center">
               <Badge
                 variant="outline"
-                className={`gap-1 truncate px-1.5 py-0.5 text-sm font-normal leading-tight ${
+                className={`gap-1 truncate px-1.5 py-0.5 text-xs font-normal leading-tight ${
                   status === "active"
                     ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                     : status === "suspended"
@@ -323,7 +323,7 @@ export function UsersTable({
         cell: ({ row }) => {
           const date = new Date(row.original.created_at)
           return (
-            <span className="text-sm text-muted-foreground tabular-nums">
+            <span className="text-xs text-muted-foreground tabular-nums">
               {date.toLocaleDateString()}
             </span>
           )

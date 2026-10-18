@@ -329,11 +329,8 @@ export function CategoriesTable({
                     ? category.name_ar || category.name
                     : category.name}
                 </span>
-                <span
-                  dir="ltr"
-                  className="self-start truncate text-start font-mono text-[11px] text-muted-foreground"
-                >
-                  {category.slug}
+                 <span className="truncate font-mono text-[11px] text-muted-foreground">
+                  /{category.slug}
                 </span>
               </div>
             </div>
@@ -345,7 +342,7 @@ export function CategoriesTable({
         accessorFn: (category) => category.sort_order ?? 0,
         header: t("COLUMN_SORT_ORDER"),
         cell: ({ row }) => (
-          <span className="text-sm text-muted-foreground tabular-nums">
+          <span className="text-xs text-muted-foreground tabular-nums">
             {row.original.sort_order ?? 0}
           </span>
         ),
@@ -365,7 +362,7 @@ export function CategoriesTable({
             // </Badge>
             <Badge
               variant="outline"
-              className={`gap-1 truncate px-1.5 py-0.5 text-sm font-normal leading-tight ${
+              className={`gap-1 truncate px-1.5 py-0.5 text-xs font-normal leading-tight ${
                 isActive
                   ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                   : "border-amber-500/30 text-amber-600 dark:text-amber-400"

@@ -5,6 +5,7 @@ import { TagsIcon } from "lucide-react"
 import { CategoriesTable } from "@/components/dashboard/categories/categories-table"
 import { CategoriesSummary } from "@/components/dashboard/categories/categories-summary"
 import { getCategoriesPageData } from "@/lib/actions/categories/queries/get-categories-page-data"
+import { getCategoriesSummary } from "@/lib/actions/categories/queries/get-categories-summary"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { appConfig } from "@/lib/config/app_config"
@@ -46,14 +47,23 @@ export default async function Page({ params }: PageProps) {
   }
 
   // Fetch pre-processed page data and business logic
-  const pageDataResult = await getCategoriesPageData()
+  const [pageDataResult, summaryResult] = await Promise.all([
+    getCategoriesPageData(),
+    getCategoriesSummary(),
+  ])
   if (!pageDataResult.success) {
     throw new Error(
       tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
     )
   }
 
-  const { categories, summary, categoryImages, isMobile } = pageDataResult.data
+  if (!summaryResult.success) {
+    throw new Error(
+      tErrors(getActionErrorKey(summaryResult.error ?? "UNEXPECTED_ERROR"))
+    )
+  }
+
+  const { categories, categoryImages, isMobile } = pageDataResult.data
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
@@ -74,9 +84,9 @@ export default async function Page({ params }: PageProps) {
       </div>
 
       <CategoriesSummary
-        totalCount={summary.total}
-        activeCount={summary.active}
-        inactiveCount={summary.inactive}
+        totalCount={summaryResult.data.total}
+        activeCount={summaryResult.data.active}
+        inactiveCount={summaryResult.data.inactive}
         totalLabel={t("TOTAL_COUNT")}
         activeLabel={t("ACTIVE_COUNT")}
         inactiveLabel={t("INACTIVE_COUNT")}

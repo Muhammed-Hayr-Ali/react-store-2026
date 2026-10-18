@@ -97,10 +97,3 @@ export type UpdateNewsletterSubscriberStatusInput = z.input<
 export type NewsletterStatus = z.infer<
   typeof newsletterStatusSchema.shape.status
 >
-export type NewsletterUnsubscribeReason = z.infer<
-  typeof newsletterUnsubscribeReasonSchema
->
-export type UnsubscribeNewsletterInput = z.input<
-  typeof unsubscribeNewsletterSchema
->
-export type SendNewsletterEmailInput = z.input<typeof sendNewsletterEmailSchema>

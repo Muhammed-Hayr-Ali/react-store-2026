@@ -82,3 +82,10 @@ export interface AdminProductSummary {
   min_price: number
   max_price: number
 }
+
+/** Aggregate counts displayed above the products dashboard table. */
+export interface AdminProductsSummary {
+  active: number
+  lowStock: number
+  expiringSoon: number
+}

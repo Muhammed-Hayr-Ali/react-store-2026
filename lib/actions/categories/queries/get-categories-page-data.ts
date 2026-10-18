@@ -1,6 +1,6 @@
 /**
  * @file lib/actions/categories/queries/get-categories-page-data.ts
- * @description Handles all business logic, data fetching, summary calculations, and environment checks for the categories page.
+ * @description Loads category rows and page-specific assets for the categories page.
  */
 
 import { readdir } from "node:fs/promises"
@@ -13,11 +13,6 @@ import type { Category } from "../types"
 
 export interface CategoriesPageData {
   categories: Category[]
-  summary: {
-    total: number
-    active: number
-    inactive: number
-  }
   categoryImages: string[]
   isMobile: boolean
 }
@@ -38,10 +33,6 @@ export async function getCategoriesPageData(): Promise<
   }
 
   const categories = result.data
-
-  const total = categories.length
-  const active = categories.filter((c) => c.is_active === true).length
-  const inactive = total - active
 
   const categoryImageDirectory = path.join(
     process.cwd(),
@@ -77,7 +68,6 @@ export async function getCategoriesPageData(): Promise<
     success: true,
     data: {
       categories,
-      summary: { total, active, inactive },
       categoryImages,
       isMobile,
     },

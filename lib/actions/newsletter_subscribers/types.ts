@@ -3,7 +3,7 @@
  * @description TypeScript types for newsletter subscribers and action inputs.
  */
 
-import type { NewsletterSubscriberInput, NewsletterStatus } from "./schemas"
+import type { NewsletterStatus } from "./schemas"
 
 export type { NewsletterStatus } from "./schemas"
 
@@ -15,11 +15,8 @@ export interface NewsletterSubscriber {
   unsubscribe_reason: string | null
 }
 
-export type NewsletterSubscriberInsert = Pick<
-  NewsletterSubscriberInput,
-  "email"
-> & {
-  status?: NewsletterStatus
+export interface NewsletterSubscribersSummary {
+  total: number
+  active: number
+  unsubscribed: number
 }
-
-export type NewsletterSubscriberUpdate = Partial<NewsletterSubscriberInsert>

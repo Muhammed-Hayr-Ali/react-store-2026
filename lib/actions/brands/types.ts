@@ -19,3 +19,9 @@ export interface BrandRecord {
   created_at: string
   updated_at: string
 }
+
+export interface BrandsSummary {
+  total: number
+  active: number
+  inactive: number
+}

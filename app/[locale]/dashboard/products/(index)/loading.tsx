@@ -22,6 +22,22 @@ export default function Loading() {
         </div>
       </div>
 
+      {/* Product summary cards */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        {Array.from({ length: 3 }, (_, index) => (
+          <div
+            key={index}
+            className="flex items-center justify-between rounded-xl border border-border bg-card px-3 py-2.5 shadow-xs sm:px-4 sm:py-3"
+          >
+            <div className="min-w-0 space-y-1">
+              <Skeleton className="h-3 w-16 max-w-full rounded-md sm:w-24" />
+              <Skeleton className="h-5 w-8 rounded-md sm:h-6 sm:w-12" />
+            </div>
+            <Skeleton className="size-7 shrink-0 rounded-lg sm:size-8" />
+          </div>
+        ))}
+      </div>
+
       {/* 2. Unified Controls Bar Skeleton (Search + Mobile Dropdown / Desktop Tabs + Columns Toggle + Action Button) */}
       <div className="flex w-full items-center gap-2">
         {/* Search Input Skeleton */}
@@ -91,7 +107,13 @@ export default function Loading() {
               {Array.from({ length: 7 }).map((_, i) => (
                 <TableRow key={i}>
                   <TableCell>
-                    <Skeleton className="h-4 w-36 rounded-md" />
+                    <div className="flex items-center gap-2.5">
+                      <Skeleton className="size-7 shrink-0 rounded-lg" />
+                      <div className="min-w-0 space-y-1">
+                        <Skeleton className="h-4 w-32 max-w-full rounded-md" />
+                        <Skeleton className="h-3 w-24 max-w-full rounded-md" />
+                      </div>
+                    </div>
                   </TableCell>
 
                   <TableCell className="hidden md:table-cell">
