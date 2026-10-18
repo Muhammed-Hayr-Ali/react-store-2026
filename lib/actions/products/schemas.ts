@@ -19,6 +19,13 @@ const variantBaseSchema = z
     stock_quantity: z.number().int().min(0, "STOCK_MUST_BE_POSITIVE"),
     track_inventory: z.boolean(),
     low_stock_threshold: z.number().int().min(0),
+    expiration_date: z
+      .union([
+        z.literal(""),
+        z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "INVALID_EXPIRATION_DATE"),
+      ])
+      .nullable()
+      .optional(),
     is_active: z.boolean(),
     sort_order: z.number().int().min(0),
   })
@@ -79,56 +86,3 @@ export const updateProductSchema = createProductSchema.extend({
 })
 
 export type UpdateProductInput = z.infer<typeof updateProductSchema>
-
-// ============================================================================
-// Storefront & Admin Queries (مخططات جلب البيانات)
-// ============================================================================
-
-export const getProductsQuerySchema = z.object({
-  limit: z.number().int().positive().max(100).default(20),
-  activeOnly: z.boolean().default(true),
-  categoryId: z.string().uuid().optional(),
-  categorySlug: z.string().optional(),
-  brandId: z.string().uuid().optional(),
-  brandSlug: z.string().optional(),
-  flashSaleId: z.string().uuid().optional(),
-})
-
-export type GetProductsQueryOptions = z.input<typeof getProductsQuerySchema>
-
-export const getLatestProductsSchema = z.object({
-  limit: z.number().int().positive().max(50).default(10),
-  activeOnly: z.boolean().default(true),
-})
-
-export type GetLatestProductsOptions = z.infer<typeof getLatestProductsSchema>
-
-export const getProductsByCategorySchema = z
-  .object({
-    categorySlug: z.string().min(1, "CATEGORY_SLUG_REQUIRED").optional(),
-    categoryId: z.string().uuid("INVALID_CATEGORY_ID").optional(),
-    limit: z.number().int().positive().max(100).default(20),
-    activeOnly: z.boolean().default(true),
-  })
-  .refine((data) => Boolean(data.categorySlug || data.categoryId), {
-    message: "CATEGORY_SLUG_OR_ID_REQUIRED",
-    path: ["categorySlug"],
-  })
-
-export type GetProductsByCategoryOptions = z.infer<
-  typeof getProductsByCategorySchema
->
-
-export const getProductsByBrandSchema = z
-  .object({
-    brandSlug: z.string().min(1, "BRAND_SLUG_REQUIRED").optional(),
-    brandId: z.string().uuid("INVALID_BRAND_ID").optional(),
-    limit: z.number().int().positive().max(100).default(20),
-    activeOnly: z.boolean().default(true),
-  })
-  .refine((data) => Boolean(data.brandSlug || data.brandId), {
-    message: "BRAND_SLUG_OR_ID_REQUIRED",
-    path: ["brandSlug"],
-  })
-
-export type GetProductsByBrandOptions = z.infer<typeof getProductsByBrandSchema>

@@ -398,7 +398,7 @@ export function CategoriesTable({
       },
       {
         id: "actions",
-        header: () => <div className="text-end">{t("COLUMN_ACTIONS")}</div>,
+        header: () => null,
         enableSorting: false,
         enableHiding: false,
         cell: ({ row }) => (

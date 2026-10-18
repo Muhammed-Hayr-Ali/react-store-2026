@@ -303,7 +303,10 @@ export function CategoryFormSheet({
         </SheetHeader>
 
         <form
-          onSubmit={handleFormSubmit(handleSubmit)}
+          onSubmit={(event) => {
+            event.stopPropagation()
+            void handleFormSubmit(handleSubmit)(event)
+          }}
           className="flex min-h-0 flex-1 flex-col"
         >
           <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5 sm:px-6">

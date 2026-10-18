@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS product_variants (
   stock_quantity INTEGER NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),
   track_inventory BOOLEAN NOT NULL DEFAULT true,
   low_stock_threshold INTEGER NOT NULL DEFAULT 0 CHECK (low_stock_threshold >= 0),
+  expiration_date DATE NULL,
   
   is_active BOOLEAN NOT NULL DEFAULT true,
   sort_order INTEGER NOT NULL DEFAULT 0,
@@ -46,6 +47,10 @@ CREATE TABLE IF NOT EXISTS product_variants (
     compare_at_price IS NULL OR compare_at_price > price
   )
 );
+
+-- Add the nullable date column to existing installations as well.
+ALTER TABLE product_variants
+  ADD COLUMN IF NOT EXISTS expiration_date DATE NULL;
 
 -- جدول الصور (Product Images)
 CREATE TABLE IF NOT EXISTS product_images (

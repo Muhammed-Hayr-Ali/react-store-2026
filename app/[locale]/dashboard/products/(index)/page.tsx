@@ -1,7 +1,7 @@
 import { headers } from "next/headers"
 import { PackageIcon } from "lucide-react"
 
-import { getAdminProductsList } from "@/lib/actions/products/queries/get-admin-products"
+import { getAdminProductsList } from "@/lib/actions/products/queries/get-admin-products-list"
 import type { AdminProductSummary } from "@/lib/actions/products/types"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"

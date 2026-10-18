@@ -63,6 +63,7 @@ export async function createProduct(
     const variantsToInsert = variants.map((variant) => ({
       ...variant,
       product_id: newProduct.id,
+      expiration_date: variant.expiration_date || null,
     }))
 
     const { error: variantsError } = await supabase

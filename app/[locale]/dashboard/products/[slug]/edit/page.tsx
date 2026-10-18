@@ -4,7 +4,7 @@ import { PackageIcon } from "lucide-react"
 
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import { getProductCompleteBySlug } from "@/lib/actions/products/queries/get-complete-by-slug"
+import { getProductForEditBySlug } from "@/lib/actions/products/queries/get-product-for-edit-by-slug"
 import { getCategories, type Category } from "@/lib/actions/categories"
 import ProductForm from "@/components/dashboard/product/product-form"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
@@ -19,7 +19,7 @@ export async function generateMetadata({
 }) {
   const { slug, locale } = await params
   const t = await getTranslations({ locale, namespace: "ProductsManagement" })
-  const result = await getProductCompleteBySlug(slug, { activeOnly: false })
+  const result = await getProductForEditBySlug(slug, { activeOnly: false })
 
   const productName =
     result.success && result.data ? result.data.name : t("UPDATE_PAGE_TITLE")
@@ -49,19 +49,19 @@ export default async function Page({
   }
 
   const [productResult, categoriesResult, brandsResult] = await Promise.all([
-    getProductCompleteBySlug(slug, { activeOnly: false }),
+    getProductForEditBySlug(slug, { activeOnly: false }),
     getCategories(),
     getBrands(),
   ])
 
   if (!productResult.success || !productResult.data) {
-    console.error("[product edit page] Failed to load product", {
-      slug,
-      error: productResult.success
-        ? "PRODUCT_NOT_FOUND"
-        : productResult.error,
-      details: productResult.success ? undefined : productResult.details,
-    })
+    const error = productResult.success
+      ? "PRODUCT_NOT_FOUND"
+      : productResult.error
+    const details = productResult.success ? undefined : productResult.details
+    console.error(
+      `[product edit page] Failed to load product (slug: ${slug}, error: ${error}, details: ${JSON.stringify(details ?? {})})`
+    )
     notFound()
   }
 

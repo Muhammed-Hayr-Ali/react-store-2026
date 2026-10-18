@@ -20,8 +20,11 @@ import {
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
+import { format, parseISO } from "date-fns"
+import { ar as arabicDateLocale, enUS } from "date-fns/locale"
 import slugify from "slugify"
 import {
+  CalendarIcon,
   PlusIcon,
   Trash2Icon,
   XIcon,
@@ -37,7 +40,13 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Spinner } from "@/components/ui/spinner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
@@ -97,6 +106,7 @@ const DEFAULT_VARIANT = {
   stock_quantity: 0,
   track_inventory: true,
   low_stock_threshold: 5,
+  expiration_date: "",
   is_active: true,
   sort_order: 1,
 }
@@ -211,6 +221,7 @@ export default function ProductForm({
       stock_quantity: v.stock_quantity,
       track_inventory: v.track_inventory,
       low_stock_threshold: v.low_stock_threshold,
+      expiration_date: v.expiration_date ?? "",
       is_active: v.is_active,
       sort_order: v.sort_order || idx + 1,
     }))
@@ -342,6 +353,7 @@ export default function ProductForm({
           v.compare_at_price !== null && v.compare_at_price !== undefined
             ? Math.round(Number(v.compare_at_price) * 100)
             : null,
+        expiration_date: v.expiration_date || null,
       })),
       images: data.images.map((img) => ({
         ...img,
@@ -1119,6 +1131,8 @@ function VariantCard({
   onRemove,
 }: VariantCardProps) {
   const t = useTranslations("ProductForm")
+  const locale = useLocale()
+  const [isExpirationPickerOpen, setIsExpirationPickerOpen] = React.useState(false)
   const variantName = useWatch({ control, name: `variants.${index}.name` })
   const productName = useWatch({ control, name: "name" })
 
@@ -1205,7 +1219,7 @@ function VariantCard({
         />
       </div>
 
-      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Controller
           name={`variants.${index}.price`}
           control={control}
@@ -1252,6 +1266,9 @@ function VariantCard({
           )}
         />
 
+      </div>
+
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Controller
           name={`variants.${index}.stock_quantity`}
           control={control}
@@ -1268,6 +1285,72 @@ function VariantCard({
                 onChange={(e) => field.onChange(Number(e.target.value))}
               />
               {fieldState.invalid && <ProductFieldError error={fieldState.error} />}
+            </Field>
+          )}
+        />
+
+        <Controller
+          name={`variants.${index}.expiration_date`}
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel className="text-xs">
+                {t("EXPIRATION_DATE")}
+              </FieldLabel>
+              <Popover
+                open={isExpirationPickerOpen}
+                onOpenChange={setIsExpirationPickerOpen}
+                dir={locale === "ar" ? "rtl" : "ltr"}
+              >
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    aria-invalid={fieldState.invalid}
+                    className={`h-8 w-full justify-start gap-2 px-2 text-xs font-normal ${
+                      field.value ? "" : "text-muted-foreground"
+                    }`}
+                  >
+                    <CalendarIcon className="size-3.5 shrink-0" />
+                    {field.value
+                      ? format(parseISO(field.value), "PPP", {
+                          locale:
+                            locale === "ar" ? arabicDateLocale : enUS,
+                        })
+                      : t("OPTIONAL")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={field.value ? parseISO(field.value) : undefined}
+                    onSelect={(date) => {
+                      field.onChange(date ? format(date, "yyyy-MM-dd") : "")
+                      setIsExpirationPickerOpen(false)
+                    }}
+                    locale={locale === "ar" ? arabicDateLocale : enUS}
+                    dir={locale === "ar" ? "rtl" : "ltr"}
+                  />
+                  {field.value && (
+                    <div className="flex justify-end border-t border-border/60 p-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          field.onChange("")
+                          setIsExpirationPickerOpen(false)
+                        }}
+                      >
+                        {t("CLEAR_DATE")}
+                      </Button>
+                    </div>
+                  )}
+                </PopoverContent>
+              </Popover>
+              {fieldState.invalid && (
+                <ProductFieldError error={fieldState.error} />
+              )}
             </Field>
           )}
         />

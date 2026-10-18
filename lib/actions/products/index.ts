@@ -21,11 +21,5 @@ export { duplicateProduct } from "./mutations/duplicate"
 // ============================================================================
 // Queries
 // ============================================================================
-export { getAdminProductsList } from "./queries/get-admin-products"
-export { getProductById } from "./queries/get-by-id"
-export { getProductCompleteById } from "./queries/get-complete-by-id"
-export { getProductCompleteBySlug } from "./queries/get-complete-by-slug"
-export { getFeaturedProductSlides } from "./queries/get-featured-slides"
-export { getLatestProducts } from "./queries/get-latest-products"
-export { getProductsByBrand } from "./queries/get-products-by-brand"
-export { getProductsByCategory } from "./queries/get-products-by-category"
+export { getAdminProductsList } from "./queries/get-admin-products-list"
+export { getProductForEditBySlug } from "./queries/get-product-for-edit-by-slug"

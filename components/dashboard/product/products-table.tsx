@@ -10,7 +10,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import {
   ColumnDef,
   flexRender,
@@ -25,8 +25,9 @@ import {
 } from "@tanstack/react-table"
 import { toast } from "sonner"
 import {
+  CircleAlertIcon,
   CircleCheckIcon,
-  CircleXIcon,
+  InfinityIcon,
   MoreHorizontalIcon,
   Columns3Icon,
   ChevronsLeftIcon,
@@ -84,7 +85,7 @@ import DeleteProductDialog from "./delete-product-dialog"
 const HIDEABLE_COLUMNS = [
   "category_name",
   "brand_name",
-  "variants_count",
+  "nearest_expiration_date",
   "total_stock",
   "price_range",
   "is_active",
@@ -100,6 +101,7 @@ export function ProductsTable({
   initialIsMobile = false,
 }: ProductsTableProps) {
   const t = useTranslations("ProductsManagement")
+  const locale = useLocale()
   const isMobile = useIsMobile()
   const router = useRouter()
 
@@ -248,19 +250,43 @@ export function ProductsTable({
           </span>
         ),
       },
-      // 4. Variants Count (Hideable)
+      // 4. Nearest Expiration Date (Hideable)
       {
-        id: "variants_count",
-        accessorKey: "variants_count",
+        id: "nearest_expiration_date",
+        accessorKey: "nearest_expiration_date",
         enableHiding: true,
-        header: () => <div className="text-center">{t("COLUMN_VARIANTS")}</div>,
-        cell: ({ row }) => (
-          <div className="text-center tabular-nums">
-            <Badge variant="secondary" className="px-2 py-0.5 text-xs">
-              {row.original.variants_count}
-            </Badge>
-          </div>
+        header: () => (
+          <div className="text-center">{t("COLUMN_EXPIRATION_DATE")}</div>
         ),
+        cell: ({ row }) => {
+          const expirationDate = row.original.nearest_expiration_date
+          if (!expirationDate) {
+            return (
+              <div className="flex justify-center text-muted-foreground">
+                <span
+                  role="img"
+                  aria-label={t("NO_EXPIRATION")}
+                  title={t("NO_EXPIRATION")}
+                >
+                  <InfinityIcon className="size-4" aria-hidden="true" />
+                </span>
+              </div>
+            )
+          }
+
+          const formattedDate = new Intl.DateTimeFormat(locale, {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            timeZone: "UTC",
+          }).format(new Date(`${expirationDate}T00:00:00.000Z`))
+
+          return (
+            <div className="text-center text-xs tabular-nums">
+              <time dateTime={expirationDate}>{formattedDate}</time>
+            </div>
+          )
+        },
       },
       // 5. Total Stock Quantity (Hideable)
       {
@@ -299,11 +325,11 @@ export function ProductsTable({
 
           return (
             <div className="flex items-center gap-1 text-xs font-semibold tabular-nums">
-              <span>\${min}</span>
+              <span>${min}</span>
               {!isSinglePrice && (
                 <>
                   <span className="text-muted-foreground">-</span>
-                  <span>\${max}</span>
+                  <span>${max}</span>
                 </>
               )}
             </div>
@@ -315,32 +341,34 @@ export function ProductsTable({
         id: "is_active",
         accessorKey: "is_active",
         enableHiding: true,
-        header: () => <div className="text-center">{t("COLUMN_STATUS")}</div>,
-        cell: ({ row }) => (
-          <div className="flex justify-center">
+        header: t("COLUMN_STATUS"),
+        cell: ({ row }) => {
+          const isActive = row.original.is_active
+          return (
             <Badge
               variant="outline"
-              className={`gap-1 px-2 py-0.5 text-xs ${
-                row.original.is_active
+              className={`gap-1 truncate px-1.5 py-0.5 font-mono text-[11px] leading-tight uppercase ${
+                isActive
                   ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
-                  : "text-muted-foreground"
+                  : "border-amber-500/30 text-amber-600 dark:text-amber-400"
               }`}
             >
-              {row.original.is_active ? (
+              {isActive ? (
                 <CircleCheckIcon className="size-3 fill-emerald-500 text-background" />
               ) : (
-                <CircleXIcon className="size-3 fill-muted-foreground text-background" />
+                <CircleAlertIcon className="size-3 fill-amber-500 text-background" />
               )}
-              {row.original.is_active
-                ? t("STATUS_ACTIVE")
-                : t("STATUS_INACTIVE")}
+              <span className="capitalize">
+                {isActive ? t("STATUS_ACTIVE") : t("STATUS_INACTIVE")}
+              </span>
             </Badge>
-          </div>
-        ),
+          )
+        },
       },
       // 8. Last Column: Actions Dropdown (Pinned Visible)
       {
         id: "actions",
+        header: () => null,
         enableHiding: false,
         cell: ({ row }) => (
           <div className="flex items-center justify-end">
@@ -469,7 +497,7 @@ export function ProductsTable({
     name: t("COLUMN_PRODUCT"),
     category_name: t("COLUMN_CATEGORY"),
     brand_name: t("COLUMN_BRAND"),
-    variants_count: t("COLUMN_VARIANTS"),
+    nearest_expiration_date: t("COLUMN_EXPIRATION_DATE"),
     total_stock: t("COLUMN_STOCK"),
     price_range: t("COLUMN_PRICE_RANGE"),
     is_active: t("COLUMN_STATUS"),
@@ -733,7 +761,7 @@ export function ProductsTable({
                 <TableRow>
                   <TableCell
                     colSpan={columns.length}
-                    className="h-24 text-center text-xs text-muted-foreground"
+                    className="h-28 text-center text-xs text-muted-foreground"
                   >
                     {t("NO_PRODUCTS_FOUND")}
                   </TableCell>
@@ -745,9 +773,12 @@ export function ProductsTable({
       </div>
 
       {/* Standard Pagination Footer */}
-      <div className="flex flex-col items-center justify-between gap-3 px-1 sm:flex-row">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Label htmlFor="rows-per-page" className="text-xs font-medium">
+      <div className="flex w-full flex-nowrap items-center justify-between gap-2 px-1">
+        <div className="flex min-w-0 shrink items-center gap-1.5 text-[11px] text-muted-foreground sm:gap-2 sm:text-xs">
+          <Label
+            htmlFor="rows-per-page"
+            className="text-xs font-medium whitespace-nowrap max-sm:sr-only"
+          >
             {t("ROWS_PER_PAGE")}
           </Label>
           <Select
@@ -756,7 +787,7 @@ export function ProductsTable({
           >
             <SelectTrigger
               size="sm"
-              className="h-8 w-18 text-xs"
+              className="h-8 w-18 shrink-0 text-xs"
               id="rows-per-page"
             >
               <SelectValue placeholder={table.getState().pagination.pageSize} />
@@ -775,7 +806,7 @@ export function ProductsTable({
               </SelectGroup>
             </SelectContent>
           </Select>
-          <span className="ms-2">
+          <span className="ms-1.5 shrink-0 whitespace-nowrap sm:ms-2">
             {t("PAGE_COUNTER", {
               page: table.getState().pagination.pageIndex + 1,
               total: table.getPageCount() || 1,
@@ -783,7 +814,7 @@ export function ProductsTable({
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
           <Button
             variant="outline"
             className="hidden size-8 p-0 sm:flex"

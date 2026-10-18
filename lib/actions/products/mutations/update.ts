@@ -15,6 +15,20 @@ export type UpdateProductResult =
   | { success: true }
   | { success: false; error: string }
 
+function logDatabaseError(stage: string, error: {
+  code?: string
+  message: string
+  details?: string | null
+  hint?: string | null
+}) {
+  console.error(`[updateProduct] ${stage} failed`, {
+    code: error.code,
+    message: error.message,
+    details: error.details,
+    hint: error.hint,
+  })
+}
+
 export async function updateProduct(
   input: UpdateProductInput
 ): Promise<UpdateProductResult> {
@@ -42,6 +56,7 @@ export async function updateProduct(
       .neq("id", id) // استثناء المنتج الجاري تعديله
 
     if (slugError) {
+      logDatabaseError("Check product slug", slugError)
       return { success: false, error: "DATABASE_ERROR" }
     }
 
@@ -59,6 +74,7 @@ export async function updateProduct(
       .eq("id", id)
 
     if (updateError) {
+      logDatabaseError("Update product", updateError)
       return { success: false, error: "UPDATE_PRODUCT_FAILED" }
     }
 
@@ -75,6 +91,7 @@ export async function updateProduct(
       .not("sku", "in", `(${incomingSkus.join(",")})`) // Supabase JS filter
 
     if (deleteVariantsError) {
+      logDatabaseError("Delete removed variants", deleteVariantsError)
       return { success: false, error: "SYNC_VARIANTS_FAILED" }
     }
 
@@ -82,6 +99,7 @@ export async function updateProduct(
     const variantsToUpsert = variants.map((variant) => ({
       ...variant,
       product_id: id,
+      expiration_date: variant.expiration_date || null,
     }))
 
     const { error: upsertVariantsError } = await supabase
@@ -89,6 +107,7 @@ export async function updateProduct(
       .upsert(variantsToUpsert, { onConflict: "sku" })
 
     if (upsertVariantsError) {
+      logDatabaseError("Upsert variants", upsertVariantsError)
       return { success: false, error: "UPDATE_VARIANTS_FAILED" }
     }
 
@@ -103,12 +122,15 @@ export async function updateProduct(
       .eq("product_id", id)
 
     if (deleteImagesError) {
+      logDatabaseError("Delete existing images", deleteImagesError)
       return { success: false, error: "SYNC_IMAGES_FAILED" }
     }
 
     const imagesToInsert = images.map((img) => ({
       ...img,
       product_id: id,
+      // An empty string cannot satisfy the product_variants SKU foreign key.
+      variant_sku: img.variant_sku?.trim() || null,
     }))
 
     const { error: insertImagesError } = await supabase
@@ -116,6 +138,7 @@ export async function updateProduct(
       .insert(imagesToInsert)
 
     if (insertImagesError) {
+      logDatabaseError("Insert images", insertImagesError)
       return { success: false, error: "UPDATE_IMAGES_FAILED" }
     }
 
@@ -123,6 +146,12 @@ export async function updateProduct(
     revalidatePath("/dashboard/products")
     revalidatePath("/products")
     revalidatePath(`/products/${productData.slug}`)
+
+    console.info("[updateProduct] Product updated", {
+      productId: id,
+      variantCount: variants.length,
+      imageCount: imagesToInsert.length,
+    })
 
     return { success: true }
   } catch (error) {

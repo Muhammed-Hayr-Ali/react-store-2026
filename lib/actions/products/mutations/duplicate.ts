@@ -87,6 +87,7 @@ export async function duplicateProduct(
           stock_quantity: variant.stock_quantity,
           track_inventory: variant.track_inventory,
           low_stock_threshold: variant.low_stock_threshold,
+          expiration_date: variant.expiration_date,
           is_active: variant.is_active,
           sort_order: variant.sort_order,
         }
