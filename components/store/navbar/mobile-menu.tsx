@@ -20,8 +20,6 @@ import { UserProfileHeader } from "./user-profile-header"
 import { PreferencesSubNav } from "./preferences-sub-nav"
 import { NavItemsList } from "./nav-items-list"
 
-
-
 export function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -32,10 +30,7 @@ export function MobileMenu() {
         isOpen={isOpen}
         onClick={() => setIsOpen(!isOpen)}
       />
-      <MobileMenuDrawer
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-      />
+      <MobileMenuDrawer isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </>
   )
 }
@@ -60,9 +55,7 @@ function MobileMenuDrawer({
       <MenuDrawer isOpen={isOpen} onOpenChange={(open) => !open && onClose()}>
         {user && (
           <MobileMenuHeader>
-            <UserProfileHeader
-              showAvatar={true}
-            />
+            <UserProfileHeader showAvatar={true} />
           </MobileMenuHeader>
         )}
 
@@ -86,13 +79,21 @@ function MobileMenuDrawer({
               </Button>
             ) : (
               <div className="flex flex-col space-y-2">
-                <Button variant="default" className="px-4 uppercase" asChild>
+                <Button
+                  variant="default"
+                  className="h-9 w-full text-xs font-medium uppercase shadow-xs"
+                  asChild
+                >
                   <Link href={appRoutes.auth.signup} onClick={onClose}>
                     Get Started
                   </Link>
                 </Button>
 
-                <Button variant="secondary" className="px-4 uppercase" asChild>
+                <Button
+                  variant="secondary"
+                  className="h-9 w-full text-xs font-medium uppercase shadow-xs"
+                  asChild
+                >
                   <Link href={appRoutes.auth.login} onClick={onClose}>
                     Login
                   </Link>
