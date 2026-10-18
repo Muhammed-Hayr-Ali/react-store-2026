@@ -10,10 +10,9 @@ import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { updateProductSchema, type UpdateProductInput } from "../schemas"
-import type { ProductWithRelations } from "../types"
 
 export type UpdateProductResult =
-  | { success: true; data: ProductWithRelations }
+  | { success: true }
   | { success: false; error: string }
 
 export async function updateProduct(
@@ -120,34 +119,12 @@ export async function updateProduct(
       return { success: false, error: "UPDATE_IMAGES_FAILED" }
     }
 
-    // ========================================================================
-    // 7. جلب المنتج المحدث بالكامل لإرجاعه للواجهة
-    // ========================================================================
-    const { data: finalProduct, error: fetchError } = await supabase
-      .from("products")
-      .select(`
-        *,
-        category:categories(id, name, name_ar, slug, parent_id),
-        brand:brands(id, name, name_ar, slug, logo_url),
-        product_variants(*),
-        product_images(*)
-      `)
-      .eq("id", id)
-      .single()
-
-    if (fetchError || !finalProduct) {
-      return { success: false, error: "FETCH_UPDATED_PRODUCT_FAILED" }
-    }
-
-    // 8. تحديث الكاش في Next.js
+    // 7. تحديث الكاش في Next.js
     revalidatePath("/dashboard/products")
     revalidatePath("/products")
-    revalidatePath(`/products/${finalProduct.slug}`)
+    revalidatePath(`/products/${productData.slug}`)
 
-    return {
-      success: true,
-      data: finalProduct as unknown as ProductWithRelations,
-    }
+    return { success: true }
   } catch (error) {
     console.error("[updateProduct] Unexpected error:", error)
     return { success: false, error: "UNEXPECTED_ERROR" }

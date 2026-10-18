@@ -10,6 +10,7 @@ import { DataTable } from "@/components/dashboard/product/products-table"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { notFound } from "next/navigation"
 import { getTranslations } from "next-intl/server"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
@@ -24,6 +25,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "ProductsManagement" })
+  const tErrors = await getTranslations({ locale, namespace: "ActionErrors" })
   const canView = await hasPermission(PERMISSIONS.VIEW_PRODUCTS)
   if (!canView) {
     notFound()
@@ -37,8 +39,15 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
     )
 
   const result = await getAdminProductsList()
-  const products: AdminProductSummary[] =
-    result.success && result.data ? result.data : []
+  if (!result.success) {
+    console.error("[products page] Failed to load products", {
+      error: result.error,
+      details: result.details,
+    })
+    throw new Error(tErrors(getActionErrorKey(result.error)))
+  }
+
+  const products: AdminProductSummary[] = result.data
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">

@@ -9,14 +9,10 @@
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-import type { 
-  ProductWithRelations, 
-  ProductVariantItem, 
-  ProductImageItem 
-} from "../types"
+import type { ProductVariantItem, ProductImageItem } from "../types"
 
 export type DuplicateProductResult =
-  | { success: true; data: ProductWithRelations }
+  | { success: true }
   | { success: false; error: string }
 
 export async function duplicateProduct(
@@ -131,29 +127,11 @@ export async function duplicateProduct(
       }
     }
 
-    // 7. جلب النسخة النهائية 
-    const { data: finalProduct, error: finalFetchError } = await supabase
-      .from("products")
-      .select(`
-        *,
-        category:categories(id, name, name_ar, slug, parent_id),
-        brand:brands(id, name, name_ar, slug, logo_url),
-        product_variants(*),
-        product_images(*)
-      `)
-      .eq("id", newProduct.id)
-      .single()
-
-    if (finalFetchError || !finalProduct) {
-      return { success: false, error: "FETCH_DUPLICATED_PRODUCT_FAILED" }
-    }
-
+    // 7. تحديث الكاش بعد اكتمال نسخ المنتج
     revalidatePath("/dashboard/products")
+    revalidatePath(`/products/${newProduct.slug}`)
 
-    return {
-      success: true,
-      data: finalProduct as unknown as ProductWithRelations,
-    }
+    return { success: true }
   } catch (error) {
     console.error("[duplicateProduct] Unexpected error:", error)
     return { success: false, error: "UNEXPECTED_ERROR" }

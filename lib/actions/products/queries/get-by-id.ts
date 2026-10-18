@@ -52,7 +52,27 @@ export async function getProductById(
         name,
         name_ar,
         slug,
-        logo_url
+        image_url
+      ),
+      product_variants (
+        id,
+        sku,
+        name,
+        attributes,
+        price,
+        compare_at_price,
+        stock_quantity,
+        track_inventory,
+        low_stock_threshold,
+        is_active,
+        sort_order
+      ),
+      product_images (
+        id,
+        url,
+        alt_text,
+        is_primary,
+        variant_sku
       )
     `
     )

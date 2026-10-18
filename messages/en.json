@@ -60,6 +60,7 @@
     "GET_ALL_ROLES_ERROR": "Could not load roles. Please try again.",
     "GET_CATEGORY_ERROR": "Could not load the category. Please try again.",
     "GET_CATEGORIES_ERROR": "Could not load categories. Please try again.",
+    "GET_BRANDS_ERROR": "Could not load brands. Please try again.",
     "GET_NEWSLETTER_SUBSCRIBERS_ERROR": "Could not load newsletter subscribers. Please try again.",
     "GET_CURRENT_USER_ERROR": "Could not load your account. Please try again.",
     "GET_CURRENT_USER_STATUS_ERROR": "Could not load your account status. Please try again.",

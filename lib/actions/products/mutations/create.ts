@@ -10,10 +10,9 @@ import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { createProductSchema, type CreateProductInput } from "../schemas"
-import type { ProductWithRelations } from "../types"
 
 export type CreateProductResult =
-  | { success: true; data: ProductWithRelations }
+  | { success: true }
   | { success: false; error: string }
 
 export async function createProduct(
@@ -71,16 +70,21 @@ export async function createProduct(
       .insert(variantsToInsert)
 
     if (variantsError) {
+      console.error("[createProduct] Failed to insert product variants", {
+        productId: newProduct.id,
+        variantCount: variantsToInsert.length,
+        skus: variantsToInsert.map(({ sku }) => sku),
+        error: variantsError,
+      })
       // عملية تراجع (Rollback): نحذف المنتج، وقاعدة البيانات ستحذف كل متعلقاته بفضل CASCADE
       await supabase.from("products").delete().eq("id", newProduct.id)
       return { success: false, error: "CREATE_VARIANTS_FAILED" }
     }
 
     // 6. إدخال الصور (Images) وتطبيق الحذف التلقائي في حال الفشل
-    const imagesToInsert = images.map((img, index) => ({
+    const imagesToInsert = images.map((img) => ({
       ...img,
       product_id: newProduct.id,
-      sort_order: index, // لضمان الترتيب كما جاء من الواجهة
     }))
 
     const { error: imagesError } = await supabase
@@ -88,38 +92,25 @@ export async function createProduct(
       .insert(imagesToInsert)
 
     if (imagesError) {
+      console.error("[createProduct] Failed to insert product images", {
+        productId: newProduct.id,
+        imageCount: imagesToInsert.length,
+        error: imagesError,
+      })
       // عملية تراجع (Rollback)
       await supabase.from("products").delete().eq("id", newProduct.id)
       return { success: false, error: "CREATE_IMAGES_FAILED" }
     }
 
     // 7. جلب المنتج النهائي مع علاقاته لإرجاعه للواجهة
-    const { data: finalProduct, error: fetchError } = await supabase
-      .from("products")
-      .select(`
-        *,
-        category:categories(id, name, name_ar, slug, parent_id),
-        brand:brands(id, name, name_ar, slug, logo_url),
-        product_variants(*),
-        product_images(*)
-      `)
-      .eq("id", newProduct.id)
-      .single()
-
-    if (fetchError || !finalProduct) {
-      return { success: false, error: "FETCH_CREATED_PRODUCT_FAILED" }
-    }
-
     // تحديث الكاش (Revalidation) للصفحات المتأثرة
     revalidatePath("/dashboard/products")
     revalidatePath("/products")
 
-    return {
-      success: true,
-      data: finalProduct as unknown as ProductWithRelations,
-    }
+    return { success: true }
   } catch (error) {
     console.error("[createProduct] Unexpected error:", error)
     return { success: false, error: "UNEXPECTED_ERROR" }
   }
 }
+

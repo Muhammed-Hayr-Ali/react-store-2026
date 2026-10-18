@@ -5,11 +5,12 @@ import { PackageIcon } from "lucide-react"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getProductCompleteBySlug } from "@/lib/actions/products/queries/get-complete-by-slug"
-import { Category, getCategories,  } from "@/lib/actions/categories"
+import { getCategories, type Category } from "@/lib/actions/categories"
 import ProductForm from "@/components/dashboard/product/product-form"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { getBrands } from "@/lib/actions/brands"
 import type { BrandRecord } from "@/lib/actions/brands/types"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 
 export async function generateMetadata({
   params,
@@ -18,7 +19,7 @@ export async function generateMetadata({
 }) {
   const { slug, locale } = await params
   const t = await getTranslations({ locale, namespace: "ProductsManagement" })
-  const result = await getProductCompleteBySlug(slug)
+  const result = await getProductCompleteBySlug(slug, { activeOnly: false })
 
   const productName =
     result.success && result.data ? result.data.name : t("UPDATE_PAGE_TITLE")
@@ -37,8 +38,13 @@ export default async function Page({
 }) {
   const { slug, locale } = await params
   const t = await getTranslations({ locale, namespace: "ProductsManagement" })
+  const tErrors = await getTranslations({ locale, namespace: "ActionErrors" })
   const canView = await hasPermission(PERMISSIONS.UPDATE_PRODUCT)
   if (!canView) {
+    console.warn("[product edit page] Access denied", {
+      slug,
+      requiredPermission: PERMISSIONS.UPDATE_PRODUCT,
+    })
     notFound()
   }
 
@@ -49,17 +55,36 @@ export default async function Page({
   ])
 
   if (!productResult.success || !productResult.data) {
+    console.error("[product edit page] Failed to load product", {
+      slug,
+      error: productResult.success
+        ? "PRODUCT_NOT_FOUND"
+        : productResult.error,
+      details: productResult.success ? undefined : productResult.details,
+    })
     notFound()
   }
 
-const categories: Category[] =
-  categoriesResult.success && categoriesResult.data
-    ? categoriesResult.data
-    : []
+  if (!categoriesResult.success) {
+    console.error("[product edit page] Failed to load categories", {
+      slug,
+      error: categoriesResult.error,
+      details: categoriesResult.details,
+    })
+    throw new Error(tErrors(getActionErrorKey(categoriesResult.error)))
+  }
 
-    
-  const brands: BrandRecord[] =
-    brandsResult.success && brandsResult.data ? brandsResult.data : []
+  if (!brandsResult.success) {
+    console.error("[product edit page] Failed to load brands", {
+      slug,
+      error: brandsResult.error,
+      details: brandsResult.details,
+    })
+    throw new Error(tErrors(getActionErrorKey(brandsResult.error)))
+  }
+
+  const categories: Category[] = categoriesResult.data
+  const brands: BrandRecord[] = brandsResult.data
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">

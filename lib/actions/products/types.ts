@@ -79,7 +79,7 @@ export interface ProductWithRelations {
     name: string
     name_ar?: string | null
     slug: string
-    logo_url?: string | null
+    image_url?: string | null
   } | null
   product_variants: ProductVariantItem[]
   product_images: ProductImageItem[]

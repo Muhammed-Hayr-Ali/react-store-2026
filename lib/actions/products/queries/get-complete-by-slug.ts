@@ -47,7 +47,7 @@ export async function getProductCompleteBySlug(
         name,
         name_ar,
         slug,
-        logo_url
+        image_url
       ),
       product_variants (
         id,
@@ -67,8 +67,7 @@ export async function getProductCompleteBySlug(
         url,
         alt_text,
         is_primary,
-        sort_order,
-        variant_id
+        variant_sku
       )
     `
     )
