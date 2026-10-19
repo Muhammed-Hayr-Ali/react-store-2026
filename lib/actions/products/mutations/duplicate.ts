@@ -19,7 +19,6 @@ export async function duplicateProduct(
   productId: string
 ): Promise<DuplicateProductResult> {
   try {
-    // 1. التحقق من الصلاحيات
     const canCreate = await hasPermission(PERMISSIONS.CREATE_PRODUCT)
     if (!canCreate) {
       return { success: false, error: "PERMISSION_DENIED" }
@@ -27,7 +26,6 @@ export async function duplicateProduct(
 
     const supabase = await createServerClient()
 
-    // 2. جلب المنتج الأصلي مع كامل علاقاته
     const { data: originalProduct, error: fetchError } = await supabase
       .from("products")
       .select(`
@@ -42,9 +40,8 @@ export async function duplicateProduct(
       return { success: false, error: "FETCH_ORIGINAL_PRODUCT_FAILED" }
     }
 
-    // 3. تجهيز بيانات المنتج الجديد (بناء الكائن صراحة لتجنب المتغيرات المهملة)
     const uniqueSuffix = Math.floor(1000 + Math.random() * 9000).toString()
-    
+
     const newProductData = {
       brand_id: originalProduct.brand_id,
       category_id: originalProduct.category_id,
@@ -53,11 +50,10 @@ export async function duplicateProduct(
       description: originalProduct.description,
       meta_title: originalProduct.meta_title,
       meta_description: originalProduct.meta_description,
-      is_active: false, // مسودة افتراضياً
+      is_active: false,
       is_featured: false,
     }
 
-    // 4. إدخال المنتج الجديد
     const { data: newProduct, error: insertProductError } = await supabase
       .from("products")
       .insert(newProductData)
@@ -68,14 +64,13 @@ export async function duplicateProduct(
       return { success: false, error: "DUPLICATE_PRODUCT_FAILED" }
     }
 
-    // 5. تجهيز وإدخال المتغيرات 
     const skuMapping: Record<string, string> = {}
     const typedVariants = originalProduct.product_variants as ProductVariantItem[] | undefined
-    
+
     if (typedVariants && typedVariants.length > 0) {
       const variantsToInsert = typedVariants.map((variant) => {
         const newSku = `${variant.sku}-COPY-${uniqueSuffix}`
-        skuMapping[variant.sku] = newSku // لحفظ العلاقة للصور لاحقاً
+        skuMapping[variant.sku] = newSku
 
         return {
           product_id: newProduct.id,
@@ -103,7 +98,6 @@ export async function duplicateProduct(
       }
     }
 
-    // 6. تجهيز وإدخال الصور 
     const typedImages = originalProduct.product_images as ProductImageItem[] | undefined
 
     if (typedImages && typedImages.length > 0) {
@@ -113,7 +107,6 @@ export async function duplicateProduct(
           url: img.url,
           alt_text: img.alt_text,
           is_primary: img.is_primary,
-          // توجيه الصورة للـ SKU الجديد إذا كانت مرتبطة بمتغير
           variant_sku: img.variant_sku ? skuMapping[img.variant_sku] : null,
         }
       })
@@ -128,7 +121,6 @@ export async function duplicateProduct(
       }
     }
 
-    // 7. تحديث الكاش بعد اكتمال نسخ المنتج
     revalidatePath("/dashboard/products")
     revalidatePath(`/products/${newProduct.slug}`)
 

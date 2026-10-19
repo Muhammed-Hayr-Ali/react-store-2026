@@ -14,9 +14,6 @@ export interface SubscribersPageData {
   isMobile: boolean
 }
 
-/**
- * تجهز المشتركين وملخص حالات الاشتراك ومؤشر عرض الهاتف.
- */
 export async function getSubscribersPageData(): Promise<
   ApiResult<SubscribersPageData>
 > {

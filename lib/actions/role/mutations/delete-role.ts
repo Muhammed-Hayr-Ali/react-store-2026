@@ -14,9 +14,6 @@ import { getValidationDetails } from "../../validation"
 import { hasPermission, PERMISSIONS } from "../index"
 import { deleteRoleSchema, type DeleteRoleInput } from "../schemas"
 
-/**
- * تحذف دورًا لا يرتبط بمستخدمين.
- */
 export async function deleteRole(
   input: DeleteRoleInput
 ): Promise<ApiResult<null>> {

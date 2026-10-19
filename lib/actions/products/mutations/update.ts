@@ -33,13 +33,11 @@ export async function updateProduct(
   input: UpdateProductInput
 ): Promise<UpdateProductResult> {
   try {
-    // 1. التحقق من الصلاحيات
     const canUpdate = await hasPermission(PERMISSIONS.UPDATE_PRODUCT)
     if (!canUpdate) {
       return { success: false, error: "PERMISSION_DENIED" }
     }
 
-    // 2. التحقق من صحة البيانات (Zod Validation)
     const validation = updateProductSchema.safeParse(input)
     if (!validation.success) {
       return { success: false, error: "VALIDATION_ERROR" }
@@ -48,12 +46,11 @@ export async function updateProduct(
     const { id, variants, images, ...productData } = validation.data
     const supabase = await createServerClient()
 
-    // 3. التحقق من عدم تضارب الـ Slug مع منتج آخر (استثناء المنتج الحالي)
     const { count: slugCount, error: slugError } = await supabase
       .from("products")
       .select("id", { count: "exact", head: true })
       .eq("slug", productData.slug)
-      .neq("id", id) // استثناء المنتج الجاري تعديله
+      .neq("id", id)
 
     if (slugError) {
       logDatabaseError("Check product slug", slugError)
@@ -64,12 +61,11 @@ export async function updateProduct(
       return { success: false, error: "PRODUCT_SLUG_ALREADY_EXISTS" }
     }
 
-    // 4. تحديث بيانات المنتج الأساسي
     const { error: updateError } = await supabase
       .from("products")
       .update({
         ...productData,
-        updated_at: new Date().toISOString(), // أو نعتمد على تريجر قاعدة البيانات
+        updated_at: new Date().toISOString(),
       })
       .eq("id", id)
 
@@ -78,24 +74,19 @@ export async function updateProduct(
       return { success: false, error: "UPDATE_PRODUCT_FAILED" }
     }
 
-    // ========================================================================
-    // 5. مزامنة المتغيرات (Variants Sync)
-    // ========================================================================
     const incomingSkus = variants.map((v) => v.sku)
 
-    // أ. حذف المتغيرات المرتبطة بالمنتج والتي لم تعد موجودة في الطلب الجديد
     const { error: deleteVariantsError } = await supabase
       .from("product_variants")
       .delete()
       .eq("product_id", id)
-      .not("sku", "in", `(${incomingSkus.join(",")})`) // Supabase JS filter
+      .not("sku", "in", `(${incomingSkus.join(",")})`)
 
     if (deleteVariantsError) {
       logDatabaseError("Delete removed variants", deleteVariantsError)
       return { success: false, error: "SYNC_VARIANTS_FAILED" }
     }
 
-    // ب. تحديث أو إدراج (Upsert) المتغيرات الحالية والجديدة بناءً على SKU
     const variantsToUpsert = variants.map((variant) => ({
       ...variant,
       product_id: id,
@@ -111,11 +102,6 @@ export async function updateProduct(
       return { success: false, error: "UPDATE_VARIANTS_FAILED" }
     }
 
-    // ========================================================================
-    // 6. مزامنة الصور (Images Sync)
-    // بما أن الصور ليس لها ارتباطات خارجية حيوية كالـ SKU، نقوم بمسحها وإعادة بنائها
-    // لضمان الترتيب وتحديث الرابط للصورة الرئيسية
-    // ========================================================================
     const { error: deleteImagesError } = await supabase
       .from("product_images")
       .delete()
@@ -129,7 +115,6 @@ export async function updateProduct(
     const imagesToInsert = images.map((img) => ({
       ...img,
       product_id: id,
-      // An empty string cannot satisfy the product_variants SKU foreign key.
       variant_sku: img.variant_sku?.trim() || null,
     }))
 
@@ -142,7 +127,6 @@ export async function updateProduct(
       return { success: false, error: "UPDATE_IMAGES_FAILED" }
     }
 
-    // 7. تحديث الكاش في Next.js
     revalidatePath("/dashboard/products")
     revalidatePath("/products")
     revalidatePath(`/products/${productData.slug}`)

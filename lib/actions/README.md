@@ -19,6 +19,10 @@ export async function getRoleById(
 ): Promise<ApiResult<RoleRecord>> {
   // Validate and use input.roleId.
 }
+
+export async function getRoles(): Promise<ApiResult<RoleRecord[]>> {
+  // Return all roles.
+}
 ```
 
 ## Results

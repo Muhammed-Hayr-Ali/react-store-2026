@@ -110,6 +110,12 @@ export interface RoleRecord {
   created_at: string
 }
 
+export interface RolesSummary {
+  total: number
+  active: number
+  empty: number
+}
+
 export const roleSchema = z.object({
   role: z.string(),
   permissions: z.array(z.string()),

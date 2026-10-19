@@ -24,9 +24,6 @@ import type { NewsletterSubscriber } from "../types"
 import { createAdminClient } from "@/lib/database/supabase/admin"
 import React from "react"
 
-/**
- * تسجل عنوان بريد في النشرة وترسل رسالة تأكيد الاشتراك.
- */
 export async function createNewsletterSubscriber(
   input: NewsletterSubscriberInput
 ): Promise<ApiResult<NewsletterSubscriber>> {

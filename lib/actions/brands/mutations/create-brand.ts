@@ -15,9 +15,6 @@ import { getValidationDetails } from "../../validation"
 import { brandSchema, type BrandFormValues } from "../schemas"
 import type { BrandRecord } from "../types"
 
-/**
- * تنشئ علامة تجارية بعد التحقق من الصلاحية والمدخلات.
- */
 export async function createBrand(
   input: BrandFormValues
 ): Promise<ApiResult<BrandRecord>> {

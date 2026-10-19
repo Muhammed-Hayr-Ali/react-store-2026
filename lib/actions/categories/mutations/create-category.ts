@@ -16,9 +16,6 @@ import { validateCategoryParent } from "../helpers"
 import { categoryFormSchema, type CategoryInput } from "../schemas"
 import type { Category } from "../types"
 
-/**
- * تنشئ تصنيفًا بعد التحقق من الصلاحية والمدخلات وعلاقة الأب.
- */
 export async function createCategory(
   input: CategoryInput
 ): Promise<ApiResult<Category>> {

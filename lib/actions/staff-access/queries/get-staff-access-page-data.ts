@@ -1,4 +1,4 @@
-/*
+/**
  * @file lib/actions/staff-access/queries/get-staff-access-page-data.ts
  * @description Loads staff access data and calculates its summary.
  */
@@ -9,16 +9,15 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import type { StaffAccessPageData } from "../types"
 import { getStaffAccessUsersWithRoles } from "./get-staff-access-users-with-roles"
 import { getStaffAccessRoles } from "./get-staff-access-roles"
+import { getStaffAccessSummary } from "./get-staff-access-summary"
 
-/**
- * تجهز المستخدمين والأدوار وملخص إسناد الأدوار لشاشة الوصول.
- */
 export async function getStaffAccessPageData(): Promise<
   ApiResult<StaffAccessPageData>
 > {
-  const [usersResult, rolesResult] = await Promise.all([
+  const [usersResult, rolesResult, summaryResult] = await Promise.all([
     getStaffAccessUsersWithRoles(),
     getStaffAccessRoles(),
+    getStaffAccessSummary(),
   ])
 
   if (!usersResult.success) {
@@ -37,13 +36,13 @@ export async function getStaffAccessPageData(): Promise<
     }
   }
 
-  const users = usersResult.data
-  const roles = rolesResult.data
-
-  // حساب الملخص برمجياً (فصل المنطق عن العرض)
-  const total = users.length
-  const assigned = users.filter((user) => user.roles.length > 0).length
-  const unassigned = total - assigned
+  if (!summaryResult.success) {
+    return {
+      success: false,
+      error: summaryResult.error,
+      details: summaryResult.details,
+    }
+  }
 
   const headersList = await headers()
   const userAgent = headersList.get("user-agent") || ""
@@ -55,9 +54,9 @@ export async function getStaffAccessPageData(): Promise<
   return {
     success: true,
     data: {
-      users,
-      roles,
-      summary: { total, assigned, unassigned },
+      users: usersResult.data,
+      roles: rolesResult.data,
+      summary: summaryResult.data,
       isMobile,
     },
   }

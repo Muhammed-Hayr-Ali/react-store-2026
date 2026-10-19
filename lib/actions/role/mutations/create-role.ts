@@ -15,9 +15,6 @@ import { hasPermission, PERMISSIONS } from "../index"
 import type { RoleRecord } from "../types"
 import { createRoleSchema, type CreateRoleInput } from "../schemas"
 
-/**
- * تنشئ دورًا جديدًا بالصلاحيات المحددة.
- */
 export async function createRole(
   input: CreateRoleInput
 ): Promise<ApiResult<RoleRecord>> {

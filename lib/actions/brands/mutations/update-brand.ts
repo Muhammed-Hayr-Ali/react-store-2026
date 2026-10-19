@@ -15,9 +15,6 @@ import { getValidationDetails } from "../../validation"
 import { updateBrandSchema, type UpdateBrandInput } from "../schemas"
 import type { BrandRecord } from "../types"
 
-/**
- * تحدث بيانات علامة تجارية بعد التحقق من الصلاحية.
- */
 export async function updateBrand(
   input: UpdateBrandInput
 ): Promise<ApiResult<BrandRecord>> {

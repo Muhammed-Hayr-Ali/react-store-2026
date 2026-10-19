@@ -15,9 +15,6 @@ import {
   type NewsletterSubscriberIdInput,
 } from "../schemas"
 
-/**
- * تحذف مشتركًا من النشرة بعد التحقق من الصلاحية والمعرّف.
- */
 export async function deleteNewsletterSubscriber(
   input: NewsletterSubscriberIdInput
 ): Promise<ApiResult<null>> {

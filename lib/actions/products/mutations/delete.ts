@@ -11,14 +11,9 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "../../types/utils"
 import { hasPermission, PERMISSIONS } from "../../role"
 
-// ============================================================================
-// Main Action Function
-// ============================================================================
-
 export async function deleteProduct(
   productId: string
 ): Promise<ApiResult<{ id: string }>> {
-  // 1. Validate Product ID
   const idValidation = z
     .string()
     .uuid("INVALID_PRODUCT_ID")
@@ -31,7 +26,6 @@ export async function deleteProduct(
   }
   const validProductId = idValidation.data
 
-  // 2. Permission check
   const canDelete = await hasPermission(PERMISSIONS.DELETE_PRODUCT)
   if (!canDelete) {
     return {
@@ -42,7 +36,6 @@ export async function deleteProduct(
 
   const supabase = await createServerClient()
 
-  // 3. Fetch product slug for cache purging
   const { data: product, error: fetchError } = await supabase
     .from("products")
     .select("id, slug")
@@ -57,13 +50,11 @@ export async function deleteProduct(
     }
   }
 
-  // 4. Fallback cascade deletion for images and variants
   await Promise.all([
     supabase.from("product_images").delete().eq("product_id", validProductId),
     supabase.from("product_variants").delete().eq("product_id", validProductId),
   ])
 
-  // 5. Delete root product
   const { error: deleteError } = await supabase
     .from("products")
     .delete()
@@ -77,7 +68,6 @@ export async function deleteProduct(
     }
   }
 
-  // 6. Invalidate caches
   revalidatePath(`/product/${product.slug}`)
   revalidatePath("/", "layout")
 

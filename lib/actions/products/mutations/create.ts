@@ -19,13 +19,11 @@ export async function createProduct(
   input: CreateProductInput
 ): Promise<CreateProductResult> {
   try {
-    // 1. التحقق من الصلاحيات
     const canCreate = await hasPermission(PERMISSIONS.CREATE_PRODUCT)
     if (!canCreate) {
       return { success: false, error: "PERMISSION_DENIED" }
     }
 
-    // 2. التحقق من صحة البيانات (Zod Validation)
     const validation = createProductSchema.safeParse(input)
     if (!validation.success) {
       return { success: false, error: "VALIDATION_ERROR" }
@@ -34,7 +32,6 @@ export async function createProduct(
     const { variants, images, ...productData } = validation.data
     const supabase = await createServerClient()
 
-    // 3. التحقق من عدم تكرار الـ Slug
     const { count: slugCount, error: slugError } = await supabase
       .from("products")
       .select("id", { count: "exact", head: true })
@@ -48,7 +45,6 @@ export async function createProduct(
       return { success: false, error: "PRODUCT_SLUG_ALREADY_EXISTS" }
     }
 
-    // 4. إدخال المنتج الأساسي
     const { data: newProduct, error: productInsertError } = await supabase
       .from("products")
       .insert(productData)
@@ -59,7 +55,6 @@ export async function createProduct(
       return { success: false, error: "CREATE_PRODUCT_FAILED" }
     }
 
-    // 5. إدخال المتغيرات (Variants) وتطبيق الحذف التلقائي في حال الفشل
     const variantsToInsert = variants.map((variant) => ({
       ...variant,
       product_id: newProduct.id,
@@ -77,12 +72,10 @@ export async function createProduct(
         skus: variantsToInsert.map(({ sku }) => sku),
         error: variantsError,
       })
-      // عملية تراجع (Rollback): نحذف المنتج، وقاعدة البيانات ستحذف كل متعلقاته بفضل CASCADE
       await supabase.from("products").delete().eq("id", newProduct.id)
       return { success: false, error: "CREATE_VARIANTS_FAILED" }
     }
 
-    // 6. إدخال الصور (Images) وتطبيق الحذف التلقائي في حال الفشل
     const imagesToInsert = images.map((img) => ({
       ...img,
       product_id: newProduct.id,
@@ -98,13 +91,10 @@ export async function createProduct(
         imageCount: imagesToInsert.length,
         error: imagesError,
       })
-      // عملية تراجع (Rollback)
       await supabase.from("products").delete().eq("id", newProduct.id)
       return { success: false, error: "CREATE_IMAGES_FAILED" }
     }
 
-    // 7. جلب المنتج النهائي مع علاقاته لإرجاعه للواجهة
-    // تحديث الكاش (Revalidation) للصفحات المتأثرة
     revalidatePath("/dashboard/products")
     revalidatePath("/products")
 

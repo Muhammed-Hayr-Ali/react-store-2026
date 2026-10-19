@@ -13,9 +13,6 @@ import { hasPermission, PERMISSIONS } from "../../role"
 import { getBrandsSchema, type GetBrandsInput } from "../schemas"
 import type { BrandRecord } from "../types"
 
-/**
- * تجلب العلامات التجارية مع تطبيق مرشحات الحالة.
- */
 export async function getBrands(
   input: GetBrandsInput = {}
 ): Promise<ApiResult<BrandRecord[]>> {

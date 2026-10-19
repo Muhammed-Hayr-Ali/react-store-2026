@@ -1,4 +1,7 @@
-/** @file lib/actions/users/index.ts واجهة التصدير العامة لأكشنات المستخدمين. */
+/**
+ * @file lib/actions/users/index.ts
+ * @description Exposes the public user action API.
+ */
 
 // Types
 export * from "./types"

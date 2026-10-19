@@ -1,5 +1,5 @@
 /**
- * @file lib/actions/role/queries/get-all-roles.ts
+ * @file lib/actions/role/queries/get-roles.ts
  * @description Retrieves all system roles and their permissions.
  */
 
@@ -8,13 +8,13 @@
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
-import { hasPermission, PERMISSIONS } from "../../role"
-import type { RoleRecord } from "../types"
+import { hasPermission } from "../permission-checker"
+import { PERMISSIONS, type RoleRecord } from "../types"
 
 /**
  * تجلب جميع الأدوار مرتبة حسب تاريخ الإنشاء.
  */
-export async function getAllRoles(): Promise<ApiResult<RoleRecord[]>> {
+export async function getRoles(): Promise<ApiResult<RoleRecord[]>> {
   const canViewRoles = await hasPermission(PERMISSIONS.VIEW_ROLES_MANAGEMENT)
   if (!canViewRoles) {
     return { success: false, error: "PERMISSION_DENIED" }

@@ -13,7 +13,7 @@ import { getActionErrorKey } from "@/lib/actions/error-keys"
 import RolesTable from "@/components/dashboard/roles/roles-table"
 import { RolesSummary } from "@/components/dashboard/roles/roles-summary"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-import { getRolesPageData } from "@/lib/actions/role/queries/get-roles-page-data"
+import { getRolesPageData } from "@/lib/actions/role"
 
 interface PageProps {
   params: Promise<{

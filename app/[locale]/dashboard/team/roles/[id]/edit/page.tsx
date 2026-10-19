@@ -4,9 +4,9 @@ import { getTranslations } from "next-intl/server"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { RoleForm } from "@/components/dashboard/roles/role-form"
-import type { RoleRecord } from "@/lib/actions/role/types"
+import type { RoleRecord } from "@/lib/actions/role"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-import { getRoleById } from "@/lib/actions/role/queries/get-role-by-id"
+import { getRoleById } from "@/lib/actions/role"
 
 
 export const dynamic = 'force-dynamic'

@@ -14,9 +14,6 @@ import { hasPermission, PERMISSIONS } from "../../role"
 import { getValidationDetails } from "../../validation"
 import { brandIdSchema, type BrandIdInput } from "../schemas"
 
-/**
- * تحذف علامة تجارية بعد التحقق من الصلاحية ووجودها.
- */
 export async function deleteBrand(
   input: BrandIdInput
 ): Promise<ApiResult<null>> {

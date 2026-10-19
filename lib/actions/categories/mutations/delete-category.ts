@@ -14,9 +14,6 @@ import { hasPermission, PERMISSIONS } from "../../role"
 import { getValidationDetails } from "../../validation"
 import { categoryIdSchema, type CategoryIdInput } from "../schemas"
 
-/**
- * تحذف تصنيفًا بعد التحقق من الصلاحية ووجوده.
- */
 export async function deleteCategory(
   input: CategoryIdInput
 ): Promise<ApiResult<null>> {

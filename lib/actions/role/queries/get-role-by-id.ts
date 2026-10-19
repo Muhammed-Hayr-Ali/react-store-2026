@@ -7,11 +7,10 @@
 
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { hasPermission, PERMISSIONS } from "../../role"
 import { getValidationDetails } from "../../validation"
 import { roleIdSchema, type RoleIdInput } from "../schemas"
-
-import type { RoleRecord } from "../types"
+import { hasPermission } from "../permission-checker"
+import { PERMISSIONS, type RoleRecord } from "../types"
 
 /**
  * تجلب دورًا واحدًا باستخدام معرّفه.

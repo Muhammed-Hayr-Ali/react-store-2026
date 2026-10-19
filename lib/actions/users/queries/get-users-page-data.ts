@@ -18,9 +18,6 @@ export interface UsersPageData {
   isMobile: boolean
 }
 
-/**
- * تجهز بيانات المستخدمين وملخص الحالات ومؤشر عرض الهاتف.
- */
 export async function getUsersPageData(): Promise<ApiResult<UsersPageData>> {
   const result = await getAdminUsers()
 

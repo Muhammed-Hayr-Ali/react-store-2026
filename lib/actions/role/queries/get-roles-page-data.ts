@@ -3,10 +3,12 @@
  * @description Handles roles fetching, summary calculations, and mobile detection with strict type safety.
  */
 
+"use server"
+
 import { headers } from "next/headers"
 
 import type { ApiResult } from "@/lib/actions/types/utils"
-import { getAllRoles } from "./get-all-roles"
+import { getRoles } from "./get-roles"
 import type { RoleRecord } from "../types"
 
 export interface RolesPageData {
@@ -19,11 +21,8 @@ export interface RolesPageData {
   isMobile: boolean
 }
 
-/**
- * تجهز الأدوار وملخص الصلاحيات ومؤشر عرض الهاتف.
- */
 export async function getRolesPageData(): Promise<ApiResult<RolesPageData>> {
-  const result = await getAllRoles()
+  const result = await getRoles()
 
   if (!result.success) {
     return {

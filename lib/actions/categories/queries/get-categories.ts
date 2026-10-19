@@ -13,9 +13,6 @@ import { getValidationDetails } from "../../validation"
 import { getCategoriesSchema, type GetCategoriesInput } from "../schemas"
 import type { Category } from "../types"
 
-/**
- * تجلب التصنيفات مع تطبيق مرشحات الحالة والأب.
- */
 export async function getCategories(
   input: GetCategoriesInput = {}
 ): Promise<ApiResult<Category[]>> {

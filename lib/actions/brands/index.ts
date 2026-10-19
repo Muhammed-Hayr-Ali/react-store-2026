@@ -10,6 +10,6 @@ export { getBrands } from "./queries/get-brands"
 export { getBrandsSummary } from "./queries/get-brands-summary"
 export { getBrandsPageData } from "./queries/get-brands-page-data"
 
-// قم بتصدير الأنواع (Types) التي قمنا بتعريفها في ملفات schemas و types
+// Types
 export type { BrandRecord } from "./types"
 export type { BrandFormValues as BrandInput, UpdateBrandInput } from "./schemas"

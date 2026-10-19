@@ -17,9 +17,6 @@ export interface CategoriesPageData {
   isMobile: boolean
 }
 
-/**
- * تجهز بيانات التصنيفات وملخصها وصور التصنيفات وحالة عرض الهاتف.
- */
 export async function getCategoriesPageData(): Promise<
   ApiResult<CategoriesPageData>
 > {

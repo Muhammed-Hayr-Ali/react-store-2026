@@ -1,4 +1,4 @@
-import { PERMISSIONS, AppPermission } from "@/lib/actions/role"
+import { PERMISSIONS, AppPermission } from "./types"
 
 /**
  * @file lib/actions/role/permission-groups.ts

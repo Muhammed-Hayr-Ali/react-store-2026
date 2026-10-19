@@ -5,9 +5,6 @@
 
 import { z } from "zod"
 
-/**
- * تتحقق من أن رابط صورة التصنيف محلي أو يستخدم HTTP أو HTTPS.
- */
 export function isValidCategoryImageUrl(value: string): boolean {
   if (value.startsWith("/") && !value.startsWith("//")) return true
 
@@ -61,7 +58,6 @@ export const categorySchema = z.object({
   updated_at: z.string().nullable(),
 })
 
-/** Category fields accepted when creating or replacing a category. */
 export const categoryFormSchema = categorySchema
   .omit({
     id: true,

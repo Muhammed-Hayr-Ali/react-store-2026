@@ -19,9 +19,6 @@ export interface BrandsPageData {
   isMobile: boolean
 }
 
-/**
- * تجهز بيانات العلامات التجارية وملخصها وصور العلامات التجارية وحالة عرض الهاتف.
- */
 export async function getBrandsPageData(): Promise<
   ApiResult<BrandsPageData>
 > {
