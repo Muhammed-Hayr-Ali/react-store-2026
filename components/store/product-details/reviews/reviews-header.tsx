@@ -10,6 +10,7 @@ import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import { ReviewDialog } from "./review-dialog"
+import { useUser } from "@/lib/context/user-context"
 
 interface ReviewsHeaderProps {
   productId: string // <-- إضافة معرف المنتج هنا
@@ -23,6 +24,7 @@ export function ReviewsHeader({
   onReviewCreated,
 }: ReviewsHeaderProps) {
   const t = useTranslations("ProductReviews")
+  const { user } = useUser()
   const [isOpen, setIsOpen] = React.useState(false)
 
   return (
@@ -35,21 +37,26 @@ export function ReviewsHeader({
           {t("VERIFIED_REVIEWS_COUNT", { count: totalReviews })}
         </p>
       </div>
-
-      <ReviewDialog
-        productId={productId} // <-- تمرير معرف المنتج للدايلوج لكي يتم إنشاء التقييم بنجاح
-        mode="create"
-        open={isOpen}
-        onOpenChange={setIsOpen}
-        onSuccess={() => {
-          setIsOpen(false)
-          onReviewCreated?.()
-        }}
-      >
-        <Button size="sm" className="text-xs" aria-label={t("WRITE_REVIEW_BUTTON")}>
-          {t("WRITE_REVIEW_BUTTON")}
-        </Button>
-      </ReviewDialog>
+      {user && (
+        <ReviewDialog
+          productId={productId}
+          mode="create"
+          open={isOpen}
+          onOpenChange={setIsOpen}
+          onSuccess={() => {
+            setIsOpen(false)
+            onReviewCreated?.()
+          }}
+        >
+          <Button
+            size="sm"
+            className="text-xs"
+            aria-label={t("WRITE_REVIEW_BUTTON")}
+          >
+            {t("WRITE_REVIEW_BUTTON")}
+          </Button>
+        </ReviewDialog>
+      )}
     </div>
   )
 }
