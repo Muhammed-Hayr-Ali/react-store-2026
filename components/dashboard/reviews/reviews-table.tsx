@@ -69,7 +69,8 @@ import { DeleteReviewDialog } from "./delete-review-dialog"
 import { ReviewStatusSheet } from "./review-status-sheet"
 
 type ReviewFilter = "all" | "approved" | "pending"
-const HIDEABLE_COLUMNS = ["rating", "created_at"]
+// جعلنا جميع الأعمدة غير الأساسية قابلة للإخفاء على الموبايل
+const HIDEABLE_COLUMNS = ["rating", "content", "status", "created_at"]
 
 interface ReviewsTableProps {
   initialReviews: ReviewWithUser[]
@@ -139,6 +140,7 @@ export function ReviewsTable({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(() => {
       const initial: VisibilityState = {}
+      // إذا كان الموبايل مفعل افتراضياً، نخفي جميع أعمدة القائمة ما عدا العميل والإجراءات
       HIDEABLE_COLUMNS.forEach((column) => {
         initial[column] = !initialIsMobile
       })
@@ -189,7 +191,6 @@ export function ReviewsTable({
       if (filter === "pending" && isApproved) return false
       if (!query) return true
 
-      // دمج الاسم الأول والأخير للبحث بشكل صحيح
       const fullName = review.user?.first_name
         ? `${review.user.first_name} ${review.user.last_name || ""}`.trim()
         : ""
@@ -368,6 +369,8 @@ export function ReviewsTable({
   const noReviews = reviews.length === 0
   const columnLabels: Record<string, string> = {
     rating: t("COLUMN_RATING"),
+    content: t("COLUMN_CONTENT"),
+    status: t("COLUMN_STATUS"),
     created_at: t("COLUMN_DATE"),
   }
 
