@@ -75,6 +75,7 @@ export const PERMISSIONS = {
   DELETE_PRODUCT: "delete_product",
 
   // --- 6. Reviews Management ---
+  VIEW_REVIEWS_MANAGEMENT: "view_reviews_management",
   CREATE_REVIEW: "create_review",
   UPDATE_REVIEW: "update_review",
   DELETE_REVIEW: "delete_review",

@@ -49,6 +49,12 @@ export const PERMISSION_GROUPS = [
         description: "Access and browse the product inventory catalog page",
       },
       {
+        key: PERMISSIONS.VIEW_REVIEWS_MANAGEMENT,
+        label: "View Reviews Management",
+        description:
+          "Access and view the product reviews dashboard to manage, moderate, and approve customer feedback",
+      },
+      {
         key: PERMISSIONS.VIEW_FLASH_SALES,
         label: "View Flash Sales",
         description: "View active and scheduled discount campaigns page",

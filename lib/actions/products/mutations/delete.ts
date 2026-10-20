@@ -1,31 +1,37 @@
 /**
  * @file lib/actions/products/mutations/delete.ts
- * @description Server Action to safely remove a product and clean up its relational entities.
+ * @description Server Action to safely remove a product.
+ * Database CASCADE handles relational entities (variants, images, reviews).
  */
 
 "use server"
 
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
+
 import { createServerClient } from "@/lib/database/supabase/server"
-import { ApiResult } from "../../types/utils"
+import type { ApiResult } from "../../types/utils"
 import { hasPermission, PERMISSIONS } from "../../role"
+import { getValidationDetails } from "../../validation"
 
 export async function deleteProduct(
   productId: string
 ): Promise<ApiResult<{ id: string }>> {
-  const idValidation = z
-    .string()
-    .uuid("INVALID_PRODUCT_ID")
-    .safeParse(productId)
+  
+  // 1. التحقق من صحة المعرف (UUID)
+  const idValidation = z.string().uuid("INVALID_PRODUCT_ID").safeParse(productId)
+  
   if (!idValidation.success) {
     return {
       success: false,
-      error: "INVALID_PRODUCT_ID",
+      error: "VALIDATION_ERROR",
+      details: getValidationDetails(idValidation.error),
     }
   }
+  
   const validProductId = idValidation.data
 
+  // 2. التحقق من صلاحيات الحذف للمشرف
   const canDelete = await hasPermission(PERMISSIONS.DELETE_PRODUCT)
   if (!canDelete) {
     return {
@@ -36,6 +42,7 @@ export async function deleteProduct(
 
   const supabase = await createServerClient()
 
+  // 3. التحقق من وجود المنتج للحصول على הSlug (من أجل مسح الكاش لاحقاً)
   const { data: product, error: fetchError } = await supabase
     .from("products")
     .select("id, slug")
@@ -50,11 +57,7 @@ export async function deleteProduct(
     }
   }
 
-  await Promise.all([
-    supabase.from("product_images").delete().eq("product_id", validProductId),
-    supabase.from("product_variants").delete().eq("product_id", validProductId),
-  ])
-
+  // 4. حذف المنتج (جداول variants, images, و reviews ستحذف تلقائياً بفضل CASCADE)
   const { error: deleteError } = await supabase
     .from("products")
     .delete()
@@ -68,8 +71,10 @@ export async function deleteProduct(
     }
   }
 
-  revalidatePath(`/product/${product.slug}`)
-  revalidatePath("/", "layout")
+  // 5. مسح الكاش (Revalidation) لتحديث الواجهات
+  revalidatePath(`/product/${product.slug}`) // تنظيف صفحة المنتج من الكاش
+  revalidatePath("/dashboard/products") // تنظيف لوحة التحكم
+  revalidatePath("/", "layout") // تنظيف القوائم العامة
 
   return {
     success: true,

@@ -7,6 +7,7 @@ import {
   Tags,
   Mail,
   PackageIcon,
+  MessageSquareIcon, // <-- 1. أضفنا هذه الأيقونة
 } from "lucide-react"
 import { appRoutes } from "@/lib/config/app-routes"
 import { PERMISSIONS, AppPermission } from "@/lib/actions/role"
@@ -67,6 +68,17 @@ export const sidebarConfig: SidebarConfig = {
       icon: PackageIcon,
       requiredPermission: PERMISSIONS.VIEW_PRODUCTS,
     },
+    
+    // --- 2. تمت إضافة قسم التقييمات هنا بعد المنتجات مباشرة ---
+    {
+      titleKey: "REVIEWS_MANAGEMENT",
+      key: "reviews-management",
+      url: appRoutes.dashboard.reviews, // تأكد أن هذا المسار موجود في appRoutes
+      icon: MessageSquareIcon,
+      requiredPermission: PERMISSIONS.VIEW_REVIEWS_MANAGEMENT,
+    },
+    // -----------------------------------------------------------
+
     {
       titleKey: "USERS_MANAGEMENT",
       key: "users-management",
