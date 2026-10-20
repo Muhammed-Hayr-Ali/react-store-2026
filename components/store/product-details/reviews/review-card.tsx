@@ -90,8 +90,6 @@ export function ReviewCard({
               review={review}
               open={isDeleteOpen}
               onOpenChange={setIsDeleteOpen}
-              onDeleted={(deletedId) => {
-              }}
             >
               <Button
                 variant="ghost"

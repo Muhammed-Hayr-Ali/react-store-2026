@@ -29,7 +29,6 @@ interface DeleteReviewDialogProps {
   review: ProductReviewItem
   open: boolean
   onOpenChange: (open: boolean) => void
-  onDeleted: (reviewId: string) => void
   children?: React.ReactNode
 }
 
@@ -37,7 +36,6 @@ export function DeleteReviewDialog({
   review,
   open,
   onOpenChange,
-  onDeleted,
   children,
 }: DeleteReviewDialogProps) {
   const t = useTranslations("ProductReviews")
@@ -63,7 +61,6 @@ export function DeleteReviewDialog({
         }
 
         onOpenChange(false)
-        onDeleted(review.id)
         toast.success(t("DELETE_REVIEW_SUCCESS"))
       } catch {
         toast.error(t("DELETE_REVIEW_ERROR"))
