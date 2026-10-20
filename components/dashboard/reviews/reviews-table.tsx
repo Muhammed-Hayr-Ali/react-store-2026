@@ -68,10 +68,6 @@ import { PERMISSIONS } from "@/lib/actions/role"
 import { DeleteReviewDialog } from "./delete-review-dialog"
 import { ReviewStatusSheet } from "./review-status-sheet"
 
-// المكونات التي سننشئها لاحقاً (Dialogs)
-// import { ReviewStatusDialog } from "./review-status-dialog"
-// import { DeleteReviewDialog } from "./delete-review-dialog"
-
 type ReviewFilter = "all" | "approved" | "pending"
 const HIDEABLE_COLUMNS = ["rating", "created_at"]
 
@@ -193,8 +189,12 @@ export function ReviewsTable({
       if (filter === "pending" && isApproved) return false
       if (!query) return true
 
-      // البحث في محتوى التعليق أو اسم المستخدم
-      return [review.content, review.user?.full_name]
+      // دمج الاسم الأول والأخير للبحث بشكل صحيح
+      const fullName = review.user?.first_name
+        ? `${review.user.first_name} ${review.user.last_name || ""}`.trim()
+        : ""
+
+      return [review.content, fullName]
         .filter(Boolean)
         .some((value) => value!.toLocaleLowerCase().includes(query))
     })
@@ -218,13 +218,18 @@ export function ReviewsTable({
     () => [
       {
         id: "user",
-        accessorFn: (review) => review.user?.full_name,
+        accessorFn: (review) =>
+          review.user?.first_name
+            ? `${review.user.first_name} ${review.user.last_name || ""}`.trim()
+            : null,
         header: t("COLUMN_USER"),
         enableHiding: false,
         cell: ({ row }) => {
           const review = row.original
-          const imageUrl = review.user?.avatar_url
-          const fullName = review.user?.full_name || t("ANONYMOUS")
+          const imageUrl = review.user?.profile_image
+          const fullName = review.user?.first_name
+            ? `${review.user.first_name} ${review.user.last_name || ""}`.trim()
+            : t("ANONYMOUS")
 
           return (
             <div className="flex min-w-0 items-center gap-2.5">
@@ -270,7 +275,7 @@ export function ReviewsTable({
         accessorFn: (review) => review.content,
         header: t("COLUMN_CONTENT"),
         cell: ({ row }) => (
-          <div className="max-w-[200px] sm:max-w-[300px]">
+          <div className="max-w-50 sm:max-w-75">
             <p
               className="truncate text-xs text-muted-foreground"
               title={row.original.content}
@@ -500,8 +505,6 @@ export function ReviewsTable({
               ))}
           </DropdownMenuContent>
         </DropdownMenu>
-
-        {/* يتم إزالة زر إضافة تعليق من هنا لأن المشرف لا يُضيف تعليقات، بل تضاف من صفحة المتجر */}
       </div>
 
       <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">
@@ -602,7 +605,8 @@ export function ReviewsTable({
         <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
           <Button
             variant="outline"
-            className="hidden size-8 p-0 sm:flex"
+            size="icon"
+            className="hidden size-8 sm:flex"
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
             title={t("FIRST_PAGE")}
@@ -634,8 +638,8 @@ export function ReviewsTable({
           </Button>
           <Button
             variant="outline"
-            className="hidden size-8 sm:flex"
             size="icon"
+            className="hidden size-8 sm:flex"
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
             title={t("LAST_PAGE")}

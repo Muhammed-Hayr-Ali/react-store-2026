@@ -59,6 +59,11 @@ export function ReviewStatusSheet({
   const tErrors = useTranslations("ActionErrors")
   const [isPending, startTransition] = React.useTransition()
 
+  // استخراج اسم المراجع بشكل آمن بناءً على الأعمدة الحقيقية (first_name, last_name)
+  const reviewerName = review?.user?.first_name
+    ? `${review.user.first_name} ${review.user.last_name || ""}`.trim()
+    : t("ANONYMOUS")
+
   // المخطط بسيط جداً لأن المشرف يعدل حالة القبول فقط
   const formSchema = React.useMemo(
     () =>
@@ -165,7 +170,7 @@ export function ReviewStatusSheet({
                 <div>
                   <label className="text-xs text-muted-foreground">{t("AUTHOR_LABEL")}</label>
                   <p className="text-sm font-medium text-foreground">
-                    {review?.user?.full_name || t("ANONYMOUS")}
+                    {reviewerName}
                   </p>
                 </div>
                 <div>

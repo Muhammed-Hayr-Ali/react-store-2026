@@ -632,7 +632,7 @@ export function CategoryFormSheet({
                                 </Avatar>
                               </span>
                               {isSelected && (
-                                <span className="absolute end-1 top-1 flex size-4 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                                <span className="absolute inset-e-1 top-1 flex size-4 items-center justify-center rounded-full bg-primary text-primary-foreground">
                                   <CheckIcon className="size-3" />
                                 </span>
                               )}

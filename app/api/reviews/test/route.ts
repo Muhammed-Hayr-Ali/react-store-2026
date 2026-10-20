@@ -2,7 +2,7 @@ import { createClient } from "@/lib/database/supabase/server"
 import { NextResponse } from "next/server"
 
 // 1. GET: لجلب جميع التقييمات مع بيانات العميل والمنتج المرتبط
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const supabase = await createClient()
 
