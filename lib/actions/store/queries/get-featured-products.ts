@@ -106,13 +106,14 @@ export async function getFeaturedProducts(
       selectedImage = images.find((img) => img.variant_sku === cheapestVariant?.sku) || null
     }
 
-    // 3. الحلول البديلة للصورة في حال عدم توفر صورة مخصصة للمتغير
     if (!selectedImage) {
       selectedImage = 
         images.find((img) => img.is_primary) || 
         images[0] || 
         null
     }
+
+
 
     return {
       id: product.id,

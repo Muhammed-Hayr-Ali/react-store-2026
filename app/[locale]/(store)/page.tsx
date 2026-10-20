@@ -1,10 +1,12 @@
 /**
  * @file app/[locale]/(store)/page.tsx
- * @description Storefront home page displaying the featured products slider.
+ * @description Storefront home page displaying the featured products slider and root categories.
  */
 
 import { getFeaturedProducts } from "@/lib/actions/store/queries/get-featured-products"
+import { getRootCategories } from "@/lib/actions/store/queries/get-root-categories"
 import FeaturedHeroSlider from "@/components/store/home/featured-hero-slider"
+import CategoriesScroll from "@/components/store/home/categories-scroll"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 
@@ -14,19 +16,27 @@ export async function generateMetadata() {
   return createMetadata({
     siteName: appConfig.name,
     title: "Home",
-    description: "Welcome to our store. Discover our featured products.",
+    description: "Welcome to our store. Discover our featured products and categories.",
   })
 }
 
 export default async function Page() {
-  // جلب المنتجات المتميزة للسلايدر
-  const result = await getFeaturedProducts({ limit: 5, activeOnly: true })
-  const slides = result.success ? result.data : []
+  // جلب المنتجات المتميزة والتصنيفات الرئيسية بشكل متزامن (بالتوازي) لتحسين الأداء
+  const [featuredResult, categoriesResult] = await Promise.all([
+    getFeaturedProducts({ limit: 5, activeOnly: true }),
+    getRootCategories({ limit: 10 }),
+  ])
+
+  const slides = featuredResult.success ? featuredResult.data : []
+  const categories = categoriesResult.success ? categoriesResult.data : []
 
   return (
-    <div className="space-y-6 pb-10">
+    <div className="space-y-4 pb-10 sm:space-y-6">
       {/* عرض السلايدر التفاعلي للمنتجات المميزة */}
       <FeaturedHeroSlider slides={slides} />
+
+      {/* عرض شريط التصنيفات الرئيسية المتحرك */}
+      <CategoriesScroll categories={categories} />
 
       {/* 
       === تم تعليق صفحة الصيانة المؤقتة بناءً على الطلب ===
