@@ -2,26 +2,30 @@
 
 /**
  * @file components/store/product-details/reviews/product-reviews-section.tsx
- * @description Main container wrapping header, summary card, and reviews list.
+ * @description Main container wrapping header, summary card, and reviews list with the new data structure.
  */
-
-import * as React from "react"
 
 import { ReviewsHeader } from "./reviews-header"
 import { ReviewsSummaryCard } from "./reviews-summary-card"
 import { EmptyReviews } from "./empty-reviews"
-import { ReviewCard, type ExtendedProductReviewItem } from "./review-card"
-import { ProductReviewsResult } from "@/lib/actions/store/product-details/reviews/queries/get-product-reviews"
+import { ReviewCard } from "./review-card"
+
+import type {
+  ProductReviewItem,
+  ProductReviewsResult,
+} from "@/lib/actions/store/product-details/reviews/queries/get-product-reviews"
 
 interface ProductReviewsSectionProps {
-  productId: string
   reviewsData: ProductReviewsResult | null
 }
 
 export function ProductReviewsSection({
-  productId,
   reviewsData,
 }: ProductReviewsSectionProps) {
+  const productId = reviewsData?.productId ?? ""
+  const currentUserId = reviewsData?.currentUserId ?? null
+  const hasUserReviewed = reviewsData?.hasUserReviewed ?? false
+
   const summary = reviewsData?.summary ?? {
     averageRating: 0,
     totalReviews: 0,
@@ -32,19 +36,26 @@ export function ProductReviewsSection({
     })),
   }
 
-  // استخدام النوع المدقق بدلاً من أي نوع مبهم
-  const reviews: ExtendedProductReviewItem[] = reviewsData?.reviews ?? []
+  const reviews: ProductReviewItem[] = reviewsData?.reviews ?? []
 
   return (
     <div className="space-y-6 pt-6">
+      {/* تمرير البيانات الجديدة للترويسة للتحكم في ظهور زر الإضافة */}
       <ReviewsHeader
-        totalReviews={summary.totalReviews}
         productId={productId}
+        currentUserId={currentUserId}
+        hasUserReviewed={hasUserReviewed}
+        totalReviews={summary.totalReviews}
       />
+
       <ReviewsSummaryCard summary={summary} />
 
       {reviews.length === 0 ? (
-        <EmptyReviews />
+        <EmptyReviews
+          productId={productId}
+          currentUserId={currentUserId}
+          hasUserReviewed={hasUserReviewed}
+        />
       ) : (
         <div className="space-y-3">
           {reviews.map((review) => (

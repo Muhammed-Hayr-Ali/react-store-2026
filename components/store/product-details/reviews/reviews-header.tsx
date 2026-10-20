@@ -5,27 +5,30 @@
  * @description Reviews section header with total count and write review button dialog.
  */
 
+
 import * as React from "react"
 import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import { ReviewDialog } from "./review-dialog"
-import { useUser } from "@/lib/context/user-context"
 
 interface ReviewsHeaderProps {
-  productId: string // <-- إضافة معرف المنتج هنا
+  currentUserId: string | null | undefined
+  hasUserReviewed: boolean | undefined
+  productId: string | undefined
   totalReviews: number
-  onReviewCreated?: () => void
 }
 
 export function ReviewsHeader({
+  currentUserId,
+  hasUserReviewed,
   productId,
   totalReviews,
-  onReviewCreated,
 }: ReviewsHeaderProps) {
   const t = useTranslations("ProductReviews")
-  const { user } = useUser()
   const [isOpen, setIsOpen] = React.useState(false)
+
+  const canReview = currentUserId && !hasUserReviewed
 
   return (
     <div className="flex items-center justify-between border-b border-border pb-4">
@@ -37,7 +40,7 @@ export function ReviewsHeader({
           {t("VERIFIED_REVIEWS_COUNT", { count: totalReviews })}
         </p>
       </div>
-      {user && (
+      {canReview && (
         <ReviewDialog
           productId={productId}
           mode="create"
@@ -45,7 +48,6 @@ export function ReviewsHeader({
           onOpenChange={setIsOpen}
           onSuccess={() => {
             setIsOpen(false)
-            onReviewCreated?.()
           }}
         >
           <Button

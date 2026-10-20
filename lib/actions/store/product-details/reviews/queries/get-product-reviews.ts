@@ -1,11 +1,12 @@
 /**
  * @file lib/actions/store/product-details/queries/get-product-reviews.ts
- * @description Retrieves approved product reviews along with reviewer profile details and rating summary statistics.
+ * @description Retrieves approved product reviews along with reviewer profile details, rating summary statistics, and current user ownership status.
  */
 
 "use server"
 
 import { createServerClient } from "@/lib/database/supabase/server"
+import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 import type { ApiResult } from "@/lib/actions/types/utils"
 
 export interface ReviewerProfile {
@@ -21,6 +22,7 @@ export interface ProductReviewItem {
   content: string | null
   is_approved: boolean
   created_at: string
+  user_id: string // أضفنا معرف صاحب التعليق هنا للتحقق السهل في الكارت
   user: ReviewerProfile | null
 }
 
@@ -37,6 +39,9 @@ export interface ProductReviewsSummary {
 }
 
 export interface ProductReviewsResult {
+  productId: string
+  currentUserId: string | null | undefined
+  hasUserReviewed: boolean | undefined
   reviews: ProductReviewItem[]
   summary: ProductReviewsSummary
 }
@@ -47,6 +52,7 @@ interface DatabaseReviewQueryResult {
   content: string | null
   is_approved: boolean
   created_at: string
+  user_id: string
   user: ReviewerProfile[] | ReviewerProfile | null
 }
 
@@ -70,27 +76,33 @@ export async function getProductReviews(
 
   const supabase = await createServerClient()
 
-  // جلب كافة التعليقات المعتمدة لحساب الملخص بدقة، مع تطبيق الـ limit للتعليقات المعروضة لاحقاً
-  const { data, error } = await supabase
-    .from("product_reviews")
-    .select(
-      `
-      id,
-      rating,
-      content,
-      is_approved,
-      created_at,
-      user:user_id (
+  // 1. جلب بيانات المستخدم الحالي بالتوازي مع جلب التعليقات لتحسين الأداء
+  const [reviewsResponse, currentUserResult] = await Promise.all([
+    supabase
+      .from("product_reviews")
+      .select(
+        `
         id,
-        first_name,
-        last_name,
-        profile_image
+        rating,
+        content,
+        is_approved,
+        created_at,
+        user_id,
+        user:user_id (
+          id,
+          first_name,
+          last_name,
+          profile_image
+        )
+      `
       )
-    `
-    )
-    .eq("product_id", productId)
-    .eq("is_approved", true)
-    .order("created_at", { ascending: false })
+      .eq("product_id", productId)
+      .eq("is_approved", true)
+      .order("created_at", { ascending: false }),
+    getCurrentUser(),
+  ])
+
+  const { data, error } = reviewsResponse
 
   if (error) {
     console.error("[getProductReviews] Database query failed", {
@@ -106,9 +118,18 @@ export async function getProductReviews(
   }
 
   const rawReviews = (data ?? []) as unknown as DatabaseReviewQueryResult[]
+  const currentUserId =
+    currentUserResult.success && currentUserResult.data
+      ? currentUserResult.data.id
+      : null
 
-  // 1. حساب إحصائيات الملخص (Summary)
+  // 2. حساب إحصائيات الملخص (Summary)
   const totalReviews = rawReviews.length
+
+  // التحقق مما إذا كان المستخدم الحالي قد علق مسبقاً ضمن قائمة التعليقات المعتمدة أو البحث المباشر
+  const hasUserReviewed = currentUserId
+    ? rawReviews.some((review) => review.user_id === currentUserId)
+    : false
 
   // تهيئة عدادات النجوم من 1 إلى 5
   const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
@@ -136,7 +157,7 @@ export async function getProductReviews(
     }
   })
 
-  // 2. تنسيق قائمة التعليقات مع تطبيق الـ limit المطلوب للعرض
+  // 3. تنسيق قائمة التعليقات مع تطبيق الـ limit المطلوب للعرض
   const limitedRawReviews = limit > 0 ? rawReviews.slice(0, limit) : rawReviews
 
   const formattedReviews: ProductReviewItem[] = limitedRawReviews.map(
@@ -152,6 +173,7 @@ export async function getProductReviews(
         content: review.content,
         is_approved: review.is_approved,
         created_at: review.created_at,
+        user_id: review.user_id,
         user: reviewer,
       }
     }
@@ -160,6 +182,9 @@ export async function getProductReviews(
   return {
     success: true,
     data: {
+      productId,
+      currentUserId,
+      hasUserReviewed,
       reviews: formattedReviews,
       summary: {
         averageRating,

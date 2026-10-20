@@ -68,7 +68,7 @@ export default async function ProductDetailsPage({
       </div>
 
       {/* 3. دمج وإرسال بيانات التقييمات والمراجعات للمكون الرئيسي */}
-      <ProductReviewsSection reviewsData={reviewsData} productId={product.id} />
+      <ProductReviewsSection reviewsData={reviewsData} />
     </div>
   )
 }

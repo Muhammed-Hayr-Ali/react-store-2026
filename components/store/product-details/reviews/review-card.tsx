@@ -15,18 +15,12 @@ import { DeleteReviewDialog } from "./delete-review-dialog"
 import { ReviewDialog } from "./review-dialog"
 import type { ProductReviewItem } from "@/lib/actions/store/product-details/reviews/queries/get-product-reviews"
 
-export interface ExtendedProductReviewItem extends ProductReviewItem {
-  user_id?: string
-}
-
 interface ReviewCardProps {
-  review: ExtendedProductReviewItem
-  onReviewDeleted?: (reviewId: string) => void
+  review: ProductReviewItem
 }
 
 export function ReviewCard({
   review,
-  onReviewDeleted,
 }: ReviewCardProps) {
   const t = useTranslations("ProductReviews")
   const { user } = useUser()
@@ -97,7 +91,6 @@ export function ReviewCard({
               open={isDeleteOpen}
               onOpenChange={setIsDeleteOpen}
               onDeleted={(deletedId) => {
-                onReviewDeleted?.(deletedId)
               }}
             >
               <Button
