@@ -1,0 +1,55 @@
+"use client"
+
+/**
+ * @file components/store/product-details/reviews/reviews-header.tsx
+ * @description Reviews section header with total count and write review button dialog.
+ */
+
+import * as React from "react"
+import { useTranslations } from "next-intl"
+
+import { Button } from "@/components/ui/button"
+import { ReviewDialog } from "./review-dialog"
+
+interface ReviewsHeaderProps {
+  productId: string // <-- إضافة معرف المنتج هنا
+  totalReviews: number
+  onReviewCreated?: () => void
+}
+
+export function ReviewsHeader({
+  productId,
+  totalReviews,
+  onReviewCreated,
+}: ReviewsHeaderProps) {
+  const t = useTranslations("ProductReviews")
+  const [isOpen, setIsOpen] = React.useState(false)
+
+  return (
+    <div className="flex items-center justify-between border-b border-border pb-4">
+      <div>
+        <h3 className="text-lg font-bold tracking-tight text-foreground">
+          {t("REVIEWS_SECTION_TITLE")}
+        </h3>
+        <p className="text-xs text-muted-foreground">
+          {t("VERIFIED_REVIEWS_COUNT", { count: totalReviews })}
+        </p>
+      </div>
+
+      <ReviewDialog
+        productId={productId} // <-- تمرير معرف المنتج للدايلوج لكي يتم إنشاء التقييم بنجاح
+        mode="create"
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        onSuccess={() => {
+          setIsOpen(false)
+          onReviewCreated?.()
+        }}
+      >
+        <Button size="sm" className="text-xs" aria-label={t("WRITE_REVIEW_BUTTON")}>
+          {t("WRITE_REVIEW_BUTTON")}
+        </Button>
+      </ReviewDialog>
+    </div>
+  )
+}

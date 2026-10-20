@@ -1112,10 +1112,10 @@
     "APPROVED_COUNT": "مقبولة",
     "PENDING_COUNT": "قيد الانتظار",
 
-    "REVIEW_NAME_CONFIRMATION_REQUIRED": "Enter the reviewer name to confirm deletion.",
-    "REVIEW_NAME_CONFIRMATION_MISMATCH": "The entered name does not match this reviewer.",
-    "TYPE_REVIEW_NAME_TO_CONFIRM": "To confirm, type the reviewer name",
-    "CONFIRM_REVIEW_NAME_PLACEHOLDER": "Type the reviewer name here...",
+    "REVIEW_NAME_CONFIRMATION_REQUIRED": "أدخل اسم المراجع لتأكيد الحذف.",
+    "REVIEW_NAME_CONFIRMATION_MISMATCH": "الاسم المدخل لا يطابق اسم هذا المراجع.",
+    "TYPE_REVIEW_NAME_TO_CONFIRM": "للتأكيد، يرجى كتابة اسم المراجع",
+    "CONFIRM_REVIEW_NAME_PLACEHOLDER": "اكتب اسم المراجع هنا...",
 
     "ACTIONS_LABEL": "الإجراءات",
     "CHANGE_STATUS_ACTION": "تغيير الحالة",
@@ -1175,5 +1175,42 @@
     "SAVE_BUTTON": "حفظ التغييرات",
     "UPDATE_SUCCESS": "تم تحديث حالة التقييم بنجاح.",
     "SAVE_ERROR": "فشل تحديث حالة التقييم. يرجى المحاولة لاحقاً."
+  },
+  "ProductReviews": {
+    "REVIEWS_SECTION_TITLE": "تقييمات العملاء",
+    "VERIFIED_REVIEWS_COUNT": "{count} تقييم موثق لهذا المنتج",
+    "WRITE_REVIEW_BUTTON": "إضافة تقييم",
+    "BASED_ON_REVIEWS": "بناءً على {count} تقييم",
+    "STAR_LABEL": "{count} نجوم",
+    "NO_REVIEWS_TITLE": "لا توجد تقييمات بعد",
+    "NO_REVIEWS_DESCRIPTION": "كن أول من يشارك تجربته مع هذا المنتج ويساعد المتسوقين الآخرين!",
+    "WRITE_FIRST_REVIEW_BUTTON": "اكتب التقييم الأول",
+    "ANONYMOUS_USER": "مستخدم مجهول",
+    "EDIT_REVIEW_ARIA": "تعديل التقييم",
+    "DELETE_REVIEW_ARIA": "حذف التقييم",
+
+    "UPDATE_REVIEW_DIALOG_TITLE": "تعديل التقييم",
+    "UPDATE_REVIEW_DIALOG_DESCRIPTION": "قم بتعديل تقييمك أو محتوى التعليق أدناه.",
+    "RATING_LABEL": "التقييم",
+    "RATING_REQUIRED": "التقييم مطلوب",
+    "CONTENT_LABEL": "محتوى التقييم",
+    "CONTENT_PLACEHOLDER": "اكتب تقييمك هنا...",
+    "CANCEL_BUTTON": "إلغاء",
+    "SAVE_CHANGES_BUTTON": "حفظ التغييرات",
+    "SAVING_BUTTON": "جاري الحفظ...",
+    "UPDATE_REVIEW_SUCCESS": "تم تعديل التقييم بنجاح",
+    "UPDATE_REVIEW_ERROR": "فشل تعديل التقييم",
+
+    "DELETE_REVIEW_DIALOG_TITLE": "حذف التقييم",
+    "DELETE_REVIEW_DIALOG_DESCRIPTION": "هل أنت متأكد من رغبتك في حذف هذا التقييم؟ لا يمكن التراجع عن هذا الإجراء.",
+    "DELETE_CONFIRM_BUTTON": "حذف",
+    "DELETING_BUTTON": "جاري الحذف...",
+    "DELETE_REVIEW_SUCCESS": "تم حذف التقييم بنجاح",
+    "DELETE_REVIEW_ERROR": "فشل حذف التقييم",
+
+    "CREATE_REVIEW_DIALOG_TITLE": "إضافة تقييم",
+    "CREATE_REVIEW_DIALOG_DESCRIPTION": "شاركنا رأيك وتجربتك حول هذا المنتج مع باقي العملاء.",
+    "CREATE_REVIEW_SUCCESS": "تم إرسال التقييم بنجاح",
+    "CREATE_REVIEW_ERROR": "فشل إرسال التقييم"
   }
 }
