@@ -51,7 +51,6 @@ export function EmptyReviews({
         >
           <Button
             variant="outline"
-            size="sm"
             className="mt-4 text-xs"
             aria-label={t("WRITE_FIRST_REVIEW_BUTTON")}
           >

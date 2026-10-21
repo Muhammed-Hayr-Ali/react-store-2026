@@ -1101,7 +1101,7 @@ export default function ProductForm({
                       {t("SAVING")}
                     </>
                   ) : (
-                    <>{isEditing ? "Update Product" : "Save Product"}</>
+                    <>{isEditing ? t("UPDATE_PRODUCT") : t("SAVE_PRODUCT")}</>
                   )}
                 </Button>
 

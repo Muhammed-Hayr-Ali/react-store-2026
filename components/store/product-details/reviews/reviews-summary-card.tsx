@@ -2,14 +2,14 @@
 
 /**
  * @file components/store/product-details/reviews/reviews-summary-card.tsx
- * @description Summary card displaying average rating, total count, and star breakdown progress bars.
+ * @description Summary card displaying average rating, total count, and star breakdown progress bars side-by-side on all screen sizes.
  */
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
 import { ProductReviewsSummary } from "@/lib/actions/store/product-details/reviews/queries/get-product-reviews"
+import { Progress } from "@/components/ui/progress"
 
- 
 interface ReviewsSummaryCardProps {
   summary: ProductReviewsSummary
 }
@@ -19,37 +19,37 @@ export function ReviewsSummaryCard({ summary }: ReviewsSummaryCardProps) {
   const { averageRating, totalReviews, ratingBreakdown } = summary
 
   return (
-    <div className="grid grid-cols-1 gap-6 rounded-2xl border border-border bg-card p-6 md:grid-cols-12 md:items-center">
-      {/* القسم الأيسر: المتوسط العام وعدد المقيمين */}
-      <div className="flex flex-col items-center justify-center text-center md:col-span-4 md:border-r md:border-border md:pr-6">
-        <span className="text-5xl font-extrabold tracking-tight text-foreground">
-          {averageRating}
+    <div className="grid grid-cols-12 items-center gap-4 rounded-2xl border border-border bg-card p-4 sm:p-6">
+      {/* القسم الأيسر: المتوسط العام (يأخذ 4 أعمدة من أصل 12 أي ما يعادل ~33.3%) */}
+      <div className="col-span-4 flex flex-col items-center justify-center border-r border-border pr-3 text-center sm:pr-6">
+        <span className="text-5xl tracking-tight text-foreground sm:text-7xl">
+          {Number(averageRating).toFixed(1)}
         </span>
-        <div className="my-1 flex items-center text-amber-500">
+        <div className="my-1 flex items-center text-sm text-amber-500 sm:text-base">
           {"★".repeat(Math.round(averageRating))}
           {"☆".repeat(5 - Math.round(averageRating))}
         </div>
-        <span className="text-xs text-muted-foreground">
+        <span className="text-[10px] leading-tight text-muted-foreground sm:text-xs">
           {t("BASED_ON_REVIEWS", { count: totalReviews })}
         </span>
       </div>
 
-      {/* القسم الأيمن: أشرطة التقدم لكل نجمة */}
-      <div className="space-y-2 md:col-span-8 md:pl-2">
+      {/* القسم الأيمن: أشرطة التقدم (يأخذ 8 أعمدة المتبقية أي ما يعادل ~66.7%) */}
+      <div className="col-span-8 space-y-2 pl-2">
         {ratingBreakdown.map((item) => (
-          <div key={item.rating} className="flex items-center gap-3 text-xs">
-            <span className="w-16 font-medium text-foreground">
-              {t("STAR_LABEL", { count: item.rating })}
-            </span>
-            <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-amber-500 transition-all duration-300"
-                style={{ width: `${item.percentage}%` }}
-              />
+          <div
+            key={item.rating}
+            className="flex items-center gap-2 text-xs sm:gap-3"
+          >
+            <div className="flex w-8 shrink-0 items-center gap-1 font-normal text-foreground sm:w-10">
+              <span>{item.rating}</span>
+              <span className="text-base leading-none text-amber-500">★</span>
             </div>
-            <span className="w-10 text-right text-muted-foreground">
-              {item.count}
-            </span>
+
+            <Progress
+              value={item.percentage}
+              className="h-1.5 flex-1 bg-muted sm:h-2 [&>div]:bg-amber-500"
+            />
           </div>
         ))}
       </div>

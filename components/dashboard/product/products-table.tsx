@@ -368,7 +368,7 @@ export function ProductsTable({
           return (
             <Badge
               variant="outline"
-              className={`gap-1 truncate px-1.5 py-0.5 text-xs font-normal leading-tight ${
+              className={`gap-1 truncate px-1.5 py-0.5 text-xs leading-tight font-normal ${
                 isActive
                   ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                   : "border-amber-500/30 text-amber-600 dark:text-amber-400"
@@ -407,7 +407,7 @@ export function ProductsTable({
               <DropdownMenuContent align="end" className="w-44 text-xs">
                 <DropdownMenuItem asChild>
                   <Link
-                    href={`/product/${row.original.slug}`}
+                    href={`/product-details/${row.original.slug}`}
                     target="_blank"
                     className="flex cursor-pointer items-center"
                   >
@@ -452,7 +452,7 @@ export function ProductsTable({
                   className="cursor-pointer"
                   onClick={() => {
                     navigator.clipboard.writeText(
-                      `${window.location.origin}/product/${row.original.slug}`
+                      `${window.location.origin}/product-details/${row.original.slug}`
                     )
                     toast.success(t("LINK_COPIED_SUCCESS"))
                   }}
@@ -474,8 +474,6 @@ export function ProductsTable({
                       router.refresh()
                     }}
                   >
-
-            
                     <DropdownMenuItem
                       onSelect={(e) => e.preventDefault()}
                       className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
@@ -714,7 +712,7 @@ export function ProductsTable({
 
           {/* Dual Responsive CTA Button */}
           <Can permission={PERMISSIONS.CREATE_PRODUCT}>
-              <Link href="/dashboard/products/create">
+            <Link href="/dashboard/products/create">
               <Button
                 variant="default"
                 size="icon"

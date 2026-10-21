@@ -40,7 +40,7 @@ export function ProductReviewsSection({
 
   return (
     <div className="space-y-6 pt-6">
-      {/* تمرير البيانات الجديدة للترويسة للتحكم في ظهور زر الإضافة */}
+      {/* Header */}
       <ReviewsHeader
         productId={productId}
         currentUserId={currentUserId}

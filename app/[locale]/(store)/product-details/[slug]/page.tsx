@@ -10,10 +10,12 @@ import { getProductReviews } from "@/lib/actions/store/product-details/reviews/q
 import { ProductReviewsSection } from "@/components/store/product-details/reviews/product-reviews-section"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
+import { ProductInfoSection } from "@/components/store/product-details/details/product-info-section"
 
 interface ProductDetailsPageProps {
   params: Promise<{
     slug: string
+    locale: string
   }>
 }
 
@@ -34,10 +36,8 @@ export async function generateMetadata({ params }: ProductDetailsPageProps) {
 
   return createMetadata({
     siteName: appConfig.name,
-    title: product.name,
-    description:
-      product.description ||
-      `Discover details and reviews for ${product.name}.`,
+    title: product.meta_title || product.name,
+    description: product.meta_description || product.name,
   })
 }
 
@@ -45,6 +45,7 @@ export default async function ProductDetailsPage({
   params,
 }: ProductDetailsPageProps) {
   const { slug } = await params
+  const { locale } = await params
 
   // 1. جلب تفاصيل المنتج أولاً للحصول على الـ id الخاص به
   const productResult = await getProductDetails(slug)
@@ -60,12 +61,13 @@ export default async function ProductDetailsPage({
   const reviewsData = reviewsResult.success ? reviewsResult.data : null
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-6 space-y-10">
+    <div className="mx-auto w-full max-w-6xl space-y-10 px-4 py-6">
       {/* تفاصيل المنتج الأساسية */}
-      <div className="space-y-4">
+      {/* <div className="space-y-4">
         <h1 className="text-3xl font-extrabold tracking-tight">{product.name}</h1>
         <p className="text-muted-foreground">{product.description}</p>
-      </div>
+      </div> */}
+      <ProductInfoSection locale={locale} product={product} />
 
       {/* 3. دمج وإرسال بيانات التقييمات والمراجعات للمكون الرئيسي */}
       <ProductReviewsSection reviewsData={reviewsData} />

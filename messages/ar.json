@@ -1047,6 +1047,8 @@
     "ACTIONS": "الإجراءات",
     "ACTIONS_DESCRIPTION": "حفظ التعديلات أو إلغاؤها",
     "SAVING": "جارٍ الحفظ...",
+    "UPDATE_PRODUCT": "تحديث المنتج",
+    "SAVE_PRODUCT": "حفظ المنتج",
     "DISCARD_CHANGES": "تجاهل التغييرات",
     "VARIANT_NUMBER": "المتغير رقم {number}",
     "SKU_CODE": "رمز SKU",
@@ -1211,6 +1213,36 @@
     "CREATE_REVIEW_DIALOG_TITLE": "إضافة تقييم",
     "CREATE_REVIEW_DIALOG_DESCRIPTION": "شاركنا رأيك وتجربتك حول هذا المنتج مع باقي العملاء.",
     "CREATE_REVIEW_SUCCESS": "تم إرسال التقييم بنجاح",
-    "CREATE_REVIEW_ERROR": "فشل إرسال التقييم"
+    "CREATE_REVIEW_ERROR": "فشل إرسال التقييم",
+
+    "ALREADY_REVIEWED_MESSAGE": "شكراً لك! لقد شاركتنا تقييمك لهذا المنتج مسبقاً."
+  },
+  "ProductDetails": {
+    "HOME": "المتجر",
+    "SELECT_VARIANT": "الخيارات / النكهات",
+    "OUT_OF_STOCK": "نفذ من المخزون",
+    "IN_STOCK": "متوفر في المخزون",
+    "DECREASE_QUANTITY": "تقليل الكمية",
+    "INCREASE_QUANTITY": "زيادة الكمية",
+    "OUT_OF_STOCK_BUTTON": "نفذ المخزون",
+    "ADDING_TO_CART": "جاري الإضافة...",
+    "ADD_TO_CART": "إضافة إلى السلة",
+
+    "VIEW_FULL_SCREEN": "تكبير الصورة",
+    "NO_IMAGE": "لا توجد صورة متوفرة",
+    "OFF": "خصم",
+    "SELECT_PRODUCT_IMAGE": "تحديد صورة المنتج",
+    "CLOSE_GALLERY": "إغلاق المعرض",
+    "PREVIOUS_IMAGE": "الصورة السابقة",
+    "NEXT_IMAGE": "الصورة التالية",
+    "IMAGE_UNAVAILABLE": "الصورة غير متوفرة",
+
+    "QUANTITY": "الكمية:",
+    "TOTAL_PRICE": "السعر الإجمالي",
+    "ADD_MULTIPLE_TO_CART": "إضافة {count} إلى السلة",
+
+    "FAST_DISPATCH": "شحن سريع",
+    "EASY_RETURNS": "إرجاع سهل",
+    "SECURE_CHECKOUT": "دفع آمن"
   }
 }

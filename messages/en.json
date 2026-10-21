@@ -1047,6 +1047,8 @@
     "ACTIONS": "Actions",
     "ACTIONS_DESCRIPTION": "Commit or cancel ongoing modifications",
     "SAVING": "Saving...",
+    "UPDATE_PRODUCT": "Update Product",
+    "SAVE_PRODUCT": "Save Product",
     "DISCARD_CHANGES": "Discard Changes",
     "VARIANT_NUMBER": "Variant #{number}",
     "SKU_CODE": "SKU Code",
@@ -1176,7 +1178,7 @@
     "UPDATE_SUCCESS": "Review status has been updated successfully.",
     "SAVE_ERROR": "Failed to update review status."
   },
- 
+
   "ProductReviews": {
     "REVIEWS_SECTION_TITLE": "Customer Reviews",
     "VERIFIED_REVIEWS_COUNT": "{count} verified reviews for this product",
@@ -1212,6 +1214,36 @@
     "CREATE_REVIEW_DIALOG_TITLE": "Write a Review",
     "CREATE_REVIEW_DIALOG_DESCRIPTION": "Share your thoughts about this product with other customers.",
     "CREATE_REVIEW_SUCCESS": "Review submitted successfully",
-    "CREATE_REVIEW_ERROR": "Failed to submit review"
+    "CREATE_REVIEW_ERROR": "Failed to submit review",
+
+    "ALREADY_REVIEWED_MESSAGE": "Thank you! You have already reviewed this product."
+  },
+  "ProductDetails": {
+    "HOME": "Store",
+    "SELECT_VARIANT": "Options / Flavors",
+    "OUT_OF_STOCK": "Out of stock",
+    "IN_STOCK": "In stock",
+    "DECREASE_QUANTITY": "Decrease quantity",
+    "INCREASE_QUANTITY": "Increase quantity",
+    "OUT_OF_STOCK_BUTTON": "Out of Stock",
+    "ADDING_TO_CART": "Adding...",
+    "ADD_TO_CART": "Add to Cart",
+
+    "VIEW_FULL_SCREEN": "View Fullscreen",
+    "NO_IMAGE": "No image available",
+    "OFF": "OFF",
+    "SELECT_PRODUCT_IMAGE": "Select product image",
+    "CLOSE_GALLERY": "Close fullscreen gallery",
+    "PREVIOUS_IMAGE": "Previous image",
+    "NEXT_IMAGE": "Next image",
+    "IMAGE_UNAVAILABLE": "Image unavailable",
+
+    "QUANTITY": "Quantity:",
+    "TOTAL_PRICE": "Total Price",
+    "ADD_MULTIPLE_TO_CART": "Add {count} to Cart",
+
+    "FAST_DISPATCH": "Fast Dispatch",
+    "EASY_RETURNS": "Easy Returns",
+    "SECURE_CHECKOUT": "Secure Checkout"
   }
 }
