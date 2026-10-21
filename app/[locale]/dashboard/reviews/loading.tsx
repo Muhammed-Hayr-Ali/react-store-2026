@@ -1,3 +1,8 @@
+/**
+ * @file app/dashboard/categories/loading.tsx
+ * @description Loading skeleton for categories management page matching the updated summary layout and table structure.
+ */
+
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -21,23 +26,29 @@ export default function Loading() {
         </div>
       </div>
 
-      {/* هيكل التحميل لبطاقات الملخص الثلاثة (بشكل أفقي متجاوب grid-cols-3) */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+      {/* هيكل التحميل لبطاقات الملخص الثلاثة مع مساحة لسلط النقاط التوضيحية */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {Array.from({ length: 3 }, (_, index) => (
           <div
             key={index}
-            className="flex items-center justify-between rounded-xl border border-border bg-card px-3 py-2.5 sm:px-4 sm:py-3 shadow-xs"
+            className="flex flex-col justify-between rounded-xl border border-border bg-card px-3 py-2.5 shadow-xs sm:px-4 sm:py-3"
           >
-            <div className="space-y-1 sm:space-y-1.5 min-w-0 flex-1">
-              <Skeleton className="h-2.5 w-16 sm:h-3 sm:w-24 rounded-md" />
-              <Skeleton className="h-5 w-8 sm:h-6 sm:w-12 rounded-md" />
+            <div className="flex items-center justify-between">
+              <div className="min-w-0 space-y-0.5 sm:space-y-1">
+                <Skeleton className="h-2.5 w-16 sm:h-3 sm:w-24 rounded-md" />
+                <Skeleton className="h-5 w-8 sm:h-6 sm:w-12 rounded-md" />
+              </div>
+              <Skeleton className="size-7 sm:size-8 shrink-0 rounded-lg" />
             </div>
-            <Skeleton className="size-7 sm:size-8 shrink-0 rounded-lg" />
+            {/* مكان سطر النقاط التوضيحية (Legend) السفلي المتطابق مع التصميم */}
+            <div className="mt-3 flex items-center gap-2 border-t border-border/50 pt-2">
+              <Skeleton className="size-2 rounded-full" />
+              <Skeleton className="h-2.5 w-24 rounded-md" />
+            </div>
           </div>
         ))}
       </div>
 
-      {/* شريط الأدوات والبحث */}
       <div className="flex w-full items-center gap-2">
         <Skeleton className="h-8 min-w-0 flex-1 rounded-md" />
         <div className="flex shrink-0 items-center gap-2">
@@ -48,37 +59,24 @@ export default function Loading() {
             <Skeleton className="h-full w-16 rounded-sm" />
           </div>
           <Skeleton className="size-8 rounded-md" />
-          {/* تمت إزالة زر "إضافة" لأنه لا يوجد زر إضافة للتقييمات للمشرف */}
+          <Skeleton className="size-8 rounded-md sm:w-28" />
         </div>
       </div>
 
-      {/* جدول التقييمات */}
       <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">
         <div className="overflow-x-auto">
           <Table className="w-full">
             <TableHeader className="bg-muted/40">
               <TableRow>
-                {/* عمود المستخدم */}
-                <TableHead className="w-[25%]">
+                <TableHead className="w-[40%]">
                   <Skeleton className="h-4 w-24 rounded-md" />
                 </TableHead>
-                {/* عمود التقييم */}
                 <TableHead>
                   <Skeleton className="h-4 w-16 rounded-md" />
                 </TableHead>
-                {/* عمود المحتوى */}
-                <TableHead className="w-[30%]">
-                  <Skeleton className="h-4 w-32 rounded-md" />
-                </TableHead>
-                {/* عمود الحالة */}
                 <TableHead>
-                  <Skeleton className="h-4 w-16 rounded-md" />
+                  <Skeleton className="h-4 w-12 rounded-md" />
                 </TableHead>
-                {/* عمود التاريخ */}
-                <TableHead>
-                  <Skeleton className="h-4 w-20 rounded-md" />
-                </TableHead>
-                {/* عمود الإجراءات */}
                 <TableHead className="text-end">
                   <div className="flex justify-end">
                     <Skeleton className="h-4 w-8 rounded-md" />
@@ -89,30 +87,21 @@ export default function Loading() {
             <TableBody>
               {Array.from({ length: 7 }, (_, index) => (
                 <TableRow key={index}>
-                  {/* المستخدم (أيقونة + اسم) */}
                   <TableCell className="py-2.5">
                     <div className="flex items-center gap-2.5">
-                      <Skeleton className="size-7 shrink-0 rounded-full" />
-                      <Skeleton className="h-3.5 w-24 max-w-full rounded-md" />
+                      <Skeleton className="size-7 shrink-0 rounded-lg" />
+                      <div className="min-w-0 space-y-1">
+                        <Skeleton className="h-3.5 w-28 max-w-full rounded-md" />
+                        <Skeleton className="h-3 w-20 max-w-full rounded-md" />
+                      </div>
                     </div>
                   </TableCell>
-                  {/* التقييم (النجوم) */}
                   <TableCell className="py-2.5">
-                    <Skeleton className="h-4 w-14 rounded-md" />
+                    <Skeleton className="h-4 w-8 rounded-md" />
                   </TableCell>
-                  {/* المحتوى */}
                   <TableCell className="py-2.5">
-                    <Skeleton className="h-3.5 w-50 sm:w-62.5 max-w-full rounded-md" />
+                    <Skeleton className="h-5 w-16 rounded-full" />
                   </TableCell>
-                  {/* الحالة (Badge) */}
-                  <TableCell className="py-2.5">
-                    <Skeleton className="h-5 w-20 rounded-full" />
-                  </TableCell>
-                  {/* التاريخ */}
-                  <TableCell className="py-2.5">
-                    <Skeleton className="h-3.5 w-20 rounded-md" />
-                  </TableCell>
-                  {/* الإجراءات (النقاط الثلاث) */}
                   <TableCell className="py-2.5">
                     <div className="flex justify-end">
                       <Skeleton className="size-7 rounded-md" />
@@ -125,7 +114,6 @@ export default function Loading() {
         </div>
       </div>
 
-      {/* التذييل (Pagination) */}
       <div className="flex w-full flex-nowrap items-center justify-between gap-2 px-1 py-1">
         <div className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2">
           <Skeleton className="hidden h-4 w-20 rounded-md sm:block" />

@@ -419,6 +419,9 @@
     "EDIT_PAGE_META_DESCRIPTION": "Modify role details and update associated access permissions.",
     "EDIT_PAGE_TITLE": "Edit Role:",
     "EDIT_PAGE_DESCRIPTION": "Modify the role description and update its assigned system permissions.",
+    "TOTAL_ROLES_LEGEND": "All defined system roles",
+    "STATUS_LEGEND_ACTIVE_ROLE": "Assigned Permissions",
+    "STATUS_LEGEND_EMPTY_ROLE": "No Permissions",
     "PERMISSION_GROUPS": {
       "dashboard_views": "Dashboard & Page Views",
       "notifications_control": "Notifications & Broadcasts (Actions)",
@@ -593,7 +596,11 @@
     "ALL_ROLES_ASSIGNED_MESSAGE": "All defined roles are already assigned to this user.",
     "DISCARD_BUTTON": "Discard",
     "ASSIGNING_BUTTON": "Assigning...",
-    "CONFIRM_ASSIGN_BUTTON": "Assign Role"
+    "CONFIRM_ASSIGN_BUTTON": "Assign Role",
+
+    "TOTAL_STAFF_LEGEND": "All staff members",
+    "STATUS_LEGEND_ASSIGNED": "Roles Assigned",
+    "STATUS_LEGEND_UNASSIGNED": "No Roles"
   },
   "UsersManagement": {
     "META_TITLE": "User Accounts Management",
@@ -681,7 +688,12 @@
     "LAST_NAME_LABEL": "Last Name",
     "PHONE_NUMBER_LABEL": "Phone Number",
     "DISCARD_BUTTON": "Discard",
-    "SAVE_USER_BUTTON": "Save User"
+    "SAVE_USER_BUTTON": "Save User",
+
+    "TOTAL_USERS_LEGEND": "All registered accounts",
+    "STATUS_LEGEND_ACTIVE": "Active",
+    "STATUS_LEGEND_SUSPENDED": "Suspended",
+    "STATUS_LEGEND_BANNED": "Banned"
   },
   "NewsletterSubscribersManagement": {
     "META_TITLE": "Newsletter Subscribers Management",
@@ -745,7 +757,11 @@
     "DELETE_DIALOG_WARNING": "This action cannot be undone.",
     "TYPE_EMAIL_TO_CONFIRM": "To confirm, please type this email address:",
     "CONFIRM_EMAIL_PLACEHOLDER": "Type the email address here...",
-    "DELETING_BUTTON": "Deleting..."
+    "DELETING_BUTTON": "Deleting...",
+
+    "TOTAL_SUBSCRIBERS_LEGEND": "All newsletter subscribers",
+    "STATUS_LEGEND_ACTIVE": "Active",
+    "STATUS_LEGEND_UNSUBSCRIBED": "Unsubscribed"
   },
   "CategoriesManagement": {
     "META_TITLE": "Categories Management",
@@ -842,7 +858,11 @@
     "CATEGORY_SLUG_TOO_LONG_ERROR": "The slug must be 255 characters or fewer.",
     "INVALID_IMAGE_URL_ERROR": "Enter a valid image URL.",
     "CATEGORY_IMAGE_ALT_TOO_LONG_ERROR": "Image alt text must be 255 characters or fewer.",
-    "INVALID_SORT_ORDER_ERROR": "Display order must be a whole number."
+    "INVALID_SORT_ORDER_ERROR": "Display order must be a whole number.",
+
+    "TOTAL_CATEGORIES_LEGEND": "All registered categories",
+    "STATUS_LEGEND_ACTIVE": "Active",
+    "STATUS_LEGEND_INACTIVE": "Inactive"
   },
   "BrandsManagement": {
     "META_TITLE": "Brands management",
@@ -934,7 +954,11 @@
     "SLUG_PLACEHOLDER": "acme",
     "SORT_ORDER_PLACEHOLDER": "0",
     "FORM_CREATE_DESCRIPTION": "Add a brand to your catalog and configure its storefront details.",
-    "FORM_EDIT_DESCRIPTION": "Update the brand details and storefront settings."
+    "FORM_EDIT_DESCRIPTION": "Update the brand details and storefront settings.",
+
+    "TOTAL_BRANDS_LEGEND": "All registered brands",
+    "STATUS_LEGEND_ACTIVE": "Active",
+    "STATUS_LEGEND_INACTIVE": "Inactive"
   },
   "ProductsManagement": {
     "PAGE_TITLE": "Products Management",
@@ -1188,7 +1212,11 @@
     "SAVING_BUTTON": "Saving...",
     "SAVE_BUTTON": "Save Changes",
     "UPDATE_SUCCESS": "Review status has been updated successfully.",
-    "SAVE_ERROR": "Failed to update review status."
+    "SAVE_ERROR": "Failed to update review status.",
+
+    "TOTAL_REVIEWS_LEGEND": "All submitted reviews",
+    "STATUS_LEGEND_APPROVED": "Approved",
+    "STATUS_LEGEND_PENDING": "Pending"
   },
 
   "ProductReviews": {

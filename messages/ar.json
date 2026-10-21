@@ -419,6 +419,9 @@
     "EDIT_PAGE_META_DESCRIPTION": "عدّل بيانات الدور وصلاحيات الوصول المرتبطة به.",
     "EDIT_PAGE_TITLE": "تعديل الدور:",
     "EDIT_PAGE_DESCRIPTION": "عدّل وصف الدور وحدّث الصلاحيات المعيّنة له.",
+    "TOTAL_ROLES_LEGEND": "جميع الأدوار المعرفة في النظام",
+    "STATUS_LEGEND_ACTIVE_ROLE": "تحتوي على صلاحيات",
+    "STATUS_LEGEND_EMPTY_ROLE": "بدون صلاحيات",
     "PERMISSION_GROUPS": {
       "dashboard_views": "لوحات المعلومات وعرض الصفحات",
       "notifications_control": "الإشعارات والبث (الإجراءات)",
@@ -593,7 +596,11 @@
     "ALL_ROLES_ASSIGNED_MESSAGE": "كافة الأدوار المعرفة ممنوحة بالفعل لهذا المستخدم.",
     "DISCARD_BUTTON": "تراجع",
     "ASSIGNING_BUTTON": "جاري التعيين...",
-    "CONFIRM_ASSIGN_BUTTON": "تعيين الدور"
+    "CONFIRM_ASSIGN_BUTTON": "تعيين الدور",
+
+    "TOTAL_STAFF_LEGEND": "جميع أعضاء طاقم العمل",
+    "STATUS_LEGEND_ASSIGNED": "لديهم أدوار مسجلة",
+    "STATUS_LEGEND_UNASSIGNED": "بدون أدوار"
   },
   "UsersManagement": {
     "META_TITLE": "إدارة حسابات المستخدمين",
@@ -681,7 +688,12 @@
     "LAST_NAME_LABEL": "اسم العائلة",
     "PHONE_NUMBER_LABEL": "رقم الهاتف",
     "DISCARD_BUTTON": "تراجع",
-    "SAVE_USER_BUTTON": "حفظ المستخدم"
+    "SAVE_USER_BUTTON": "حفظ المستخدم",
+
+    "TOTAL_USERS_LEGEND": "جميع الحسابات المسجلة",
+    "STATUS_LEGEND_ACTIVE": "نشط",
+    "STATUS_LEGEND_SUSPENDED": "معلق",
+    "STATUS_LEGEND_BANNED": "محظور"
   },
   "NewsletterSubscribersManagement": {
     "META_TITLE": "إدارة القائمة البريدية",
@@ -745,7 +757,11 @@
     "DELETE_DIALOG_WARNING": "لا يمكن التراجع عن هذا الإجراء.",
     "TYPE_EMAIL_TO_CONFIRM": "للتأكيد، يرجى كتابة عنوان البريد الإلكتروني:",
     "CONFIRM_EMAIL_PLACEHOLDER": "اكتب عنوان البريد الإلكتروني هنا...",
-    "DELETING_BUTTON": "جارٍ الحذف..."
+    "DELETING_BUTTON": "جارٍ الحذف...",
+
+    "TOTAL_SUBSCRIBERS_LEGEND": "جميع مشتركي النشرة البرمجية",
+    "STATUS_LEGEND_ACTIVE": "نشط",
+    "STATUS_LEGEND_UNSUBSCRIBED": "غير مشترك"
   },
   "CategoriesManagement": {
     "META_TITLE": "إدارة التصنيفات",
@@ -842,7 +858,11 @@
     "CATEGORY_SLUG_TOO_LONG_ERROR": "يجب ألا يتجاوز الرابط المختصر 255 حرفًا.",
     "INVALID_IMAGE_URL_ERROR": "أدخل رابط صورة صالحًا.",
     "CATEGORY_IMAGE_ALT_TOO_LONG_ERROR": "يجب ألا يتجاوز النص البديل للصورة 255 حرفًا.",
-    "INVALID_SORT_ORDER_ERROR": "يجب أن يكون ترتيب العرض عددًا صحيحًا."
+    "INVALID_SORT_ORDER_ERROR": "يجب أن يكون ترتيب العرض عددًا صحيحًا.",
+
+    "TOTAL_CATEGORIES_LEGEND": "جميع سجلات التصنيفات المسجلة",
+    "STATUS_LEGEND_ACTIVE": "نشط",
+    "STATUS_LEGEND_INACTIVE": "غير نشط"
   },
   "BrandsManagement": {
     "META_TITLE": "إدارة العلامات التجارية",
@@ -1188,7 +1208,11 @@
     "SAVING_BUTTON": "جاري الحفظ...",
     "SAVE_BUTTON": "حفظ التغييرات",
     "UPDATE_SUCCESS": "تم تحديث حالة التقييم بنجاح.",
-    "SAVE_ERROR": "فشل تحديث حالة التقييم. يرجى المحاولة لاحقاً."
+    "SAVE_ERROR": "فشل تحديث حالة التقييم. يرجى المحاولة لاحقاً.",
+
+    "TOTAL_REVIEWS_LEGEND": "جميع التقييمات المقدمة",
+    "STATUS_LEGEND_APPROVED": "مقبول",
+    "STATUS_LEGEND_PENDING": "قيد الانتظار"
   },
   "ProductReviews": {
     "REVIEWS_SECTION_TITLE": "تقييمات العملاء",

@@ -1,3 +1,8 @@
+/**
+ * @file app/dashboard/categories/loading.tsx
+ * @description Loading skeleton for categories management page matching the updated summary layout and table structure.
+ */
+
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -11,26 +16,35 @@ import {
 export default function Loading() {
   return (
     <div className="mx-auto w-full max-w-7xl animate-pulse space-y-6 px-2 py-4 md:px-4 md:py-6">
-      <div className="flex items-center gap-2 border-b border-border/40 pb-4">
-        <Skeleton className="size-7 rounded-lg" />
+      <div className="flex flex-col gap-3 border-b border-border/40 pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <Skeleton className="h-7 w-40 rounded-md sm:h-8" />
-          <Skeleton className="mt-1 h-4 w-80 max-w-full rounded-md" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="size-7 rounded-lg" />
+            <Skeleton className="h-7 w-40 rounded-md sm:h-8" />
+          </div>
+          <Skeleton className="mt-2 h-4 w-80 max-w-full rounded-md" />
         </div>
       </div>
 
-      {/* هيكل التحميل لبطاقات الملخص الثلاثة (بشكل أفقي متجاوب grid-cols-3) */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+      {/* هيكل التحميل لبطاقات الملخص الثلاثة مع مساحة لسلط النقاط التوضيحية */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {Array.from({ length: 3 }, (_, index) => (
           <div
             key={index}
-            className="flex items-center justify-between rounded-xl border border-border bg-card px-3 py-2.5 sm:px-4 sm:py-3 shadow-xs"
+            className="flex flex-col justify-between rounded-xl border border-border bg-card px-3 py-2.5 shadow-xs sm:px-4 sm:py-3"
           >
-            <div className="space-y-1 sm:space-y-1.5 min-w-0 flex-1">
-              <Skeleton className="h-2.5 w-16 sm:h-3 sm:w-24 rounded-md" />
-              <Skeleton className="h-5 w-8 sm:h-6 sm:w-12 rounded-md" />
+            <div className="flex items-center justify-between">
+              <div className="min-w-0 space-y-0.5 sm:space-y-1">
+                <Skeleton className="h-2.5 w-16 sm:h-3 sm:w-24 rounded-md" />
+                <Skeleton className="h-5 w-8 sm:h-6 sm:w-12 rounded-md" />
+              </div>
+              <Skeleton className="size-7 sm:size-8 shrink-0 rounded-lg" />
             </div>
-            <Skeleton className="size-7 sm:size-8 shrink-0 rounded-lg" />
+            {/* مكان سطر النقاط التوضيحية (Legend) السفلي المتطابق مع التصميم */}
+            <div className="mt-3 flex items-center gap-2 border-t border-border/50 pt-2">
+              <Skeleton className="size-2 rounded-full" />
+              <Skeleton className="h-2.5 w-24 rounded-md" />
+            </div>
           </div>
         ))}
       </div>
@@ -58,12 +72,10 @@ export default function Loading() {
                   <Skeleton className="h-4 w-24 rounded-md" />
                 </TableHead>
                 <TableHead>
-                  <Skeleton className="h-4 w-12 rounded-md" />
+                  <Skeleton className="h-4 w-16 rounded-md" />
                 </TableHead>
-                <TableHead className="text-center">
-                  <div className="flex justify-center">
-                    <Skeleton className="h-4 w-16 rounded-md" />
-                  </div>
+                <TableHead>
+                  <Skeleton className="h-4 w-12 rounded-md" />
                 </TableHead>
                 <TableHead className="text-end">
                   <div className="flex justify-end">
@@ -80,7 +92,7 @@ export default function Loading() {
                       <Skeleton className="size-7 shrink-0 rounded-lg" />
                       <div className="min-w-0 space-y-1">
                         <Skeleton className="h-3.5 w-28 max-w-full rounded-md" />
-                        <Skeleton className="h-3 w-32 max-w-full rounded-md" />
+                        <Skeleton className="h-3 w-20 max-w-full rounded-md" />
                       </div>
                     </div>
                   </TableCell>
@@ -88,9 +100,7 @@ export default function Loading() {
                     <Skeleton className="h-4 w-8 rounded-md" />
                   </TableCell>
                   <TableCell className="py-2.5">
-                    <div className="flex justify-center">
-                      <Skeleton className="h-5 w-16 rounded-full" />
-                    </div>
+                    <Skeleton className="h-5 w-16 rounded-full" />
                   </TableCell>
                   <TableCell className="py-2.5">
                     <div className="flex justify-end">
