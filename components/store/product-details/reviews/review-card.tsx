@@ -2,7 +2,7 @@
 
 /**
  * @file components/store/product-details/reviews/review-card.tsx
- * @description Single review card showing reviewer details, content, and owner actions via dialog triggers.
+ * @description Single review card showing reviewer details, content, and owner actions with two-letter avatar initials.
  */
 
 import * as React from "react"
@@ -11,6 +11,7 @@ import { PencilIcon, Trash2Icon } from "lucide-react"
 
 import { useUser } from "@/lib/context/user-context"
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { DeleteReviewDialog } from "./delete-review-dialog"
 import { ReviewDialog } from "./review-dialog"
 import type { ProductReviewItem } from "@/lib/actions/store/product-details/reviews/queries/get-product-reviews"
@@ -19,9 +20,7 @@ interface ReviewCardProps {
   review: ProductReviewItem
 }
 
-export function ReviewCard({
-  review,
-}: ReviewCardProps) {
+export function ReviewCard({ review }: ReviewCardProps) {
   const t = useTranslations("ProductReviews")
   const { user } = useUser()
 
@@ -36,44 +35,73 @@ export function ReviewCard({
       t("ANONYMOUS_USER")
     : t("ANONYMOUS_USER")
 
+  // استخراج الحرفين الأولين بشكل مباشر بدون useMemo لتوافق تام مع React Compiler
+  const getInitials = (name: string) => {
+    const parts = name.trim().split(/\s+/)
+    if (parts.length >= 2) {
+      return `${parts[0].charAt(0)}${parts[1].charAt(0)}`.toUpperCase()
+    }
+    return name.slice(0, 2).toUpperCase()
+  }
+
+  const fallbackInitials = getInitials(reviewerName)
+
+  // حساب الوقت النسبي (منذ يومين، منذ ساعة، الخ)
+  const timeAgo = React.useMemo(() => {
+    const now = new Date().getTime()
+    const reviewTime = new Date(review.created_at).getTime()
+    const diffInSeconds = Math.floor((now - reviewTime) / 1000)
+
+    if (diffInSeconds < 60) return t("JUST_NOW")
+
+    const minutes = Math.floor(diffInSeconds / 60)
+    if (minutes < 60) return t("MINUTES_AGO", { count: minutes })
+
+    const hours = Math.floor(minutes / 60)
+    if (hours < 24) return t("HOURS_AGO", { count: hours })
+
+    const days = Math.floor(hours / 24)
+    if (days < 30) return t("DAYS_AGO", { count: days })
+
+    const months = Math.floor(days / 30)
+    if (months < 12) return t("MONTHS_AGO", { count: months })
+
+    const years = Math.floor(months / 12)
+    return t("YEARS_AGO", { count: years })
+  }, [review.created_at, t])
+
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-muted/25">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          {review.user?.profile_image ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={review.user.profile_image}
+          {/* استخدام مكون Avatar الاحترافي مع الحرفين */}
+          <Avatar className="size-9">
+            <AvatarImage
+              src={review.user?.profile_image || undefined}
               alt={reviewerName}
-              className="size-9 rounded-full object-cover"
             />
-          ) : (
-            <div className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-              {reviewerName.charAt(0).toUpperCase()}
-            </div>
-          )}
+            <AvatarFallback className="text-xs">
+              {fallbackInitials}
+            </AvatarFallback>
+          </Avatar>
+
           <div>
             <h5 className="text-sm font-semibold text-foreground">
               {reviewerName}
             </h5>
-            <span className="text-[10px] text-muted-foreground">
-              {new Date(review.created_at).toLocaleDateString()}
-            </span>
+            <span className="text-[10px] text-muted-foreground">{timeAgo}</span>
           </div>
         </div>
 
         {/* عرض أزرار التعديل والحذف فقط إذا كان المستخدم هو صاحب التعليق */}
         {isOwner && (
           <div className="flex items-center gap-1">
-            {/* دايلوج التعديل المشترك */}
             <ReviewDialog
               review={review}
               mode="update"
               open={isEditOpen}
               onOpenChange={setIsEditOpen}
-              onSuccess={() => {
-                setIsEditOpen(false)
-              }}
+              onSuccess={() => setIsEditOpen(false)}
             >
               <Button
                 variant="ghost"
@@ -85,7 +113,6 @@ export function ReviewCard({
               </Button>
             </ReviewDialog>
 
-            {/* دايلوج الحذف */}
             <DeleteReviewDialog
               review={review}
               open={isDeleteOpen}

@@ -1,7 +1,7 @@
 /**
  * @file lib/actions/products/queries/get-admin-products-list.ts
  * @description Retrieves a concise summary list of all products for the administrative dashboard table.
- * Calculates aggregate stock quantities and price ranges per product.
+ * Calculates minimum stock quantities, price ranges, and the nearest expiration date per product.
  */
 
 "use server"
@@ -74,14 +74,19 @@ export async function getAdminProductsList(): Promise<
   const products: AdminProductSummary[] = rawProducts.map((prod) => {
     const variants = prod.product_variants ?? []
 
-    const totalStock = variants.reduce(
-      (sum, v) => sum + (Number(v.stock_quantity) || 0),
-      0
-    )
+    // حساب العدد الأقل للمتغيرات (Minimum Stock Quantity)
+    const stockQuantities = variants
+      .map((v) => Number(v.stock_quantity))
+      .filter((s) => !isNaN(s))
+    
+    const minStock = stockQuantities.length > 0 ? Math.min(...stockQuantities) : 0
 
+    // حساب الأسعار
     const prices = variants
       .map((v) => Number(v.price))
       .filter((p) => !isNaN(p) && p > 0)
+
+    // حساب التاريخ الأقرب لانتهاء الصلاحية (Nearest Expiration Date)
     const nearestExpirationDate = variants
       .map((variant) => variant.expiration_date)
       .filter((date): date is string => Boolean(date))
@@ -95,7 +100,7 @@ export async function getAdminProductsList(): Promise<
       category_name: prod.category?.name || prod.category?.name_ar || null,
       brand_name: prod.brand?.name || prod.brand?.name_ar || null,
       nearest_expiration_date: nearestExpirationDate,
-      total_stock: totalStock,
+      total_stock: minStock, // تم التعديل ليصبح العدد الأقل (Minimum Stock)
       min_price: prices.length > 0 ? Math.min(...prices) : 0,
       max_price: prices.length > 0 ? Math.max(...prices) : 0,
     }

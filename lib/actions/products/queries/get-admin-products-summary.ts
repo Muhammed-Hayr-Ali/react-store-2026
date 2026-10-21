@@ -1,6 +1,6 @@
 /**
  * @file lib/actions/products/queries/get-admin-products-summary.ts
- * @description Retrieves aggregate product counts for the dashboard summary.
+ * @description Retrieves aggregate product counts for the dashboard summary based on minimum variant stock and expiration dates.
  */
 
 "use server"
@@ -50,11 +50,17 @@ export async function getAdminProductsSummary(): Promise<
     data: {
       active: products.filter((product) => product.is_active).length,
       lowStock: products.filter((product) => {
-        const totalStock = (product.product_variants ?? []).reduce(
-          (sum, variant) => sum + (Number(variant.stock_quantity) || 0),
-          0
-        )
-        return totalStock <= 10
+        const variants = product.product_variants ?? []
+        if (variants.length === 0) return true // إذا لم تكن هناك متغيرات يعتبر مخزون منخفض
+
+        // استخراج جميع الكميات وحساب الحد الأدنى (أقل كمية متوفرة بين المتغيرات)
+        const stockQuantities = variants
+          .map((v) => Number(v.stock_quantity))
+          .filter((s) => !isNaN(s))
+
+        const minStock = stockQuantities.length > 0 ? Math.min(...stockQuantities) : 0
+        
+        return minStock <= 10
       }).length,
       expiringSoon: products.filter((product) =>
         (product.product_variants ?? []).some(

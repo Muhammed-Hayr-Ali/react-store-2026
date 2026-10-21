@@ -993,7 +993,19 @@
     "DELETE_ERROR_TOAST": "Could not delete product.",
     "DELETE_SUCCESS_TOAST": "{name} was deleted successfully.",
     "DELETING_BUTTON": "Deleting...",
-    "GENERIC_ERROR_TOAST": "Something went wrong. Please try again."
+    "GENERIC_ERROR_TOAST": "Something went wrong. Please try again.",
+
+    "STATUS_LEGEND_ACTIVE": "Active",
+    "STATUS_LEGEND_INACTIVE": "Inactive",
+
+    "EXP_EXPIRED": "Expired",
+    "EXP_SEVEN_DAYS": "≤ 7 days",
+    "EXP_THIRTY_DAYS": "≤ 30 days",
+    "EXP_NINETY_DAYS": "≤ 90 days",
+    "EXP_SAFE": "Safe (> 90 days)",
+
+    "STOCK_LOW": "Low (≤ 10 pcs)",
+    "STOCK_NORMAL": "Normal (> 10 pcs)"
   },
   "ProductForm": {
     "ALERT_TITLE": "Action Required",
@@ -1216,7 +1228,14 @@
     "CREATE_REVIEW_SUCCESS": "Review submitted successfully",
     "CREATE_REVIEW_ERROR": "Failed to submit review",
 
-    "ALREADY_REVIEWED_MESSAGE": "Thank you! You have already reviewed this product."
+    "ALREADY_REVIEWED_MESSAGE": "Thank you! You have already reviewed this product.",
+
+    "JUST_NOW": "Just now",
+    "MINUTES_AGO": "{count} m ago",
+    "HOURS_AGO": "{count} h ago",
+    "DAYS_AGO": "{count} d ago",
+    "MONTHS_AGO": "{count} mo ago",
+    "YEARS_AGO": "{count} y ago"
   },
   "ProductDetails": {
     "HOME": "Store",

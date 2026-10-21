@@ -993,7 +993,19 @@
     "DELETE_ERROR_TOAST": "تعذر حذف المنتج.",
     "DELETE_SUCCESS_TOAST": "تم حذف {name} بنجاح.",
     "DELETING_BUTTON": "جارٍ الحذف...",
-    "GENERIC_ERROR_TOAST": "حدث خطأ ما. حاول مجددًا."
+    "GENERIC_ERROR_TOAST": "حدث خطأ ما. حاول مجددًا.",
+
+    "STATUS_LEGEND_ACTIVE": "نشط",
+    "STATUS_LEGEND_INACTIVE": "غير نشط",
+
+    "EXP_EXPIRED": "منتهي",
+    "EXP_SEVEN_DAYS": "≤ 7 أيام",
+    "EXP_THIRTY_DAYS": "≤ 30 يوم",
+    "EXP_NINETY_DAYS": "≤ 90 يوم",
+    "EXP_SAFE": "آمن (> 90 يوم)",
+
+    "STOCK_LOW": "منخفض (≤ 10 قطع)",
+    "STOCK_NORMAL": "متوفر (> 10 قطع)"
   },
   "ProductForm": {
     "ALERT_TITLE": "يتطلب الانتباه",
@@ -1215,7 +1227,14 @@
     "CREATE_REVIEW_SUCCESS": "تم إرسال التقييم بنجاح",
     "CREATE_REVIEW_ERROR": "فشل إرسال التقييم",
 
-    "ALREADY_REVIEWED_MESSAGE": "شكراً لك! لقد شاركتنا تقييمك لهذا المنتج مسبقاً."
+    "ALREADY_REVIEWED_MESSAGE": "شكراً لك! لقد شاركتنا تقييمك لهذا المنتج مسبقاً.",
+
+    "JUST_NOW": "الآن",
+    "MINUTES_AGO": "منذ {count} دقيقة",
+    "HOURS_AGO": "منذ {count} ساعة",
+    "DAYS_AGO": "منذ {count} أيام",
+    "MONTHS_AGO": "منذ {count} أشهر",
+    "YEARS_AGO": "منذ {count} سنوات"
   },
   "ProductDetails": {
     "HOME": "المتجر",
