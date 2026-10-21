@@ -25,7 +25,7 @@ export function ProductPriceStock({ variant }: ProductPriceStockProps) {
       {/* قسم السعر */}
       <div className="flex items-center gap-3">
         <span className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-          {variant.price / 100}{" "}
+          {variant.price / 100} USD
           <span className="text-sm font-normal text-muted-foreground">$</span>
         </span>
 
@@ -33,7 +33,7 @@ export function ProductPriceStock({ variant }: ProductPriceStockProps) {
         {variant.compare_at_price &&
           variant.compare_at_price > variant.price && (
             <span className="text-sm text-muted-foreground line-through sm:text-base">
-              {variant.compare_at_price} IQD
+              {variant.compare_at_price / 100} USD
             </span>
           )}
       </div>
