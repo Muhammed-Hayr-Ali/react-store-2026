@@ -65,7 +65,7 @@ export function ProductGallery({
   }, [images, activeImage])
 
   // دالة لتغيير الصورة وتحديث المتغير المرتبط بها تلقائياً إن وجد
-  const handleImageChange = (targetImage: ProductImageDetail) => {
+  const handleImageChange = React.useCallback((targetImage: ProductImageDetail) => {
     if (targetImage?.variant_sku) {
       const matchedVariant = variants.find(
         (v) => v.sku === targetImage.variant_sku
@@ -74,19 +74,19 @@ export function ProductGallery({
         onVariantSelect(matchedVariant)
       }
     }
-  }
+  }, [variants, onVariantSelect])
 
-  const handlePrev = (e?: React.MouseEvent) => {
+  const handlePrev = React.useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation()
     const nextIdx = (currentIndex - 1 + images.length) % images.length
     handleImageChange(images[nextIdx])
-  }
+  }, [currentIndex, images, handleImageChange])
 
-  const handleNext = (e?: React.MouseEvent) => {
+  const handleNext = React.useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation()
     const nextIdx = (currentIndex + 1) % images.length
     handleImageChange(images[nextIdx])
-  }
+  }, [currentIndex, images, handleImageChange])
 
   // دعم اختصارات لوحة المفاتيح عند فتح النافذة المنبثقة
   React.useEffect(() => {
@@ -100,7 +100,7 @@ export function ProductGallery({
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isOpen, currentIndex, images])
+  }, [isOpen, handlePrev, handleNext])
 
   return (
     <>
