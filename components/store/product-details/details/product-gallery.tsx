@@ -177,7 +177,7 @@ export function ProductGallery({
                     src={activeImage}
                     alt={productName}
                     onError={() => markImageAsFailed(activeImage)}
-                    className="max-h-[70vh] max-w-full rounded-sm object-contain object-center transition-transform duration-500"
+                    className="max-h-[70vh] max-w-full rounded-lg object-contain object-center transition-transform duration-500"
                   />
                 ) : (
                   <div className="flex size-64 flex-col items-center justify-center text-muted-foreground">
