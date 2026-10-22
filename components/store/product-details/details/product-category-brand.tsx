@@ -2,12 +2,10 @@
 
 /**
  * @file components/store/product-details/details/product-category-brand.tsx
- * @description Displays product category badge and brand information side-by-side.
+ * @description Apple-inspired minimalist display of product category and brand.
  */
 
 import * as React from "react"
-import Link from "next/link"
-import { Badge } from "@/components/ui/badge"
 import {
   BrandDetail,
   CategoryDetail,
@@ -31,6 +29,7 @@ export function ProductCategoryBrand({
       ? category.name_ar
       : category.name
     : null
+
   const brandName = brand
     ? locale === "ar"
       ? brand.name_ar
@@ -38,27 +37,22 @@ export function ProductCategoryBrand({
     : null
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      {/* شارة التصنيف */}
-      {category && (
-        <Badge
-          variant="secondary"
-          className="px-3 py-1 text-xs font-medium transition-colors hover:bg-secondary/80"
-        >
+    <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground/80">
+      {/* اسم أو تصنيف المنتج بأسلوب نظيف */}
+      {categoryName && (
+        <span className="tracking-wide uppercase">
           {categoryName}
-        </Badge>
+        </span>
       )}
 
-      {/* شارة أو اسم العلامة التجارية */}
-      {brand && (
-        <Badge
-          variant="outline"
-          className="flex items-center gap-2 border-border/60 px-3 py-1 text-xs font-medium transition-colors group-hover:border-primary/50"
-        >
-          <span className="text-muted-foreground transition-colors group-hover:text-foreground">
-            {brandName}
-          </span>
-        </Badge>
+      {categoryName && brandName && (
+        <span className="size-1 rounded-full bg-muted-foreground/40" />
+      )}
+
+      {brandName && (
+        <span className="font-semibold text-foreground tracking-wide">
+          {brandName}
+        </span>
       )}
     </div>
   )

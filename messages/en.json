@@ -1274,7 +1274,6 @@
     "INCREASE_QUANTITY": "Increase quantity",
     "OUT_OF_STOCK_BUTTON": "Out of Stock",
     "ADDING_TO_CART": "Adding...",
-    "ADD_TO_CART": "Add to Cart",
 
     "VIEW_FULL_SCREEN": "View Fullscreen",
     "NO_IMAGE": "No image available",
@@ -1285,10 +1284,13 @@
     "NEXT_IMAGE": "Next image",
     "IMAGE_UNAVAILABLE": "Image unavailable",
 
-    "QUANTITY": "Quantity:",
-    "TOTAL_PRICE": "Total Price",
     "ADD_MULTIPLE_TO_CART": "Add {count} to Cart",
 
+    "AVAILABLE_COUNT": "{count} available",
+    "SKU_LABEL": "SKU",
+    "QUANTITY": "Quantity",
+    "TOTAL_PRICE": "Total",
+    "ADD_TO_CART": "Add to Bag",
     "FAST_DISPATCH": "Fast Dispatch",
     "EASY_RETURNS": "Easy Returns",
     "SECURE_CHECKOUT": "Secure Checkout"

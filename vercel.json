@@ -1,8 +1,8 @@
 {
-    "crons": [
-        {
-            "path": "/api/update-rates",
-            "schedule": "10 5 * * *"
-        }
-    ]
+  "crons": [
+    {
+      "path": "/api/cron/update-currency-rates",
+      "schedule": "0 */3 * * *"
+    }
+  ]
 }

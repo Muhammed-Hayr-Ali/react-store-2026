@@ -1,3 +1,8 @@
+/**
+ * @file components/store/navbar/desktop-navbar.tsx
+ * @description Desktop navigation bar including search, shopping cart, currency switcher, and user profile/auth actions.
+ */
+
 "use client"
 
 import * as React from "react"
@@ -12,6 +17,7 @@ import { useUser } from "@/lib/context/user-context"
 import { cn } from "@/lib/utils"
 
 import UserProfilePopover from "./user-profile-popover"
+import { CurrencySwitcher } from "@/components/shared/currency-switcher"
 
 interface DesktopNavbarProps {
   className?: string
@@ -22,6 +28,9 @@ export default function DesktopNavbar({ className }: DesktopNavbarProps) {
 
   return (
     <div className={cn("hidden items-center gap-3 md:flex", className)}>
+      {/* قائمة تبديل العملة */}
+      <CurrencySwitcher />
+
       <Button variant="secondary" size="icon" aria-label="Search">
         <SearchIcon />
       </Button>

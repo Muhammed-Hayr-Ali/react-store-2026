@@ -1280,10 +1280,12 @@
     "NEXT_IMAGE": "الصورة التالية",
     "IMAGE_UNAVAILABLE": "الصورة غير متوفرة",
 
-    "QUANTITY": "الكمية:",
-    "TOTAL_PRICE": "السعر الإجمالي",
     "ADD_MULTIPLE_TO_CART": "إضافة {count} إلى السلة",
 
+    "AVAILABLE_COUNT": "متاح ({count})",
+    "SKU_LABEL": "الرمز",
+    "QUANTITY": "الكمية",
+    "TOTAL_PRICE": "الإجمالي",
     "FAST_DISPATCH": "شحن سريع",
     "EASY_RETURNS": "إرجاع سهل",
     "SECURE_CHECKOUT": "دفع آمن"

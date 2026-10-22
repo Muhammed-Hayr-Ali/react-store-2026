@@ -2,7 +2,7 @@
 
 /**
  * @file components/store/product-details/details/product-actions.tsx
- * @description Product action bar featuring quantity selector and add-to-cart button.
+ * @description Apple-inspired minimalist product action bar.
  */
 
 import * as React from "react"
@@ -10,6 +10,7 @@ import { useTranslations } from "next-intl"
 import { ShoppingCartIcon, PlusIcon, MinusIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ProductVariantDetail } from "@/lib/actions/store/product-details/details/queries/get-product-details"
+import { useCurrency } from "@/lib/context/currency-context"
 
 interface ProductActionsProps {
   variant: ProductVariantDetail
@@ -18,10 +19,11 @@ interface ProductActionsProps {
 
 export function ProductActions({ variant, isProductActive }: ProductActionsProps) {
   const t = useTranslations("ProductDetails")
+  const { formatRawPrice, currentCurrency } = useCurrency()
+
   const [quantity, setQuantity] = React.useState(1)
   const [isAdding, setIsAdding] = React.useState(false)
 
-  // تتبع الـ variant السابق بالطريقة الموصى بها من React لتصفير الكمية عند تغييره دون useEffect
   const [prevVariantId, setPrevVariantId] = React.useState(variant.id)
   if (prevVariantId !== variant.id) {
     setPrevVariantId(variant.id)
@@ -31,9 +33,8 @@ export function ProductActions({ variant, isProductActive }: ProductActionsProps
   const isOutOfStock = variant.track_inventory && variant.stock_quantity <= 0
   const isDisabled = !isProductActive || isOutOfStock
 
-  // حساب السعر الإجمالي مباشرة
-  const unitPrice = variant.price || 0
-  const totalPrice = unitPrice * (isOutOfStock ? 0 : quantity)
+  const unitPriceInCents = variant.price || 0
+  const totalPriceInCents = unitPriceInCents * (isOutOfStock ? 0 : quantity)
 
   const handleIncrement = () => {
     if (!variant.track_inventory || quantity < variant.stock_quantity) {
@@ -47,37 +48,34 @@ export function ProductActions({ variant, isProductActive }: ProductActionsProps
 
   const handleAddToCart = async () => {
     setIsAdding(true)
-    // TODO: ربطها مع سلة التسوق (Cart Store / Server Action)
     setTimeout(() => {
       setIsAdding(false)
     }, 600)
   }
 
   return (
-    <div className="space-y-4 pt-4 border-t border-border">
-      {/* صندوق عرض الكمية وإجمالي السعر */}
-      <div
-        className={`flex items-center justify-between rounded-2xl border border-border/70 bg-muted/15 p-3.5 transition-opacity ${
-          isOutOfStock ? "opacity-50" : "opacity-100"
-        }`}
-      >
-        <div className="flex items-center gap-2.5">
+    <div className="space-y-4 pt-2">
+      {/* شريط موحد ونظيف تماماً بدون خلفيات ثقيلة */}
+      <div className={`flex items-center justify-between py-2 ${isOutOfStock ? "opacity-50" : ""}`}>
+        
+        {/* محدد الكمية بنمط Minimalist */}
+        <div className="flex items-center gap-3">
           <span className="text-xs font-medium text-muted-foreground">
-            {t("QUANTITY", { default: "Quantity:" })}
+            {t("QUANTITY", { default: "Quantity" })}
           </span>
-          <div className="inline-flex items-center rounded-xl border bg-background p-0.5 shadow-xs">
+          <div className="flex items-center rounded-lg bg-muted/60 p-0.5">
             <Button
               type="button"
               variant="ghost"
               size="icon"
               onClick={handleDecrement}
               disabled={isDisabled || quantity <= 1}
-              className="size-8 rounded-lg disabled:pointer-events-none disabled:opacity-40"
-              aria-label={t("DECREASE_QUANTITY", { default: "Decrease quantity" })}
+              className="size-7 rounded-md text-muted-foreground hover:text-foreground"
+              aria-label={t("DECREASE_QUANTITY", { default: "Decrease" })}
             >
-              <MinusIcon className="size-3.5" />
+              <MinusIcon className="size-3" />
             </Button>
-            <span className="w-10 text-center text-xs font-semibold text-foreground tabular-nums">
+            <span className="w-8 text-center text-xs font-semibold tabular-nums text-foreground">
               {isOutOfStock ? 0 : quantity}
             </span>
             <Button
@@ -86,29 +84,30 @@ export function ProductActions({ variant, isProductActive }: ProductActionsProps
               size="icon"
               onClick={handleIncrement}
               disabled={isDisabled || (variant.track_inventory && quantity >= variant.stock_quantity)}
-              className="size-8 rounded-lg disabled:pointer-events-none disabled:opacity-40"
-              aria-label={t("INCREASE_QUANTITY", { default: "Increase quantity" })}
+              className="size-7 rounded-md text-muted-foreground hover:text-foreground"
+              aria-label={t("INCREASE_QUANTITY", { default: "Increase" })}
             >
-              <PlusIcon className="size-3.5" />
+              <PlusIcon className="size-3" />
             </Button>
           </div>
         </div>
 
+        {/* عرض الإجمالي بتنسيق هادئ وخفيف */}
         <div className="text-end">
-          <span className="block text-[11px] font-medium text-muted-foreground">
-            {t("TOTAL_PRICE", { default: "Total Price" })}
+          <span className="text-xs text-muted-foreground me-1.5">
+            {t("TOTAL_PRICE", { default: "Total" })}:
           </span>
-          <span className="text-base font-bold tracking-tight text-foreground tabular-nums">
-            {totalPrice.toFixed(2)}
+          <span className="text-lg font-bold tracking-tight text-foreground tabular-nums">
+            {formatRawPrice(totalPriceInCents)} {currentCurrency.symbol}
           </span>
         </div>
       </div>
 
-      {/* زر إضافة إلى السلة */}
+      {/* زر الشراء البارز والناعم */}
       <Button
         type="button"
         size="lg"
-        className="h-12 w-full gap-2 text-sm font-semibold shadow-sm"
+        className="h-12 w-full gap-2 rounded-2xl text-sm font-medium shadow-sm transition-all active:scale-[0.99]"
         disabled={isDisabled || isAdding}
         onClick={handleAddToCart}
       >
@@ -118,8 +117,8 @@ export function ProductActions({ variant, isProductActive }: ProductActionsProps
           : isAdding
           ? t("ADDING_TO_CART", { default: "Adding..." })
           : quantity > 1
-          ? t("ADD_MULTIPLE_TO_CART", { count: quantity, default: `Add ${quantity} to Cart` })
-          : t("ADD_TO_CART", { default: "Add to Cart" })}
+          ? t("ADD_MULTIPLE_TO_CART", { count: quantity, default: `Add ${quantity} to Bag` })
+          : t("ADD_TO_CART", { default: "Add to Bag" })}
       </Button>
     </div>
   )

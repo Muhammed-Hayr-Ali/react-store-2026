@@ -2,7 +2,7 @@
 
 /**
  * @file components/store/product-details/details/product-header.tsx
- * @description Displays the product name and its detailed description.
+ * @description Apple-inspired minimalist product header and description.
  */
 
 import * as React from "react"
@@ -14,12 +14,12 @@ interface ProductHeaderProps {
 
 export function ProductHeader({ name, description }: ProductHeaderProps) {
   return (
-    <div className="space-y-3">
-      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+    <div className="space-y-2">
+      <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
         {name}
       </h1>
       {description && (
-        <p className="text-sm leading-relaxed text-muted-foreground">
+        <p className="text-sm leading-relaxed text-muted-foreground/90">
           {description}
         </p>
       )}
