@@ -44,7 +44,7 @@ export function ProductInfoSection({
       {/* تخطيط الشبكة الرئيسي */}
       <div className="grid grid-cols-1 items-start gap-12 md:grid-cols-12">
         {/* القسم الأيسر: معرض الصور الفاخر */}
-        <div className="sticky top-20 md:col-span-6">
+        <div className="md:col-span-6">
           <ProductGallery
             images={product.product_images}
             variants={product.product_variants}

@@ -39,7 +39,7 @@ export default async function MainLayout({ children, params }: MainLayoutProps) 
     >
       <div className="relative flex min-h-screen flex-col bg-background text-foreground">
         <Navbar />
-        <main className="flex-1 pt-14">{children}</main>
+        <main className="flex-1">{children}</main>
         <Footer />
       </div>
     </CurrencyProvider>

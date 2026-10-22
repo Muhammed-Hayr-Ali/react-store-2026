@@ -34,7 +34,7 @@ export function ProductPriceStock({ variant }: ProductPriceStockProps) {
         {/* السعر القديم قبل الخصم إن وجد */}
         {variant.compare_at_price &&
           variant.compare_at_price > variant.price && (
-            <span className="ms-3 text-sm text-muted-foreground line-through tabular-nums">
+            <span className="ms-3 text-sm text-destructive/50 line-through tabular-nums">
               {formatRawPrice(variant.compare_at_price)} {currentCurrency.symbol}
             </span>
           )}

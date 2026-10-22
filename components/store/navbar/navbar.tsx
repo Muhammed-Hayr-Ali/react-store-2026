@@ -9,7 +9,7 @@ export default async function Navbar() {
 
 
   return (
-    <nav className="fixed top-0 z-50 w-full border-b border-border/60 bg-background/60 backdrop-blur-md transition-colors">
+    <nav className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/60 backdrop-blur-md transition-colors">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-14 items-center justify-between">
           <div className="flex flex-1 items-center justify-start">

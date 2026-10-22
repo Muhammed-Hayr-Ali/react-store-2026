@@ -66,7 +66,7 @@ export function PreferencesSubNav({
 
 
 
-  const { language, appearance, currency } = PREFERENCES_CONFIG
+  const { language, appearance } = PREFERENCES_CONFIG
 
   return (
     <div className="flex flex-col gap-0.5">

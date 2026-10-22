@@ -38,12 +38,12 @@ export function ProductBreadcrumb({
     locale === "ar" ? parentCategory?.name_ar : parentCategory?.name
 
   return (
-    <Breadcrumb className="mb-6">
+    <Breadcrumb>
       <BreadcrumbList>
         {/* الصفحة الرئيسية للمتجر */}
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link href="/store">{t("HOME", { default: "Store" })}</Link>
+            <Link href="/">{t("HOME", { default: "Store" })}</Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />

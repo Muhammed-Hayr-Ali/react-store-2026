@@ -61,7 +61,7 @@ export default async function ProductDetailsPage({
   const reviewsData = reviewsResult.success ? reviewsResult.data : null
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-10 px-4 py-6">
+    <div className="mx-auto w-full max-w-6xl space-y-10 px-8 py-8">
       {/* تفاصيل المنتج الأساسية */}
       {/* <div className="space-y-4">
         <h1 className="text-3xl font-extrabold tracking-tight">{product.name}</h1>
