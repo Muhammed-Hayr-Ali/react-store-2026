@@ -217,11 +217,23 @@ export function ProductGallery({
                       key={img.id}
                       type="button"
                       onClick={() => handleImageChange(img)}
-                      className={`relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-sm transition-all duration-300 ${
-                        isSelected
-                          ? "opacity-100 ring-1 ring-foreground ring-offset-1"
-                          : "opacity-40 hover:opacity-100"
-                      }`}
+
+
+                  className={`group relative size-16 shrink-0 cursor-pointer overflow-hidden  rounded-[50%] corner-squircle  bg-muted transition-all duration-300 ${
+                    isSelected
+                      ? "opacity-100 ring-1 ring-foreground ring-offset-1"
+                      : "opacity-40 hover:opacity-100"
+                  }`}
+
+
+
+
+
+                      // className={`relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-sm transition-all duration-300 ${
+                      //   isSelected
+                      //     ? "opacity-100 ring-1 ring-foreground ring-offset-1"
+                      //     : "opacity-40 hover:opacity-100"
+                      // }`}
                     >
                       {!isFailed ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
