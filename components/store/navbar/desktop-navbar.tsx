@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils"
 
 import UserProfilePopover from "./user-profile-popover"
 import { CurrencySwitcher } from "@/components/shared/currency-switcher"
+import { WishlistHeaderButton } from "../wishlist/wishlist-header-button"
 
 interface DesktopNavbarProps {
   className?: string
@@ -34,6 +35,8 @@ export default function DesktopNavbar({ className }: DesktopNavbarProps) {
       <Button variant="secondary" size="icon" aria-label="Search">
         <SearchIcon />
       </Button>
+
+      <WishlistHeaderButton />
 
       <Button variant="secondary" size="icon" aria-label="Shopping Cart">
         <ShoppingCartIcon />

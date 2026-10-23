@@ -19,13 +19,13 @@ export function ReviewsSummaryCard({ summary }: ReviewsSummaryCardProps) {
   const { averageRating, totalReviews, ratingBreakdown } = summary
 
   return (
-    <div className="grid grid-cols-12 items-center gap-4 rounded-2xl border border-border bg-card p-4 sm:p-6">
+    <div className="grid grid-cols-12 items-center gap-4 rounded-2xl border border-border bg-card p-3 sm:p-4">
       {/* القسم الأيسر: المتوسط العام (يأخذ 4 أعمدة من أصل 12 أي ما يعادل ~33.3%) */}
-      <div className="col-span-4 flex flex-col items-center justify-center border-r border-border pr-3 text-center sm:pr-6">
+      <div className="col-span-4 flex flex-col items-center justify-center ltr:border-r rtl:border-l border-border  text-center ">
         <span className="text-5xl tracking-tight text-foreground sm:text-7xl">
           {Number(averageRating).toFixed(1)}
         </span>
-        <div className="my-1 flex items-center text-sm text-amber-500 sm:text-base">
+        <div className=" flex items-center text-sm text-amber-500 sm:text-base">
           {"★".repeat(Math.round(averageRating))}
           {"☆".repeat(5 - Math.round(averageRating))}
         </div>
@@ -48,7 +48,7 @@ export function ReviewsSummaryCard({ summary }: ReviewsSummaryCardProps) {
 
             <Progress
               value={item.percentage}
-              className="h-1.5 flex-1 bg-muted sm:h-2 [&>div]:bg-amber-500"
+              className="h-1.5 flex-1 bg-muted sm:h-2 [&>div]:bg-amber-500 rtl:rotate-180"
             />
           </div>
         ))}

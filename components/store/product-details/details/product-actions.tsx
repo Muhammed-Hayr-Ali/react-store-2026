@@ -1,9 +1,9 @@
-"use client"
-
 /**
  * @file components/store/product-details/details/product-actions.tsx
- * @description Apple-inspired minimalist product action bar.
+ * @description Apple-inspired minimalist product action bar including wishlist and cart actions.
  */
+
+"use client"
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
@@ -11,13 +11,16 @@ import { ShoppingCartIcon, PlusIcon, MinusIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ProductVariantDetail } from "@/lib/actions/store/product-details/details/queries/get-product-details"
 import { useCurrency } from "@/lib/context/currency-context"
+import { WishlistButton } from "@/components/store/wishlist/wishlist-button"
 
 interface ProductActionsProps {
+  productId: string
   variant: ProductVariantDetail
   isProductActive: boolean
 }
 
 export function ProductActions({
+  productId,
   variant,
   isProductActive,
 }: ProductActionsProps) {
@@ -100,13 +103,12 @@ export function ProductActions({
         </div>
 
         {/* عرض الإجمالي بتنسيق هادئ وخفيف */}
-
         <div className="flex items-center gap-3">
           <span className="me-1.5 text-xs font-medium text-muted-foreground">
             {t("TOTAL_PRICE", { default: "Total" })}:
           </span>
           <div className="flex items-baseline gap-1">
-            <span className="text-lg font-bold   text-foreground  ">
+            <span className="text-lg font-bold text-foreground">
               {formatRawPrice(totalPriceInCents)}
             </span>
             <span className="text-xs font-medium text-muted-foreground">
@@ -116,26 +118,31 @@ export function ProductActions({
         </div>
       </div>
 
-      {/* زر الشراء البارز والناعم */}
-      <Button
-        type="button"
-        size="lg"
-        className="h-12 w-full gap-2 rounded-2xl text-sm font-medium shadow-sm transition-all active:scale-[0.99]"
-        disabled={isDisabled || isAdding}
-        onClick={handleAddToCart}
-      >
-        <ShoppingCartIcon className="size-4" />
-        {isOutOfStock
-          ? t("OUT_OF_STOCK_BUTTON", { default: "Out of Stock" })
-          : isAdding
-            ? t("ADDING_TO_CART", { default: "Adding..." })
-            : quantity > 1
-              ? t("ADD_MULTIPLE_TO_CART", {
-                  count: quantity,
-                  default: `Add ${quantity} to Bag`,
-                })
-              : t("ADD_TO_CART", { default: "Add to Bag" })}
-      </Button>
+      {/* صف الأزرار: زر السلة وزر المفضلة بجانبه */}
+      <div className="flex items-center gap-3">
+        <Button
+          type="button"
+          size="lg"
+          className="h-12 flex-1 gap-2 rounded-2xl text-sm font-medium transition-all active:scale-[0.99]"
+          disabled={isDisabled || isAdding}
+          onClick={handleAddToCart}
+        >
+          <ShoppingCartIcon className="size-4" />
+          {isOutOfStock
+            ? t("OUT_OF_STOCK_BUTTON", { default: "Out of Stock" })
+            : isAdding
+              ? t("ADDING_TO_CART", { default: "Adding..." })
+              : quantity > 1
+                ? t("ADD_MULTIPLE_TO_CART", {
+                    count: quantity,
+                    default: `Add ${quantity} to Bag`,
+                  })
+                : t("ADD_TO_CART", { default: "Add to Bag" })}
+        </Button>
+
+        {/* زر القلب للمفضلة بتصميم متناسق تماماً مع زر السلة */}
+           <WishlistButton productId={productId} />
+       </div>
     </div>
   )
 }

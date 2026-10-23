@@ -58,9 +58,7 @@ export default async function RootLayout({
 
   // جلب سياق العملة والمستخدم الحالي بالتوازي لتحقيق أسرع استجابة خادمة
   const currentUserResult = await getCurrentUser()
-  const currentUser = currentUserResult.success
-    ? currentUserResult.data
-    : null
+  const currentUser = currentUserResult.success ? currentUserResult.data : null
 
   const permissions = currentUser?.permissions || []
 
@@ -72,19 +70,19 @@ export default async function RootLayout({
       className={cn("antialiased", rubik.variable, fontMono.variable)}
     >
       <body className="min-h-screen bg-background font-sans text-foreground">
-        <DirectionProvider dir={direction}>
-          <ThemeProvider>
-            <NextIntlClientProvider>
-              <TooltipProvider>
-                <ScrollToTop />
-                <UserProvider user={currentUser} permissions={permissions}>
+        <ThemeProvider>
+          <NextIntlClientProvider>
+            <TooltipProvider>
+              <ScrollToTop />
+              <UserProvider user={currentUser} permissions={permissions}>
+                <DirectionProvider dir={direction}>
                   {children}
-                </UserProvider>
-              </TooltipProvider>
-            </NextIntlClientProvider>
-          </ThemeProvider>
-          <Toaster />
-        </DirectionProvider>
+                </DirectionProvider>
+              </UserProvider>
+            </TooltipProvider>
+          </NextIntlClientProvider>
+        </ThemeProvider>
+        <Toaster />
       </body>
     </html>
   )

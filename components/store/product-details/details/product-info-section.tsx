@@ -38,7 +38,8 @@ export function ProductInfoSection({
    * وعرضها كخيارات مستقلة ودقيقة للمستخدم.
    */
   const variantOptions = React.useMemo(() => {
-    if (!product.product_variants || product.product_variants.length === 0) return []
+    if (!product.product_variants || product.product_variants.length === 0)
+      return []
 
     // تجميع الخصائص الفريدة من جميع الـ variants (مثلاً: استخراج مفاتيح الـ attributes مثل size)
     const attributeKeys = new Set<string>()
@@ -68,12 +69,20 @@ export function ProductInfoSection({
     const options: Array<{
       id: string
       name: string
-      values: Array<{ id: string; name: string; isSelected: boolean; isDisabled?: boolean }>
+      values: Array<{
+        id: string
+        name: string
+        isSelected: boolean
+        isDisabled?: boolean
+      }>
     }> = []
 
     attributeKeys.forEach((attrKey) => {
       // جمع القيم الفريدة لكل خاصية
-      const uniqueValues = new Map<string, { id: string; name: string; isDisabled: boolean }>()
+      const uniqueValues = new Map<
+        string,
+        { id: string; name: string; isDisabled: boolean }
+      >()
 
       product.product_variants.forEach((v) => {
         const attrVal = v.attributes?.[attrKey]
@@ -169,6 +178,7 @@ export function ProductInfoSection({
 
           {selectedVariant && (
             <ProductActions
+              productId={product.id}
               variant={selectedVariant}
               isProductActive={product.is_active}
             />

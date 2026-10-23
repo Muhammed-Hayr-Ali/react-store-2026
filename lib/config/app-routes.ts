@@ -1,5 +1,11 @@
+/**
+ * @file lib/config/routes.ts
+ * @description Application routes configuration.
+ */
+
 export const appRoutes = {
   home: "/",
+  wishlist: "/wishlist",
   terms: "/terms",
   privacy: "/privacy",
   newsletterUnsubscribe: "/unsubscribe",
