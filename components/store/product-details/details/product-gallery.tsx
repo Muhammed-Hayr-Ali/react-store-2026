@@ -132,7 +132,7 @@ export function ProductGallery({
             role="dialog"
             aria-modal="true"
             onClick={() => toggleLightbox(false)}
-            className="fixed inset-0 z-50 flex animate-in flex-col items-center justify-between bg-background/95 p-4 backdrop-blur-2xl duration-300 fade-in sm:p-8"
+            className="fixed inset-0 z-50 flex animate-in flex-col items-center justify-between bg-background/95 p-4 backdrop-blur-2xl duration-300 fade-in"
           >
             {/* شريط رأس النافذة (عداد الصور وزر الإغلاق) */}
             <div className="flex w-full max-w-6xl items-center justify-between text-foreground">
@@ -206,7 +206,7 @@ export function ProductGallery({
             {images.length > 1 && (
               <div
                 onClick={(e) => e.stopPropagation()}
-                className="flex max-w-full scrollbar-none items-center gap-3 overflow-x-auto scroll-smooth rounded-sm bg-muted/50 p-2.5 backdrop-blur-xl [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                className="flex max-w-full scrollbar-none items-center gap-4 overflow-x-auto scroll-smooth rounded-sm bg-muted/50 p-2.5 backdrop-blur-xl [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
               >
                 {images.map((img) => {
                   const isSelected = activeImage === img.url
@@ -218,22 +218,11 @@ export function ProductGallery({
                       type="button"
                       onClick={() => handleImageChange(img)}
 
-
-                  className={`group relative size-16 shrink-0 cursor-pointer overflow-hidden  rounded-[50%] corner-squircle  bg-muted transition-all duration-300 ${
-                    isSelected
-                      ? "opacity-100 ring-1 ring-foreground ring-offset-1"
-                      : "opacity-40 hover:opacity-100"
-                  }`}
-
-
-
-
-
-                      // className={`relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-sm transition-all duration-300 ${
-                      //   isSelected
-                      //     ? "opacity-100 ring-1 ring-foreground ring-offset-1"
-                      //     : "opacity-40 hover:opacity-100"
-                      // }`}
+                      className={`group relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-[50%] bg-muted transition-all duration-300 corner-squircle ${
+                        isSelected
+                          ? "opacity-100 ring-1 ring-muted-foreground/50 ring-offset-1"
+                          : "opacity-40 hover:opacity-100"
+                      }`}
                     >
                       {!isFailed ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
@@ -318,9 +307,9 @@ export function ProductGallery({
                   key={img.id}
                   type="button"
                   onClick={() => handleImageChange(img)}
-                  className={`group relative size-16 shrink-0 cursor-pointer overflow-hidden  rounded-[50%] corner-squircle  bg-muted transition-all duration-300 ${
+                  className={`group relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-[50%] bg-muted transition-all duration-300 corner-squircle ${
                     isSelected
-                      ? "opacity-100 ring-1 ring-foreground ring-offset-1"
+                      ? "opacity-100 ring-1 ring-muted-foreground/50 ring-offset-1"
                       : "opacity-40 hover:opacity-100"
                   }`}
                   aria-label={t("SELECT_PRODUCT_IMAGE", {
