@@ -220,7 +220,7 @@ export function ProductGallery({
 
                       className={`group relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-[50%] bg-muted transition-all duration-300 corner-squircle ${
                         isSelected
-                          ? "opacity-100 ring-1 ring-muted-foreground/50 ring-offset-1"
+                          ? "opacity-100 ring-1 ring-muted-foreground/50 ring-offset-2"
                           : "opacity-40 hover:opacity-100"
                       }`}
                     >
@@ -322,7 +322,7 @@ export function ProductGallery({
                       src={img.url}
                       alt={img.alt_text || productName}
                       onError={() => markImageAsFailed(img.url)}
-                      className="size-full object-contain object-center transition-transform duration-500 group-hover:scale-105"
+                      className="size-full object-contain object-center transition-transform duration-500 group-hover:scale-95"
                     />
                   ) : (
                     <div className="flex size-full items-center justify-center text-muted-foreground">

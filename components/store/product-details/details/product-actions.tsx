@@ -17,7 +17,10 @@ interface ProductActionsProps {
   isProductActive: boolean
 }
 
-export function ProductActions({ variant, isProductActive }: ProductActionsProps) {
+export function ProductActions({
+  variant,
+  isProductActive,
+}: ProductActionsProps) {
   const t = useTranslations("ProductDetails")
   const { formatRawPrice, currentCurrency } = useCurrency()
 
@@ -56,14 +59,32 @@ export function ProductActions({ variant, isProductActive }: ProductActionsProps
   return (
     <div className="space-y-4 pt-2">
       {/* شريط موحد ونظيف تماماً بدون خلفيات ثقيلة */}
-      <div className={`flex items-center justify-between py-2 ${isOutOfStock ? "opacity-50" : ""}`}>
-        
+      <div
+        className={`flex items-center justify-between py-2 ${isOutOfStock ? "opacity-50" : ""}`}
+      >
         {/* محدد الكمية بنمط Minimalist */}
         <div className="flex items-center gap-3">
           <span className="text-xs font-medium text-muted-foreground">
             {t("QUANTITY", { default: "Quantity" })}
           </span>
           <div className="flex items-center rounded-lg bg-muted/60 p-0.5">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handleIncrement}
+              disabled={
+                isDisabled ||
+                (variant.track_inventory && quantity >= variant.stock_quantity)
+              }
+              className="size-7 rounded-md text-muted-foreground hover:text-foreground"
+              aria-label={t("INCREASE_QUANTITY", { default: "Increase" })}
+            >
+              <PlusIcon className="size-3" />
+            </Button>{" "}
+            <span className="w-8 text-center text-xs font-semibold text-foreground tabular-nums">
+              {isOutOfStock ? 0 : quantity}
+            </span>
             <Button
               type="button"
               variant="ghost"
@@ -75,31 +96,23 @@ export function ProductActions({ variant, isProductActive }: ProductActionsProps
             >
               <MinusIcon className="size-3" />
             </Button>
-            <span className="w-8 text-center text-xs font-semibold tabular-nums text-foreground">
-              {isOutOfStock ? 0 : quantity}
-            </span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={handleIncrement}
-              disabled={isDisabled || (variant.track_inventory && quantity >= variant.stock_quantity)}
-              className="size-7 rounded-md text-muted-foreground hover:text-foreground"
-              aria-label={t("INCREASE_QUANTITY", { default: "Increase" })}
-            >
-              <PlusIcon className="size-3" />
-            </Button>
           </div>
         </div>
 
         {/* عرض الإجمالي بتنسيق هادئ وخفيف */}
-        <div className="text-end">
-          <span className="text-xs text-muted-foreground me-1.5">
+
+        <div className="flex items-center gap-3">
+          <span className="me-1.5 text-xs font-medium text-muted-foreground">
             {t("TOTAL_PRICE", { default: "Total" })}:
           </span>
-          <span className="text-lg font-bold tracking-tight text-foreground tabular-nums">
-            {formatRawPrice(totalPriceInCents)} {currentCurrency.symbol}
-          </span>
+          <div className="flex items-baseline gap-1">
+            <span className="text-lg font-bold   text-foreground  ">
+              {formatRawPrice(totalPriceInCents)}
+            </span>
+            <span className="text-xs font-medium text-muted-foreground">
+              {currentCurrency.symbol}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -115,10 +128,13 @@ export function ProductActions({ variant, isProductActive }: ProductActionsProps
         {isOutOfStock
           ? t("OUT_OF_STOCK_BUTTON", { default: "Out of Stock" })
           : isAdding
-          ? t("ADDING_TO_CART", { default: "Adding..." })
-          : quantity > 1
-          ? t("ADD_MULTIPLE_TO_CART", { count: quantity, default: `Add ${quantity} to Bag` })
-          : t("ADD_TO_CART", { default: "Add to Bag" })}
+            ? t("ADDING_TO_CART", { default: "Adding..." })
+            : quantity > 1
+              ? t("ADD_MULTIPLE_TO_CART", {
+                  count: quantity,
+                  default: `Add ${quantity} to Bag`,
+                })
+              : t("ADD_TO_CART", { default: "Add to Bag" })}
       </Button>
     </div>
   )
