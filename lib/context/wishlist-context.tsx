@@ -18,9 +18,7 @@ interface WishlistContextType {
   isPending: boolean
 }
 
-const WishlistContext = React.createContext<WishlistContextType | undefined>(
-  undefined
-)
+const WishlistContext = React.createContext<WishlistContextType | undefined>(undefined)
 
 export function WishlistProvider({
   initialWishlistIds,
@@ -30,8 +28,7 @@ export function WishlistProvider({
   children: React.ReactNode
 }) {
   const t = useTranslations("Wishlist")
-  const [wishlistIds, setWishlistIds] =
-    React.useState<string[]>(initialWishlistIds)
+  const [wishlistIds, setWishlistIds] = React.useState<string[]>(initialWishlistIds)
   const [isPending, startTransition] = useTransition()
 
   // التحقق السريع هل المنتج موجود في المفضلة
@@ -59,17 +56,17 @@ export function WishlistProvider({
 
       // إذا حدث خطأ، نُعيد الحالة كما كانت لتجنب عدم التوافق وإظهار التوست
       if (!result.success) {
-        console.log(result.error)
-
         setWishlistIds((prev) =>
           exists ? [...prev, productId] : prev.filter((id) => id !== productId)
         )
 
-        toast.error(
-          t("GENERAL_ERROR", {
-            default: result.error || "Something went wrong, please try again.",
+        if (result.error === "PERMISSION_DENIED") {
+          toast.error(t("AUTH_REQUIRED_TITLE", { default: "Sign in required" }), {
+            description: t("AUTH_REQUIRED_DESC", { default: "Please sign in to save items to your wishlist." }),
           })
-        )
+        } else {
+          toast.error(t("GENERAL_ERROR", { default: "Something went wrong, please try again." }))
+        }
       }
     })
   }

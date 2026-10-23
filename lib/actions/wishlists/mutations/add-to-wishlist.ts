@@ -34,8 +34,10 @@ export async function addToWishlist(
     error: userError,
   } = await supabase.auth.getUser()
 
+
   if (userError || !user) {
-    console.error("Wishlist Auth Error or No User:", userError)
+  
+    console.log("XXXXXXXXXXXXXXXXXXXXX")
     return { success: false, error: "PERMISSION_DENIED" }
   }
 
