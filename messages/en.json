@@ -1294,5 +1294,10 @@
     "FAST_DISPATCH": "Fast Dispatch",
     "EASY_RETURNS": "Easy Returns",
     "SECURE_CHECKOUT": "Secure Checkout"
+  },
+  "CategoriesScroll": {
+    "title": "Categories",
+    "previous_aria": "Previous categories",
+    "next_aria": "Next categories"
   }
 }

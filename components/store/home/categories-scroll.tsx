@@ -2,12 +2,12 @@
 
 /**
  * @file components/store/home/categories-scroll.tsx
- * @description Horizontal scrollable categories component for storefront.
+ * @description Horizontal scrollable categories component with flawless localized gradient mask for RTL and LTR.
  */
 
 import * as React from "react"
 import Link from "next/link"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import useEmblaCarousel from "embla-carousel-react"
 import { ChevronLeftIcon, ChevronRightIcon, LayoutGridIcon } from "lucide-react"
 
@@ -23,6 +23,7 @@ export default function CategoriesScroll({
   categories,
 }: CategoriesScrollProps) {
   const locale = useLocale()
+  const t = useTranslations("CategoriesScroll")
   const isRtl = locale === "ar"
 
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -62,18 +63,22 @@ export default function CategoriesScroll({
 
   if (!categories || categories.length === 0) return null
 
-  const startStop = canScrollPrev ? "transparent 0%, black 48px" : "black 0%"
-  const endStop = canScrollNext
-    ? "black calc(100% - 48px), transparent 100%"
-    : "black 100%"
-  const maskStyle = `linear-gradient(to right, ${startStop}, ${endStop})`
+  // التعديل الجذري: في الـ LTR البداية يسار والنهاية يمين، أما في الـ RTL البداية يمين والنهاية يسار.
+  // لذلك نقوم بعكس المتغيرات بناءً على الـ isRtl لضمان صحة التلاشي في كلا اللغتين.
+  const leftHasScroll = isRtl ? canScrollNext : canScrollPrev
+  const rightHasScroll = isRtl ? canScrollPrev : canScrollNext
+
+  const leftStop = leftHasScroll ? "transparent 0%, black 48px" : "black 0%"
+  const rightStop = rightHasScroll ? "black calc(100% - 48px), transparent 100%" : "black 100%"
+
+  const maskStyle = `linear-gradient(to right, ${leftStop}, ${rightStop})`
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-3 sm:px-6 lg:px-8">
       {/* الترويسة وأزرار التمرير السريعة */}
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-bold tracking-tight text-foreground sm:text-base">
-          Categories
+          {t("title", { default: "Categories" })}
         </h3>
 
         <div className="flex items-center gap-1">
@@ -83,7 +88,7 @@ export default function CategoriesScroll({
             onClick={scrollPrev}
             disabled={!canScrollPrev}
             className="size-7 rounded-full text-muted-foreground hover:bg-muted disabled:opacity-30 sm:size-8"
-            aria-label="Previous categories"
+            aria-label={t("previous_aria", { default: "Previous categories" })}
           >
             <ChevronLeftIcon className="size-4 rtl:rotate-180" />
           </Button>
@@ -93,14 +98,14 @@ export default function CategoriesScroll({
             onClick={scrollNext}
             disabled={!canScrollNext}
             className="size-7 rounded-full text-muted-foreground hover:bg-muted disabled:opacity-30 sm:size-8"
-            aria-label="Next categories"
+            aria-label={t("next_aria", { default: "Next categories" })}
           >
             <ChevronRightIcon className="size-4 rtl:rotate-180" />
           </Button>
         </div>
       </div>
 
-      {/* مسار السحب مع تطبيق التلاشي التلقائي عند الحواف */}
+      {/* مسار السحب مع تطبيق التلاشي التلقائي المتطابق تماماً مع اتجاه السكرول */}
       <div
         className="overflow-hidden transition-all duration-300"
         ref={emblaRef}

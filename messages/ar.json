@@ -1289,5 +1289,10 @@
     "FAST_DISPATCH": "شحن سريع",
     "EASY_RETURNS": "إرجاع سهل",
     "SECURE_CHECKOUT": "دفع آمن"
+  },
+  "CategoriesScroll": {
+    "title": "الفئات",
+    "previous_aria": "الفئات السابقة",
+    "next_aria": "الفئات التالية"
   }
 }
