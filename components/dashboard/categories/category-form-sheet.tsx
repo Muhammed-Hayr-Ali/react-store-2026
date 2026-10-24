@@ -61,6 +61,7 @@ import {
 } from "@/lib/actions/categories/schemas"
 import { getSiteAssetUrl } from "@/lib/database/supabase/storage"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 interface CategoryFormSheetProps {
   open: boolean
@@ -122,6 +123,7 @@ export function CategoryFormSheet({
   onSaved,
   trigger,
 }: CategoryFormSheetProps) {
+  const isMobile = useIsMobile()
   const t = useTranslations("CategoriesManagement")
   const tErrors = useTranslations("ActionErrors")
   const [isPending, startTransition] = React.useTransition()
@@ -273,24 +275,18 @@ export function CategoryFormSheet({
         if (!isPending) onOpenChange(nextOpen)
       }}
     >
-
-
       <SheetTrigger asChild>
         {trigger ?? (
-            <Button type="button" size="sm" className="h-8 gap-1.5 text-xs">
-              <TagsIcon className="size-3.5" />
-              {t("CREATE_CATEGORY")}
-            </Button>
+          <Button type="button" size="sm" className="h-8 gap-1.5 text-xs">
+            <TagsIcon className="size-3.5" />
+            {t("CREATE_CATEGORY")}
+          </Button>
         )}
       </SheetTrigger>
 
- 
       <SheetContent
-        side="right"
-        className="gap-0 p-0 sm:max-w-xl"
-        onEscapeKeyDown={(event) => {
-          if (isPending) event.preventDefault()
-        }}
+        side={isMobile ? "bottom" : "right"}
+        className="gap-0 p-0 sm:max-w-xl max-h-dvh data-[side=left]:sm:max-w-1/3 data-[side=right]:sm:max-w-2/5"
       >
         <SheetHeader className="border-b border-border/60 px-5 py-4 pe-12 sm:px-6">
           <SheetTitle className="flex items-center gap-2 text-sm font-semibold">

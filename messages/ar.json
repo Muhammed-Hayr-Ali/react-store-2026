@@ -1044,7 +1044,12 @@
     "EXP_SAFE": "آمن (> 90 يوم)",
 
     "STOCK_LOW": "منخفض (≤ 10 قطع)",
-    "STOCK_NORMAL": "متوفر (> 10 قطع)"
+    "STOCK_NORMAL": "متوفر (> 10 قطع)",
+
+    "PRODUCT_NAME_CONFIRMATION_REQUIRED": "يرجى كتابة اسم المنتج للتأكيد",
+    "PRODUCT_NAME_CONFIRMATION_MISMATCH": "اسم المنتج المدخل غير مطابق",
+    "TYPE_PRODUCT_NAME_TO_CONFIRM": "اكتب",
+    "TO_CONFIRM": "للتأكيد"
   },
   "ProductForm": {
     "ALERT_TITLE": "يتطلب الانتباه",

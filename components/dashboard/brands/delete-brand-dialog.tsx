@@ -27,6 +27,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { deleteBrand } from "@/lib/actions/brands"
 import type { BrandRecord } from "@/lib/actions/brands/types"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
+import { LoaderCircleIcon } from "lucide-react"
 
 interface DeleteBrandDialogProps {
   brand: BrandRecord | null
@@ -149,7 +150,7 @@ export function DeleteBrandDialog({
             )}
           />
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending} className="mt-0 text-xs">
+            <AlertDialogCancel disabled={isPending} className="h-9 text-xs">
               {t("CANCEL_BUTTON")}
             </AlertDialogCancel>
             <Button
@@ -157,16 +158,13 @@ export function DeleteBrandDialog({
               variant="destructive"
               onClick={handleDelete}
               disabled={isPending || !form.formState.isValid}
-              className="text-xs"
+              className="h-9 gap-1.5 text-xs"
             >
-              {isPending ? (
-                <>
-                  <Spinner className="me-1.5 size-3.5" />
-                  {t("DELETING_BUTTON")}
-                </>
-              ) : (
-                t("DELETE_CONFIRM")
+              {isPending && (
+                <LoaderCircleIcon className="size-3.5 animate-spin" />
               )}
+
+              {isPending ? t("DELETING_BUTTON") : t("DELETE_CONFIRM")}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

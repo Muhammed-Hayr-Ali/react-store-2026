@@ -1,5 +1,10 @@
 "use client"
 
+/**
+ * @file components/dashboard/newsletter-subscribers/newsletter-compose-dialog.tsx
+ * @description Dialog component for composing and sending newsletter emails to subscribers.
+ */
+
 import * as React from "react"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
@@ -24,6 +29,7 @@ import { sendNewsletterEmail } from "@/lib/actions/newsletter_subscribers/mutati
 import { NEWSLETTER_EMAIL_BATCH_LIMIT } from "@/lib/actions/newsletter_subscribers/schemas"
 import type { NewsletterSubscriber } from "@/lib/actions/newsletter_subscribers/types"
 import type { AppLocale } from "@/i18n/routing"
+import { LoaderCircleIcon } from "lucide-react"
 
 interface NewsletterComposeDialogProps {
   subscriberIds: string[]
@@ -52,20 +58,24 @@ export function NewsletterComposeDialog({
   const t = useTranslations("NewsletterSubscribersManagement")
   const tErrors = useTranslations("ActionErrors")
   const [open, setOpen] = React.useState(false)
-  const [recipientIds, setRecipientIds] = React.useState(subscriberIds)
+
+  // تتبع الفشلات الحية أثناء عملية الإرسال الجزئي دون الحاجة لـ useEffect للـ props
+  const [failedIdsState, setFailedIdsState] = React.useState<string[] | null>(
+    null
+  )
+
   const [emailLocale, setEmailLocale] = React.useState<AppLocale>(locale)
   const [subject, setSubject] = React.useState("")
   const [message, setMessage] = React.useState("")
   const [isSending, startSending] = React.useTransition()
 
-  React.useEffect(() => {
-    setRecipientIds(subscriberIds)
-  }, [subscriberIds])
+  // القائمة الفعلية للمستلمين (تعتمد على الفشل الجزئي أو الـ props الأساسية)
+  const recipientIds = failedIdsState ?? subscriberIds
 
   function handleOpenChange(nextOpen: boolean) {
     if (isSending) return
     if (nextOpen) {
-      setRecipientIds(subscriberIds)
+      setFailedIdsState(null) // إعادة ضبط عند الفتح
       setEmailLocale(locale)
       setSubject(t("DEFAULT_SUBJECT"))
       setMessage("")
@@ -85,7 +95,9 @@ export function NewsletterComposeDialog({
         })
 
         if (result.success) {
-          toast.success(t("SEND_SUCCESS_TOAST", { count: result.data.sentCount }))
+          toast.success(
+            t("SEND_SUCCESS_TOAST", { count: result.data.sentCount })
+          )
           onSent(recipientIds)
           setOpen(false)
           return
@@ -93,7 +105,7 @@ export function NewsletterComposeDialog({
 
         if (result.error === "NEWSLETTER_EMAIL_PARTIAL_FAILURE") {
           const failedIds = result.failedSubscriberIds ?? []
-          setRecipientIds(failedIds)
+          setFailedIdsState(failedIds)
           onPartialFailure(recipientIds, failedIds)
           toast.error(
             t("SEND_PARTIAL_FAILURE", {
@@ -109,7 +121,7 @@ export function NewsletterComposeDialog({
           const inactiveIds = result.inactiveSubscriberIds ?? []
           const missingIds = result.missingSubscriberIds ?? []
           onRecipientsChanged(invalidIds, inactiveIds, missingIds)
-          setRecipientIds([])
+          setFailedIdsState([])
         }
 
         toast.error(tErrors(getActionErrorKey(result.error)))
@@ -121,7 +133,7 @@ export function NewsletterComposeDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger render={children} />
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent
         className="sm:max-w-lg"
         onEscapeKeyDown={(event) => {
@@ -194,6 +206,7 @@ export function NewsletterComposeDialog({
               variant="outline"
               disabled={isSending}
               onClick={() => setOpen(false)}
+              className="h-9 gap-1.5 text-xs"
             >
               {t("CANCEL_BUTTON")}
             </Button>
@@ -206,15 +219,15 @@ export function NewsletterComposeDialog({
                 recipientIds.length === 0 ||
                 recipientIds.length > NEWSLETTER_EMAIL_BATCH_LIMIT
               }
+              className="h-9 gap-1.5 text-xs"
             >
-              {isSending ? (
-                <>
-                  <Spinner className="me-1.5 size-3.5" />
-                  {t("SENDING_BUTTON")}
-                </>
-              ) : (
-                t("SEND_BUTTON", { count: recipientIds.length })
+              {isSending && (
+                <LoaderCircleIcon className="size-3.5 animate-spin" />
               )}
+
+              {isSending
+                ? t("SENDING_BUTTON")
+                : t("SEND_BUTTON", { count: recipientIds.length })}
             </Button>
           </DialogFooter>
         </form>

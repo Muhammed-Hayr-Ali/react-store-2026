@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import type { NewsletterSubscriber } from "@/lib/actions/newsletter_subscribers/types"
+import { LoaderCircleIcon } from "lucide-react"
 
 interface DeleteSubscriberDialogProps {
   subscriber: NewsletterSubscriber
@@ -89,8 +90,9 @@ export function DeleteSubscriberDialog({
         <AlertDialogFooter>
           <AlertDialogCancel
             disabled={isDeleting}
-            className="mt-0 text-xs"
             onClick={() => setConfirmEmail("")}
+            className="h-9 text-xs"
+            
           >
             {t("CANCEL_BUTTON")}
           </AlertDialogCancel>
@@ -99,16 +101,13 @@ export function DeleteSubscriberDialog({
             variant="destructive"
             disabled={isDeleting || confirmEmail !== subscriber.email}
             onClick={() => onDelete(subscriber.id)}
-            className="text-xs shadow-xs"
+            className="h-9 gap-1.5 text-xs"
           >
-            {isDeleting ? (
-              <>
-                <Spinner className="me-1.5 size-3.5" />
-                {t("DELETING_BUTTON")}
-              </>
-            ) : (
-              t("DELETE_ACTION")
+            {isDeleting && (
+              <LoaderCircleIcon className="size-3.5 animate-spin" />
             )}
+
+            {isDeleting ? t("DELETING_BUTTON") : t("DELETE_ACTION")}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

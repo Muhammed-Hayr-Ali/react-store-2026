@@ -36,6 +36,7 @@ import type { AdminUserSummary } from "@/lib/actions/users/types"
 import { createUser } from "@/lib/actions/users/mutations/create-user"
 import { createUserSchema } from "@/lib/actions/users/schemas"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 type CreateUserFormValues = z.infer<typeof createUserSchema>
 
@@ -46,6 +47,7 @@ interface CreateUserSheetProps {
 
 export function CreateUserSheet({ children, onSuccess }: CreateUserSheetProps) {
   // Resolve translations and navigation for the account creation flow.
+  const isMobile = useIsMobile()
   const t = useTranslations("UsersManagement")
   const tErrors = useTranslations("ActionErrors")
   const router = useRouter()
@@ -161,16 +163,9 @@ export function CreateUserSheet({ children, onSuccess }: CreateUserSheetProps) {
           </Button>
         )}
       </SheetTrigger>
-
       <SheetContent
-        side="right"
-        className="flex w-full flex-col p-0 sm:max-w-xl"
-        onInteractOutside={(event) => {
-          if (isSubmitting) event.preventDefault()
-        }}
-        onEscapeKeyDown={(event) => {
-          if (isSubmitting) event.preventDefault()
-        }}
+        side={isMobile ? "bottom" : "right"}
+        className="max-h-dvh gap-0 p-0 sm:max-w-xl data-[side=left]:sm:max-w-1/3 data-[side=right]:sm:max-w-2/5"
       >
         <SheetHeader className="shrink-0 border-b bg-card px-5 py-4 text-start sm:px-6">
           <SheetTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">

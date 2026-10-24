@@ -50,6 +50,7 @@ import type { BrandRecord } from "@/lib/actions/brands/types"
 import type { BrandFormValues as BrandInput } from "@/lib/actions/brands/schemas"
 import { getSiteAssetUrl } from "@/lib/database/supabase/storage"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 interface BrandFormSheetProps {
   open: boolean
@@ -106,6 +107,7 @@ export function BrandFormSheet({
   onSaved,
   trigger,
 }: BrandFormSheetProps) {
+  const isMobile = useIsMobile()
   const t = useTranslations("BrandsManagement")
   const tErrors = useTranslations("ActionErrors")
   const [isPending, startTransition] = React.useTransition()
@@ -248,11 +250,8 @@ export function BrandFormSheet({
         )}
       </SheetTrigger>
       <SheetContent
-        side="right"
-        className="gap-0 p-0 sm:max-w-xl"
-        onEscapeKeyDown={(event) => {
-          if (isPending) event.preventDefault()
-        }}
+        side={isMobile ? "bottom" : "right"}
+        className="max-h-dvh gap-0 p-0 sm:max-w-xl data-[side=left]:sm:max-w-1/3 data-[side=right]:sm:max-w-2/5"
       >
         <SheetHeader className="border-b border-border/60 px-5 py-4 pe-12 sm:px-6">
           <SheetTitle className="flex items-center gap-2 text-sm font-semibold">

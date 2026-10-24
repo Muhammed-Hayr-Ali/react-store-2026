@@ -27,6 +27,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { deleteCategory } from "@/lib/actions/categories"
 import type { Category } from "@/lib/actions/categories"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
+import { LoaderCircleIcon } from "lucide-react"
 
 interface DeleteCategoryDialogProps {
   category: Category | null
@@ -148,24 +149,33 @@ export function DeleteCategoryDialog({
             )}
           />
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending} className="mt-0 text-xs">
+            <AlertDialogCancel disabled={isPending} className="h-9 text-xs">
               {t("CANCEL_BUTTON")}
             </AlertDialogCancel>
+
+            {/* 
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="h-9 gap-1.5 text-xs"
+            >
+              {isPending && (
+                <LoaderCircleIcon className="size-3.5 animate-spin" />
+              )}
+              {isPending ? t("SAVING_BUTTON") : t("SAVE_BUTTON")}
+            </Button> */}
+
             <Button
               type="button"
               variant="destructive"
               onClick={handleDelete}
               disabled={isPending || !form.formState.isValid}
-              className="text-xs"
+              className="h-9 gap-1.5 text-xs"
             >
-              {isPending ? (
-                <>
-                  <Spinner className="me-1.5 size-3.5" />
-                  {t("DELETING_BUTTON")}
-                </>
-              ) : (
-                t("DELETE_CONFIRM")
+              {isPending && (
+                <LoaderCircleIcon className="size-3.5 animate-spin" />
               )}
+              {isPending ? t("DELETING_BUTTON") : t("DELETE_CONFIRM")}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

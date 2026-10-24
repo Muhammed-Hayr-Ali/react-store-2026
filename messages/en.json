@@ -1048,7 +1048,12 @@
     "EXP_SAFE": "Safe (> 90 days)",
 
     "STOCK_LOW": "Low (≤ 10 pcs)",
-    "STOCK_NORMAL": "Normal (> 10 pcs)"
+    "STOCK_NORMAL": "Normal (> 10 pcs)",
+
+    "PRODUCT_NAME_CONFIRMATION_REQUIRED": "Please type the product name to confirm",
+    "PRODUCT_NAME_CONFIRMATION_MISMATCH": "The product name does not match",
+    "TYPE_PRODUCT_NAME_TO_CONFIRM": "Type",
+    "TO_CONFIRM": "to confirm"
   },
   "ProductForm": {
     "ALERT_TITLE": "Action Required",
