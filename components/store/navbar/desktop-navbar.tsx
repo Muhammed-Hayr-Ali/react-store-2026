@@ -1,13 +1,13 @@
 /**
  * @file components/store/navbar/desktop-navbar.tsx
- * @description Desktop navigation bar including search, shopping cart, currency switcher, and user profile/auth actions.
+ * @description Desktop navigation bar including search, shopping cart sheet, currency switcher, and user profile/auth actions.
  */
 
 "use client"
 
 import * as React from "react"
 import Link from "next/link"
-import { SearchIcon, ShoppingCartIcon } from "lucide-react"
+import { SearchIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils"
 
 import UserProfilePopover from "./user-profile-popover"
 import { CurrencySwitcher } from "@/components/shared/currency-switcher"
-import { WishlistHeaderButton } from "../wishlist/wishlist-header-button"
+import { CartSheet } from "@/components/store/cart/cart-sheet"
 
 interface DesktopNavbarProps {
   className?: string
@@ -36,11 +36,8 @@ export default function DesktopNavbar({ className }: DesktopNavbarProps) {
         <SearchIcon />
       </Button>
 
-      <WishlistHeaderButton />
-
-      <Button variant="secondary" size="icon" aria-label="Shopping Cart">
-        <ShoppingCartIcon />
-      </Button>
+      {/* سلة المشتريات الجانبية */}
+      <CartSheet />
 
       {user ? (
         <>

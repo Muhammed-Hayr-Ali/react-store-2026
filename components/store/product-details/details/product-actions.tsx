@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { ProductVariantDetail } from "@/lib/actions/store/product-details/details/queries/get-product-details"
 import { useCurrency } from "@/lib/context/currency-context"
 import { WishlistButton } from "@/components/store/wishlist/wishlist-button"
+import { useCart } from "@/lib/context/cart-context"
 
 interface ProductActionsProps {
   productId: string
@@ -26,9 +27,9 @@ export function ProductActions({
 }: ProductActionsProps) {
   const t = useTranslations("ProductDetails")
   const { formatRawPrice, currentCurrency } = useCurrency()
+  const { addItem, isPending } = useCart()
 
   const [quantity, setQuantity] = React.useState(1)
-  const [isAdding, setIsAdding] = React.useState(false)
 
   const [prevVariantId, setPrevVariantId] = React.useState(variant.id)
   if (prevVariantId !== variant.id) {
@@ -53,10 +54,7 @@ export function ProductActions({
   }
 
   const handleAddToCart = async () => {
-    setIsAdding(true)
-    setTimeout(() => {
-      setIsAdding(false)
-    }, 600)
+    await addItem(productId, variant.id, quantity)
   }
 
   return (
@@ -124,13 +122,13 @@ export function ProductActions({
           type="button"
           size="lg"
           className="h-12 flex-1 gap-2 rounded-2xl text-sm font-medium transition-all active:scale-[0.99]"
-          disabled={isDisabled || isAdding}
+          disabled={isDisabled || isPending}
           onClick={handleAddToCart}
         >
           <ShoppingCartIcon className="size-4" />
           {isOutOfStock
             ? t("OUT_OF_STOCK_BUTTON", { default: "Out of Stock" })
-            : isAdding
+            : isPending
               ? t("ADDING_TO_CART", { default: "Adding..." })
               : quantity > 1
                 ? t("ADD_MULTIPLE_TO_CART", {
@@ -141,8 +139,8 @@ export function ProductActions({
         </Button>
 
         {/* زر القلب للمفضلة بتصميم متناسق تماماً مع زر السلة */}
-           <WishlistButton productId={productId} />
-       </div>
+        <WishlistButton productId={productId} />
+      </div>
     </div>
   )
 }

@@ -434,7 +434,8 @@
       "community_moderation": "Reviews Management (Actions)",
       "reports_moderation": "Reports & Moderation Management (Actions)",
       "users_security": "Users & Profiles Management (Actions)",
-      "roles_security": "Roles & Permissions Management (Actions)"
+      "roles_security": "Roles & Permissions Management (Actions)",
+      "cart_wishlist_management": "Cart & Wishlist Management"
     },
     "PERMISSION_LABELS": {
       "view_reviews_management": "View Reviews Management",
@@ -491,7 +492,16 @@
       "manage_roles": "Manage Roles",
       "assign_role": "Assign Role",
       "remove_role": "Remove Role",
-      "view_brands_management": "View Brands Management"
+      "view_brands_management": "View Brands Management",
+      "view_cart": "View Cart",
+      "create_cart": "Create Cart",
+      "update_cart": "Update Cart",
+      "delete_cart": "Delete Cart",
+      "manage_cart": "Manage Cart",
+      "view_wishlist": "View Wishlist",
+      "create_wishlist": "Create Wishlist",
+      "update_wishlist": "Update Wishlist",
+      "manage_wishlist": "Manage Wishlist"
     },
     "PERMISSION_DESCRIPTIONS": {
       "view_reviews_management": "Access the product reviews dashboard to moderate, approve, or delete customer feedback.",
@@ -548,7 +558,16 @@
       "manage_roles": "Full administrative control over roles and permissions",
       "assign_role": "Bind roles to specific staff users",
       "remove_role": "Revoke roles from specific staff users",
-      "view_brands_management": "Access and view the brands catalog and management dashboard page"
+      "view_brands_management": "Access and view the brands catalog and management dashboard page",
+      "view_cart": "View and inspect shopping cart contents",
+      "create_cart": "Initialize and create new shopping carts",
+      "update_cart": "Modify cart items, quantities, and properties",
+      "delete_cart": "Clear or delete shopping carts",
+      "manage_cart": "Full administrative control over user shopping carts",
+      "view_wishlist": "View and inspect saved wishlist items",
+      "create_wishlist": "Add items and create new wishlist records",
+      "update_wishlist": "Modify and update wishlist collections",
+      "manage_wishlist": "Full administrative control over user wishlists"
     }
   },
   "StaffAccessManagement": {
@@ -1313,5 +1332,22 @@
     "AUTH_REQUIRED_TITLE": "Sign in required",
     "AUTH_REQUIRED_DESC": "Please sign in to save items to your wishlist.",
     "GENERAL_ERROR": "Something went wrong, please try again later."
+  },
+  "Cart": {
+    "OPEN_CART": "Open cart",
+    "TITLE": "Shopping Cart",
+    "EMPTY": "Your cart is empty",
+    "EMPTY_DESC": "Add some products to start shopping",
+    "SUBTOTAL": "Subtotal",
+    "CHECKOUT": "Proceed to Checkout",
+    "CURRENCY": "$",
+    "ITEM_ADDED": "Added to cart successfully",
+    "ITEM_UPDATED": "Cart updated",
+    "ITEM_REMOVED": "Item removed from cart",
+    "GENERAL_ERROR": "An error occurred",
+    "UPDATE_ERROR": "Failed to update quantity",
+    "REMOVE_ERROR": "Failed to remove item",
+    "AUTH_REQUIRED_TITLE": "Sign in required",
+    "AUTH_REQUIRED_DESC": "Please sign in to add items to your cart."
   }
 }

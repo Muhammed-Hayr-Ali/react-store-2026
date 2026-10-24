@@ -40,7 +40,6 @@ export const PERMISSIONS = {
   DELETE_BRAND: "delete_brand",
 
   // --- 2. Categories Management ---
-
   VIEW_CATEGORIES_MANAGEMENT: "view_categories_management",
   CREATE_CATEGORY: "create_category",
   UPDATE_CATEGORY: "update_category",
@@ -99,6 +98,17 @@ export const PERMISSIONS = {
   MANAGE_ROLES: "manage_roles",
   ASSIGN_ROLE: "assign_role",
   REMOVE_ROLE: "remove_role",
+
+  // --- 10. Cart & Wishlist Management ---
+  MANAGE_CART: "manage_cart",
+  CREATE_CART: "create_cart",
+  VIEW_CART: "view_cart",
+  UPDATE_CART: "update_cart",
+  DELETE_CART: "delete_cart",
+  MANAGE_WISHLIST: "manage_wishlist",
+  CREATE_WISHLIST: "create_wishlist",
+  VIEW_WISHLIST: "view_wishlist",
+  UPDATE_WISHLIST: "update_wishlist",
 } as const
 
 export type AppPermission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]

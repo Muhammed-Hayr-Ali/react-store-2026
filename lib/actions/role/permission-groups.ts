@@ -1,9 +1,9 @@
-import { PERMISSIONS, AppPermission } from "./types"
-
 /**
  * @file lib/actions/role/permission-groups.ts
  * @description تصنيف الصلاحيات إلى مجموعات لعرضها في واجهة الإدارة.
  */
+
+import { PERMISSIONS, AppPermission } from "./types"
 
 export interface PermissionGroup {
   id: string
@@ -111,6 +111,58 @@ export const PERMISSION_GROUPS = [
         label: "View Coupons",
         description:
           "Access available discount vouchers and claimed promotional coupons",
+      },
+    ],
+  },
+
+  {
+    id: "cart_wishlist_management",
+    label: "Cart & Wishlist Management",
+    permissions: [
+      {
+        key: PERMISSIONS.VIEW_CART,
+        label: "View Cart",
+        description: "View and inspect shopping cart contents",
+      },
+      {
+        key: PERMISSIONS.CREATE_CART,
+        label: "Create Cart",
+        description: "Initialize and create new shopping carts",
+      },
+      {
+        key: PERMISSIONS.UPDATE_CART,
+        label: "Update Cart",
+        description: "Modify cart items, quantities, and properties",
+      },
+      {
+        key: PERMISSIONS.DELETE_CART,
+        label: "Delete Cart",
+        description: "Clear or delete shopping carts",
+      },
+      {
+        key: PERMISSIONS.MANAGE_CART,
+        label: "Manage Cart",
+        description: "Full administrative control over user shopping carts",
+      },
+      {
+        key: PERMISSIONS.VIEW_WISHLIST,
+        label: "View Wishlist",
+        description: "View and inspect saved wishlist items",
+      },
+      {
+        key: PERMISSIONS.CREATE_WISHLIST,
+        label: "Create Wishlist",
+        description: "Add items and create new wishlist records",
+      },
+      {
+        key: PERMISSIONS.UPDATE_WISHLIST,
+        label: "Update Wishlist",
+        description: "Modify and update wishlist collections",
+      },
+      {
+        key: PERMISSIONS.MANAGE_WISHLIST,
+        label: "Manage Wishlist",
+        description: "Full administrative control over user wishlists",
       },
     ],
   },

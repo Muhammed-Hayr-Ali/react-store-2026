@@ -1,6 +1,6 @@
 /**
  * @file app/[locale]/(store)/layout.tsx
- * @description Main storefront layout with Navbar, Footer, Multi-Currency Provider, and Wishlist Provider.
+ * @description Main storefront layout with Navbar, Footer, Multi-Currency Provider, Wishlist Provider, and Cart Provider.
  */
 
 import * as React from "react"
@@ -8,7 +8,9 @@ import { cookies } from "next/headers"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { CurrencyProvider } from "@/lib/context/currency-context"
 import { WishlistProvider } from "@/lib/context/wishlist-context"
+import { CartProvider } from "@/lib/context/cart-context"
 import { getWishlistProductIds } from "@/lib/actions/wishlists"
+import { getCart } from "@/lib/actions/cart"
 import Navbar from "@/components/store/navbar/navbar"
 import Footer from "@/components/store/footer/footer"
 import type { AppLocale } from "@/i18n/routing"
@@ -33,9 +35,13 @@ export default async function MainLayout({ children, params }: MainLayoutProps) 
   const cookieStore = await cookies()
   const savedCurrency = cookieStore.get("app_currency")?.value || "USD"
 
-  // 3. جلب معرفات المفضلة واستخراج الـ data الصافية (تجنب خطأ Type ApiResult vs string[])
+  // 3. جلب معرفات المفضلة واستخراج الـ data الصافية
   const wishlistResult = await getWishlistProductIds()
   const wishlistIds = wishlistResult.success ? wishlistResult.data : []
+
+  // 4. جلب سلة المشتريات الأولية للمستخدم الحالي
+  const cartResult = await getCart()
+  const initialCart = cartResult.success ? cartResult.data : null
 
   return (
     <CurrencyProvider
@@ -44,11 +50,13 @@ export default async function MainLayout({ children, params }: MainLayoutProps) 
       locale={typedLocale}
     >
       <WishlistProvider initialWishlistIds={wishlistIds}>
-        <div className="relative flex min-h-screen flex-col bg-background text-foreground">
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </div>
+        <CartProvider initialCart={initialCart}>
+          <div className="relative flex min-h-screen flex-col bg-background text-foreground">
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
+        </CartProvider>
       </WishlistProvider>
     </CurrencyProvider>
   )

@@ -434,7 +434,8 @@
       "community_moderation": "إدارة التقييمات (الإجراءات)",
       "reports_moderation": "إدارة البلاغات والإشراف (الإجراءات)",
       "users_security": "إدارة المستخدمين والملفات الشخصية (الإجراءات)",
-      "roles_security": "إدارة الأدوار والصلاحيات (الإجراءات)"
+      "roles_security": "إدارة الأدوار والصلاحيات (الإجراءات)",
+      "cart_wishlist_management": "إدارة سلة المشتريات والمفضلة"
     },
     "PERMISSION_LABELS": {
       "view_reviews_management": "إدارة التقييمات",
@@ -491,7 +492,16 @@
       "manage_roles": "إدارة الأدوار",
       "assign_role": "تعيين دور",
       "remove_role": "إزالة دور",
-      "view_brands_management": "عرض إدارة العلامات التجارية"
+      "view_brands_management": "عرض إدارة العلامات التجارية",
+      "view_cart": "عرض السلة",
+      "create_cart": "إنشاء سلة",
+      "update_cart": "تحديث السلة",
+      "delete_cart": "حذف السلة",
+      "manage_cart": "إدارة السلة",
+      "view_wishlist": "عرض المفضلة",
+      "create_wishlist": "إضافة للمفضلة",
+      "update_wishlist": "تحديث المفضلة",
+      "manage_wishlist": "إدارة المفضلة"
     },
     "PERMISSION_DESCRIPTIONS": {
       "view_reviews_management": "الوصول إلى لوحة إدارة تقييمات المنتجات للإشراف عليها، قبولها، أو حذف آراء العملاء.",
@@ -548,7 +558,16 @@
       "manage_roles": "تحكم إداري كامل في الأدوار والصلاحيات",
       "assign_role": "ربط الأدوار بموظفين محددين",
       "remove_role": "إلغاء الأدوار عن موظفين محددين",
-      "view_brands_management": "الوصول إلى كتالوج العلامات التجارية وصفحة إدارتها في لوحة التحكم"
+      "view_brands_management": "الوصول إلى كتالوج العلامات التجارية وصفحة إدارتها في لوحة التحكم",
+      "view_cart": "عرض وتفقد محتويات سلة المشتريات",
+      "create_cart": "تهيئة وإنشاء سلال تسوق جديدة",
+      "update_cart": "تعديل عناصر السلة والكميات والخصائص",
+      "delete_cart": "إفراغ أو حذف سلال المشتريات",
+      "manage_cart": "تحكم إداري كامل في سلال تسوق المستخدمين",
+      "view_wishlist": "عرض وتفقد عناصر قائمة المفضلة المحفوظة",
+      "create_wishlist": "إضافة عناصر وإنشاء سجلات جديدة في المفضلة",
+      "update_wishlist": "تعديل وتحديث مجموعات المفضلة",
+      "manage_wishlist": "تحكم إداري كامل في قوائم المفضلة للمستخدمين"
     }
   },
   "StaffAccessManagement": {
@@ -1308,5 +1327,22 @@
     "AUTH_REQUIRED_TITLE": "يجب تسجيل الدخول أولاً",
     "AUTH_REQUIRED_DESC": "يرجى تسجيل الدخول لحفظ منتجاتك المفضلة.",
     "GENERAL_ERROR": "حدث خطأ ما، يرجى المحاولة لاحقاً."
+  },
+  "Cart": {
+    "OPEN_CART": "فتح السلة",
+    "TITLE": "سلة المشتريات",
+    "EMPTY": "سلة التسوق فارغة",
+    "EMPTY_DESC": "أضف بعض المنتجات للبدء بالتسوق",
+    "SUBTOTAL": "المجموع الفرعي",
+    "CHECKOUT": "إتمام الطلب",
+    "CURRENCY": "$",
+    "ITEM_ADDED": "تم إضافة المنتج إلى السلة بنجاح",
+    "ITEM_UPDATED": "تم تحديث السلة",
+    "ITEM_REMOVED": "تمت إزالة المنتج من السلة",
+    "GENERAL_ERROR": "حدث خطأ ما",
+    "UPDATE_ERROR": "فشل تحديث الكمية",
+    "REMOVE_ERROR": "فشل إزالة المنتج",
+    "AUTH_REQUIRED_TITLE": "تسجيل الدخول مطلوب",
+    "AUTH_REQUIRED_DESC": "يرجى تسجيل الدخول لإضافة المنتجات إلى السلة."
   }
 }

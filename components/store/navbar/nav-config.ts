@@ -81,7 +81,7 @@ export const NAV_LINKS: NavLinkItem[] = [
   {
     title: "Wishlist",
     key: "wishlist",
-    url: "#",
+    url: appRoutes.wishlist,
     icon: Heart,
     requiredPermission: PERMISSIONS.VIEW_USER_WISHLIST,
   },
