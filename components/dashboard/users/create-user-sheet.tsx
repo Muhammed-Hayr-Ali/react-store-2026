@@ -148,21 +148,19 @@ export function CreateUserSheet({ children, onSuccess }: CreateUserSheetProps) {
         }
       }}
     >
-      <SheetTrigger
-        render={
-          children ?? (
-            <Button
-              type="button"
-              variant="default"
-              size="sm"
-              className="h-8 gap-1.5 px-3 text-xs"
-            >
-              <UserPlusIcon className="size-3.5" />
-              <span>{t("CREATE_USER_BUTTON")}</span>
-            </Button>
-          )
-        }
-      />
+      <SheetTrigger asChild>
+        {children ?? (
+          <Button
+            type="button"
+            variant="default"
+            size="sm"
+            className="h-8 gap-1.5 px-3 text-xs"
+          >
+            <UserPlusIcon className="size-3.5" />
+            <span>{t("CREATE_USER_BUTTON")}</span>
+          </Button>
+        )}
+      </SheetTrigger>
 
       <SheetContent
         side="right"

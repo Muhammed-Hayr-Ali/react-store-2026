@@ -239,16 +239,14 @@ export function BrandFormSheet({
         if (!isPending) onOpenChange(nextOpen)
       }}
     >
-      <SheetTrigger
-        render={
-          trigger ?? (
-            <Button type="button" size="sm" className="h-8 gap-1.5 text-xs">
-              <TagsIcon className="size-3.5" />
-              {t("CREATE_BRAND")}
-            </Button>
-          )
-        }
-      />
+      <SheetTrigger asChild>
+        {trigger ?? (
+          <Button type="button" size="sm" className="h-8 gap-1.5 text-xs">
+            <TagsIcon className="size-3.5" />
+            {t("CREATE_BRAND")}
+          </Button>
+        )}
+      </SheetTrigger>
       <SheetContent
         side="right"
         className="gap-0 p-0 sm:max-w-xl"
