@@ -36,8 +36,6 @@ export async function addToWishlist(
 
 
   if (userError || !user) {
-  
-    console.log("XXXXXXXXXXXXXXXXXXXXX")
     return { success: false, error: "PERMISSION_DENIED" }
   }
 

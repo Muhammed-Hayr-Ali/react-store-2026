@@ -54,7 +54,6 @@ export function WishlistProvider({
         result = await addToWishlist({ product_id: productId })
       }
 
-      // إذا حدث خطأ، نُعيد الحالة كما كانت لتجنب عدم التوافق وإظهار التوست
       if (!result.success) {
         setWishlistIds((prev) =>
           exists ? [...prev, productId] : prev.filter((id) => id !== productId)
