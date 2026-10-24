@@ -8,7 +8,7 @@
 import * as React from "react"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
-import { LogOutIcon } from "lucide-react"
+import { LoaderCircleIcon } from "lucide-react"
 
 import {
   AlertDialog,
@@ -17,23 +17,23 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogMedia,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { Spinner } from "../ui/spinner"
 import { signOut } from "@/lib/actions/authentication"
 import { appRoutes } from "@/lib/config/app-routes"
 import { useRouter } from "next/navigation"
 
 interface LogoutAlertDialogProps {
-  children: React.ReactElement
+  open: boolean
+  onOpenChange(open: boolean): void
 }
 
-export function LogoutAlertDialog({ children }: LogoutAlertDialogProps) {
+export function LogoutAlertDialog({
+  open,
+  onOpenChange,
+}: LogoutAlertDialogProps) {
   const t = useTranslations("DashboardSidebar")
-  const [isOpen, setIsOpen] = React.useState(false)
   const [isPending, startTransition] = React.useTransition()
   const router = useRouter()
 
@@ -46,7 +46,7 @@ export function LogoutAlertDialog({ children }: LogoutAlertDialogProps) {
           return
         }
 
-        setIsOpen(false)
+        onOpenChange(false)
         router.replace(appRoutes.home)
         router.refresh()
       } catch {
@@ -56,22 +56,13 @@ export function LogoutAlertDialog({ children }: LogoutAlertDialogProps) {
   }
 
   return (
-    <AlertDialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (open || !isPending) setIsOpen(open)
-      }}
-    >
-      <AlertDialogTrigger render={children} />
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent
         onEscapeKeyDown={(event) => {
           if (isPending) event.preventDefault()
         }}
       >
         <AlertDialogHeader className="text-start">
-          <AlertDialogMedia className="bg-destructive/10 text-destructive">
-            <LogOutIcon />
-          </AlertDialogMedia>
           <AlertDialogTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
             {t("LOGOUT_DIALOG_TITLE")}
           </AlertDialogTitle>
@@ -80,7 +71,10 @@ export function LogoutAlertDialog({ children }: LogoutAlertDialogProps) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending} className="mt-0 text-xs">
+          <AlertDialogCancel
+            disabled={isPending}
+            className="h-9 text-xs"
+          >
             {t("CANCEL_BUTTON")}
           </AlertDialogCancel>
           <Button
@@ -88,16 +82,13 @@ export function LogoutAlertDialog({ children }: LogoutAlertDialogProps) {
             variant="destructive"
             onClick={handleLogout}
             disabled={isPending}
-            className="text-xs shadow-xs"
+            className="h-9 gap-1.5 text-xs"
           >
-            {isPending ? (
-              <>
-                <Spinner className="me-1.5 size-3.5" />
-                {t("LOGGING_OUT")}
-              </>
-            ) : (
-              t("LOGOUT_CONFIRM")
+            {isPending && (
+              <LoaderCircleIcon className="size-3.5 animate-spin" />
             )}
+
+            {isPending ? t("LOGGING_OUT") : t("LOGOUT_CONFIRM")}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

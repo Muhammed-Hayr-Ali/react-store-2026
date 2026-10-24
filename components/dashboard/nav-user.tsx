@@ -24,13 +24,15 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { LogoutAlertDialog } from "./logout-alert"
+import { LogoutAlertDialog } from "../shared/logout-alert"
 import { useUser } from "@/lib/context/user-context"
+import React from "react"
 
 export function NavUser() {
   // Use responsive menu placement and read the current dashboard user.
   const { user } = useUser()
   const { isMobile } = useSidebar()
+  const [isOpen, setIsOpen] = React.useState(false)
 
   if (!user) return null
 
@@ -100,16 +102,22 @@ export function NavUser() {
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <LogoutAlertDialog>
-                <DropdownMenuItem variant="destructive">
-                  <LogOut />
-                  Log out
-                </DropdownMenuItem>
-              </LogoutAlertDialog>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => setIsOpen(true)}
+              >
+                <LogOut />
+                Log out
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
+
+      <LogoutAlertDialog
+        open={isOpen}
+        onOpenChange={(open) => open === false && setIsOpen(false)}
+      />
     </>
   )
 }

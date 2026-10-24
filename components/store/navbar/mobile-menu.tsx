@@ -15,10 +15,11 @@ import { Button } from "@/components/ui/button"
 
 import { appRoutes } from "@/lib/config/app-routes"
 import { useUser } from "@/lib/context/user-context"
-import { LogoutDialog } from "./logout-dialog"
+
 import { UserProfileHeader } from "./user-profile-header"
 import { PreferencesSubNav } from "./preferences-sub-nav"
 import { NavItemsList } from "./nav-items-list"
+import { LogoutAlertDialog } from "@/components/shared/logout-alert"
 
 export function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false)
@@ -43,11 +44,11 @@ function MobileMenuDrawer({
   onClose: () => void
 }) {
   const { user } = useUser()
-  const [logoutStatus, setLogoutStatus] = useState<string | null>(null)
+  const [logoutStatus, setLogoutStatus] = useState<boolean>(false)
 
   const handleOpenLogout = () => {
     onClose()
-    setLogoutStatus("logout")
+    setLogoutStatus(false)
   }
 
   return (
@@ -104,9 +105,9 @@ function MobileMenuDrawer({
         </MobileMenuFooter>
       </MenuDrawer>
 
-      <LogoutDialog
-        status={logoutStatus}
-        onOpenChange={(open) => setLogoutStatus(open ? "logout" : null)}
+      <LogoutAlertDialog
+        open={logoutStatus}
+        onOpenChange={(open) => setLogoutStatus(open)}
       />
     </>
   )

@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { UserIcon } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useUser } from "@/lib/context/user-context"

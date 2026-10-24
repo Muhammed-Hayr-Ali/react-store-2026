@@ -18,7 +18,7 @@ import { useUser } from "@/lib/context/user-context"
 import { PreferencesSubNav } from "./preferences-sub-nav"
 import { UserProfileHeader } from "./user-profile-header"
 import { NavItemsList } from "./nav-items-list"
-import { LogoutDialog } from "./logout-dialog"
+import { LogoutAlertDialog } from "@/components/shared/logout-alert"
 
 interface UserProfilePopoverProps {
   className?: string
@@ -28,17 +28,12 @@ export default function UserProfilePopover({
   className,
 }: UserProfilePopoverProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [dialogStatus, setDialogStatus] = useState<string | null>(null)
+  const [logoutStatus, setLogoutStatus] = useState<boolean>(false)
   const { user } = useUser()
 
   if (!user) return null
 
   const handleClose = () => setIsOpen(false)
-
-  const handleOpenLogout = () => {
-    handleClose()
-    setDialogStatus("logout")
-  }
 
   return (
     <>
@@ -98,7 +93,7 @@ export default function UserProfilePopover({
               size="sm"
               variant="ghost"
               className="h-8 w-full justify-start rounded-lg px-2 text-xs font-normal text-destructive hover:bg-destructive/10 hover:text-destructive"
-              onClick={handleOpenLogout}
+              onClick={() => setLogoutStatus(true)}
             >
               <LogOutIcon className="me-2 size-3.5" />
               Logout
@@ -107,9 +102,9 @@ export default function UserProfilePopover({
         </PopoverContent>
       </Popover>
 
-      <LogoutDialog
-        status={dialogStatus}
-        onOpenChange={(open) => setDialogStatus(open ? "logout" : null)}
+      <LogoutAlertDialog
+        open={logoutStatus}
+        onOpenChange={(open) => setLogoutStatus(open)}
       />
     </>
   )

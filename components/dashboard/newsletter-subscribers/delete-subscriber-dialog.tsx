@@ -16,7 +16,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Spinner } from "@/components/ui/spinner"
 import type { NewsletterSubscriber } from "@/lib/actions/newsletter_subscribers/types"
 import { LoaderCircleIcon } from "lucide-react"
 

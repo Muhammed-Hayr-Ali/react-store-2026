@@ -23,7 +23,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Spinner } from "@/components/ui/spinner"
 import { deleteBrand } from "@/lib/actions/brands"
 import type { BrandRecord } from "@/lib/actions/brands/types"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
