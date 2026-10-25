@@ -1,15 +1,15 @@
 /**
  * @file lib/actions/store/queries/get-featured-products.ts
- * @description Retrieves a simplified list of featured products, picking the cheapest variant and its specific image.
+ * @description Retrieves a simplified list of featured products, picking the cheapest variant and its specific image including variant_id.
  */
 
 "use server"
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import type { ApiResult } from "../../types/utils"
-import type { SimplifiedFeaturedProduct } from "../types"
 
 interface ProductVariantRecord {
+  id: string // أضفنا الـ id الخاص بالمتغير
   sku: string
   price: number
   compare_at_price?: number | null
@@ -29,6 +29,18 @@ interface ProductQueryResult {
   description?: string | null
   product_variants: ProductVariantRecord[] | null
   product_images: ProductImageRecord[] | null
+}
+
+export interface SimplifiedFeaturedProduct {
+  id: string
+  name: string
+  slug: string
+  description?: string | null
+  variant_id: string | null // أضفنا الحقل هنا
+  price: number | null
+  compare_at_price?: number | null
+  image_url?: string | null
+  image_alt?: string | null
 }
 
 interface GetFeaturedProductsOptions {
@@ -52,6 +64,7 @@ export async function getFeaturedProducts(
       slug,
       description,
       product_variants (
+        id,
         sku,
         price,
         compare_at_price
@@ -113,13 +126,12 @@ export async function getFeaturedProducts(
         null
     }
 
-
-
     return {
       id: product.id,
       name: product.name,
       slug: product.slug,
       description: product.description,
+      variant_id: cheapestVariant?.id ?? null, // تمرير معرف المتغير الأرخص
       price: cheapestVariant?.price ?? null,
       compare_at_price: cheapestVariant?.compare_at_price ?? null,
       image_url: selectedImage?.url ?? null,

@@ -13,7 +13,7 @@ import Autoplay from "embla-carousel-autoplay"
 import { ChevronLeftIcon, ChevronRightIcon, ImageIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import type { SimplifiedFeaturedProduct } from "@/lib/actions/store/types"
+import { SimplifiedFeaturedProduct } from "@/lib/actions/store/queries/get-featured-products"
 
 interface FeaturedHeroSliderProps {
   slides: SimplifiedFeaturedProduct[]
@@ -32,7 +32,7 @@ function SlideItem({
   return (
     <div className="relative min-w-0 flex-[0_0_100%] transition-opacity duration-300">
       <Link
-        href={`/${locale}/product/${slide.slug}`}
+        href={`/${locale}/product-details/${slide.slug}`}
         className="relative block h-56 w-full overflow-hidden bg-muted/40 sm:h-72 md:h-84 lg:h-96"
       >
         {slide.image_url && !imageError ? (

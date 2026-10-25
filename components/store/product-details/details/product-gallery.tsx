@@ -218,7 +218,7 @@ export function ProductGallery({
                       type="button"
                       onClick={() => handleImageChange(img)}
 
-                      className={`group relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-[50%] bg-muted transition-all duration-300 corner-squircle ${
+                      className={`group relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-md bg-muted transition-all duration-300  ${
                         isSelected
                           ? "opacity-100 ring-1 ring-muted-foreground/50 ring-offset-2"
                           : "opacity-40 hover:opacity-100"
@@ -307,7 +307,7 @@ export function ProductGallery({
                   key={img.id}
                   type="button"
                   onClick={() => handleImageChange(img)}
-                  className={`group relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-[50%] bg-muted transition-all duration-300 corner-squircle ${
+                  className={`group relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-md bg-muted transition-all duration-300  ${
                     isSelected
                       ? "opacity-100 ring-1 ring-muted-foreground/50 ring-offset-1"
                       : "opacity-40 hover:opacity-100"

@@ -1,15 +1,15 @@
 /**
  * @file lib/actions/store/queries/get-latest-regular-products.ts
- * @description Retrieves a simplified list of non-featured (regular) latest products.
+ * @description Retrieves a simplified list of non-featured (regular) latest products including the cheapest variant ID.
  */
 
 "use server"
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import type { ApiResult } from "../../types/utils"
-import type { SimplifiedFeaturedProduct } from "../types" // يمكنك إعادة استخدام نفس النوع أو تعريف نوع مشابه
 
 interface ProductVariantRecord {
+  id: string // أضفنا معرف المتغير هنا
   sku: string
   price: number
   compare_at_price?: number | null
@@ -31,6 +31,19 @@ interface ProductQueryResult {
   product_images: ProductImageRecord[] | null
 }
 
+// تعريف شكل المنتج المُبسّط ليضم variant_id
+export interface SimplifiedRegularProduct {
+  id: string
+  name: string
+  slug: string
+  description?: string | null
+  variant_id: string | null
+  price: number | null
+  compare_at_price?: number | null
+  image_url?: string | null
+  image_alt?: string | null
+}
+
 interface GetLatestRegularProductsOptions {
   limit?: number
   activeOnly?: boolean
@@ -38,7 +51,7 @@ interface GetLatestRegularProductsOptions {
 
 export async function getLatestRegularProducts(
   options: GetLatestRegularProductsOptions = {}
-): Promise<ApiResult<SimplifiedFeaturedProduct[]>> {
+): Promise<ApiResult<SimplifiedRegularProduct[]>> {
   const { limit = 10, activeOnly = true } = options
 
   const supabase = await createServerClient()
@@ -52,6 +65,7 @@ export async function getLatestRegularProducts(
       slug,
       description,
       product_variants (
+        id,
         sku,
         price,
         compare_at_price
@@ -64,7 +78,7 @@ export async function getLatestRegularProducts(
       )
     `
     )
-    .eq("is_featured", false) // التغيير هنا: جلب غير المميزة فقط
+    .eq("is_featured", false)
     .order("created_at", { ascending: false })
     .limit(limit)
 
@@ -88,7 +102,7 @@ export async function getLatestRegularProducts(
 
   const rawProducts = (productsData ?? []) as unknown as ProductQueryResult[]
 
-  const simplifiedProducts: SimplifiedFeaturedProduct[] = rawProducts.map((product) => {
+  const simplifiedProducts: SimplifiedRegularProduct[] = rawProducts.map((product) => {
     const variants = product.product_variants ?? []
     const images = product.product_images ?? []
 
@@ -118,6 +132,7 @@ export async function getLatestRegularProducts(
       name: product.name,
       slug: product.slug,
       description: product.description,
+      variant_id: cheapestVariant?.id ?? null, // إرجاع الـ ID الخاص بالمتغير الأرخص
       price: cheapestVariant?.price ?? null,
       compare_at_price: cheapestVariant?.compare_at_price ?? null,
       image_url: selectedImage?.url ?? null,

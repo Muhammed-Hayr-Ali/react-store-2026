@@ -2,27 +2,28 @@
 
 /**
  * @file components/store/home/product-card.tsx
- * @description Apple-inspired minimalist product card component.
+ * @description Apple-inspired minimalist product card component with local loading state.
  */
 
+import * as React from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ShoppingCartIcon } from "lucide-react"
+import { ShoppingCartIcon, Loader2Icon } from "lucide-react"
+import { useCurrency } from "@/lib/context/currency-context"
+import { useCart } from "@/lib/context/cart-context"
+import { SimplifiedRegularProduct } from "@/lib/actions/store/queries/get-latest-regular-products"
 
 interface ProductCardProps {
-  product: {
-    id: string
-    name: string
-    slug: string
-    description?: string | null
-    price: number | null
-    compare_at_price?: number | null
-    image_url?: string | null
-    image_alt?: string | null
-  }
+  product: SimplifiedRegularProduct
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const { formatRawPrice } = useCurrency()
+  const { addItem } = useCart()
+
+  // حالة تحميل محلية خاصة بهذا الكارد فقط
+  const [isLoading, setIsLoading] = React.useState(false)
+
   const hasDiscount =
     product.compare_at_price && product.compare_at_price > (product.price ?? 0)
   const discountPercentage = hasDiscount
@@ -32,6 +33,23 @@ export function ProductCard({ product }: ProductCardProps) {
           100
       )
     : null
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (!product.price || !product.variant_id) return
+
+    try {
+      setIsLoading(true)
+
+      // تنفيذ الإضافة للسلة بجانب ضمان ظهور أ حداقل مدة للتحميل (مثلاً نصف ثانية لتكون واضحة للعين)
+      await Promise.all([
+        addItem(product.id, product.variant_id, 1),
+        new Promise((resolve) => setTimeout(resolve, 500)),
+      ])
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-card p-3 transition-all hover:border-border hover:shadow-sm">
@@ -44,7 +62,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <img
             src={product.image_url}
             alt={product.image_alt || product.name}
-            className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
+            className="size-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
           />
         ) : (
@@ -80,11 +98,11 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="flex items-center justify-between pt-1">
           <div className="flex items-baseline gap-1.5">
             <span className="font-mono text-sm font-bold text-foreground">
-              ${product.price}
+              {product.price !== null ? formatRawPrice(product.price) : "—"}
             </span>
-            {hasDiscount && (
+            {hasDiscount && product.compare_at_price !== null && (
               <span className="font-mono text-xs text-muted-foreground line-through">
-                ${product.compare_at_price}
+                {formatRawPrice(product.compare_at_price ?? 0)}
               </span>
             )}
           </div>
@@ -94,12 +112,14 @@ export function ProductCard({ product }: ProductCardProps) {
             variant="outline"
             className="size-8 rounded-full shadow-none transition-transform active:scale-95"
             aria-label="Add to cart"
-            onClick={(e) => {
-              e.preventDefault()
-              // منطق إضافة المنتج للسلة هنا
-            }}
+            disabled={isLoading}
+            onClick={handleAddToCart}
           >
-            <ShoppingCartIcon className="size-3.5" />
+            {isLoading ? (
+              <Loader2Icon className="size-3.5 animate-spin" />
+            ) : (
+              <ShoppingCartIcon className="size-3.5" />
+            )}
           </Button>
         </div>
       </div>

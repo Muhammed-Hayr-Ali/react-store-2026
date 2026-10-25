@@ -5,20 +5,11 @@
 
 import * as React from "react"
 import { ProductCard } from "./product-card"
+import { SimplifiedRegularProduct } from "@/lib/actions/store/queries/get-latest-regular-products"
 
-interface ProductItem {
-  id: string
-  name: string
-  slug: string
-  description?: string | null
-  price: number | null
-  compare_at_price?: number | null
-  image_url?: string | null
-  image_alt?: string | null
-}
 
 interface ProductGridProps {
-  products: ProductItem[]
+  products: SimplifiedRegularProduct[]
   emptyMessage?: string
 }
 
