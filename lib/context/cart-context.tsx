@@ -9,17 +9,21 @@ import * as React from "react"
 import { useTransition } from "react"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
-import { 
-  addToCart, 
-  updateCartItem, 
-  removeCartItem, 
-  getCart, 
-  type CartQueryResult 
+import {
+  addToCart,
+  updateCartItem,
+  removeCartItem,
+  getCart,
+  type CartQueryResult,
 } from "@/lib/actions/cart"
 
 interface CartContextType {
   cart: CartQueryResult | null
-  addItem: (productId: string, variantId: string, quantity?: number) => Promise<void>
+  addItem: (
+    productId: string,
+    variantId: string,
+    quantity?: number
+  ) => Promise<void>
   updateItemQuantity: (itemId: string, quantity: number) => Promise<void>
   removeItem: (itemId: string) => Promise<void>
   isPending: boolean
@@ -52,13 +56,35 @@ export function CartProvider({
     }
   }
 
-  const addItem = async (productId: string, variantId: string, quantity = 1) => {
+  const addItem = async (
+    productId: string,
+    variantId: string,
+    quantity = 1
+  ) => {
     startTransition(async () => {
-      const result = await addToCart({ product_id: productId, variant_id: variantId, quantity })
+      const result = await addToCart({
+        product_id: productId,
+        variant_id: variantId,
+        quantity,
+      })
       if (!result.success) {
-        toast.error(t("GENERAL_ERROR", { default: "Failed to add item" }))
+        if (result.error === "AUTH_REQUIRED") {
+          toast.error(
+            t("AUTH_REQUIRED_TITLE", {
+              default: "AUTH_REQUIRED_DESC",
+            })
+          )
+        } else {
+          toast.error(
+            t("GENERAL_ERROR", {
+              default: "Failed to add item",
+            })
+          )
+        }
       } else {
-        toast.success(t("ITEM_ADDED", { default: "Added to cart successfully" }))
+        toast.success(
+          t("ITEM_ADDED", { default: "Added to cart successfully" })
+        )
         await refreshCart()
       }
     })
@@ -89,7 +115,16 @@ export function CartProvider({
   }
 
   return (
-    <CartContext.Provider value={{ cart, addItem, updateItemQuantity, removeItem, isPending, totalItemsCount }}>
+    <CartContext.Provider
+      value={{
+        cart,
+        addItem,
+        updateItemQuantity,
+        removeItem,
+        isPending,
+        totalItemsCount,
+      }}
+    >
       {children}
     </CartContext.Provider>
   )

@@ -33,12 +33,11 @@ export const getCurrentUser = cache(
 
       const { data, error } = await supabase.rpc("get_current_user")
 
-      if (error) {
-        console.error("Error fetching current user:", error.message)
+      if (!data || error) {
         return {
           success: false,
           error: "GET_CURRENT_USER_ERROR",
-          details: { database: [error.message] },
+          details: { database: [error?.message ?? "Unknown database error"] },
         }
       }
 

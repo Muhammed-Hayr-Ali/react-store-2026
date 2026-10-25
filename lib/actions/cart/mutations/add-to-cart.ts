@@ -10,8 +10,11 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { getValidationDetails } from "@/lib/actions/validation"
 import { addToCartSchema, type AddToCartInput } from "../schemas"
+import { getCurrentUser } from "../../users/queries/get-current-user"
 
-export async function addToCart(input: AddToCartInput): Promise<ApiResult<boolean>> {
+export async function addToCart(
+  input: AddToCartInput
+): Promise<ApiResult<boolean>> {
   const validation = addToCartSchema.safeParse(input)
   if (!validation.success) {
     return {
@@ -22,19 +25,20 @@ export async function addToCart(input: AddToCartInput): Promise<ApiResult<boolea
   }
 
   const supabase = await createServerClient()
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  const result = await getCurrentUser()
 
-  if (userError || !user) {
-    return { success: false, error: "PERMISSION_DENIED" }
+  if (!result.success) {
+    return { success: false, error: "AUTH_REQUIRED" }
   }
 
+  const userId = result.data?.id
   const { product_id, variant_id, quantity } = validation.data
 
   // 1. البحث عن سلة المستخدم النشطة
   const { data: existingCart, error: cartError } = await supabase
     .from("carts")
     .select("id")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .single()
 
   if (cartError && cartError.code !== "PGRST116") {
@@ -47,7 +51,7 @@ export async function addToCart(input: AddToCartInput): Promise<ApiResult<boolea
   if (!cartId) {
     const { data: newCart, error: createError } = await supabase
       .from("carts")
-      .insert({ user_id: user.id })
+      .insert({ user_id: userId })
       .select("id")
       .single()
 
@@ -82,14 +86,12 @@ export async function addToCart(input: AddToCartInput): Promise<ApiResult<boolea
     }
   } else {
     // إذا لم يكن موجوداً: أضفه كعنصر جديد تماماً
-    const { error: insertError } = await supabase
-      .from("cart_items")
-      .insert({
-        cart_id: cartId,
-        product_id,
-        variant_id,
-        quantity,
-      })
+    const { error: insertError } = await supabase.from("cart_items").insert({
+      cart_id: cartId,
+      product_id,
+      variant_id,
+      quantity,
+    })
 
     if (insertError) {
       return { success: false, error: "CART_ADD_ERROR" }

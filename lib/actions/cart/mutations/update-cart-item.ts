@@ -10,6 +10,7 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { getValidationDetails } from "@/lib/actions/validation"
 import { updateCartItemSchema, type UpdateCartItemInput } from "../schemas"
+import { getCurrentUser } from "../../users/queries/get-current-user"
 
 export async function updateCartItem(input: UpdateCartItemInput): Promise<ApiResult<boolean>> {
   const validation = updateCartItemSchema.safeParse(input)
@@ -22,12 +23,13 @@ export async function updateCartItem(input: UpdateCartItemInput): Promise<ApiRes
   }
 
   const supabase = await createServerClient()
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  const result = await getCurrentUser()
 
-  if (userError || !user) {
-    return { success: false, error: "PERMISSION_DENIED" }
+  if (!result.success) {
+    return { success: false, error: "LOGIN_REQUIRED" }
   }
 
+ 
   const { item_id, quantity } = validation.data
 
   const { error: updateError } = await supabase

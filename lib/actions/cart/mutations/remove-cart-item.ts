@@ -10,8 +10,11 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { getValidationDetails } from "@/lib/actions/validation"
 import { removeCartItemSchema, type RemoveCartItemInput } from "../schemas"
+import { getCurrentUser } from "../../users/queries/get-current-user"
 
-export async function removeCartItem(input: RemoveCartItemInput): Promise<ApiResult<boolean>> {
+export async function removeCartItem(
+  input: RemoveCartItemInput
+): Promise<ApiResult<boolean>> {
   const validation = removeCartItemSchema.safeParse(input)
   if (!validation.success) {
     return {
@@ -22,10 +25,11 @@ export async function removeCartItem(input: RemoveCartItemInput): Promise<ApiRes
   }
 
   const supabase = await createServerClient()
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
 
-  if (userError || !user) {
-    return { success: false, error: "PERMISSION_DENIED" }
+  const result = await getCurrentUser()
+
+  if (!result.success) {
+    return { success: false, error: "LOGIN_REQUIRED" }
   }
 
   const { item_id } = validation.data
