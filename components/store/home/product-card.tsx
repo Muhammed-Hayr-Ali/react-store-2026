@@ -55,7 +55,7 @@ export function ProductCard({ product }: ProductCardProps) {
     <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-card p-3 transition-all hover:border-border hover:shadow-sm">
       {/* Image Container */}
       <Link
-        href={`/products/${product.slug}`}
+        href={`/product/${product.slug}`}
         className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted/40"
       >
         {product.image_url ? (

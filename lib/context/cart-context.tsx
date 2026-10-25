@@ -94,7 +94,17 @@ export function CartProvider({
     startTransition(async () => {
       const result = await updateCartItem({ item_id: itemId, quantity })
       if (!result.success) {
-        toast.error(t("UPDATE_ERROR", { default: "Failed to update quantity" }))
+        if (result.error === "AUTH_REQUIRED") {
+          toast.error(
+            t("AUTH_REQUIRED_TITLE", {
+              default: "AUTH_REQUIRED_DESC",
+            })
+          )
+        } else {
+          toast.error(
+            t("UPDATE_ERROR", { default: "Failed to update quantity" })
+          )
+        }
       } else {
         toast.success(t("ITEM_UPDATED", { default: "Cart updated" }))
         await refreshCart()
@@ -106,7 +116,15 @@ export function CartProvider({
     startTransition(async () => {
       const result = await removeCartItem({ item_id: itemId })
       if (!result.success) {
-        toast.error(t("REMOVE_ERROR", { default: "Failed to remove item" }))
+        if (result.error === "AUTH_REQUIRED") {
+          toast.error(
+            t("AUTH_REQUIRED_TITLE", {
+              default: "AUTH_REQUIRED_DESC",
+            })
+          )
+        } else {
+          toast.error(t("REMOVE_ERROR", { default: "Failed to remove item" }))
+        }
       } else {
         toast.success(t("ITEM_REMOVED", { default: "Item removed from cart" }))
         await refreshCart()

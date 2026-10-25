@@ -25,11 +25,11 @@ export async function updateCartItem(input: UpdateCartItemInput): Promise<ApiRes
   const supabase = await createServerClient()
   const result = await getCurrentUser()
 
-  if (!result.success) {
-    return { success: false, error: "LOGIN_REQUIRED" }
-  }
 
- 
+  if (!result.success) {
+    return { success: false, error: "AUTH_REQUIRED" }
+  }
+  
   const { item_id, quantity } = validation.data
 
   const { error: updateError } = await supabase

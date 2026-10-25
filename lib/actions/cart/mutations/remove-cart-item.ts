@@ -28,10 +28,11 @@ export async function removeCartItem(
 
   const result = await getCurrentUser()
 
-  if (!result.success) {
-    return { success: false, error: "LOGIN_REQUIRED" }
-  }
 
+  if (!result.success) {
+    return { success: false, error: "AUTH_REQUIRED" }
+  }
+  
   const { item_id } = validation.data
 
   const { error: deleteError } = await supabase
