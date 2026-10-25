@@ -2,7 +2,7 @@
 
 /**
  * @file components/store/home/product-card.tsx
- * @description Clean, minimalist Apple-inspired product card component with refined currency styling.
+ * @description Clean, minimalist Apple-inspired product card component with optimized spacing and price styling.
  */
 
 import * as React from "react"
@@ -76,7 +76,7 @@ export function ProductCard({ product }: ProductCardProps) {
       </Link>
 
       {/* Content Area */}
-      <div className="mt-3 flex flex-1 flex-col justify-between gap-2.5 px-1">
+      <div className="mt-2 flex flex-1 flex-col justify-between gap-2 px-1">
         <div className="space-y-1">
           {/* Ratings */}
           {product.review_count > 0 && (
@@ -105,23 +105,19 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Price & Action Row */}
-        <div className="flex items-center justify-between pt-1">
+        <div className="flex items-center justify-between">
           <div className="flex items-baseline gap-1.5">
-            {/* السعر الحالي مع تنسيق مميز لرمز العملة */}
-            <span className="font-mono text-xs font-semibold text-foreground sm:text-sm flex items-baseline gap-1">
-              <span>{product.price !== null ? formatRawPrice(product.price) : "—"}</span>
-              <span className="text-[10px] font-normal text-muted-foreground">
-                {currentCurrency.symbol}
-              </span>
+            {/* السعر الحالي */}
+            <span className="text-xs font-semibold text-foreground sm:text-sm">
+              {product.price !== null ? formatRawPrice(product.price) : "—"}{" "}
+              {currentCurrency.symbol}
             </span>
 
-            {/* السعر القديم (قبل الخصم) مع شطب ورمز مصغر */}
+            {/* السعر القديم (قبل الخصم) باللون الأحمر destructive */}
             {hasDiscount && product.compare_at_price !== null && (
-              <span className="font-mono text-[11px] text-muted-foreground/70 line-through flex items-baseline gap-0.5">
-                <span>{formatRawPrice(product.compare_at_price ?? 0)}</span>
-                <span className="text-[9px] font-normal">
-                  {currentCurrency.symbol}
-                </span>
+              <span className="text-[11px] text-destructive line-through">
+                {formatRawPrice(product.compare_at_price ?? 0)}{" "}
+                {currentCurrency.symbol}
               </span>
             )}
           </div>
