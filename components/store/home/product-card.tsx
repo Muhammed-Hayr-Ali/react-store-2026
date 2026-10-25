@@ -48,7 +48,7 @@ export function ProductCard({ product }: ProductCardProps) {
   }
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-2xl bg-muted/80 p-2.5 transition-all duration-300 hover:bg-muted/40">
+    <div className="group relative flex flex-col overflow-hidden rounded-2xl bg-muted/50 p-2.5 transition-all duration-300 hover:bg-muted/40">
       {/* Image Container */}
       <Link
         href={`/product/${product.slug}`}
