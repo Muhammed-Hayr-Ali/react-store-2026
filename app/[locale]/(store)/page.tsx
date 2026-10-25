@@ -16,7 +16,8 @@ export async function generateMetadata() {
   return createMetadata({
     siteName: appConfig.name,
     title: "Home",
-    description: "Welcome to our store. Discover our featured products and categories.",
+    description:
+      "Welcome to our store. Discover our featured products and categories.",
   })
 }
 
@@ -31,7 +32,7 @@ export default async function Page() {
   const categories = categoriesResult.success ? categoriesResult.data : []
 
   return (
-    <div className="space-y-4 pb-10 sm:space-y-6">
+    <main>
       {/* عرض السلايدر التفاعلي للمنتجات المميزة */}
       <FeaturedHeroSlider slides={slides} />
 
@@ -57,6 +58,6 @@ export default async function Page() {
         </div>
       </div>
       */}
-    </div>
+    </main>
   )
 }

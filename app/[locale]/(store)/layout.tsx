@@ -20,7 +20,10 @@ interface MainLayoutProps {
   params: Promise<{ locale: string }>
 }
 
-export default async function MainLayout({ children, params }: MainLayoutProps) {
+export default async function MainLayout({
+  children,
+  params,
+}: MainLayoutProps) {
   const { locale } = await params
   const typedLocale = locale as AppLocale
   const supabase = await createServerClient()
@@ -53,7 +56,9 @@ export default async function MainLayout({ children, params }: MainLayoutProps) 
         <CartProvider initialCart={initialCart}>
           <div className="relative flex min-h-screen flex-col bg-background text-foreground">
             <Navbar />
-            <main className="flex-1">{children}</main>
+            <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
+              {children}
+            </main>
             <Footer />
           </div>
         </CartProvider>

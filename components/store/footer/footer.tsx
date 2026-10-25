@@ -13,8 +13,9 @@ import { NewsletterSection } from "./newsletter-section"
 
 export default function Footer() {
   return (
-    <footer className="w-full border-t border-border/60 bg-background text-sm text-muted-foreground">
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <footer className="w-full border-t border-border/40 bg-background text-sm text-muted-foreground">
+      {/* توحيد الـ max-w إلى 7xl ليتطابق تماماً مع الناف بار والـ main */}
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
         {/* شبكة محتويات الفوتر */}
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* 1. قسم العلامة التجارية والوصف */}
@@ -82,7 +83,6 @@ export default function Footer() {
           {/* 4. النشرة البريدية */}
           <NewsletterSection />
         </div>
-
         {/* الجزء السفلي للحقوق والمظهر */}
         <div className="mt-10 border-t border-border/50 pt-6">
           <div className="flex flex-col-reverse items-center justify-between gap-4 sm:flex-row">

@@ -1354,5 +1354,11 @@
     "REMOVE_ERROR": "Failed to remove item",
     "AUTH_REQUIRED_TITLE": "Sign in required",
     "AUTH_REQUIRED_DESC": "Please sign in to add items to your cart."
+  },
+  "NotFound": {
+    "TITLE": "Page Not Found",
+    "DESCRIPTION": "The page you are looking for doesn't exist, has been removed, or is temporarily unavailable.",
+    "GO_BACK": "Go Back",
+    "BACK_TO_HOME": "Back to Home"
   }
 }

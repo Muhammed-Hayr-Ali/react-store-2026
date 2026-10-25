@@ -74,7 +74,7 @@ export default function CategoriesScroll({
   const maskStyle = `linear-gradient(to right, ${leftStop}, ${rightStop})`
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-3 sm:px-6 lg:px-8">
+    <div className="py-3">
       {/* الترويسة وأزرار التمرير السريعة */}
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-bold tracking-tight text-foreground sm:text-base">

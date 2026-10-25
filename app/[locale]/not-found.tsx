@@ -1,37 +1,47 @@
+"use client"
+
+/**
+ * @file components/not-found.tsx
+ * @description Apple-inspired ultra-minimalist NotFound page with a single primary action.
+ */
+
+import * as React from "react"
 import Link from "next/link"
-import { routing } from "@/i18n/routing"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
-import { HomeIcon, ArrowLeftIcon } from "lucide-react"
 import { appRoutes } from "@/lib/config/app-routes"
 
 export default function NotFound() {
-  return (
-    <div className="flex min-h-[calc(100dvh-4rem)] w-full flex-col items-center justify-center p-4">
-      {/* Container Card */}
-      <div className="relative flex w-full max-w-lg flex-col items-center text-center">
-        {/* Subtle Background Glow Accent */}
-        <div className="absolute -top-12 -z-10 size-64 rounded-full bg-primary/10 blur-3xl" />
+  const t = useTranslations("NotFound")
 
-        {/* 404 Large Numeric Header */}
-        <span className="font-mono text-8xl font-black tracking-tight text-foreground select-none sm:text-9xl">
+  return (
+    <div className="flex min-h-[calc(100dvh-4rem)] w-full flex-col items-center justify-center px-6 py-12">
+      <div className="flex w-full max-w-sm flex-col items-center text-center">
+        {/* Subtle, refined typographic code */}
+        <span className="font-mono text-5xl font-light tracking-tight text-muted-foreground/40 select-none sm:text-6xl">
           404
         </span>
 
-        {/* Header Text */}
-        <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          Page Not Found
+        {/* Clean, Apple-style Heading */}
+        <h1 className="mt-5 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+          {t("TITLE", { default: "Page Not Found" })}
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you are looking for doesn&apos;t exist, has been removed, or
-          is temporarily unavailable.
+        
+        <p className="mt-2.5 text-xs leading-relaxed text-muted-foreground sm:text-sm max-w-xs">
+          {t("DESCRIPTION", {
+            default: "The page you’re looking for doesn’t exist or has been moved.",
+          })}
         </p>
 
-        {/* Action Buttons */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Button asChild className="gap-2 shadow-xs">
-            <Link href={appRoutes.home} className="flex items-center gap-2">
-              <HomeIcon className="size-4" />
-              Back to Home
+        {/* Single Minimalist Action Button */}
+        <div className="mt-8 w-full sm:w-auto">
+          <Button 
+            asChild 
+            size="sm" 
+            className="h-10 w-full sm:w-auto text-xs font-medium px-6 rounded-full shadow-none transition-transform active:scale-95"
+          >
+            <Link href={appRoutes.home}>
+              <span>{t("BACK_TO_HOME", { default: "Back to Home" })}</span>
             </Link>
           </Button>
         </div>

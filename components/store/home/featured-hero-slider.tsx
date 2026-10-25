@@ -129,7 +129,7 @@ export default function FeaturedHeroSlider({
   if (!slides || slides.length === 0) return null
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-2 sm:px-6 sm:py-3 lg:px-8">
+    <div>
       <div
         className="group relative overflow-hidden rounded-2xl border-0 sm:rounded-3xl"
         ref={emblaRef}

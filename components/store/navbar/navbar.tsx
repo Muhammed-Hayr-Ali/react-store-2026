@@ -5,11 +5,8 @@ import DesktopNavbar from "./desktop-navbar"
 import { MobileMenu } from "./mobile-menu"
 
 export default async function Navbar() {
-
-
-
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/60 backdrop-blur-md transition-colors">
+    <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md transition-colors">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-14 items-center justify-between">
           <div className="flex flex-1 items-center justify-start">
@@ -19,10 +16,8 @@ export default async function Navbar() {
           </div>
 
           <div className="flex flex-1 items-center justify-end gap-4 md:gap-6">
-            <DesktopNavbar
-            />
-            <MobileMenu
-            />
+            <DesktopNavbar />
+            <MobileMenu />
           </div>
         </div>
       </div>
