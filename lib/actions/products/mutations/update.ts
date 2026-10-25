@@ -1,10 +1,10 @@
-"use server"
-
 /**
  * @file lib/actions/products/update.ts
  * @description Server action for updating an existing product, its variants, and images.
  * Uses smart Upserting (by SKU) to preserve existing variant IDs for relational integrity.
  */
+
+"use server"
 
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
@@ -13,7 +13,11 @@ import { updateProductSchema, type UpdateProductInput } from "../schemas"
 
 export type UpdateProductResult =
   | { success: true }
-  | { success: false; error: string }
+  | { 
+      success: false
+      error: string
+      details?: Record<string, string[] | undefined>
+    }
 
 function logDatabaseError(stage: string, error: {
   code?: string
@@ -40,7 +44,11 @@ export async function updateProduct(
 
     const validation = updateProductSchema.safeParse(input)
     if (!validation.success) {
-      return { success: false, error: "VALIDATION_ERROR" }
+      return {
+        success: false,
+        error: "VALIDATION_ERROR",
+        details: validation.error.flatten().fieldErrors,
+      }
     }
 
     const { id, variants, images, ...productData } = validation.data
