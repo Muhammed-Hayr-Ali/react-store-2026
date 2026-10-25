@@ -1360,5 +1360,10 @@
     "DESCRIPTION": "The page you are looking for doesn't exist, has been removed, or is temporarily unavailable.",
     "GO_BACK": "Go Back",
     "BACK_TO_HOME": "Back to Home"
+  },
+  "Home": {
+    "NEW_ARRIVALS": "New Arrivals",
+    "NEW_ARRIVALS_DESC": "Explore our latest additions and everyday essentials.",
+    "NO_PRODUCTS_AVAILABLE": "No products available."
   }
 }

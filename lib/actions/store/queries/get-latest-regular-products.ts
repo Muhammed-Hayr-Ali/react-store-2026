@@ -1,6 +1,6 @@
 /**
  * @file lib/actions/store/queries/get-latest-regular-products.ts
- * @description Retrieves a simplified list of non-featured (regular) latest products including the cheapest variant ID.
+ * @description Retrieves a simplified list of non-featured regular products including variant ID and reviews summary.
  */
 
 "use server"
@@ -9,7 +9,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import type { ApiResult } from "../../types/utils"
 
 interface ProductVariantRecord {
-  id: string // أضفنا معرف المتغير هنا
+  id: string
   sku: string
   price: number
   compare_at_price?: number | null
@@ -22,6 +22,11 @@ interface ProductImageRecord {
   variant_sku?: string | null
 }
 
+// تعريف سجل الريفيو القادم من قاعدة البيانات
+interface ProductReviewRecord {
+  rating: number
+}
+
 interface ProductQueryResult {
   id: string
   name: string
@@ -29,9 +34,9 @@ interface ProductQueryResult {
   description?: string | null
   product_variants: ProductVariantRecord[] | null
   product_images: ProductImageRecord[] | null
+  product_reviews: ProductReviewRecord[] | null // العلاقة مع جدول الريفيوهات
 }
 
-// تعريف شكل المنتج المُبسّط ليضم variant_id
 export interface SimplifiedRegularProduct {
   id: string
   name: string
@@ -42,6 +47,8 @@ export interface SimplifiedRegularProduct {
   compare_at_price?: number | null
   image_url?: string | null
   image_alt?: string | null
+  rating: number      // متوسط التقييم (مثلاً 4.5)
+  review_count: number // عدد التقييمات الإجمالي
 }
 
 interface GetLatestRegularProductsOptions {
@@ -75,6 +82,9 @@ export async function getLatestRegularProducts(
         alt_text,
         is_primary,
         variant_sku
+      ),
+      product_reviews (
+        rating
       )
     `
     )
@@ -105,8 +115,15 @@ export async function getLatestRegularProducts(
   const simplifiedProducts: SimplifiedRegularProduct[] = rawProducts.map((product) => {
     const variants = product.product_variants ?? []
     const images = product.product_images ?? []
+    const reviews = product.product_reviews ?? []
 
-    // 1. العثور على المتغير الأرخص
+    // 1. حساب متوسط التقييم وعدد التقييمات
+    const review_count = reviews.length
+    const rating = review_count > 0 
+      ? Number((reviews.reduce((acc, curr) => acc + curr.rating, 0) / review_count).toFixed(1))
+      : 0
+
+    // 2. العثور على المتغير الأرخص
     let cheapestVariant: ProductVariantRecord | null = null
     if (variants.length > 0) {
       cheapestVariant = variants.reduce((prev, curr) => 
@@ -114,7 +131,7 @@ export async function getLatestRegularProducts(
       )
     }
 
-    // 2. البحث عن الصورة المرتبطة عبر SKU أو اختيار الصورة الأساسية
+    // 3. البحث عن الصورة المرتبطة
     let selectedImage: ProductImageRecord | null = null
     if (cheapestVariant?.sku) {
       selectedImage = images.find((img) => img.variant_sku === cheapestVariant?.sku) || null
@@ -132,11 +149,13 @@ export async function getLatestRegularProducts(
       name: product.name,
       slug: product.slug,
       description: product.description,
-      variant_id: cheapestVariant?.id ?? null, // إرجاع الـ ID الخاص بالمتغير الأرخص
+      variant_id: cheapestVariant?.id ?? null,
       price: cheapestVariant?.price ?? null,
       compare_at_price: cheapestVariant?.compare_at_price ?? null,
       image_url: selectedImage?.url ?? null,
       image_alt: selectedImage?.alt_text ?? null,
+      rating,
+      review_count,
     }
   })
 

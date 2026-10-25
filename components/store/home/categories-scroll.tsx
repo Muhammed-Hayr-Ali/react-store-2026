@@ -69,7 +69,9 @@ export default function CategoriesScroll({
   const rightHasScroll = isRtl ? canScrollPrev : canScrollNext
 
   const leftStop = leftHasScroll ? "transparent 0%, black 48px" : "black 0%"
-  const rightStop = rightHasScroll ? "black calc(100% - 48px), transparent 100%" : "black 100%"
+  const rightStop = rightHasScroll
+    ? "black calc(100% - 48px), transparent 100%"
+    : "black 100%"
 
   const maskStyle = `linear-gradient(to right, ${leftStop}, ${rightStop})`
 
@@ -77,9 +79,9 @@ export default function CategoriesScroll({
     <div className="py-3">
       {/* الترويسة وأزرار التمرير السريعة */}
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-bold tracking-tight text-foreground sm:text-base">
+        <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
           {t("title", { default: "Categories" })}
-        </h3>
+        </h2>
 
         <div className="flex items-center gap-1">
           <Button

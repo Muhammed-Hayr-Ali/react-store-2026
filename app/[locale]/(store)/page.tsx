@@ -8,9 +8,9 @@ import { getLatestRegularProducts } from "@/lib/actions/store/queries/get-latest
 import { getRootCategories } from "@/lib/actions/store/queries/get-root-categories"
 import FeaturedHeroSlider from "@/components/store/home/featured-hero-slider"
 import CategoriesScroll from "@/components/store/home/categories-scroll"
+import { ProductGrid } from "@/components/store/home/product-grid"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import { ProductGrid } from "@/components/store/home/product-grid"
 
 export async function generateMetadata() {
   return createMetadata({
@@ -22,10 +22,9 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
-  // جلب المنتجات المميزة، أحدث المنتجات، والتصنيفات الرئيسية بشكل متزامن (بالتوازي) لضمان أعلى أداء
   const [featuredResult, latestResult, categoriesResult] = await Promise.all([
     getFeaturedProducts({ limit: 5, activeOnly: true }),
-    getLatestRegularProducts({ limit: 30, activeOnly: true }),
+    getLatestRegularProducts({ limit: 20, activeOnly: true }),
     getRootCategories({ limit: 10 }),
   ])
 
@@ -35,17 +34,16 @@ export default async function Page() {
 
   return (
     <div className="space-y-12 pb-12">
-      {/* 1. عرض السلايدر التفاعلي للمنتجات المميزة */}
+      {/* 1. السلايدر التفاعلي للمنتجات المميزة */}
       <FeaturedHeroSlider slides={slides} />
 
-      {/* 2. عرض شريط التصنيفات الرئيسية المتحرك */}
+      {/* 2. شريط التصنيفات الرئيسية */}
       <CategoriesScroll categories={categories} />
 
-      {/* 3. عرض شبكة أحدث المنتجات (غير المميزة) */}
-      <ProductGrid 
-            products={latestProducts} 
-            emptyMessage="No new products available right now." 
-          />
+      <ProductGrid
+        products={latestProducts}
+        emptyMessage="No new products available right now."
+      />
     </div>
   )
 }
