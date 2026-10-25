@@ -2,7 +2,7 @@
 
 /**
  * @file components/store/home/product-grid.tsx
- * @description Responsive grid/list wrapper for product cards with view mode toggle.
+ * @description Responsive grid/list wrapper for product cards with view mode stored in cookies.
  */
 
 import * as React from "react"
@@ -17,12 +17,44 @@ interface ProductGridProps {
   emptyMessage?: string
 }
 
+const COOKIE_NAME = "store_product_view_mode"
+
+// دالة مساعدة لقراءة الكوكي أثناء تهيئة الحالة بدون الحاجة لـ useEffect
+const getInitialViewMode = (): "grid" | "list" => {
+  if (typeof window === "undefined") return "grid"
+  try {
+    const cookies = document.cookie.split("; ")
+    const viewModeCookie = cookies.find((row) => row.startsWith(`${COOKIE_NAME}=`))
+    if (viewModeCookie) {
+      const value = viewModeCookie.split("=")[1]
+      if (value === "list" || value === "grid") {
+        return value
+      }
+    }
+  } catch (error) {
+    console.error("Failed to read view mode cookie", error)
+  }
+  return "grid"
+}
+
 export function ProductGrid({
   products,
   emptyMessage,
 }: ProductGridProps) {
   const t = useTranslations("Home")
-  const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid")
+  
+  // تعيين القيمة الأولية مباشرة من الكوكيز لتجنب أي رندر إضافي أو تحذير
+  const [viewMode, setViewMode] = React.useState<"grid" | "list">(getInitialViewMode)
+
+  // دالة لتغيير وحفظ طريقة العرض في الكوكيز
+  const handleViewModeChange = (mode: "grid" | "list") => {
+    setViewMode(mode)
+    try {
+      document.cookie = `${COOKIE_NAME}=${mode}; path=/; max-age=31536000; SameSite=Lax`
+    } catch (error) {
+      console.error("Failed to save view mode cookie", error)
+    }
+  }
 
   const resolvedEmptyMessage =
     emptyMessage ||
@@ -59,7 +91,7 @@ export function ProductGrid({
             className={`size-7 rounded-full transition-all ${
               viewMode === "grid" ? "bg-background shadow-xs text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
-            onClick={() => setViewMode("grid")}
+            onClick={() => handleViewModeChange("grid")}
             aria-label="Grid view"
           >
             <LayoutGridIcon className="size-3.5" />
@@ -71,7 +103,7 @@ export function ProductGrid({
             className={`size-7 rounded-full transition-all ${
               viewMode === "list" ? "bg-background shadow-xs text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
-            onClick={() => setViewMode("list")}
+            onClick={() => handleViewModeChange("list")}
             aria-label="List view"
           >
             <ListIcon className="size-3.5" />
