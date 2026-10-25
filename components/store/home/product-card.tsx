@@ -2,7 +2,7 @@
 
 /**
  * @file components/store/home/product-card.tsx
- * @description Clean, minimalist Apple-inspired product card component with optimized spacing and price styling.
+ * @description Clean, minimalist Apple-inspired product card component with ratings moved below description.
  */
 
 import * as React from "react"
@@ -78,7 +78,21 @@ export function ProductCard({ product }: ProductCardProps) {
       {/* Content Area */}
       <div className="mt-2 flex flex-1 flex-col justify-between gap-2 px-1">
         <div className="space-y-1">
-          {/* Ratings */}
+          {/* اسم المنتج */}
+          <Link href={`/product/${product.slug}`}>
+            <h3 className="line-clamp-1 text-xs font-medium text-foreground transition-colors group-hover:text-primary sm:text-sm">
+              {product.name}
+            </h3>
+          </Link>
+
+          {/* الوصف */}
+          {product.description && (
+            <p className="line-clamp-1 text-[11px] text-muted-foreground/80">
+              {product.description}
+            </p>
+          )}
+
+          {/* التقييمات والنجوم (أسفل الوصف) */}
           {product.review_count > 0 && (
             <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
               <StarIcon className="size-3 fill-amber-500 text-amber-500" />
@@ -89,18 +103,6 @@ export function ProductCard({ product }: ProductCardProps) {
                 ({product.review_count})
               </span>
             </div>
-          )}
-
-          <Link href={`/product/${product.slug}`}>
-            <h3 className="line-clamp-1 text-xs font-medium text-foreground transition-colors group-hover:text-primary sm:text-sm">
-              {product.name}
-            </h3>
-          </Link>
-
-          {product.description && (
-            <p className="line-clamp-1 text-[11px] text-muted-foreground/80">
-              {product.description}
-            </p>
           )}
         </div>
 
@@ -113,7 +115,7 @@ export function ProductCard({ product }: ProductCardProps) {
               {currentCurrency.symbol}
             </span>
 
-            {/* السعر القديم (قبل الخصم) باللون الأحمر destructive */}
+            {/* السعر القديم باللون الأحمر */}
             {hasDiscount && product.compare_at_price !== null && (
               <span className="text-[11px] text-destructive line-through">
                 {formatRawPrice(product.compare_at_price ?? 0)}{" "}
