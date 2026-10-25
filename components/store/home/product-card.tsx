@@ -2,7 +2,7 @@
 
 /**
  * @file components/store/home/product-card.tsx
- * @description Clean, minimalist Apple-inspired product card component with ratings moved below description.
+ * @description Clean, minimalist Apple-inspired product card component supporting both vertical and horizontal layouts.
  */
 
 import * as React from "react"
@@ -15,9 +15,10 @@ import { SimplifiedRegularProduct } from "@/lib/actions/store/queries/get-latest
 
 interface ProductCardProps {
   product: SimplifiedRegularProduct
+  layout?: "vertical" | "horizontal" // الخاصية الجديدة لدعم التصميمين
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, layout = "vertical" }: ProductCardProps) {
   const { formatRawPrice, currentCurrency } = useCurrency()
   const { addItem } = useCart()
   const [isLoading, setIsLoading] = React.useState(false)
@@ -47,6 +48,97 @@ export function ProductCard({ product }: ProductCardProps) {
     }
   }
 
+  // ==================== 1. التصميم الأفقي (Horizontal Layout) ====================
+  if (layout === "horizontal") {
+    return (
+      <div className="group relative flex items-center gap-3 overflow-hidden rounded-2xl bg-muted/50 p-2.5 transition-all duration-300 hover:bg-muted/40">
+        {/* Image Container */}
+        <Link
+          href={`/product/${product.slug}`}
+          className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-background/50 sm:size-24"
+        >
+          {product.image_url ? (
+            <img
+              src={product.image_url}
+              alt={product.image_alt || product.name}
+              className="size-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-[10px] text-muted-foreground">
+              No image
+            </div>
+          )}
+
+          {/* Discount Badge */}
+          {discountPercentage && (
+            <span className="absolute inset-s-1.5 top-1.5 rounded-full bg-background/80 px-1.5 py-0.5 text-[9px] font-medium text-destructive backdrop-blur-md">
+              -{discountPercentage}%
+            </span>
+          )}
+        </Link>
+
+        {/* Content Area */}
+        <div className="flex flex-1 flex-col justify-between py-0.5">
+          <div className="space-y-0.5">
+            <Link href={`/product/${product.slug}`}>
+              <h3 className="line-clamp-1 text-xs font-medium text-foreground transition-colors group-hover:text-primary sm:text-sm">
+                {product.name}
+              </h3>
+            </Link>
+
+            {product.description && (
+              <p className="line-clamp-1 text-[11px] text-muted-foreground/80">
+                {product.description}
+              </p>
+            )}
+
+            {/* Ratings */}
+            {product.review_count > 0 && (
+              <div className="flex items-center gap-1 pt-0.5 text-[10px] text-muted-foreground">
+                <StarIcon className="size-2.5 fill-amber-500 text-amber-500" />
+                <span className="font-medium text-foreground">{product.rating}</span>
+                <span className="text-muted-foreground/70">({product.review_count})</span>
+              </div>
+            )}
+          </div>
+
+          {/* Price & Action Row */}
+          <div className="flex items-center justify-between pt-1.5">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xs font-semibold text-foreground sm:text-sm">
+                {product.price !== null ? formatRawPrice(product.price) : "—"}{" "}
+                {currentCurrency.symbol}
+              </span>
+
+              {hasDiscount && product.compare_at_price !== null && (
+                <span className="text-[10px] text-destructive line-through">
+                  {formatRawPrice(product.compare_at_price ?? 0)}{" "}
+                  {currentCurrency.symbol}
+                </span>
+              )}
+            </div>
+
+            <Button
+              size="icon"
+              variant="secondary"
+              className="size-7 rounded-full bg-background shadow-xs transition-transform hover:bg-background/90 active:scale-95"
+              aria-label="Add to cart"
+              disabled={isLoading}
+              onClick={handleAddToCart}
+            >
+              {isLoading ? (
+                <Loader2Icon className="size-3.5 animate-spin text-primary" />
+              ) : (
+                <ShoppingCartIcon className="size-3.5" />
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ==================== 2. التصميم العامودي (Vertical Layout - Default) ====================
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-2xl bg-muted/50 p-2.5 transition-all duration-300 hover:bg-muted/40">
       {/* Image Container */}
