@@ -59,9 +59,8 @@ export function WishlistProvider({
           exists ? [...prev, productId] : prev.filter((id) => id !== productId)
         )
 
-        if (result.error === "PERMISSION_DENIED") {
+        if (result.error === "AUTH_REQUIRED") {
           toast.error(t("AUTH_REQUIRED_TITLE", { default: "Sign in required" }), {
-            description: t("AUTH_REQUIRED_DESC", { default: "Please sign in to save items to your wishlist." }),
           })
         } else {
           toast.error(t("GENERAL_ERROR", { default: "Something went wrong, please try again." }))

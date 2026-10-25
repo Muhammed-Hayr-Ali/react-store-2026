@@ -1329,7 +1329,7 @@
     "BROWSE_PRODUCTS": "تصفح المنتجات",
     "REMOVE_FROM_WISHLIST": "إزالة من المفضلة",
     "ITEMS_COUNT": "{count} منتجات",
-    "AUTH_REQUIRED_TITLE": "يجب تسجيل الدخول أولاً",
+    "AUTH_REQUIRED_TITLE": "يجب تسجيل الدخول",
     "AUTH_REQUIRED_DESC": "يرجى تسجيل الدخول لحفظ منتجاتك المفضلة.",
     "GENERAL_ERROR": "حدث خطأ ما، يرجى المحاولة لاحقاً."
   },
@@ -1347,7 +1347,7 @@
     "GENERAL_ERROR": "حدث خطأ ما",
     "UPDATE_ERROR": "فشل تحديث الكمية",
     "REMOVE_ERROR": "فشل إزالة المنتج",
-    "AUTH_REQUIRED_TITLE": "تسجيل الدخول مطلوب",
+    "AUTH_REQUIRED_TITLE": "يجب تسجيل الدخول",
     "AUTH_REQUIRED_DESC": "يرجى تسجيل الدخول لإضافة المنتجات إلى السلة."
   },"NotFound": {
     "TITLE": "الصفحة غير موجودة",

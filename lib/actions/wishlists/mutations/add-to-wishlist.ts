@@ -13,6 +13,7 @@ import { getValidationDetails } from "@/lib/actions/validation"
 
 import { wishlistSchema, type WishlistInput } from "../schemas"
 import type { Wishlist } from "../types"
+import { getCurrentUser } from "../../users/queries/get-current-user"
 
 export async function addToWishlist(
   input: WishlistInput
@@ -29,27 +30,32 @@ export async function addToWishlist(
 
   const supabase = await createServerClient()
 
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser()
+  const result = await getCurrentUser()
 
-
-  if (userError || !user) {
-    return { success: false, error: "PERMISSION_DENIED" }
+  if (!result.success) {
+    return { success: false, error: "AUTH_REQUIRED" }
   }
+
+  const userId = result.data?.id
 
   const { data, error } = await supabase
     .from("wishlists")
     .insert({
-      user_id: user.id,
+      user_id: userId,
       product_id: validation.data.product_id,
     })
     .select("*")
     .single()
 
   if (error) {
-    console.error("Supabase Insert Wishlist Error Code:", error.code, "Message:", error.message, "Details:", error.details)
+    console.error(
+      "Supabase Insert Wishlist Error Code:",
+      error.code,
+      "Message:",
+      error.message,
+      "Details:",
+      error.details
+    )
 
     if (error.code === "23505") {
       return {

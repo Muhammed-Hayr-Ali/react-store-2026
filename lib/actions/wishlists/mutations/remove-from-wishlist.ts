@@ -12,6 +12,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { getValidationDetails } from "@/lib/actions/validation"
 
 import { wishlistSchema, type WishlistInput } from "../schemas"
+import { getCurrentUser } from "../../users/queries/get-current-user"
 
 export async function removeFromWishlist(
   input: WishlistInput
@@ -27,19 +28,18 @@ export async function removeFromWishlist(
 
   const supabase = await createServerClient()
 
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser()
+  const result = await getCurrentUser()
 
-  if (userError || !user) {
-    return { success: false, error: "PERMISSION_DENIED" }
+  if (!result.success) {
+    return { success: false, error: "AUTH_REQUIRED" }
   }
+
+  const userId = result.data?.id
 
   const { data, error } = await supabase
     .from("wishlists")
     .delete()
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .eq("product_id", validation.data.product_id)
     .select("id")
     .maybeSingle()

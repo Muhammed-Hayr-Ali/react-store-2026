@@ -93,12 +93,12 @@ export function CartProvider({
   const updateItemQuantity = async (itemId: string, quantity: number) => {
     startTransition(async () => {
       const result = await updateCartItem({ item_id: itemId, quantity })
+
       if (!result.success) {
         if (result.error === "AUTH_REQUIRED") {
           toast.error(
-            t("AUTH_REQUIRED_TITLE", {
-              default: "AUTH_REQUIRED_DESC",
-            })
+            t("AUTH_REQUIRED_TITLE", { default: "Sign in required" }),
+            {}
           )
         } else {
           toast.error(
@@ -118,9 +118,8 @@ export function CartProvider({
       if (!result.success) {
         if (result.error === "AUTH_REQUIRED") {
           toast.error(
-            t("AUTH_REQUIRED_TITLE", {
-              default: "AUTH_REQUIRED_DESC",
-            })
+            t("AUTH_REQUIRED_TITLE", { default: "Sign in required" }),
+            {}
           )
         } else {
           toast.error(t("REMOVE_ERROR", { default: "Failed to remove item" }))
