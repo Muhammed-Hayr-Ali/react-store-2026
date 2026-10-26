@@ -2,7 +2,7 @@
 
 /**
  * @file components/store/product-details/details/product-breadcrumb.tsx
- * @description Breadcrumb navigation for the product details page showing category and product hierarchy.
+ * @description Breadcrumb navigation for the product details page showing localized category and product hierarchy.
  */
 
 import * as React from "react"
@@ -40,20 +40,20 @@ export function ProductBreadcrumb({
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        {/* الصفحة الرئيسية للمتجر */}
+        {/* الصفحة الرئيسية للمتجر مع دعم اللغة */}
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link href="/">{t("HOME", { default: "Store" })}</Link>
+            <Link href={`/${locale}`}>{t("HOME", { default: "Home" })}</Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
 
-        {/* التصنيف الأب (إن وجد) */}
+        {/* التصنيف الأب (إن وجد) مع استخدام الـ slug والـ locale الصحيح */}
         {parentCategory && (
           <>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href={`/store/categories/${parentCategory.slug}`}>
+                <Link href={`/${locale}/categories/${parentCategory.slug}`}>
                   {parentCat}
                 </Link>
               </BreadcrumbLink>
@@ -62,12 +62,12 @@ export function ProductBreadcrumb({
           </>
         )}
 
-        {/* التصنيف الحالي */}
+        {/* التصنيف الحالي مع استخدام الـ slug والـ locale الصحيح */}
         {category && (
           <>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href={`/store/categories/${category.slug}`}>
+                <Link href={`/${locale}/categories/${category.slug}`}>
                   {rootCategory}
                 </Link>
               </BreadcrumbLink>
@@ -76,6 +76,7 @@ export function ProductBreadcrumb({
           </>
         )}
 
+        {/* اسم المنتج الحالي */}
         <BreadcrumbItem>
           <BreadcrumbPage className="max-w-50 truncate font-medium text-foreground sm:max-w-xs">
             {productName}
