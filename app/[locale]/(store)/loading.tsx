@@ -9,22 +9,32 @@ import { ProductCardSkeleton } from "@/omponents/store/skeletons/product-card-sk
 export default function StoreLoading() {
   // مصفوفة وهمية لتمثيل 8 كارتات منتجات
   const productSkeletons = Array.from({ length: 8 }, (_, i) => i)
-  // مصفوفة وهمية لتمثيل دوائر التصنيفات في الشريط
+  // مصفوفة وهمية لتمثيل كبسولات التصنيفات الأفقية في الشريط
   const categorySkeletons = Array.from({ length: 6 }, (_, i) => i)
 
   return (
     <div className="space-y-12 pb-12 animate-pulse">
       {/* 1. هيكل السلايدر الوهمي (Hero Slider Skeleton) */}
-      <div className="aspect-21/9 w-full rounded-3xl bg-muted/60" />
+      <div className="aspect-[21/9] w-full rounded-3xl bg-muted/60" />
 
-      {/* 2. هيكل شريط التصنيفات (Categories Scroll Skeleton) */}
-      <div className="space-y-4">
-        <div className="h-5 w-32 rounded-md bg-muted/60" />
-        <div className="flex gap-4 overflow-hidden py-2">
+      {/* 2. هيكل شريط التصنيفات الأفقية (Categories Scroll Skeleton) */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="h-5 w-32 rounded-md bg-muted/60" />
+          <div className="flex gap-1">
+            <div className="size-7 rounded-full bg-muted/40" />
+            <div className="size-7 rounded-full bg-muted/40" />
+          </div>
+        </div>
+
+        <div className="flex gap-3 overflow-hidden py-1">
           {categorySkeletons.map((index) => (
-            <div key={index} className="flex flex-col items-center gap-2 shrink-0">
-              <div className="size-20 rounded-full bg-muted/60" />
-              <div className="h-3 w-14 rounded bg-muted/40" />
+            <div
+              key={index}
+              className="flex shrink-0 items-center gap-2.5 rounded-xl bg-muted/50 px-4 py-2.5"
+            >
+              <div className="size-8 rounded-lg bg-muted/60" />
+              <div className="h-4 w-20 rounded bg-muted/60" />
             </div>
           ))}
         </div>

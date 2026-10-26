@@ -32,7 +32,7 @@ function SlideItem({
   return (
     <div className="relative min-w-0 flex-[0_0_100%] transition-opacity duration-300">
       <Link
-        href={`/${locale}/product-details/${slide.slug}`}
+        href={`/${locale}/product/${slide.slug}`}
         className="relative block h-56 w-full overflow-hidden bg-muted/40 sm:h-72 md:h-84 lg:h-96"
       >
         {slide.image_url && !imageError ? (
