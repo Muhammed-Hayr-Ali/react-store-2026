@@ -115,17 +115,11 @@ export function ProductGrid({
     emptyMessage ||
     t("NO_PRODUCTS_AVAILABLE", { default: "No products available." })
 
-  if (!products || products.length === 0) {
-    return (
-      <div className="flex min-h-37.5 w-full items-center justify-center rounded-2xl border border-dashed border-border/60 bg-card/50 p-6 text-center text-xs text-muted-foreground">
-        {resolvedEmptyMessage}
-      </div>
-    )
-  }
+  const isEmpty = !products || products.length === 0
 
   return (
     <section className="space-y-6">
-      {/* Header & Toolbar Section (اختياري وقابل للتخصيص) */}
+      {/* Header & Toolbar Section (يبقي العنوان ظاهراً دائماً) */}
       {(title || showToolbar) && (
         <div className="flex items-center justify-between">
           <div className="space-y-1">
@@ -141,8 +135,8 @@ export function ProductGrid({
             )}
           </div>
 
-          {/* أزرار اختيار طريقة العرض */}
-          {showToolbar && (
+          {/* يختفي زر طريقة العرض (Toolbar) إذا لم تكن هناك منتجات */}
+          {showToolbar && !isEmpty && (
             <div className="flex items-center gap-1 rounded-full border border-border/50 bg-muted/40 p-1">
               <Button
                 size="icon"
@@ -176,32 +170,41 @@ export function ProductGrid({
         </div>
       )}
 
-      {/* Products Container */}
-      <div
-        className={
-          mode === "grid"
-            ? "grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4"
-            : "grid grid-cols-1 gap-3 sm:grid-cols-2"
-        }
-      >
-        {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            layout={mode === "grid" ? "vertical" : "horizontal"}
-          />
-        ))}
-      </div>
-
-      {/* عنصر مراقبة التمرير للتحميل التلقائي */}
-      <div ref={loaderRef} className="flex justify-center py-8">
-        {isLoading && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Loader2 className="size-4 animate-spin text-primary" />
-            <span>{t("LOADING", { default: "Loading more products..." })}</span>
+      {/* المحتوى: إما رسالة الفراغ أو شبكة المنتجات */}
+      {isEmpty ? (
+        <div className="flex min-h-37.5 w-full items-center justify-center rounded-2xl border border-dashed border-border/60 bg-card/50 p-6 text-center text-xs text-muted-foreground">
+          {resolvedEmptyMessage}
+        </div>
+      ) : (
+        <>
+          {/* Products Container */}
+          <div
+            className={
+              mode === "grid"
+                ? "grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4"
+                : "grid grid-cols-1 gap-3 sm:grid-cols-2"
+            }
+          >
+            {products.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                layout={mode === "grid" ? "vertical" : "horizontal"}
+              />
+            ))}
           </div>
-        )}
-      </div>
+
+          {/* عنصر مراقبة التمرير للتحميل التلقائي */}
+          <div ref={loaderRef} className="flex justify-center py-8">
+            {isLoading && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Loader2 className="size-4 animate-spin text-primary" />
+                <span>{t("LOADING", { default: "Loading more products..." })}</span>
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </section>
   )
 }
