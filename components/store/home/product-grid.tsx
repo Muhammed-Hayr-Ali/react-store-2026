@@ -16,8 +16,14 @@ interface ProductGridProps {
   initialProducts: SimplifiedRegularProduct[]
   emptyMessage?: string
   viewMode: "grid" | "list"
-  fetchMoreAction: (page: number) => Promise<{ success: boolean; data?: SimplifiedRegularProduct[]; hasMore?: boolean }>
-  
+  fetchMoreAction: (
+    page: number
+  ) => Promise<{
+    success: boolean
+    data?: SimplifiedRegularProduct[]
+    hasMore?: boolean
+  }>
+
   // خصائص اختيارية للتحكم بالرأس (Header) من الخارج لمرونة كاملة
   title?: string
   description?: string
@@ -35,7 +41,8 @@ export function ProductGrid({
 }: ProductGridProps) {
   const t = useTranslations("Home")
   const [mode, setMode] = React.useState<"grid" | "list">(initialViewMode)
-  const [products, setProducts] = React.useState<SimplifiedRegularProduct[]>(initialProducts)
+  const [products, setProducts] =
+    React.useState<SimplifiedRegularProduct[]>(initialProducts)
   const [page, setPage] = React.useState(1)
   const [hasMore, setHasMore] = React.useState(initialProducts.length >= 12)
   const [isLoading, setIsLoading] = React.useState(false)
@@ -65,7 +72,9 @@ export function ProductGrid({
       if (result.success && result.data && result.data.length > 0) {
         setProducts((prev) => {
           const existingIds = new Set(prev.map((p) => p.id))
-          const uniqueNewProducts = result.data!.filter((p) => !existingIds.has(p.id))
+          const uniqueNewProducts = result.data!.filter(
+            (p) => !existingIds.has(p.id)
+          )
 
           if (uniqueNewProducts.length === 0) {
             setHasMore(false)
@@ -74,7 +83,7 @@ export function ProductGrid({
           return [...prev, ...uniqueNewProducts]
         })
         setPage(nextPage)
-        
+
         if (result.hasMore === false) {
           setHasMore(false)
         }
@@ -199,7 +208,9 @@ export function ProductGrid({
             {isLoading && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Loader2 className="size-4 animate-spin text-primary" />
-                <span>{t("LOADING", { default: "Loading more products..." })}</span>
+                <span>
+                  {t("LOADING", { default: "Loading more products..." })}
+                </span>
               </div>
             )}
           </div>

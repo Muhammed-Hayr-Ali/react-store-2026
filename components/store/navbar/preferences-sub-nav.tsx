@@ -1,5 +1,10 @@
 "use client"
 
+/**
+ * @file components/store/navigation/preferences-sub-nav.tsx
+ * @description Sub-navigation for changing language, theme, and currency preferences.
+ */
+
 import * as React from "react"
 import { useLocale } from "next-intl"
 import { usePathname, useRouter } from "@/i18n/navigation"
@@ -14,6 +19,7 @@ import {
 } from "@/components/ui/collapsible"
 import { PREFERENCES_CONFIG } from "./nav-config"
 import { cn } from "@/lib/utils"
+import { useCurrency } from "@/lib/context/currency-context"
 
 interface PreferencesSubNavProps {
   itemClassName?: string
@@ -28,6 +34,8 @@ export function PreferencesSubNav({
   const pathname = usePathname()
   const currentLocale = useLocale()
   const { theme, setTheme } = useTheme()
+  const { currentCurrency, setCurrency, currencies } = useCurrency()
+
   const [isMounted, setIsMounted] = React.useState(false)
   const [isLangPending, startLangTransition] = React.useTransition()
   const [optimisticLocale, setOptimisticLocale] = React.useOptimistic(
@@ -35,6 +43,7 @@ export function PreferencesSubNav({
     (_current, next: string) => next
   )
   const [isThemePending, setIsThemePending] = React.useState(false)
+  const [isCurrencyPending, setIsCurrencyPending] = React.useState(false)
 
   React.useEffect(() => {
     const frame = requestAnimationFrame(() => setIsMounted(true))
@@ -64,9 +73,19 @@ export function PreferencesSubNav({
     }, 220)
   }
 
+  const handleCurrencyChange = (e: React.MouseEvent, nextCurrencyCode: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (nextCurrencyCode === currentCurrency.code || isCurrencyPending) return
 
+    setIsCurrencyPending(true)
+    setTimeout(() => {
+      setCurrency(nextCurrencyCode)
+      setIsCurrencyPending(false)
+    }, 200)
+  }
 
-  const { language, appearance } = PREFERENCES_CONFIG
+  const { language, appearance, currency: currencyConfig } = PREFERENCES_CONFIG
 
   return (
     <div className="flex flex-col gap-0.5">
@@ -190,7 +209,66 @@ export function PreferencesSubNav({
         </CollapsibleContent>
       </Collapsible>
 
-
+      {/* 3. العملة */}
+      <Collapsible className="group/currency">
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={isCurrencyPending}
+            className={cn(
+              "flex h-10 w-full items-center justify-between font-normal",
+              itemClassName
+            )}
+          >
+            <div className="flex items-center">
+              <currencyConfig.icon className="me-2 size-4 text-muted-foreground" />
+              <span>{currencyConfig.name}</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              {isCurrencyPending ? (
+                <Loader2Icon className="size-3.5 animate-spin text-primary" />
+              ) : (
+                isMounted && (
+                  <span className="text-[11px] font-medium uppercase">
+                    {currentCurrency.code}
+                  </span>
+                )
+              )}
+              <ChevronRight className="size-3.5 transition-transform duration-200 group-data-[state=open]/currency:rotate-90 rtl:rotate-180" />
+            </div>
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-0.5 ps-6 pt-0.5">
+          {currencies.map((curr) => {
+            const isSelected = isMounted && currentCurrency.code === curr.code
+            return (
+              <Button
+                key={curr.code}
+                variant="ghost"
+                size="sm"
+                disabled={isCurrencyPending}
+                onClick={(e) => handleCurrencyChange(e, curr.code)}
+                className={cn(
+                  "flex h-8 w-full items-center justify-between text-xs font-normal",
+                  (!isSelected || isCurrencyPending) && "text-muted-foreground",
+                  subItemClassName
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <span>{curr.name}</span>
+                  <span className="text-[10px] text-muted-foreground/80">({curr.symbol})</span>
+                </div>
+                {isSelected && !isCurrencyPending ? (
+                  <CheckIcon className="size-3.5 text-primary" />
+                ) : (
+                  <span className="size-3.5" aria-hidden="true" />
+                )}
+              </Button>
+            )
+          })}
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   )
 }
