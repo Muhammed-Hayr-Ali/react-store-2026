@@ -42,9 +42,7 @@ export default async function Page({ params }: PageProps) {
   })
 
   // Check administrative permissions
-  if (!(await hasPermission(PERMISSIONS.VIEW_CATEGORIES_MANAGEMENT))) {
-    notFound()
-  }
+  if (!(await hasPermission(PERMISSIONS.VIEW_CATEGORIES_MANAGEMENT))) notFound()
 
   // Fetch pre-processed page data and business logic
   const [pageDataResult, summaryResult] = await Promise.all([

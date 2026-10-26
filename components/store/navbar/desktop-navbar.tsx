@@ -28,7 +28,7 @@ export default function DesktopNavbar({ className }: DesktopNavbarProps) {
   const { user } = useUser()
 
   return (
-    <div className={cn("hidden items-center gap-3 md:flex", className)}>
+    <div className={cn("hidden items-center gap-3.5 md:flex", className)}>
       {/* قائمة تبديل العملة */}
       <CurrencySwitcher />
 
@@ -41,7 +41,6 @@ export default function DesktopNavbar({ className }: DesktopNavbarProps) {
 
       {user ? (
         <>
-          <Separator orientation="vertical" className="mx-1 h-5" />
           <UserProfilePopover />
         </>
       ) : (

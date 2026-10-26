@@ -13,20 +13,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-import { cn } from "@/lib/utils"
 import { useUser } from "@/lib/context/user-context"
 import { PreferencesSubNav } from "./preferences-sub-nav"
 import { UserProfileHeader } from "./user-profile-header"
 import { NavItemsList } from "./nav-items-list"
 import { LogoutAlertDialog } from "@/components/shared/logout-alert"
 
-interface UserProfilePopoverProps {
-  className?: string
-}
-
-export default function UserProfilePopover({
-  className,
-}: UserProfilePopoverProps) {
+export default function UserProfilePopover() {
   const [isOpen, setIsOpen] = useState(false)
   const [logoutStatus, setLogoutStatus] = useState<boolean>(false)
   const { user } = useUser()
@@ -39,21 +32,19 @@ export default function UserProfilePopover({
     <>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
-          <button
-            type="button"
-            className={cn(
-              "cursor-pointer rounded-full focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none",
-              className
-            )}
+          <Button
+            variant="secondary"
+            size="icon"
             aria-label="User profile menu"
+            className="overflow-hidden rounded-[50%] corner-squircle"
           >
-            <Avatar className="size-8 ring-2 ring-transparent transition-all hover:ring-primary/20">
+            <Avatar className="ring-transparent transition-all">
               <AvatarImage src={user.avatar} alt={user.name} />
               <AvatarFallback className="text-[10px]">
                 {user.name.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-          </button>
+          </Button>
         </PopoverTrigger>
 
         <PopoverContent

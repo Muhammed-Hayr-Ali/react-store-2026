@@ -8,7 +8,13 @@
 import * as React from "react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
-import { ShoppingBagIcon, Trash2Icon, PlusIcon, MinusIcon } from "lucide-react"
+import {
+  ShoppingBagIcon,
+  Trash2Icon,
+  PlusIcon,
+  MinusIcon,
+  ShoppingCartIcon,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -42,10 +48,10 @@ export function CartSheet() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="icon" className="relative">
-          <ShoppingBagIcon className="size-5" />
+        <Button variant="secondary" size="icon" className="relative">
+          <ShoppingCartIcon />
           {totalItemsCount > 0 && (
-            <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+            <span className="absolute -top-1.5 -right-1.5 flex size-3.5 items-center justify-center rounded-full bg-foreground text-[10px] font-normal text-background">
               {totalItemsCount}
             </span>
           )}

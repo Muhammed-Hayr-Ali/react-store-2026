@@ -27,8 +27,11 @@ export default async function Page({ params }: PageProps) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "BrandsManagement" })
   const errors = await getTranslations({ locale, namespace: "ActionErrors" })
+
   if (!(await hasPermission(PERMISSIONS.VIEW_BRANDS_MANAGEMENT))) notFound()
-  const [pageDataResult, summaryResult] = await Promise.all([
+
+
+    const [pageDataResult, summaryResult] = await Promise.all([
     getBrandsPageData(),
     getBrandsSummary(),
   ])
