@@ -1362,9 +1362,23 @@
     "BACK_TO_HOME": "Back to Home"
   },
   "Home": {
+    "META_TITLE": "Home",
+    "META_DESCRIPTION": "Welcome to our store. Explore our featured products, categories, and latest arrivals.",
     "NEW_ARRIVALS": "New Arrivals",
     "NEW_ARRIVALS_DESC": "Explore our latest additions and everyday essentials.",
     "NO_PRODUCTS_AVAILABLE": "No products available.",
     "LOADING": "Loading more products..."
+  },
+  "Brand": {
+    "META_TITLE": "{brand} Products",
+    "META_DESCRIPTION": "Explore all products, offers, and latest releases from {brand}.",
+    "PAGE_DESC": "Explore all available products from {brand}",
+    "NO_PRODUCTS": "No products available from this brand right now."
+  },
+  "Category": {
+    "META_TITLE": "{category} Products",
+    "META_DESCRIPTION": "Browse our collection of {category} items and everyday essentials.",
+    "PAGE_DESC": "Explore all available products in {category}",
+    "NO_PRODUCTS": "No products available in this category."
   }
 }

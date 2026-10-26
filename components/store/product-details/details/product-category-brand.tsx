@@ -2,10 +2,11 @@
 
 /**
  * @file components/store/product-details/details/product-category-brand.tsx
- * @description Apple-inspired minimalist display of product category and brand.
+ * @description Apple-inspired minimalist interactive display of product category and brand links.
  */
 
 import * as React from "react"
+import Link from "next/link"
 import {
   BrandDetail,
   CategoryDetail,
@@ -38,21 +39,28 @@ export function ProductCategoryBrand({
 
   return (
     <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground/80">
-      {/* اسم أو تصنيف المنتج بأسلوب نظيف */}
-      {categoryName && (
-        <span className="tracking-wide uppercase">
+      {/* رابط التصنيف */}
+      {category && categoryName && (
+        <Link
+          href={`/${locale}/categories/${category.slug}`}
+          className="tracking-wide uppercase transition-colors hover:text-primary hover:underline underline-offset-4"
+        >
           {categoryName}
-        </span>
+        </Link>
       )}
 
       {categoryName && brandName && (
         <span className="size-1 rounded-full bg-muted-foreground/40" />
       )}
 
-      {brandName && (
-        <span className="font-semibold text-foreground tracking-wide">
+      {/* رابط العلامة التجارية */}
+      {brand && brandName && (
+        <Link
+          href={`/${locale}/brands/${brand.slug}`}
+          className="font-semibold text-foreground tracking-wide transition-colors hover:text-primary hover:underline underline-offset-4"
+        >
           {brandName}
-        </span>
+        </Link>
       )}
     </div>
   )

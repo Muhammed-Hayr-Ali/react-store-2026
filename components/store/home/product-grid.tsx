@@ -2,7 +2,7 @@
 
 /**
  * @file components/store/home/product-grid.tsx
- * @description Responsive grid/list wrapper for product cards with infinite scroll support and view mode toggle.
+ * @description Flexible product grid wrapper supporting infinite scroll and view mode control.
  */
 
 import * as React from "react"
@@ -17,16 +17,24 @@ interface ProductGridProps {
   emptyMessage?: string
   viewMode: "grid" | "list"
   fetchMoreAction: (page: number) => Promise<{ success: boolean; data?: SimplifiedRegularProduct[]; hasMore?: boolean }>
+  
+  // خصائص اختيارية للتحكم بالرأس (Header) من الخارج لمرونة كاملة
+  title?: string
+  description?: string
+  showToolbar?: boolean // إظهار أو إخفاء أزرار التحكم بالعرض
 }
 
 export function ProductGrid({
   initialProducts,
   emptyMessage,
-  viewMode,
+  viewMode: initialViewMode,
   fetchMoreAction,
+  title,
+  description,
+  showToolbar = true,
 }: ProductGridProps) {
   const t = useTranslations("Home")
-  const [mode, setMode] = React.useState<"grid" | "list">(viewMode)
+  const [mode, setMode] = React.useState<"grid" | "list">(initialViewMode)
   const [products, setProducts] = React.useState<SimplifiedRegularProduct[]>(initialProducts)
   const [page, setPage] = React.useState(1)
   const [hasMore, setHasMore] = React.useState(initialProducts.length >= 12)
@@ -45,7 +53,7 @@ export function ProductGrid({
     }
   }
 
-  // دالة جلب المزيد من المنتجات تلقائياً عند التمرير
+  // دالة جلب المزيد من المنتجات تلقائياً عند التمرير مع منع التكرار
   const loadMore = React.useCallback(async () => {
     if (isLoading || !hasMore) return
 
@@ -56,7 +64,6 @@ export function ProductGrid({
 
       if (result.success && result.data && result.data.length > 0) {
         setProducts((prev) => {
-          // دمج القائمة القديمة والجديدة مع منع تكرار نفس الـ ID نهائياً
           const existingIds = new Set(prev.map((p) => p.id))
           const uniqueNewProducts = result.data!.filter((p) => !existingIds.has(p.id))
 
@@ -80,6 +87,7 @@ export function ProductGrid({
       setIsLoading(false)
     }
   }, [isLoading, hasMore, page, fetchMoreAction])
+
   // مراقبة الوصول لنهاية الصفحة لتفعيل التحميل التلقائي
   React.useEffect(() => {
     const currentLoader = loaderRef.current
@@ -117,50 +125,56 @@ export function ProductGrid({
 
   return (
     <section className="space-y-6">
-      {/* Header with Title and View Mode Toggles */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
-            {t("NEW_ARRIVALS", { default: "New Arrivals" })}
-          </h2>
-          <p className="text-xs text-muted-foreground sm:text-sm">
-            {t("NEW_ARRIVALS_DESC", {
-              default: "Explore our latest additions and everyday essentials.",
-            })}
-          </p>
-        </div>
+      {/* Header & Toolbar Section (اختياري وقابل للتخصيص) */}
+      {(title || showToolbar) && (
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            {title && (
+              <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
+                {title}
+              </h2>
+            )}
+            {description && (
+              <p className="text-xs text-muted-foreground sm:text-sm">
+                {description}
+              </p>
+            )}
+          </div>
 
-        {/* أزرار اختيار طريقة العرض */}
-        <div className="flex items-center gap-1 rounded-full border border-border/50 bg-muted/40 p-1">
-          <Button
-            size="icon"
-            variant={mode === "grid" ? "secondary" : "ghost"}
-            className={`size-7 rounded-full transition-all ${
-              mode === "grid"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-            onClick={() => handleViewModeChange("grid")}
-            aria-label="Grid view"
-          >
-            <LayoutGridIcon className="size-3.5" />
-          </Button>
+          {/* أزرار اختيار طريقة العرض */}
+          {showToolbar && (
+            <div className="flex items-center gap-1 rounded-full border border-border/50 bg-muted/40 p-1">
+              <Button
+                size="icon"
+                variant={mode === "grid" ? "secondary" : "ghost"}
+                className={`size-7 rounded-full transition-all ${
+                  mode === "grid"
+                    ? "bg-background text-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                onClick={() => handleViewModeChange("grid")}
+                aria-label="Grid view"
+              >
+                <LayoutGridIcon className="size-3.5" />
+              </Button>
 
-          <Button
-            size="icon"
-            variant={mode === "list" ? "secondary" : "ghost"}
-            className={`size-7 rounded-full transition-all ${
-              mode === "list"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-            onClick={() => handleViewModeChange("list")}
-            aria-label="List view"
-          >
-            <ListIcon className="size-3.5" />
-          </Button>
+              <Button
+                size="icon"
+                variant={mode === "list" ? "secondary" : "ghost"}
+                className={`size-7 rounded-full transition-all ${
+                  mode === "list"
+                    ? "bg-background text-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                onClick={() => handleViewModeChange("list")}
+                aria-label="List view"
+              >
+                <ListIcon className="size-3.5" />
+              </Button>
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
       {/* Products Container */}
       <div
