@@ -31,20 +31,13 @@ export default function UserProfilePopover() {
   return (
     <>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="secondary"
-            size="icon"
-            aria-label="User profile menu"
-            className="overflow-hidden rounded-[50%] corner-squircle"
-          >
-            <Avatar className="ring-transparent transition-all">
-              <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback className="text-[10px]">
-                {user.name.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </Button>
+        <PopoverTrigger>
+          <Avatar>
+            <AvatarImage src={user.avatar} alt={user.name} />
+            <AvatarFallback className="text-[10px]">
+              {user.name.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
         </PopoverTrigger>
 
         <PopoverContent

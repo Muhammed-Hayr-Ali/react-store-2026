@@ -1,48 +1,68 @@
+"use client"
+
 /**
  * @file components/shared/currency-switcher.tsx
- * @description Dropdown menu to switch store currency dynamically.
+ * @description Popover menu to switch store currency dynamically without affecting the page scrollbar.
  */
-
-"use client"
 
 import * as React from "react"
 import { useCurrency } from "@/lib/context/currency-context"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
-import { ChevronDownIcon, CoinsIcon } from "lucide-react"
+import { CheckIcon } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 export function CurrencySwitcher() {
   const { currentCurrency, setCurrency, currencies } = useCurrency()
+  const [open, setOpen] = React.useState(false)
+
+  const handleSelectCurrency = (code: string) => {
+    setCurrency(code)
+    setOpen(false) // إغلاق الـ Popover فور اختيار العملة
+  }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="h-8 gap-1.5 px-2.5 text-xs font-medium">
-          <CoinsIcon className="size-3.5 text-muted-foreground" />
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="secondary" size="default" >
           <span>{currentCurrency.code}</span>
-          <span className="text-muted-foreground">({currentCurrency.symbol})</span>
-          <ChevronDownIcon className="size-3 text-muted-foreground" />
+          <span className="text-[10px] font-normal">
+            ({currentCurrency.symbol})
+          </span>
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-36 text-xs">
-        {currencies.map((currency) => (
-          <DropdownMenuItem
-            key={currency.code}
-            onClick={() => setCurrency(currency.code)}
-            className={`flex cursor-pointer items-center justify-between ${
-              currentCurrency.code === currency.code ? "font-bold text-primary" : ""
-            }`}
-          >
-            <span>{currency.code}</span>
-            <span className="text-muted-foreground">{currency.symbol}</span>
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-30 p-0.5 text-xs">
+        <div className="flex flex-col gap-0.5">
+          {currencies.map((currency) => {
+            const isSelected = currentCurrency.code === currency.code
+            return (
+              <button
+                key={currency.code}
+                type="button"
+                onClick={() => handleSelectCurrency(currency.code)}
+                className={cn(
+                  "flex w-full items-center justify-between rounded-sm px-2 py-1.5 text-left text-xs transition-colors hover:bg-muted",
+                  isSelected
+                    ? "font-bold text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <div className="flex items-center gap-1.5">
+                  <span>{currency.code}</span>
+                  <span className="text-[10px] opacity-80">
+                    ({currency.symbol})
+                  </span>
+                </div>
+                {isSelected && <CheckIcon className="size-3.5 text-primary" />}
+              </button>
+            )
+          })}
+        </div>
+      </PopoverContent>
+    </Popover>
   )
 }

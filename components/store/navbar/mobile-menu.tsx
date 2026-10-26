@@ -20,18 +20,49 @@ import { UserProfileHeader } from "./user-profile-header"
 import { PreferencesSubNav } from "./preferences-sub-nav"
 import { NavItemsList } from "./nav-items-list"
 import { LogoutAlertDialog } from "@/components/shared/logout-alert"
+import { ShoppingCartIcon } from "lucide-react"
+import { useCart } from "@/lib/context/cart-context"
+import MobileCardDrawer from "../cart/mobile-cart"
 
 export function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isCardOpen, setIsCardOpen] = useState(false)
+  const { totalItemsCount } = useCart()
 
   return (
     <>
-      <MenuButton
-        className="flex md:hidden"
-        isOpen={isOpen}
-        onClick={() => setIsOpen(!isOpen)}
-      />
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative"
+          onClick={() => {
+            setIsOpen(false)
+            setIsCardOpen(!isCardOpen)
+          }}
+        >
+          <ShoppingCartIcon className="size-4.5" />
+          {totalItemsCount > 0 && (
+            <span className="absolute -top-1 -right-1 flex size-3.5 items-center justify-center rounded-full bg-foreground text-[10px] font-normal text-background">
+              {totalItemsCount}
+            </span>
+          )}
+        </Button>
+
+        <MenuButton
+          className="flex md:hidden"
+          isOpen={isOpen}
+          onClick={() => {
+            setIsCardOpen(false)
+            setIsOpen(!isOpen)
+          }}
+        />
+      </div>
       <MobileMenuDrawer isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      <MobileCardDrawer
+        isOpen={isCardOpen}
+        onClose={() => setIsCardOpen(false)}
+      />
     </>
   )
 }
@@ -73,7 +104,7 @@ function MobileMenuDrawer({
             {user ? (
               <Button
                 variant="default"
-                className="px-4 uppercase"
+                className="h-9 w-full text-xs font-medium uppercase shadow-xs"
                 onClick={handleOpenLogout}
               >
                 Logout

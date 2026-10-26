@@ -29,7 +29,11 @@ import { Separator } from "@/components/ui/separator"
 import { useCart } from "@/lib/context/cart-context"
 import { useCurrency } from "@/lib/context/currency-context"
 
-export function CartSheet() {
+interface CartSheetProps {
+  children?: React.ReactNode
+}
+
+export function CartSheet({ children }: CartSheetProps) {
   const t = useTranslations("Cart")
   const { cart, updateItemQuantity, removeItem, isPending, totalItemsCount } =
     useCart()
@@ -48,17 +52,19 @@ export function CartSheet() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="secondary" size="icon" className="relative">
-          <ShoppingCartIcon />
-          {totalItemsCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 flex size-3.5 items-center justify-center rounded-full bg-foreground text-[10px] font-normal text-background">
-              {totalItemsCount}
+        {children ?? (
+          <Button variant="secondary" size="icon" className="relative">
+            <ShoppingCartIcon />
+            {totalItemsCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 flex size-3.5 items-center justify-center rounded-full bg-foreground text-[10px] font-normal text-background">
+                {totalItemsCount}
+              </span>
+            )}
+            <span className="sr-only">
+              {t("OPEN_CART", { default: "Open cart" })}
             </span>
-          )}
-          <span className="sr-only">
-            {t("OPEN_CART", { default: "Open cart" })}
-          </span>
-        </Button>
+          </Button>
+        )}
       </SheetTrigger>
 
       <SheetContent className="flex w-full flex-col sm:max-w-xs">
