@@ -2,7 +2,7 @@
 
 /**
  * @file components/store/home/product-grid.tsx
- * @description Responsive grid/list wrapper for product cards with view mode stored in cookies.
+ * @description Responsive grid/list wrapper for product cards with view mode toggle.
  */
 
 import * as React from "react"
@@ -15,42 +15,19 @@ import { SimplifiedRegularProduct } from "@/lib/actions/store/queries/get-latest
 interface ProductGridProps {
   products: SimplifiedRegularProduct[]
   emptyMessage?: string
+  viewMode: "grid" | "list"
 }
 
-const COOKIE_NAME = "store_product_view_mode"
 
-// دالة مساعدة لقراءة الكوكي أثناء تهيئة الحالة بدون الحاجة لـ useEffect
-const getInitialViewMode = (): "grid" | "list" => {
-  if (typeof window === "undefined") return "grid"
-  try {
-    const cookies = document.cookie.split("; ")
-    const viewModeCookie = cookies.find((row) => row.startsWith(`${COOKIE_NAME}=`))
-    if (viewModeCookie) {
-      const value = viewModeCookie.split("=")[1]
-      if (value === "list" || value === "grid") {
-        return value
-      }
-    }
-  } catch (error) {
-    console.error("Failed to read view mode cookie", error)
-  }
-  return "grid"
-}
-
-export function ProductGrid({
-  products,
-  emptyMessage,
-}: ProductGridProps) {
+export function ProductGrid({ products, emptyMessage, viewMode }: ProductGridProps) {
   const t = useTranslations("Home")
-  
-  // تعيين القيمة الأولية مباشرة من الكوكيز لتجنب أي رندر إضافي أو تحذير
-  const [viewMode, setViewMode] = React.useState<"grid" | "list">(getInitialViewMode)
+  const [mode, setMode] = React.useState<"grid" | "list">(viewMode)
 
   // دالة لتغيير وحفظ طريقة العرض في الكوكيز
   const handleViewModeChange = (mode: "grid" | "list") => {
-    setViewMode(mode)
+    setMode(mode)
     try {
-      document.cookie = `${COOKIE_NAME}=${mode}; path=/; max-age=31536000; SameSite=Lax`
+      document.cookie = `${"store_product_view_mode"}=${mode}; path=/; max-age=31536000; SameSite=Lax`
     } catch (error) {
       console.error("Failed to save view mode cookie", error)
     }
@@ -84,12 +61,14 @@ export function ProductGrid({
         </div>
 
         {/* أزرار اختيار طريقة العرض */}
-        <div className="flex items-center gap-1 rounded-full bg-muted/40 p-1 border border-border/50">
+        <div className="flex items-center gap-1 rounded-full border border-border/50 bg-muted/40 p-1">
           <Button
             size="icon"
             variant={viewMode === "grid" ? "secondary" : "ghost"}
             className={`size-7 rounded-full transition-all ${
-              viewMode === "grid" ? "bg-background shadow-xs text-foreground" : "text-muted-foreground hover:text-foreground"
+              viewMode === "grid"
+                ? "bg-background text-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
             }`}
             onClick={() => handleViewModeChange("grid")}
             aria-label="Grid view"
@@ -101,7 +80,9 @@ export function ProductGrid({
             size="icon"
             variant={viewMode === "list" ? "secondary" : "ghost"}
             className={`size-7 rounded-full transition-all ${
-              viewMode === "list" ? "bg-background shadow-xs text-foreground" : "text-muted-foreground hover:text-foreground"
+              viewMode === "list"
+                ? "bg-background text-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
             }`}
             onClick={() => handleViewModeChange("list")}
             aria-label="List view"
@@ -114,7 +95,7 @@ export function ProductGrid({
       {/* Products Container */}
       <div
         className={
-          viewMode === "grid"
+          mode === "grid"
             ? "grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4"
             : "grid grid-cols-1 gap-3 sm:grid-cols-2"
         }
@@ -123,7 +104,7 @@ export function ProductGrid({
           <ProductCard
             key={product.id}
             product={product}
-            layout={viewMode === "grid" ? "vertical" : "horizontal"}
+            layout={mode === "grid" ? "vertical" : "horizontal"}
           />
         ))}
       </div>

@@ -11,6 +11,7 @@ import CategoriesScroll from "@/components/store/home/categories-scroll"
 import { ProductGrid } from "@/components/store/home/product-grid"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
+import { cookies } from "next/headers"
 
 export async function generateMetadata() {
   return createMetadata({
@@ -22,6 +23,12 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
+  const cookieStore = await cookies()
+  // viewMode: "grid" | "list"
+  const viewModeCookie = cookieStore.get("store_product_view_mode")?.value
+  const viewMode = (viewModeCookie === "list" ? "list" : "grid") as
+    "grid" | "list"
+
   const [featuredResult, latestResult, categoriesResult] = await Promise.all([
     getFeaturedProducts({ limit: 5, activeOnly: true }),
     getLatestRegularProducts({ limit: 20, activeOnly: true }),
@@ -41,6 +48,7 @@ export default async function Page() {
       <CategoriesScroll categories={categories} />
 
       <ProductGrid
+        viewMode={viewMode}
         products={latestProducts}
         emptyMessage="No new products available right now."
       />
