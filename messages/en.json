@@ -1328,7 +1328,7 @@
     "META_TITLE": "Wishlist | Your Store",
     "META_DESCRIPTION": "Browse the products you have saved to your wishlist.",
     "PAGE_TITLE": "My Wishlist",
-    "PAGE_DESCRIPTION": "Products you have saved for later so you can easily return to them.",
+    "PAGE_DESC": "Products you have saved for later so you can easily return to them.",
     "EMPTY_TITLE": "Your wishlist is empty",
     "EMPTY_DESCRIPTION": "You haven't added any products to your wishlist yet. Explore the store and add what you like!",
     "BROWSE_PRODUCTS": "Browse Products",
@@ -1336,7 +1336,9 @@
     "ITEMS_COUNT": "{count} items",
     "AUTH_REQUIRED_TITLE": "Sign in required",
     "AUTH_REQUIRED_DESC": "Please sign in to save items to your wishlist.",
-    "GENERAL_ERROR": "Something went wrong, please try again later."
+    "GENERAL_ERROR": "Something went wrong, please try again later.",
+    "ITEM_ADDED": "Added to wishlist successfully",
+    "ITEM_REMOVED": "Removed from wishlist"
   },
   "Cart": {
     "OPEN_CART": "Open cart",

@@ -1,87 +1,98 @@
 /**
  * @file app/[locale]/(store)/wishlist/page.tsx
- * @description User wishlist page displaying saved products with translations and strict error handling.
+ * @description User wishlist page displaying saved products with infinite scroll support, matching category and brand page architecture.
  */
-
-import { getTranslations } from "next-intl/server"
-import Link from "next/link"
-import { HeartCrackIcon, ShoppingBagIcon, HeartIcon } from "lucide-react"
 
 import { getWishlist } from "@/lib/actions/wishlists"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import { ProductsGrid } from "@/components/store/wishlist/products-grid"
-import { Button } from "@/components/ui/button"
-import type { AppLocale } from "@/i18n/routing"
+import { cookies } from "next/headers"
+import { getTranslations } from "next-intl/server"
+import { WishlistProductGrid } from "@/components/store/wishlist/wishlist-product-grid"
+import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
+import { notFound } from "next/navigation"
 
-interface PageProps {
+interface WishlistPageProps {
   params: Promise<{ locale: string }>
 }
 
-export async function generateMetadata({ params }: PageProps) {
+// توليد الميتا داتا ديناميكياً باستخدام مفترس الترجمة الخاص بالـ Wishlist
+export async function generateMetadata({ params }: WishlistPageProps) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "Wishlist" })
+
   return createMetadata({
     siteName: appConfig.name,
-    title: t("META_TITLE"),
-    description: t("META_DESCRIPTION"),
+    title: t("META_TITLE", { default: "My Wishlist" }),
+    description: t("META_DESCRIPTION", {
+      default: "View and manage your saved favorite products.",
+    }),
   })
 }
 
-export default async function Page({ params }: PageProps) {
+export default async function WishlistPage({ params }: WishlistPageProps) {
+  const userResult = await getCurrentUser()
+  if (!userResult.success) {
+    return notFound()
+  }
+
   const { locale } = await params
-  const typedLocale = locale as AppLocale
   const t = await getTranslations({ locale, namespace: "Wishlist" })
   const errors = await getTranslations({ locale, namespace: "ActionErrors" })
 
-  const result = await getWishlist()
+  // 1. جلب الكوكيز لتحديد عرض الشبكة أو القائمة (مطابق تماماً لصفحة التصنيفات)
+  const cookieStore = await cookies()
+  const viewModeCookie = cookieStore.get("store_product_view_mode")?.value
+  const viewMode = (viewModeCookie === "list" ? "list" : "grid") as
+    "grid" | "list"
 
-  if (!result.success) {
+  const PAGE_LIMIT = 12
+
+  // 2. جلب المنتجات الأولية للمفضلة باستخدام دالة getWishlist المدعومة بالصفحات
+  const productsResult = await getWishlist({
+    limit: PAGE_LIMIT,
+    page: 1,
+    activeOnly: true,
+  })
+
+  if (!productsResult.success) {
     throw new Error(
-      errors(getActionErrorKey(result.error ?? "UNEXPECTED_ERROR"))
+      errors(getActionErrorKey(productsResult.error ?? "UNEXPECTED_ERROR"))
     )
   }
 
-  const wishlistItems = result.data
+  const initialProducts = productsResult.success ? productsResult.data : []
+
+  // 3. Server Action للتحميل التلقائي (Infinite Scroll) مطابق تماماً لصفحة التصنيفات
+  async function loadMoreProducts(pageNumber: number) {
+    "use server"
+    const res = await getWishlist({
+      limit: PAGE_LIMIT,
+      page: pageNumber,
+      activeOnly: true,
+    })
+    return {
+      success: res.success,
+      data: res.success ? res.data : [],
+      hasMore: res.success && res.data ? res.data.length === PAGE_LIMIT : false,
+    }
+  }
 
   return (
-    <main className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
-      <header className="flex items-center gap-2 border-b border-border/40 pb-4">
-        <span className="flex size-7 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
-          <HeartIcon className="size-4" />
-        </span>
-        <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
-            {t("PAGE_TITLE")}
-          </h1>
-          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-            {t("PAGE_DESCRIPTION")} ({t("ITEMS_COUNT", { count: wishlistItems.length })})
-          </p>
-        </div>
-      </header>
-
-      {wishlistItems.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border/80 bg-muted/20 py-16 px-4 text-center">
-          <div className="flex size-16 items-center justify-center rounded-full bg-muted mb-4 text-muted-foreground">
-            <HeartCrackIcon className="size-8" />
-          </div>
-          <h2 className="text-lg font-semibold text-foreground mb-1">
-            {t("EMPTY_TITLE")}
-          </h2>
-          <p className="text-sm text-muted-foreground max-w-sm mb-6">
-            {t("EMPTY_DESCRIPTION")}
-          </p>
-          <Button asChild className="rounded-2xl gap-2">
-            <Link href={`/${typedLocale}`}>
-              <ShoppingBagIcon className="size-4" />
-              {t("BROWSE_PRODUCTS")}
-            </Link>
-          </Button>
-        </div>
-      ) : (
-        <ProductsGrid items={wishlistItems} locale={typedLocale} />
-      )}
-    </main>
+    <div className="container space-y-8 py-8">
+      <WishlistProductGrid
+        title={t("PAGE_TITLE", { default: "My Wishlist" })}
+        description={t("PAGE_DESC", {
+          default: "Explore all your saved favorite products.",
+        })}
+        viewMode={viewMode}
+        initialProducts={initialProducts}
+        emptyMessage={t("EMPTY_DESCRIPTION", {
+          default: "No products available in your wishlist right now.",
+        })}
+        fetchMoreAction={loadMoreProducts}
+      />
+    </div>
   )
 }

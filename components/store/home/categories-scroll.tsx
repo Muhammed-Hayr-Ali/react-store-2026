@@ -63,8 +63,6 @@ export default function CategoriesScroll({
 
   if (!categories || categories.length === 0) return null
 
-  // التعديل الجذري: في الـ LTR البداية يسار والنهاية يمين، أما في الـ RTL البداية يمين والنهاية يسار.
-  // لذلك نقوم بعكس المتغيرات بناءً على الـ isRtl لضمان صحة التلاشي في كلا اللغتين.
   const leftHasScroll = isRtl ? canScrollNext : canScrollPrev
   const rightHasScroll = isRtl ? canScrollPrev : canScrollNext
 
@@ -107,7 +105,7 @@ export default function CategoriesScroll({
         </div>
       </div>
 
-      {/* مسار السحب مع تطبيق التلاشي التلقائي المتطابق تماماً مع اتجاه السكرول */}
+      {/* مسار السحب مع تطبيق التلاشي التلقائي */}
       <div
         className="overflow-hidden transition-all duration-300"
         ref={emblaRef}
@@ -128,7 +126,7 @@ export default function CategoriesScroll({
             return (
               <Link
                 key={category.slug}
-                href={`/${locale}/category/${category.slug}`}
+                href={`/${locale}/categories/${category.slug}`}
                 className="group flex shrink-0 items-center gap-2.5 rounded-xl bg-muted/50 px-3.5 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none sm:px-4 sm:py-2.5 sm:text-sm"
               >
                 {/* أيقونة أو صورة التصنيف */}
