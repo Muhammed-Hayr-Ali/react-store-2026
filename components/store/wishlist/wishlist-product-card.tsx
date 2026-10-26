@@ -2,12 +2,12 @@
 
 /**
  * @file components/store/wishlist/wishlist-product-card.tsx
- * @description Wishlist product card component supporting both vertical and horizontal layouts with server-confirmed removal and refined red button styling.
+ * @description Wishlist product card component supporting both vertical and horizontal layouts, fully clickable with server-confirmed removal and refined styling.
  */
 
 import * as React from "react"
-import Link from "next/link"
-import { useLocale, useTranslations } from "next-intl"
+import { Link } from "@/i18n/navigation"
+import { useTranslations } from "next-intl"
 import {
   ShoppingCartIcon,
   Loader2Icon,
@@ -33,7 +33,6 @@ export function WishlistProductCard({
   product,
   layout = "vertical",
 }: WishlistProductCardProps) {
-  const locale = useLocale()
   const t = useTranslations("Wishlist")
   const { addItem } = useCart()
   const { formatRawPrice, currentCurrency } = useCurrency()
@@ -53,6 +52,7 @@ export function WishlistProductCard({
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault()
+    e.stopPropagation() // منع انتقال النقر للرابط الرئيسي
     if (!product.price || !product.variant_id) return
 
     try {
@@ -68,7 +68,7 @@ export function WishlistProductCard({
 
   const handleRemoveFromWishlist = async (e: React.MouseEvent) => {
     e.preventDefault()
-    e.stopPropagation()
+    e.stopPropagation() // منع انتقال النقر للرابط الرئيسي
     try {
       setIsRemoving(true)
       const result = await toggleWishlist(product.id)
@@ -87,8 +87,11 @@ export function WishlistProductCard({
   // ==================== 1. التصميم الأفقي (Horizontal Layout) ====================
   if (layout === "horizontal") {
     return (
-      <div className="group/card relative flex items-center gap-3 overflow-hidden rounded-2xl bg-muted/50 p-2.5 transition-all duration-300 hover:bg-muted/40">
-        {/* زر القلب للإزالة بدائرة حمراء وتغيير الألوان بسلاسة عند التحويم */}
+      <Link
+        href={`/product/${product.slug}`}
+        className="group/card relative flex items-center gap-3 overflow-hidden rounded-2xl bg-muted/50 p-2.5 transition-all duration-300 hover:bg-muted/40"
+      >
+        {/* زر القلب للإزالة */}
         <div className="absolute inset-s-3 top-3 z-10">
           <button
             type="button"
@@ -100,7 +103,10 @@ export function WishlistProductCard({
             })}
           >
             {isRemoving ? (
-              <LoaderCircleIcon className="animate-spin text-destructive transition-colors group-hover:text-white" />
+              <LoaderCircleIcon 
+                fill="none" 
+                className="size-3.5 animate-spin text-destructive transition-colors group-hover:text-white" 
+              />
             ) : (
               <HeartIcon className="size-3.5 fill-destructive text-destructive transition-colors group-hover:fill-white group-hover:text-white" />
             )}
@@ -108,10 +114,7 @@ export function WishlistProductCard({
         </div>
 
         {/* Image Container */}
-        <Link
-          href={`/${locale}/product-details/${product.slug}`}
-          className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-background/50 sm:size-24"
-        >
+        <div className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-background/50 sm:size-24">
           {product.image_url ? (
             <img
               src={product.image_url}
@@ -130,16 +133,14 @@ export function WishlistProductCard({
               -{discountPercentage}%
             </span>
           )}
-        </Link>
+        </div>
 
         {/* Content Area */}
         <div className="flex flex-1 flex-col justify-between py-0.5">
           <div className="space-y-0.5">
-            <Link href={`/${locale}/product-details/${product.slug}`}>
-              <h3 className="line-clamp-1 text-xs font-medium text-foreground transition-colors group-hover/card:text-primary sm:text-sm">
-                {product.name}
-              </h3>
-            </Link>
+            <h3 className="line-clamp-1 text-xs font-medium text-foreground transition-colors group-hover/card:text-primary sm:text-sm">
+              {product.name}
+            </h3>
 
             {product.description && (
               <p className="line-clamp-1 text-[11px] text-muted-foreground/80">
@@ -193,13 +194,16 @@ export function WishlistProductCard({
             </Button>
           </div>
         </div>
-      </div>
+      </Link>
     )
   }
 
   // ==================== 2. التصميم العامودي (Vertical Layout - Default) ====================
   return (
-    <div className="group/card relative flex flex-col overflow-hidden rounded-2xl bg-muted/50 p-2.5 transition-all duration-300 hover:bg-muted/40">
+    <Link
+      href={`/product/${product.slug}`}
+      className="group/card relative flex flex-col overflow-hidden rounded-2xl bg-muted/50 p-2.5 transition-all duration-300 hover:bg-muted/40"
+    >
       {/* زر القلب للإزالة في الزاوية العليا */}
       <div className="absolute inset-e-4 top-4 z-10">
         <button
@@ -212,7 +216,10 @@ export function WishlistProductCard({
           })}
         >
           {isRemoving ? (
-            <LoaderCircleIcon className="animate-spin text-destructive transition-colors group-hover:text-white" />
+            <LoaderCircleIcon 
+              fill="none" 
+              className="size-3.5 animate-spin text-destructive transition-colors group-hover:text-white" 
+            />
           ) : (
             <HeartIcon className="size-3.5 fill-destructive text-destructive transition-colors group-hover:fill-white group-hover:text-white" />
           )}
@@ -220,10 +227,7 @@ export function WishlistProductCard({
       </div>
 
       {/* Image Container */}
-      <Link
-        href={`/${locale}/product-details/${product.slug}`}
-        className="relative aspect-square w-full overflow-hidden rounded-xl bg-background/50"
-      >
+      <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-background/50">
         {product.image_url ? (
           <img
             src={product.image_url}
@@ -243,17 +247,15 @@ export function WishlistProductCard({
             -{discountPercentage}%
           </span>
         )}
-      </Link>
+      </div>
 
       {/* Content Area */}
       <div className="mt-2 flex flex-1 flex-col justify-between gap-2 px-1">
         <div className="space-y-1">
           {/* اسم المنتج */}
-          <Link href={`/${locale}/product-details/${product.slug}`}>
-            <h3 className="line-clamp-1 text-xs font-medium text-foreground transition-colors group-hover/card:text-primary sm:text-sm">
-              {product.name}
-            </h3>
-          </Link>
+          <h3 className="line-clamp-1 text-xs font-medium text-foreground transition-colors group-hover/card:text-primary sm:text-sm">
+            {product.name}
+          </h3>
 
           {/* الوصف */}
           {product.description && (
@@ -310,6 +312,6 @@ export function WishlistProductCard({
           </Button>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }

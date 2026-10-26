@@ -2,11 +2,11 @@
 
 /**
  * @file components/store/home/product-card.tsx
- * @description Clean, minimalist Apple-inspired product card component supporting both vertical and horizontal layouts.
+ * @description Clean, minimalist Apple-inspired product card component supporting both vertical and horizontal layouts, fully clickable with localized routing.
  */
 
 import * as React from "react"
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
 import { ShoppingCartIcon, Loader2Icon, StarIcon } from "lucide-react"
 import { useCurrency } from "@/lib/context/currency-context"
@@ -15,7 +15,7 @@ import { SimplifiedRegularProduct } from "@/lib/actions/store/queries/get-latest
 
 interface ProductCardProps {
   product: SimplifiedRegularProduct
-  layout?: "vertical" | "horizontal" // الخاصية الجديدة لدعم التصميمين
+  layout?: "vertical" | "horizontal"
 }
 
 export function ProductCard({ product, layout = "vertical" }: ProductCardProps) {
@@ -35,6 +35,7 @@ export function ProductCard({ product, layout = "vertical" }: ProductCardProps) 
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault()
+    e.stopPropagation() // لمنع انتقال الحدث (Click) للرابط الرئيسي عند النقر على زر السلة
     if (!product.price || !product.variant_id) return
 
     try {
@@ -51,12 +52,12 @@ export function ProductCard({ product, layout = "vertical" }: ProductCardProps) 
   // ==================== 1. التصميم الأفقي (Horizontal Layout) ====================
   if (layout === "horizontal") {
     return (
-      <div className="group relative flex items-center gap-3 overflow-hidden rounded-2xl bg-muted/50 p-2.5 transition-all duration-300 hover:bg-muted/40">
+      <Link
+        href={`/product/${product.slug}`}
+        className="group relative flex items-center gap-3 overflow-hidden rounded-2xl bg-muted/50 p-2.5 transition-all duration-300 hover:bg-muted/40"
+      >
         {/* Image Container */}
-        <Link
-          href={`/product/${product.slug}`}
-          className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-background/50 sm:size-24"
-        >
+        <div className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-background/50 sm:size-24">
           {product.image_url ? (
             <img
               src={product.image_url}
@@ -75,16 +76,14 @@ export function ProductCard({ product, layout = "vertical" }: ProductCardProps) 
               -{discountPercentage}%
             </span>
           )}
-        </Link>
+        </div>
 
         {/* Content Area */}
         <div className="flex flex-1 flex-col justify-between py-0.5">
           <div className="space-y-0.5">
-            <Link href={`/product/${product.slug}`}>
-              <h3 className="line-clamp-1 text-xs font-medium text-foreground transition-colors group-hover:text-primary sm:text-sm">
-                {product.name}
-              </h3>
-            </Link>
+            <h3 className="line-clamp-1 text-xs font-medium text-foreground transition-colors group-hover:text-primary sm:text-sm">
+              {product.name}
+            </h3>
 
             {product.description && (
               <p className="line-clamp-1 text-[11px] text-muted-foreground/80">
@@ -134,18 +133,18 @@ export function ProductCard({ product, layout = "vertical" }: ProductCardProps) 
             </Button>
           </div>
         </div>
-      </div>
+      </Link>
     )
   }
 
   // ==================== 2. التصميم العامودي (Vertical Layout - Default) ====================
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-2xl bg-muted/50 p-2.5 transition-all duration-300 hover:bg-muted/40">
+    <Link
+      href={`/product/${product.slug}`}
+      className="group relative flex flex-col overflow-hidden rounded-2xl bg-muted/50 p-2.5 transition-all duration-300 hover:bg-muted/40"
+    >
       {/* Image Container */}
-      <Link
-        href={`/product/${product.slug}`}
-        className="relative aspect-square w-full overflow-hidden rounded-xl bg-background/50"
-      >
+      <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-background/50">
         {product.image_url ? (
           <img
             src={product.image_url}
@@ -165,17 +164,15 @@ export function ProductCard({ product, layout = "vertical" }: ProductCardProps) 
             -{discountPercentage}%
           </span>
         )}
-      </Link>
+      </div>
 
       {/* Content Area */}
       <div className="mt-2 flex flex-1 flex-col justify-between gap-2 px-1">
         <div className="space-y-1">
           {/* اسم المنتج */}
-          <Link href={`/product/${product.slug}`}>
-            <h3 className="line-clamp-1 text-xs font-medium text-foreground transition-colors group-hover:text-primary sm:text-sm">
-              {product.name}
-            </h3>
-          </Link>
+          <h3 className="line-clamp-1 text-xs font-medium text-foreground transition-colors group-hover:text-primary sm:text-sm">
+            {product.name}
+          </h3>
 
           {/* الوصف */}
           {product.description && (
@@ -184,7 +181,7 @@ export function ProductCard({ product, layout = "vertical" }: ProductCardProps) 
             </p>
           )}
 
-          {/* التقييمات والنجوم (أسفل الوصف) */}
+          {/* التقييمات والنجوم */}
           {product.review_count > 0 && (
             <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
               <StarIcon className="size-3 fill-amber-500 text-amber-500" />
@@ -232,6 +229,6 @@ export function ProductCard({ product, layout = "vertical" }: ProductCardProps) 
           </Button>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }
