@@ -27,17 +27,35 @@ export default async function Page() {
   // viewMode: "grid" | "list"
   const viewModeCookie = cookieStore.get("store_product_view_mode")?.value
   const viewMode = (viewModeCookie === "list" ? "list" : "grid") as
-    "grid" | "list"
+    | "grid"
+    | "list"
+
+  const PAGE_LIMIT = 12 // عدد المنتجات في الدفعة الأولى وعند التمرير
 
   const [featuredResult, latestResult, categoriesResult] = await Promise.all([
     getFeaturedProducts({ limit: 5, activeOnly: true }),
-    getLatestRegularProducts({ limit: 20, activeOnly: true }),
+    getLatestRegularProducts({ limit: PAGE_LIMIT, page: 1, activeOnly: true }),
     getRootCategories({ limit: 10 }),
   ])
 
   const slides = featuredResult.success ? featuredResult.data : []
-  const latestProducts = latestResult.success ? latestResult.data : []
+  const initialProducts = latestResult.success ? latestResult.data : []
   const categories = categoriesResult.success ? categoriesResult.data : []
+
+  // Server Action لجلب الدفعات التالية تلقائياً عند التمرير
+  async function loadMoreProducts(pageNumber: number) {
+    "use server"
+    const res = await getLatestRegularProducts({
+      limit: PAGE_LIMIT,
+      page: pageNumber,
+      activeOnly: true,
+    })
+    return {
+      success: res.success,
+      data: res.success ? res.data : [],
+      hasMore: res.success && res.data ? res.data.length === PAGE_LIMIT : false,
+    }
+  }
 
   return (
     <div className="space-y-12 pb-12">
@@ -47,10 +65,12 @@ export default async function Page() {
       {/* 2. شريط التصنيفات الرئيسية */}
       <CategoriesScroll categories={categories} />
 
+      {/* 3. شبكة المنتجات مع التحميل التلقائي (Infinite Scroll) */}
       <ProductGrid
         viewMode={viewMode}
-        products={latestProducts}
+        initialProducts={initialProducts}
         emptyMessage="No new products available right now."
+        fetchMoreAction={loadMoreProducts}
       />
     </div>
   )

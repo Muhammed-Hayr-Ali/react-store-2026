@@ -1364,6 +1364,7 @@
   "Home": {
     "NEW_ARRIVALS": "New Arrivals",
     "NEW_ARRIVALS_DESC": "Explore our latest additions and everyday essentials.",
-    "NO_PRODUCTS_AVAILABLE": "No products available."
+    "NO_PRODUCTS_AVAILABLE": "No products available.",
+    "LOADING": "Loading more products..."
   }
 }
