@@ -31,7 +31,7 @@ export function MobileMenu() {
 
   return (
     <>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 md:hidden">
         <Button
           variant="ghost"
           size="icon"
