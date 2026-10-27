@@ -17,13 +17,15 @@ import Link from "next/link"
 import { CartItemCard } from "./cart-item-card"
 import { cn } from "@/lib/utils"
 
+interface MobileCardDrawerProps {
+  isOpen: boolean
+  onClose: () => void
+}
+
 export default function MobileCardDrawer({
   isOpen,
   onClose,
-}: {
-  isOpen: boolean
-  onClose: () => void
-}) {
+}: MobileCardDrawerProps) {
   const t = useTranslations("Cart")
   const { cart, updateItemQuantity, removeItem, isPending, totalItemsCount } =
     useCart()
@@ -39,7 +41,9 @@ export default function MobileCardDrawer({
 
   return (
     <MenuDrawer isOpen={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <MobileMenuHeader className="flex w-full items-center gap-2">
+      <MobileMenuHeader
+        onClose={() => onClose()}
+      >
         <p className="text-base leading-tight font-semibold text-foreground">
           {t("TITLE", { default: "Shopping Cart" })}
         </p>

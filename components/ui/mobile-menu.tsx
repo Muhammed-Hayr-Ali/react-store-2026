@@ -1,7 +1,13 @@
+/**
+ * @file components/ui/mobile-menu.tsx
+ * @description Mobile menu drawer component with vertically centered close button and default button interaction states.
+ */
+
 "use client"
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
+ import { XIcon } from "lucide-react"
 
 interface MobileMenuProps {
   isOpen: boolean
@@ -46,12 +52,32 @@ const MobileMenu = ({ isOpen, onOpenChange, children }: MobileMenuProps) => {
   )
 }
 
+interface MobileMenuHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  showCloseButton?: boolean
+  onClose?: () => void
+}
+
 const MobileMenuHeader = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, children, ...props }, ref) => (
-  <div ref={ref} className={cn("shrink-0 border-b p-4", className)} {...props}>
+  MobileMenuHeaderProps
+>(({ className, children, showCloseButton = true, onClose, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("relative flex items-center gap-2 shrink-0 border-b p-4 pe-12", className)}
+    {...props}
+  >
     {children}
+    {showCloseButton && (
+      <button
+         // التوسيط الرأسي مع بقاء تأثيرات الزر الافتراضية كما هي
+        className="absolute top-1/2 inset-e-4 -translate-y-1/2"
+         onClick={onClose}
+        aria-label="Close menu"
+      >
+        <XIcon className="size-4"/>
+        <span className="sr-only">Close</span>
+      </button>
+    )}
   </div>
 ))
 MobileMenuHeader.displayName = "MobileMenuHeader"
