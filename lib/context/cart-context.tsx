@@ -1,6 +1,6 @@
 /**
  * @file lib/context/cart-context.tsx
- * @description Cart context for state management, adding, updating, and removing items with strict typing.
+ * @description Cart context for state management, adding, updating, and removing items with strict typing and Promise returns.
  */
 
 "use client"
@@ -48,7 +48,7 @@ export function CartProvider({
     return cart.items.reduce((acc, item) => acc + Number(item.quantity), 0)
   }, [cart])
 
-  // دالة تحديث الحالة من السيرفر لجلب أحدث البيانات (بما فيها الصور المخصصة للمتغيرات)
+  // دالة تحديث الحالة من السيرفر لجلب أحدث البيانات
   const refreshCart = async () => {
     const updatedCartResult = await getCart()
     if (updatedCartResult.success) {
@@ -60,72 +60,81 @@ export function CartProvider({
     productId: string,
     variantId: string,
     quantity = 1
-  ) => {
-    startTransition(async () => {
-      const result = await addToCart({
-        product_id: productId,
-        variant_id: variantId,
-        quantity,
+  ): Promise<void> => {
+    return new Promise((resolve) => {
+      startTransition(async () => {
+        const result = await addToCart({
+          product_id: productId,
+          variant_id: variantId,
+          quantity,
+        })
+        if (!result.success) {
+          if (result.error === "AUTH_REQUIRED") {
+            toast.error(
+              t("AUTH_REQUIRED_TITLE", {
+                default: "Please sign in to add items to cart",
+              })
+            )
+          } else {
+            toast.error(
+              t("GENERAL_ERROR", {
+                default: "Failed to add item",
+              })
+            )
+          }
+        } else {
+          toast.success(
+            t("ITEM_ADDED", { default: "Added to cart successfully" })
+          )
+          await refreshCart()
+        }
+        resolve()
       })
-      if (!result.success) {
-        if (result.error === "AUTH_REQUIRED") {
-          toast.error(
-            t("AUTH_REQUIRED_TITLE", {
-              default: "Please sign in to add items to cart",
-            })
-          )
-        } else {
-          toast.error(
-            t("GENERAL_ERROR", {
-              default: "Failed to add item",
-            })
-          )
-        }
-      } else {
-        toast.success(
-          t("ITEM_ADDED", { default: "Added to cart successfully" })
-        )
-        await refreshCart()
-      }
     })
   }
 
-  const updateItemQuantity = async (itemId: string, quantity: number) => {
-    startTransition(async () => {
-      const result = await updateCartItem({ item_id: itemId, quantity })
+  const updateItemQuantity = async (itemId: string, quantity: number): Promise<void> => {
+    return new Promise((resolve) => {
+      startTransition(async () => {
+        const result = await updateCartItem({ item_id: itemId, quantity })
 
-      if (!result.success) {
-        if (result.error === "AUTH_REQUIRED") {
-          toast.error(
-            t("AUTH_REQUIRED_TITLE", { default: "Sign in required" })
-          )
+        if (!result.success) {
+          if (result.error === "AUTH_REQUIRED") {
+            toast.error(
+              t("AUTH_REQUIRED_TITLE", { default: "Sign in required" })
+            )
+          } else {
+            toast.error(
+              t("UPDATE_ERROR", { default: "Failed to update quantity" })
+            )
+          }
         } else {
-          toast.error(
-            t("UPDATE_ERROR", { default: "Failed to update quantity" })
-          )
+          toast.success(t("ITEM_UPDATED", { default: "Cart updated" }))
+          await refreshCart()
         }
-      } else {
-        toast.success(t("ITEM_UPDATED", { default: "Cart updated" }))
-        await refreshCart()
-      }
+        resolve()
+      })
     })
   }
 
-  const removeItem = async (itemId: string) => {
-    startTransition(async () => {
-      const result = await removeCartItem({ item_id: itemId })
-      if (!result.success) {
-        if (result.error === "AUTH_REQUIRED") {
-          toast.error(
-            t("AUTH_REQUIRED_TITLE", { default: "Sign in required" })
-          )
+  const removeItem = async (itemId: string): Promise<void> => {
+    return new Promise((resolve) => {
+      startTransition(async () => {
+        const result = await removeCartItem({ item_id: itemId })
+        if (!result.success) {
+          if (result.error === "AUTH_REQUIRED") {
+            toast.error(
+              t("AUTH_REQUIRED_TITLE", { default: "Sign in required" })
+            )
+          } else {
+            toast.error(t("REMOVE_ERROR", { default: "Failed to remove item" }))
+          }
         } else {
-          toast.error(t("REMOVE_ERROR", { default: "Failed to remove item" }))
+          toast.success(t("ITEM_REMOVED", { default: "Item removed from cart" }))
+          await refreshCart()
         }
-      } else {
-        toast.success(t("ITEM_REMOVED", { default: "Item removed from cart" }))
-        await refreshCart()
-      }
+        resolve()
+      })
     })
   }
 

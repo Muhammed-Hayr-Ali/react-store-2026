@@ -98,9 +98,6 @@ export function CartSheet() {
                 <CartItemCard
                   key={item.id}
                   item={item}
-                  isPending={isPending}
-                  onUpdateQuantity={updateItemQuantity}
-                  onRemove={removeItem}
                 />
               ))}
             </div>
