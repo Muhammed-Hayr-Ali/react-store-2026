@@ -12,15 +12,12 @@ import {
   MobileMenuHeader,
 } from "@/components/ui/mobile-menu"
 import {
-  MinusIcon,
-  PlusIcon,
-  ShoppingBagIcon,
-  ShoppingCartIcon,
-  Trash2Icon,
-} from "lucide-react"
+   ShoppingBagIcon,
+ } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { CartItemCard } from "./cart-item-card"
+import { cn } from "@/lib/utils"
 
 export default function MobileCardDrawer({
   isOpen,
@@ -32,7 +29,7 @@ export default function MobileCardDrawer({
   const t = useTranslations("Cart")
   const { cart, updateItemQuantity, removeItem, isPending, totalItemsCount } =
     useCart()
-  const { formatPrice, formatRawPrice, currentCurrency } = useCurrency()
+  const { formatRawPrice, currentCurrency } = useCurrency()
 
   const subtotal = React.useMemo(() => {
     if (!cart?.items) return 0
@@ -53,9 +50,16 @@ export default function MobileCardDrawer({
           ({totalItemsCount})
         </p>
       </MobileMenuHeader>
-      <MobileMenuBody className="px-2">
+      <MobileMenuBody
+        className={cn(
+          "px-2",
+          !cart?.items ||
+            (cart.items.length === 0 &&
+              "flex items-center justify-center pb-20")
+        )}
+      >
         {!cart?.items || cart.items.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center text-center text-muted-foreground">
+          <div className="flex flex-col items-center justify-center text-center text-muted-foreground">
             <ShoppingBagIcon className="mb-4 size-16 stroke-1" />
             <p className="text-lg font-medium">
               {t("EMPTY", { default: "Your cart is empty" })}

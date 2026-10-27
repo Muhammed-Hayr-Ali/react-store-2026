@@ -1,6 +1,6 @@
 /**
  * @file lib/context/cart-context.tsx
- * @description Cart context for state management, adding, updating, and removing items.
+ * @description Cart context for state management, adding, updating, and removing items with strict typing.
  */
 
 "use client"
@@ -48,7 +48,7 @@ export function CartProvider({
     return cart.items.reduce((acc, item) => acc + Number(item.quantity), 0)
   }, [cart])
 
-  // دالة تحديث الحالة من السيرفر
+  // دالة تحديث الحالة من السيرفر لجلب أحدث البيانات (بما فيها الصور المخصصة للمتغيرات)
   const refreshCart = async () => {
     const updatedCartResult = await getCart()
     if (updatedCartResult.success) {
@@ -71,7 +71,7 @@ export function CartProvider({
         if (result.error === "AUTH_REQUIRED") {
           toast.error(
             t("AUTH_REQUIRED_TITLE", {
-              default: "AUTH_REQUIRED_DESC",
+              default: "Please sign in to add items to cart",
             })
           )
         } else {
@@ -97,8 +97,7 @@ export function CartProvider({
       if (!result.success) {
         if (result.error === "AUTH_REQUIRED") {
           toast.error(
-            t("AUTH_REQUIRED_TITLE", { default: "Sign in required" }),
-            {}
+            t("AUTH_REQUIRED_TITLE", { default: "Sign in required" })
           )
         } else {
           toast.error(
@@ -118,8 +117,7 @@ export function CartProvider({
       if (!result.success) {
         if (result.error === "AUTH_REQUIRED") {
           toast.error(
-            t("AUTH_REQUIRED_TITLE", { default: "Sign in required" }),
-            {}
+            t("AUTH_REQUIRED_TITLE", { default: "Sign in required" })
           )
         } else {
           toast.error(t("REMOVE_ERROR", { default: "Failed to remove item" }))

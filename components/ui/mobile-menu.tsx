@@ -84,10 +84,4 @@ const MobileMenuFooter = React.forwardRef<
 ))
 MobileMenuFooter.displayName = "MobileMenuFooter"
 
-
-export {
-  MobileMenu,
-  MobileMenuHeader,
-  MobileMenuBody,
-  MobileMenuFooter,
-}
+export { MobileMenu, MobileMenuHeader, MobileMenuBody, MobileMenuFooter }

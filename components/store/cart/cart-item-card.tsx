@@ -2,7 +2,7 @@
 
 /**
  * @file components/store/cart/cart-item-card.tsx
- * @description Apple-inspired minimalist cart item card with smooth controls and clean layout.
+ * @description Apple-inspired minimalist cart item card with exact price formatting matching ProductPriceStock.
  */
 
 import * as React from "react"
@@ -16,14 +16,12 @@ interface CartItemCardProps {
     quantity: number
     product_variants?: {
       price?: number | null
+      sku?: string | null
     } | null
     products?: {
       name?: string | null
-      product_images?: Array<{
-        is_primary?: boolean | null
-        url?: string | null
-      }> | null
     } | null
+    resolved_image_url?: string | null
   }
   isPending: boolean
   onUpdateQuantity: (id: string, newQuantity: number) => void
@@ -36,18 +34,16 @@ export function CartItemCard({
   onUpdateQuantity,
   onRemove,
 }: CartItemCardProps) {
-  const { formatPrice } = useCurrency()
+  const { formatRawPrice, currentCurrency } = useCurrency()
 
   const product = item.products
   const variant = item.product_variants
-  const imageUrl =
-    product?.product_images?.find((img) => img.is_primary)?.url ||
-    product?.product_images?.[0]?.url
   const itemUnitPrice = variant?.price || 0
+  const imageUrl = item.resolved_image_url
 
   return (
     <div className="group relative flex items-center gap-4 rounded-2xl bg-muted/40 p-3.5 transition-all duration-300 hover:bg-muted/60">
-      {/* صورة المنتج - تصميم Apple أنيق مع زوايا ناعمة */}
+      {/* صورة المنتج / المتغير */}
       <div className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-background/80 shadow-xs">
         {imageUrl ? (
           <img
@@ -68,8 +64,7 @@ export function CartItemCard({
           <h4 className="line-clamp-1 text-xs font-medium text-foreground sm:text-sm">
             {product?.name}
           </h4>
-
-          {/* زر الحذف الفوري بشكل هادئ */}
+          
           <button
             type="button"
             disabled={isPending}
@@ -82,12 +77,17 @@ export function CartItemCard({
         </div>
 
         <div className="mt-1 flex items-center justify-between">
-          <p className="text-xs font-semibold text-foreground">
-            {formatPrice(itemUnitPrice)}
-          </p>
+          {/* طريقة عرض السعر المطابقة لـ ProductPriceStock تماماً */}
+          <div className="flex items-baseline gap-1">
+            <span className="text-sm font-semibold text-foreground">
+              {formatRawPrice(itemUnitPrice)}
+            </span>
+            <span className="text-xs font-medium text-muted-foreground">
+              {currentCurrency.symbol}
+            </span>
+          </div>
 
-          {/* أزرار التحكم بالكمية على طراز Apple (كبسولة دائرية أو شبه دائرية بنمط مريح) */}
-          <div className="flex items-center rounded-full border border-border/40 bg-background/80 p-0.5 shadow-2xs">
+          <div className="flex items-center rounded-full bg-background/80 border border-border/40 p-0.5 shadow-2xs">
             <Button
               variant="ghost"
               size="icon"

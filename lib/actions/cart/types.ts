@@ -1,6 +1,6 @@
 /**
  * @file lib/actions/cart/types.ts
- * @description TypeScript types and interfaces for Cart system.
+ * @description TypeScript types and interfaces for Cart system, updated with variant_sku and resolved image support.
  */
 
 export interface CartRecord {
@@ -29,6 +29,7 @@ export interface CartItemQueryResult extends CartItemRecord {
     product_images: {
       url: string
       is_primary: boolean
+      variant_sku?: string | null
     }[]
     brand?: {
       name: string
@@ -43,6 +44,7 @@ export interface CartItemQueryResult extends CartItemRecord {
     sku: string
     attributes?: Record<string, string> | null
   }
+  resolved_image_url: string | null
 }
 
 export interface CartQueryResult extends CartRecord {
