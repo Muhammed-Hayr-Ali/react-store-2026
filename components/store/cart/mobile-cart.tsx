@@ -11,9 +11,7 @@ import {
   MobileMenuFooter,
   MobileMenuHeader,
 } from "@/components/ui/mobile-menu"
-import {
-   ShoppingBagIcon,
- } from "lucide-react"
+import { ShoppingBagIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { CartItemCard } from "./cart-item-card"
@@ -53,9 +51,8 @@ export default function MobileCardDrawer({
       <MobileMenuBody
         className={cn(
           "px-2",
-          !cart?.items ||
-            (cart.items.length === 0 &&
-              "flex items-center justify-center pb-20")
+          (!cart?.items || cart.items.length === 0) &&
+            "flex items-center justify-center pb-20"
         )}
       >
         {!cart?.items || cart.items.length === 0 ? (
