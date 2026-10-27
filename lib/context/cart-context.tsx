@@ -83,9 +83,9 @@ export function CartProvider({
             )
           }
         } else {
-          toast.success(
-            t("ITEM_ADDED", { default: "Added to cart successfully" })
-          )
+          // toast.success(
+          //   t("ITEM_ADDED", { default: "Added to cart successfully" })
+          // )
           await refreshCart()
         }
         resolve()
@@ -93,7 +93,10 @@ export function CartProvider({
     })
   }
 
-  const updateItemQuantity = async (itemId: string, quantity: number): Promise<void> => {
+  const updateItemQuantity = async (
+    itemId: string,
+    quantity: number
+  ): Promise<void> => {
     return new Promise((resolve) => {
       startTransition(async () => {
         const result = await updateCartItem({ item_id: itemId, quantity })
@@ -109,7 +112,7 @@ export function CartProvider({
             )
           }
         } else {
-          toast.success(t("ITEM_UPDATED", { default: "Cart updated" }))
+          // toast.success(t("ITEM_UPDATED", { default: "Cart updated" }))
           await refreshCart()
         }
         resolve()
@@ -130,7 +133,9 @@ export function CartProvider({
             toast.error(t("REMOVE_ERROR", { default: "Failed to remove item" }))
           }
         } else {
-          toast.success(t("ITEM_REMOVED", { default: "Item removed from cart" }))
+          // toast.success(
+          //   t("ITEM_REMOVED", { default: "Item removed from cart" })
+          // )
           await refreshCart()
         }
         resolve()

@@ -79,6 +79,7 @@ export async function getCart(): Promise<ApiResult<CartQueryResult | null>> {
     `
     )
     .eq("cart_id", cart.id)
+    .order("created_at", { ascending: true })
 
   if (itemsError) {
     console.error("Error fetching cart items:", itemsError.message)

@@ -1,6 +1,6 @@
 /**
  * @file components/store/cart/cart-item-card.tsx
- * @description Ultra-compact cart item card with minimal padding and line-clamp-2 description.
+ * @description Ultra-compact cart item card with minimal padding, line-clamp-2 description, and smooth exit animation.
  */
 
 "use client"
@@ -9,6 +9,7 @@ import * as React from "react"
 import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react"
 import { useCurrency } from "@/lib/context/currency-context"
 import { useCart } from "@/lib/context/cart-context"
+import { motion } from "framer-motion"
 
 interface CartItemCardProps {
   item: {
@@ -59,7 +60,22 @@ export function CartItemCard({ item }: CartItemCardProps) {
   }
 
   return (
-    <div className="group relative flex items-center gap-2.5 rounded-xl border border-border/40 bg-card px-2 py-1.5 shadow-2xs transition-all duration-300">
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{
+        opacity: 0,
+        scale: 0.95,
+        height: 0,
+        marginBottom: 0,
+        paddingTop: 0,
+        paddingBottom: 0,
+        transition: { duration: 0.2, ease: "easeInOut" },
+      }}
+      transition={{ duration: 0.25, ease: "easeInOut" }}
+      className="group relative flex items-center gap-2.5 rounded-xl border border-border/40 bg-card px-2 py-1.5 shadow-2xs transition-all duration-300 overflow-hidden"
+    >
       {/* صورة المنتج - مصغرة جداً */}
       <div className="relative size-20 shrink-0 overflow-hidden rounded-lg bg-muted shadow-2xs">
         {imageUrl ? (
@@ -136,6 +152,6 @@ export function CartItemCard({ item }: CartItemCardProps) {
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

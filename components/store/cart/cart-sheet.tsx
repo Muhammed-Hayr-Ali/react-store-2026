@@ -24,13 +24,14 @@ import { useCurrency } from "@/lib/context/currency-context"
 import { CartItemCard } from "./cart-item-card"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Spinner } from "@/components/ui/spinner"
 
 export function CartSheet() {
   const t = useTranslations("Cart")
   const locale = useLocale()
   const isRtl = ["ar", "fa", "ur", "he"].includes(locale)
-  const { cart, updateItemQuantity, removeItem, isPending, totalItemsCount } =
-    useCart()
+  const { cart, totalItemsCount, isPending } = useCart()
   const { formatRawPrice, currentCurrency } = useCurrency()
 
   const subtotal = React.useMemo(() => {
@@ -51,18 +52,27 @@ export function CartSheet() {
           className="relative"
         >
           <ShoppingCartIcon />
-          {totalItemsCount > 0 && (
-            <span className="absolute -top-1 -right-1 flex size-3.5 items-center justify-center rounded-full bg-foreground text-[10px] font-normal text-background">
-              {totalItemsCount}
-            </span>
-          )}
+          {totalItemsCount > 0 &&
+            (isPending ? (
+              <Spinner className="absolute -top-1 -right-1 size-3.5" />
+            ) : (
+              <span
+                className={cn(
+                  "absolute -top-1 -right-1 flex h-3.5 items-center justify-center rounded-full bg-foreground p-1.5 text-[9px] font-normal text-background transition-transform size-3.5"
+                )}
+              >
+                {totalItemsCount > 99 ? "99+" : totalItemsCount}
+              </span>
+            ))}
         </Button>
       </SheetTrigger>
       <SheetContent
         side={isRtl ? "left" : "right"}
-        className="max-h-dvh gap-0 p-0 "
+        // تحويل محتوى الـ Sheet إلى Flex العمودي لضبط الارتفاعات بدقة
+        className="flex h-dvh flex-col p-0 sm:max-w-md"
       >
-        <SheetHeader className="border-b px-2 py-4">
+        {/* رأس الشيت (ثابت) */}
+        <SheetHeader className="shrink-0 border-b px-4 py-4">
           <SheetTitle className="flex w-full items-center justify-start gap-2">
             <p className="text-base leading-tight font-semibold text-foreground">
               {t("TITLE", { default: "Shopping Cart" })}
@@ -73,38 +83,43 @@ export function CartSheet() {
             </p>
           </SheetTitle>
         </SheetHeader>
-        <div
-          className={cn(
-            "h-full px-2 py-3",
-            (!cart?.items || cart.items.length === 0) &&
-              "flex items-center justify-center pb-20"
-          )}
+
+        {/* منطقة المنتجات القابلة للتمرير (تأخذ المساحة المتبقية بمرونة باستخدام h-0 و grow) */}
+        <ScrollArea
+          className={cn("h-0 grow py-2", isRtl ? "pr-2.5 pl-4" : "pr-4 pl-2.5")}
         >
-          {!cart?.items || cart.items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center text-center text-muted-foreground">
-              <ShoppingBagIcon className="mb-4 size-16 stroke-1" />
-              <p className="text-lg font-medium">
-                {t("EMPTY", { default: "Your cart is empty" })}
-              </p>
-              <p className="text-sm">
-                {t("EMPTY_DESC", {
-                  default: "Add some products to start shopping",
-                })}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {cart.items.map((item) => (
-                <CartItemCard
-                  key={item.id}
-                  item={item}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+          <div
+            className={cn(
+              "h-full",
+              (!cart?.items || cart.items.length === 0) &&
+                "flex h-full items-center justify-center pb-20"
+            )}
+          >
+            {!cart?.items || cart.items.length === 0 ? (
+              <div className="flex flex-col items-center justify-center text-center text-muted-foreground">
+                <ShoppingBagIcon className="mb-4 size-16 stroke-1" />
+                <p className="text-lg font-medium">
+                  {t("EMPTY", { default: "Your cart is empty" })}
+                </p>
+                <p className="text-sm">
+                  {t("EMPTY_DESC", {
+                    default: "Add some products to start shopping",
+                  })}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3 py-2">
+                {cart.items.map((item) => (
+                  <CartItemCard key={item.id} item={item} />
+                ))}
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+
+        {/* تذييل الشيت والمجاميع (ثابت في الأسفل) */}
         {cart?.items && cart.items.length > 0 && (
-          <SheetFooter className="space-y-2 border-t px-2 py-4">
+          <SheetFooter className="shrink-0 space-y-3 border-t bg-background px-4 py-4">
             <div className="flex justify-between text-base font-semibold">
               <span>{t("SUBTOTAL", { default: "Subtotal" })}:</span>
               <div className="flex items-baseline gap-1.5">
@@ -114,7 +129,7 @@ export function CartSheet() {
                 </span>
               </div>
             </div>
-            <SheetClose>
+            <SheetClose asChild>
               <Button
                 variant="default"
                 className="h-9 w-full text-xs font-medium uppercase shadow-xs"

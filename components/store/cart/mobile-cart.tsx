@@ -27,8 +27,7 @@ export default function MobileCardDrawer({
   onClose,
 }: MobileCardDrawerProps) {
   const t = useTranslations("Cart")
-  const { cart, updateItemQuantity, removeItem, isPending, totalItemsCount } =
-    useCart()
+  const { cart, totalItemsCount } = useCart()
   const { formatRawPrice, currentCurrency } = useCurrency()
 
   const subtotal = React.useMemo(() => {
