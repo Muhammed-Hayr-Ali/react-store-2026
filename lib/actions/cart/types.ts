@@ -24,7 +24,7 @@ export interface CartItemQueryResult extends CartItemRecord {
   products: {
     id: string
     name: string
-    name_ar?: string | null
+    description?: string | null
     slug: string
     product_images: {
       url: string

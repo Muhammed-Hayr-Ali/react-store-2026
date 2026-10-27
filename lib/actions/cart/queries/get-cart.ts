@@ -66,7 +66,8 @@ export async function getCart(): Promise<ApiResult<CartQueryResult | null>> {
         id,
         name,
         slug,
-        product_images (url, is_primary, variant_sku)
+         description,
+     product_images (url, is_primary, variant_sku)
       ),
       product_variants (
         id,
@@ -121,6 +122,7 @@ export async function getCart(): Promise<ApiResult<CartQueryResult | null>> {
         id: product?.id ?? "",
         name: product?.name ?? "",
         slug: product?.slug ?? "",
+        description: product?.description ?? "",
         product_images: productImages.map((img) => ({
           url: img.url,
           is_primary: img.is_primary,

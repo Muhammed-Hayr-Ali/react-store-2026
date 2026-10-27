@@ -1,13 +1,12 @@
-"use client"
-
 /**
  * @file components/store/cart/cart-item-card.tsx
- * @description Apple-inspired minimalist cart item card with exact price formatting matching ProductPriceStock.
+ * @description Ultra-compact cart item card with minimal padding and line-clamp-2 description.
  */
+
+"use client"
 
 import * as React from "react"
 import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { useCurrency } from "@/lib/context/currency-context"
 
 interface CartItemCardProps {
@@ -20,6 +19,7 @@ interface CartItemCardProps {
     } | null
     products?: {
       name?: string | null
+      description?: string | null
     } | null
     resolved_image_url?: string | null
   }
@@ -42,9 +42,9 @@ export function CartItemCard({
   const imageUrl = item.resolved_image_url
 
   return (
-    <div className="group relative flex items-center gap-4 rounded-2xl bg-muted/40 p-3.5 transition-all duration-300 hover:bg-muted/60">
-      {/* صورة المنتج / المتغير */}
-      <div className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-background/80 shadow-xs">
+    <div className="group relative flex items-center gap-2.5 rounded-xl bg-card py-1.5 px-2 shadow-2xs border border-border/40 transition-all duration-300">
+      {/* صورة المنتج - مصغرة جداً */}
+      <div className="relative size-20 shrink-0 overflow-hidden rounded-lg bg-muted shadow-2xs">
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -52,64 +52,71 @@ export function CartItemCard({
             className="size-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-[10px] text-muted-foreground">
+          <div className="flex h-full items-center justify-center text-[9px] text-muted-foreground">
             No image
           </div>
         )}
       </div>
 
       {/* تفاصيل المنتج وأزرار التحكم */}
-      <div className="flex flex-1 flex-col justify-between py-0.5">
+      <div className="flex flex-1 flex-col justify-between py-0.5 space-y-1">
+        {/* الصف العلوي: الاسم والسعر */}
         <div className="flex items-start justify-between gap-2">
-          <h4 className="line-clamp-1 text-xs font-medium text-foreground sm:text-sm">
+          <h4 className="font-medium text-foreground text-xs line-clamp-1">
             {product?.name}
           </h4>
-          
+          <div className="flex items-baseline gap-1 shrink-0 font-semibold text-foreground text-xs">
+            <span>{formatRawPrice(itemUnitPrice)}</span>
+            <span className="text-[10px] font-medium text-muted-foreground">
+              {currentCurrency.symbol}
+            </span>
+          </div>
+        </div>
+
+        {/* وصف المنتج - على سطر ونصف تقريبا باستخدام line-clamp-2 مع ارتفاع سطر محكم */}
+        {product?.description && (
+          <p className="text-[10px] leading-snug text-muted-foreground line-clamp-2 mt-0.5">
+            {product.description}
+          </p>
+        )}
+
+        {/* الصف السفلي: أزرار التحكم بالكمية وزر الحذف */}
+        <div className="mt-1.5 flex items-center justify-between">
+          {/* أزرار الكمية المصغرة */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={isPending || item.quantity <= 1}
+              onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+              className="flex size-5 items-center justify-center rounded-full bg-foreground text-background transition-transform active:scale-95 disabled:opacity-50"
+              aria-label="Decrease quantity"
+            >
+              <MinusIcon className="size-3" />
+            </button>
+            <span className="min-w-3 text-center text-xs font-medium text-foreground">
+              {item.quantity}
+            </span>
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+              className="flex size-5 items-center justify-center rounded-full bg-foreground text-background transition-transform active:scale-95 disabled:opacity-50"
+              aria-label="Increase quantity"
+            >
+              <PlusIcon className="size-3" />
+            </button>
+          </div>
+
+          {/* زر الحذف المصغر */}
           <button
             type="button"
             disabled={isPending}
             onClick={() => onRemove(item.id)}
-            className="text-muted-foreground/60 transition-colors hover:text-destructive"
+            className="text-destructive transition-colors hover:opacity-80 p-0.5"
             aria-label="Remove item"
           >
             <Trash2Icon className="size-3.5" />
           </button>
-        </div>
-
-        <div className="mt-1 flex items-center justify-between">
-          {/* طريقة عرض السعر المطابقة لـ ProductPriceStock تماماً */}
-          <div className="flex items-baseline gap-1">
-            <span className="text-sm font-semibold text-foreground">
-              {formatRawPrice(itemUnitPrice)}
-            </span>
-            <span className="text-xs font-medium text-muted-foreground">
-              {currentCurrency.symbol}
-            </span>
-          </div>
-
-          <div className="flex items-center rounded-full bg-background/80 border border-border/40 p-0.5 shadow-2xs">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-6 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
-              disabled={isPending || item.quantity <= 1}
-              onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
-            >
-              <MinusIcon className="size-2.5" />
-            </Button>
-            <span className="flex min-w-6 items-center justify-center text-[11px] font-medium text-foreground">
-              {item.quantity}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-6 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
-              disabled={isPending}
-              onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-            >
-              <PlusIcon className="size-2.5" />
-            </Button>
-          </div>
         </div>
       </div>
     </div>
