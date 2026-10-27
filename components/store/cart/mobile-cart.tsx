@@ -41,9 +41,7 @@ export default function MobileCardDrawer({
 
   return (
     <MenuDrawer isOpen={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <MobileMenuHeader
-        onClose={() => onClose()}
-      >
+      <MobileMenuHeader onClose={() => onClose()}>
         <p className="text-base leading-tight font-semibold text-foreground">
           {t("TITLE", { default: "Shopping Cart" })}
         </p>
@@ -74,13 +72,7 @@ export default function MobileCardDrawer({
         ) : (
           <div className="space-y-4">
             {cart.items.map((item) => (
-              <CartItemCard
-                key={item.id}
-                item={item}
-                isPending={isPending}
-                onUpdateQuantity={updateItemQuantity}
-                onRemove={removeItem}
-              />
+              <CartItemCard key={item.id} item={item} />
             ))}
           </div>
         )}
