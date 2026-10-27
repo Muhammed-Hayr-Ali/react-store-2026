@@ -54,9 +54,10 @@ export default async function RootLayout({
     notFound()
   }
 
-  const direction = locale === "ar" ? "rtl" : "ltr"
+  const isRtl = ["ar", "fa", "ur", "he"].includes(locale)
+  const dir = isRtl ? "rtl" : "ltr"
 
-  // جلب سياق العملة والمستخدم الحالي بالتوازي لتحقيق أسرع استجابة خادمة
+
   const currentUserResult = await getCurrentUser()
   const currentUser = currentUserResult.success ? currentUserResult.data : null
 
@@ -65,7 +66,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      dir={direction}
+      dir={dir}
       suppressHydrationWarning
       className={cn("antialiased", rubik.variable, fontMono.variable)}
     >
@@ -75,9 +76,7 @@ export default async function RootLayout({
             <TooltipProvider>
               <ScrollToTop />
               <UserProvider user={currentUser} permissions={permissions}>
-                <DirectionProvider dir={direction}>
-                  {children}
-                </DirectionProvider>
+                <DirectionProvider dir={dir}>{children}</DirectionProvider>
               </UserProvider>
             </TooltipProvider>
           </NextIntlClientProvider>

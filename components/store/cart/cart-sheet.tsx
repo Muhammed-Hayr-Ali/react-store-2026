@@ -16,28 +16,32 @@ import {
   SheetTrigger,
   SheetFooter,
   SheetClose,
-  SheetDescription,
 } from "@/components/ui/sheet"
-import { SearchIcon, ShoppingBagIcon, ShoppingCartIcon } from "lucide-react"
+import { ShoppingBagIcon, ShoppingCartIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useCart } from "@/lib/context/cart-context"
 import { useCurrency } from "@/lib/context/currency-context"
 import { CartItemCard } from "./cart-item-card"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
 
-interface CartSheetProps {
-  children?: React.ReactNode
-}
-
-export function CartSheet({ children }: CartSheetProps) {
+export function CartSheet() {
   const t = useTranslations("Cart")
+
   const { cart, updateItemQuantity, removeItem, isPending, totalItemsCount } =
     useCart()
   const { formatRawPrice, currentCurrency } = useCurrency()
 
+  const subtotal = React.useMemo(() => {
+    if (!cart?.items) return 0
+    return cart.items.reduce((acc, item) => {
+      const price = item.product_variants?.price || 0
+      return acc + price * item.quantity
+    }, 0)
+  }, [cart])
+
   return (
-    <div className="flex flex-wrap gap-2">
-      <Sheet>
+       <Sheet>
         <SheetTrigger asChild>
           <Button
             variant="secondary"
@@ -53,8 +57,8 @@ export function CartSheet({ children }: CartSheetProps) {
             )}
           </Button>
         </SheetTrigger>
-        <SheetContent className="data-[side=bottom]:max-h-[50vh] data-[side=top]:max-h-[50vh]">
-          <SheetHeader>
+        <SheetContent >
+          <SheetHeader className="border-b px-2 py-4">
             <SheetTitle className="flex w-full items-center justify-start gap-2">
               <p className="text-base leading-tight font-semibold text-foreground">
                 {t("TITLE", { default: "Shopping Cart" })}
@@ -67,7 +71,7 @@ export function CartSheet({ children }: CartSheetProps) {
           </SheetHeader>
           <div
             className={cn(
-              "h-full px-2",
+              "h-full px-2 py-3",
               (!cart?.items || cart.items.length === 0) &&
                 "flex items-center justify-center pb-20"
             )}
@@ -99,15 +103,30 @@ export function CartSheet({ children }: CartSheetProps) {
             )}
           </div>
           {cart?.items && cart.items.length > 0 && (
-            <SheetFooter>
-              <Button type="submit">Save changes</Button>
-              <SheetClose asChild>
-                <Button variant="outline">Cancel</Button>
+            <SheetFooter className="border-t  px-2 py-4">
+              <div className="flex justify-between text-base font-semibold">
+                <span>{t("SUBTOTAL", { default: "Subtotal" })}:</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span>{formatRawPrice(subtotal)}</span>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {currentCurrency.symbol}
+                  </span>{" "}
+                </div>
+              </div>
+              <SheetClose>
+                <Button
+                  variant="default"
+                  className="h-9 w-full text-xs font-medium uppercase shadow-xs"
+                  asChild
+                >
+                  <Link href="/checkout">
+                    {t("CHECKOUT", { default: "Proceed to Checkout" })}
+                  </Link>
+                </Button>
               </SheetClose>
             </SheetFooter>
           )}
         </SheetContent>
       </Sheet>
-    </div>
-  )
+   )
 }
