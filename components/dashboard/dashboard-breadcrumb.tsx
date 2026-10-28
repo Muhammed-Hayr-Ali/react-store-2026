@@ -25,7 +25,6 @@ const routeLabelKeys: Record<string, string> = {
   orders: "ORDERS",
   roles: "ROLES",
   "staff-access": "STAFF_ACCESS",
-  "flash-sales": "FLASH_SALES",
   reports: "REPORTS",
   users: "USERS",
   "newsletter-subscribers": "NEWSLETTER_SUBSCRIBERS",

@@ -243,7 +243,7 @@ export function RoleForm({ initialData, roleId }: RoleFormProps) {
                   >
                     <div className="flex items-center justify-between border-b border-border/60 pb-2">
                       <span className="text-xs font-bold text-card-foreground">
-                        {t(`PERMISSION_GROUPS.${group.id}`)}
+                        {t(`Permission_Groups.${group.id}`)}
                       </span>
                       <Button
                         type="button"
@@ -283,10 +283,10 @@ export function RoleForm({ initialData, roleId }: RoleFormProps) {
                             />
                             <div className="space-y-0.5">
                               <p className="text-xs leading-none font-semibold text-foreground">
-                                {t(`PERMISSION_LABELS.${perm.key}`)}
+                                {t(`Permission_Groups.${perm.key}`)}
                               </p>
                               <p className="text-[11px] leading-tight text-muted-foreground">
-                                {t(`PERMISSION_DESCRIPTIONS.${perm.key}`)}
+                                {t(`Permission_Groups.${perm.key}_desc`)}
                               </p>
                             </div>
                           </label>

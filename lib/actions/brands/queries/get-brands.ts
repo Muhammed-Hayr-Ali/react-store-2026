@@ -25,9 +25,6 @@ export async function getBrands(
   }
 
   const { includeInactive } = validation.data
-  if (includeInactive) {
-    return { success: false, error: "PERMISSION_DENIED" }
-  }
 
   const supabase = await createServerClient()
   let query = supabase

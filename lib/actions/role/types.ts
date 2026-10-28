@@ -15,16 +15,26 @@ export const ROLES = {
 export type AppRole = (typeof ROLES)[keyof typeof ROLES]
 
 export const PERMISSIONS = {
-
-// --- 1. Brands Management ---
+  // --- 1. Brands Management ---
   VIEW_BRANDS_MANAGEMENT: "view_brands_management",
   MANAGE_BRANDS: "manage_brands",
   CREATE_BRAND: "create_brand",
   UPDATE_BRAND: "update_brand",
-  DELETE_BRAND: "delete_brand"
+  DELETE_BRAND: "delete_brand",
 
+  // --- 2. Categories Management ---
+  VIEW_CATEGORIES_MANAGEMENT: "view_categories_management",
+  MANAGE_CATEGORIES: "manage_categories",
+  CREATE_CATEGORY: "create_category",
+  UPDATE_CATEGORY: "update_category",
+  DELETE_CATEGORY: "delete_category",
 
-  
+  // --- 3. Products Management ---
+  VIEW_PRODUCTS_MANAGEMENT: "view_products_management",
+  MANAGE_PRODUCTS: "manage_products",
+  CREATE_PRODUCT: "create_product",
+  UPDATE_PRODUCT: "update_product",
+  DELETE_PRODUCT: "delete_product",
 } as const
 
 export type AppPermission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]
