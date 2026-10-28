@@ -22,6 +22,7 @@ import { useCart } from "@/lib/context/cart-context"
 import { useWishlist } from "@/lib/context/wishlist-context"
 import { SimplifiedRegularProduct } from "@/lib/actions/store/queries/get-latest-regular-products"
 import { toast } from "sonner"
+import { AspectRatio } from "@/components/ui/aspect-ratio"
 
 interface WishlistProductCardProps {
   product: SimplifiedRegularProduct
@@ -103,9 +104,9 @@ export function WishlistProductCard({
             })}
           >
             {isRemoving ? (
-              <LoaderCircleIcon 
-                fill="none" 
-                className="size-3.5 animate-spin text-destructive transition-colors group-hover:text-white" 
+              <LoaderCircleIcon
+                fill="none"
+                className="size-3.5 animate-spin text-destructive transition-colors group-hover:text-white"
               />
             ) : (
               <HeartIcon className="size-3.5 fill-destructive text-destructive transition-colors group-hover:fill-white group-hover:text-white" />
@@ -115,18 +116,19 @@ export function WishlistProductCard({
 
         {/* Image Container */}
         <div className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-background/50 sm:size-24">
-          {product.image_url ? (
-            <img
-              src={product.image_url}
-              alt={product.image_alt || product.name}
-              className="size-full object-cover object-center transition-transform duration-500 group-hover/card:scale-105"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-[10px] text-muted-foreground">
-              No image
-            </div>
-          )}
-
+          <AspectRatio ratio={1 / 1} className="w-full">
+            {product.image_url ? (
+              <img
+                src={product.image_url}
+                alt={product.image_alt || product.name}
+                className="size-full object-cover object-center transition-transform duration-500 group-hover/card:scale-105"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center text-[10px] text-muted-foreground">
+                No image
+              </div>
+            )}
+          </AspectRatio>
           {/* Discount Badge */}
           {discountPercentage && (
             <span className="absolute inset-e-1.5 top-1.5 rounded-full bg-background/80 px-1.5 py-0.5 text-[9px] font-medium text-destructive backdrop-blur-md">
@@ -216,9 +218,9 @@ export function WishlistProductCard({
           })}
         >
           {isRemoving ? (
-            <LoaderCircleIcon 
-              fill="none" 
-              className="size-3.5 animate-spin text-destructive transition-colors group-hover:text-white" 
+            <LoaderCircleIcon
+              fill="none"
+              className="size-3.5 animate-spin text-destructive transition-colors group-hover:text-white"
             />
           ) : (
             <HeartIcon className="size-3.5 fill-destructive text-destructive transition-colors group-hover:fill-white group-hover:text-white" />
@@ -228,18 +230,20 @@ export function WishlistProductCard({
 
       {/* Image Container */}
       <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-background/50">
-        {product.image_url ? (
-          <img
-            src={product.image_url}
-            alt={product.image_alt || product.name}
-            className="size-full object-cover object-center transition-transform duration-500 group-hover/card:scale-105"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-[11px] text-muted-foreground">
-            No image
-          </div>
-        )}
+        <AspectRatio ratio={1 / 1} className="w-full">
+          {product.image_url ? (
+            <img
+              src={product.image_url}
+              alt={product.image_alt || product.name}
+              className="size-full object-cover object-center transition-transform duration-500 group-hover/card:scale-105"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-[11px] text-muted-foreground">
+              No image
+            </div>
+          )}
+        </AspectRatio>
 
         {/* Discount Badge */}
         {discountPercentage && (

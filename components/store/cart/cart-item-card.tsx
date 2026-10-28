@@ -10,6 +10,7 @@ import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react"
 import { useCurrency } from "@/lib/context/currency-context"
 import { useCart } from "@/lib/context/cart-context"
 import { motion } from "framer-motion"
+import { AspectRatio } from "@/components/ui/aspect-ratio"
 
 interface CartItemCardProps {
   item: {
@@ -74,21 +75,23 @@ export function CartItemCard({ item }: CartItemCardProps) {
         transition: { duration: 0.2, ease: "easeInOut" },
       }}
       transition={{ duration: 0.25, ease: "easeInOut" }}
-      className="group relative flex items-center gap-2.5 rounded-xl border border-border/40 bg-card px-2 py-1.5 shadow-2xs transition-all duration-300 overflow-hidden"
+      className="group relative flex items-center gap-2.5 overflow-hidden rounded-xl border border-border/40 bg-card px-2 py-1.5 shadow-2xs transition-all duration-300"
     >
       {/* صورة المنتج - مصغرة جداً */}
       <div className="relative size-20 shrink-0 overflow-hidden rounded-lg bg-muted shadow-2xs">
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={product?.name || "Product"}
-            className="size-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-[9px] text-muted-foreground">
-            No image
-          </div>
-        )}
+        <AspectRatio ratio={1 / 1} className="w-full">
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={product?.name || "Product"}
+              className="size-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-[9px] text-muted-foreground">
+              No image
+            </div>
+          )}
+        </AspectRatio>
       </div>
 
       {/* تفاصيل المنتج وأزرار التحكم */}

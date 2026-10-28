@@ -14,6 +14,7 @@ import { ChevronLeftIcon, ChevronRightIcon, LayoutGridIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SimplifiedRootCategory } from "@/lib/actions/store/queries/get-root-categories"
 import { getSiteAssetUrl } from "@/lib/database/supabase/storage"
+import { AspectRatio } from "@/components/ui/aspect-ratio"
 
 interface CategoriesScrollProps {
   categories: SimplifiedRootCategory[]
@@ -131,17 +132,19 @@ export default function CategoriesScroll({
               >
                 {/* أيقونة أو صورة التصنيف */}
                 <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-background text-muted-foreground transition-transform duration-200 group-hover:scale-105 sm:size-8">
-                  {imageUrl ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={imageUrl}
-                      alt={category.image_alt || displayName}
-                      loading="lazy"
-                      className="size-full rounded-lg object-contain p-1 transition-all duration-200 dark:invert"
-                    />
-                  ) : (
-                    <LayoutGridIcon className="size-3.5 sm:size-4" />
-                  )}
+                  <AspectRatio ratio={1 / 1} className="w-full">
+                    {imageUrl ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={imageUrl}
+                        alt={category.image_alt || displayName}
+                        loading="lazy"
+                        className="size-full rounded-lg object-contain p-1 transition-all duration-200 dark:invert"
+                      />
+                    ) : (
+                      <LayoutGridIcon className="size-3.5 sm:size-4" />
+                    )}
+                  </AspectRatio>
                 </div>
 
                 <span className="whitespace-nowrap">{displayName}</span>

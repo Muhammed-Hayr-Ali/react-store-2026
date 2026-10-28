@@ -83,6 +83,7 @@ import { CategoryFormSheet } from "@/components/dashboard/categories/category-fo
 import { DeleteCategoryDialog } from "@/components/dashboard/categories/delete-category-dialog"
 import { BrandFormSheet } from "@/components/dashboard/brands/brand-form-sheet"
 import { DeleteBrandDialog } from "@/components/dashboard/brands/delete-brand-dialog"
+import { AspectRatio } from "@/components/ui/aspect-ratio"
 
 type FormValues = CreateProductInput
 
@@ -1476,18 +1477,20 @@ function ImageCard({
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-border bg-muted/10 p-4 sm:flex-row">
       <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-background text-muted-foreground">
-        {currentUrl ? (
-          <img
-            src={currentUrl}
-            alt={t("IMAGE_PREVIEW")}
-            className="size-full object-cover"
-            onError={(e) => {
-              e.currentTarget.style.display = "none"
-            }}
-          />
-        ) : (
-          <ImageIcon className="size-6 stroke-[1.5]" />
-        )}
+        <AspectRatio ratio={1 / 1} className="w-full">
+          {currentUrl ? (
+            <img
+              src={currentUrl}
+              alt={t("IMAGE_PREVIEW")}
+              className="size-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = "none"
+              }}
+            />
+          ) : (
+            <ImageIcon className="size-6 stroke-[1.5]" />
+          )}{" "}
+        </AspectRatio>
       </div>
 
       <div className="min-w-0 flex-1 space-y-3">
@@ -1576,7 +1579,8 @@ function ImageCard({
                           value={itemValue}
                           disabled={isAlreadyUsed}
                         >
-                          {displayLabel} {isAlreadyUsed ? "(مستخدم مسبقاً)" : ""}
+                          {displayLabel}{" "}
+                          {isAlreadyUsed ? "(مستخدم مسبقاً)" : ""}
                         </SelectItem>
                       )
                     })}

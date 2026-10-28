@@ -36,9 +36,9 @@ function SlideItem({
         href={`/${locale}/product/${slide.slug}`}
         className="relative block w-full overflow-hidden rounded-2xl bg-muted/40 sm:rounded-3xl"
       >
-        {slide.image_url && !imageError ? (
-          // تم ضبط النسبة هنا (مثلاً 21/9 لتناسب بانر الـ Hero العريض أو 16/9)
-          <AspectRatio ratio={21 / 9} className="w-full">
+        <AspectRatio ratio={21 / 9} className="w-full">
+          {slide.image_url && !imageError ? (
+            // تم ضبط النسبة هنا (مثلاً 21/9 لتناسب بانر الـ Hero العريض أو 16/9)
             <img
               src={slide.image_url}
               alt={slide.image_alt || slide.name}
@@ -46,15 +46,13 @@ function SlideItem({
               onError={() => setImageError(true)}
               className="size-full border-0 object-cover object-center transition-transform duration-500 hover:scale-[1.01]"
             />
-          </AspectRatio>
-        ) : (
-          <AspectRatio ratio={21 / 9} className="w-full">
+          ) : (
             <div className="flex size-full flex-col items-center justify-center gap-2 bg-muted/50 text-muted-foreground/60">
               <ImageIcon className="size-10 stroke-[1.5] sm:size-12" />
               <span className="text-xs font-medium">{slide.name}</span>
             </div>
-          </AspectRatio>
-        )}
+          )}
+        </AspectRatio>
       </Link>
     </div>
   )
