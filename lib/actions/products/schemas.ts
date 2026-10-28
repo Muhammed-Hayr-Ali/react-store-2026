@@ -1,12 +1,12 @@
 /**
  * @file lib/actions/products/schemas.ts
- * @description Zod validation schemas for products.
+ * @description Zod validation schemas for products with strict image uniqueness rules (one primary image & one image per variant).
  */
 
 import { z } from "zod"
 
 // ============================================================================
-// اللبنات الأساسية (Building Blocks - لا يتم تصديرها كأنواع رئيسية)
+// اللبنات الأساسية (Building Blocks)
 // ============================================================================
 
 const variantBaseSchema = z
@@ -57,22 +57,49 @@ const imageBaseSchema = z.object({
 // 1. النوع الأول: إنشاء منتج (Create Product)
 // ============================================================================
 
-export const createProductSchema = z.object({
-  category_id: z.string().uuid("INVALID_CATEGORY_ID"),
-  brand_id: z.string().uuid("INVALID_BRAND_ID").nullable().optional(),
-  name: z.string().min(1, "NAME_REQUIRED"),
-  slug: z
-    .string()
-    .min(1, "SLUG_REQUIRED")
-    .regex(/^[a-z0-9-]+$/, "SLUG_INVALID_FORMAT"),
-  description: z.string().nullable().optional(),
-  meta_title: z.string().max(70, "META_TITLE_TOO_LONG").nullable().optional(),
-  meta_description: z.string().nullable().optional(),
-  is_active: z.boolean(),
-  is_featured: z.boolean(),
-  variants: z.array(variantBaseSchema).min(1, "AT_LEAST_ONE_VARIANT_REQUIRED"),
-  images: z.array(imageBaseSchema).min(1, "AT_LEAST_ONE_IMAGE_REQUIRED"),
-})
+export const createProductSchema = z
+  .object({
+    category_id: z.string().uuid("INVALID_CATEGORY_ID"),
+    brand_id: z.string().uuid("INVALID_BRAND_ID").nullable().optional(),
+    name: z.string().min(1, "NAME_REQUIRED"),
+    slug: z
+      .string()
+      .min(1, "SLUG_REQUIRED")
+      .regex(/^[a-z0-9-]+$/, "SLUG_INVALID_FORMAT"),
+    description: z.string().nullable().optional(),
+    meta_title: z.string().max(70, "META_TITLE_TOO_LONG").nullable().optional(),
+    meta_description: z.string().nullable().optional(),
+    is_active: z.boolean(),
+    is_featured: z.boolean(),
+    variants: z.array(variantBaseSchema).min(1, "AT_LEAST_ONE_VARIANT_REQUIRED"),
+    images: z.array(imageBaseSchema).min(1, "AT_LEAST_ONE_IMAGE_REQUIRED"),
+  })
+  .refine(
+    (data) => {
+      // التحقق من وجود صورة رئيسية واحدة فقط كحد أقصى
+      const primaryCount = data.images.filter((img) => img.is_primary).length
+      return primaryCount <= 1
+    },
+    {
+      message: "ONLY_ONE_PRIMARY_IMAGE_ALLOWED",
+      path: ["images"],
+    }
+  )
+  .refine(
+    (data) => {
+      // التحقق من عدم تكرار ربط أكثر من صورة لنفس الـ Variant SKU
+      const variantSkus = data.images
+        .map((img) => img.variant_sku?.trim())
+        .filter((sku): sku is string => Boolean(sku))
+
+      const uniqueSkus = new Set(variantSkus)
+      return uniqueSkus.size === variantSkus.length
+    },
+    {
+      message: "DUPLICATE_VARIANT_IMAGE_NOT_ALLOWED",
+      path: ["images"],
+    }
+  )
 
 export type CreateProductInput = z.infer<typeof createProductSchema>
 
@@ -80,7 +107,6 @@ export type CreateProductInput = z.infer<typeof createProductSchema>
 // 2. النوع الثاني: تحديث منتج (Update Product)
 // ============================================================================
 
-// يرث كل خصائص الإنشاء بالإضافة إلى الـ ID الإلزامي
 export const updateProductSchema = createProductSchema.extend({
   id: z.string().uuid("INVALID_ID"),
 })

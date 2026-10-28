@@ -1,7 +1,6 @@
 /**
  * @file lib/actions/store/product-details/queries/get-product-details.ts
- * @description Retrieves full product details including variants, images, category, and brand by slug,
- * wrapped with React cache to prevent duplicate queries within the same request.
+ * @description Retrieves full product details including variants, filtering product images to variant-specific ones only safely.
  */
 
 "use server"
@@ -235,6 +234,12 @@ export const getProductDetails = cache(
       }
     }
 
+    // تصفية الصور برمجياً لضمان جلب الصور المرتبطة بمتغيرات فقط (حيث variant_sku ليس فارغاً أو null)
+    const allImages = rawProduct.product_images ?? []
+    const variantSpecificImages = allImages.filter(
+      (img) => img.variant_sku !== null && img.variant_sku !== undefined && String(img.variant_sku).trim() !== ""
+    )
+
     const formattedProduct: FullProductDetails = {
       id: rawProduct.id,
       name: rawProduct.name,
@@ -249,7 +254,7 @@ export const getProductDetails = cache(
       parent_category: parentCategory,
       brand: processedBrand,
       product_variants: rawProduct.product_variants ?? [],
-      product_images: rawProduct.product_images ?? [],
+      product_images: variantSpecificImages, // استخدام الصور المصفاة للمتغيرات فقط
     }
 
     return { success: true, data: formattedProduct }

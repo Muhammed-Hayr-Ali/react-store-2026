@@ -407,7 +407,7 @@ export function ProductsTable({
               <DropdownMenuContent align="end" className="w-44 text-xs">
                 <DropdownMenuItem asChild>
                   <Link
-                    href={`/product-details/${row.original.slug}`}
+                    href={`/product/${row.original.slug}`}
                     target="_blank"
                     className="flex cursor-pointer items-center"
                   >
@@ -452,7 +452,7 @@ export function ProductsTable({
                   className="cursor-pointer"
                   onClick={() => {
                     navigator.clipboard.writeText(
-                      `${window.location.origin}/product-details/${row.original.slug}`
+                      `${window.location.origin}/product/${row.original.slug}`
                     )
                     toast.success(t("LINK_COPIED_SUCCESS"))
                   }}

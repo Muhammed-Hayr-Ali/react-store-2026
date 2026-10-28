@@ -1,6 +1,6 @@
 /**
  * @file lib/actions/store/queries/get-featured-products.ts
- * @description Retrieves a simplified list of featured products, picking the cheapest variant and its specific image including variant_id.
+ * @description Retrieves a simplified list of featured products, picking the cheapest variant and prioritizing primary product images, falling back to variant-specific images.
  */
 
 "use server"
@@ -9,7 +9,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import type { ApiResult } from "../../types/utils"
 
 interface ProductVariantRecord {
-  id: string // أضفنا الـ id الخاص بالمتغير
+  id: string // الـ id الخاص بالمتغير
   sku: string
   price: number
   compare_at_price?: number | null
@@ -36,7 +36,7 @@ export interface SimplifiedFeaturedProduct {
   name: string
   slug: string
   description?: string | null
-  variant_id: string | null // أضفنا الحقل هنا
+  variant_id: string | null // معرف المتغير الأرخص
   price: number | null
   compare_at_price?: number | null
   image_url?: string | null
@@ -113,17 +113,24 @@ export async function getFeaturedProducts(
       )
     }
 
-    // 2. البحث عن الصورة المرتبطة بالمتغير الأرخص عبر SKU
+    // 2. البحث عن الصورة الافتراضية للمنتج أولاً (is_primary أو أول صورة عامة بدون variant_sku أو العامة)
     let selectedImage: ProductImageRecord | null = null
-    if (cheapestVariant?.sku) {
+    
+    // محاولة إيجاد الصورة الأساسية المحددة كـ primary ولا تتبع متغير محدد أو عامة
+    selectedImage = 
+      images.find((img) => img.is_primary && (!img.variant_sku || img.variant_sku === cheapestVariant?.sku)) ||
+      images.find((img) => img.is_primary) || 
+      images.find((img) => !img.variant_sku) ||
+      null
+
+    // 3. إن لم توجد صورة افتراضية عامة، نبحث عن صورة المتغير الأرخص عبر الـ SKU
+    if (!selectedImage && cheapestVariant?.sku) {
       selectedImage = images.find((img) => img.variant_sku === cheapestVariant?.sku) || null
     }
 
-    if (!selectedImage) {
-      selectedImage = 
-        images.find((img) => img.is_primary) || 
-        images[0] || 
-        null
+    // 4. إن لم نجد أي شروط سابقة، نأخذ أول صورة متوفرة كحل أخير
+    if (!selectedImage && images.length > 0) {
+      selectedImage = images[0]
     }
 
     return {
@@ -131,7 +138,7 @@ export async function getFeaturedProducts(
       name: product.name,
       slug: product.slug,
       description: product.description,
-      variant_id: cheapestVariant?.id ?? null, // تمرير معرف المتغير الأرخص
+      variant_id: cheapestVariant?.id ?? null,
       price: cheapestVariant?.price ?? null,
       compare_at_price: cheapestVariant?.compare_at_price ?? null,
       image_url: selectedImage?.url ?? null,

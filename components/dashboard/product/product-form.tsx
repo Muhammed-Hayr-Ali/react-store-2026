@@ -1,7 +1,6 @@
 /**
  * @file components/dashboard/product/product-form.tsx
- * @description Form component for creating and updating products, variants, and media.
- * React 19 / Compiler compliant (Zero Cascading Renders, Single Source of Truth).
+ * @description Form component for creating and updating products, variants, and media with strict typing (No Any).
  */
 
 "use client"
@@ -15,6 +14,7 @@ import {
   Control,
   useWatch,
   UseFormSetValue,
+  UseFormGetValues,
   FieldError as RHFFieldError,
 } from "react-hook-form"
 import { toast } from "sonner"
@@ -84,7 +84,6 @@ import { DeleteCategoryDialog } from "@/components/dashboard/categories/delete-c
 import { BrandFormSheet } from "@/components/dashboard/brands/brand-form-sheet"
 import { DeleteBrandDialog } from "@/components/dashboard/brands/delete-brand-dialog"
 
-// الاعتماد على النوع الجديد
 type FormValues = CreateProductInput
 
 function ProductFieldError({ error }: { error?: RHFFieldError }) {
@@ -176,7 +175,6 @@ export default function ProductForm({
 
   const isEditing = Boolean(product)
 
-  // Single Source of Truth
   const categoriesList = React.useMemo(
     () => initialCategories ?? [],
     [initialCategories]
@@ -214,8 +212,7 @@ export default function ProductForm({
     return product.product_variants.map((v, idx) => ({
       sku: v.sku,
       name: v.name || "",
-      attributes: v.attributes || {},
-      // جلب السعر بالسنت من قاعدة البيانات وتحويله لعرضه كدولار
+      attributes: (v.attributes as Record<string, string>) || {},
       price: Number(v.price) / 100,
       compare_at_price: v.compare_at_price
         ? Number(v.compare_at_price) / 100
@@ -230,7 +227,7 @@ export default function ProductForm({
   }, [product])
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(createProductSchema), // استخدام المخطط الجديد
+    resolver: zodResolver(createProductSchema),
     mode: "onChange",
     shouldFocusError: false,
     defaultValues: {
@@ -253,6 +250,7 @@ export default function ProductForm({
     control,
     setValue,
     getFieldState,
+    getValues,
   } = form
 
   const {
@@ -277,6 +275,7 @@ export default function ProductForm({
   const currentProductName = useWatch({ control, name: "name" }) || ""
   const selectedBrandId = useWatch({ control, name: "brand_id" })
   const selectedCategoryId = useWatch({ control, name: "category_id" })
+  const watchedImages = useWatch({ control, name: "images" }) || []
 
   const selectedCategoryObject = React.useMemo(() => {
     return categoriesList.find((cat) => cat.id === selectedCategoryId) || null
@@ -347,7 +346,6 @@ export default function ProductForm({
         name: v.name || "",
         attributes: v.attributes || {},
         sort_order: idx + 1,
-        // تحويل السعر من الواجهة (دولار) للحفظ في قاعدة البيانات (سنت)
         price: Math.round(Number(v.price) * 100),
         compare_at_price:
           v.compare_at_price !== null && v.compare_at_price !== undefined
@@ -364,7 +362,6 @@ export default function ProductForm({
 
     let result
     if (isEditing && product) {
-      // تعديل استدعاء تحديث المنتج ليشمل الـ id داخل كائن البيانات
       result = await updateProduct({ ...payload, id: product.id })
     } else {
       result = await createProduct(payload)
@@ -607,6 +604,8 @@ export default function ProductForm({
                     index={index}
                     control={control}
                     setValue={setValue}
+                    getValues={getValues}
+                    watchedImages={watchedImages}
                     totalImages={imageFields.length}
                     onRemove={() => removeImage(index)}
                   />
@@ -1089,7 +1088,7 @@ export default function ProductForm({
                   {t("ACTIONS_DESCRIPTION")}
                 </p>
               </div>
-              <div className="flex flex-col gap-2 sm:flex-col">
+              <div className="flex flex-col gap-2">
                 <Button
                   type="submit"
                   disabled={isSubmitting}
@@ -1394,7 +1393,7 @@ function VariantCard({
           control={control}
           render={({ field }) => (
             <VariantAttributesManager
-              attributes={field.value || {}}
+              attributes={(field.value as Record<string, string>) || {}}
               onChange={field.onChange}
             />
           )}
@@ -1408,6 +1407,8 @@ interface ImageCardProps {
   index: number
   control: Control<FormValues>
   setValue: UseFormSetValue<FormValues>
+  getValues: UseFormGetValues<FormValues>
+  watchedImages: FormValues["images"]
   totalImages: number
   onRemove: () => void
 }
@@ -1416,6 +1417,8 @@ function ImageCard({
   index,
   control,
   setValue,
+  getValues,
+  watchedImages,
   totalImages,
   onRemove,
 }: ImageCardProps) {
@@ -1428,6 +1431,12 @@ function ImageCard({
     control,
     name: `images.${index}.variant_sku`,
   })
+
+  const usedVariantSkus = React.useMemo(() => {
+    return watchedImages
+      .map((img, i) => (i !== index ? img?.variant_sku : null))
+      .filter((sku): sku is string => Boolean(sku))
+  }, [watchedImages, index])
 
   const handleGenerateImageAlt = () => {
     if (!productName.trim()) {
@@ -1450,6 +1459,18 @@ function ImageCard({
       shouldValidate: true,
       shouldDirty: true,
     })
+  }
+
+  const handlePrimaryChange = (checked: boolean) => {
+    if (checked) {
+      const allImages = getValues("images") || []
+      allImages.forEach((_, i: number) => {
+        if (i !== index) {
+          setValue(`images.${i}.is_primary`, false, { shouldDirty: true })
+        }
+      })
+    }
+    setValue(`images.${index}.is_primary`, checked, { shouldDirty: true })
   }
 
   return (
@@ -1506,39 +1527,6 @@ function ImageCard({
 
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           <Controller
-            name={`images.${index}.alt_text`}
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel className="text-xs">
-                  {t("IMAGE_ALT_TEXT")}
-                </FieldLabel>
-                <div className="relative flex items-center">
-                  <Input
-                    {...field}
-                    value={field.value ?? ""}
-                    placeholder={t("IMAGE_ALT_TEXT")}
-                    className="h-8 pe-8 text-xs"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleGenerateImageAlt}
-                    title={t("GENERATE_ALT_TEXT")}
-                    className="absolute inset-e-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
-                  >
-                    <Wand2Icon className="size-3.5" />
-                  </Button>
-                </div>
-                {fieldState.invalid && (
-                  <ProductFieldError error={fieldState.error} />
-                )}
-              </Field>
-            )}
-          />
-
-          <Controller
             name={`images.${index}.variant_sku`}
             control={control}
             render={({ field }) => (
@@ -1560,34 +1548,73 @@ function ImageCard({
                       {t("ALL_VARIANTS_GENERAL")}
                     </SelectItem>
                     {variants.map((v, i) => {
-                      const currentSku = v?.sku?.trim()
-                      const currentName = v?.name?.trim()
+                      const currentSku = v?.sku?.trim() || ""
+                      const currentName = v?.name?.trim() || ""
+                      const isAlreadyUsed =
+                        usedVariantSkus.includes(currentSku) &&
+                        currentSku !== field.value
 
                       const attrSummary = v?.attributes
-                        ? Object.values(v.attributes)
+                        ? Object.values(v.attributes as Record<string, string>)
                             .filter(Boolean)
                             .join(" / ")
                         : ""
 
                       const displayLabel = currentName
-                        ? `${currentName}${currentSku ? ` (\${currentSku})` : ""}`
+                        ? `${currentName}${currentSku ? ` (${currentSku})` : ""}`
                         : attrSummary
-                          ? `${attrSummary}${currentSku ? ` (\${currentSku})` : ""}`
+                          ? `${attrSummary}${currentSku ? ` (${currentSku})` : ""}`
                           : currentSku
                             ? `SKU: ${currentSku}`
                             : `Variant #${i + 1}`
 
+                      const itemValue = currentSku || `variant-${i}`
+
                       return (
                         <SelectItem
                           key={i}
-                          value={currentSku || `variant-${i}`}
+                          value={itemValue}
+                          disabled={isAlreadyUsed}
                         >
-                          {displayLabel}
+                          {displayLabel} {isAlreadyUsed ? "(مستخدم مسبقاً)" : ""}
                         </SelectItem>
                       )
                     })}
                   </SelectContent>
                 </Select>
+              </Field>
+            )}
+          />
+
+          <Controller
+            name={`images.${index}.alt_text`}
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel className="text-xs">
+                  {t("IMAGE_ALT_TEXT")}
+                </FieldLabel>
+                <div className="relative flex items-center">
+                  <Input
+                    {...field}
+                    value={field.value ?? ""}
+                    placeholder={t("IMAGE_ALT_TEXT")}
+                    className="h-9 pe-8 text-xs"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleGenerateImageAlt}
+                    title={t("GENERATE_ALT_TEXT")}
+                    className="absolute inset-e-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
+                  >
+                    <Wand2Icon className="size-3.5" />
+                  </Button>
+                </div>
+                {fieldState.invalid && (
+                  <ProductFieldError error={fieldState.error} />
+                )}
               </Field>
             )}
           />
@@ -1600,7 +1627,7 @@ function ImageCard({
             <div className="flex items-center gap-2 pt-1">
               <Switch
                 checked={field.value}
-                onCheckedChange={field.onChange}
+                onCheckedChange={handlePrimaryChange}
                 id={`primary-${index}`}
               />
               <label

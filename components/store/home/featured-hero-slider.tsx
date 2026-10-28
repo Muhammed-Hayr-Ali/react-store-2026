@@ -2,7 +2,7 @@
 
 /**
  * @file components/store/featured-hero-slider.tsx
- * @description Hero banner slider for storefront displaying featured products.
+ * @description Hero banner slider for storefront displaying featured products with fixed aspect ratio and responsive image scaling.
  */
 
 import * as React from "react"
@@ -14,6 +14,7 @@ import { ChevronLeftIcon, ChevronRightIcon, ImageIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { SimplifiedFeaturedProduct } from "@/lib/actions/store/queries/get-featured-products"
+import { AspectRatio } from "@/components/ui/aspect-ratio"
 
 interface FeaturedHeroSliderProps {
   slides: SimplifiedFeaturedProduct[]
@@ -33,22 +34,26 @@ function SlideItem({
     <div className="relative min-w-0 flex-[0_0_100%] transition-opacity duration-300">
       <Link
         href={`/${locale}/product/${slide.slug}`}
-        className="relative block h-56 w-full overflow-hidden bg-muted/40 sm:h-72 md:h-84 lg:h-96"
+        className="relative block w-full overflow-hidden rounded-2xl bg-muted/40 sm:rounded-3xl"
       >
         {slide.image_url && !imageError ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            src={slide.image_url}
-            alt={slide.image_alt || slide.name}
-            loading="lazy"
-            onError={() => setImageError(true)}
-            className="size-full border-0 object-cover object-center transition-transform duration-500 hover:scale-[1.01]"
-          />
+          // تم ضبط النسبة هنا (مثلاً 21/9 لتناسب بانر الـ Hero العريض أو 16/9)
+          <AspectRatio ratio={21 / 9} className="w-full">
+            <img
+              src={slide.image_url}
+              alt={slide.image_alt || slide.name}
+              loading="lazy"
+              onError={() => setImageError(true)}
+              className="size-full border-0 object-cover object-center transition-transform duration-500 hover:scale-[1.01]"
+            />
+          </AspectRatio>
         ) : (
-          <div className="flex size-full flex-col items-center justify-center gap-2 bg-muted/50 text-muted-foreground/60">
-            <ImageIcon className="size-10 stroke-[1.5] sm:size-12" />
-            <span className="text-xs font-medium">{slide.name}</span>
-          </div>
+          <AspectRatio ratio={21 / 9} className="w-full">
+            <div className="flex size-full flex-col items-center justify-center gap-2 bg-muted/50 text-muted-foreground/60">
+              <ImageIcon className="size-10 stroke-[1.5] sm:size-12" />
+              <span className="text-xs font-medium">{slide.name}</span>
+            </div>
+          </AspectRatio>
         )}
       </Link>
     </div>

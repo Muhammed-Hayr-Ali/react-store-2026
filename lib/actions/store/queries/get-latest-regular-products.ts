@@ -1,6 +1,6 @@
 /**
  * @file lib/actions/store/queries/get-latest-regular-products.ts
- * @description Retrieves a simplified list of non-featured regular products supporting pagination for infinite scroll.
+ * @description Retrieves a simplified list of non-featured regular products supporting pagination for infinite scroll, prioritizing primary/general product images before falling back to variant-specific images.
  */
 
 "use server"
@@ -52,7 +52,7 @@ export interface SimplifiedRegularProduct {
 
 interface GetLatestRegularProductsOptions {
   limit?: number
-  page?: number // أضفنا دعم رقم الصفحة للتحميل التلقائي
+  page?: number
   activeOnly?: boolean
 }
 
@@ -61,7 +61,6 @@ export async function getLatestRegularProducts(
 ): Promise<ApiResult<SimplifiedRegularProduct[]>> {
   const { limit = 12, page = 1, activeOnly = true } = options
 
-  // حساب نطاق الـ Pagination لـ Supabase (مثلاً الصفحة 1: من 0 إلى 11، الصفحة 2: من 12 إلى 23)
   const from = (page - 1) * limit
   const to = from + limit - 1
 
@@ -94,7 +93,7 @@ export async function getLatestRegularProducts(
     )
     .eq("is_featured", false)
     .order("created_at", { ascending: false })
-    .range(from, to) // استخدام range بدلاً من limit فقط لدعم الصفحات
+    .range(from, to)
 
   if (activeOnly) {
     query = query.eq("is_active", true)
@@ -142,16 +141,24 @@ export async function getLatestRegularProducts(
         )
       }
 
-      // البحث عن الصورة المرتبطة
+      // 1. البحث عن الصورة الرئيسية أو العامة للمنتج أولاً
       let selectedImage: ProductImageRecord | null = null
-      if (cheapestVariant?.sku) {
+      
+      selectedImage =
+        images.find((img) => img.is_primary && (!img.variant_sku || img.variant_sku === cheapestVariant?.sku)) ||
+        images.find((img) => img.is_primary) ||
+        images.find((img) => !img.variant_sku) ||
+        null
+
+      // 2. إذا لم توجد صورة رئيسية أو عامة، نبحث عن صورة المتغير الأرخص عبر الـ SKU
+      if (!selectedImage && cheapestVariant?.sku) {
         selectedImage =
           images.find((img) => img.variant_sku === cheapestVariant?.sku) || null
       }
 
-      if (!selectedImage) {
-        selectedImage =
-          images.find((img) => img.is_primary) || images[0] || null
+      // 3. كحل أخير، نأخذ أول صورة متوفرة
+      if (!selectedImage && images.length > 0) {
+        selectedImage = images[0]
       }
 
       return {
