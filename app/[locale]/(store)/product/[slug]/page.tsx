@@ -36,8 +36,9 @@ export async function generateMetadata({ params }: ProductDetailsPageProps) {
 
   return createMetadata({
     siteName: appConfig.name,
-    title: product.meta_title || product.name,
-    description: product.meta_description || product.name,
+    title: product.meta_title || product.name || product.slug,
+    description:
+      product.meta_description || product.description || product.slug,
   })
 }
 
@@ -61,7 +62,7 @@ export default async function ProductDetailsPage({
   const reviewsData = reviewsResult.success ? reviewsResult.data : null
 
   return (
-    <div >
+    <div>
       {/* تفاصيل المنتج الأساسية */}
       {/* <div className="space-y-4">
         <h1 className="text-3xl font-extrabold tracking-tight">{product.name}</h1>
