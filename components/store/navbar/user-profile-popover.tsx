@@ -18,6 +18,7 @@ import { PreferencesSubNav } from "./preferences-sub-nav"
 import { UserProfileHeader } from "./user-profile-header"
 import { NavItemsList } from "./nav-items-list"
 import { LogoutAlertDialog } from "@/components/shared/logout-alert"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 export default function UserProfilePopover() {
   const [isOpen, setIsOpen] = useState(false)
@@ -50,25 +51,23 @@ export default function UserProfilePopover() {
 
           <Separator />
 
-          <div className="max-h-[60vh] overflow-y-auto p-1.5">
+          <ScrollArea className="h-75">
             <NavItemsList
               onItemClick={handleClose}
               itemClassName="h-8 text-xs px-2 rounded-lg"
               subItemClassName="h-7 text-[11px] px-2 rounded-md"
               iconClassName="size-3.5"
             />
-
             <div
               role="separator"
               aria-orientation="horizontal"
               className="my-1.5 h-px bg-border"
             />
-
             <PreferencesSubNav
               itemClassName="h-8 text-xs px-2"
               subItemClassName="h-7 text-[11px] px-2"
             />
-          </div>
+          </ScrollArea>
 
           <Separator />
 

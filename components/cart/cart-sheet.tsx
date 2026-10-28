@@ -64,38 +64,41 @@ export function CartSheet() {
           </SheetTitle>
         </SheetHeader>
 
-        {/* منطقة المنتجات القابلة للتمرير (تأخذ المساحة المتبقية بمرونة باستخدام h-0 و grow) */}
-        <ScrollArea
-          className={cn("h-0 grow py-2", isRtl ? "pr-2.5 pl-4" : "pr-4 pl-2.5")}
+        {/* منطقة المنتجات القابلة للتمرير (تأخذ المساحة المتبقية بمرونة وتمنع التمدد الخاطئ) */}
+        <div
+          className={cn(
+            "flex flex-1 flex-col overflow-hidden",
+            (!cart?.items || cart.items.length === 0) &&
+              "items-center justify-center"
+          )}
         >
-          <div
-            className={cn(
-              "h-full",
-              (!cart?.items || cart.items.length === 0) &&
-                "flex h-full items-center justify-center pb-20"
-            )}
-          >
-            {!cart?.items || cart.items.length === 0 ? (
-              <div className="flex flex-col items-center justify-center text-center text-muted-foreground">
-                <ShoppingCartIcon className="mb-4 size-16 stroke-1" />
-                <p className="text-lg font-medium">
-                  {t("EMPTY", { default: "Your cart is empty" })}
-                </p>
-                <p className="text-sm">
-                  {t("EMPTY_DESC", {
-                    default: "Add some products to start shopping",
-                  })}
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3 py-2">
+          {!cart?.items || cart.items.length === 0 ? (
+            <div className="flex flex-col items-center justify-center text-center text-muted-foreground p-4">
+              <ShoppingCartIcon className="mb-4 size-16 stroke-1" />
+              <p className="text-lg font-medium">
+                {t("EMPTY", { default: "Your cart is empty" })}
+              </p>
+              <p className="text-sm">
+                {t("EMPTY_DESC", {
+                  default: "Add some products to start shopping",
+                })}
+              </p>
+            </div>
+          ) : (
+            <ScrollArea
+              className={cn(
+                "h-full w-full",
+                isRtl ? "pr-2.5 pl-4" : "pr-4 pl-2.5"
+              )}
+            >
+              <div className="space-y-3 py-4">
                 {cart.items.map((item) => (
                   <CartItemCard key={item.id} item={item} />
                 ))}
               </div>
-            )}
-          </div>
-        </ScrollArea>
+            </ScrollArea>
+          )}
+        </div>
 
         {/* تذييل الشيت والمجاميع (ثابت في الأسفل) */}
         {cart?.items && cart.items.length > 0 && (
