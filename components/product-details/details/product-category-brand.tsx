@@ -78,7 +78,7 @@ export function ProductCategoryBrand({
           asChild
         >
           <Link href={`/dashboard/products/${slug}/edit`}>
-            <PenLineIcon />
+            <PenLineIcon className="text-background"/>
           </Link>
         </Button>
       </Can>
