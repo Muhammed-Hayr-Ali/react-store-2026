@@ -1383,5 +1383,28 @@
     "META_DESCRIPTION": "تصفح تشكيلة منتجات {category} والأساسيات اليومية المتاحة في المتجر.",
     "PAGE_DESC": "استكشف كافة المنتجات المتاحة في تصنيف {category}",
     "NO_PRODUCTS": "لا توجد منتجات متاحة في هذا التصنيف حالياً."
+  },
+  "Navigation": {
+    "links": {
+      "home": "الرئيسية",
+      "overview": "لوحة التحكم",
+      "orders": "الطلبات",
+      "wishlist": "المفضلة",
+      "coupons": "قسائمي",
+      "about": "من نحن",
+      "contact": "اتصل بنا",
+      "shipping": "سياسة الشحن",
+      "returns": "الاسترجاع والاستبدال",
+      "faq": "الأسئلة الشائعة",
+      "terms_and_privacy": "الشروط والخصوصية"
+    },
+    "preferences": {
+      "language": "اللغة",
+      "appearance": "المظهر",
+      "currency": "العملة",
+      "light": "فاتح",
+      "dark": "داكن",
+      "system": "حسب النظام"
+    }
   }
 }

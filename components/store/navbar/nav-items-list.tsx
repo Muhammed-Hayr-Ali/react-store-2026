@@ -1,8 +1,14 @@
 "use client"
 
+/**
+ * @file components/store/nav-items-list.tsx
+ * @description Navigation items list component with integrated next-intl localization support.
+ */
+
 import React, { useMemo, Fragment } from "react"
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -28,14 +34,14 @@ export function NavItemsList({
   iconClassName = "size-4",
 }: NavItemsListProps) {
   const { user, hasPermission } = useUser()
+  const t = useTranslations("Navigation") // استدعاء ملف الترجمة الخاص بالقوائم
 
   const accessibleLinks = useMemo(() => {
-    return NAV_LINKS
-      .filter((item) => {
-        if (!item.requiredPermission) return true
-        if (!user) return false
-        return hasPermission(item.requiredPermission)
-      })
+    return NAV_LINKS.filter((item) => {
+      if (!item.requiredPermission) return true
+      if (!user) return false
+      return hasPermission(item.requiredPermission)
+    })
       .map((item) => {
         if (item.items) {
           return {
@@ -72,9 +78,13 @@ export function NavItemsList({
                   >
                     <div className="flex items-center">
                       <item.icon
-                        className={cn("me-2 text-muted-foreground", iconClassName)}
+                        className={cn(
+                          "me-2 text-muted-foreground",
+                          iconClassName
+                        )}
                       />
-                      <span>{item.title}</span>
+                      {/* جلب الترجمة بالاعتماد على المفتاح key */}
+                      <span>{t(`links.${item.key}`)}</span>
                     </div>
                     <ChevronRight className="size-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180" />
                   </Button>
@@ -82,7 +92,7 @@ export function NavItemsList({
                 <CollapsibleContent className="space-y-0.5 ps-5 pt-0.5">
                   {item.items?.map((subItem) => (
                     <Button
-                      key={subItem.title}
+                      key={subItem.url}
                       variant="ghost"
                       size="sm"
                       className={cn(
@@ -92,7 +102,8 @@ export function NavItemsList({
                       asChild
                     >
                       <Link href={subItem.url} onClick={onItemClick}>
-                        {subItem.title}
+                        {/* جلب ترجمة الروابط الفرعية إن وجدت */}
+                        {t(`links.${subItem.url}`)}
                       </Link>
                     </Button>
                   ))}
@@ -111,7 +122,8 @@ export function NavItemsList({
                   <item.icon
                     className={cn("me-2 text-muted-foreground", iconClassName)}
                   />
-                  {item.title}
+                  {/* جلب الترجمة بالاعتماد على المفتاح key */}
+                  <span>{t(`links.${item.key}`)}</span>
                 </Link>
               </Button>
             )}

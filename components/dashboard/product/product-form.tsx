@@ -1,6 +1,6 @@
 /**
  * @file components/dashboard/product/product-form.tsx
- * @description Form component for creating and updating products, variants, and media with strict typing (No Any).
+ * @description Form component for creating and updating products, variants, and media with strict typing (No Any) and bilingual support (name_ar).
  */
 
 "use client"
@@ -296,7 +296,7 @@ export default function ProductForm({
     setErrorMessage(null)
 
     const brandSuffix = selectedBrandObject
-      ? ` | ${selectedBrandObject.name}`
+      ? ` | ${locale === "ar" && selectedBrandObject.name_ar ? selectedBrandObject.name_ar : selectedBrandObject.name}`
       : ""
     const generatedTitle = `${currentProductName.trim()}${brandSuffix}`.slice(
       0,
@@ -309,15 +309,23 @@ export default function ProductForm({
       generatedDescription =
         cleanDesc.length > 157 ? `${cleanDesc.slice(0, 157)}...` : cleanDesc
     } else {
-      const categoryPart = selectedCategoryObject
-        ? ` in ${selectedCategoryObject.name}`
+      const categoryName = selectedCategoryObject
+        ? locale === "ar" && selectedCategoryObject.name_ar
+          ? selectedCategoryObject.name_ar
+          : selectedCategoryObject.name
         : ""
-      const brandPart = selectedBrandObject
-        ? ` by ${selectedBrandObject.name}`
+      const brandName = selectedBrandObject
+        ? locale === "ar" && selectedBrandObject.name_ar
+          ? selectedBrandObject.name_ar
+          : selectedBrandObject.name
         : ""
+
+      const categoryPart = categoryName ? ` in ${categoryName}` : ""
+      const brandPart = brandName ? ` by ${brandName}` : ""
+
       generatedDescription = (
         locale === "ar"
-          ? `تسوق ${currentProductName.trim()}${brandPart}${categoryPart}. جودة عالية وأسعار مناسبة مع توصيل سريع وموثوق.`
+          ? `تسوق ${currentProductName.trim()}${brandPart ? ` لـ ${brandName}` : ""}. جودة عالية وأسعار مناسبة مع توصيل سريع وموثوق.`
           : `Shop ${currentProductName.trim()}${brandPart}${categoryPart}. High quality at the best prices with fast and reliable delivery.`
       ).slice(0, 160)
     }
@@ -387,6 +395,288 @@ export default function ProductForm({
     setErrorMessage(t("FORM_VALIDATION_ERROR"))
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
+
+  // دالة مساعدة لعرض حقول التنظيم مع دعم الاسم العربي name_ar
+  const renderOrganizationFields = () => (
+    <FieldGroup className="space-y-3.5">
+      <Controller
+        name="category_id"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel className="text-xs">
+              {t("CATEGORY")} <span className="text-destructive">*</span>
+            </FieldLabel>
+
+            <div className="flex items-center gap-1.5">
+              <Select
+                onValueChange={(val) =>
+                  field.onChange(val === "none" ? "" : val)
+                }
+                value={field.value || "none"}
+              >
+                <SelectTrigger
+                  aria-invalid={fieldState.invalid}
+                  className="h-8 flex-1 text-xs"
+                >
+                  <SelectValue placeholder={t("SELECT_CATEGORY")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">
+                    {t("SELECT_CATEGORY")}
+                  </SelectItem>
+                  {categoriesList.map((cat) => {
+                    const displayName =
+                      locale === "ar" && cat.name_ar
+                        ? cat.name_ar
+                        : cat.name
+                    return (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {displayName}
+                      </SelectItem>
+                    )
+                  })}
+                </SelectContent>
+              </Select>
+
+              <CategoryFormSheet
+                open={categoryModal.type === "create"}
+                category={null}
+                categories={categoriesList}
+                categoryImages={[]}
+                onOpenChange={(open) =>
+                  setCategoryModal(
+                    open ? { type: "create", data: null } : { type: null, data: null }
+                  )
+                }
+                onSaved={() => {
+                  setCategoryModal({ type: null, data: null })
+                  router.refresh()
+                }}
+                trigger={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    title={t("CREATE_CATEGORY")}
+                    className="h-9 w-9 shrink-0 cursor-pointer p-0"
+                  >
+                    <PlusIcon className="size-3.5" />
+                  </Button>
+                }
+              />
+
+              {selectedCategoryObject && (
+                <>
+                  <CategoryFormSheet
+                    open={
+                      categoryModal.type === "update" &&
+                      categoryModal.data?.id === selectedCategoryObject.id
+                    }
+                    category={selectedCategoryObject}
+                    categories={categoriesList}
+                    categoryImages={[]}
+                    onOpenChange={(open) =>
+                      setCategoryModal(
+                        open
+                          ? { type: "update", data: selectedCategoryObject }
+                          : { type: null, data: null }
+                      )
+                    }
+                    onSaved={() => {
+                      setCategoryModal({ type: null, data: null })
+                      router.refresh()
+                    }}
+                    trigger={
+                      <Button
+                        type="button"
+                        variant="outline"
+                        title={t("EDIT_CATEGORY")}
+                        className="h-9 w-9 shrink-0 cursor-pointer p-0 text-muted-foreground hover:text-foreground"
+                      >
+                        <PencilIcon className="size-3.5" />
+                      </Button>
+                    }
+                  />
+
+                  <DeleteCategoryDialog
+                    category={selectedCategoryObject}
+                    open={
+                      categoryModal.type === "delete" &&
+                      categoryModal.data?.id === selectedCategoryObject.id
+                    }
+                    onOpenChange={(open) =>
+                      setCategoryModal(
+                        open
+                          ? { type: "delete", data: selectedCategoryObject }
+                          : { type: null, data: null }
+                      )
+                    }
+                    onDeleted={(deletedCategory) => {
+                      if (form.getValues("category_id") === deletedCategory.id) {
+                        setValue("category_id", "", {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        })
+                      }
+                      setCategoryModal({ type: null, data: null })
+                      router.refresh()
+                    }}
+                  >
+                    <Button
+                      type="button"
+                      variant="outline"
+                      title={t("DELETE_CATEGORY")}
+                      className="h-9 w-9 shrink-0 cursor-pointer p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    >
+                      <Trash2Icon className="size-3.5" />
+                    </Button>
+                  </DeleteCategoryDialog>
+                </>
+              )}
+            </div>
+
+            {fieldState.invalid && (
+              <ProductFieldError error={fieldState.error} />
+            )}
+          </Field>
+        )}
+      />
+
+      <Controller
+        name="brand_id"
+        control={control}
+        render={({ field }) => (
+          <Field>
+            <FieldLabel className="text-xs">{t("BRAND_OPTIONAL")}</FieldLabel>
+
+            <div className="flex items-center gap-1.5">
+              <Select
+                onValueChange={(val) =>
+                  field.onChange(val === "none" ? null : val)
+                }
+                value={field.value ?? "none"}
+              >
+                <SelectTrigger className="h-8 flex-1 text-xs">
+                  <SelectValue placeholder={t("SELECT_BRAND")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">{t("NO_BRAND")}</SelectItem>
+                  {brandsList.map((brand) => {
+                    const displayBrandName =
+                      locale === "ar" && brand.name_ar
+                        ? brand.name_ar
+                        : brand.name
+                    return (
+                      <SelectItem key={brand.id} value={brand.id}>
+                        {displayBrandName}
+                      </SelectItem>
+                    )
+                  })}
+                </SelectContent>
+              </Select>
+
+              <BrandFormSheet
+                open={brandModal.type === "create"}
+                brand={null}
+                brandImages={[]}
+                onOpenChange={(open) =>
+                  setBrandModal(
+                    open ? { type: "create", data: null } : { type: null, data: null }
+                  )
+                }
+                onSaved={(savedBrand) => {
+                  setValue("brand_id", savedBrand.id, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  })
+                  setBrandModal({ type: null, data: null })
+                  router.refresh()
+                }}
+                trigger={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    title={t("CREATE_BRAND")}
+                    className="h-9 w-9 shrink-0 cursor-pointer p-0"
+                  >
+                    <PlusIcon className="size-3.5" />
+                  </Button>
+                }
+              />
+
+              {selectedBrandObject && (
+                <>
+                  <BrandFormSheet
+                    open={
+                      brandModal.type === "update" &&
+                      brandModal.data?.id === selectedBrandObject.id
+                    }
+                    brand={selectedBrandObject}
+                    brandImages={[]}
+                    onOpenChange={(open) =>
+                      setBrandModal(
+                        open
+                          ? { type: "update", data: selectedBrandObject }
+                          : { type: null, data: null }
+                      )
+                    }
+                    onSaved={() => {
+                      setBrandModal({ type: null, data: null })
+                      router.refresh()
+                    }}
+                    trigger={
+                      <Button
+                        type="button"
+                        variant="outline"
+                        title={t("EDIT_BRAND")}
+                        className="h-9 w-9 shrink-0 cursor-pointer p-0 text-muted-foreground hover:text-foreground"
+                      >
+                        <PencilIcon className="size-3.5" />
+                      </Button>
+                    }
+                  />
+
+                  <DeleteBrandDialog
+                    brand={selectedBrandObject}
+                    open={
+                      brandModal.type === "delete" &&
+                      brandModal.data?.id === selectedBrandObject.id
+                    }
+                    onOpenChange={(open) =>
+                      setBrandModal(
+                        open
+                          ? { type: "delete", data: selectedBrandObject }
+                          : { type: null, data: null }
+                      )
+                    }
+                    onDeleted={(deletedBrand) => {
+                      if (form.getValues("brand_id") === deletedBrand.id) {
+                        setValue("brand_id", null, {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        })
+                      }
+                      setBrandModal({ type: null, data: null })
+                      router.refresh()
+                    }}
+                  >
+                    <Button
+                      type="button"
+                      variant="outline"
+                      title={t("DELETE_BRAND")}
+                      className="h-9 w-9 shrink-0 cursor-pointer p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    >
+                      <Trash2Icon className="size-3.5" />
+                    </Button>
+                  </DeleteBrandDialog>
+                </>
+              )}
+            </div>
+          </Field>
+        )}
+      />
+    </FieldGroup>
+  )
 
   return (
     <>
@@ -521,6 +811,22 @@ export default function ProductForm({
                   )}
                 />
               </FieldGroup>
+            </div>
+
+            {/* 📱 Organization Card for Mobile: يظهر أسفل المعلومات الأساسية على الجوال فقط */}
+            <div className="rounded-xl border border-border bg-card p-5 shadow-xs block lg:hidden">
+              <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
+                <TagIcon className="size-4 text-primary" />
+                <div>
+                  <h2 className="text-sm font-semibold text-card-foreground">
+                    {t("ORGANIZATION")}
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    {t("ORGANIZATION_DESCRIPTION")}
+                  </p>
+                </div>
+              </div>
+              {renderOrganizationFields()}
             </div>
 
             {/* Variants & Pricing */}
@@ -676,8 +982,8 @@ export default function ProductForm({
               </div>
             </div>
 
-            {/* Organization Card */}
-            <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+            {/* 💻 Organization Card for Desktop: يظهر في السايدبار للكمبيوتر فقط */}
+            <div className="rounded-xl border border-border bg-card p-5 shadow-xs hidden lg:block">
               <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
                 <TagIcon className="size-4 text-primary" />
                 <div>
@@ -689,301 +995,7 @@ export default function ProductForm({
                   </p>
                 </div>
               </div>
-
-              <FieldGroup className="space-y-3.5">
-                <Controller
-                  name="category_id"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel className="text-xs">
-                        {t("CATEGORY")}{" "}
-                        <span className="text-destructive">*</span>
-                      </FieldLabel>
-
-                      <div className="flex items-center gap-1.5">
-                        <Select
-                          onValueChange={(val) =>
-                            field.onChange(val === "none" ? "" : val)
-                          }
-                          value={field.value || "none"}
-                        >
-                          <SelectTrigger
-                            aria-invalid={fieldState.invalid}
-                            className="h-8 flex-1 text-xs"
-                          >
-                            <SelectValue placeholder={t("SELECT_CATEGORY")} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">
-                              {t("SELECT_CATEGORY")}
-                            </SelectItem>
-                            {categoriesList.map((cat) => (
-                              <SelectItem key={cat.id} value={cat.id}>
-                                {cat.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-
-                        <CategoryFormSheet
-                          open={categoryModal.type === "create"}
-                          category={null}
-                          categories={categoriesList}
-                          categoryImages={[]}
-                          onOpenChange={(open) =>
-                            setCategoryModal(
-                              open
-                                ? { type: "create", data: null }
-                                : { type: null, data: null }
-                            )
-                          }
-                          onSaved={() => {
-                            setCategoryModal({ type: null, data: null })
-                            router.refresh()
-                          }}
-                          trigger={
-                            <Button
-                              type="button"
-                              variant="outline"
-                              title={t("CREATE_CATEGORY")}
-                              className="h-9 w-9 shrink-0 cursor-pointer p-0"
-                            >
-                              <PlusIcon className="size-3.5" />
-                            </Button>
-                          }
-                        />
-
-                        {selectedCategoryObject && (
-                          <>
-                            <CategoryFormSheet
-                              open={
-                                categoryModal.type === "update" &&
-                                categoryModal.data?.id ===
-                                  selectedCategoryObject.id
-                              }
-                              category={selectedCategoryObject}
-                              categories={categoriesList}
-                              categoryImages={[]}
-                              onOpenChange={(open) =>
-                                setCategoryModal(
-                                  open
-                                    ? {
-                                        type: "update",
-                                        data: selectedCategoryObject,
-                                      }
-                                    : { type: null, data: null }
-                                )
-                              }
-                              onSaved={() => {
-                                setCategoryModal({ type: null, data: null })
-                                router.refresh()
-                              }}
-                              trigger={
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  title={t("EDIT_CATEGORY")}
-                                  className="h-9 w-9 shrink-0 cursor-pointer p-0 text-muted-foreground hover:text-foreground"
-                                >
-                                  <PencilIcon className="size-3.5" />
-                                </Button>
-                              }
-                            />
-
-                            <DeleteCategoryDialog
-                              category={selectedCategoryObject}
-                              open={
-                                categoryModal.type === "delete" &&
-                                categoryModal.data?.id ===
-                                  selectedCategoryObject.id
-                              }
-                              onOpenChange={(open) =>
-                                setCategoryModal(
-                                  open
-                                    ? {
-                                        type: "delete",
-                                        data: selectedCategoryObject,
-                                      }
-                                    : { type: null, data: null }
-                                )
-                              }
-                              onDeleted={(deletedCategory) => {
-                                if (
-                                  form.getValues("category_id") ===
-                                  deletedCategory.id
-                                ) {
-                                  setValue("category_id", "", {
-                                    shouldValidate: true,
-                                    shouldDirty: true,
-                                  })
-                                }
-                                setCategoryModal({ type: null, data: null })
-                                router.refresh()
-                              }}
-                            >
-                              <Button
-                                type="button"
-                                variant="outline"
-                                title={t("DELETE_CATEGORY")}
-                                className="h-9 w-9 shrink-0 cursor-pointer p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                              >
-                                <Trash2Icon className="size-3.5" />
-                              </Button>
-                            </DeleteCategoryDialog>
-                          </>
-                        )}
-                      </div>
-
-                      {fieldState.invalid && (
-                        <ProductFieldError error={fieldState.error} />
-                      )}
-                    </Field>
-                  )}
-                />
-
-                <Controller
-                  name="brand_id"
-                  control={control}
-                  render={({ field }) => (
-                    <Field>
-                      <FieldLabel className="text-xs">
-                        {t("BRAND_OPTIONAL")}
-                      </FieldLabel>
-
-                      <div className="flex items-center gap-1.5">
-                        <Select
-                          onValueChange={(val) =>
-                            field.onChange(val === "none" ? null : val)
-                          }
-                          value={field.value ?? "none"}
-                        >
-                          <SelectTrigger className="h-8 flex-1 text-xs">
-                            <SelectValue placeholder={t("SELECT_BRAND")} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">
-                              {t("NO_BRAND")}
-                            </SelectItem>
-                            {brandsList.map((brand) => (
-                              <SelectItem key={brand.id} value={brand.id}>
-                                {brand.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-
-                        <BrandFormSheet
-                          open={brandModal.type === "create"}
-                          brand={null}
-                          brandImages={[]}
-                          onOpenChange={(open) =>
-                            setBrandModal(
-                              open
-                                ? { type: "create", data: null }
-                                : { type: null, data: null }
-                            )
-                          }
-                          onSaved={(savedBrand) => {
-                            setValue("brand_id", savedBrand.id, {
-                              shouldValidate: true,
-                              shouldDirty: true,
-                            })
-                            setBrandModal({ type: null, data: null })
-                            router.refresh()
-                          }}
-                          trigger={
-                            <Button
-                              type="button"
-                              variant="outline"
-                              title={t("CREATE_BRAND")}
-                              className="h-9 w-9 shrink-0 cursor-pointer p-0"
-                            >
-                              <PlusIcon className="size-3.5" />
-                            </Button>
-                          }
-                        />
-
-                        {selectedBrandObject && (
-                          <>
-                            <BrandFormSheet
-                              open={
-                                brandModal.type === "update" &&
-                                brandModal.data?.id === selectedBrandObject.id
-                              }
-                              brand={selectedBrandObject}
-                              brandImages={[]}
-                              onOpenChange={(open) =>
-                                setBrandModal(
-                                  open
-                                    ? {
-                                        type: "update",
-                                        data: selectedBrandObject,
-                                      }
-                                    : { type: null, data: null }
-                                )
-                              }
-                              onSaved={() => {
-                                setBrandModal({ type: null, data: null })
-                                router.refresh()
-                              }}
-                              trigger={
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  title={t("EDIT_BRAND")}
-                                  className="h-9 w-9 shrink-0 cursor-pointer p-0 text-muted-foreground hover:text-foreground"
-                                >
-                                  <PencilIcon className="size-3.5" />
-                                </Button>
-                              }
-                            />
-
-                            <DeleteBrandDialog
-                              brand={selectedBrandObject}
-                              open={
-                                brandModal.type === "delete" &&
-                                brandModal.data?.id === selectedBrandObject.id
-                              }
-                              onOpenChange={(open) =>
-                                setBrandModal(
-                                  open
-                                    ? {
-                                        type: "delete",
-                                        data: selectedBrandObject,
-                                      }
-                                    : { type: null, data: null }
-                                )
-                              }
-                              onDeleted={(deletedBrand) => {
-                                if (
-                                  form.getValues("brand_id") === deletedBrand.id
-                                ) {
-                                  setValue("brand_id", null, {
-                                    shouldValidate: true,
-                                    shouldDirty: true,
-                                  })
-                                }
-                                setBrandModal({ type: null, data: null })
-                                router.refresh()
-                              }}
-                            >
-                              <Button
-                                type="button"
-                                variant="outline"
-                                title={t("DELETE_BRAND")}
-                                className="h-9 w-9 shrink-0 cursor-pointer p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                              >
-                                <Trash2Icon className="size-3.5" />
-                              </Button>
-                            </DeleteBrandDialog>
-                          </>
-                        )}
-                      </div>
-                    </Field>
-                  )}
-                />
-              </FieldGroup>
+              {renderOrganizationFields()}
             </div>
 
             {/* SEO Details Card */}
@@ -1403,11 +1415,6 @@ function VariantCard({
     </div>
   )
 }
-
-/**
- * @file components/dashboard/product/product-form.tsx (ImageCard component)
- * @description Card component for managing product images, variant linking, and primary flags with localized UI guidance.
- */
 
 interface ImageCardProps {
   index: number

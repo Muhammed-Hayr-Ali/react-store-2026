@@ -2,7 +2,7 @@
 
 /**
  * @file components/store/product-details/details/product-category-brand.tsx
- * @description Apple-inspired minimalist interactive display of product category and brand links.
+ * @description Apple-inspired minimalist interactive display of product category and brand links with robust fallback to English names if Arabic name is missing.
  */
 
 import * as React from "react"
@@ -25,15 +25,16 @@ export function ProductCategoryBrand({
 }: ProductCategoryBrandProps) {
   if (!category && !brand) return null
 
+  // استخدام الاسم العربي إن وجد عند تفعيل العربية، وإلا التراجع للإنكليزية (fallback)
   const categoryName = category
     ? locale === "ar"
-      ? category.name_ar
+      ? category.name_ar || category.name
       : category.name
     : null
 
   const brandName = brand
     ? locale === "ar"
-      ? brand.name_ar
+      ? brand.name_ar || brand.name
       : brand.name
     : null
 

@@ -2,11 +2,11 @@
 
 /**
  * @file components/store/navigation/preferences-sub-nav.tsx
- * @description Sub-navigation for changing language, theme, and currency preferences.
+ * @description Sub-navigation for changing language, theme, and currency preferences with integrated next-intl localization support.
  */
 
 import * as React from "react"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { usePathname, useRouter } from "@/i18n/navigation"
 import { useTheme } from "next-themes"
 import { CheckIcon, ChevronRight, Loader2Icon } from "lucide-react"
@@ -35,6 +35,7 @@ export function PreferencesSubNav({
   const currentLocale = useLocale()
   const { theme, setTheme } = useTheme()
   const { currentCurrency, setCurrency, currencies } = useCurrency()
+  const t = useTranslations("Navigation.preferences") // جلب ترجمة التفضيلات
 
   const [isMounted, setIsMounted] = React.useState(false)
   const [isLangPending, startLangTransition] = React.useTransition()
@@ -103,7 +104,7 @@ export function PreferencesSubNav({
           >
             <div className="flex items-center">
               <language.icon className="me-2 size-4 text-muted-foreground" />
-              <span>{language.name}</span>
+              <span>{t(language.name)}</span>
             </div>
             <div className="flex items-center gap-1.5 text-muted-foreground">
               {isLangPending ? (
@@ -161,7 +162,7 @@ export function PreferencesSubNav({
           >
             <div className="flex items-center">
               <appearance.icon className="me-2 size-4 text-muted-foreground" />
-              <span>{appearance.name}</span>
+              <span>{t(appearance.name)}</span>
             </div>
             <div className="flex items-center gap-1.5 text-muted-foreground">
               {isThemePending ? (
@@ -169,7 +170,7 @@ export function PreferencesSubNav({
               ) : (
                 isMounted && (
                   <span className="text-[11px] font-medium capitalize">
-                    {theme}
+                    {theme ? t(theme) : ""}
                   </span>
                 )
               )}
@@ -196,7 +197,7 @@ export function PreferencesSubNav({
               >
                 <div className="flex items-center gap-2">
                   {OptIcon && <OptIcon className="size-3.5 text-muted-foreground" />}
-                  <span>{opt.label}</span>
+                  <span>{t(opt.key)}</span>
                 </div>
                 {isSelected && !isThemePending ? (
                   <CheckIcon className="size-3.5 text-primary" />
@@ -223,7 +224,7 @@ export function PreferencesSubNav({
           >
             <div className="flex items-center">
               <currencyConfig.icon className="me-2 size-4 text-muted-foreground" />
-              <span>{currencyConfig.name}</span>
+              <span>{t(currencyConfig.name)}</span>
             </div>
             <div className="flex items-center gap-1.5 text-muted-foreground">
               {isCurrencyPending ? (

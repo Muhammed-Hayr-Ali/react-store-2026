@@ -21,7 +21,7 @@ export const footerConfig = {
       { label: "FAQ", href: "/faq" },
       { label: "Shipping", href: "/shipping" },
       { label: "Returns", href: "/returns" },
-      { label: "Terms & Privacy", href: "/terms-and-privacy" },
+      { label: "terms_and_privacy", href: "/terms-and-privacy" },
     ],
   },
   socialLinks: [

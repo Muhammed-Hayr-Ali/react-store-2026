@@ -125,8 +125,8 @@ export const NAV_LINKS: NavLinkItem[] = [
     icon: CircleQuestionMark,
   },
   {
-    title: "Terms & Privacy",
-    key: "terms-and-privacy",
+    title: "terms_and_privacy",
+    key: "terms_and_privacy",
     url: "#",
     icon: ShieldCheck,
   },

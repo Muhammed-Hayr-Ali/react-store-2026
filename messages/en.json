@@ -1388,5 +1388,28 @@
     "META_DESCRIPTION": "Browse our collection of {category} items and everyday essentials.",
     "PAGE_DESC": "Explore all available products in {category}",
     "NO_PRODUCTS": "No products available in this category."
+  },
+  "Navigation": {
+    "links": {
+      "home": "Home",
+      "overview": "Dashboard",
+      "orders": "Orders",
+      "wishlist": "Wishlist",
+      "coupons": "My Coupons",
+      "about": "About Us",
+      "contact": "Contact",
+      "shipping": "Shipping Policy",
+      "returns": "Returns & Refund",
+      "faq": "FAQ",
+      "terms_and_privacy": "Terms & Privacy"
+    },
+    "preferences": {
+      "language": "Language",
+      "appearance": "Appearance",
+      "currency": "Currency",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
   }
 }
