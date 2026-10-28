@@ -47,8 +47,7 @@ export function LogoutAlertDialog({
         }
 
         onOpenChange(false)
-        router.replace(appRoutes.home)
-        router.refresh()
+        window.location.href = appRoutes.home
       } catch {
         toast.error(t("LOGOUT_ERROR"))
       }
@@ -71,10 +70,7 @@ export function LogoutAlertDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel
-            disabled={isPending}
-            className="h-9 text-xs"
-          >
+          <AlertDialogCancel disabled={isPending} className="h-9 text-xs">
             {t("CANCEL_BUTTON")}
           </AlertDialogCancel>
           <Button
