@@ -6,12 +6,10 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
-const TARGET_CURRENCIES = [
-  "USD", "EUR", "SAR", "AED", "KWD", 
-  "QAR", "BHD", "TRY", "EGP", "IQD", "SYP"
-] as const
-
-const CURRENCY_METADATA: Record<string, { name: string; name_ar: string; symbol: string }> = {
+const CURRENCY_METADATA: Record<
+  string,
+  { name: string; name_ar: string; symbol: string }
+> = {
   USD: { name: "US Dollar", name_ar: "دولار أمريكي", symbol: "$" },
   EUR: { name: "Euro", name_ar: "يورو", symbol: "€" },
   SAR: { name: "Saudi Riyal", name_ar: "ريال سعودي", symbol: "ر.س" },
@@ -30,18 +28,22 @@ interface ExchangeRateResponse {
   conversion_rates: Record<string, number>
 }
 
-export async function GET(request: Request) {
-  console.log("=== CRON JOB STARTED: /api/cron/update-currency-rates ===");
+export async function GET() {
+  console.log("=== CRON JOB STARTED: /api/cron/update-currency-rates ===")
 
   try {
     const apiKey = process.env.EXCHANGE_RATE_API_KEY
     if (!apiKey) {
-      throw new Error("EXCHANGE_RATE_API_KEY is not defined in environment variables")
+      throw new Error(
+        "EXCHANGE_RATE_API_KEY is not defined in environment variables"
+      )
     }
 
     // 1. جلب الأسعار من الـ API
-    console.log("Fetching rates from ExchangeRate-API...");
-    const response = await fetch(`https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`)
+    console.log("Fetching rates from ExchangeRate-API...")
+    const response = await fetch(
+      `https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`
+    )
     const data = (await response.json()) as ExchangeRateResponse
 
     if (data.result !== "success" || !data.conversion_rates) {
@@ -55,11 +57,13 @@ export async function GET(request: Request) {
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
     if (!supabaseUrl || !supabaseServiceKey) {
-      throw new Error("Supabase environment variables (URL or SERVICE_ROLE_KEY) are missing")
+      throw new Error(
+        "Supabase environment variables (URL or SERVICE_ROLE_KEY) are missing"
+      )
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: { persistSession: false }
+      auth: { persistSession: false },
     })
 
     const currencyRecords = []
@@ -75,14 +79,14 @@ export async function GET(request: Request) {
           symbol: meta.symbol,
           rate_factor: rateFactor,
           is_active: true,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
       }
     }
 
     // 3. تنفيذ التحديث في قاعدة البيانات
     if (currencyRecords.length > 0) {
-      console.log("Upserting currency records to Supabase...");
+      console.log("Upserting currency records to Supabase...")
       const { error } = await supabase
         .from("currencies")
         .upsert(currencyRecords, { onConflict: "code" })
@@ -92,15 +96,21 @@ export async function GET(request: Request) {
       }
     }
 
-    console.log("=== CRON JOB COMPLETED SUCCESSFULLY ===");
-    return NextResponse.json({ 
-      success: true, 
-      message: "Currency rates updated successfully in database via cron job" 
-    }, { status: 200 })
-
+    console.log("=== CRON JOB COMPLETED SUCCESSFULLY ===")
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Currency rates updated successfully in database via cron job",
+      },
+      { status: 200 }
+    )
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred"
-    console.error("CRON JOB ERROR:", errorMessage);
-    return NextResponse.json({ success: false, error: errorMessage }, { status: 500 })
+    const errorMessage =
+      error instanceof Error ? error.message : "An unexpected error occurred"
+    console.error("CRON JOB ERROR:", errorMessage)
+    return NextResponse.json(
+      { success: false, error: errorMessage },
+      { status: 500 }
+    )
   }
 }
