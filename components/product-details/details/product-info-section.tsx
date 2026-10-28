@@ -151,6 +151,7 @@ export function ProductInfoSection({
         {/* ================================================================= */}
         <div className="flex flex-col gap-6 md:col-span-6">
           <ProductCategoryBrand
+            slug={product.slug}
             locale={locale}
             category={product.category}
             brand={product.brand}

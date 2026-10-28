@@ -11,15 +11,21 @@ import {
   BrandDetail,
   CategoryDetail,
 } from "@/lib/actions/store/product-details/details/queries/get-product-details"
+import { Button } from "@/components/ui/button"
+import { PenLineIcon } from "lucide-react"
+import { Can } from "@/components/shared/can"
+import { PERMISSIONS } from "@/lib/actions/role"
 
 interface ProductCategoryBrandProps {
   locale: string
+  slug: string
   category?: CategoryDetail | null
   brand?: BrandDetail | null
 }
 
 export function ProductCategoryBrand({
   locale,
+  slug,
   category,
   brand,
 }: ProductCategoryBrandProps) {
@@ -39,30 +45,43 @@ export function ProductCategoryBrand({
     : null
 
   return (
-    <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground/80">
-      {/* رابط التصنيف */}
-      {category && categoryName && (
-        <Link
-          href={`/${locale}/categories/${category.slug}`}
-          className="tracking-wide uppercase transition-colors hover:text-primary hover:underline underline-offset-4"
-        >
-          {categoryName}
-        </Link>
-      )}
+    <div className="flex justify-between">
+      <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground/80">
+        {/* رابط التصنيف */}
+        {category && categoryName && (
+          <Link
+            href={`/${locale}/categories/${category.slug}`}
+            className="tracking-wide uppercase underline-offset-4 transition-colors hover:text-primary hover:underline"
+          >
+            {categoryName}
+          </Link>
+        )}
 
-      {categoryName && brandName && (
-        <span className="size-1 rounded-full bg-muted-foreground/40" />
-      )}
+        {categoryName && brandName && (
+          <span className="size-1 rounded-full bg-muted-foreground/40" />
+        )}
 
-      {/* رابط العلامة التجارية */}
-      {brand && brandName && (
-        <Link
-          href={`/${locale}/brands/${brand.slug}`}
-          className="font-semibold text-foreground tracking-wide transition-colors hover:text-primary hover:underline underline-offset-4"
+        {/* رابط العلامة التجارية */}
+        {brand && brandName && (
+          <Link
+            href={`/${locale}/brands/${brand.slug}`}
+            className="font-semibold tracking-wide text-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
+          >
+            {brandName}
+          </Link>
+        )}
+      </div>
+      <Can permission={PERMISSIONS.UPDATE_PRODUCT}>
+        <Button
+          size="icon-sm"
+          className="rounded-full bg-foreground shadow-none"
+          asChild
         >
-          {brandName}
-        </Link>
-      )}
+          <Link href={`/dashboard/products/${slug}/edit`}>
+            <PenLineIcon />
+          </Link>
+        </Button>
+      </Can>
     </div>
   )
 }
