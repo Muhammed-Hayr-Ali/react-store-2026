@@ -27,7 +27,7 @@ export default function MobileCardDrawer({
   onClose,
 }: MobileCardDrawerProps) {
   const t = useTranslations("Cart")
-  const { cart, totalItemsCount } = useCart()
+  const { cart, totalItemsCount, isPending } = useCart()
   const { formatRawPrice, currentCurrency } = useCurrency()
 
   const subtotal = React.useMemo(() => {
@@ -91,8 +91,9 @@ export default function MobileCardDrawer({
           <Button
             variant="default"
             className="h-9 w-full text-xs font-medium uppercase shadow-xs"
-            asChild
+            disabled={isPending}
             onClick={onClose}
+            asChild
           >
             <Link href="/checkout">
               {t("CHECKOUT", { default: "Proceed to Checkout" })}

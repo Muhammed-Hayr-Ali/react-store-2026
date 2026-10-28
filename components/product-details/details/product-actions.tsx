@@ -11,7 +11,7 @@ import { ShoppingCartIcon, PlusIcon, MinusIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ProductVariantDetail } from "@/lib/actions/store/product-details/details/queries/get-product-details"
 import { useCurrency } from "@/lib/context/currency-context"
-import { WishlistButton } from "@/components/store/wishlist/wishlist-button"
+import { WishlistButton } from "@/components/wishlist/wishlist-button"
 import { useCart } from "@/lib/context/cart-context"
 
 interface ProductActionsProps {

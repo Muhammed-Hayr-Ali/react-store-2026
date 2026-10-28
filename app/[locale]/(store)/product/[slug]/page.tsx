@@ -7,10 +7,10 @@ import { notFound } from "next/navigation"
 
 import { getProductDetails } from "@/lib/actions/store/product-details/details/queries/get-product-details"
 import { getProductReviews } from "@/lib/actions/store/product-details/reviews/queries/get-product-reviews"
-import { ProductReviewsSection } from "@/components/store/product-details/reviews/product-reviews-section"
+import { ProductReviewsSection } from "@/components/product-details/reviews/product-reviews-section"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import { ProductInfoSection } from "@/components/store/product-details/details/product-info-section"
+import { ProductInfoSection } from "@/components/product-details/details/product-info-section"
 
 interface ProductDetailsPageProps {
   params: Promise<{

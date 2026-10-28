@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils"
 
 import UserProfilePopover from "./user-profile-popover"
 import { CurrencySwitcher } from "@/components/shared/currency-switcher"
-import { CartSheet } from "@/components/store/cart/cart-sheet"
+import { CartSheet } from "@/components/cart/cart-sheet"
 
 interface DesktopNavbarProps {
   className?: string

@@ -58,7 +58,7 @@ export function CartSheet() {
             ) : (
               <span
                 className={cn(
-                  "absolute -top-1 -right-1 flex h-3.5 items-center justify-center rounded-full bg-foreground p-1.5 text-[9px] font-normal text-background transition-transform size-3.5"
+                  "absolute -top-1 -right-1 flex size-3.5 h-3.5 items-center justify-center rounded-full bg-foreground p-1.5 text-[9px] font-normal text-background transition-transform"
                 )}
               >
                 {totalItemsCount > 99 ? "99+" : totalItemsCount}
@@ -133,6 +133,7 @@ export function CartSheet() {
               <Button
                 variant="default"
                 className="h-9 w-full text-xs font-medium uppercase shadow-xs"
+                disabled={isPending}
                 asChild
               >
                 <Link href="/checkout">

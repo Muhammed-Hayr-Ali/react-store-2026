@@ -9,7 +9,7 @@ import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { cookies } from "next/headers"
 import { getTranslations } from "next-intl/server"
-import { WishlistProductGrid } from "@/components/store/wishlist/wishlist-product-grid"
+import { WishlistProductGrid } from "@/components/wishlist/wishlist-product-grid"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 import { notFound } from "next/navigation"
 

@@ -22,7 +22,7 @@ import { NavItemsList } from "./nav-items-list"
 import { LogoutAlertDialog } from "@/components/shared/logout-alert"
 import { ShoppingCartIcon } from "lucide-react"
 import { useCart } from "@/lib/context/cart-context"
-import MobileCardDrawer from "../cart/mobile-cart"
+import MobileCardDrawer from "../../cart/mobile-cart"
 import { cn } from "@/lib/utils"
 import { Spinner } from "@/components/ui/spinner"
 
