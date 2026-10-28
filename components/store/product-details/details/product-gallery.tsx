@@ -132,10 +132,10 @@ export function ProductGallery({
             role="dialog"
             aria-modal="true"
             onClick={() => toggleLightbox(false)}
-            className="fixed inset-0 z-50 flex animate-in flex-col items-center justify-between bg-background/95 p-4 backdrop-blur-2xl duration-300 fade-in"
+            className="fixed inset-0 z-50 flex h-dvh animate-in flex-col justify-between bg-background/95 p-4 backdrop-blur-2xl duration-300 fade-in sm:p-6"
           >
             {/* شريط رأس النافذة (عداد الصور وزر الإغلاق) */}
-            <div className="flex w-full max-w-6xl items-center justify-between text-foreground">
+            <div className="mx-auto flex w-full max-w-6xl shrink-0 items-center justify-between text-foreground">
               <Badge variant="secondary">
                 <span className="text-xs font-normal">
                   {currentIndex + 1} / {images.length}
@@ -153,31 +153,31 @@ export function ProductGallery({
               </Button>
             </div>
 
-            {/* محتوى الصورة الرئيسية بملء الشاشة مع أزرار التنقل الجانبية */}
+            {/* محتوى الصورة الرئيسية بملء الشاشة مع أزرار التنقل الجانبية (متمركزة تماماً في المنتصف) */}
             <div
               onClick={(e) => e.stopPropagation()}
-              className="relative flex max-h-[72vh] w-full max-w-6xl flex-1 items-center justify-center"
+              className="relative mx-auto flex w-full max-w-6xl flex-1 items-center justify-center overflow-hidden py-4"
             >
               {images.length > 1 && (
                 <Button
                   type="button"
                   variant="ghost"
                   onClick={handlePrev}
-                  className="absolute -inset-s-2.5 z-10 size-10 rounded-full bg-muted/80 text-foreground backdrop-blur-md transition-all hover:scale-105 active:scale-95 sm:inset-s-6"
+                  className="absolute inset-s-2 z-10 size-11 rounded-full bg-muted/80 text-foreground backdrop-blur-md transition-all hover:scale-105 active:scale-95 sm:inset-s-6"
                   aria-label={t("PREVIOUS_IMAGE", { default: "Previous" })}
                 >
                   <ChevronLeftIcon className="size-6 rtl:rotate-180" />
                 </Button>
               )}
 
-              <div className="relative flex max-h-full max-w-full items-center justify-center">
+              <div className="flex h-full w-full items-center justify-center">
                 {!isMainImageFailed ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={activeImage}
                     alt={productName}
                     onError={() => markImageAsFailed(activeImage)}
-                    className="max-h-[70vh] max-w-full rounded-lg object-contain object-center transition-transform duration-500"
+                    className="max-h-[75vh] max-w-full object-contain object-center transition-transform duration-500"
                   />
                 ) : (
                   <div className="flex size-64 flex-col items-center justify-center text-muted-foreground">
@@ -194,7 +194,7 @@ export function ProductGallery({
                   type="button"
                   variant="ghost"
                   onClick={handleNext}
-                  className="absolute -inset-e-2 z-10 size-10 rounded-full bg-muted/80 text-foreground backdrop-blur-md transition-all hover:scale-105 active:scale-95 sm:inset-e-6"
+                  className="absolute inset-e-2 z-10 size-11 rounded-full bg-muted/80 text-foreground backdrop-blur-md transition-all hover:scale-105 active:scale-95 sm:inset-e-6"
                   aria-label={t("NEXT_IMAGE", { default: "Next" })}
                 >
                   <ChevronRightIcon className="size-6 rtl:rotate-180" />
@@ -206,7 +206,7 @@ export function ProductGallery({
             {images.length > 1 && (
               <div
                 onClick={(e) => e.stopPropagation()}
-                className="flex max-w-full scrollbar-none items-center gap-4 overflow-x-auto scroll-smooth rounded-sm bg-muted/50 p-2.5 backdrop-blur-xl [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                className="mx-auto flex max-w-full shrink-0 scrollbar-none items-center justify-center gap-3 overflow-x-auto scroll-smooth rounded-xl bg-muted/50 p-2.5 backdrop-blur-xl [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
               >
                 {images.map((img) => {
                   const isSelected = activeImage === img.url
@@ -217,10 +217,9 @@ export function ProductGallery({
                       key={img.id}
                       type="button"
                       onClick={() => handleImageChange(img)}
-
-                      className={`group relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-md bg-muted transition-all duration-300  ${
+                      className={`group relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-lg bg-muted transition-all duration-300 ${
                         isSelected
-                          ? "opacity-100 ring-1 ring-muted-foreground/50 ring-offset-2"
+                          ? "opacity-100 ring-2 ring-primary ring-offset-2"
                           : "opacity-40 hover:opacity-100"
                       }`}
                     >
@@ -307,7 +306,7 @@ export function ProductGallery({
                   key={img.id}
                   type="button"
                   onClick={() => handleImageChange(img)}
-                  className={`group relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-md bg-muted transition-all duration-300  ${
+                  className={`group relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-md bg-muted transition-all duration-300 ${
                     isSelected
                       ? "opacity-100 ring-1 ring-muted-foreground/50 ring-offset-1"
                       : "opacity-40 hover:opacity-100"
