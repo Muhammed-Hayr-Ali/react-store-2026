@@ -1411,5 +1411,29 @@
       "dark": "Dark",
       "system": "System"
     }
+  },
+  "Footer": {
+    "app_description": "Marketna: Your smart destination for everyday essentials where quality, variety, and speed come together.",
+    "sections": {
+      "quick_links": "Quick Links",
+      "support": "Support"
+    },
+    "links": {
+      "home": "Home",
+      "store": "Store",
+      "products": "Products",
+      "about": "About",
+      "contact": "Contact",
+      "faq": "FAQ",
+      "shipping": "Shipping",
+      "returns": "Returns",
+      "terms_and_privacy": "Terms & Privacy"
+    },
+    "social": {
+      "twitter": "X (Twitter)",
+      "facebook": "Facebook",
+      "instagram": "Instagram"
+    },
+    "rights_reserved": "All rights reserved."
   }
 }

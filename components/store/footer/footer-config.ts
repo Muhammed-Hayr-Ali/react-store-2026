@@ -1,3 +1,8 @@
+/**
+ * @file components/store/footer-config.ts
+ * @description Configuration for footer links and social media channels with translation keys.
+ */
+
 import {
   FacebookIcon,
   InstagramIcon,
@@ -5,38 +10,40 @@ import {
 } from "@/components/shared/icons"
 
 export const footerConfig = {
+  description: "app_description",
+
   quickLinks: {
-    title: "Quick Links",
+    key: "quick_links",
     items: [
-      { label: "Home", href: "/" },
-      { label: "Store", href: "/" },
-      { label: "Products", href: "/products" },
-      { label: "About", href: "/about" },
+      { key: "home", href: "/" },
+      { key: "store", href: "/" },
+      { key: "products", href: "/products" },
+      { key: "about", href: "/about" },
     ],
   },
   supportLinks: {
-    title: "Support",
+    key: "support",
     items: [
-      { label: "Contact", href: "/contact" },
-      { label: "FAQ", href: "/faq" },
-      { label: "Shipping", href: "/shipping" },
-      { label: "Returns", href: "/returns" },
-      { label: "terms_and_privacy", href: "/terms-and-privacy" },
+      { key: "contact", href: "/contact" },
+      { key: "faq", href: "/faq" },
+      { key: "shipping", href: "/shipping" },
+      { key: "returns", href: "/returns" },
+      { key: "terms_and_privacy", href: "/terms-and-privacy" },
     ],
   },
   socialLinks: [
     {
-      label: "X (Twitter)",
+      key: "twitter",
       href: "https://x.com/marketna",
       icon: TwitterIcon,
     },
     {
-      label: "Facebook",
+      key: "facebook",
       href: "https://www.facebook.com/marketna",
       icon: FacebookIcon,
     },
     {
-      label: "Instagram",
+      key: "instagram",
       href: "https://www.instagram.com/marketna",
       icon: InstagramIcon,
     },

@@ -2,7 +2,7 @@
 
 /**
  * @file components/store/navigation/preferences-sub-nav.tsx
- * @description Sub-navigation for changing language, theme, and currency preferences with integrated next-intl localization support.
+ * @description Sub-navigation for changing language, theme, and currency preferences with Arabic currency name support.
  */
 
 import * as React from "react"
@@ -35,7 +35,7 @@ export function PreferencesSubNav({
   const currentLocale = useLocale()
   const { theme, setTheme } = useTheme()
   const { currentCurrency, setCurrency, currencies } = useCurrency()
-  const t = useTranslations("Navigation.preferences") // جلب ترجمة التفضيلات
+  const t = useTranslations("Navigation.preferences")
 
   const [isMounted, setIsMounted] = React.useState(false)
   const [isLangPending, startLangTransition] = React.useTransition()
@@ -74,7 +74,10 @@ export function PreferencesSubNav({
     }, 220)
   }
 
-  const handleCurrencyChange = (e: React.MouseEvent, nextCurrencyCode: string) => {
+  const handleCurrencyChange = (
+    e: React.MouseEvent,
+    nextCurrencyCode: string
+  ) => {
     e.preventDefault()
     e.stopPropagation()
     if (nextCurrencyCode === currentCurrency.code || isCurrencyPending) return
@@ -196,7 +199,9 @@ export function PreferencesSubNav({
                 )}
               >
                 <div className="flex items-center gap-2">
-                  {OptIcon && <OptIcon className="size-3.5 text-muted-foreground" />}
+                  {OptIcon && (
+                    <OptIcon className="size-3.5 text-muted-foreground" />
+                  )}
                   <span>{t(opt.key)}</span>
                 </div>
                 {isSelected && !isThemePending ? (
@@ -243,6 +248,12 @@ export function PreferencesSubNav({
         <CollapsibleContent className="space-y-0.5 ps-6 pt-0.5">
           {currencies.map((curr) => {
             const isSelected = isMounted && currentCurrency.code === curr.code
+            // التحقق من توفر الاسم العربي واستخدامه عند اختيار اللغة العربية
+            const currencyDisplayName =
+              currentLocale === "ar" && "name_ar" in curr && curr.name_ar
+                ? (curr.name_ar as string)
+                : curr.name
+
             return (
               <Button
                 key={curr.code}
@@ -257,8 +268,10 @@ export function PreferencesSubNav({
                 )}
               >
                 <div className="flex items-center gap-2">
-                  <span>{curr.name}</span>
-                  <span className="text-[10px] text-muted-foreground/80">({curr.symbol})</span>
+                  <span>{currencyDisplayName}</span>
+                  <span className="text-[10px] text-muted-foreground/80">
+                    ({curr.symbol})
+                  </span>
                 </div>
                 {isSelected && !isCurrencyPending ? (
                   <CheckIcon className="size-3.5 text-primary" />

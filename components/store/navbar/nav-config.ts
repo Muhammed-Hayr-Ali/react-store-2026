@@ -134,7 +134,7 @@ export const NAV_LINKS: NavLinkItem[] = [
 
 export const PREFERENCES_CONFIG = {
   language: {
-    name: "Language",
+    name: "language",
     icon: Languages,
     options: [
       { label: "العربية", key: "ar", value: "ar" },
@@ -142,7 +142,7 @@ export const PREFERENCES_CONFIG = {
     ],
   },
   appearance: {
-    name: "Appearance",
+    name: "appearance",
     icon: SunMoon,
     options: [
       { label: "Light", key: "light", value: "light", icon: Sun },
@@ -151,7 +151,7 @@ export const PREFERENCES_CONFIG = {
     ],
   },
   currency: {
-    name: "Currency",
+    name: "currency",
     icon: Coins,
     options: SUPPORTED_CURRENCIES.map((c) => ({
       label: `${c.code} (${c.symbol})`,
