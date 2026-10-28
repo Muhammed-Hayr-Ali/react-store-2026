@@ -20,47 +20,24 @@ import { UserProfileHeader } from "./user-profile-header"
 import { PreferencesSubNav } from "./preferences-sub-nav"
 import { NavItemsList } from "./nav-items-list"
 import { LogoutAlertDialog } from "@/components/shared/logout-alert"
-import { ShoppingCartIcon } from "lucide-react"
-import { useCart } from "@/lib/context/cart-context"
 import MobileCardDrawer from "../../cart/mobile-cart"
-import { cn } from "@/lib/utils"
-import { Spinner } from "@/components/ui/spinner"
+import CartButton from "@/components/cart/cart-button"
 
 export function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false)
   const [isCardOpen, setIsCardOpen] = useState(false)
-  const { totalItemsCount, isPending } = useCart()
 
   return (
     <>
       <div className="flex items-center gap-4 md:hidden">
-        <Button
+        <CartButton
+          iconClassName="size-4.5"
           variant="ghost"
-          size="icon"
-          aria-label="Cart"
           onClick={() => {
             setIsOpen(false)
             setIsCardOpen(!isCardOpen)
           }}
-          className={cn("relative")}
-        >
-          {/* يمكنك جعل الأيقونة تنبض أو تدور ببطء أثناء التحديث */}
-          <ShoppingCartIcon className={cn("size-4.5")} />
-
-          {totalItemsCount > 0 &&
-            (isPending ? (
-              <Spinner className="absolute -top-1 -right-1 size-3.5" />
-            ) : (
-              <span
-                className={cn(
-                  "absolute -top-1 -right-1 flex size-3.5 h-3.5 items-center justify-center rounded-full bg-foreground p-1.5 text-[9px] font-normal text-background transition-transform"
-                )}
-              >
-                {totalItemsCount > 99 ? "99+" : totalItemsCount}
-              </span>
-            ))}
-        </Button>
-
+        />
         <MenuButton
           className="flex md:hidden"
           isOpen={isOpen}

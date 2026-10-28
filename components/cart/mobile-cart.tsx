@@ -11,9 +11,8 @@ import {
   MobileMenuFooter,
   MobileMenuHeader,
 } from "@/components/ui/mobile-menu"
-import { ShoppingBagIcon } from "lucide-react"
+import { ShoppingCartIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
 import { CartItemCard } from "./cart-item-card"
 import { cn } from "@/lib/utils"
 
@@ -58,7 +57,7 @@ export default function MobileCardDrawer({
       >
         {!cart?.items || cart.items.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center text-muted-foreground">
-            <ShoppingBagIcon className="mb-4 size-16 stroke-1" />
+            <ShoppingCartIcon className="mb-4 size-16 stroke-1" />
             <p className="text-lg font-medium">
               {t("EMPTY", { default: "Your cart is empty" })}
             </p>
@@ -93,11 +92,8 @@ export default function MobileCardDrawer({
             className="h-9 w-full text-xs font-medium uppercase shadow-xs"
             disabled={isPending}
             onClick={onClose}
-            asChild
           >
-            <Link href="/checkout">
-              {t("CHECKOUT", { default: "Proceed to Checkout" })}
-            </Link>
+            {t("CHECKOUT", { default: "Proceed to Checkout" })}
           </Button>
         </MobileMenuFooter>
       )}

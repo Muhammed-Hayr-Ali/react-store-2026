@@ -17,15 +17,15 @@ import {
   SheetFooter,
   SheetClose,
 } from "@/components/ui/sheet"
-import { ShoppingBagIcon, ShoppingCartIcon } from "lucide-react"
+import { ShoppingCartIcon } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
 import { useCart } from "@/lib/context/cart-context"
 import { useCurrency } from "@/lib/context/currency-context"
 import { CartItemCard } from "./cart-item-card"
 import { cn } from "@/lib/utils"
-import Link from "next/link"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Spinner } from "@/components/ui/spinner"
+import CartButton from "./cart-button"
 
 export function CartSheet() {
   const t = useTranslations("Cart")
@@ -45,26 +45,7 @@ export function CartSheet() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button
-          variant="secondary"
-          size="icon"
-          aria-label="Search"
-          className="relative"
-        >
-          <ShoppingCartIcon />
-          {totalItemsCount > 0 &&
-            (isPending ? (
-              <Spinner className="absolute -top-1 -right-1 size-3.5" />
-            ) : (
-              <span
-                className={cn(
-                  "absolute -top-1 -right-1 flex size-3.5 h-3.5 items-center justify-center rounded-full bg-foreground p-1.5 text-[9px] font-normal text-background transition-transform"
-                )}
-              >
-                {totalItemsCount > 99 ? "99+" : totalItemsCount}
-              </span>
-            ))}
-        </Button>
+        <CartButton variant="secondary" />
       </SheetTrigger>
       <SheetContent
         side={isRtl ? "left" : "right"}
@@ -97,7 +78,7 @@ export function CartSheet() {
           >
             {!cart?.items || cart.items.length === 0 ? (
               <div className="flex flex-col items-center justify-center text-center text-muted-foreground">
-                <ShoppingBagIcon className="mb-4 size-16 stroke-1" />
+                <ShoppingCartIcon className="mb-4 size-16 stroke-1" />
                 <p className="text-lg font-medium">
                   {t("EMPTY", { default: "Your cart is empty" })}
                 </p>
@@ -134,11 +115,8 @@ export function CartSheet() {
                 variant="default"
                 className="h-9 w-full text-xs font-medium uppercase shadow-xs"
                 disabled={isPending}
-                asChild
               >
-                <Link href="/checkout">
-                  {t("CHECKOUT", { default: "Proceed to Checkout" })}
-                </Link>
+                {t("CHECKOUT", { default: "Proceed to Checkout" })}
               </Button>
             </SheetClose>
           </SheetFooter>
