@@ -9,7 +9,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 // قائمة العملات المستهدفة
 const TARGET_CURRENCIES = [
   "USD", "EUR", "SAR", "AED", "KWD", 
-  "QAR", "BHD", "JOD", "EGP", "IQD", "SYP"
+  "QAR", "BHD", "TRY", "EGP", "IQD", "SYP"
 ] as const
 
 interface ExchangeRateResponse {

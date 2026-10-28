@@ -139,6 +139,7 @@ export const PREFERENCES_CONFIG = {
     options: [
       { label: "العربية", key: "ar", value: "ar" },
       { label: "English", key: "en", value: "en" },
+      { label: "Türkçe", key: "tr", value: "tr" },
     ],
   },
   appearance: {
