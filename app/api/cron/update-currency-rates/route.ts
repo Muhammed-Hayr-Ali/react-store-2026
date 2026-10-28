@@ -1,6 +1,6 @@
 /**
  * @file app/api/cron/update-currency-rates/route.ts
- * @description Robust Cron job endpoint with explicit logging and Supabase Admin client.
+ * @description Cron job endpoint to fetch latest exchange rates from exchangerate-api.com and bulk upsert Supabase without secret key restriction.
  */
 
 import { NextResponse } from "next/server"
@@ -31,23 +31,15 @@ interface ExchangeRateResponse {
 }
 
 export async function GET(request: Request) {
-  // طباعة أولية لضمان ظهور أي محاولة دخول في اللوجز
   console.log("=== CRON JOB STARTED: /api/cron/update-currency-rates ===");
 
   try {
-    // 1. التحقق من مفتاح الحماية
-    const authHeader = request.headers.get("authorization")
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      console.error("Unauthorized cron execution attempt.");
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
-    }
-
     const apiKey = process.env.EXCHANGE_RATE_API_KEY
     if (!apiKey) {
       throw new Error("EXCHANGE_RATE_API_KEY is not defined in environment variables")
     }
 
-    // 2. جلب الأسعار من الـ API
+    // 1. جلب الأسعار من الـ API
     console.log("Fetching rates from ExchangeRate-API...");
     const response = await fetch(`https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`)
     const data = (await response.json()) as ExchangeRateResponse
@@ -58,7 +50,7 @@ export async function GET(request: Request) {
 
     const rates = data.conversion_rates
 
-    // 3. استخدام Supabase Admin Client (لإلغاء قيود الكوكيز والـ RLS في مهام الـ Cron)
+    // 2. استخدام Supabase Admin Client
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
@@ -88,7 +80,7 @@ export async function GET(request: Request) {
       }
     }
 
-    // 4. تنفيذ التحديث في قاعدة البيانات
+    // 3. تنفيذ التحديث في قاعدة البيانات
     if (currencyRecords.length > 0) {
       console.log("Upserting currency records to Supabase...");
       const { error } = await supabase
