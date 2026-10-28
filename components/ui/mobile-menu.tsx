@@ -55,6 +55,7 @@ const MobileMenu = ({ isOpen, onOpenChange, children }: MobileMenuProps) => {
 interface MobileMenuHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   showCloseButton?: boolean
   onClose?: () => void
+  
 }
 
 const MobileMenuHeader = React.forwardRef<

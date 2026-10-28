@@ -98,7 +98,7 @@ function MobileMenuDrawer({
     <>
       <MenuDrawer isOpen={isOpen} onOpenChange={(open) => !open && onClose()}>
         {user && (
-          <MobileMenuHeader>
+          <MobileMenuHeader showCloseButton={false}>
             <UserProfileHeader showAvatar={true} />
           </MobileMenuHeader>
         )}
