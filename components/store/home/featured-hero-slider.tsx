@@ -36,7 +36,10 @@ function SlideItem({
         href={`/${locale}/product/${slide.slug}`}
         className="relative block w-full overflow-hidden rounded-2xl bg-muted/40 sm:rounded-3xl"
       >
-        <AspectRatio ratio={21 / 9} className="w-full">
+        <AspectRatio
+          ratio={21 / 9}
+          className="flex w-full items-center justify-center"
+        >
           {slide.image_url && !imageError ? (
             // تم ضبط النسبة هنا (مثلاً 21/9 لتناسب بانر الـ Hero العريض أو 16/9)
             <img

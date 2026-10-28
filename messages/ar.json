@@ -1157,7 +1157,13 @@
     "ATTRIBUTE_VALUE_PLACEHOLDER": "القيمة...",
     "ADD": "إضافة",
     "SKU_NAME_REQUIRED": "أدخل اسم المنتج أولًا",
-    "URL_SLUG_PLACEHOLDER": "premium-oxford-cotton-shirt"
+    "URL_SLUG_PLACEHOLDER": "premium-oxford-cotton-shirt",
+    "IMAGE_GUIDE_TITLE": "💡 إرشادات صور المنتج:",
+    "IMAGE_GUIDE_FEATURED": "المنتجات المميزة تستخدم نسبة عرض 21/9 (Hero Slider).",
+    "IMAGE_GUIDE_REGULAR": "المنتجات العادية والبطاقات تستخدم نسبة مربعة 1/1.",
+    "IMAGE_GUIDE_GENERAL": "الصورة العامة (بدون ربط متغير): هي الصورة الأساسية التي تظهر في القوائم والصفحة الرئيسية.",
+    "IMAGE_GUIDE_VARIANT": "الصورة المرتبطة بمتغير: تظهر فقط داخل صفحة تفاصيل المنتج عند اختيار ذلك المتغير.",
+    "ALREADY_USED": "مستخدم مسبقاً"
   },
   "ReviewsManagement": {
     "REVIEWS_MANAGEMENT": "تقييمات المنتجات",

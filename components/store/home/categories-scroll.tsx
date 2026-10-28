@@ -132,7 +132,10 @@ export default function CategoriesScroll({
               >
                 {/* أيقونة أو صورة التصنيف */}
                 <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-background text-muted-foreground transition-transform duration-200 group-hover:scale-105 sm:size-8">
-                  <AspectRatio ratio={1 / 1} className="w-full">
+                  <AspectRatio
+                    ratio={1 / 1}
+                    className="flex w-full items-center justify-center"
+                  >
                     {imageUrl ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img

@@ -1161,7 +1161,13 @@
     "ATTRIBUTE_VALUE_PLACEHOLDER": "Value...",
     "ADD": "Add",
     "SKU_NAME_REQUIRED": "Please enter the product name first",
-    "URL_SLUG_PLACEHOLDER": "premium-oxford-cotton-shirt"
+    "URL_SLUG_PLACEHOLDER": "premium-oxford-cotton-shirt",
+    "IMAGE_GUIDE_TITLE": "💡 Product Image Guidelines:",
+    "IMAGE_GUIDE_FEATURED": "Featured products use a 21/9 aspect ratio (Hero Slider).",
+    "IMAGE_GUIDE_REGULAR": "Regular products and cards use a 1/1 square aspect ratio.",
+    "IMAGE_GUIDE_GENERAL": "General image (unlinked): Serves as the primary image across lists and homepage.",
+    "IMAGE_GUIDE_VARIANT": "Variant-linked image: Appears exclusively on the product details page when that variant is selected.",
+    "ALREADY_USED": "Already used"
   },
   "ReviewsManagement": {
     "REVIEWS_MANAGEMENT": "Reviews Management",

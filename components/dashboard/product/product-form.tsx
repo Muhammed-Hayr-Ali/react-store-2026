@@ -1404,6 +1404,11 @@ function VariantCard({
   )
 }
 
+/**
+ * @file components/dashboard/product/product-form.tsx (ImageCard component)
+ * @description Card component for managing product images, variant linking, and primary flags with localized UI guidance.
+ */
+
 interface ImageCardProps {
   index: number
   control: Control<FormValues>
@@ -1477,7 +1482,10 @@ function ImageCard({
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-border bg-muted/10 p-4 sm:flex-row">
       <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-background text-muted-foreground">
-        <AspectRatio ratio={1 / 1} className="w-full">
+        <AspectRatio
+          ratio={1 / 1}
+          className="flex w-full items-center justify-center"
+        >
           {currentUrl ? (
             <img
               src={currentUrl}
@@ -1509,6 +1517,43 @@ function ImageCard({
             <Trash2Icon className="size-3.5" />
           </Button>
         </div>
+
+        {/* 📌 إرشادات مرئية للمستخدم في الواجهة باستخدام مفاتيح الترجمة */}
+        {index === 0 && (
+          <div className="space-y-1 rounded-md border border-primary/20 bg-primary/5 p-2.5 text-[11px] text-muted-foreground">
+            <p className="font-medium text-foreground">
+              {t("IMAGE_GUIDE_TITLE", {
+                default: "💡 Product Image Guidelines:",
+              })}
+            </p>
+            <ul className="list-inside list-disc space-y-0.5 ps-1">
+              <li>
+                {t("IMAGE_GUIDE_FEATURED", {
+                  default:
+                    "Featured products use a 21/9 aspect ratio (Hero Slider).",
+                })}
+              </li>
+              <li>
+                {t("IMAGE_GUIDE_REGULAR", {
+                  default:
+                    "Regular products and cards use a 1/1 square aspect ratio.",
+                })}
+              </li>
+              <li>
+                {t("IMAGE_GUIDE_GENERAL", {
+                  default:
+                    "General image (unlinked): Serves as the primary image across lists and homepage.",
+                })}
+              </li>
+              <li>
+                {t("IMAGE_GUIDE_VARIANT", {
+                  default:
+                    "Variant-linked image: Appears exclusively on the product details page when that variant is selected.",
+                })}
+              </li>
+            </ul>
+          </div>
+        )}
 
         <Controller
           name={`images.${index}.url`}
@@ -1580,7 +1625,9 @@ function ImageCard({
                           disabled={isAlreadyUsed}
                         >
                           {displayLabel}{" "}
-                          {isAlreadyUsed ? "(مستخدم مسبقاً)" : ""}
+                          {isAlreadyUsed
+                            ? `(${t("ALREADY_USED", { default: "Already used" })})`
+                            : ""}
                         </SelectItem>
                       )
                     })}

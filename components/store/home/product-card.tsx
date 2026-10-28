@@ -19,7 +19,10 @@ interface ProductCardProps {
   layout?: "vertical" | "horizontal"
 }
 
-export function ProductCard({ product, layout = "vertical" }: ProductCardProps) {
+export function ProductCard({
+  product,
+  layout = "vertical",
+}: ProductCardProps) {
   const { formatRawPrice, currentCurrency } = useCurrency()
   const { addItem } = useCart()
   const [isLoading, setIsLoading] = React.useState(false)
@@ -59,7 +62,10 @@ export function ProductCard({ product, layout = "vertical" }: ProductCardProps) 
       >
         {/* Image Container with Aspect Ratio */}
         <div className="relative w-20 shrink-0 overflow-hidden rounded-xl bg-background/50 sm:w-24">
-          <AspectRatio ratio={1 / 1} className="w-full">
+          <AspectRatio
+            ratio={1 / 1}
+            className="flex w-full items-center justify-center"
+          >
             {product.image_url ? (
               <img
                 src={product.image_url}
@@ -98,8 +104,12 @@ export function ProductCard({ product, layout = "vertical" }: ProductCardProps) 
             {product.review_count > 0 && (
               <div className="flex items-center gap-1 pt-0.5 text-[10px] text-muted-foreground">
                 <StarIcon className="size-2.5 fill-amber-500 text-amber-500" />
-                <span className="font-medium text-foreground">{product.rating}</span>
-                <span className="text-muted-foreground/70">({product.review_count})</span>
+                <span className="font-medium text-foreground">
+                  {product.rating}
+                </span>
+                <span className="text-muted-foreground/70">
+                  ({product.review_count})
+                </span>
               </div>
             )}
           </div>
@@ -148,7 +158,11 @@ export function ProductCard({ product, layout = "vertical" }: ProductCardProps) 
     >
       {/* Image Container with Aspect Ratio */}
       <div className="relative w-full overflow-hidden rounded-xl bg-background/50">
-        <AspectRatio ratio={1 / 1} className="w-full">
+        <AspectRatio
+          ratio={1 / 1}
+          className="flex w-full items-center justify-center"
+        >
+          {" "}
           {product.image_url ? (
             <img
               src={product.image_url}

@@ -79,7 +79,10 @@ export function CartItemCard({ item }: CartItemCardProps) {
     >
       {/* صورة المنتج - مصغرة جداً */}
       <div className="relative size-20 shrink-0 overflow-hidden rounded-lg bg-muted shadow-2xs">
-        <AspectRatio ratio={1 / 1} className="w-full">
+        <AspectRatio
+          ratio={1 / 1}
+          className="flex w-full items-center justify-center"
+        >
           {imageUrl ? (
             <img
               src={imageUrl}

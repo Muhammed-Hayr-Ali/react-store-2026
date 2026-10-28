@@ -116,7 +116,11 @@ export function WishlistProductCard({
 
         {/* Image Container */}
         <div className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-background/50 sm:size-24">
-          <AspectRatio ratio={1 / 1} className="w-full">
+          <AspectRatio
+            ratio={1 / 1}
+            className="flex w-full items-center justify-center"
+          >
+            {" "}
             {product.image_url ? (
               <img
                 src={product.image_url}
@@ -230,7 +234,11 @@ export function WishlistProductCard({
 
       {/* Image Container */}
       <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-background/50">
-        <AspectRatio ratio={1 / 1} className="w-full">
+        <AspectRatio
+          ratio={1 / 1}
+          className="flex w-full items-center justify-center"
+        >
+          {" "}
           {product.image_url ? (
             <img
               src={product.image_url}
