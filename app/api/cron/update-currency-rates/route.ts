@@ -1,12 +1,16 @@
 /**
  * @file app/api/cron/update-currency-rates/route.ts
- * @description Cron job endpoint to fetch latest exchange rates from exchangerate-api.com and bulk upsert Supabase.
+ * @description Robust Cron job endpoint with explicit logging and Supabase Admin client.
  */
 
 import { NextResponse } from "next/server"
-import { createServerClient } from "@/lib/database/supabase/server"
+import { createClient } from "@supabase/supabase-js"
 
-// بيانات العملات الأساسية لضمان عدم حدوث خطأ Not-Null Constraint في الجدول
+const TARGET_CURRENCIES = [
+  "USD", "EUR", "SAR", "AED", "KWD", 
+  "QAR", "BHD", "TRY", "EGP", "IQD", "SYP"
+] as const
+
 const CURRENCY_METADATA: Record<string, { name: string; name_ar: string; symbol: string }> = {
   USD: { name: "US Dollar", name_ar: "دولار أمريكي", symbol: "$" },
   EUR: { name: "Euro", name_ar: "يورو", symbol: "€" },
@@ -27,19 +31,24 @@ interface ExchangeRateResponse {
 }
 
 export async function GET(request: Request) {
-  // 1. التحقق من مفتاح الحماية الخاص بـ Vercel Cron
-  const authHeader = request.headers.get("authorization")
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
-  }
+  // طباعة أولية لضمان ظهور أي محاولة دخول في اللوجز
+  console.log("=== CRON JOB STARTED: /api/cron/update-currency-rates ===");
 
   try {
+    // 1. التحقق من مفتاح الحماية
+    const authHeader = request.headers.get("authorization")
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      console.error("Unauthorized cron execution attempt.");
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+    }
+
     const apiKey = process.env.EXCHANGE_RATE_API_KEY
     if (!apiKey) {
       throw new Error("EXCHANGE_RATE_API_KEY is not defined in environment variables")
     }
 
     // 2. جلب الأسعار من الـ API
+    console.log("Fetching rates from ExchangeRate-API...");
     const response = await fetch(`https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`)
     const data = (await response.json()) as ExchangeRateResponse
 
@@ -48,18 +57,25 @@ export async function GET(request: Request) {
     }
 
     const rates = data.conversion_rates
-    const supabase = await createServerClient()
+
+    // 3. استخدام Supabase Admin Client (لإلغاء قيود الكوكيز والـ RLS في مهام الـ Cron)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error("Supabase environment variables (URL or SERVICE_ROLE_KEY) are missing")
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { persistSession: false }
+    })
 
     const currencyRecords = []
 
-    // 3. تجهيز بيانات العملات المستهدفة للتحديث الجماعي (Upsert)
     for (const [code, meta] of Object.entries(CURRENCY_METADATA)) {
       const rateValue = rates[code]
-      
       if (typeof rateValue === "number") {
-        // تحويل السعر إلى رقم صحيح بدقة 4 منازل عشرية (ضرب في 10,000)
         const rateFactor = Math.round(rateValue * 10000)
-
         currencyRecords.push({
           code,
           name: meta.name,
@@ -74,6 +90,7 @@ export async function GET(request: Request) {
 
     // 4. تنفيذ التحديث في قاعدة البيانات
     if (currencyRecords.length > 0) {
+      console.log("Upserting currency records to Supabase...");
       const { error } = await supabase
         .from("currencies")
         .upsert(currencyRecords, { onConflict: "code" })
@@ -83,6 +100,7 @@ export async function GET(request: Request) {
       }
     }
 
+    console.log("=== CRON JOB COMPLETED SUCCESSFULLY ===");
     return NextResponse.json({ 
       success: true, 
       message: "Currency rates updated successfully in database via cron job" 
@@ -90,6 +108,7 @@ export async function GET(request: Request) {
 
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred"
+    console.error("CRON JOB ERROR:", errorMessage);
     return NextResponse.json({ success: false, error: errorMessage }, { status: 500 })
   }
 }
