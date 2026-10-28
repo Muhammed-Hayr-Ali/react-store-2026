@@ -68,7 +68,7 @@ function MobileMenuDrawer({
 
   const handleOpenLogout = () => {
     onClose()
-    setLogoutStatus(false)
+    setLogoutStatus(true)
   }
 
   return (

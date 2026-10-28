@@ -10,7 +10,6 @@ import Link from "next/link"
 import { SearchIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 
 import { appRoutes } from "@/lib/config/app-routes"
 import { useUser } from "@/lib/context/user-context"
