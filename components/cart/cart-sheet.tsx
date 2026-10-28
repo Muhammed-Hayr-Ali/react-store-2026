@@ -24,7 +24,6 @@ import { useCurrency } from "@/lib/context/currency-context"
 import { CartItemCard } from "./cart-item-card"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Spinner } from "@/components/ui/spinner"
 import CartButton from "./cart-button"
 
 export function CartSheet() {
