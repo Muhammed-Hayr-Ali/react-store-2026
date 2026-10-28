@@ -12,8 +12,7 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { appRoutes } from "@/lib/config/app-routes"
 import { createAdminClient } from "@/lib/database/supabase/admin"
 
-import { hasPermission, PERMISSIONS } from "../../role"
-
+ 
 interface DeleteUserInput {
   userId: string
 }
@@ -21,11 +20,7 @@ interface DeleteUserInput {
 export async function deleteUser(
   input: DeleteUserInput
 ): Promise<ApiResult<null>> {
-  const canDelete = await hasPermission(PERMISSIONS.DELETE_USER)
-  if (!canDelete) {
-    return { success: false, error: "PERMISSION_DENIED" }
-  }
-
+ 
   const idValidation = z.string().uuid().safeParse(input.userId)
   if (!idValidation.success) {
     return { success: false, error: "INVALID_USER_ID" }

@@ -1,10 +1,7 @@
-import { notFound } from "next/navigation"
-import { getTranslations } from "next-intl/server"
-import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-import { appConfig } from "@/lib/config/app_config"
+ import { getTranslations } from "next-intl/server"
+ import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import { Can } from "@/components/shared/can"
-
+ 
 interface PageProps {
   params: Promise<{
     locale: string
@@ -27,20 +24,12 @@ export default async function UserOverviewPage({ params }: PageProps) {
   const { locale } = await params
   // 2. تهيئة المترجم ليعمل داخل المكون الخادم (Server Component)
   const t = await getTranslations({ locale, namespace: "DashboardPage" })
-
-  const canView = await hasPermission([
-    PERMISSIONS.VIEW_ADMIN_OVERVIEW,
-    PERMISSIONS.VIEW_USER_OVERVIEW,
-  ])
-
-  if (!canView) {
-    notFound()
-  }
+ 
+ 
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">
       {/* User Overview */}
-      <Can permission={PERMISSIONS.VIEW_USER_OVERVIEW}>
         <>
           <div className="border-b border-border/40 pb-3">
             <h1 className="text-xl font-bold tracking-tight text-foreground">
@@ -75,10 +64,8 @@ export default async function UserOverviewPage({ params }: PageProps) {
             {t("RECENT_ACTIVITIES")}
           </div>
         </>
-      </Can>
 
       {/* Admin Overview */}
-      <Can permission={PERMISSIONS.VIEW_ADMIN_OVERVIEW}>
         <>
           <div className="border-b border-border/40 pb-3">
             <h1 className="text-xl font-bold tracking-tight text-foreground">
@@ -114,7 +101,6 @@ export default async function UserOverviewPage({ params }: PageProps) {
             {t("PLATFORM_ANALYTICS")}
           </div>
         </>
-      </Can>
     </div>
   )
 }

@@ -10,8 +10,7 @@ import { revalidatePath } from "next/cache"
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
-import { hasPermission, PERMISSIONS } from "../../role"
-import { getValidationDetails } from "../../validation"
+ import { getValidationDetails } from "../../validation"
 import { updateReviewStatusSchema, type UpdateReviewStatusInput } from "../schemas"
 import type { ProductReview } from "../types"
 
@@ -19,12 +18,7 @@ export async function updateReviewStatus(
   input: UpdateReviewStatusInput
 ): Promise<ApiResult<ProductReview>> {
   
-  // 1. التحقق من صلاحيات المشرف
-  const canUpdate = await hasPermission(PERMISSIONS.UPDATE_REVIEW) // تأكد من إضافة هذه الصلاحية لملف role.ts
-  if (!canUpdate) {
-    return { success: false, error: "PERMISSION_DENIED" }
-  }
-
+ 
   // 2. التحقق من صحة المدخلات
   const validation = updateReviewStatusSchema.safeParse(input)
   if (!validation.success) {

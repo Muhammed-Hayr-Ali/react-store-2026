@@ -52,22 +52,19 @@ export const sidebarConfig: SidebarConfig = {
       key: "categories-management",
       url: appRoutes.dashboard.categories,
       icon: Tags,
-      requiredPermission: PERMISSIONS.VIEW_CATEGORIES_MANAGEMENT,
-    },
+     },
     {
       titleKey: "BRANDS_MANAGEMENT",
       key: "brands-management",
       url: appRoutes.dashboard.brands,
       icon: Tags,
-      requiredPermission: PERMISSIONS.VIEW_BRANDS_MANAGEMENT,
-    },
+     },
     {
       titleKey: "PRODUCTS_MANAGEMENT",
       key: "products-management",
       url: appRoutes.dashboard.products,
       icon: PackageIcon,
-      requiredPermission: PERMISSIONS.VIEW_PRODUCTS,
-    },
+     },
     
     // --- 2. تمت إضافة قسم التقييمات هنا بعد المنتجات مباشرة ---
     {
@@ -75,8 +72,7 @@ export const sidebarConfig: SidebarConfig = {
       key: "reviews-management",
       url: appRoutes.dashboard.reviews, // تأكد أن هذا المسار موجود في appRoutes
       icon: MessageSquareIcon,
-      requiredPermission: PERMISSIONS.VIEW_REVIEWS_MANAGEMENT,
-    },
+     },
     // -----------------------------------------------------------
 
     {
@@ -84,15 +80,13 @@ export const sidebarConfig: SidebarConfig = {
       key: "users-management",
       url: appRoutes.dashboard.users,
       icon: Users,
-      requiredPermission: PERMISSIONS.VIEW_USERS_MANAGEMENT,
-    },
+     },
     {
       titleKey: "NEWSLETTER_SUBSCRIBERS",
       key: "newsletter-subscribers",
       url: appRoutes.dashboard.newsletterSubscribers,
       icon: Mail,
-      requiredPermission: PERMISSIONS.VIEW_NEWSLETTER_SUBSCRIBERS,
-    },
+     },
 
     {
       titleKey: "TEAM_MANAGEMENT",
@@ -103,13 +97,11 @@ export const sidebarConfig: SidebarConfig = {
         {
           titleKey: "ROLES_AND_PERMISSIONS",
           url: appRoutes.dashboard.team.roles,
-          requiredPermission: PERMISSIONS.VIEW_ROLES_MANAGEMENT,
-        },
+         },
         {
           titleKey: "STAFF_ACCESS",
           url: appRoutes.dashboard.team.staffAccess,
-          requiredPermission: PERMISSIONS.VIEW_STAFF_ACCESS,
-        },
+         },
       ],
     },
   ],

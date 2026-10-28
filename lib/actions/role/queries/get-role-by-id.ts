@@ -9,19 +9,15 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { getValidationDetails } from "../../validation"
 import { roleIdSchema, type RoleIdInput } from "../schemas"
-import { hasPermission } from "../permission-checker"
-import { PERMISSIONS, type RoleRecord } from "../types"
-
+import { RoleRecord } from "../types"
+ 
 /**
  * تجلب دورًا واحدًا باستخدام معرّفه.
  */
 export async function getRoleById(
   input: RoleIdInput
 ): Promise<ApiResult<RoleRecord>> {
-  const canViewRoles = await hasPermission(PERMISSIONS.VIEW_ROLES_MANAGEMENT)
-  if (!canViewRoles) {
-    return { success: false, error: "PERMISSION_DENIED" }
-  }
+ 
 
   const validation = roleIdSchema.safeParse(input)
   if (!validation.success) {

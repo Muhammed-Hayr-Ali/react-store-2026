@@ -93,9 +93,6 @@ function CategoryRowActions({
   const t = useTranslations("CategoriesManagement")
 
   return (
-    <Can
-      permission={[PERMISSIONS.UPDATE_CATEGORY, PERMISSIONS.DELETE_CATEGORY]}
-    >
       <div className="flex justify-end">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -109,7 +106,6 @@ function CategoryRowActions({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40 text-xs">
-            <Can permission={PERMISSIONS.UPDATE_CATEGORY}>
               <DropdownMenuItem
                 onClick={() => onEdit(category)}
                 className="cursor-pointer"
@@ -117,8 +113,6 @@ function CategoryRowActions({
                 <PencilIcon className="me-2 size-3.5" />
                 {t("EDIT_ACTION")}
               </DropdownMenuItem>
-            </Can>
-            <Can permission={PERMISSIONS.DELETE_CATEGORY}>
               <DropdownMenuItem
                 onSelect={() => onDelete(category)}
                 className="cursor-pointer text-destructive focus:text-destructive"
@@ -126,11 +120,9 @@ function CategoryRowActions({
                 <Trash2Icon className="me-2 size-3.5" />
                 {t("DELETE_ACTION")}
               </DropdownMenuItem>
-            </Can>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </Can>
   )
 }
 
@@ -561,7 +553,6 @@ export function CategoriesTable({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Can permission={PERMISSIONS.CREATE_CATEGORY}>
           <CategoryFormSheet
             open={formOpen}
             category={editingCategory}
@@ -593,7 +584,6 @@ export function CategoriesTable({
             }}
             onDeleted={handleDeleted}
           />
-        </Can>
       </div>
 
       <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">

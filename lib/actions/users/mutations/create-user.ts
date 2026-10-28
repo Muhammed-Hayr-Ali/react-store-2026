@@ -10,18 +10,14 @@ import { revalidatePath } from "next/cache"
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createAdminClient } from "@/lib/database/supabase/admin"
 
-import { hasPermission, PERMISSIONS } from "../../role"
-import { getValidationDetails } from "../../validation"
+ import { getValidationDetails } from "../../validation"
 import { createUserSchema, type CreateUserFormValues } from "../schemas"
 import type { AdminUserSummary } from "../types"
 
 export async function createUser(
   input: CreateUserFormValues
 ): Promise<ApiResult<AdminUserSummary>> {
-  const canCreate = await hasPermission(PERMISSIONS.CREATE_USER)
-  if (!canCreate) {
-    return { success: false, error: "PERMISSION_DENIED" }
-  }
+ 
 
   const validation = createUserSchema.safeParse(input)
   if (!validation.success) {

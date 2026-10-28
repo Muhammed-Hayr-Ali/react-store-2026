@@ -10,19 +10,14 @@ import { revalidatePath } from "next/cache"
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
-import { hasPermission, PERMISSIONS } from "../../role"
-import { getValidationDetails } from "../../validation"
+ import { getValidationDetails } from "../../validation"
 import { updateBrandSchema, type UpdateBrandInput } from "../schemas"
 import type { BrandRecord } from "../types"
 
 export async function updateBrand(
   input: UpdateBrandInput
 ): Promise<ApiResult<BrandRecord>> {
-  const canUpdate = await hasPermission(PERMISSIONS.UPDATE_BRAND)
-  if (!canUpdate) {
-    return { success: false, error: "PERMISSION_DENIED" }
-  }
-
+ 
   const validation = updateBrandSchema.safeParse(input)
   if (!validation.success) {
     return {

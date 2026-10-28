@@ -111,7 +111,6 @@ export function AssignRoleDialog({
 
   // Render a permission-gated menu trigger and role assignment dialog.
   return (
-    <Can permission={PERMISSIONS.ASSIGN_ROLE}>
       <AlertDialog
         open={isOpen}
         onOpenChange={(open) => {
@@ -253,7 +252,7 @@ export function AssignRoleDialog({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Can>
+    
   )
 }
 

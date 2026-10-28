@@ -4,8 +4,7 @@
  * @file components/dashboard/staff-access/staff-access-table.tsx
  * @description Standard TanStack Table v8 implementation for staff authorization & RBAC access.
  * Fully compliant with React 19, strict VisibilityState, role assignment dialogs,
- * mobile column isolation, RTL-first layout, and permission gating via <Can />.
- */
+  */
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
@@ -283,8 +282,7 @@ export function StaffAccessTable({
                     >
                       <ShieldIcon className="size-3 text-primary opacity-70" />
                       <span>{role.name}</span>
-                      <Can permission={PERMISSIONS.REMOVE_ROLE}>
-                        <button
+                         <button
                           type="button"
                           disabled={isRevoking}
                           onClick={() =>
@@ -299,7 +297,7 @@ export function StaffAccessTable({
                         >
                           <XIcon className="size-3" />
                         </button>
-                      </Can>
+                      
                     </Badge>
                   )
                 })

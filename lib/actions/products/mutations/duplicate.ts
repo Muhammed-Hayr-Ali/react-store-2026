@@ -8,8 +8,7 @@
 
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-import type { ProductVariantItem, ProductImageItem } from "../types"
+ import type { ProductVariantItem, ProductImageItem } from "../types"
 
 export type DuplicateProductResult =
   | { success: true }
@@ -19,11 +18,7 @@ export async function duplicateProduct(
   productId: string
 ): Promise<DuplicateProductResult> {
   try {
-    const canCreate = await hasPermission(PERMISSIONS.CREATE_PRODUCT)
-    if (!canCreate) {
-      return { success: false, error: "PERMISSION_DENIED" }
-    }
-
+ 
     const supabase = await createServerClient()
 
     const { data: originalProduct, error: fetchError } = await supabase

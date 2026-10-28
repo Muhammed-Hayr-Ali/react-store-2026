@@ -8,8 +8,7 @@
 
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-import { createProductSchema, type CreateProductInput } from "../schemas"
+ import { createProductSchema, type CreateProductInput } from "../schemas"
 
 export type CreateProductResult =
   | { success: true }
@@ -19,11 +18,7 @@ export async function createProduct(
   input: CreateProductInput
 ): Promise<CreateProductResult> {
   try {
-    const canCreate = await hasPermission(PERMISSIONS.CREATE_PRODUCT)
-    if (!canCreate) {
-      return { success: false, error: "PERMISSION_DENIED" }
-    }
-
+ 
     const validation = createProductSchema.safeParse(input)
     if (!validation.success) {
       return { success: false, error: "VALIDATION_ERROR" }

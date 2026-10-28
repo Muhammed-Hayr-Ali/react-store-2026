@@ -11,17 +11,12 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
 import { getValidationDetails } from "../../validation"
-import { hasPermission, PERMISSIONS } from "../../role/index"
-import { assignUserRoleSchema, type AssignUserRoleInput } from "../schemas"
+ import { assignUserRoleSchema, type AssignUserRoleInput } from "../schemas"
 
 export async function removeRoleFromUser(
   input: AssignUserRoleInput
 ): Promise<ApiResult<null>> {
-  const canRemove = await hasPermission(PERMISSIONS.REMOVE_ROLE)
-  if (!canRemove) {
-    return { success: false, error: "PERMISSION_DENIED" }
-  }
-
+ 
   const validation = assignUserRoleSchema.safeParse(input)
   if (!validation.success) {
     return {

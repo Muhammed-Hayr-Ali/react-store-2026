@@ -1,5 +1,4 @@
-import { notFound } from "next/navigation"
-import { getTranslations } from "next-intl/server"
+ import { getTranslations } from "next-intl/server"
 import { TagsIcon } from "lucide-react"
 
 import { CategoriesTable } from "@/components/dashboard/categories/categories-table"
@@ -7,8 +6,7 @@ import { CategoriesSummary } from "@/components/dashboard/categories/categories-
 import { getCategoriesPageData } from "@/lib/actions/categories/queries/get-categories-page-data"
 import { getCategoriesSummary } from "@/lib/actions/categories/queries/get-categories-summary"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
-import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-import { appConfig } from "@/lib/config/app_config"
+ import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 
 interface PageProps {
@@ -41,9 +39,7 @@ export default async function Page({ params }: PageProps) {
     namespace: "ActionErrors",
   })
 
-  // Check administrative permissions
-  if (!(await hasPermission(PERMISSIONS.VIEW_CATEGORIES_MANAGEMENT))) notFound()
-
+ 
   // Fetch pre-processed page data and business logic
   const [pageDataResult, summaryResult] = await Promise.all([
     getCategoriesPageData(),

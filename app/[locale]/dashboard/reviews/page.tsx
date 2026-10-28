@@ -1,5 +1,4 @@
-import { notFound } from "next/navigation"
-import { getTranslations } from "next-intl/server"
+ import { getTranslations } from "next-intl/server"
 import { MessageSquareIcon } from "lucide-react"
 
 import { ReviewsTable } from "@/components/dashboard/reviews/reviews-table"
@@ -7,8 +6,7 @@ import { ReviewsSummary } from "@/components/dashboard/reviews/reviews-summary"
 import { getReviewsPageData } from "@/lib/actions/reviews/queries/get-reviews-page-data"
 // نستخدم الـ Page Data الذي يجمع كل شيء، لكن لو احتجنا الملخص منفصلاً سنستخدمه من الداخل
 import { getActionErrorKey } from "@/lib/actions/error-keys"
-import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-import { appConfig } from "@/lib/config/app_config"
+ import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 
 interface PageProps {
@@ -41,11 +39,7 @@ export default async function Page({ params }: PageProps) {
     namespace: "ActionErrors",
   })
 
-  // Check administrative permissions
-  if (!(await hasPermission(PERMISSIONS.VIEW_REVIEWS_MANAGEMENT))) {
-    notFound()
-  }
-
+ 
   // Fetch pre-processed page data and business logic
   // نحن جلبنا كل شيء بداخل دالة getReviewsPageData كما بنيناها سابقاً
   const pageDataResult = await getReviewsPageData()

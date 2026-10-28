@@ -10,18 +10,14 @@ import { revalidatePath } from "next/cache"
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
-import { hasPermission, PERMISSIONS } from "../../role"
-import { getValidationDetails } from "../../validation"
+ import { getValidationDetails } from "../../validation"
 import { brandSchema, type BrandFormValues } from "../schemas"
 import type { BrandRecord } from "../types"
 
 export async function createBrand(
   input: BrandFormValues
 ): Promise<ApiResult<BrandRecord>> {
-  const canCreate = await hasPermission(PERMISSIONS.CREATE_BRAND)
-  if (!canCreate) {
-    return { success: false, error: "PERMISSION_DENIED" }
-  }
+ 
 
   const validation = brandSchema.safeParse(input)
   if (!validation.success) {

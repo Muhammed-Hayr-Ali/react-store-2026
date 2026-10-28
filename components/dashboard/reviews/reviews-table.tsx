@@ -87,7 +87,6 @@ function ReviewRowActions({ review, onEdit, onDelete }: ReviewRowActionsProps) {
   const t = useTranslations("ReviewsManagement")
 
   return (
-    <Can permission={[PERMISSIONS.UPDATE_REVIEW, PERMISSIONS.DELETE_REVIEW]}>
       <div className="flex justify-end">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -101,7 +100,6 @@ function ReviewRowActions({ review, onEdit, onDelete }: ReviewRowActionsProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40 text-xs">
-            <Can permission={PERMISSIONS.UPDATE_REVIEW}>
               <DropdownMenuItem
                 onClick={() => onEdit(review)}
                 className="cursor-pointer"
@@ -109,8 +107,6 @@ function ReviewRowActions({ review, onEdit, onDelete }: ReviewRowActionsProps) {
                 <PencilIcon className="me-2 size-3.5" />
                 {t("CHANGE_STATUS_ACTION")}
               </DropdownMenuItem>
-            </Can>
-            <Can permission={PERMISSIONS.DELETE_REVIEW}>
               <DropdownMenuItem
                 onSelect={() => onDelete(review)}
                 className="cursor-pointer text-destructive focus:text-destructive"
@@ -118,11 +114,10 @@ function ReviewRowActions({ review, onEdit, onDelete }: ReviewRowActionsProps) {
                 <Trash2Icon className="me-2 size-3.5" />
                 {t("DELETE_ACTION")}
               </DropdownMenuItem>
-            </Can>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </Can>
+   
   )
 }
 

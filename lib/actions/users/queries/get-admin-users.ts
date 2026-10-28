@@ -8,8 +8,7 @@
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
-import { hasPermission, PERMISSIONS } from "../../role"
-import { getValidationDetails } from "../../validation"
+ import { getValidationDetails } from "../../validation"
 import { getAdminUsersSchema, type GetAdminUsersInput } from "../schemas"
 import type { AdminUserSummary } from "../types"
 
@@ -19,11 +18,7 @@ import type { AdminUserSummary } from "../types"
 export async function getAdminUsers(
   input?: GetAdminUsersInput
 ): Promise<ApiResult<AdminUserSummary[]>> {
-  const canViewUsers = await hasPermission(PERMISSIONS.VIEW_USERS_MANAGEMENT)
-  if (!canViewUsers) {
-    return { success: false, error: "PERMISSION_DENIED" }
-  }
-
+ 
   const validation = getAdminUsersSchema.safeParse(input ?? {})
   if (!validation.success) {
     return {

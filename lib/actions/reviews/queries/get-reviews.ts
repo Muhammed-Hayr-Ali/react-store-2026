@@ -8,8 +8,7 @@
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
-import { hasPermission, PERMISSIONS } from "../../role"
-import { getValidationDetails } from "../../validation"
+ import { getValidationDetails } from "../../validation"
 import { getReviewsSchema, type GetReviewsInput } from "../schemas"
 import type { ReviewWithUser } from "../types"
 
@@ -27,13 +26,7 @@ export async function getReviews(
 
   const { includePending, productId } = validation.data
   
-  if (includePending) {
-    const canViewManagement = await hasPermission(PERMISSIONS.VIEW_REVIEWS_MANAGEMENT)
-    if (!canViewManagement) {
-      return { success: false, error: "PERMISSION_DENIED" }
-    }
-  }
-
+ 
   const supabase = await createServerClient()
   
   // تعديل الأعمدة المطلوبة لتطابق جدول profiles في قاعدة البيانات

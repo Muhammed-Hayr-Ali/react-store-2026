@@ -22,7 +22,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { signOut } from "@/lib/actions/authentication"
 import { appRoutes } from "@/lib/config/app-routes"
-import { useRouter } from "next/navigation"
 
 interface LogoutAlertDialogProps {
   open: boolean
@@ -35,7 +34,6 @@ export function LogoutAlertDialog({
 }: LogoutAlertDialogProps) {
   const t = useTranslations("DashboardSidebar")
   const [isPending, startTransition] = React.useTransition()
-  const router = useRouter()
 
   const handleLogout = () => {
     startTransition(async () => {

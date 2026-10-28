@@ -3,8 +3,7 @@
  * @description Roles and permissions management dashboard page.
  */
 
-import { notFound } from "next/navigation"
-import { getTranslations } from "next-intl/server"
+ import { getTranslations } from "next-intl/server"
 import { ShieldCheckIcon } from "lucide-react"
 
 import { appConfig } from "@/lib/config/app_config"
@@ -12,8 +11,7 @@ import { createMetadata } from "@/lib/config/metadata_generator"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import RolesTable from "@/components/dashboard/roles/roles-table"
 import { RolesSummary } from "@/components/dashboard/roles/roles-summary"
-import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-import { getRolesPageData } from "@/lib/actions/role"
+ import { getRolesPageData } from "@/lib/actions/role"
 
 interface PageProps {
   params: Promise<{
@@ -37,11 +35,8 @@ export default async function Page({ params }: PageProps) {
   const t = await getTranslations({ locale, namespace: "RolesManagement" })
   const tErrors = await getTranslations({ locale, namespace: "ActionErrors" })
 
-  const canView = await hasPermission(PERMISSIONS.VIEW_ROLES_MANAGEMENT)
-  if (!canView) {
-    notFound()
-  }
 
+  
   // استدعاء دالة جلب البيانات والمعالجة المستقلة
   const pageDataResult = await getRolesPageData()
   if (!pageDataResult.success) {

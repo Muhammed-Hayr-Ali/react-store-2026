@@ -55,26 +55,24 @@ export function ReviewsHeader({
 
       {/* زر إضافة تقييم إذا استوفى الشروط والصلاحيات */}
       {canReview && productId && (
-        <Can permission={PERMISSIONS.CREATE_REVIEW}>
-          <ReviewDialog
-            productId={productId}
-            mode="create"
-            open={isOpen}
-            onOpenChange={setIsOpen}
-            onSuccess={() => {
-              setIsOpen(false)
-              onReviewCreated?.()
-            }}
+        <ReviewDialog
+          productId={productId}
+          mode="create"
+          open={isOpen}
+          onOpenChange={setIsOpen}
+          onSuccess={() => {
+            setIsOpen(false)
+            onReviewCreated?.()
+          }}
+        >
+          <Button
+            variant="outline"
+            className="text-xs"
+            aria-label={t("WRITE_REVIEW_BUTTON")}
           >
-            <Button
-              variant="outline"
-              className="text-xs"
-              aria-label={t("WRITE_REVIEW_BUTTON")}
-            >
-              {t("WRITE_REVIEW_BUTTON")}
-            </Button>
-          </ReviewDialog>
-        </Can>
+            {t("WRITE_REVIEW_BUTTON")}
+          </Button>
+        </ReviewDialog>
       )}
     </div>
   )

@@ -11,8 +11,7 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
 import { getValidationDetails } from "../../validation"
-import { hasPermission, PERMISSIONS } from "../index"
-import {
+ import {
   updateRolePermissionsSchema,
   type UpdateRolePermissionsInput,
 } from "../schemas"
@@ -21,13 +20,7 @@ import type { RoleRecord } from "../types"
 export async function updateRole(
   input: UpdateRolePermissionsInput
 ): Promise<ApiResult<RoleRecord>> {
-  const canUpdate = await hasPermission(PERMISSIONS.UPDATE_ROLE)
-  if (!canUpdate) {
-    return {
-      success: false,
-      error: "PERMISSION_DENIED",
-    }
-  }
+ 
 
   const validation = updateRolePermissionsSchema.safeParse(input)
   if (!validation.success) {

@@ -7,8 +7,7 @@ import { createMetadata } from "@/lib/config/metadata_generator"
 import { getProductForEditBySlug } from "@/lib/actions/products/queries/get-product-for-edit-by-slug"
 import { getCategories, type Category } from "@/lib/actions/categories"
 import ProductForm from "@/components/dashboard/product/product-form"
-import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-import { getBrands } from "@/lib/actions/brands"
+ import { getBrands } from "@/lib/actions/brands"
 import type { BrandRecord } from "@/lib/actions/brands/types"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 
@@ -39,15 +38,8 @@ export default async function Page({
   const { slug, locale } = await params
   const t = await getTranslations({ locale, namespace: "ProductsManagement" })
   const tErrors = await getTranslations({ locale, namespace: "ActionErrors" })
-  const canView = await hasPermission(PERMISSIONS.UPDATE_PRODUCT)
-  if (!canView) {
-    console.warn("[product edit page] Access denied", {
-      slug,
-      requiredPermission: PERMISSIONS.UPDATE_PRODUCT,
-    })
-    notFound()
-  }
 
+  
   const [productResult, categoriesResult, brandsResult] = await Promise.all([
     getProductForEditBySlug(slug, { activeOnly: false }),
     getCategories(),

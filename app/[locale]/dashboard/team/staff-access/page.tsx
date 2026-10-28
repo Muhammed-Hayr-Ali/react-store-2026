@@ -1,5 +1,4 @@
-import { notFound } from "next/navigation"
-import { getTranslations } from "next-intl/server"
+ import { getTranslations } from "next-intl/server"
 import { UsersIcon } from "lucide-react"
 
 import { appConfig } from "@/lib/config/app_config"
@@ -10,8 +9,7 @@ import { getStaffAccessPageData } from "@/lib/actions/staff-access/queries/get-s
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import StaffAccessTable from "@/components/dashboard/staff-access/staff-access-table"
 import { StaffAccessSummary } from "@/components/dashboard/staff-access/staff-access-summary"
-import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-
+ 
 interface PageProps {
   params: Promise<{
     locale: string
@@ -40,10 +38,7 @@ export default async function Page({ params }: PageProps) {
   })
   const tErrors = await getTranslations({ locale, namespace: "ActionErrors" })
 
-  const canView = await hasPermission(PERMISSIONS.VIEW_STAFF_ACCESS)
-  if (!canView) {
-    notFound()
-  }
+  
 
   const pageDataResult = await getStaffAccessPageData()
   if (!pageDataResult.success) {

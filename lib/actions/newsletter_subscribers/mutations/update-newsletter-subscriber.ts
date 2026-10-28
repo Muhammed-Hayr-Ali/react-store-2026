@@ -8,8 +8,7 @@
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
-import { hasPermission, PERMISSIONS } from "../../role"
-import { getValidationDetails } from "../../validation"
+ import { getValidationDetails } from "../../validation"
 import {
   updateNewsletterSubscriberStatusSchema,
   type UpdateNewsletterSubscriberStatusInput,
@@ -22,13 +21,7 @@ import type { NewsletterSubscriber } from "../types"
 export async function updateNewsletterSubscriberStatus(
   input: UpdateNewsletterSubscriberStatusInput
 ): Promise<ApiResult<NewsletterSubscriber>> {
-  const canUpdate = await hasPermission(
-    PERMISSIONS.UPDATE_NEWSLETTER_SUBSCRIBER
-  )
-  if (!canUpdate) {
-    return { success: false, error: "PERMISSION_DENIED" }
-  }
-
+ 
   const validation = updateNewsletterSubscriberStatusSchema.safeParse(input)
   if (!validation.success) {
     return {

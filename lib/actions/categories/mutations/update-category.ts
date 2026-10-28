@@ -10,8 +10,7 @@ import { revalidatePath } from "next/cache"
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
-import { hasPermission, PERMISSIONS } from "../../role"
-import { getValidationDetails } from "../../validation"
+ import { getValidationDetails } from "../../validation"
 import { validateCategoryParent } from "../helpers"
 import { updateCategorySchema, type UpdateCategoryInput } from "../schemas"
 import type { Category } from "../types"
@@ -19,11 +18,7 @@ import type { Category } from "../types"
 export async function updateCategory(
   input: UpdateCategoryInput
 ): Promise<ApiResult<Category>> {
-  const canUpdate = await hasPermission(PERMISSIONS.UPDATE_CATEGORY)
-  if (!canUpdate) {
-    return { success: false, error: "PERMISSION_DENIED" }
-  }
-
+ 
   const validation = updateCategorySchema.safeParse(input)
   if (!validation.success) {
     return {

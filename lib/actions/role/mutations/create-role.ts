@@ -11,18 +11,13 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
 import { getValidationDetails } from "../../validation"
-import { hasPermission, PERMISSIONS } from "../index"
-import type { RoleRecord } from "../types"
+ import type { RoleRecord } from "../types"
 import { createRoleSchema, type CreateRoleInput } from "../schemas"
 
 export async function createRole(
   input: CreateRoleInput
 ): Promise<ApiResult<RoleRecord>> {
-  const canCreate = await hasPermission(PERMISSIONS.CREATE_ROLE)
-  if (!canCreate) {
-    return { success: false, error: "PERMISSION_DENIED" }
-  }
-
+ 
   const validation = createRoleSchema.safeParse(input)
   if (!validation.success) {
     return {

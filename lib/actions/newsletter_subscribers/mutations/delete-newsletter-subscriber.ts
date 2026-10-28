@@ -8,8 +8,7 @@
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
-import { hasPermission, PERMISSIONS } from "../../role"
-import { getValidationDetails } from "../../validation"
+ import { getValidationDetails } from "../../validation"
 import {
   newsletterSubscriberIdSchema,
   type NewsletterSubscriberIdInput,
@@ -18,12 +17,7 @@ import {
 export async function deleteNewsletterSubscriber(
   input: NewsletterSubscriberIdInput
 ): Promise<ApiResult<null>> {
-  const canDelete = await hasPermission(
-    PERMISSIONS.DELETE_NEWSLETTER_SUBSCRIBER
-  )
-  if (!canDelete) {
-    return { success: false, error: "PERMISSION_DENIED" }
-  }
+ 
 
   const validation = newsletterSubscriberIdSchema.safeParse(input)
   if (!validation.success) {

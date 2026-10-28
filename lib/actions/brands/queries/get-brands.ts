@@ -9,7 +9,6 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
 import { getValidationDetails } from "../../validation"
-import { hasPermission, PERMISSIONS } from "../../role"
 import { getBrandsSchema, type GetBrandsInput } from "../schemas"
 import type { BrandRecord } from "../types"
 
@@ -26,10 +25,7 @@ export async function getBrands(
   }
 
   const { includeInactive } = validation.data
-  if (
-    includeInactive &&
-    !(await hasPermission(PERMISSIONS.VIEW_BRANDS_MANAGEMENT))
-  ) {
+  if (includeInactive) {
     return { success: false, error: "PERMISSION_DENIED" }
   }
 

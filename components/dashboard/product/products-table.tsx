@@ -4,7 +4,6 @@
  * @file components/dashboard/product/products-table.tsx
  * @description Standard TanStack Table v8 data table for admin product catalog management.
  * Fully compliant with React 19, strict VisibilityState, uncontrolled delete dialogs,
- * RTL-first layout, and permission gating via <Can />.
  */
 
 import * as React from "react"
@@ -201,21 +200,13 @@ export function ProductsTable({
                 <PackageIcon className="size-3.5 text-primary" />
               </div>
               <div className="flex max-w-xs min-w-0 flex-col sm:max-w-md">
-                <Can
-                  permission={PERMISSIONS.UPDATE_PRODUCT}
-                  fallback={
-                    <span className="truncate text-sm font-normal text-foreground">
-                      {product.name}
-                    </span>
-                  }
-                >
+               
                   <Link
                     href={`/dashboard/products/${product.slug}/edit`}
                     className="truncate text-sm font-normal text-foreground transition-colors hover:text-primary hover:underline"
                   >
                     {product.name}
                   </Link>
-                </Can>
                 <span className="truncate font-mono text-[11px] text-muted-foreground">
                   /{product.slug}
                 </span>
@@ -416,7 +407,6 @@ export function ProductsTable({
                   </Link>
                 </DropdownMenuItem>
 
-                <Can permission={PERMISSIONS.UPDATE_PRODUCT}>
                   <DropdownMenuItem asChild>
                     <Link
                       href={`/dashboard/products/${row.original.slug}/edit`}
@@ -426,9 +416,7 @@ export function ProductsTable({
                       {t("EDIT_PRODUCT")}
                     </Link>
                   </DropdownMenuItem>
-                </Can>
 
-                <Can permission={PERMISSIONS.CREATE_PRODUCT}>
                   <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => {
@@ -446,7 +434,6 @@ export function ProductsTable({
                     <CopyIcon className="me-2 size-3.5" />
                     {t("DUPLICATE_PRODUCT")}
                   </DropdownMenuItem>
-                </Can>
 
                 <DropdownMenuItem
                   className="cursor-pointer"
@@ -461,7 +448,6 @@ export function ProductsTable({
                   {t("COPY_STORE_LINK")}
                 </DropdownMenuItem>
 
-                <Can permission={PERMISSIONS.DELETE_PRODUCT}>
                   <DropdownMenuSeparator />
                   {/* Uncontrolled DeleteProductDialog Trigger */}
                   <DeleteProductDialog
@@ -482,7 +468,6 @@ export function ProductsTable({
                       <span>{t("DELETE_PRODUCT")}</span>
                     </DropdownMenuItem>
                   </DeleteProductDialog>
-                </Can>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -711,7 +696,6 @@ export function ProductsTable({
           </DropdownMenu>
 
           {/* Dual Responsive CTA Button */}
-          <Can permission={PERMISSIONS.CREATE_PRODUCT}>
             <Link href="/dashboard/products/create">
               <Button
                 variant="default"
@@ -731,7 +715,6 @@ export function ProductsTable({
                 <span>{t("ADD_PRODUCT")}</span>
               </Button>
             </Link>
-          </Can>
         </div>
       </div>
 

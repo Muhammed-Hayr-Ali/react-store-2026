@@ -9,9 +9,7 @@ import { createMetadata } from "@/lib/config/metadata_generator"
 import {} from "@/lib/config/app-routes"
 import { DataTable } from "@/components/dashboard/product/products-table"
 import { ProductsSummary } from "@/components/dashboard/product/products-summary"
-import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-import { notFound } from "next/navigation"
-import { getTranslations } from "next-intl/server"
+ import { getTranslations } from "next-intl/server"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -28,11 +26,9 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "ProductsManagement" })
   const tErrors = await getTranslations({ locale, namespace: "ActionErrors" })
-  const canView = await hasPermission(PERMISSIONS.VIEW_PRODUCTS)
-  if (!canView) {
-    notFound()
-  }
 
+  
+  
   const headersList = await headers()
   const userAgent = headersList.get("user-agent") || ""
   const isMobile =

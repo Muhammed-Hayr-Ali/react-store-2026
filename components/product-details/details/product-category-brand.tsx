@@ -71,8 +71,7 @@ export function ProductCategoryBrand({
           </Link>
         )}
       </div>
-      <Can permission={PERMISSIONS.UPDATE_PRODUCT}>
-        <Button
+         <Button
           size="icon-sm"
           className="rounded-full bg-foreground shadow-none"
           asChild
@@ -81,7 +80,6 @@ export function ProductCategoryBrand({
             <PenLineIcon className="text-background"/>
           </Link>
         </Button>
-      </Can>
-    </div>
+     </div>
   )
 }

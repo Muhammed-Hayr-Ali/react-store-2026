@@ -10,18 +10,13 @@ import { revalidatePath } from "next/cache"
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
-import { hasPermission, PERMISSIONS } from "../../role"
-import { getValidationDetails } from "../../validation"
+ import { getValidationDetails } from "../../validation"
 import { categoryIdSchema, type CategoryIdInput } from "../schemas"
 
 export async function deleteCategory(
   input: CategoryIdInput
 ): Promise<ApiResult<null>> {
-  const canDelete = await hasPermission(PERMISSIONS.DELETE_CATEGORY)
-  if (!canDelete) {
-    return { success: false, error: "PERMISSION_DENIED" }
-  }
-
+ 
   const validation = categoryIdSchema.safeParse(input)
   if (!validation.success) {
     return {

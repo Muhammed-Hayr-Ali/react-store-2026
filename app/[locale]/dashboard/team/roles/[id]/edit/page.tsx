@@ -5,8 +5,7 @@ import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { RoleForm } from "@/components/dashboard/roles/role-form"
 import type { RoleRecord } from "@/lib/actions/role"
-import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-import { getRoleById } from "@/lib/actions/role"
+ import { getRoleById } from "@/lib/actions/role"
 
 
 export const dynamic = 'force-dynamic'
@@ -33,11 +32,8 @@ interface EditRolePageProps {
 export default async function EditRolePage({ params }: EditRolePageProps) {
   const { id, locale } = await params
   const t = await getTranslations({ locale, namespace: "RolesManagement" })
-  const canView = await hasPermission(PERMISSIONS.UPDATE_ROLE)
-  if (!canView) {
-    console.error("Permission denied for updating roles")
-    notFound()
-  }
+
+  
 
   const res = await getRoleById({ roleId: id })
 

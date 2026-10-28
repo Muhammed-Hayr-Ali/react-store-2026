@@ -19,7 +19,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { appRoutes } from "@/lib/config/app-routes"
-import { AppPermission, PERMISSIONS } from "@/lib/actions/role"
+import { AppPermission } from "@/lib/actions/role"
 
 export const SUPPORTED_CURRENCIES = [
   { code: "USD", key: "USD", locale: "en-US", symbol: "\$" },
@@ -76,22 +76,19 @@ export const NAV_LINKS: NavLinkItem[] = [
     key: "orders",
     url: "#",
     icon: Package,
-    requiredPermission: PERMISSIONS.VIEW_USER_ORDERS,
-  },
+   },
   {
     title: "Wishlist",
     key: "wishlist",
     url: appRoutes.wishlist,
     icon: Heart,
-    requiredPermission: PERMISSIONS.VIEW_USER_WISHLIST,
-  },
+   },
   {
     title: "My Coupons",
     key: "coupons",
     url: "#",
     icon: Ticket,
-    requiredPermission: PERMISSIONS.VIEW_USER_COUPONS,
-    hasSeparator: true,
+     hasSeparator: true,
   },
 
   {

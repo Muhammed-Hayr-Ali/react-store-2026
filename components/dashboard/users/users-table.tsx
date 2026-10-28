@@ -4,8 +4,7 @@
  * @file components/dashboard/users/users-table.tsx
  * @description Standard TanStack Table v8 data table for user accounts management.
  * Fully compliant with React 19, strict VisibilityState, mobile column isolation,
- * uncontrolled sheets/dialog triggers, RTL-first layout, and permission gating via <Can />.
- */
+  */
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
@@ -368,8 +367,7 @@ export function UsersTable({
                     {t("COPY_EMAIL_ACTION")}
                   </DropdownMenuItem>
 
-                  <Can permission={PERMISSIONS.UPDATE_USER}>
-                    <EditUserDialog
+                     <EditUserDialog
                       user={row.original}
                       onSuccess={(updatedUser) => {
                         setData((prev) =>
@@ -387,10 +385,8 @@ export function UsersTable({
                         {t("EDIT_USER_ACTION")}
                       </DropdownMenuItem>
                     </EditUserDialog>
-                  </Can>
-
-                  <Can permission={PERMISSIONS.UPDATE_USER}>
-                    <UserStatusDialog
+ 
+                     <UserStatusDialog
                       user={row.original}
                       onSuccess={(userId, newStatus, banReason) => {
                         setData((prev) =>
@@ -414,10 +410,8 @@ export function UsersTable({
                         {t("CHANGE_STATUS_ACTION")}
                       </DropdownMenuItem>
                     </UserStatusDialog>
-                  </Can>
-
-                  <Can permission={PERMISSIONS.DELETE_USER}>
-                    <DropdownMenuSeparator />
+ 
+                     <DropdownMenuSeparator />
                     <DeleteUserDialog
                       userId={row.original.id}
                       userName={userDisplayName}
@@ -435,7 +429,7 @@ export function UsersTable({
                         {t("DELETE_ACCOUNT")}
                       </DropdownMenuItem>
                     </DeleteUserDialog>
-                  </Can>
+                  
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -659,8 +653,7 @@ export function UsersTable({
           </DropdownMenu>
 
           {/* Responsive user creation buttons */}
-          <Can permission={PERMISSIONS.CREATE_USER}>
-            <CreateUserSheet
+             <CreateUserSheet
               onSuccess={(newUser) => {
                 setData((prev) => [newUser, ...prev])
               }}
@@ -690,7 +683,7 @@ export function UsersTable({
                 <span>{t("CREATE_USER_BUTTON")}</span>
               </Button>
             </CreateUserSheet>
-          </Can>
+          
         </div>
       </div>
 

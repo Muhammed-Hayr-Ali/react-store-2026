@@ -19,8 +19,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Can } from "@/components/shared/can"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -455,7 +454,6 @@ export function NewsletterSubscribersTable({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Can permission={PERMISSIONS.SEND_NEWSLETTER_EMAIL}>
             <Button
               type="button"
               size="sm"
@@ -470,7 +468,6 @@ export function NewsletterSubscribersTable({
               </span>
               <span className="sm:hidden">{selectedIds.length}</span>
             </Button>
-          </Can>
         </div>
       </div>
 
@@ -500,7 +497,6 @@ export function NewsletterSubscribersTable({
             <TableHeader className="bg-muted/40">
               <TableRow>
                 <TableHead className="w-10">
-                  <Can permission={PERMISSIONS.SEND_NEWSLETTER_EMAIL}>
                     <Checkbox
                       aria-label={t("SELECT_PAGE")}
                       checked={
@@ -511,7 +507,6 @@ export function NewsletterSubscribersTable({
                         togglePageSelection(checked === true)
                       }
                     />
-                  </Can>
                 </TableHead>
                 <TableHead className="text-xs">{t("COLUMN_EMAIL")}</TableHead>
                 {columnVisibility.status && (
@@ -546,7 +541,6 @@ export function NewsletterSubscribersTable({
                   return (
                     <TableRow key={subscriber.id} className="hover:bg-muted/20">
                       <TableCell className="w-10">
-                        <Can permission={PERMISSIONS.SEND_NEWSLETTER_EMAIL}>
                           <Checkbox
                             aria-label={t("SELECT_SUBSCRIBER", {
                               email: subscriber.email,
@@ -560,7 +554,6 @@ export function NewsletterSubscribersTable({
                               )
                             }
                           />
-                        </Can>
                       </TableCell>
                       <TableCell className="min-w-52">
                         <span className="text-sm font-normal text-foreground">
@@ -608,13 +601,7 @@ export function NewsletterSubscribersTable({
                       )}
                       <TableCell>
                         <div className="flex justify-end">
-                          <Can
-                            permission={[
-                              PERMISSIONS.SEND_NEWSLETTER_EMAIL,
-                              PERMISSIONS.UPDATE_NEWSLETTER_SUBSCRIBER,
-                              PERMISSIONS.DELETE_NEWSLETTER_SUBSCRIBER,
-                            ]}
-                          >
+                        
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button
@@ -631,11 +618,7 @@ export function NewsletterSubscribersTable({
                                 className="w-44 text-xs"
                               >
                                 {isActive && (
-                                  <Can
-                                    permission={
-                                      PERMISSIONS.SEND_NEWSLETTER_EMAIL
-                                    }
-                                  >
+                              
                                     <DropdownMenuItem
                                       onClick={() =>
                                         openComposer([subscriber.id])
@@ -645,13 +628,9 @@ export function NewsletterSubscribersTable({
                                       <MailIcon className="me-2 size-3.5" />
                                       {t("SEND_INDIVIDUAL")}
                                     </DropdownMenuItem>
-                                  </Can>
+                                  
                                 )}
-                                <Can
-                                  permission={
-                                    PERMISSIONS.UPDATE_NEWSLETTER_SUBSCRIBER
-                                  }
-                                >
+                              
                                   <DropdownMenuItem
                                     disabled={isUpdating}
                                     onClick={() =>
@@ -670,12 +649,8 @@ export function NewsletterSubscribersTable({
                                         : "REACTIVATE_ACTION"
                                     )}
                                   </DropdownMenuItem>
-                                </Can>
-                                <Can
-                                  permission={
-                                    PERMISSIONS.DELETE_NEWSLETTER_SUBSCRIBER
-                                  }
-                                >
+                                
+                              
                                   <DeleteSubscriberDialog
                                     subscriber={subscriber}
                                     isDeleting={isDeleting}
@@ -726,10 +701,10 @@ export function NewsletterSubscribersTable({
                                       </DropdownMenuItem>
                                     }
                                   />
-                                </Can>
+                                
                               </DropdownMenuContent>
                             </DropdownMenu>
-                          </Can>
+                          
                         </div>
                       </TableCell>
                     </TableRow>

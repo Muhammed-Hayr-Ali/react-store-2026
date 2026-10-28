@@ -8,8 +8,7 @@
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
-import { hasPermission, PERMISSIONS } from "../../role"
-import type { NewsletterSubscriber } from "../types"
+ import type { NewsletterSubscriber } from "../types"
 
 /**
  * تجلب مشتركي النشرة البريدية للمستخدمين المخولين.
@@ -17,13 +16,8 @@ import type { NewsletterSubscriber } from "../types"
 export async function getNewsletterSubscribers(): Promise<
   ApiResult<NewsletterSubscriber[]>
 > {
-  const canViewManagement = await hasPermission(
-    PERMISSIONS.VIEW_NEWSLETTER_SUBSCRIBERS
-  )
-  if (!canViewManagement) {
-    return { success: false, error: "PERMISSION_DENIED" }
-  }
-
+ 
+ 
   const supabase = await createServerClient()
   const { data, error } = await supabase
     .from("newsletter_subscribers")

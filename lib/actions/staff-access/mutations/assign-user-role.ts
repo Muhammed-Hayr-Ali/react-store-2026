@@ -11,19 +11,12 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
 import { getValidationDetails } from "../../validation"
-import { hasPermission, PERMISSIONS } from "../../role/index"
-import { assignUserRoleSchema, type AssignUserRoleInput } from "../schemas"
+ import { assignUserRoleSchema, type AssignUserRoleInput } from "../schemas"
 
 export async function assignRoleToUser(
   input: AssignUserRoleInput
 ): Promise<ApiResult<null>> {
-  const canAssign = await hasPermission(PERMISSIONS.ASSIGN_ROLE)
-  if (!canAssign) {
-    return {
-      success: false,
-      error: "PERMISSION_DENIED",
-    }
-  }
+ 
 
   const validation = assignUserRoleSchema.safeParse(input)
   if (!validation.success) {

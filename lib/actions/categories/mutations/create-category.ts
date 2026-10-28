@@ -10,8 +10,7 @@ import { revalidatePath } from "next/cache"
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
-import { hasPermission, PERMISSIONS } from "../../role"
-import { getValidationDetails } from "../../validation"
+ import { getValidationDetails } from "../../validation"
 import { validateCategoryParent } from "../helpers"
 import { categoryFormSchema, type CategoryInput } from "../schemas"
 import type { Category } from "../types"
@@ -19,12 +18,7 @@ import type { Category } from "../types"
 export async function createCategory(
   input: CategoryInput
 ): Promise<ApiResult<Category>> {
-  const canCreate = await hasPermission(PERMISSIONS.CREATE_CATEGORY)
-  if (!canCreate) {
-    return { success: false, error: "PERMISSION_DENIED" }
-  }
-
-  const validation = categoryFormSchema.safeParse(input)
+   const validation = categoryFormSchema.safeParse(input)
   if (!validation.success) {
     return {
       success: false,

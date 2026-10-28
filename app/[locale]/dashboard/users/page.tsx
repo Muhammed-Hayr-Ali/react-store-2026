@@ -1,5 +1,4 @@
-import { notFound } from "next/navigation"
-import { getTranslations } from "next-intl/server"
+ import { getTranslations } from "next-intl/server"
 import { UsersIcon } from "lucide-react"
 
 import { appConfig } from "@/lib/config/app_config"
@@ -8,8 +7,7 @@ import { getUsersPageData } from "@/lib/actions/users/queries/get-users-page-dat
 import { UsersTable } from "@/components/dashboard/users/users-table"
 import { UsersSummary } from "@/components/dashboard/users/users-summary"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
-import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-
+ 
 interface PageProps {
   params: Promise<{
     locale: string
@@ -32,10 +30,8 @@ export default async function Page({ params }: PageProps) {
   const t = await getTranslations({ locale, namespace: "UsersManagement" })
   const tErrors = await getTranslations({ locale, namespace: "ActionErrors" })
 
-  const canView = await hasPermission(PERMISSIONS.VIEW_USERS_MANAGEMENT)
-  if (!canView) {
-    notFound()
-  }
+
+  
 
   const pageDataResult = await getUsersPageData()
   if (!pageDataResult.success) {

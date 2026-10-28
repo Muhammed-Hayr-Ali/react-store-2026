@@ -4,7 +4,6 @@
  * @file components/dashboard/roles/roles-table.tsx
  * @description Standard TanStack Table v8 data table for RBAC roles management.
  * Fully compliant with React 19, strict VisibilityState, mobile column isolation,
- * RTL-first layout, and permission gating via <Can />.
  */
 
 import * as React from "react"
@@ -91,7 +90,6 @@ function RoleRowActions({ role, onDeleted }: RoleRowActionsProps) {
       roleName={role.name}
       onDeleted={onDeleted}
     >
-      <Can permission={[PERMISSIONS.UPDATE_ROLE, PERMISSIONS.DELETE_ROLE]}>
         <div className="flex items-center justify-end">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -105,7 +103,6 @@ function RoleRowActions({ role, onDeleted }: RoleRowActionsProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40 text-xs">
-              <Can permission={PERMISSIONS.UPDATE_ROLE}>
                 <DropdownMenuItem asChild>
                   <Link
                     href={`${appRoutes.dashboard.team.roles}/${role.id}/edit`}
@@ -115,8 +112,6 @@ function RoleRowActions({ role, onDeleted }: RoleRowActionsProps) {
                     {t("EDIT_ROLE")}
                   </Link>
                 </DropdownMenuItem>
-              </Can>
-              <Can permission={PERMISSIONS.DELETE_ROLE}>
                 <AlertDialogTrigger
                   render={
                     <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive">
@@ -125,11 +120,9 @@ function RoleRowActions({ role, onDeleted }: RoleRowActionsProps) {
                     </DropdownMenuItem>
                   }
                 />
-              </Can>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </Can>
     </DeleteRoleDialog>
   )
 }
@@ -517,7 +510,6 @@ export function RolesTable({
           </DropdownMenu>
 
           {/* Dual Responsive CTA Button */}
-          <Can permission={PERMISSIONS.CREATE_ROLE}>
             <Link href={appRoutes.dashboard.team.create_roles}>
               <Button
                 variant="default"
@@ -537,7 +529,6 @@ export function RolesTable({
                 <span>{t("CREATE_ROLE")}</span>
               </Button>
             </Link>
-          </Can>
         </div>
       </div>
 

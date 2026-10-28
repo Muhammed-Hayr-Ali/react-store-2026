@@ -10,18 +10,13 @@ import { revalidatePath } from "next/cache"
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
-import { hasPermission, PERMISSIONS } from "../../role"
-import { getValidationDetails } from "../../validation"
+ import { getValidationDetails } from "../../validation"
 import { brandIdSchema, type BrandIdInput } from "../schemas"
 
 export async function deleteBrand(
   input: BrandIdInput
 ): Promise<ApiResult<null>> {
-  const canDelete = await hasPermission(PERMISSIONS.DELETE_BRAND)
-  if (!canDelete) {
-    return { success: false, error: "PERMISSION_DENIED" }
-  }
-
+ 
   const validation = brandIdSchema.safeParse(input)
   if (!validation.success) {
     return {

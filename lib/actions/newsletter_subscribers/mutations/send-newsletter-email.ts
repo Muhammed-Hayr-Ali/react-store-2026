@@ -12,8 +12,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { sendEmail } from "@/lib/services/email/send-email"
 import NewsletterBroadcastEmail from "@/lib/services/email/templates/newsletter-broadcast-email"
 
-import { hasPermission, PERMISSIONS } from "../../role"
-import { getValidationDetails } from "../../validation"
+ import { getValidationDetails } from "../../validation"
 import { sendNewsletterEmailSchema } from "../schemas"
 import {
   createNewsletterUnsubscribeToken,
@@ -40,10 +39,7 @@ type NewsletterEmailSendResult =
 export async function sendNewsletterEmail(
   input: unknown
 ): Promise<NewsletterEmailSendResult> {
-  const canSend = await hasPermission(PERMISSIONS.SEND_NEWSLETTER_EMAIL)
-  if (!canSend) {
-    return { success: false, error: "PERMISSION_DENIED" }
-  }
+ 
 
   const validation = sendNewsletterEmailSchema.safeParse(input)
   if (!validation.success) {

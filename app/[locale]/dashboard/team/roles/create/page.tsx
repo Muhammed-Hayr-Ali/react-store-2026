@@ -3,8 +3,6 @@ import { ShieldCheckIcon } from "lucide-react"
 import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { RoleForm } from "@/components/dashboard/roles/role-form"
-import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-import { notFound } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 
 interface PageProps {
@@ -27,10 +25,6 @@ export async function generateMetadata({ params }: PageProps) {
 export default async function Page({ params }: PageProps) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "RolesManagement" })
-  const canView = await hasPermission(PERMISSIONS.CREATE_ROLE)
-  if (!canView) {
-    notFound()
-  }
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-2 py-4 md:px-4 md:py-6">

@@ -7,15 +7,12 @@
 
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
-import { hasPermission, PERMISSIONS } from "../../role"
-import type { NewsletterSubscribersSummary } from "../types"
+ import type { NewsletterSubscribersSummary } from "../types"
 
 export async function getNewsletterSubscribersSummary(): Promise<
   ApiResult<NewsletterSubscribersSummary>
 > {
-  if (!(await hasPermission(PERMISSIONS.VIEW_NEWSLETTER_SUBSCRIBERS))) {
-    return { success: false, error: "PERMISSION_DENIED" }
-  }
+ 
 
   const supabase = await createServerClient()
   const { data, error } = await supabase

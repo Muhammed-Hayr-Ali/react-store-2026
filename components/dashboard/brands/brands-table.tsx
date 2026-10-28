@@ -88,7 +88,6 @@ function BrandRowActions({ brand, onEdit, onDelete }: BrandRowActionsProps) {
   const t = useTranslations("BrandsManagement")
 
   return (
-    <Can permission={[PERMISSIONS.UPDATE_BRAND, PERMISSIONS.DELETE_BRAND]}>
       <div className="flex justify-end">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -102,7 +101,6 @@ function BrandRowActions({ brand, onEdit, onDelete }: BrandRowActionsProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40 text-xs">
-            <Can permission={PERMISSIONS.UPDATE_BRAND}>
               <DropdownMenuItem
                 onClick={() => onEdit(brand)}
                 className="cursor-pointer"
@@ -110,8 +108,6 @@ function BrandRowActions({ brand, onEdit, onDelete }: BrandRowActionsProps) {
                 <PencilIcon className="me-2 size-3.5" />
                 {t("EDIT_ACTION")}
               </DropdownMenuItem>
-            </Can>
-            <Can permission={PERMISSIONS.DELETE_BRAND}>
               <DropdownMenuItem
                 onSelect={() => onDelete(brand)}
                 className="cursor-pointer text-destructive focus:text-destructive"
@@ -119,11 +115,9 @@ function BrandRowActions({ brand, onEdit, onDelete }: BrandRowActionsProps) {
                 <Trash2Icon className="me-2 size-3.5" />
                 {t("DELETE_ACTION")}
               </DropdownMenuItem>
-            </Can>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </Can>
   )
 }
 
@@ -471,7 +465,6 @@ export function BrandsTable({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Can permission={PERMISSIONS.CREATE_BRAND}>
           <BrandFormSheet
             open={formOpen}
             brand={editingBrand}
@@ -502,7 +495,6 @@ export function BrandsTable({
             }}
             onDeleted={handleDeleted}
           />
-        </Can>
       </div>
 
       <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">

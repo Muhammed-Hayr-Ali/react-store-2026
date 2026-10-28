@@ -1,12 +1,10 @@
-import { notFound } from "next/navigation"
-import { getTranslations } from "next-intl/server"
+ import { getTranslations } from "next-intl/server"
 import { TagsIcon } from "lucide-react"
 import { BrandsManagement } from "@/components/dashboard/brands/brands-management"
 import { getBrandsPageData } from "@/lib/actions/brands"
 import { getBrandsSummary } from "@/lib/actions/brands"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
-import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
-import { appConfig } from "@/lib/config/app_config"
+ import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 
 interface PageProps {
@@ -28,8 +26,7 @@ export default async function Page({ params }: PageProps) {
   const t = await getTranslations({ locale, namespace: "BrandsManagement" })
   const errors = await getTranslations({ locale, namespace: "ActionErrors" })
 
-  if (!(await hasPermission(PERMISSIONS.VIEW_BRANDS_MANAGEMENT))) notFound()
-
+ 
 
     const [pageDataResult, summaryResult] = await Promise.all([
     getBrandsPageData(),

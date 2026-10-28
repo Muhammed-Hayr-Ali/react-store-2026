@@ -46,8 +46,7 @@ export function WishlistButton({ productId }: WishlistButtonProps) {
   }
 
   return (
-    <Can permission={PERMISSIONS.VIEW_USER_WISHLIST}>
-      <Button
+       <Button
         size="icon-lg"
         variant="outline"
         type="button"
@@ -67,6 +66,5 @@ export function WishlistButton({ productId }: WishlistButtonProps) {
           />
         )}
       </Button>
-    </Can>
-  )
+   )
 }

@@ -11,8 +11,7 @@ import { revalidatePath } from "next/cache"
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import type { ApiResult } from "../../types/utils"
-import { hasPermission, PERMISSIONS } from "../../role"
-import { getValidationDetails } from "../../validation"
+ import { getValidationDetails } from "../../validation"
 
 export async function deleteProduct(
   productId: string
@@ -31,15 +30,7 @@ export async function deleteProduct(
   
   const validProductId = idValidation.data
 
-  // 2. التحقق من صلاحيات الحذف للمشرف
-  const canDelete = await hasPermission(PERMISSIONS.DELETE_PRODUCT)
-  if (!canDelete) {
-    return {
-      success: false,
-      error: "PERMISSION_DENIED",
-    }
-  }
-
+ 
   const supabase = await createServerClient()
 
   // 3. التحقق من وجود المنتج للحصول على הSlug (من أجل مسح الكاش لاحقاً)
