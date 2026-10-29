@@ -7,9 +7,10 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }>) {
   const canView = await hasPermission(PERMISSIONS.VIEW_PRODUCTS_MANAGEMENT)
+  
   if (!canView) {
     notFound()
   }
 
-  return { children }
+  return <>{children}</>
 }
