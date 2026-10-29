@@ -1,4 +1,4 @@
- import { getTranslations } from "next-intl/server"
+import { getTranslations } from "next-intl/server"
 import { TagsIcon } from "lucide-react"
 
 import { CategoriesTable } from "@/components/dashboard/categories/categories-table"
@@ -6,8 +6,10 @@ import { CategoriesSummary } from "@/components/dashboard/categories/categories-
 import { getCategoriesPageData } from "@/lib/actions/categories/queries/get-categories-page-data"
 import { getCategoriesSummary } from "@/lib/actions/categories/queries/get-categories-summary"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
- import { appConfig } from "@/lib/config/app_config"
+import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
+import { notFound } from "next/navigation"
 
 interface PageProps {
   params: Promise<{
@@ -29,6 +31,11 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function Page({ params }: PageProps) {
+  const canView = await hasPermission(PERMISSIONS.MANAGE_CATEGORIES)
+  if (!canView) {
+    notFound()
+  }
+
   const { locale } = await params
   const t = await getTranslations({
     locale,
@@ -39,7 +46,6 @@ export default async function Page({ params }: PageProps) {
     namespace: "ActionErrors",
   })
 
- 
   // Fetch pre-processed page data and business logic
   const [pageDataResult, summaryResult] = await Promise.all([
     getCategoriesPageData(),

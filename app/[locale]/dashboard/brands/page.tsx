@@ -1,11 +1,13 @@
- import { getTranslations } from "next-intl/server"
+import { getTranslations } from "next-intl/server"
 import { TagsIcon } from "lucide-react"
 import { BrandsManagement } from "@/components/dashboard/brands/brands-management"
 import { getBrandsPageData } from "@/lib/actions/brands"
 import { getBrandsSummary } from "@/lib/actions/brands"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
- import { appConfig } from "@/lib/config/app_config"
+import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
+import { notFound } from "next/navigation"
 
 interface PageProps {
   params: Promise<{ locale: string }>
@@ -22,13 +24,16 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function Page({ params }: PageProps) {
+  const canView = await hasPermission(PERMISSIONS.MANAGE_BRANDS)
+  if (!canView) {
+    notFound()
+  }
+
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "BrandsManagement" })
   const errors = await getTranslations({ locale, namespace: "ActionErrors" })
 
- 
-
-    const [pageDataResult, summaryResult] = await Promise.all([
+  const [pageDataResult, summaryResult] = await Promise.all([
     getBrandsPageData(),
     getBrandsSummary(),
   ])
