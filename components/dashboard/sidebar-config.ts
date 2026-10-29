@@ -75,7 +75,7 @@ export const sidebarConfig: SidebarConfig = {
       key: "reviews-management",
       url: appRoutes.dashboard.reviews, // تأكد أن هذا المسار موجود في appRoutes
       icon: MessageSquareIcon,
-      requiredPermission: PERMISSIONS.MANAGE_REVIEWS,
+      requiredPermission: PERMISSIONS.VIEW_REVIEWS_DASHBOARD,
     },
     // -----------------------------------------------------------
 

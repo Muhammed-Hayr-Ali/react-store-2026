@@ -49,8 +49,12 @@ export const PERMISSIONS = {
   MANAGE_NEWSLETTER: "manage_newsletter",
 
   // --- 7. Reviews Management ---
-  VIEW_REVIEWS_MANAGEMENT: "view_reviews_management",
-  MANAGE_REVIEWS: "manage_reviews",
+  VIEW_REVIEWS_DASHBOARD: "view_reviews_dashboard", // عرض زر وصفحة لوحة التحكم
+  READ_REVIEWS: "read_reviews", // استعراض وقراءة التعليقات
+  CREATE_REVIEW: "create_review", // إضافة تعليق جديد
+  UPDATE_REVIEW: "update_review", // تعديل التعليقات
+  DELETE_REVIEW: "delete_review", // حذف التعليقات
+  MANAGE_REVIEWS: "manage_reviews", // صلاحية شاملة للإدارة الكاملة
 
   // --- 8. Users Management ---
   VIEW_USERS_MANAGEMENT: "view_users_management",

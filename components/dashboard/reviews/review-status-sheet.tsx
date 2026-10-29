@@ -1,9 +1,9 @@
-"use client"
-
 /**
  * @file components/dashboard/reviews/review-status-sheet.tsx
  * @description Provides the edit form sheet for moderating a product review status.
  */
+
+"use client"
 
 import * as React from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -34,9 +34,10 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import { updateReviewStatus } from "@/lib/actions/reviews/mutations/update-review"
 import type { ReviewWithUser } from "@/lib/actions/reviews/types"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
+import { updateReview } from "@/lib/actions/reviews/mutations/update-review"
+import { UpdateReviewInput } from "@/lib/actions/reviews/schemas"
 
 interface ReviewStatusSheetProps {
   open: boolean
@@ -59,12 +60,10 @@ export function ReviewStatusSheet({
   const tErrors = useTranslations("ActionErrors")
   const [isPending, startTransition] = React.useTransition()
 
-  // استخراج اسم المراجع بشكل آمن بناءً على الأعمدة الحقيقية (first_name, last_name)
   const reviewerName = review?.user?.first_name
     ? `${review.user.first_name} ${review.user.last_name || ""}`.trim()
     : t("ANONYMOUS")
 
-  // المخطط بسيط جداً لأن المشرف يعدل حالة القبول فقط
   const formSchema = React.useMemo(
     () =>
       z.object({
@@ -92,10 +91,13 @@ export function ReviewStatusSheet({
 
     startTransition(async () => {
       try {
-        const result = await updateReviewStatus({
-          id: review.id,
+        // تم تعديل الاستدعاء ليتوافق مع المعرف `reviewId` المطلوب في السيرفر أكشن
+        const result = await updateReview({
+          reviewId: review.id,
+          rating: review.rating,
+          content: review.content,
           is_approved: formValues.is_approved,
-        })
+        } as UpdateReviewInput)
 
         if (!result.success) {
           toast.error(
@@ -106,7 +108,6 @@ export function ReviewStatusSheet({
           return
         }
 
-        // نقوم بتحديث حالة التقييم محلياً لإرجاعها للجدول
         const updatedReview = { ...review, is_approved: formValues.is_approved }
         onSaved(updatedReview)
         onOpenChange(false)
@@ -138,9 +139,7 @@ export function ReviewStatusSheet({
             </span>
             {t("FORM_EDIT_TITLE")}
           </SheetTitle>
-          <SheetDescription>
-            {t("FORM_EDIT_DESCRIPTION")}
-          </SheetDescription>
+          <SheetDescription>{t("FORM_EDIT_DESCRIPTION")}</SheetDescription>
         </SheetHeader>
 
         <form
@@ -151,7 +150,6 @@ export function ReviewStatusSheet({
           className="flex min-h-0 flex-1 flex-col"
         >
           <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5 sm:px-6">
-            
             {/* قسم عرض تفاصيل التقييم (للقراءة فقط) */}
             <section className="rounded-xl border border-border bg-card p-4 shadow-xs">
               <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
@@ -165,30 +163,36 @@ export function ReviewStatusSheet({
                   </p>
                 </div>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs text-muted-foreground">{t("AUTHOR_LABEL")}</label>
+                  <label className="text-xs text-muted-foreground">
+                    {t("AUTHOR_LABEL")}
+                  </label>
                   <p className="text-sm font-medium text-foreground">
                     {reviewerName}
                   </p>
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground">{t("RATING_LABEL")}</label>
-                  <div className="flex items-center gap-1 text-amber-500 mt-1">
+                  <label className="text-xs text-muted-foreground">
+                    {t("RATING_LABEL")}
+                  </label>
+                  <div className="mt-1 flex items-center gap-1 text-amber-500">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <StarIcon
                         key={i}
                         className={`size-4 ${i < (review?.rating || 0) ? "fill-current" : "text-muted opacity-30"}`}
                       />
                     ))}
-                    <span className="text-xs font-semibold tabular-nums text-foreground ms-1">
+                    <span className="ms-1 text-xs font-semibold text-foreground tabular-nums">
                       ({review?.rating})
                     </span>
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground">{t("CONTENT_LABEL")}</label>
+                  <label className="text-xs text-muted-foreground">
+                    {t("CONTENT_LABEL")}
+                  </label>
                   <div className="mt-1 rounded-md border border-border/60 bg-muted/50 p-3 text-sm text-foreground">
                     {review?.content}
                   </div>
@@ -237,7 +241,6 @@ export function ReviewStatusSheet({
                 />
               </FieldGroup>
             </section>
-
           </div>
 
           <SheetFooter className="flex-row justify-end border-t border-border/60 px-5 py-4 sm:px-6">

@@ -198,18 +198,37 @@ export const PERMISSION_GROUPS = [
   // ==========================================
   {
     id: "reviews_group",
-    label: "⭐ Reviews Management",
+    label: "reviews_group.label",
     permissions: [
       {
-        key: PERMISSIONS.VIEW_REVIEWS_MANAGEMENT,
-        label: "View Product Reviews",
-        description: "Access and view customer product reviews and ratings.",
+        key: PERMISSIONS.VIEW_REVIEWS_DASHBOARD,
+        label: "reviews_group.view_dashboard.label",
+        description: "reviews_group.view_dashboard.description",
+      },
+      {
+        key: PERMISSIONS.READ_REVIEWS,
+        label: "reviews_group.read_reviews.label",
+        description: "reviews_group.read_reviews.description",
+      },
+      {
+        key: PERMISSIONS.CREATE_REVIEW,
+        label: "reviews_group.create_review.label",
+        description: "reviews_group.create_review.description",
+      },
+      {
+        key: PERMISSIONS.UPDATE_REVIEW,
+        label: "reviews_group.update_review.label",
+        description: "reviews_group.update_review.description",
+      },
+      {
+        key: PERMISSIONS.DELETE_REVIEW,
+        label: "reviews_group.delete_review.label",
+        description: "reviews_group.delete_review.description",
       },
       {
         key: PERMISSIONS.MANAGE_REVIEWS,
-        label: "Manage Reviews & Moderation (Database Access)",
-        description:
-          "Core permission required to moderate, approve, or delete product reviews.",
+        label: "reviews_group.manage_reviews.label",
+        description: "reviews_group.manage_reviews.description",
       },
     ],
   },

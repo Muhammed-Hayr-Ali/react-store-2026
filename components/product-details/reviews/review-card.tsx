@@ -1,13 +1,13 @@
 /**
  * @file components/store/product-details/reviews/review-card.tsx
- * @description Single review card showing reviewer details, content, and distinct actions for owner vs admin.
+ * @description Single review card showing reviewer details, content, and standard actions.
  */
 
 "use client"
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
-import { PencilIcon, Trash2Icon, ShieldAlertIcon } from "lucide-react"
+import { PencilIcon, Trash2Icon } from "lucide-react"
 
 import { useUser } from "@/lib/context/user-context"
 import { Button } from "@/components/ui/button"
@@ -30,9 +30,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
 
   const ownerId = review.user_id ?? review.user?.id
   const isOwner = Boolean(user?.id && ownerId && user.id === ownerId)
-  const canManage = hasPermission(PERMISSIONS.MANAGE_REVIEWS)
-  
-  const canModify = isOwner || canManage
+  const canModify = isOwner || hasPermission(PERMISSIONS.MANAGE_REVIEWS)
 
   const reviewerName = review.user
     ? `${review.user.first_name || ""} ${review.user.last_name || ""}`.trim() ||
@@ -68,15 +66,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
   }, [review.created_at, t])
 
   return (
-    <div 
-      className={`flex flex-col gap-3 rounded-xl border p-4 transition-colors ${
-        isOwner 
-          ? "border-primary/40 bg-primary/2" 
-          : canManage && !isOwner 
-          ? "border-amber-500/30 bg-amber-500/1" 
-          : "border-border bg-card hover:bg-muted/25"
-      }`}
-    >
+    <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-muted/25">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Avatar className="size-9">
@@ -90,24 +80,9 @@ export function ReviewCard({ review }: ReviewCardProps) {
           </Avatar>
 
           <div>
-            <div className="flex items-center gap-2">
-              <h5 className="text-sm font-semibold text-foreground">
-                {reviewerName}
-              </h5>
-              {/* تمييز تعليق المستخدم الحالي */}
-              {isOwner && (
-                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-                  {t("YOU_BADGE") || "You"}
-                </span>
-              )}
-              {/* شارة توضح أن المشرف يعرض تعليق لشخص آخر */}
-              {!isOwner && canManage && (
-                <span className="flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
-                  <ShieldAlertIcon className="size-2.5" />
-                  {t("ADMIN_VIEW_BADGE") || "Admin"}
-                </span>
-              )}
-            </div>
+            <h5 className="text-sm font-semibold text-foreground">
+              {reviewerName}
+            </h5>
             <span className="text-[10px] text-muted-foreground">{timeAgo}</span>
           </div>
         </div>
@@ -122,13 +97,10 @@ export function ReviewCard({ review }: ReviewCardProps) {
               onSuccess={() => setIsEditOpen(false)}
             >
               <Button
-                variant={!isOwner && canManage ? "outline" : "secondary"}
+                variant="secondary"
                 size="icon"
-                className={`size-8 text-muted-foreground hover:text-foreground ${
-                  !isOwner && canManage ? "border-amber-500/40 hover:border-amber-500" : ""
-                }`}
+                className="size-8 text-muted-foreground hover:text-foreground"
                 aria-label={t("EDIT_REVIEW_ARIA")}
-                title={!isOwner && canManage ? "Admin Edit" : undefined}
               >
                 <PencilIcon className="size-3.5" />
               </Button>
@@ -140,13 +112,10 @@ export function ReviewCard({ review }: ReviewCardProps) {
               onOpenChange={setIsDeleteOpen}
             >
               <Button
-                variant={!isOwner && canManage ? "outline" : "destructive"}
+                variant="destructive"
                 size="icon"
-                className={`size-8 text-muted-foreground hover:text-destructive ${
-                  !isOwner && canManage ? "border-destructive/40 hover:border-destructive" : ""
-                }`}
+                className="size-8 text-muted-foreground hover:text-destructive"
                 aria-label={t("DELETE_REVIEW_ARIA")}
-                title={!isOwner && canManage ? "Admin Delete" : undefined}
               >
                 <Trash2Icon className="size-3.5" />
               </Button>
