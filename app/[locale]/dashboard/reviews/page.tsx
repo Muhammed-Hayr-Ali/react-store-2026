@@ -1,4 +1,4 @@
- import { getTranslations } from "next-intl/server"
+import { getTranslations } from "next-intl/server"
 import { MessageSquareIcon } from "lucide-react"
 
 import { ReviewsTable } from "@/components/dashboard/reviews/reviews-table"
@@ -6,8 +6,10 @@ import { ReviewsSummary } from "@/components/dashboard/reviews/reviews-summary"
 import { getReviewsPageData } from "@/lib/actions/reviews/queries/get-reviews-page-data"
 // نستخدم الـ Page Data الذي يجمع كل شيء، لكن لو احتجنا الملخص منفصلاً سنستخدمه من الداخل
 import { getActionErrorKey } from "@/lib/actions/error-keys"
- import { appConfig } from "@/lib/config/app_config"
+import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
+import { notFound } from "next/navigation"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 
 interface PageProps {
   params: Promise<{
@@ -29,6 +31,11 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function Page({ params }: PageProps) {
+  const canView = await hasPermission(PERMISSIONS.MANAGE_REVIEWS)
+  if (!canView) {
+    notFound()
+  }
+
   const { locale } = await params
   const t = await getTranslations({
     locale,
@@ -39,7 +46,6 @@ export default async function Page({ params }: PageProps) {
     namespace: "ActionErrors",
   })
 
- 
   // Fetch pre-processed page data and business logic
   // نحن جلبنا كل شيء بداخل دالة getReviewsPageData كما بنيناها سابقاً
   const pageDataResult = await getReviewsPageData()
@@ -79,10 +85,7 @@ export default async function Page({ params }: PageProps) {
         pendingLabel={t("PENDING_COUNT")}
       />
 
-      <ReviewsTable
-        initialReviews={reviews}
-        initialIsMobile={isMobile}
-      />
+      <ReviewsTable initialReviews={reviews} initialIsMobile={isMobile} />
     </div>
   )
 }

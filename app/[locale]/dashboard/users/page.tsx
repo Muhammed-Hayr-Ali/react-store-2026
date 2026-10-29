@@ -1,4 +1,4 @@
- import { getTranslations } from "next-intl/server"
+import { getTranslations } from "next-intl/server"
 import { UsersIcon } from "lucide-react"
 
 import { appConfig } from "@/lib/config/app_config"
@@ -7,7 +7,9 @@ import { getUsersPageData } from "@/lib/actions/users/queries/get-users-page-dat
 import { UsersTable } from "@/components/dashboard/users/users-table"
 import { UsersSummary } from "@/components/dashboard/users/users-summary"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
- 
+import { notFound } from "next/navigation"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
+
 interface PageProps {
   params: Promise<{
     locale: string
@@ -26,12 +28,14 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function Page({ params }: PageProps) {
+  const canView = await hasPermission(PERMISSIONS.MANAGE_USERS)
+  if (!canView) {
+    notFound()
+  }
+
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "UsersManagement" })
   const tErrors = await getTranslations({ locale, namespace: "ActionErrors" })
-
-
-  
 
   const pageDataResult = await getUsersPageData()
   if (!pageDataResult.success) {

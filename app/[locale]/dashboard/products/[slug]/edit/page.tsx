@@ -7,9 +7,10 @@ import { createMetadata } from "@/lib/config/metadata_generator"
 import { getProductForEditBySlug } from "@/lib/actions/products/queries/get-product-for-edit-by-slug"
 import { getCategories, type Category } from "@/lib/actions/categories"
 import ProductForm from "@/components/dashboard/product/product-form"
- import { getBrands } from "@/lib/actions/brands"
+import { getBrands } from "@/lib/actions/brands"
 import type { BrandRecord } from "@/lib/actions/brands/types"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 
 export async function generateMetadata({
   params,
@@ -35,11 +36,15 @@ export default async function Page({
 }: {
   params: Promise<{ slug: string; locale: string }>
 }) {
+  const canView = await hasPermission(PERMISSIONS.UPDATE_PRODUCT)
+  if (!canView) {
+    notFound()
+  }
+
   const { slug, locale } = await params
   const t = await getTranslations({ locale, namespace: "ProductsManagement" })
   const tErrors = await getTranslations({ locale, namespace: "ActionErrors" })
 
-  
   const [productResult, categoriesResult, brandsResult] = await Promise.all([
     getProductForEditBySlug(slug, { activeOnly: false }),
     getCategories(),

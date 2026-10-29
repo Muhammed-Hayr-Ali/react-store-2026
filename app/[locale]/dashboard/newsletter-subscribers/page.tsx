@@ -1,13 +1,15 @@
- import { getTranslations } from "next-intl/server"
+import { getTranslations } from "next-intl/server"
 import { MailIcon } from "lucide-react"
 
 import { NewsletterSubscribersTable } from "@/components/dashboard/newsletter-subscribers/newsletter-subscribers-table"
 import { getSubscribersPageData } from "@/lib/actions/newsletter_subscribers/queries/get-subscribers-page-data"
 import { getNewsletterSubscribersSummary } from "@/lib/actions/newsletter_subscribers/queries/get-newsletter-subscribers-summary"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
- import { appConfig } from "@/lib/config/app_config"
+import { appConfig } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { SubscribersSummary } from "@/components/dashboard/newsletter-subscribers/subscribers-summary"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
+import { notFound } from "next/navigation"
 
 interface PageProps {
   params: Promise<{ locale: string }>
@@ -27,6 +29,11 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function Page({ params }: PageProps) {
+  const canView = await hasPermission(PERMISSIONS.MANAGE_NEWSLETTER)
+  if (!canView) {
+    notFound()
+  }
+
   const { locale } = await params
   const t = await getTranslations({
     locale,
@@ -37,7 +44,6 @@ export default async function Page({ params }: PageProps) {
     namespace: "ActionErrors",
   })
 
- 
   const [pageDataResult, summaryResult] = await Promise.all([
     getSubscribersPageData(),
     getNewsletterSubscribersSummary(),

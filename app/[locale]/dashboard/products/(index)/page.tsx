@@ -9,10 +9,16 @@ import { createMetadata } from "@/lib/config/metadata_generator"
 import {} from "@/lib/config/app-routes"
 import { DataTable } from "@/components/dashboard/product/products-table"
 import { ProductsSummary } from "@/components/dashboard/product/products-summary"
- import { getTranslations } from "next-intl/server"
+import { getTranslations } from "next-intl/server"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
+import { notFound } from "next/navigation"
 
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "ProductsManagement" })
   return createMetadata({
@@ -22,13 +28,20 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   })
 }
 
-export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const canView = await hasPermission(PERMISSIONS.MANAGE_PRODUCTS)
+  if (!canView) {
+    notFound()
+  }
+
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "ProductsManagement" })
   const tErrors = await getTranslations({ locale, namespace: "ActionErrors" })
 
-  
-  
   const headersList = await headers()
   const userAgent = headersList.get("user-agent") || ""
   const isMobile =
