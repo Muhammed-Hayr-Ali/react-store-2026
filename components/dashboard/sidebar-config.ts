@@ -52,21 +52,21 @@ export const sidebarConfig: SidebarConfig = {
       key: "categories-management",
       url: appRoutes.dashboard.categories,
       icon: Tags,
-      requiredPermission: PERMISSIONS.MANAGE_CATEGORIES,
+      requiredPermission: PERMISSIONS.VIEW_CATEGORIES_DASHBOARD,
     },
     {
       titleKey: "BRANDS_MANAGEMENT",
       key: "brands-management",
       url: appRoutes.dashboard.brands,
       icon: Tags,
-      requiredPermission: PERMISSIONS.UPDATE_BRAND,
+      requiredPermission: PERMISSIONS.VIEW_BRANDS_DASHBOARD,
     },
     {
       titleKey: "PRODUCTS_MANAGEMENT",
       key: "products-management",
       url: appRoutes.dashboard.products,
       icon: PackageIcon,
-      requiredPermission: PERMISSIONS.MANAGE_PRODUCTS,
+      requiredPermission: PERMISSIONS.VIEW_PRODUCTS_DASHBOARD,
     },
 
     // --- 2. تمت إضافة قسم التقييمات هنا بعد المنتجات مباشرة ---
@@ -84,14 +84,14 @@ export const sidebarConfig: SidebarConfig = {
       key: "users-management",
       url: appRoutes.dashboard.users,
       icon: Users,
-      requiredPermission: PERMISSIONS.MANAGE_USERS,
+      requiredPermission: PERMISSIONS.VIEW_USERS_DASHBOARD,
     },
     {
       titleKey: "NEWSLETTER_SUBSCRIBERS",
       key: "newsletter-subscribers",
       url: appRoutes.dashboard.newsletterSubscribers,
       icon: Mail,
-      requiredPermission: PERMISSIONS.MANAGE_NEWSLETTER,
+      requiredPermission: PERMISSIONS.VIEW_NEWSLETTER_DASHBOARD,
     },
 
     {
@@ -99,7 +99,7 @@ export const sidebarConfig: SidebarConfig = {
       key: "team-management",
       url: "#",
       icon: UserCog,
-      requiredPermission: PERMISSIONS.MANAGE_ROLES,
+      requiredPermission: PERMISSIONS.VIEW_ROLES_DASHBOARD,
       items: [
         {
           titleKey: "ROLES_AND_PERMISSIONS",
