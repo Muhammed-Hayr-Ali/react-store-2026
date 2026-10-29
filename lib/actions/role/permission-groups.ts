@@ -126,4 +126,134 @@ export const PERMISSION_GROUPS = [
       },
     ],
   },
+
+  // ==========================================
+  // 4. Wishlists Management
+  // ==========================================
+  {
+    id: "wishlists_group",
+    label: "❤️ Wishlists Management",
+    permissions: [
+      {
+        key: PERMISSIONS.VIEW_WISHLISTS_MANAGEMENT,
+        label: "View Wishlists Management",
+        description:
+          "Access and view customer wishlist statistics and overview.",
+      },
+      {
+        key: PERMISSIONS.MANAGE_WISHLISTS,
+        label: "Manage Customer Wishlists (Database Access)",
+        description:
+          "Core permission required to moderate and manage user wishlists.",
+      },
+    ],
+  },
+
+  // ==========================================
+  // 5. Carts Management
+  // ==========================================
+  {
+    id: "carts_group",
+    label: "🛒 Carts Management",
+    permissions: [
+      {
+        key: PERMISSIONS.VIEW_CARTS_MANAGEMENT,
+        label: "View Carts Management",
+        description:
+          "Access and view active customer shopping carts and items.",
+      },
+      {
+        key: PERMISSIONS.MANAGE_CARTS,
+        label: "Manage Customer Carts (Database Access)",
+        description:
+          "Core permission required to manage shopping cart records.",
+      },
+    ],
+  },
+
+  // ==========================================
+  // 6. Newsletter Management
+  // ==========================================
+  {
+    id: "newsletter_group",
+    label: "✉️ Newsletter Management",
+    permissions: [
+      {
+        key: PERMISSIONS.VIEW_NEWSLETTER_MANAGEMENT,
+        label: "View Newsletter Subscribers",
+        description:
+          "Access and view newsletter subscribers list and statistics.",
+      },
+      {
+        key: PERMISSIONS.MANAGE_NEWSLETTER,
+        label: "Manage Newsletter & Broadcasts (Database Access)",
+        description:
+          "Core permission required to manage subscribers and send broadcast emails.",
+      },
+    ],
+  },
+
+  // ==========================================
+  // 7. Reviews Management
+  // ==========================================
+  {
+    id: "reviews_group",
+    label: "⭐ Reviews Management",
+    permissions: [
+      {
+        key: PERMISSIONS.VIEW_REVIEWS_MANAGEMENT,
+        label: "View Product Reviews",
+        description: "Access and view customer product reviews and ratings.",
+      },
+      {
+        key: PERMISSIONS.MANAGE_REVIEWS,
+        label: "Manage Reviews & Moderation (Database Access)",
+        description:
+          "Core permission required to moderate, approve, or delete product reviews.",
+      },
+    ],
+  },
+
+  // ==========================================
+  // 8. Users Management
+  // ==========================================
+  {
+    id: "users_group",
+    label: "👥 Users Management",
+    permissions: [
+      {
+        key: PERMISSIONS.VIEW_USERS_MANAGEMENT,
+        label: "View Users Profiles",
+        description:
+          "Access and view registered users profiles and account statuses.",
+      },
+      {
+        key: PERMISSIONS.MANAGE_USERS,
+        label: "Manage Users & Bans (Database Access)",
+        description:
+          "Core permission required to manage user accounts, status, and bans.",
+      },
+    ],
+  },
+
+  // ==========================================
+  // 9. Roles & Permissions Management
+  // ==========================================
+  {
+    id: "roles_group",
+    label: "🔐 Roles & Security Management",
+    permissions: [
+      {
+        key: PERMISSIONS.VIEW_ROLES_MANAGEMENT,
+        label: "View System Roles",
+        description: "Access and view system roles and assigned permissions.",
+      },
+      {
+        key: PERMISSIONS.MANAGE_ROLES,
+        label: "Manage Roles & Permissions (Database Access)",
+        description:
+          "Core permission required to create, modify, or delete roles and access rights.",
+      },
+    ],
+  },
 ] as const satisfies PermissionGroup[]
