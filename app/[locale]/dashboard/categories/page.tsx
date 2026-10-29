@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function Page({ params }: PageProps) {
-  const canView = await hasPermission(PERMISSIONS.VIEW_CATEGORIES_MANAGEMENT)
+  const canView = await hasPermission(PERMISSIONS.MANAGE_CATEGORIES)
   if (!canView) {
     notFound()
   }
