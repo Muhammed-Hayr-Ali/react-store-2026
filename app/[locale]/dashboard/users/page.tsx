@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function Page({ params }: PageProps) {
-  const canView = await hasPermission(PERMISSIONS.MANAGE_USERS)
+  const canView = await hasPermission(PERMISSIONS.VIEW_USERS_MANAGEMENT)
   if (!canView) {
     notFound()
   }

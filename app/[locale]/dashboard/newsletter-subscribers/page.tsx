@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function Page({ params }: PageProps) {
-  const canView = await hasPermission(PERMISSIONS.MANAGE_NEWSLETTER)
+  const canView = await hasPermission(PERMISSIONS.VIEW_NEWSLETTER_MANAGEMENT)
   if (!canView) {
     notFound()
   }
