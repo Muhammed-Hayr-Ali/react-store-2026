@@ -132,41 +132,41 @@ export function ReviewCard({ review }: ReviewCardProps) {
           </div>
         )}
         <Can permission={PERMISSIONS.MANAGE_REVIEWS}>
-          (
-          <div className="flex items-center gap-1">
-            <ReviewDialog
-              review={review}
-              mode="update"
-              open={isEditOpen}
-              onOpenChange={setIsEditOpen}
-              onSuccess={() => setIsEditOpen(false)}
-            >
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8 text-muted-foreground hover:text-foreground"
-                aria-label={t("EDIT_REVIEW_ARIA")}
+          {!isOwner && (
+            <div className="flex items-center gap-1">
+              <ReviewDialog
+                review={review}
+                mode="update"
+                open={isEditOpen}
+                onOpenChange={setIsEditOpen}
+                onSuccess={() => setIsEditOpen(false)}
               >
-                <PencilIcon className="size-3.5" />
-              </Button>
-            </ReviewDialog>
+                <Button
+                  variant="default"
+                  size="icon"
+                  className="size-8 text-muted-foreground hover:text-foreground"
+                  aria-label={t("EDIT_REVIEW_ARIA")}
+                >
+                  <PencilIcon className="size-3.5" />
+                </Button>
+              </ReviewDialog>
 
-            <DeleteReviewDialog
-              review={review}
-              open={isDeleteOpen}
-              onOpenChange={setIsDeleteOpen}
-            >
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8 text-muted-foreground hover:text-destructive"
-                aria-label={t("DELETE_REVIEW_ARIA")}
+              <DeleteReviewDialog
+                review={review}
+                open={isDeleteOpen}
+                onOpenChange={setIsDeleteOpen}
               >
-                <Trash2Icon className="size-3.5" />
-              </Button>
-            </DeleteReviewDialog>
-          </div>
-          )
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="size-8 text-muted-foreground hover:text-destructive"
+                  aria-label={t("DELETE_REVIEW_ARIA")}
+                >
+                  <Trash2Icon className="size-3.5" />
+                </Button>
+              </DeleteReviewDialog>
+            </div>
+          )}
         </Can>
       </div>
 
