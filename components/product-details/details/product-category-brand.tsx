@@ -71,15 +71,17 @@ export function ProductCategoryBrand({
           </Link>
         )}
       </div>
-         <Button
+      <Can permission={PERMISSIONS.UPDATE_PRODUCT}>
+        <Button
           size="icon-sm"
           className="rounded-full bg-foreground shadow-none"
           asChild
         >
           <Link href={`/dashboard/products/${slug}/edit`}>
-            <PenLineIcon className="text-background"/>
+            <PenLineIcon className="text-background" />
           </Link>
         </Button>
-     </div>
+      </Can>
+    </div>
   )
 }
