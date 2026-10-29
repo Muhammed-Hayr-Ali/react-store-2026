@@ -49,7 +49,7 @@ export async function updateReview(
   // 2. التحقق من وجود التعليق وملكيته قبل التعديل
   const { data: existingReview, error: fetchError } = await supabase
     .from("product_reviews")
-    .select("id, user_id")
+    .select()
     .eq("id", reviewId)
     .maybeSingle()
 

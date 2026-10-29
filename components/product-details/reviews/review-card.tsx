@@ -142,7 +142,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
                 onSuccess={() => setIsEditOpen(false)}
               >
                 <Button
-                  variant="default"
+                  variant="secondary"
                   size="icon"
                   className="size-8 text-muted-foreground hover:text-foreground"
                   aria-label={t("EDIT_REVIEW_ARIA")}
