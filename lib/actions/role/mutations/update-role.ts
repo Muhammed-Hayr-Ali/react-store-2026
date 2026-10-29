@@ -11,7 +11,7 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
 import { getValidationDetails } from "../../validation"
- import {
+import {
   updateRolePermissionsSchema,
   type UpdateRolePermissionsInput,
 } from "../schemas"
@@ -20,16 +20,17 @@ import type { RoleRecord } from "../types"
 export async function updateRole(
   input: UpdateRolePermissionsInput
 ): Promise<ApiResult<RoleRecord>> {
- 
-
   const validation = updateRolePermissionsSchema.safeParse(input)
   if (!validation.success) {
+    const validationDetails = getValidationDetails(validation.error)
+    console.error("[updateRole] Validation Error:", validationDetails)
     return {
       success: false,
       error: "VALIDATION_ERROR",
-      details: getValidationDetails(validation.error),
+      details: validationDetails,
     }
   }
+
   const { roleId, description, permissions } = validation.data
   const supabase = await createServerClient()
 
@@ -49,6 +50,7 @@ export async function updateRole(
     .single()
 
   if (error) {
+    console.error("[updateRole] Database Error:", error.message, error)
     return {
       success: false,
       error: "UPDATE_ROLE_ERROR",
