@@ -1,6 +1,6 @@
 /**
  * @file lib/actions/store/product-details/reviews/mutations/delete-review.ts
- * @description Deletes an existing product review ensuring ownership verification.
+ * @description Deletes an existing product review.
  */
 
 "use server"
@@ -27,13 +27,12 @@ export async function deleteReview(
     return { success: false, error: "UNAUTHORIZED" }
   }
 
-  const currentUser = userResult.data
   const supabase = await createServerClient()
 
-  // 2. التحقق من وجود التعليق وملكيته قبل الحذف
+  // 2. التحقق من وجود التعليق فقط قبل الحذف
   const { data: existingReview, error: fetchError } = await supabase
     .from("product_reviews")
-    .select()
+    .select("id")
     .eq("id", reviewId)
     .maybeSingle()
 
@@ -45,15 +44,7 @@ export async function deleteReview(
     }
   }
 
-  if (existingReview.user_id !== currentUser.id) {
-    return {
-      success: false,
-      error: "FORBIDDEN",
-      details: { database: ["You are not allowed to delete this review."] },
-    }
-  }
-
-  // 3. تنفيذ الحذف
+  // 3. تنفيذ الحذف مباشرة (معتمداً على سياسات RLS في قاعدة البيانات)
   const { error: deleteError } = await supabase
     .from("product_reviews")
     .delete()

@@ -34,7 +34,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import { updateReviewStatus } from "@/lib/actions/reviews/mutations/update-review-status"
+import { updateReviewStatus } from "@/lib/actions/reviews/mutations/update-review"
 import type { ReviewWithUser } from "@/lib/actions/reviews/types"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 

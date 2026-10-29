@@ -1,6 +1,6 @@
 /**
  * @file lib/actions/store/product-details/reviews/mutations/update-review.ts
- * @description Updates an existing product review ensuring ownership verification.
+ * @description Updates an existing product review.
  */
 
 "use server"
@@ -43,13 +43,12 @@ export async function updateReview(
     return { success: false, error: "UNAUTHORIZED" }
   }
 
-  const currentUser = userResult.data
   const supabase = await createServerClient()
 
-  // 2. التحقق من وجود التعليق وملكيته قبل التعديل
+  // 2. التحقق من وجود التعليق فقط قبل التعديل
   const { data: existingReview, error: fetchError } = await supabase
     .from("product_reviews")
-    .select()
+    .select("id")
     .eq("id", reviewId)
     .maybeSingle()
 
@@ -61,15 +60,7 @@ export async function updateReview(
     }
   }
 
-  if (existingReview.user_id !== currentUser.id) {
-    return {
-      success: false,
-      error: "FORBIDDEN",
-      details: { database: ["You are not allowed to update this review."] },
-    }
-  }
-
-  // 3. تنفيذ التعديل (قد يتطلب إعادة ضبط الحالة لـ is_approved = false حسب سياسة المتجر، هنا نحدث المحتوى والتقييم)
+  // 3. تنفيذ التعديل مباشرة (معتمداً على صلاحيات السياسات في قاعدة البيانات)
   const { error: updateError } = await supabase
     .from("product_reviews")
     .update({
