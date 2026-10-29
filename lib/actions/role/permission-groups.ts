@@ -1,6 +1,6 @@
 /**
  * @file lib/actions/role/permission-groups.ts
- * @description تنظيم وتصنيف الصلاحيات حسب النوع وتحديث صلاحيات الطلبات.
+ * @description تنظيم وتصنيف الصلاحيات حسب النوع لجميع أقسام النظام.
  */
 
 import { PERMISSIONS, AppPermission } from "./types"
@@ -21,33 +21,37 @@ export const PERMISSION_GROUPS = [
   // ==========================================
   {
     id: "brands_group",
-    label: "🏷️ Brands Management",
+    label: "brands_group",
     permissions: [
       {
-        key: PERMISSIONS.VIEW_BRANDS_MANAGEMENT,
-        label: "View Brands Management",
-        description: "Access and view the brands management dashboard.",
+        key: PERMISSIONS.VIEW_BRANDS_DASHBOARD,
+        label: "view_brands_dashboard",
+        description: "view_brands_dashboard_desc",
       },
       {
-        key: PERMISSIONS.MANAGE_BRANDS,
-        label: "Manage Brands (Database Access)",
-        description:
-          "Core permission required to execute brand operations in the database.",
+        key: PERMISSIONS.READ_BRANDS,
+        label: "read_brands",
+        description: "read_brands_desc",
       },
       {
         key: PERMISSIONS.CREATE_BRAND,
-        label: "Create Brand",
-        description: "Add new brands and manufacturers to the catalog.",
+        label: "create_brand",
+        description: "create_brand_desc",
       },
       {
         key: PERMISSIONS.UPDATE_BRAND,
-        label: "Update Brand",
-        description: "Modify existing brand details, logos, and status.",
+        label: "update_brand",
+        description: "update_brand_desc",
       },
       {
         key: PERMISSIONS.DELETE_BRAND,
-        label: "Delete Brand",
-        description: "Permanently remove brands from the system.",
+        label: "delete_brand",
+        description: "delete_brand_desc",
+      },
+      {
+        key: PERMISSIONS.MANAGE_BRANDS,
+        label: "manage_brands",
+        description: "manage_brands_desc",
       },
     ],
   },
@@ -57,33 +61,37 @@ export const PERMISSION_GROUPS = [
   // ==========================================
   {
     id: "categories_group",
-    label: "📁 Categories Management",
+    label: "categories_group",
     permissions: [
       {
-        key: PERMISSIONS.VIEW_CATEGORIES_MANAGEMENT,
-        label: "View Categories Management",
-        description: "Access and view the categories management dashboard.",
+        key: PERMISSIONS.VIEW_CATEGORIES_DASHBOARD,
+        label: "view_categories_dashboard",
+        description: "view_categories_dashboard_desc",
       },
       {
-        key: PERMISSIONS.MANAGE_CATEGORIES,
-        label: "Manage Categories (Database Access)",
-        description:
-          "Core permission required to execute category operations in the database.",
+        key: PERMISSIONS.READ_CATEGORIES,
+        label: "read_categories",
+        description: "read_categories_desc",
       },
       {
         key: PERMISSIONS.CREATE_CATEGORY,
-        label: "Create Category",
-        description: "Add new categories and subcategories to the catalog.",
+        label: "create_category",
+        description: "create_category_desc",
       },
       {
         key: PERMISSIONS.UPDATE_CATEGORY,
-        label: "Update Category",
-        description: "Modify existing category details, hierarchy, and status.",
+        label: "update_category",
+        description: "update_category_desc",
       },
       {
         key: PERMISSIONS.DELETE_CATEGORY,
-        label: "Delete Category",
-        description: "Permanently remove categories from the system.",
+        label: "delete_category",
+        description: "delete_category_desc",
+      },
+      {
+        key: PERMISSIONS.MANAGE_CATEGORIES,
+        label: "manage_categories",
+        description: "manage_categories_desc",
       },
     ],
   },
@@ -93,36 +101,37 @@ export const PERMISSION_GROUPS = [
   // ==========================================
   {
     id: "products_group",
-    label: "📦 Products Management",
+    label: "products_group",
     permissions: [
       {
-        key: PERMISSIONS.VIEW_PRODUCTS_MANAGEMENT,
-        label: "View Products Management",
-        description: "Access and view the products inventory dashboard.",
+        key: PERMISSIONS.VIEW_PRODUCTS_DASHBOARD,
+        label: "view_products_dashboard",
+        description: "view_products_dashboard_desc",
       },
       {
-        key: PERMISSIONS.MANAGE_PRODUCTS,
-        label: "Manage Products & Variants (Database Access)",
-        description:
-          "Core permission required to execute product, variant, and image operations.",
+        key: PERMISSIONS.READ_PRODUCTS,
+        label: "read_products",
+        description: "read_products_desc",
       },
       {
         key: PERMISSIONS.CREATE_PRODUCT,
-        label: "Create Product",
-        description:
-          "Add new products, pricing variants, and media to the store.",
+        label: "create_product",
+        description: "create_product_desc",
       },
       {
         key: PERMISSIONS.UPDATE_PRODUCT,
-        label: "Update Product",
-        description:
-          "Modify existing product details, stock, variants, and images.",
+        label: "update_product",
+        description: "update_product_desc",
       },
       {
         key: PERMISSIONS.DELETE_PRODUCT,
-        label: "Delete Product",
-        description:
-          "Permanently remove products, variants, and associated images.",
+        label: "delete_product",
+        description: "delete_product_desc",
+      },
+      {
+        key: PERMISSIONS.MANAGE_PRODUCTS,
+        label: "manage_products",
+        description: "manage_products_desc",
       },
     ],
   },
@@ -132,19 +141,37 @@ export const PERMISSION_GROUPS = [
   // ==========================================
   {
     id: "wishlists_group",
-    label: "❤️ Wishlists Management",
+    label: "wishlists_group",
     permissions: [
       {
-        key: PERMISSIONS.VIEW_WISHLISTS_MANAGEMENT,
-        label: "View Wishlists Management",
-        description:
-          "Access and view customer wishlist statistics and overview.",
+        key: PERMISSIONS.VIEW_WISHLISTS_DASHBOARD,
+        label: "view_wishlists_dashboard",
+        description: "view_wishlists_dashboard_desc",
+      },
+      {
+        key: PERMISSIONS.READ_WISHLISTS,
+        label: "read_wishlists",
+        description: "read_wishlists_desc",
+      },
+      {
+        key: PERMISSIONS.CREATE_WISHLIST,
+        label: "create_wishlist",
+        description: "create_wishlist_desc",
+      },
+      {
+        key: PERMISSIONS.UPDATE_WISHLIST,
+        label: "update_wishlist",
+        description: "update_wishlist_desc",
+      },
+      {
+        key: PERMISSIONS.DELETE_WISHLIST,
+        label: "delete_wishlist",
+        description: "delete_wishlist_desc",
       },
       {
         key: PERMISSIONS.MANAGE_WISHLISTS,
-        label: "Manage Customer Wishlists (Database Access)",
-        description:
-          "Core permission required to moderate and manage user wishlists.",
+        label: "manage_wishlists",
+        description: "manage_wishlists_desc",
       },
     ],
   },
@@ -154,19 +181,37 @@ export const PERMISSION_GROUPS = [
   // ==========================================
   {
     id: "carts_group",
-    label: "🛒 Carts Management",
+    label: "carts_group",
     permissions: [
       {
-        key: PERMISSIONS.VIEW_CARTS_MANAGEMENT,
-        label: "View Carts Management",
-        description:
-          "Access and view active customer shopping carts and items.",
+        key: PERMISSIONS.VIEW_CARTS_DASHBOARD,
+        label: "view_carts_dashboard",
+        description: "view_carts_dashboard_desc",
+      },
+      {
+        key: PERMISSIONS.READ_CARTS,
+        label: "read_carts",
+        description: "read_carts_desc",
+      },
+      {
+        key: PERMISSIONS.CREATE_CART,
+        label: "create_cart",
+        description: "create_cart_desc",
+      },
+      {
+        key: PERMISSIONS.UPDATE_CART,
+        label: "update_cart",
+        description: "update_cart_desc",
+      },
+      {
+        key: PERMISSIONS.DELETE_CART,
+        label: "delete_cart",
+        description: "delete_cart_desc",
       },
       {
         key: PERMISSIONS.MANAGE_CARTS,
-        label: "Manage Customer Carts (Database Access)",
-        description:
-          "Core permission required to manage shopping cart records.",
+        label: "manage_carts",
+        description: "manage_carts_desc",
       },
     ],
   },
@@ -176,19 +221,37 @@ export const PERMISSION_GROUPS = [
   // ==========================================
   {
     id: "newsletter_group",
-    label: "✉️ Newsletter Management",
+    label: "newsletter_group",
     permissions: [
       {
-        key: PERMISSIONS.VIEW_NEWSLETTER_MANAGEMENT,
-        label: "View Newsletter Subscribers",
-        description:
-          "Access and view newsletter subscribers list and statistics.",
+        key: PERMISSIONS.VIEW_NEWSLETTER_DASHBOARD,
+        label: "view_newsletter_dashboard",
+        description: "view_newsletter_dashboard_desc",
+      },
+      {
+        key: PERMISSIONS.READ_NEWSLETTER,
+        label: "read_newsletter",
+        description: "read_newsletter_desc",
+      },
+      {
+        key: PERMISSIONS.CREATE_NEWSLETTER,
+        label: "create_newsletter",
+        description: "create_newsletter_desc",
+      },
+      {
+        key: PERMISSIONS.UPDATE_NEWSLETTER,
+        label: "update_newsletter",
+        description: "update_newsletter_desc",
+      },
+      {
+        key: PERMISSIONS.DELETE_NEWSLETTER,
+        label: "delete_newsletter",
+        description: "delete_newsletter_desc",
       },
       {
         key: PERMISSIONS.MANAGE_NEWSLETTER,
-        label: "Manage Newsletter & Broadcasts (Database Access)",
-        description:
-          "Core permission required to manage subscribers and send broadcast emails.",
+        label: "manage_newsletter",
+        description: "manage_newsletter_desc",
       },
     ],
   },
@@ -198,37 +261,37 @@ export const PERMISSION_GROUPS = [
   // ==========================================
   {
     id: "reviews_group",
-    label: "reviews_group.label",
+    label: "reviews_group",
     permissions: [
       {
         key: PERMISSIONS.VIEW_REVIEWS_DASHBOARD,
-        label: "reviews_group.view_dashboard.label",
-        description: "reviews_group.view_dashboard.description",
+        label: "view_reviews_dashboard",
+        description: "view_reviews_dashboard_desc",
       },
       {
         key: PERMISSIONS.READ_REVIEWS,
-        label: "reviews_group.read_reviews.label",
-        description: "reviews_group.read_reviews.description",
+        label: "read_reviews",
+        description: "read_reviews_desc",
       },
       {
         key: PERMISSIONS.CREATE_REVIEW,
-        label: "reviews_group.create_review.label",
-        description: "reviews_group.create_review.description",
+        label: "create_review",
+        description: "create_review_desc",
       },
       {
         key: PERMISSIONS.UPDATE_REVIEW,
-        label: "reviews_group.update_review.label",
-        description: "reviews_group.update_review.description",
+        label: "update_review",
+        description: "update_review_desc",
       },
       {
         key: PERMISSIONS.DELETE_REVIEW,
-        label: "reviews_group.delete_review.label",
-        description: "reviews_group.delete_review.description",
+        label: "delete_review",
+        description: "delete_review_desc",
       },
       {
         key: PERMISSIONS.MANAGE_REVIEWS,
-        label: "reviews_group.manage_reviews.label",
-        description: "reviews_group.manage_reviews.description",
+        label: "manage_reviews",
+        description: "manage_reviews_desc",
       },
     ],
   },
@@ -238,19 +301,37 @@ export const PERMISSION_GROUPS = [
   // ==========================================
   {
     id: "users_group",
-    label: "👥 Users Management",
+    label: "users_group",
     permissions: [
       {
-        key: PERMISSIONS.VIEW_USERS_MANAGEMENT,
-        label: "View Users Profiles",
-        description:
-          "Access and view registered users profiles and account statuses.",
+        key: PERMISSIONS.VIEW_USERS_DASHBOARD,
+        label: "view_users_dashboard",
+        description: "view_users_dashboard_desc",
+      },
+      {
+        key: PERMISSIONS.READ_USERS,
+        label: "read_users",
+        description: "read_users_desc",
+      },
+      {
+        key: PERMISSIONS.CREATE_USER,
+        label: "create_user",
+        description: "create_user_desc",
+      },
+      {
+        key: PERMISSIONS.UPDATE_USER,
+        label: "update_user",
+        description: "update_user_desc",
+      },
+      {
+        key: PERMISSIONS.DELETE_USER,
+        label: "delete_user",
+        description: "delete_user_desc",
       },
       {
         key: PERMISSIONS.MANAGE_USERS,
-        label: "Manage Users & Bans (Database Access)",
-        description:
-          "Core permission required to manage user accounts, status, and bans.",
+        label: "manage_users",
+        description: "manage_users_desc",
       },
     ],
   },
@@ -260,18 +341,37 @@ export const PERMISSION_GROUPS = [
   // ==========================================
   {
     id: "roles_group",
-    label: "🔐 Roles & Security Management",
+    label: "roles_group",
     permissions: [
       {
-        key: PERMISSIONS.VIEW_ROLES_MANAGEMENT,
-        label: "View System Roles",
-        description: "Access and view system roles and assigned permissions.",
+        key: PERMISSIONS.VIEW_ROLES_DASHBOARD,
+        label: "view_roles_dashboard",
+        description: "view_roles_dashboard_desc",
+      },
+      {
+        key: PERMISSIONS.READ_ROLES,
+        label: "read_roles",
+        description: "read_roles_desc",
+      },
+      {
+        key: PERMISSIONS.CREATE_ROLE,
+        label: "create_role",
+        description: "create_role_desc",
+      },
+      {
+        key: PERMISSIONS.UPDATE_ROLE,
+        label: "update_role",
+        description: "update_role_desc",
+      },
+      {
+        key: PERMISSIONS.DELETE_ROLE,
+        label: "delete_role",
+        description: "delete_role_desc",
       },
       {
         key: PERMISSIONS.MANAGE_ROLES,
-        label: "Manage Roles & Permissions (Database Access)",
-        description:
-          "Core permission required to create, modify, or delete roles and access rights.",
+        label: "manage_roles",
+        description: "manage_roles_desc",
       },
     ],
   },

@@ -1,3 +1,4 @@
+
 export const APP_NAME = "Marketna"
 
 export const appConfig = {

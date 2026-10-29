@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * @file components/store/navigation/preferences-sub-nav.tsx
  * @description Sub-navigation for changing language, theme, and currency preferences with Arabic currency name support.
@@ -17,9 +15,13 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import { PREFERENCES_CONFIG } from "./nav-config"
 import { cn } from "@/lib/utils"
 import { useCurrency } from "@/lib/context/currency-context"
+import {
+  PreferenceOption,
+  PREFERENCES_CONFIG,
+  SUPPORTED_CURRENCIES,
+} from "./nav-config"
 
 interface PreferencesSubNavProps {
   itemClassName?: string
@@ -34,7 +36,7 @@ export function PreferencesSubNav({
   const pathname = usePathname()
   const currentLocale = useLocale()
   const { theme, setTheme } = useTheme()
-  const { currentCurrency, setCurrency, currencies } = useCurrency()
+  const { currentCurrency, setCurrency } = useCurrency()
   const t = useTranslations("Navigation.preferences")
 
   const [isMounted, setIsMounted] = React.useState(false)
@@ -124,7 +126,7 @@ export function PreferencesSubNav({
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-0.5 ps-6 pt-0.5">
-          {language.options.map((opt) => {
+          {language.options.map((opt: PreferenceOption) => {
             const isSelected = isMounted && optimisticLocale === opt.value
             return (
               <Button
@@ -182,7 +184,7 @@ export function PreferencesSubNav({
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-0.5 ps-6 pt-0.5">
-          {appearance.options.map((opt) => {
+          {appearance.options.map((opt: PreferenceOption) => {
             const isSelected = isMounted && theme === opt.value
             const OptIcon = opt.icon
             return (
@@ -246,21 +248,29 @@ export function PreferencesSubNav({
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-0.5 ps-6 pt-0.5">
-          {currencies.map((curr) => {
-            const isSelected = isMounted && currentCurrency.code === curr.code
-            // التحقق من توفر الاسم العربي واستخدامه عند اختيار اللغة العربية
+          {Object.values(SUPPORTED_CURRENCIES).map((curr) => {
+            const typedCurr = curr as {
+              code: string
+              name: string
+              name_ar?: string
+              symbol: string
+            }
+            const isSelected =
+              isMounted && currentCurrency.code === typedCurr.code
             const currencyDisplayName =
-              currentLocale === "ar" && "name_ar" in curr && curr.name_ar
-                ? (curr.name_ar as string)
-                : curr.name
+              currentLocale === "ar" &&
+              "name_ar" in typedCurr &&
+              typedCurr.name_ar
+                ? typedCurr.name_ar
+                : typedCurr.name
 
             return (
               <Button
-                key={curr.code}
+                key={typedCurr.code}
                 variant="ghost"
                 size="sm"
                 disabled={isCurrencyPending}
-                onClick={(e) => handleCurrencyChange(e, curr.code)}
+                onClick={(e) => handleCurrencyChange(e, typedCurr.code)}
                 className={cn(
                   "flex h-8 w-full items-center justify-between text-xs font-normal",
                   (!isSelected || isCurrencyPending) && "text-muted-foreground",
@@ -270,7 +280,7 @@ export function PreferencesSubNav({
                 <div className="flex items-center gap-2">
                   <span>{currencyDisplayName}</span>
                   <span className="text-[10px] text-muted-foreground/80">
-                    ({curr.symbol})
+                    ({typedCurr.symbol})
                   </span>
                 </div>
                 {isSelected && !isCurrencyPending ? (
