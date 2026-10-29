@@ -6,6 +6,8 @@ import { getCategories, type Category } from "@/lib/actions/categories"
 import { getBrands, type BrandRecord } from "@/lib/actions/brands"
 import ProductForm from "@/components/dashboard/product/product-form"
 import { getTranslations } from "next-intl/server"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
+import { notFound } from "next/navigation"
  
 export async function generateMetadata({
   params,
@@ -27,6 +29,13 @@ export default async function Page({
   params: Promise<{ locale: string }>
 }) {
  
+
+    const canView = await hasPermission(PERMISSIONS.CREATE_PRODUCT)
+  
+  if (!canView) {
+    notFound()
+  }
+
 
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "ProductsManagement" })

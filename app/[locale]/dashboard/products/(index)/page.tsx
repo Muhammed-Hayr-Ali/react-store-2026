@@ -11,6 +11,8 @@ import { DataTable } from "@/components/dashboard/product/products-table"
 import { ProductsSummary } from "@/components/dashboard/product/products-summary"
 import { getTranslations } from "next-intl/server"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
+import { notFound } from "next/navigation"
  
 export async function generateMetadata({
   params,
@@ -31,6 +33,15 @@ export default async function Page({
 }: {
   params: Promise<{ locale: string }>
 }) {
+
+    const canView = await hasPermission(PERMISSIONS.MANAGE_PRODUCTS)
+  
+  if (!canView) {
+    notFound()
+  }
+
+
+
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "ProductsManagement" })
   const tErrors = await getTranslations({ locale, namespace: "ActionErrors" })

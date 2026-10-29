@@ -10,7 +10,8 @@ import ProductForm from "@/components/dashboard/product/product-form"
 import { getBrands } from "@/lib/actions/brands"
 import type { BrandRecord } from "@/lib/actions/brands/types"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
- 
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
+
 export async function generateMetadata({
   params,
 }: {
@@ -35,7 +36,11 @@ export default async function Page({
 }: {
   params: Promise<{ slug: string; locale: string }>
 }) {
- 
+  const canView = await hasPermission(PERMISSIONS.UPDATE_PRODUCT)
+
+  if (!canView) {
+    notFound()
+  }
 
   const { slug, locale } = await params
   const t = await getTranslations({ locale, namespace: "ProductsManagement" })
