@@ -52,27 +52,31 @@ export const sidebarConfig: SidebarConfig = {
       key: "categories-management",
       url: appRoutes.dashboard.categories,
       icon: Tags,
-     },
+      requiredPermission: PERMISSIONS.MANAGE_CATEGORIES,
+    },
     {
       titleKey: "BRANDS_MANAGEMENT",
       key: "brands-management",
       url: appRoutes.dashboard.brands,
       icon: Tags,
-     },
+      requiredPermission: PERMISSIONS.UPDATE_BRAND,
+    },
     {
       titleKey: "PRODUCTS_MANAGEMENT",
       key: "products-management",
       url: appRoutes.dashboard.products,
       icon: PackageIcon,
-     },
-    
+      requiredPermission: PERMISSIONS.MANAGE_PRODUCTS,
+    },
+
     // --- 2. تمت إضافة قسم التقييمات هنا بعد المنتجات مباشرة ---
     {
       titleKey: "REVIEWS_MANAGEMENT",
       key: "reviews-management",
       url: appRoutes.dashboard.reviews, // تأكد أن هذا المسار موجود في appRoutes
       icon: MessageSquareIcon,
-     },
+      requiredPermission: PERMISSIONS.MANAGE_REVIEWS,
+    },
     // -----------------------------------------------------------
 
     {
@@ -80,28 +84,31 @@ export const sidebarConfig: SidebarConfig = {
       key: "users-management",
       url: appRoutes.dashboard.users,
       icon: Users,
-     },
+      requiredPermission: PERMISSIONS.MANAGE_USERS,
+    },
     {
       titleKey: "NEWSLETTER_SUBSCRIBERS",
       key: "newsletter-subscribers",
       url: appRoutes.dashboard.newsletterSubscribers,
       icon: Mail,
-     },
+      requiredPermission: PERMISSIONS.MANAGE_NEWSLETTER,
+    },
 
     {
       titleKey: "TEAM_MANAGEMENT",
       key: "team-management",
       url: "#",
       icon: UserCog,
+      requiredPermission: PERMISSIONS.MANAGE_ROLES,
       items: [
         {
           titleKey: "ROLES_AND_PERMISSIONS",
           url: appRoutes.dashboard.team.roles,
-         },
+        },
         {
           titleKey: "STAFF_ACCESS",
           url: appRoutes.dashboard.team.staffAccess,
-         },
+        },
       ],
     },
   ],
