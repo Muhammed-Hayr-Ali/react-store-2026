@@ -106,7 +106,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
               onSuccess={() => setIsEditOpen(false)}
             >
               <Button
-                variant="ghost"
+                variant="secondary"
                 size="icon"
                 className="size-8 text-muted-foreground hover:text-foreground"
                 aria-label={t("EDIT_REVIEW_ARIA")}
@@ -121,7 +121,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
               onOpenChange={setIsDeleteOpen}
             >
               <Button
-                variant="ghost"
+                variant="destructive"
                 size="icon"
                 className="size-8 text-muted-foreground hover:text-destructive"
                 aria-label={t("DELETE_REVIEW_ARIA")}
