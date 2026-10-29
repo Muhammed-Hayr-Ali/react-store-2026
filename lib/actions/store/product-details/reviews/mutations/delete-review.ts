@@ -33,7 +33,7 @@ export async function deleteReview(
   // 2. التحقق من وجود التعليق وملكيته قبل الحذف
   const { data: existingReview, error: fetchError } = await supabase
     .from("product_reviews")
-    .select("id, user_id")
+    .select()
     .eq("id", reviewId)
     .maybeSingle()
 
