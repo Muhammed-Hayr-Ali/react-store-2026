@@ -54,7 +54,6 @@ export function ReviewDialog({
   children,
 }: ReviewDialogProps) {
   const t = useTranslations("ProductReviews")
-  const tErrors = useTranslations("ActionErrors")
   const [isPending, startTransition] = React.useTransition()
   const [hoverRating, setHoverRating] = React.useState<number | null>(null)
 
@@ -104,7 +103,7 @@ export function ReviewDialog({
         if (!result.success) {
           toast.error(
             result.error
-              ? tErrors(getActionErrorKey(result.error))
+              ? t(getActionErrorKey(result.error))
               : t(isUpdate ? "UPDATE_REVIEW_ERROR" : "CREATE_REVIEW_ERROR")
           )
           return

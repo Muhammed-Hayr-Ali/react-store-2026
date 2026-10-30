@@ -27,20 +27,18 @@ export async function generateMetadata({ params }: PageProps) {
   })
 }
 
-export default async function Page({ params }: PageProps) {
+export default async function Page() {
   const canView = await hasPermission(PERMISSIONS.MANAGE_USERS)
   if (!canView) {
     notFound()
   }
 
-  const { locale } = await params
-  const t = await getTranslations({ locale, namespace: "UsersManagement" })
-  const tErrors = await getTranslations({ locale, namespace: "ActionErrors" })
+  const t = await getTranslations("UsersManagement" )
 
   const pageDataResult = await getUsersPageData()
   if (!pageDataResult.success) {
     throw new Error(
-      tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
+      t(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
     )
   }
 

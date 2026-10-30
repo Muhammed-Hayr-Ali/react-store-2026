@@ -91,7 +91,6 @@ export default async function Page({ params }: PageProps) {
 
       <NewsletterSubscribersTable
         initialSubscribers={subscribers}
-        locale={locale === "ar" ? "ar" : "en"}
         initialIsMobile={isMobile}
       />
     </div>

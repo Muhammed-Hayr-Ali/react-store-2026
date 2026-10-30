@@ -44,7 +44,6 @@ export default async function Page({
 
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "ProductsManagement" })
-  const tErrors = await getTranslations({ locale, namespace: "ActionErrors" })
 
   const headersList = await headers()
   const userAgent = headersList.get("user-agent") || ""
@@ -62,7 +61,7 @@ export default async function Page({
       error: result.error,
       details: result.details,
     })
-    throw new Error(tErrors(getActionErrorKey(result.error)))
+    throw new Error(t(getActionErrorKey(result.error)))
   }
 
   if (!summaryResult.success) {
@@ -70,7 +69,7 @@ export default async function Page({
       error: summaryResult.error,
       details: summaryResult.details,
     })
-    throw new Error(tErrors(getActionErrorKey(summaryResult.error)))
+    throw new Error(t(getActionErrorKey(summaryResult.error)))
   }
 
   const products: AdminProductSummary[] = result.data

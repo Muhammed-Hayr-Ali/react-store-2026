@@ -41,10 +41,6 @@ export default async function Page({ params }: PageProps) {
     locale,
     namespace: "CategoriesManagement",
   })
-  const tErrors = await getTranslations({
-    locale,
-    namespace: "ActionErrors",
-  })
 
   // Fetch pre-processed page data and business logic
   const [pageDataResult, summaryResult] = await Promise.all([
@@ -53,13 +49,13 @@ export default async function Page({ params }: PageProps) {
   ])
   if (!pageDataResult.success) {
     throw new Error(
-      tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
+      t(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
     )
   }
 
   if (!summaryResult.success) {
     throw new Error(
-      tErrors(getActionErrorKey(summaryResult.error ?? "UNEXPECTED_ERROR"))
+      t(getActionErrorKey(summaryResult.error ?? "UNEXPECTED_ERROR"))
     )
   }
 

@@ -39,7 +39,6 @@ export function DeleteReviewDialog({
   children,
 }: DeleteReviewDialogProps) {
   const t = useTranslations("ProductReviews")
-  const tErrors = useTranslations("ActionErrors")
   const [isPending, startTransition] = React.useTransition()
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -54,7 +53,7 @@ export function DeleteReviewDialog({
         if (!result.success) {
           toast.error(
             result.error
-              ? tErrors(getActionErrorKey(result.error))
+              ? t(getActionErrorKey(result.error))
               : t("DELETE_REVIEW_ERROR")
           )
           return

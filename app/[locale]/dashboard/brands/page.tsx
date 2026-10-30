@@ -23,15 +23,13 @@ export async function generateMetadata({ params }: PageProps) {
   })
 }
 
-export default async function Page({ params }: PageProps) {
+export default async function Page() {
   const canView = await hasPermission(PERMISSIONS.MANAGE_BRANDS)
   if (!canView) {
     notFound()
   }
 
-  const { locale } = await params
-  const t = await getTranslations({ locale, namespace: "BrandsManagement" })
-  const errors = await getTranslations({ locale, namespace: "ActionErrors" })
+  const t = await getTranslations("BrandsManagement" )
 
   const [pageDataResult, summaryResult] = await Promise.all([
     getBrandsPageData(),
@@ -40,12 +38,12 @@ export default async function Page({ params }: PageProps) {
 
   if (!pageDataResult.success)
     throw new Error(
-      errors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
+      t(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
     )
 
   if (!summaryResult.success)
     throw new Error(
-      errors(getActionErrorKey(summaryResult.error ?? "UNEXPECTED_ERROR"))
+      t(getActionErrorKey(summaryResult.error ?? "UNEXPECTED_ERROR"))
     )
 
   const { brands, brandImages, isMobile } = pageDataResult.data

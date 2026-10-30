@@ -44,7 +44,6 @@ export default async function Page({
 
   const { slug, locale } = await params
   const t = await getTranslations({ locale, namespace: "ProductsManagement" })
-  const tErrors = await getTranslations({ locale, namespace: "ActionErrors" })
 
   const [productResult, categoriesResult, brandsResult] = await Promise.all([
     getProductForEditBySlug(slug, { activeOnly: false }),
@@ -69,7 +68,7 @@ export default async function Page({
       error: categoriesResult.error,
       details: categoriesResult.details,
     })
-    throw new Error(tErrors(getActionErrorKey(categoriesResult.error)))
+    throw new Error(t(getActionErrorKey(categoriesResult.error)))
   }
 
   if (!brandsResult.success) {
@@ -78,7 +77,7 @@ export default async function Page({
       error: brandsResult.error,
       details: brandsResult.details,
     })
-    throw new Error(tErrors(getActionErrorKey(brandsResult.error)))
+    throw new Error(t(getActionErrorKey(brandsResult.error)))
   }
 
   const categories: Category[] = categoriesResult.data

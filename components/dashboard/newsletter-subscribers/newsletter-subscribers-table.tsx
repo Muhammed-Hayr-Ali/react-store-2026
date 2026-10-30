@@ -78,15 +78,15 @@ const HIDEABLE_COLUMNS: HideableColumn[] = ["status", "joined", "reason"]
 
 interface NewsletterSubscribersTableProps {
   initialSubscribers: NewsletterSubscriber[]
-  locale: AppLocale
   initialIsMobile?: boolean
 }
 
 export function NewsletterSubscribersTable({
   initialSubscribers,
-  locale,
   initialIsMobile = false,
+
 }: NewsletterSubscribersTableProps) {
+  const locale = useLocale()
   const t = useTranslations("NewsletterSubscribersManagement")
   const displayLocale = useLocale()
   const [subscribers, setSubscribers] = React.useState(initialSubscribers)
@@ -104,7 +104,7 @@ export function NewsletterSubscribersTable({
   const [pageSize, setPageSize] = React.useState(initialIsMobile ? 20 : 10)
   const [composeOpen, setComposeOpen] = React.useState(false)
   const [recipientIds, setRecipientIds] = React.useState<string[]>([])
-  const [emailLocale, setEmailLocale] = React.useState<AppLocale>(locale)
+  const [emailLocale, setEmailLocale] = React.useState<string>(locale)
   const [subject, setSubject] = React.useState("")
   const [message, setMessage] = React.useState("")
   const [isSending, startSending] = React.useTransition()

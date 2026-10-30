@@ -11,8 +11,6 @@ import { CheckCircle2Icon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { ReviewDialog } from "./review-dialog"
-import { PERMISSIONS } from "@/lib/actions/role"
-import { Can } from "@/components/shared/can"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface ReviewsHeaderProps {
