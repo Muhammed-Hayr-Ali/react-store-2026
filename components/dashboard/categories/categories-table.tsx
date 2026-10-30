@@ -34,7 +34,6 @@ import {
   XIcon,
 } from "lucide-react"
 
-import { Can } from "@/components/shared/can"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -65,7 +64,6 @@ import {
 } from "@/components/ui/table"
 import { useIsMobile } from "@/hooks/use-mobile"
 import type { Category } from "@/lib/actions/categories"
-import { PERMISSIONS } from "@/lib/actions/role"
 import { getSiteAssetUrl } from "@/lib/database/supabase/storage"
 import { CategoryFormSheet } from "./category-form-sheet"
 import { DeleteCategoryDialog } from "./delete-category-dialog"

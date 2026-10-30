@@ -55,7 +55,6 @@ export function NewsletterComposeDialog({
   onRecipientsChanged,
 }: NewsletterComposeDialogProps) {
   const t = useTranslations("NewsletterSubscribersManagement")
-  const tErrors = useTranslations("ActionErrors")
   const [open, setOpen] = React.useState(false)
 
   // تتبع الفشلات الحية أثناء عملية الإرسال الجزئي دون الحاجة لـ useEffect للـ props
@@ -123,9 +122,9 @@ export function NewsletterComposeDialog({
           setFailedIdsState([])
         }
 
-        toast.error(tErrors(getActionErrorKey(result.error)))
+        toast.error(t(getActionErrorKey(result.error)))
       } catch {
-        toast.error(tErrors("UNEXPECTED_ERROR"))
+        toast.error(t("UNEXPECTED_ERROR"))
       }
     })
   }

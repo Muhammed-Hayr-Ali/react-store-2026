@@ -23,7 +23,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Spinner } from "@/components/ui/spinner"
 import { deleteCategory } from "@/lib/actions/categories"
 import type { Category } from "@/lib/actions/categories"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
@@ -49,7 +48,6 @@ export function DeleteCategoryDialog({
   children,
 }: DeleteCategoryDialogProps) {
   const t = useTranslations("CategoriesManagement")
-  const tErrors = useTranslations("ActionErrors")
   const [isPending, startTransition] = React.useTransition()
   const form = useForm<DeleteCategoryFormValues>({
     defaultValues: { confirmName: "" },
@@ -71,7 +69,7 @@ export function DeleteCategoryDialog({
         if (!result.success) {
           toast.error(
             result.error
-              ? tErrors(getActionErrorKey(result.error))
+              ? t(getActionErrorKey(result.error))
               : t("DELETE_ERROR")
           )
           return

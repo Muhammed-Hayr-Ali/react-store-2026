@@ -24,8 +24,7 @@ interface OAuthCallbackViewProps {
 
 export function OAuthCallbackView({ code, error }: OAuthCallbackViewProps) {
   const t = useTranslations("OAuthCallback")
-  const tErrors = useTranslations("ActionErrors")
-  const router = useRouter()
+   const router = useRouter()
   const hasProcessed = React.useRef(false)
 
   // Exchange the OAuth code once, then redirect based on the result.
@@ -44,7 +43,7 @@ export function OAuthCallbackView({ code, error }: OAuthCallbackViewProps) {
           } else {
             toast.error(
               result.error
-                ? tErrors(getActionErrorKey(result.error))
+                ? t(getActionErrorKey(result.error))
                 : t("EXCHANGE_FAILED")
             )
             router.replace(appRoutes.auth.login)
@@ -58,7 +57,7 @@ export function OAuthCallbackView({ code, error }: OAuthCallbackViewProps) {
 
       processExchange()
     }
-  }, [code, router, t, tErrors])
+  }, [code, router, t, t])
 
   // Error view when OAuth provider returns an error parameter
   if (error) {
@@ -71,7 +70,7 @@ export function OAuthCallbackView({ code, error }: OAuthCallbackViewProps) {
           {t("FAILED_TITLE")}
         </h1>
         <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-          {tErrors(getActionErrorKey(error))}
+          {t(getActionErrorKey(error))}
         </p>
         <Button
           variant="outline"

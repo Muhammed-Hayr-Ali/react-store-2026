@@ -48,7 +48,6 @@ export function DeleteBrandDialog({
   children,
 }: DeleteBrandDialogProps) {
   const t = useTranslations("BrandsManagement")
-  const tErrors = useTranslations("ActionErrors")
   const [isPending, startTransition] = React.useTransition()
 
   const form = useForm<DeleteBrandFormValues>({
@@ -72,7 +71,7 @@ export function DeleteBrandDialog({
         if (!result.success) {
           toast.error(
             result.error
-              ? tErrors(getActionErrorKey(result.error))
+              ? t(getActionErrorKey(result.error))
               : t("DELETE_ERROR")
           )
           return

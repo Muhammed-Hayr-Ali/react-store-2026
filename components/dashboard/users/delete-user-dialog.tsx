@@ -44,7 +44,6 @@ export function DeleteUserDialog({
 }: DeleteUserDialogProps) {
   // Resolve translations and track dialog, confirmation, and pending states.
   const t = useTranslations("UsersManagement")
-  const tErrors = useTranslations("ActionErrors")
   const [isPending, startTransition] = React.useTransition()
   const [isOpen, setIsOpen] = React.useState(false)
   const [confirmName, setConfirmName] = React.useState("")
@@ -64,7 +63,7 @@ export function DeleteUserDialog({
         } else {
           toast.error(
             res.error
-              ? tErrors(getActionErrorKey(res.error))
+              ? t(getActionErrorKey(res.error))
               : t("DELETE_ERROR_TOAST")
           )
         }

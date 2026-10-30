@@ -33,7 +33,6 @@ import {
   XIcon,
 } from "lucide-react"
 
-import { Can } from "@/components/shared/can"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -64,7 +63,6 @@ import {
 } from "@/components/ui/table"
 import { useIsMobile } from "@/hooks/use-mobile"
 import type { ReviewWithUser } from "@/lib/actions/reviews/types"
-import { PERMISSIONS } from "@/lib/actions/role"
 import { DeleteReviewDialog } from "./delete-review-dialog"
 import { ReviewStatusSheet } from "./review-status-sheet"
 

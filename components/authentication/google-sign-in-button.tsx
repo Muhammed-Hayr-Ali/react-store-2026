@@ -24,8 +24,7 @@ export function GoogleSignInButton({
   lastLoginMethod,
 }: GoogleSignInButtonProps) {
   const t = useTranslations("GoogleSignInButton")
-  const tErrors = useTranslations("ActionErrors")
-
+ 
   // Track the OAuth request while it is being dispatched.
   const [isPending, startTransition] = React.useTransition()
 
@@ -42,7 +41,7 @@ export function GoogleSignInButton({
 
         const errorMessage =
           !result.success && result.error
-            ? tErrors(getActionErrorKey(result.error))
+            ? t(getActionErrorKey(result.error))
             : t("SIGN_IN_FAILED_FALLBACK")
 
         toast.error(errorMessage)

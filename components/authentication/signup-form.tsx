@@ -46,7 +46,6 @@ import { getActionErrorKey } from "@/lib/actions/error-keys"
 export function SignUpForm() {
   // Load translations and navigation for the registration flow.
   const t = useTranslations("SignUpForm")
-  const tErrors = useTranslations("ActionErrors")
   const locale = useLocale()
   const router = useRouter()
 
@@ -95,9 +94,7 @@ export function SignUpForm() {
       setErrorMessage(t("EMAIL_ALREADY_EXISTS_ERROR"))
     } else {
       setErrorMessage(
-        result.error
-          ? tErrors(getActionErrorKey(result.error))
-          : t("GENERIC_ERROR")
+        result.error ? t(getActionErrorKey(result.error)) : t("GENERIC_ERROR")
       )
     }
   }

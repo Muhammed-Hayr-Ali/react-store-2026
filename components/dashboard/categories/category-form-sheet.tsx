@@ -125,7 +125,6 @@ export function CategoryFormSheet({
 }: CategoryFormSheetProps) {
   const isMobile = useIsMobile()
   const t = useTranslations("CategoriesManagement")
-  const tErrors = useTranslations("ActionErrors")
   const [isPending, startTransition] = React.useTransition()
   const formSchema = React.useMemo(
     () =>
@@ -253,7 +252,7 @@ export function CategoryFormSheet({
                   result.error === "PARENT_CATEGORY_NOT_FOUND"
                 ? t("INVALID_PARENT")
                 : result.error
-                  ? tErrors(getActionErrorKey(result.error))
+                  ? t(getActionErrorKey(result.error))
                   : t("SAVE_ERROR")
           toast.error(message)
           return

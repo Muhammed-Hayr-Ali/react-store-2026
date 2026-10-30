@@ -52,8 +52,7 @@ interface ResetPasswordFormProps {
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   // Load translations and navigation for the reset flow.
   const t = useTranslations("ResetPasswordForm")
-  const tErrors = useTranslations("ActionErrors")
-  const router = useRouter()
+   const router = useRouter()
 
   // Track password visibility and server-side errors.
   const [showPassword, setShowPassword] = React.useState(false)
@@ -104,7 +103,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     } else {
       setErrorMessage(
         result.error
-          ? tErrors(getActionErrorKey(result.error))
+          ? t(getActionErrorKey(result.error))
           : t("GENERIC_ERROR")
       )
     }

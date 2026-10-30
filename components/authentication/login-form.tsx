@@ -51,7 +51,6 @@ interface LoginFormProps {
 export function LoginForm({ lastLoginMethod }: LoginFormProps) {
   // Load translations and resolve the post-login destination.
   const t = useTranslations("LoginForm")
-  const tErrors = useTranslations("ActionErrors")
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTarget = searchParams.get("redirect") || appRoutes.home
@@ -102,7 +101,7 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
     } else {
       setErrorMessage(
         result.error
-          ? tErrors(getActionErrorKey(result.error))
+          ? t(getActionErrorKey(result.error))
           : t("GENERIC_ERROR")
       )
     }

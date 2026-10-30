@@ -57,7 +57,6 @@ export function ReviewStatusSheet({
   onSaved,
 }: ReviewStatusSheetProps) {
   const t = useTranslations("ReviewsManagement")
-  const tErrors = useTranslations("ActionErrors")
   const [isPending, startTransition] = React.useTransition()
 
   const reviewerName = review?.user?.first_name
@@ -102,7 +101,7 @@ export function ReviewStatusSheet({
         if (!result.success) {
           toast.error(
             result.error
-              ? tErrors(getActionErrorKey(result.error))
+              ? t(getActionErrorKey(result.error))
               : t("SAVE_ERROR")
           )
           return

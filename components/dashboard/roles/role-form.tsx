@@ -44,7 +44,6 @@ interface RoleFormProps {
 export function RoleForm({ initialData, roleId }: RoleFormProps) {
   // Resolve form translations and navigation after saving a role.
   const t = useTranslations("RolesManagement")
-  const tErrors = useTranslations("ActionErrors")
   const router = useRouter()
 
   const isEditing = Boolean(roleId || initialData)
@@ -145,13 +144,13 @@ export function RoleForm({ initialData, roleId }: RoleFormProps) {
             res.error === "VALIDATION_ERROR" && res.details
               ? Object.values(res.details)
                   .flat()
-                  .map((error) => tErrors(getActionErrorKey(error)))
+                  .map((error) => t(getActionErrorKey(error)))
                   .join(" ")
               : ""
           setErrorMessage(
             validationMessage ||
               (res.error
-                ? tErrors(getActionErrorKey(res.error))
+                ? t(getActionErrorKey(res.error))
                 : isEditing
                   ? t("FAILED_TO_UPDATE_ROLE")
                   : t("FAILED_TO_CREATE_ROLE"))

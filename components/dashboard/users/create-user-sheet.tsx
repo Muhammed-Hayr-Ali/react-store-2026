@@ -49,7 +49,6 @@ export function CreateUserSheet({ children, onSuccess }: CreateUserSheetProps) {
   // Resolve translations and navigation for the account creation flow.
   const isMobile = useIsMobile()
   const t = useTranslations("UsersManagement")
-  const tErrors = useTranslations("ActionErrors")
   const router = useRouter()
   const [isOpen, setIsOpen] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
@@ -129,7 +128,7 @@ export function CreateUserSheet({ children, onSuccess }: CreateUserSheetProps) {
       result.error === "PERMISSION_DENIED"
         ? t("PERMISSION_DENIED_ERROR")
         : result.error
-          ? tErrors(getActionErrorKey(result.error))
+          ? t(getActionErrorKey(result.error))
           : t("FAILED_TO_CREATE_USER")
     )
   }

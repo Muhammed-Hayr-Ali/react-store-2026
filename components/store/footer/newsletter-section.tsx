@@ -18,7 +18,6 @@ import { Input } from "@/components/ui/input"
 
 export function NewsletterSection() {
   const t = useTranslations("NewsletterSection")
-  const tErrors = useTranslations("ActionErrors")
   const locale = useLocale()
 
   const form = useForm<NewsletterSubscriberInput>({
@@ -41,15 +40,15 @@ export function NewsletterSection() {
         result.error === "VALIDATION_ERROR" && result.details
           ? Object.values(result.details).flat()[0]
           : undefined
-      toast.error(tErrors(getActionErrorKey(validationMessage ?? result.error)))
+      toast.error(t(getActionErrorKey(validationMessage ?? result.error)))
     } catch {
-      toast.error(tErrors("UNEXPECTED_ERROR"))
+      toast.error(t("UNEXPECTED_ERROR"))
     }
   }
 
   function onInvalid() {
     const message = form.formState.errors.email?.message
-    toast.error(tErrors(getActionErrorKey(message)))
+    toast.error(t(getActionErrorKey(message)))
   }
 
   return (

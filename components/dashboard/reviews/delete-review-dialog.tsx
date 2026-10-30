@@ -49,7 +49,6 @@ export function DeleteReviewDialog({
   children,
 }: DeleteReviewDialogProps) {
   const t = useTranslations("ReviewsManagement")
-  const tErrors = useTranslations("ActionErrors")
   const [isPending, startTransition] = React.useTransition()
   const form = useForm<DeleteReviewFormValues>({
     defaultValues: { confirmName: "" },
@@ -76,7 +75,7 @@ export function DeleteReviewDialog({
         if (!result.success) {
           toast.error(
             result.error
-              ? tErrors(getActionErrorKey(result.error))
+              ? t(getActionErrorKey(result.error))
               : t("DELETE_ERROR_TOAST")
           )
           return

@@ -109,7 +109,6 @@ export function BrandFormSheet({
 }: BrandFormSheetProps) {
   const isMobile = useIsMobile()
   const t = useTranslations("BrandsManagement")
-  const tErrors = useTranslations("ActionErrors")
   const [isPending, startTransition] = React.useTransition()
 
   // نستخدم useMemo لدعم الترجمة الديناميكية لأخطاء Zod
@@ -219,7 +218,7 @@ export function BrandFormSheet({
             result.error === "BRAND_SLUG_ALREADY_EXISTS"
               ? t("SLUG_ALREADY_EXISTS")
               : result.error
-                ? tErrors(getActionErrorKey(result.error))
+                ? t(getActionErrorKey(result.error))
                 : t("SAVE_ERROR")
           toast.error(message)
           return

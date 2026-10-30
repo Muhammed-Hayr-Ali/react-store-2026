@@ -66,7 +66,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Can } from "@/components/shared/can"
 import { PERMISSIONS } from "@/lib/actions/role"
 import { useIsMobile } from "@/hooks/use-mobile"
 import type { RoleRecord } from "@/lib/actions/role"
@@ -90,39 +89,39 @@ function RoleRowActions({ role, onDeleted }: RoleRowActionsProps) {
       roleName={role.name}
       onDeleted={onDeleted}
     >
-        <div className="flex items-center justify-end">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="flex size-7 text-muted-foreground data-[state=open]:bg-muted"
+      <div className="flex items-center justify-end">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="flex size-7 text-muted-foreground data-[state=open]:bg-muted"
+            >
+              <MoreHorizontalIcon className="size-4" />
+              <span className="sr-only">{t("ACTIONS_LABEL")}</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40 text-xs">
+            <DropdownMenuItem asChild>
+              <Link
+                href={`${appRoutes.dashboard.team.roles}/${role.id}/edit`}
+                className="flex cursor-pointer items-center"
               >
-                <MoreHorizontalIcon className="size-4" />
-                <span className="sr-only">{t("ACTIONS_LABEL")}</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40 text-xs">
-                <DropdownMenuItem asChild>
-                  <Link
-                    href={`${appRoutes.dashboard.team.roles}/${role.id}/edit`}
-                    className="flex cursor-pointer items-center"
-                  >
-                    <PencilIcon className="me-2 size-3.5" />
-                    {t("EDIT_ROLE")}
-                  </Link>
+                <PencilIcon className="me-2 size-3.5" />
+                {t("EDIT_ROLE")}
+              </Link>
+            </DropdownMenuItem>
+            <AlertDialogTrigger
+              render={
+                <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive">
+                  <Trash2Icon className="me-2 size-3.5" />
+                  {t("DELETE_ROLE")}
                 </DropdownMenuItem>
-                <AlertDialogTrigger
-                  render={
-                    <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive">
-                      <Trash2Icon className="me-2 size-3.5" />
-                      {t("DELETE_ROLE")}
-                    </DropdownMenuItem>
-                  }
-                />
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+              }
+            />
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </DeleteRoleDialog>
   )
 }
@@ -510,25 +509,25 @@ export function RolesTable({
           </DropdownMenu>
 
           {/* Dual Responsive CTA Button */}
-            <Link href={appRoutes.dashboard.team.create_roles}>
-              <Button
-                variant="default"
-                size="icon"
-                className="size-8 sm:hidden"
-                title={t("CREATE_ROLE")}
-              >
-                <PlusIcon className="size-3.5" />
-                <span className="sr-only">{t("CREATE_ROLE")}</span>
-              </Button>
-              <Button
-                variant="default"
-                size="sm"
-                className="hidden h-8 gap-1.5 px-3 text-xs sm:inline-flex"
-              >
-                <PlusIcon className="size-3.5" />
-                <span>{t("CREATE_ROLE")}</span>
-              </Button>
-            </Link>
+          <Link href={appRoutes.dashboard.team.create_roles}>
+            <Button
+              variant="default"
+              size="icon"
+              className="size-8 sm:hidden"
+              title={t("CREATE_ROLE")}
+            >
+              <PlusIcon className="size-3.5" />
+              <span className="sr-only">{t("CREATE_ROLE")}</span>
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              className="hidden h-8 gap-1.5 px-3 text-xs sm:inline-flex"
+            >
+              <PlusIcon className="size-3.5" />
+              <span>{t("CREATE_ROLE")}</span>
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -579,7 +578,7 @@ export function RolesTable({
                     colSpan={columns.length}
                     className="h-24 text-center text-xs text-muted-foreground"
                   >
-                    {t("NO_ROLES_FOUND")}
+                    {t("no_roles_found")}
                   </TableCell>
                 </TableRow>
               )}

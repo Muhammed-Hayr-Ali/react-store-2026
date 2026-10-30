@@ -62,9 +62,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Can } from "@/components/shared/can"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { PERMISSIONS } from "@/lib/actions/role"
 import { useIsMobile } from "@/hooks/use-mobile"
 
 import AssignRoleDialog from "./assign-role-dialog"
@@ -89,7 +87,6 @@ export function StaffAccessTable({
 }: StaffAccessTableProps) {
   // Resolve translations and responsive table layout.
   const t = useTranslations("StaffAccessManagement")
-  const tErrors = useTranslations("ActionErrors")
   const isMobile = useIsMobile()
 
   // Track staff records, filters, search text, and role revocation requests.
@@ -129,7 +126,7 @@ export function StaffAccessTable({
         } else {
           toast.error(
             res.error
-              ? tErrors(getActionErrorKey(res.error))
+              ? t(getActionErrorKey(res.error))
               : t("FAILED_TO_REMOVE_ROLE")
           )
         }
@@ -143,7 +140,7 @@ export function StaffAccessTable({
         })
       }
     },
-    [t, tErrors]
+    [t, t]
   )
 
   // Filter staff by role assignment status and search text.

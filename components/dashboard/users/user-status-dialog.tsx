@@ -53,7 +53,6 @@ export function UserStatusDialog({
 }: UserStatusDialogProps) {
   // Track the selected account status, ban reason, and dialog state.
   const t = useTranslations("UsersManagement")
-  const tErrors = useTranslations("ActionErrors")
   const [status, setStatus] = React.useState<UserStatus>(user.status)
   const [banReason, setBanReason] = React.useState(user.ban_reason || "")
   const [isPending, startTransition] = React.useTransition()
@@ -76,7 +75,7 @@ export function UserStatusDialog({
         } else {
           toast.error(
             res.error
-              ? tErrors(getActionErrorKey(res.error))
+              ? t(getActionErrorKey(res.error))
               : t("FAILED_TO_UPDATE_STATUS")
           )
         }

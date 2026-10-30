@@ -12,8 +12,6 @@ import { cn } from "@/lib/utils" // دالة دمج الـ tailwind المعتم
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
-import { Can } from "@/components/shared/can"
-import { PERMISSIONS } from "@/lib/actions/role"
 
 interface WishlistButtonProps {
   productId: string

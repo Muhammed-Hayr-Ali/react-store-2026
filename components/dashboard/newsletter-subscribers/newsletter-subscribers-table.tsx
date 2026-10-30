@@ -68,8 +68,7 @@ import {
   type NewsletterStatus,
 } from "@/lib/actions/newsletter_subscribers/schemas"
 import type { NewsletterSubscriber } from "@/lib/actions/newsletter_subscribers/types"
-import { PERMISSIONS } from "@/lib/actions/role"
-import type { AppLocale } from "@/i18n/routing"
+ import type { AppLocale } from "@/i18n/routing"
 import { DeleteSubscriberDialog } from "./delete-subscriber-dialog"
 
 type StatusFilter = "all" | NewsletterStatus
@@ -89,7 +88,6 @@ export function NewsletterSubscribersTable({
   initialIsMobile = false,
 }: NewsletterSubscribersTableProps) {
   const t = useTranslations("NewsletterSubscribersManagement")
-  const tErrors = useTranslations("ActionErrors")
   const displayLocale = useLocale()
   const [subscribers, setSubscribers] = React.useState(initialSubscribers)
   const [query, setQuery] = React.useState("")
@@ -270,13 +268,13 @@ export function NewsletterSubscribersTable({
               )
           )
           setRecipientIds([])
-          toast.error(tErrors(getActionErrorKey(result.error)))
+          toast.error(t(getActionErrorKey(result.error)))
           return
         }
 
-        toast.error(tErrors(getActionErrorKey(result.error)))
+        toast.error(t(getActionErrorKey(result.error)))
       } catch {
-        toast.error(tErrors("UNEXPECTED_ERROR"))
+        toast.error(t("UNEXPECTED_ERROR"))
       }
     })
   }
@@ -291,7 +289,7 @@ export function NewsletterSubscribersTable({
           status: nextStatus,
         })
         if (!result.success) {
-          toast.error(tErrors(getActionErrorKey(result.error)))
+          toast.error(t(getActionErrorKey(result.error)))
           return
         }
 
@@ -311,7 +309,7 @@ export function NewsletterSubscribersTable({
           )
         )
       } catch {
-        toast.error(tErrors("UNEXPECTED_ERROR"))
+        toast.error(t("UNEXPECTED_ERROR"))
       }
     })
   }
@@ -663,7 +661,7 @@ export function NewsletterSubscribersTable({
                                             })
                                           if (!result.success) {
                                             toast.error(
-                                              tErrors(
+                                              t(
                                                 getActionErrorKey(result.error)
                                               )
                                             )
@@ -684,7 +682,7 @@ export function NewsletterSubscribersTable({
                                           )
                                         } catch {
                                           toast.error(
-                                            tErrors("UNEXPECTED_ERROR")
+                                            t("UNEXPECTED_ERROR")
                                           )
                                         }
                                       })

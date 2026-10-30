@@ -30,8 +30,7 @@ import { getActionErrorKey } from "@/lib/actions/error-keys"
 
 export function ForgotPasswordForm() {
   const t = useTranslations("ForgotPasswordForm")
-  const tErrors = useTranslations("ActionErrors")
-  const locale = useLocale()
+   const locale = useLocale()
 
   // Track the request outcome and any server-side error.
   const [submittedEmail, setSubmittedEmail] = React.useState<string | null>(
@@ -72,7 +71,7 @@ export function ForgotPasswordForm() {
 
     setErrorMessage(
       result.error
-        ? tErrors(getActionErrorKey(result.error))
+        ? t(getActionErrorKey(result.error))
         : t("GENERIC_ERROR")
     )
   }

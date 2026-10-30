@@ -21,7 +21,6 @@ export function NewsletterUnsubscribeForm({
   token,
 }: NewsletterUnsubscribeFormProps) {
   const t = useTranslations("NewsletterUnsubscribe")
-  const tErrors = useTranslations("ActionErrors")
   const [reasons, setReasons] = React.useState<string[]>([])
   const [otherReason, setOtherReason] = React.useState("")
   const [isSubmitting, setIsSubmitting] = React.useState(false)
@@ -64,7 +63,7 @@ export function NewsletterUnsubscribeForm({
       toast.error(
         validationMessage === "NEWSLETTER_OTHER_REASON_REQUIRED"
           ? t("OTHER_REASON_REQUIRED")
-          : tErrors(result.error)
+          : t(result.error)
       )
     } catch {
       toast.error(t("FAILURE"))

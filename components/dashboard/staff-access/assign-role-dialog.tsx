@@ -11,7 +11,6 @@ import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { toast } from "sonner"
 import { MoreHorizontalIcon, ShieldPlusIcon } from "lucide-react"
 
-import { Can } from "@/components/shared/can"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { Field, FieldLabel } from "@/components/ui/field"
@@ -39,7 +38,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { PERMISSIONS } from "@/lib/actions/role"
 import type { StaffAccessRole, UserWithRoles } from "@/lib/actions/staff-access/types"
 import { assignRoleToUser } from "@/lib/actions/staff-access/mutations/assign-user-role"
 
@@ -56,8 +54,6 @@ export function AssignRoleDialog({
 }: AssignRoleDialogProps) {
   // Track the selected role, dialog visibility, and pending request.
   const t = useTranslations("StaffAccessManagement")
-  const tErrors = useTranslations("ActionErrors")
-  const tUsers = useTranslations("UsersManagement")
   const [selectedRoleId, setSelectedRoleId] = React.useState<string>("")
   const [isPending, startTransition] = React.useTransition()
   const [isOpen, setIsOpen] = React.useState(false)
@@ -94,7 +90,7 @@ export function AssignRoleDialog({
         } else {
           toast.error(
             res.error
-              ? tErrors(getActionErrorKey(res.error))
+              ? t(getActionErrorKey(res.error))
               : t("FAILED_TO_ASSIGN_ROLE")
           )
         }
@@ -129,7 +125,7 @@ export function AssignRoleDialog({
                 className="flex size-7 text-muted-foreground data-[state=open]:bg-muted"
               >
                 <MoreHorizontalIcon className="size-4" />
-                <span className="sr-only">{tUsers("ACTIONS_LABEL")}</span>
+                <span className="sr-only">{t("ACTIONS_LABEL")}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40 text-xs">

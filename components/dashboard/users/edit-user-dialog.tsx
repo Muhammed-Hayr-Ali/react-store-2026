@@ -46,7 +46,6 @@ export function EditUserDialog({
 }: EditUserDialogProps) {
   // Resolve translations and navigation for the edit flow.
   const t = useTranslations("UsersManagement")
-  const tErrors = useTranslations("ActionErrors")
   const router = useRouter()
   const [isOpen, setIsOpen] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
@@ -100,7 +99,7 @@ export function EditUserDialog({
       result.error === "PERMISSION_DENIED"
         ? t("PERMISSION_DENIED_ERROR")
         : result.error
-          ? tErrors(getActionErrorKey(result.error))
+          ? t(getActionErrorKey(result.error))
           : t("FAILED_TO_UPDATE_USER")
     )
   }

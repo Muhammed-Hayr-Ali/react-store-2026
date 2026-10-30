@@ -49,7 +49,6 @@ export function DeleteProductDialog({
   children,
 }: DeleteProductDialogProps) {
   const t = useTranslations("ProductsManagement")
-  const tErrors = useTranslations("ActionErrors")
   const [isPending, startTransition] = React.useTransition()
 
   // حالة داخلية احتياطية لضمان عمل الحوار بشكل مستقل (Uncontrolled) إذا لم يُمرر له الأب حالة
@@ -79,7 +78,7 @@ export function DeleteProductDialog({
         if (!result.success) {
           toast.error(
             result.error
-              ? tErrors(getActionErrorKey(result.error))
+              ? t(getActionErrorKey(result.error))
               : t("DELETE_ERROR_TOAST")
           )
           return

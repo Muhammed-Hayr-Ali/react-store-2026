@@ -171,7 +171,6 @@ export default function ProductForm({
   const router = useRouter()
   const locale = useLocale()
   const t = useTranslations("ProductForm")
-  const tErrors = useTranslations("ActionErrors")
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   const isEditing = Boolean(product)
@@ -383,7 +382,7 @@ export default function ProductForm({
     } else {
       console.error("Submission Error:", result)
       const errorMsg = result.error
-        ? tErrors(result.error)
+        ? t(result.error)
         : t(isEditing ? "UPDATE_ERROR" : "CREATE_ERROR")
 
       setErrorMessage(errorMsg)

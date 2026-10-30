@@ -1,8 +1,6 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
-import { ExternalLink, XIcon } from "lucide-react"
 
 import {
   SidebarMenu,
@@ -11,14 +9,11 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Button } from "@/components/ui/button"
 import { APP_NAME } from "@/lib/config/app_config"
-import { appRoutes } from "@/lib/config/app-routes"
 import { AppLogo } from "../ui/app-logo"
+import { XIcon } from "lucide-react"
 
 export function StoreSwitcher() {
   // Read sidebar state to adapt the store header for mobile and collapsed views.
