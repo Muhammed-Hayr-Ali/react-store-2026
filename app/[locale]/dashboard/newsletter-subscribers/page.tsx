@@ -39,10 +39,6 @@ export default async function Page({ params }: PageProps) {
     locale,
     namespace: "NewsletterSubscribersManagement",
   })
-  const tErrors = await getTranslations({
-    locale,
-    namespace: "ActionErrors",
-  })
 
   const [pageDataResult, summaryResult] = await Promise.all([
     getSubscribersPageData(),
@@ -50,13 +46,13 @@ export default async function Page({ params }: PageProps) {
   ])
   if (!pageDataResult.success) {
     throw new Error(
-      tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
+      t(getActionErrorKey(pageDataResult.error) ?? t("UNEXPECTED_ERROR"))
     )
   }
 
   if (!summaryResult.success) {
     throw new Error(
-      tErrors(getActionErrorKey(summaryResult.error ?? "UNEXPECTED_ERROR"))
+      t(getActionErrorKey(summaryResult.error) ?? t("UNEXPECTED_ERROR"))
     )
   }
 
@@ -84,9 +80,7 @@ export default async function Page({ params }: PageProps) {
         totalCount={summaryResult.data.total}
         activeCount={summaryResult.data.active}
         unsubscribedCount={summaryResult.data.unsubscribed}
-        totalLabel={t("TOTAL_COUNT")}
-        activeLabel={t("ACTIVE_COUNT")}
-        unsubscribedLabel={t("UNSUBSCRIBED_COUNT")}
+     
       />
 
       <NewsletterSubscribersTable

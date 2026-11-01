@@ -383,7 +383,9 @@ export default function ProductForm({
       console.error("Submission Error:", result)
       const errorMsg = result.error
         ? t(result.error)
-        : t(isEditing ? "UPDATE_ERROR" : "CREATE_ERROR")
+        : isEditing
+          ? t("UPDATE_ERROR")
+          : t("CREATE_ERROR")
 
       setErrorMessage(errorMsg)
       window.scrollTo({ top: 0, behavior: "smooth" })
@@ -421,14 +423,10 @@ export default function ProductForm({
                   <SelectValue placeholder={t("SELECT_CATEGORY")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">
-                    {t("SELECT_CATEGORY")}
-                  </SelectItem>
+                  <SelectItem value="none">{t("SELECT_CATEGORY")}</SelectItem>
                   {categoriesList.map((cat) => {
                     const displayName =
-                      locale === "ar" && cat.name_ar
-                        ? cat.name_ar
-                        : cat.name
+                      locale === "ar" && cat.name_ar ? cat.name_ar : cat.name
                     return (
                       <SelectItem key={cat.id} value={cat.id}>
                         {displayName}
@@ -445,7 +443,9 @@ export default function ProductForm({
                 categoryImages={[]}
                 onOpenChange={(open) =>
                   setCategoryModal(
-                    open ? { type: "create", data: null } : { type: null, data: null }
+                    open
+                      ? { type: "create", data: null }
+                      : { type: null, data: null }
                   )
                 }
                 onSaved={() => {
@@ -511,7 +511,9 @@ export default function ProductForm({
                       )
                     }
                     onDeleted={(deletedCategory) => {
-                      if (form.getValues("category_id") === deletedCategory.id) {
+                      if (
+                        form.getValues("category_id") === deletedCategory.id
+                      ) {
                         setValue("category_id", "", {
                           shouldValidate: true,
                           shouldDirty: true,
@@ -580,7 +582,9 @@ export default function ProductForm({
                 brandImages={[]}
                 onOpenChange={(open) =>
                   setBrandModal(
-                    open ? { type: "create", data: null } : { type: null, data: null }
+                    open
+                      ? { type: "create", data: null }
+                      : { type: null, data: null }
                   )
                 }
                 onSaved={(savedBrand) => {
@@ -813,7 +817,7 @@ export default function ProductForm({
             </div>
 
             {/* 📱 Organization Card for Mobile: يظهر أسفل المعلومات الأساسية على الجوال فقط */}
-            <div className="rounded-xl border border-border bg-card p-5 shadow-xs block lg:hidden">
+            <div className="block rounded-xl border border-border bg-card p-5 shadow-xs lg:hidden">
               <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
                 <TagIcon className="size-4 text-primary" />
                 <div>
@@ -982,7 +986,7 @@ export default function ProductForm({
             </div>
 
             {/* 💻 Organization Card for Desktop: يظهر في السايدبار للكمبيوتر فقط */}
-            <div className="rounded-xl border border-border bg-card p-5 shadow-xs hidden lg:block">
+            <div className="hidden rounded-xl border border-border bg-card p-5 shadow-xs lg:block">
               <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
                 <TagIcon className="size-4 text-primary" />
                 <div>

@@ -23,8 +23,6 @@ interface WishlistProductGridProps {
     hasMore?: boolean
   }>
 
-  title?: string
-  description?: string
   showToolbar?: boolean
 }
 
@@ -33,11 +31,9 @@ export function WishlistProductGrid({
   emptyMessage,
   viewMode: initialViewMode,
   fetchMoreAction,
-  title,
-  description,
   showToolbar = true,
 }: WishlistProductGridProps) {
-  const t = useTranslations("Home")
+  const t = useTranslations("Wishlist")
   const { wishlistIds } = useWishlist() // جلب معرفات المفضلة المحدثة من السياق
   const [mode, setMode] = React.useState<"grid" | "list">(initialViewMode)
   const [products, setProducts] =
@@ -126,26 +122,23 @@ export function WishlistProductGrid({
 
   const resolvedEmptyMessage =
     emptyMessage ||
-    t("NO_PRODUCTS_AVAILABLE", { default: "No products available." })
+    t("NO_PRODUCTS_AVAILABLE")
 
   const isEmpty = !displayedProducts || displayedProducts.length === 0
 
   return (
     <section className="space-y-6">
       {/* Header & Toolbar Section: يبقى العنوان ظاهراً دائماً */}
-      {(title || showToolbar) && (
+      {showToolbar && (
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            {title && (
-              <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
-                {title}
-              </h2>
-            )}
-            {description && (
-              <p className="text-xs text-muted-foreground sm:text-sm">
-                {description}
-              </p>
-            )}
+            <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
+              {t("PAGE_TITLE")}
+            </h2>
+
+            <p className="text-xs text-muted-foreground sm:text-sm">
+              {t("PAGE_DESC")}
+            </p>
           </div>
 
           {/* يختفي زر طريقة العرض (Toolbar) إذا لم تكن هناك عناصر */}
@@ -212,7 +205,9 @@ export function WishlistProductGrid({
             {isLoading && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Loader2 className="size-4 animate-spin text-primary" />
-                <span>{t("LOADING", { default: "Loading more products..." })}</span>
+                <span>
+                  {t("LOADING", { default: "Loading more products..." })}
+                </span>
               </div>
             )}
           </div>

@@ -14,18 +14,12 @@ interface ReviewsSummaryProps {
   totalCount: number
   approvedCount: number
   pendingCount: number
-  totalLabel: string
-  approvedLabel: string
-  pendingLabel: string
 }
 
 export function ReviewsSummary({
   totalCount,
   approvedCount,
   pendingCount,
-  totalLabel,
-  approvedLabel,
-  pendingLabel,
 }: ReviewsSummaryProps) {
   const t = useTranslations("ReviewsManagement")
 
@@ -36,9 +30,9 @@ export function ReviewsSummary({
         <div className="flex items-center justify-between">
           <div className="min-w-0 space-y-0.5 sm:space-y-1">
             <p className="truncate text-[10px] text-muted-foreground sm:text-xs">
-              {totalLabel}
+              {t("TOTAL_COUNT")}
             </p>
-            <p className="text-base font-bold tabular-nums text-foreground sm:text-xl">
+            <p className="text-base font-bold text-foreground tabular-nums sm:text-xl">
               <AnimatedNumber value={totalCount} />
             </p>
           </div>
@@ -48,7 +42,9 @@ export function ReviewsSummary({
         </div>
         <div className="mt-3 flex items-center gap-1 border-t border-border/50 pt-2 text-[10px] text-muted-foreground">
           <span className="size-2 rounded-full bg-muted-foreground/60" />
-          <span>{t("TOTAL_REVIEWS_LEGEND", { default: "All submitted reviews" })}</span>
+          <span>
+            {t("TOTAL_REVIEWS_LEGEND", { default: "All submitted reviews" })}
+          </span>
         </div>
       </div>
 
@@ -57,9 +53,9 @@ export function ReviewsSummary({
         <div className="flex items-center justify-between">
           <div className="min-w-0 space-y-0.5 sm:space-y-1">
             <p className="truncate text-[10px] text-muted-foreground sm:text-xs">
-              {approvedLabel}
+              {t("APPROVED_COUNT")}
             </p>
-            <p className="text-base font-bold tabular-nums text-emerald-600 sm:text-xl dark:text-emerald-400">
+            <p className="text-base font-bold text-emerald-600 tabular-nums sm:text-xl dark:text-emerald-400">
               <AnimatedNumber value={approvedCount} />
             </p>
           </div>
@@ -79,9 +75,9 @@ export function ReviewsSummary({
         <div className="flex items-center justify-between">
           <div className="min-w-0 space-y-0.5 sm:space-y-1">
             <p className="truncate text-[10px] text-muted-foreground sm:text-xs">
-              {pendingLabel}
+              {t("PENDING_COUNT")}
             </p>
-            <p className="text-base font-bold tabular-nums text-amber-600 sm:text-xl dark:text-amber-400">
+            <p className="text-base font-bold text-amber-600 tabular-nums sm:text-xl dark:text-amber-400">
               <AnimatedNumber value={pendingCount} />
             </p>
           </div>

@@ -74,9 +74,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Can } from "@/components/shared/can"
-import { PERMISSIONS } from "@/lib/actions/role"
-import { useIsMobile } from "@/hooks/use-mobile"
+ import { useIsMobile } from "@/hooks/use-mobile"
 
 import type { AdminProductSummary } from "@/lib/actions/products/types"
 import { duplicateProduct } from "@/lib/actions/products/mutations/duplicate"

@@ -91,36 +91,36 @@ function CategoryRowActions({
   const t = useTranslations("CategoriesManagement")
 
   return (
-      <div className="flex justify-end">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7 text-muted-foreground data-[state=open]:bg-muted"
-              aria-label={t("ACTIONS_LABEL")}
-            >
-              <MoreHorizontalIcon className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40 text-xs">
-              <DropdownMenuItem
-                onClick={() => onEdit(category)}
-                className="cursor-pointer"
-              >
-                <PencilIcon className="me-2 size-3.5" />
-                {t("EDIT_ACTION")}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={() => onDelete(category)}
-                className="cursor-pointer text-destructive focus:text-destructive"
-              >
-                <Trash2Icon className="me-2 size-3.5" />
-                {t("DELETE_ACTION")}
-              </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+    <div className="flex justify-end">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7 text-muted-foreground data-[state=open]:bg-muted"
+            aria-label={t("ACTIONS_LABEL")}
+          >
+            <MoreHorizontalIcon className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-40 text-xs">
+          <DropdownMenuItem
+            onClick={() => onEdit(category)}
+            className="cursor-pointer"
+          >
+            <PencilIcon className="me-2 size-3.5" />
+            {t("EDIT_ACTION")}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => onDelete(category)}
+            className="cursor-pointer text-destructive focus:text-destructive"
+          >
+            <Trash2Icon className="me-2 size-3.5" />
+            {t("DELETE_ACTION")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   )
 }
 
@@ -319,7 +319,7 @@ export function CategoriesTable({
                     ? category.name_ar || category.name
                     : category.name}
                 </span>
-                 <span className="truncate font-mono text-[11px] text-muted-foreground">
+                <span className="truncate font-mono text-[11px] text-muted-foreground">
                   /{category.slug}
                 </span>
               </div>
@@ -352,7 +352,7 @@ export function CategoriesTable({
             // </Badge>
             <Badge
               variant="outline"
-              className={`gap-1 truncate px-1.5 py-0.5 text-xs font-normal leading-tight ${
+              className={`gap-1 truncate px-1.5 py-0.5 text-xs leading-tight font-normal ${
                 isActive
                   ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                   : "border-amber-500/30 text-amber-600 dark:text-amber-400"
@@ -365,6 +365,7 @@ export function CategoriesTable({
               )}
               <span className="capitalize">
                 {t(isActive ? "ACTIVE" : "INACTIVE")}
+                {isActive ? t("ACTIVE") : t("INACTIVE")}
               </span>
             </Badge>
           )
@@ -466,13 +467,11 @@ export function CategoriesTable({
                   className="flex cursor-pointer items-center justify-between"
                 >
                   <span>
-                    {t(
-                      value === "all"
-                        ? "FILTER_ALL"
-                        : value === "active"
-                          ? "FILTER_ACTIVE"
-                          : "FILTER_INACTIVE"
-                    )}
+                    {value === "all"
+                      ? t("FILTER_ALL")
+                      : value === "active"
+                        ? t("FILTER_ACTIVE")
+                        : t("FILTER_INACTIVE")}
                   </span>
                   <Badge variant="secondary" className="px-1 py-0 text-[10px]">
                     {value === "all"
@@ -500,13 +499,12 @@ export function CategoriesTable({
                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
               }`}
             >
-              {t(
-                value === "all"
-                  ? "FILTER_ALL"
-                  : value === "active"
-                    ? "FILTER_ACTIVE"
-                    : "FILTER_INACTIVE"
-              )}
+              {value === "all"
+                ? t("FILTER_ALL")
+                : value === "active"
+                  ? t("FILTER_ACTIVE")
+                  : t("FILTER_INACTIVE")}
+
               <Badge
                 variant="secondary"
                 className="ms-1.5 px-1.5 py-0 text-[10px]"
@@ -551,37 +549,37 @@ export function CategoriesTable({
           </DropdownMenuContent>
         </DropdownMenu>
 
-          <CategoryFormSheet
-            open={formOpen}
-            category={editingCategory}
-            categories={categories}
-            categoryImages={categoryImages}
-            trigger={
-              <Button
-                type="button"
-                onClick={prepareCreateForm}
-                size="sm"
-                className="size-8 shrink-0 gap-1.5 p-0 text-xs sm:h-8 sm:w-auto sm:px-3"
-                title={t("CREATE_CATEGORY")}
-              >
-                <PlusIcon className="size-3.5" />
-                <span className="sr-only sm:not-sr-only">
-                  {t("CREATE_CATEGORY")}
-                </span>
-              </Button>
-            }
-            onOpenChange={setFormOpen}
-            onSaved={handleSaved}
-          />
+        <CategoryFormSheet
+          open={formOpen}
+          category={editingCategory}
+          categories={categories}
+          categoryImages={categoryImages}
+          trigger={
+            <Button
+              type="button"
+              onClick={prepareCreateForm}
+              size="sm"
+              className="size-8 shrink-0 gap-1.5 p-0 text-xs sm:h-8 sm:w-auto sm:px-3"
+              title={t("CREATE_CATEGORY")}
+            >
+              <PlusIcon className="size-3.5" />
+              <span className="sr-only sm:not-sr-only">
+                {t("CREATE_CATEGORY")}
+              </span>
+            </Button>
+          }
+          onOpenChange={setFormOpen}
+          onSaved={handleSaved}
+        />
 
-          <DeleteCategoryDialog
-            category={deletingCategory}
-            open={Boolean(deletingCategory)}
-            onOpenChange={(open) => {
-              if (!open) setDeletingCategory(null)
-            }}
-            onDeleted={handleDeleted}
-          />
+        <DeleteCategoryDialog
+          category={deletingCategory}
+          open={Boolean(deletingCategory)}
+          onOpenChange={(open) => {
+            if (!open) setDeletingCategory(null)
+          }}
+          onDeleted={handleDeleted}
+        />
       </div>
 
       <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">

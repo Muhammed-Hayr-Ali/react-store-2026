@@ -285,17 +285,20 @@ export function CategoryFormSheet({
 
       <SheetContent
         side={isMobile ? "bottom" : "right"}
-        className="gap-0 p-0 sm:max-w-xl max-h-dvh data-[side=left]:sm:max-w-1/3 data-[side=right]:sm:max-w-2/5"
+        className="max-h-dvh gap-0 p-0 sm:max-w-xl data-[side=left]:sm:max-w-1/3 data-[side=right]:sm:max-w-2/5"
       >
         <SheetHeader className="border-b border-border/60 px-5 py-4 pe-12 sm:px-6">
           <SheetTitle className="flex items-center gap-2 text-sm font-semibold">
             <span className="flex size-7 items-center justify-center rounded-lg bg-secondary">
               <TagsIcon className="size-4 text-primary" />
             </span>
-            {t(isEditing ? "FORM_EDIT_TITLE" : "FORM_CREATE_TITLE")}
+
+            {isEditing ? t("FORM_EDIT_TITLE") : t("FORM_CREATE_TITLE")}
           </SheetTitle>
           <SheetDescription>
-            {t(isEditing ? "FORM_EDIT_DESCRIPTION" : "FORM_CREATE_DESCRIPTION")}
+            {isEditing
+              ? t("FORM_EDIT_DESCRIPTION")
+              : t("FORM_CREATE_DESCRIPTION")}
           </SheetDescription>
         </SheetHeader>
 

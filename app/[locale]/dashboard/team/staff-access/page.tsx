@@ -71,9 +71,6 @@ export default async function Page({ params }: PageProps) {
         totalCount={summary.total}
         assignedCount={summary.assigned}
         unassignedCount={summary.unassigned}
-        totalLabel={t("TOTAL_STAFF_COUNT")}
-        assignedLabel={t("ASSIGNED_STAFF_COUNT")}
-        unassignedLabel={t("UNASSIGNED_STAFF_COUNT")}
       />
 
       <StaffAccessTable initialUsers={users} availableRoles={roles} />

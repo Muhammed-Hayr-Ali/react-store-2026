@@ -3,7 +3,7 @@
  * @description Roles and permissions management dashboard page.
  */
 
- import { getTranslations } from "next-intl/server"
+import { getTranslations } from "next-intl/server"
 import { ShieldCheckIcon } from "lucide-react"
 
 import { appConfig } from "@/lib/config/app_config"
@@ -11,7 +11,7 @@ import { createMetadata } from "@/lib/config/metadata_generator"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import RolesTable from "@/components/dashboard/roles/roles-table"
 import { RolesSummary } from "@/components/dashboard/roles/roles-summary"
- import { getRolesPageData } from "@/lib/actions/role"
+import { getRolesPageData } from "@/lib/actions/role"
 
 interface PageProps {
   params: Promise<{
@@ -33,15 +33,12 @@ export async function generateMetadata({ params }: PageProps) {
 export default async function Page({ params }: PageProps) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "RolesManagement" })
-  const tErrors = await getTranslations({ locale, namespace: "ActionErrors" })
 
-
-  
   // استدعاء دالة جلب البيانات والمعالجة المستقلة
   const pageDataResult = await getRolesPageData()
   if (!pageDataResult.success) {
     throw new Error(
-      tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
+      t(getActionErrorKey(pageDataResult.error) ?? t("UNEXPECTED_ERROR"))
     )
   }
 
@@ -70,9 +67,6 @@ export default async function Page({ params }: PageProps) {
         totalCount={summary.total}
         activeCount={summary.active}
         emptyCount={summary.empty}
-        totalLabel={t("TOTAL_ROLES_COUNT")}
-        activeLabel={t("ACTIVE_ROLES_COUNT")}
-        emptyLabel={t("EMPTY_ROLES_COUNT")}
       />
 
       <RolesTable initialRoles={roles} initialIsMobile={isMobile} />

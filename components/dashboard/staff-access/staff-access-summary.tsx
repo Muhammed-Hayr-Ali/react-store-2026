@@ -14,18 +14,15 @@ interface StaffAccessSummaryProps {
   totalCount: number
   assignedCount: number
   unassignedCount: number
-  totalLabel: string
-  assignedLabel: string
-  unassignedLabel: string
+
 }
+
 
 export function StaffAccessSummary({
   totalCount,
   assignedCount,
   unassignedCount,
-  totalLabel,
-  assignedLabel,
-  unassignedLabel,
+
 }: StaffAccessSummaryProps) {
   const t = useTranslations("StaffAccessManagement")
 
@@ -36,7 +33,7 @@ export function StaffAccessSummary({
         <div className="flex items-center justify-between">
           <div className="min-w-0 space-y-0.5 sm:space-y-1">
             <p className="truncate text-[10px] text-muted-foreground sm:text-xs">
-              {totalLabel}
+            { t("TOTAL_STAFF_COUNT")}
             </p>
             <p className="text-base font-bold tabular-nums text-foreground sm:text-xl">
               <AnimatedNumber value={totalCount} />
@@ -57,7 +54,7 @@ export function StaffAccessSummary({
         <div className="flex items-center justify-between">
           <div className="min-w-0 space-y-0.5 sm:space-y-1">
             <p className="truncate text-[10px] text-muted-foreground sm:text-xs">
-              {assignedLabel}
+             { t("ASSIGNED_STAFF_COUNT")}
             </p>
             <p className="text-base font-bold tabular-nums text-emerald-600 sm:text-xl dark:text-emerald-400">
               <AnimatedNumber value={assignedCount} />
@@ -79,7 +76,7 @@ export function StaffAccessSummary({
         <div className="flex items-center justify-between">
           <div className="min-w-0 space-y-0.5 sm:space-y-1">
             <p className="truncate text-[10px] text-muted-foreground sm:text-xs">
-              {unassignedLabel}
+             { t("UNASSIGNED_STAFF_COUNT")}
             </p>
             <p className="text-base font-bold tabular-nums text-amber-600 sm:text-xl dark:text-amber-400">
               <AnimatedNumber value={unassignedCount} />

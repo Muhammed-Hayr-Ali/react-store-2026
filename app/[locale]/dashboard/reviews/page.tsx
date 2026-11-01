@@ -80,9 +80,6 @@ export default async function Page({ params }: PageProps) {
         totalCount={summary.total}
         approvedCount={summary.approved}
         pendingCount={summary.pending}
-        totalLabel={t("TOTAL_COUNT")}
-        approvedLabel={t("APPROVED_COUNT")}
-        pendingLabel={t("PENDING_COUNT")}
       />
 
       <ReviewsTable initialReviews={reviews} initialIsMobile={isMobile} />

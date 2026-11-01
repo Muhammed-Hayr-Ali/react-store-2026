@@ -14,18 +14,12 @@ interface RolesSummaryProps {
   totalCount: number
   activeCount: number
   emptyCount: number
-  totalLabel: string
-  activeLabel: string
-  emptyLabel: string
 }
 
 export function RolesSummary({
   totalCount,
   activeCount,
   emptyCount,
-  totalLabel,
-  activeLabel,
-  emptyLabel,
 }: RolesSummaryProps) {
   const t = useTranslations("RolesManagement")
 
@@ -36,9 +30,9 @@ export function RolesSummary({
         <div className="flex items-center justify-between">
           <div className="min-w-0 space-y-0.5 sm:space-y-1">
             <p className="truncate text-[10px] text-muted-foreground sm:text-xs">
-              {totalLabel}
+              {t("TOTAL_ROLES_COUNT")}
             </p>
-            <p className="text-base font-bold tabular-nums text-foreground sm:text-xl">
+            <p className="text-base font-bold text-foreground tabular-nums sm:text-xl">
               <AnimatedNumber value={totalCount} />
             </p>
           </div>
@@ -48,7 +42,9 @@ export function RolesSummary({
         </div>
         <div className="mt-3 flex items-center gap-1 border-t border-border/50 pt-2 text-[10px] text-muted-foreground">
           <span className="size-2 rounded-full bg-muted-foreground/60" />
-          <span>{t("TOTAL_ROLES_LEGEND", { default: "All defined system roles" })}</span>
+          <span>
+            {t("TOTAL_ROLES_LEGEND", { default: "All defined system roles" })}
+          </span>
         </div>
       </div>
 
@@ -57,9 +53,9 @@ export function RolesSummary({
         <div className="flex items-center justify-between">
           <div className="min-w-0 space-y-0.5 sm:space-y-1">
             <p className="truncate text-[10px] text-muted-foreground sm:text-xs">
-              {activeLabel}
+              {t("ACTIVE_ROLES_COUNT")}
             </p>
-            <p className="text-base font-bold tabular-nums text-emerald-600 sm:text-xl dark:text-emerald-400">
+            <p className="text-base font-bold text-emerald-600 tabular-nums sm:text-xl dark:text-emerald-400">
               <AnimatedNumber value={activeCount} />
             </p>
           </div>
@@ -70,7 +66,11 @@ export function RolesSummary({
         {/* دليل الألوان للأدوار النشطة */}
         <div className="mt-3 flex items-center gap-1 border-t border-border/50 pt-2 text-[10px] text-muted-foreground">
           <span className="size-2 rounded-full bg-emerald-500" />
-          <span>{t("STATUS_LEGEND_ACTIVE_ROLE", { default: "Assigned Permissions" })}</span>
+          <span>
+            {t("STATUS_LEGEND_ACTIVE_ROLE", {
+              default: "Assigned Permissions",
+            })}
+          </span>
         </div>
       </div>
 
@@ -79,9 +79,9 @@ export function RolesSummary({
         <div className="flex items-center justify-between">
           <div className="min-w-0 space-y-0.5 sm:space-y-1">
             <p className="truncate text-[10px] text-muted-foreground sm:text-xs">
-              {emptyLabel}
+              {t("EMPTY_ROLES_COUNT")}
             </p>
-            <p className="text-base font-bold tabular-nums text-amber-600 sm:text-xl dark:text-amber-400">
+            <p className="text-base font-bold text-amber-600 tabular-nums sm:text-xl dark:text-amber-400">
               <AnimatedNumber value={emptyCount} />
             </p>
           </div>
@@ -92,7 +92,9 @@ export function RolesSummary({
         {/* دليل الألوان للأدوار الفارغة */}
         <div className="mt-3 flex items-center gap-1 border-t border-border/50 pt-2 text-[10px] text-muted-foreground">
           <span className="size-2 rounded-full bg-amber-500" />
-          <span>{t("STATUS_LEGEND_EMPTY_ROLE", { default: "No Permissions" })}</span>
+          <span>
+            {t("STATUS_LEGEND_EMPTY_ROLE", { default: "No Permissions" })}
+          </span>
         </div>
       </div>
     </div>

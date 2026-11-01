@@ -83,9 +83,6 @@ export function CartProvider({
             )
           }
         } else {
-          // toast.success(
-          //   t("ITEM_ADDED", { default: "Added to cart successfully" })
-          // )
           await refreshCart()
         }
         resolve()
@@ -133,9 +130,7 @@ export function CartProvider({
             toast.error(t("REMOVE_ERROR", { default: "Failed to remove item" }))
           }
         } else {
-          // toast.success(
-          //   t("ITEM_REMOVED", { default: "Item removed from cart" })
-          // )
+         
           await refreshCart()
         }
         resolve()

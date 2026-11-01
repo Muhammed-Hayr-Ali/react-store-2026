@@ -100,12 +100,12 @@ export function NavMain({ permissions = [] }: NavMainProps) {
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
-                        tooltip={t(item.titleKey)}
+                        tooltip={t(item.label)}
                         isActive={false}
                         className="data-[state=open]:bg-muted"
                       >
                         {IconComponent && <IconComponent />}
-                        <span>{t(item.titleKey)}</span>
+                        <span>{t(item.label)}</span>
                         <ChevronRight className="ms-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180 rtl:group-data-[state=open]/collapsible:rotate-90" />{" "}
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
@@ -115,7 +115,7 @@ export function NavMain({ permissions = [] }: NavMainProps) {
                           const isSubActive = normalizedPath === subItem.url
 
                           return (
-                            <SidebarMenuSubItem key={subItem.titleKey}>
+                            <SidebarMenuSubItem key={subItem.key}>
                               <SidebarMenuSubButton
                                 asChild
                                 isActive={isSubActive}
@@ -124,7 +124,7 @@ export function NavMain({ permissions = [] }: NavMainProps) {
                                   href={subItem.url}
                                   onClick={handleLinkClick}
                                 >
-                                  <span>{t(subItem.titleKey)}</span>
+                                  <span>{t(subItem.label)}</span>
                                 </Link>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
@@ -136,13 +136,13 @@ export function NavMain({ permissions = [] }: NavMainProps) {
                 ) : (
                   <SidebarMenuItem>
                     <SidebarMenuButton
-                      tooltip={t(item.titleKey)}
+                      tooltip={t(item.label)}
                       asChild
                       isActive={isSingleActive}
                     >
                       <Link href={item.url} onClick={handleLinkClick}>
                         {IconComponent && <IconComponent />}
-                        <span>{t(item.titleKey)}</span>
+                        <span>{t(item.label)}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

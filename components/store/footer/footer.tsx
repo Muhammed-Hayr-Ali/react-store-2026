@@ -28,13 +28,14 @@ export default function Footer() {
           <div className="flex flex-col gap-4 sm:col-span-2 lg:col-span-1">
             <AppLogo size="md" />
             <p className="max-w-sm text-xs leading-relaxed text-muted-foreground/90">
-              {t(footerConfig.description)}
+              {t("app_description")}
             </p>
 
             {/* قنوات التواصل الاجتماعي */}
             <div className="flex flex-wrap items-center gap-2">
               {footerConfig.socialLinks.map((item) => {
-                const label = t(`social.${item.key}`)
+                const label = item.label
+
                 return (
                   <Button
                     key={item.key}
@@ -49,7 +50,7 @@ export default function Footer() {
                       aria-label={label}
                     >
                       <item.icon className="size-4" />
-                      <span className="sr-only">{label}</span>
+                      <span className="sr-only">{t(label)}</span>
                     </Link>
                   </Button>
                 )
@@ -58,34 +59,42 @@ export default function Footer() {
           </div>
 
           {/* 2. الروابط السريعة */}
-          <FooterSection title={t(`sections.${footerConfig.quickLinks.key}`)}>
+          <FooterSection title={t(`${footerConfig.quickLinks.key}`)}>
             <ul className="flex flex-col gap-2.5">
-              {footerConfig.quickLinks.items.map((item) => (
-                <li key={item.key}>
-                  <Link
-                    href={item.href}
-                    className="text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:underline focus-visible:outline-none"
-                  >
-                    {t(`links.${item.key}`)}
-                  </Link>
-                </li>
-              ))}
+              {footerConfig.quickLinks.items.map((item) => {
+                const label = item.label
+
+                return (
+                  <li key={item.key}>
+                    <Link
+                      href={item.href}
+                      className="text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:underline focus-visible:outline-none"
+                    >
+                      {t(label)}
+                    </Link>
+                  </li>
+                )
+              })}
             </ul>
           </FooterSection>
 
           {/* 3. روابط الدعم والمساعدة */}
-          <FooterSection title={t(`sections.${footerConfig.supportLinks.key}`)}>
+          <FooterSection title={t(`${footerConfig.supportLinks.key}`)}>
             <ul className="flex flex-col gap-2.5">
-              {footerConfig.supportLinks.items.map((item) => (
-                <li key={item.key}>
-                  <Link
-                    href={item.href}
-                    className="text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:underline focus-visible:outline-none"
-                  >
-                    {t(`links.${item.key}`)}
-                  </Link>
-                </li>
-              ))}
+              {footerConfig.supportLinks.items.map((item) => {
+                const label = t(item.label)
+
+                return (
+                  <li key={item.key}>
+                    <Link
+                      href={item.href}
+                      className="text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:underline focus-visible:outline-none"
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                )
+              })}
             </ul>
           </FooterSection>
 

@@ -14,13 +14,14 @@ import { PERMISSIONS, AppPermission } from "@/lib/actions/role"
 
 // Define the shape of a dashboard navigation entry and its nested links.
 export interface SidebarItem {
-  titleKey: string
   key: string
+  label: string
   url: string
   icon: LucideIcon
   requiredPermission?: AppPermission
   items?: {
-    titleKey: string
+    key: string
+    label: string
     url: string
     requiredPermission?: AppPermission
   }[]
@@ -36,34 +37,34 @@ interface SidebarConfig {
 export const sidebarConfig: SidebarConfig = {
   navMain: [
     {
-      titleKey: "STORE",
       key: "store",
+      label: "STORE",
       url: appRoutes.home,
       icon: StoreIcon,
     },
     {
-      titleKey: "OVERVIEW",
       key: "overview",
+      label: "OVERVIEW",
       url: appRoutes.dashboard.overview,
       icon: LayoutDashboard,
     },
     {
-      titleKey: "CATEGORIES_MANAGEMENT",
       key: "categories-management",
+      label: "CATEGORIES_MANAGEMENT",
       url: appRoutes.dashboard.categories,
       icon: Tags,
       requiredPermission: PERMISSIONS.VIEW_CATEGORIES_DASHBOARD,
     },
     {
-      titleKey: "BRANDS_MANAGEMENT",
       key: "brands-management",
+      label: "BRANDS_MANAGEMENT",
       url: appRoutes.dashboard.brands,
       icon: Tags,
       requiredPermission: PERMISSIONS.VIEW_BRANDS_DASHBOARD,
     },
     {
-      titleKey: "PRODUCTS_MANAGEMENT",
       key: "products-management",
+      label: "PRODUCTS_MANAGEMENT",
       url: appRoutes.dashboard.products,
       icon: PackageIcon,
       requiredPermission: PERMISSIONS.VIEW_PRODUCTS_DASHBOARD,
@@ -71,8 +72,8 @@ export const sidebarConfig: SidebarConfig = {
 
     // --- 2. تمت إضافة قسم التقييمات هنا بعد المنتجات مباشرة ---
     {
-      titleKey: "REVIEWS_MANAGEMENT",
       key: "reviews-management",
+      label: "REVIEWS_MANAGEMENT",
       url: appRoutes.dashboard.reviews, // تأكد أن هذا المسار موجود في appRoutes
       icon: MessageSquareIcon,
       requiredPermission: PERMISSIONS.VIEW_REVIEWS_DASHBOARD,
@@ -80,33 +81,35 @@ export const sidebarConfig: SidebarConfig = {
     // -----------------------------------------------------------
 
     {
-      titleKey: "USERS_MANAGEMENT",
       key: "users-management",
+      label: "USERS_MANAGEMENT",
       url: appRoutes.dashboard.users,
       icon: Users,
       requiredPermission: PERMISSIONS.VIEW_USERS_DASHBOARD,
     },
     {
-      titleKey: "NEWSLETTER_SUBSCRIBERS",
       key: "newsletter-subscribers",
+      label: "NEWSLETTER_SUBSCRIBERS",
       url: appRoutes.dashboard.newsletterSubscribers,
       icon: Mail,
       requiredPermission: PERMISSIONS.VIEW_NEWSLETTER_DASHBOARD,
     },
 
     {
-      titleKey: "TEAM_MANAGEMENT",
       key: "team-management",
+      label: "TEAM_MANAGEMENT",
       url: "#",
       icon: UserCog,
       requiredPermission: PERMISSIONS.VIEW_ROLES_DASHBOARD,
       items: [
         {
-          titleKey: "ROLES_AND_PERMISSIONS",
+          key: "roles-and-permissions",
+          label: "ROLES_AND_PERMISSIONS",
           url: appRoutes.dashboard.team.roles,
         },
         {
-          titleKey: "STAFF_ACCESS",
+          key: "staff-access",
+          label: "STAFF_ACCESS",
           url: appRoutes.dashboard.team.staffAccess,
         },
       ],

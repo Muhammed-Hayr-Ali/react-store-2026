@@ -82,11 +82,8 @@ export default async function WishlistPage({ params }: WishlistPageProps) {
   return (
     <div className="container space-y-8 py-8">
       <WishlistProductGrid
-        title={t("PAGE_TITLE")}
-        description={t("PAGE_DESC")}
-        viewMode={viewMode}
+         viewMode={viewMode}
         initialProducts={initialProducts}
-        emptyMessage={t("EMPTY_DESCRIPTION", )}
         fetchMoreAction={loadMoreProducts}
       />
     </div>
