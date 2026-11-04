@@ -28,7 +28,7 @@ import { createReview } from "@/lib/actions/store/product-details/reviews/mutati
 import { updateReview } from "@/lib/actions/store/product-details/reviews/mutations/update-review"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { ProductReviewItem } from "@/lib/actions/store/product-details/reviews/queries/get-product-reviews"
- 
+
 interface ReviewDialogProps {
   productId?: string
   review?: ProductReviewItem | null
@@ -104,18 +104,23 @@ export function ReviewDialog({
           toast.error(
             result.error
               ? t(getActionErrorKey(result.error))
-              : t(isUpdate ? "UPDATE_REVIEW_ERROR" : "CREATE_REVIEW_ERROR")
+              : isUpdate
+                ? t("UPDATE_REVIEW_ERROR")
+                : t("CREATE_REVIEW_ERROR")
           )
+
           return
         }
 
         onOpenChange(false)
         onSuccess()
         toast.success(
-          t(isUpdate ? "UPDATE_REVIEW_SUCCESS" : "CREATE_REVIEW_SUCCESS")
+          isUpdate ? t("UPDATE_REVIEW_SUCCESS") : t("CREATE_REVIEW_SUCCESS")
         )
       } catch {
-        toast.error(t(isUpdate ? "UPDATE_REVIEW_ERROR" : "CREATE_REVIEW_ERROR"))
+        toast.error(
+          isUpdate ? t("UPDATE_REVIEW_ERROR") : t("CREATE_REVIEW_ERROR")
+        )
       }
     })
   })
@@ -131,18 +136,14 @@ export function ReviewDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="text-start">
           <DialogTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
-            {t(
-              isUpdate
-                ? "UPDATE_REVIEW_DIALOG_TITLE"
-                : "CREATE_REVIEW_DIALOG_TITLE"
-            )}
+            {isUpdate
+              ? t("UPDATE_REVIEW_DIALOG_TITLE")
+              : t("CREATE_REVIEW_DIALOG_TITLE")}
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
-            {t(
-              isUpdate
-                ? "UPDATE_REVIEW_DIALOG_DESCRIPTION"
-                : "CREATE_REVIEW_DIALOG_DESCRIPTION"
-            )}
+            {isUpdate
+              ? t("UPDATE_REVIEW_DIALOG_DESCRIPTION")
+              : t("CREATE_REVIEW_DIALOG_DESCRIPTION")}
           </DialogDescription>
         </DialogHeader>
 

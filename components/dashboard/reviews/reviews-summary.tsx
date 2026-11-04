@@ -66,7 +66,7 @@ export function ReviewsSummary({
         {/* دليل الألوان للتقييمات المقبولة */}
         <div className="mt-3 flex items-center gap-1 border-t border-border/50 pt-2 text-[10px] text-muted-foreground">
           <span className="size-2 rounded-full bg-emerald-500" />
-          <span>{t("STATUS_LEGEND_APPROVED", { default: "Approved" })}</span>
+          <span>{t("STATUS_LEGEND_APPROVED")}</span>
         </div>
       </div>
 

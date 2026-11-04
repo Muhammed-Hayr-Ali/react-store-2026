@@ -63,7 +63,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { PERMISSIONS } from "@/lib/actions/role"
 import { getSiteAssetUrl } from "@/lib/database/supabase/storage"
 import type { BrandRecord } from "@/lib/actions/brands/types"
 import { BrandFormSheet } from "./brand-form-sheet"
@@ -88,36 +87,36 @@ function BrandRowActions({ brand, onEdit, onDelete }: BrandRowActionsProps) {
   const t = useTranslations("BrandsManagement")
 
   return (
-      <div className="flex justify-end">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7 text-muted-foreground data-[state=open]:bg-muted"
-              aria-label={t("ACTIONS_LABEL")}
-            >
-              <MoreHorizontalIcon className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40 text-xs">
-              <DropdownMenuItem
-                onClick={() => onEdit(brand)}
-                className="cursor-pointer"
-              >
-                <PencilIcon className="me-2 size-3.5" />
-                {t("EDIT_ACTION")}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={() => onDelete(brand)}
-                className="cursor-pointer text-destructive focus:text-destructive"
-              >
-                <Trash2Icon className="me-2 size-3.5" />
-                {t("DELETE_ACTION")}
-              </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+    <div className="flex justify-end">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7 text-muted-foreground data-[state=open]:bg-muted"
+            aria-label={t("ACTIONS_LABEL")}
+          >
+            <MoreHorizontalIcon className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-40 text-xs">
+          <DropdownMenuItem
+            onClick={() => onEdit(brand)}
+            className="cursor-pointer"
+          >
+            <PencilIcon className="me-2 size-3.5" />
+            {t("EDIT_ACTION")}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => onDelete(brand)}
+            className="cursor-pointer text-destructive focus:text-destructive"
+          >
+            <Trash2Icon className="me-2 size-3.5" />
+            {t("DELETE_ACTION")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   )
 }
 
@@ -145,8 +144,12 @@ export function BrandsTable({
     pageSize: initialIsMobile ? 20 : 10,
   })
   const [formOpen, setFormOpen] = React.useState(false)
-  const [editingBrand, setEditingBrand] = React.useState<BrandRecord | null>(null)
-  const [deletingBrand, setDeletingBrand] = React.useState<BrandRecord | null>(null)
+  const [editingBrand, setEditingBrand] = React.useState<BrandRecord | null>(
+    null
+  )
+  const [deletingBrand, setDeletingBrand] = React.useState<BrandRecord | null>(
+    null
+  )
 
   React.useEffect(() => {
     setBrands(initialBrands)
@@ -204,7 +207,9 @@ export function BrandsTable({
   }
 
   const handleDeleted = (deletedBrand: BrandRecord) => {
-    setBrands((current) => current.filter((item) => item.id !== deletedBrand.id))
+    setBrands((current) =>
+      current.filter((item) => item.id !== deletedBrand.id)
+    )
   }
 
   const columns = React.useMemo<ColumnDef<BrandRecord>[]>(
@@ -239,7 +244,7 @@ export function BrandsTable({
                 >
                   {locale === "ar" ? brand.name_ar || brand.name : brand.name}
                 </span>
-               <span className="truncate font-mono text-[11px] text-muted-foreground">
+                <span className="truncate font-mono text-[11px] text-muted-foreground">
                   /{brand.slug}
                 </span>
               </div>
@@ -266,7 +271,7 @@ export function BrandsTable({
           return (
             <Badge
               variant="outline"
-              className={`gap-1 truncate px-1.5 py-0.5 text-xs font-normal leading-tight ${
+              className={`gap-1 truncate px-1.5 py-0.5 text-xs leading-tight font-normal ${
                 isActive
                   ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                   : "border-amber-500/30 text-amber-600 dark:text-amber-400"
@@ -278,7 +283,7 @@ export function BrandsTable({
                 <CircleAlertIcon className="size-3 fill-amber-500 text-background" />
               )}
               <span className="capitalize">
-                {t(isActive ? "ACTIVE" : "INACTIVE")}
+                {isActive ? t("ACTIVE") : t("INACTIVE")}
               </span>
             </Badge>
           )
@@ -380,13 +385,11 @@ export function BrandsTable({
                   className="flex cursor-pointer items-center justify-between"
                 >
                   <span>
-                    {t(
-                      value === "all"
-                        ? "FILTER_ALL"
-                        : value === "active"
-                          ? "FILTER_ACTIVE"
-                          : "FILTER_INACTIVE"
-                    )}
+                    {value === "all"
+                      ? t("FILTER_ALL")
+                      : value === "active"
+                        ? t("FILTER_ACTIVE")
+                        : t("FILTER_INACTIVE")}
                   </span>
                   <Badge variant="secondary" className="px-1 py-0 text-[10px]">
                     {value === "all"
@@ -414,13 +417,12 @@ export function BrandsTable({
                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
               }`}
             >
-              {t(
-                value === "all"
-                  ? "FILTER_ALL"
-                  : value === "active"
-                    ? "FILTER_ACTIVE"
-                    : "FILTER_INACTIVE"
-              )}
+              {value === "all"
+                ? t("FILTER_ALL")
+                : value === "active"
+                  ? t("FILTER_ACTIVE")
+                  : t("FILTER_INACTIVE")}
+
               <Badge
                 variant="secondary"
                 className="ms-1.5 px-1.5 py-0 text-[10px]"
@@ -465,36 +467,36 @@ export function BrandsTable({
           </DropdownMenuContent>
         </DropdownMenu>
 
-          <BrandFormSheet
-            open={formOpen}
-            brand={editingBrand}
-            brandImages={brandImages}
-            trigger={
-              <Button
-                type="button"
-                onClick={prepareCreateForm}
-                size="sm"
-                className="size-8 shrink-0 gap-1.5 p-0 text-xs sm:h-8 sm:w-auto sm:px-3"
-                title={t("CREATE_BRAND")}
-              >
-                <PlusIcon className="size-3.5" />
-                <span className="sr-only sm:not-sr-only">
-                  {t("CREATE_BRAND")}
-                </span>
-              </Button>
-            }
-            onOpenChange={setFormOpen}
-            onSaved={handleSaved}
-          />
+        <BrandFormSheet
+          open={formOpen}
+          brand={editingBrand}
+          brandImages={brandImages}
+          trigger={
+            <Button
+              type="button"
+              onClick={prepareCreateForm}
+              size="sm"
+              className="size-8 shrink-0 gap-1.5 p-0 text-xs sm:h-8 sm:w-auto sm:px-3"
+              title={t("CREATE_BRAND")}
+            >
+              <PlusIcon className="size-3.5" />
+              <span className="sr-only sm:not-sr-only">
+                {t("CREATE_BRAND")}
+              </span>
+            </Button>
+          }
+          onOpenChange={setFormOpen}
+          onSaved={handleSaved}
+        />
 
-          <DeleteBrandDialog
-            brand={deletingBrand}
-            open={Boolean(deletingBrand)}
-            onOpenChange={(open) => {
-              if (!open) setDeletingBrand(null)
-            }}
-            onDeleted={handleDeleted}
-          />
+        <DeleteBrandDialog
+          brand={deletingBrand}
+          open={Boolean(deletingBrand)}
+          onOpenChange={(open) => {
+            if (!open) setDeletingBrand(null)
+          }}
+          onDeleted={handleDeleted}
+        />
       </div>
 
       <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs">

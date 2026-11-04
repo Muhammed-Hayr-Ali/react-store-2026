@@ -1,18 +1,19 @@
 /**
  * @file app/[locale]/(auth)/signup/page.tsx
- * @description Server Component page for customer sign-up with active session guard
- * and localized metadata generation.
+ * @description Server Component page for customer phone sign-up with active session protection
+ * and unified metadata resolution.
  */
 
+import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 
-import { SignUpForm } from "@/components/authentication/signup-form"
 import { appConfig } from "@/lib/config/app_config"
 import { appRoutes } from "@/lib/config/app-routes"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
-
+import { SignUpForm } from "@/components/authentication/sign-up-form"
+ 
 interface SignUpPageProps {
   params: Promise<{
     locale: string
@@ -39,5 +40,8 @@ export default async function SignUpPage({ params }: SignUpPageProps) {
     redirect(appRoutes.home)
   }
 
-  return <SignUpForm />
+  const cookieStore = await cookies()
+  const lastSignupPhone = cookieStore.get("signup_phone")?.value ?? null
+
+  return <SignUpForm lastSignupPhone={lastSignupPhone} />
 }

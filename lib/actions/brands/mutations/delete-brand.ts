@@ -12,16 +12,18 @@ import { createServerClient } from "@/lib/database/supabase/server"
 
  import { getValidationDetails } from "../../validation"
 import { brandIdSchema, type BrandIdInput } from "../schemas"
+import { getTranslations } from "next-intl/server"
 
 export async function deleteBrand(
   input: BrandIdInput
 ): Promise<ApiResult<null>> {
- 
+
+  const t = await getTranslations("BrandsManagement")
   const validation = brandIdSchema.safeParse(input)
   if (!validation.success) {
     return {
       success: false,
-      error: "VALIDATION_ERROR",
+      error: t("VALIDATION_ERROR"),
       details: getValidationDetails(validation.error),
     }
   }

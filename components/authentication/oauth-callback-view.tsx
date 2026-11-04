@@ -24,7 +24,7 @@ interface OAuthCallbackViewProps {
 
 export function OAuthCallbackView({ code, error }: OAuthCallbackViewProps) {
   const t = useTranslations("OAuthCallback")
-   const router = useRouter()
+  const router = useRouter()
   const hasProcessed = React.useRef(false)
 
   // Exchange the OAuth code once, then redirect based on the result.
@@ -57,7 +57,7 @@ export function OAuthCallbackView({ code, error }: OAuthCallbackViewProps) {
 
       processExchange()
     }
-  }, [code, router, t, t])
+  }, [code, router, t])
 
   // Error view when OAuth provider returns an error parameter
   if (error) {

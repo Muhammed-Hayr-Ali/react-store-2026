@@ -85,37 +85,36 @@ function ReviewRowActions({ review, onEdit, onDelete }: ReviewRowActionsProps) {
   const t = useTranslations("ReviewsManagement")
 
   return (
-      <div className="flex justify-end">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7 text-muted-foreground data-[state=open]:bg-muted"
-              aria-label={t("ACTIONS_LABEL")}
-            >
-              <MoreHorizontalIcon className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40 text-xs">
-              <DropdownMenuItem
-                onClick={() => onEdit(review)}
-                className="cursor-pointer"
-              >
-                <PencilIcon className="me-2 size-3.5" />
-                {t("CHANGE_STATUS_ACTION")}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={() => onDelete(review)}
-                className="cursor-pointer text-destructive focus:text-destructive"
-              >
-                <Trash2Icon className="me-2 size-3.5" />
-                {t("DELETE_ACTION")}
-              </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-   
+    <div className="flex justify-end">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7 text-muted-foreground data-[state=open]:bg-muted"
+            aria-label={t("ACTIONS_LABEL")}
+          >
+            <MoreHorizontalIcon className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-40 text-xs">
+          <DropdownMenuItem
+            onClick={() => onEdit(review)}
+            className="cursor-pointer"
+          >
+            <PencilIcon className="me-2 size-3.5" />
+            {t("CHANGE_STATUS_ACTION")}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => onDelete(review)}
+            className="cursor-pointer text-destructive focus:text-destructive"
+          >
+            <Trash2Icon className="me-2 size-3.5" />
+            {t("DELETE_ACTION")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   )
 }
 
@@ -300,7 +299,7 @@ export function ReviewsTable({
                 <ClockIcon className="size-3 fill-amber-500 text-background" />
               )}
               <span className="capitalize">
-                {t(isApproved ? "APPROVED" : "PENDING")}
+                {isApproved ? t("APPROVED") : t("PENDING")}
               </span>
             </Badge>
           )
@@ -417,13 +416,11 @@ export function ReviewsTable({
                   className="flex cursor-pointer items-center justify-between"
                 >
                   <span>
-                    {t(
-                      value === "all"
-                        ? "FILTER_ALL"
-                        : value === "approved"
-                          ? "FILTER_APPROVED"
-                          : "FILTER_PENDING"
-                    )}
+                    {value === "all"
+                      ? t("FILTER_ALL")
+                      : value === "approved"
+                        ? t("FILTER_APPROVED")
+                        : t("FILTER_PENDING")}{" "}
                   </span>
                   <Badge variant="secondary" className="px-1 py-0 text-[10px]">
                     {value === "all"
@@ -451,13 +448,12 @@ export function ReviewsTable({
                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
               }`}
             >
-              {t(
-                value === "all"
-                  ? "FILTER_ALL"
-                  : value === "approved"
-                    ? "FILTER_APPROVED"
-                    : "FILTER_PENDING"
-              )}
+              {value === "all"
+                ? t("FILTER_ALL")
+                : value === "approved"
+                  ? t("FILTER_APPROVED")
+                  : t("FILTER_PENDING")}
+
               <Badge
                 variant="secondary"
                 className="ms-1.5 px-1.5 py-0 text-[10px]"

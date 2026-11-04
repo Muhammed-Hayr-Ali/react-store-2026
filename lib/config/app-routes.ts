@@ -15,6 +15,7 @@ export const appRoutes = {
     forgotPassword: "/auth/forgot-password",
     resetPassword: "/auth/reset-password",
     callback: "/auth/callback",
+    verifyOtp: "/auth/verify-otp",
   },
   dashboard: {
     overview: "/dashboard",

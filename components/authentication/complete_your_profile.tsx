@@ -43,9 +43,9 @@ import {
 import { appRoutes } from "@/lib/config/app-routes"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 
-export function SignUpForm() {
+export function CompleteProfilePage({phone}: {phone: string | null}) {
   // Load translations and navigation for the registration flow.
-  const t = useTranslations("SignUpForm")
+  const t = useTranslations("CompleteProfilePage")
   const locale = useLocale()
   const router = useRouter()
 
@@ -61,6 +61,8 @@ export function SignUpForm() {
       lastName: "",
       email: "",
       password: "",
+      phone_number: phone,
+      phone_verified_at: new Date(),
     },
   })
 

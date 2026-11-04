@@ -18,6 +18,7 @@ import WelcomeEmail from "@/lib/services/email/templates/welcome-email"
 
 import { getValidationDetails } from "../../validation"
 import { signUpWithPasswordSchema } from "../schemas"
+import { createOpenWAClient } from "@/lib/openwa/openWAClient"
 
 /**
  * تنشئ حسابًا جديدًا بالبريد الإلكتروني وكلمة المرور.
@@ -34,7 +35,15 @@ export async function signUpWithPassword(
     }
   }
 
-  const { firstName, lastName, email, password } = validation.data
+  const {
+    firstName,
+    lastName,
+    email,
+    password,
+    phone_number,
+    phone_verified_at,
+    locale,
+  } = validation.data
 
   const supabase = await createServerClient()
 
@@ -45,6 +54,8 @@ export async function signUpWithPassword(
       data: {
         first_name: firstName,
         last_name: lastName,
+        phone_number: phone_number,
+        phone_verified_at: phone_verified_at,
       },
     },
   })
@@ -64,7 +75,7 @@ export async function signUpWithPassword(
 
   try {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-    const emailLocale = resolveEmailLocale(validation.data.locale)
+    const emailLocale = resolveEmailLocale(locale)
     await sendEmail({
       to: email,
       subject:
@@ -79,6 +90,29 @@ export async function signUpWithPassword(
     })
   } catch (emailError) {
     console.error("Non-blocking email delivery error:", emailError)
+  }
+
+  if (phone_number && phone_verified_at) {
+    const sessionId = process.env.OPENWA_SESSION_ID
+    if (!sessionId) {
+      console.error("WhatsApp session ID is not configured.")
+      return { success: false, error: "WHATSAPP_SESSION_NOT_CONFIGURED" }
+    }
+
+    const messageText =
+      locale === "ar"
+        ? `مرحبًا ${firstName} ${lastName}! شكرًا لانضمامك إلى Marketna. نحن متحمسون لمساعدتك في اكتشاف أفضل العروض وإدارة طلباتك بسهولة.`
+        : `Hello ${firstName} ${lastName}! Thank you for joining Marketna. We're excited to help you discover the best deals and manage your orders with ease.`
+
+    try {
+      const openWA = createOpenWAClient()
+      await openWA.messages.sendText(sessionId, {
+        chatId: `${phone_number.replace(/[^0-9]/g, "")}@c.us`,
+        text: messageText,
+      })
+    } catch (whatsappError) {
+      console.error("Non-blocking WhatsApp delivery error:", whatsappError)
+    }
   }
 
   const cookieStore = await cookies()

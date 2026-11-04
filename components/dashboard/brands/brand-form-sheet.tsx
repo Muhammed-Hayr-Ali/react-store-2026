@@ -226,7 +226,7 @@ export function BrandFormSheet({
 
         onSaved(result.data)
         onOpenChange(false)
-        toast.success(t(isEditing ? "UPDATE_SUCCESS" : "CREATE_SUCCESS"))
+        toast.success(isEditing ? t("UPDATE_SUCCESS") : t("CREATE_SUCCESS"))
       } catch {
         toast.error(t("SAVE_ERROR"))
       }
@@ -257,10 +257,12 @@ export function BrandFormSheet({
             <span className="flex size-7 items-center justify-center rounded-lg bg-secondary">
               <TagsIcon className="size-4 text-primary" />
             </span>
-            {t(isEditing ? "FORM_EDIT_TITLE" : "FORM_CREATE_TITLE")}
+            {isEditing ? t("FORM_EDIT_TITLE") : t("FORM_CREATE_TITLE")}
           </SheetTitle>
           <SheetDescription>
-            {t(isEditing ? "FORM_EDIT_DESCRIPTION" : "FORM_CREATE_DESCRIPTION")}
+            {isEditing
+              ? t("FORM_EDIT_DESCRIPTION")
+              : t("FORM_CREATE_DESCRIPTION")}
           </SheetDescription>
         </SheetHeader>
 

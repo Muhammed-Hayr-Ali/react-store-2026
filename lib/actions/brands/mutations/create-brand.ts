@@ -10,20 +10,21 @@ import { revalidatePath } from "next/cache"
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
- import { getValidationDetails } from "../../validation"
+import { getValidationDetails } from "../../validation"
 import { brandSchema, type BrandFormValues } from "../schemas"
 import type { BrandRecord } from "../types"
+import { getTranslations } from "next-intl/server"
 
 export async function createBrand(
   input: BrandFormValues
 ): Promise<ApiResult<BrandRecord>> {
- 
+  const t = await getTranslations("BrandsManagement")
 
   const validation = brandSchema.safeParse(input)
   if (!validation.success) {
     return {
       success: false,
-      error: "VALIDATION_ERROR",
+      error: t("VALIDATION_ERROR"),
       details: getValidationDetails(validation.error),
     }
   }

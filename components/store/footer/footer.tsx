@@ -34,7 +34,7 @@ export default function Footer() {
             {/* قنوات التواصل الاجتماعي */}
             <div className="flex flex-wrap items-center gap-2">
               {footerConfig.socialLinks.map((item) => {
-                const label = item.label
+                const label = t(item.label)
 
                 return (
                   <Button
@@ -50,7 +50,7 @@ export default function Footer() {
                       aria-label={label}
                     >
                       <item.icon className="size-4" />
-                      <span className="sr-only">{t(label)}</span>
+                      <span className="sr-only">{label}</span>
                     </Link>
                   </Button>
                 )
@@ -62,7 +62,7 @@ export default function Footer() {
           <FooterSection title={t(`${footerConfig.quickLinks.key}`)}>
             <ul className="flex flex-col gap-2.5">
               {footerConfig.quickLinks.items.map((item) => {
-                const label = item.label
+                const label = t(item.label)
 
                 return (
                   <li key={item.key}>
@@ -70,7 +70,7 @@ export default function Footer() {
                       href={item.href}
                       className="text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:underline focus-visible:outline-none"
                     >
-                      {t(label)}
+                      {label}
                     </Link>
                   </li>
                 )

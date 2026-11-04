@@ -358,60 +358,66 @@ export function NewsletterSubscribersTable({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40 text-xs">
-                {(["all", "active", "unsubscribed"] as const).map((filter) => (
-                  <DropdownMenuItem
-                    key={filter}
-                    onClick={() => {
-                      setStatusFilter(filter)
-                      setPageIndex(0)
-                    }}
-                    className="flex cursor-pointer items-center justify-between"
-                  >
-                    <span>{t(`FILTER_${filter.toUpperCase()}`)}</span>
-                    <Badge
-                      variant="secondary"
-                      className="px-1 py-0 text-[10px]"
+                {(["all", "active", "unsubscribed"] as const).map((filter) => {
+                  const filterLabel = t(filter.toUpperCase())
+                  return (
+                    <DropdownMenuItem
+                      key={filter}
+                      onClick={() => {
+                        setStatusFilter(filter)
+                        setPageIndex(0)
+                      }}
+                      className="flex cursor-pointer items-center justify-between"
                     >
-                      {filter === "all"
-                        ? subscribers.length
-                        : filter === "active"
-                          ? activeCount
-                          : unsubscribedCount}
-                    </Badge>
-                  </DropdownMenuItem>
-                ))}
+                      <span>{filterLabel}</span>
+                      <Badge
+                        variant="secondary"
+                        className="px-1 py-0 text-[10px]"
+                      >
+                        {filter === "all"
+                          ? subscribers.length
+                          : filter === "active"
+                            ? activeCount
+                            : unsubscribedCount}
+                      </Badge>
+                    </DropdownMenuItem>
+                  )
+                })}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
 
           <div className="hidden h-8 items-center overflow-hidden rounded-md border border-input bg-background p-0.5 sm:inline-flex">
-            {(["all", "active", "unsubscribed"] as const).map((filter) => (
-              <button
-                key={filter}
-                type="button"
-                onClick={() => {
-                  setStatusFilter(filter)
-                  setPageIndex(0)
-                }}
-                className={`inline-flex h-full items-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
-                  statusFilter === filter
-                    ? "bg-muted font-semibold text-foreground shadow-xs"
-                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                }`}
-              >
-                {t(`FILTER_${filter.toUpperCase()}`)}
-                <Badge
-                  variant="secondary"
-                  className="ms-1.5 px-1.5 py-0 text-[10px]"
+            {(["all", "active", "unsubscribed"] as const).map((filter) => {
+              const filterLabel = t(filter.toUpperCase())
+              return (
+                <button
+                  key={filter}
+                  type="button"
+                  onClick={() => {
+                    setStatusFilter(filter)
+                    setPageIndex(0)
+                  }}
+                  className={`inline-flex h-full items-center rounded-sm px-2.5 text-xs font-medium transition-colors ${
+                    statusFilter === filter
+                      ? "bg-muted font-semibold text-foreground shadow-xs"
+                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                  }`}
                 >
-                  {filter === "all"
-                    ? subscribers.length
-                    : filter === "active"
-                      ? activeCount
-                      : unsubscribedCount}
-                </Badge>
-              </button>
-            ))}
+                  {filterLabel}
+                  <Badge
+                    variant="secondary"
+                    className="ms-1.5 px-1.5 py-0 text-[10px]"
+                  >
+                    {filter === "all"
+                      ? subscribers.length
+                      : filter === "active"
+                        ? activeCount
+                        : unsubscribedCount}
+                  </Badge>
+                </button>
+              )
+            })}
           </div>
 
           <DropdownMenu>

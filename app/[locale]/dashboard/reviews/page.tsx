@@ -41,10 +41,6 @@ export default async function Page({ params }: PageProps) {
     locale,
     namespace: "ReviewsManagement",
   })
-  const tErrors = await getTranslations({
-    locale,
-    namespace: "ActionErrors",
-  })
 
   // Fetch pre-processed page data and business logic
   // نحن جلبنا كل شيء بداخل دالة getReviewsPageData كما بنيناها سابقاً
@@ -52,7 +48,7 @@ export default async function Page({ params }: PageProps) {
 
   if (!pageDataResult.success) {
     throw new Error(
-      tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
+      t(getActionErrorKey(pageDataResult.error)) ?? t("UNEXPECTED_ERROR")
     )
   }
 

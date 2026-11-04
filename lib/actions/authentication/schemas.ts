@@ -23,6 +23,8 @@ export const signUpWithPasswordSchema = z.object({
     .min(2, "NAME_TOO_SHORT"),
   email: z.string().trim().min(1, "EMAIL_REQUIRED").email("INVALID_EMAIL"),
   password: z.string().min(6, "PASSWORD_TOO_SHORT"),
+  phone_number: z.string().nullable().optional(),
+  phone_verified_at: z.date().nullable().optional(),
   locale: z.string().optional(),
 })
 

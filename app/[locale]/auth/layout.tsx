@@ -46,7 +46,7 @@ export default async function AuthLayout({
       {/* Main Authentication Card Container */}
       <div className="flex w-full flex-1 flex-col items-center justify-center py-6 sm:py-10">
         <div className="w-full max-w-sm sm:max-w-md">
-          <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm sm:p-8">
+          <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
             {children}
           </div>
         </div>

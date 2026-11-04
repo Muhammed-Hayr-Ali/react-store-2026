@@ -36,14 +36,12 @@ export default async function Page({ params }: PageProps) {
     locale,
     namespace: "StaffAccessManagement",
   })
-  const tErrors = await getTranslations({ locale, namespace: "ActionErrors" })
 
-  
 
   const pageDataResult = await getStaffAccessPageData()
   if (!pageDataResult.success) {
     throw new Error(
-      tErrors(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
+      t(getActionErrorKey(pageDataResult.error) ??  t("UNEXPECTED_ERROR"))
     )
   }
 

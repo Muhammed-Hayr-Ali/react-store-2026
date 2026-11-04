@@ -260,7 +260,7 @@ export function CategoryFormSheet({
 
         onSaved(result.data)
         onOpenChange(false)
-        toast.success(t(isEditing ? "UPDATE_SUCCESS" : "CREATE_SUCCESS"))
+        toast.success(isEditing ? t("UPDATE_SUCCESS") : t("CREATE_SUCCESS"))
       } catch {
         toast.error(t("SAVE_ERROR"))
       }

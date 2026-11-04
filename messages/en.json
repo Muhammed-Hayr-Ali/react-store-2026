@@ -136,8 +136,7 @@
     "SAVE_ERROR": "Save Error",
     "PAGE_TITLE": "My Wishlist",
     "EMPTY_DESCRIPTION": "No products available in your wishlist right now",
-    "PAGE_DESC": "Explore all your saved favorite products.",
-    "PAGE_DESCRIPTION": "Assign security roles and monitor authorization privileges granted to platform users."
+    "PAGE_DESC": "Explore all your saved favorite products."
   },
   "AuthLayout": {
     "BACK_TO_HOME_SR": "Return to homepage",
@@ -164,7 +163,6 @@
     "SEARCH_PLACEHOLDER": "Search brands…",
     "CREATE_BRAND": "Add brand",
     "COLUMN_BRAND": "Brand",
-    "COLUMN_ORDER": "Order",
     "COLUMN_STATUS": "Status",
     "ACTIVE": "Active",
     "INACTIVE": "Inactive",
@@ -174,7 +172,6 @@
     "NO_BRANDS_MATCH": "No brands match your search.",
     "FORM_CREATE_TITLE": "Create brand",
     "FORM_EDIT_TITLE": "Edit brand",
-    "FORM_DESCRIPTION": "Enter brand details and storefront visibility.",
     "NAME_LABEL": "Name",
     "NAME_AR_LABEL": "Arabic name",
     "SLUG_LABEL": "Slug",
@@ -192,7 +189,6 @@
     "DELETE_SUCCESS": "Brand deleted successfully.",
     "DELETE_ERROR": "Could not delete this brand.",
     "SAVE_ERROR": "Could not save this brand.",
-    "DELETE_CONFIRMATION": "Delete {name}?",
     "ACTIONS_LABEL": "Brand actions",
     "FILTER_BUTTON": "Filter brands",
     "FILTER_ALL": "All",
@@ -206,8 +202,6 @@
     "NEXT_PAGE": "Next page",
     "DETAILS_SECTION": "Brand details",
     "DETAILS_DESCRIPTION": "Name and public URL identifier.",
-    "DISPLAY_SECTION": "Display and visibility",
-    "DISPLAY_DESCRIPTION": "Set the image, display order, and storefront status.",
     "VALIDATION_ERROR": "Please check the brand details and try again.",
     "DELETE_DIALOG_TITLE": "Delete brand?",
     "DELETE_DIALOG_DESCRIPTION": "This will permanently delete",
@@ -353,7 +347,9 @@
     "ACTIVE": "Active",
     "FORM_CREATE_TITLE": "Create category",
     "FORM_CREATE_DESCRIPTION": "Add a category and optionally place it under a parent.",
-    "INACTIVE": "Inactive"
+    "INACTIVE": "Inactive",
+    "UPDATE_SUCCESS": "category updated successfully.",
+    "CREATE_SUCCESS": "category created successfully."
   },
   "CategoriesScroll": {
     "title": "Categories",
@@ -511,7 +507,7 @@
     "SUBSCRIBE_BUTTON": "Subscribe",
     "SUBSCRIBE_ARIA_LABEL": "Subscribe to newsletter",
     "SUBSCRIBE_SUCCESS": "Thanks for subscribing!",
-    "UNEXPECTED_ERROR": "\"UNEXPECTED_ERROR\": \"An unexpected error occurred\""
+    "UNEXPECTED_ERROR": "An unexpected error occurred. Please try again."
   },
   "NewsletterSubscribersManagement": {
     "META_TITLE": "Newsletter Subscribers Management",
@@ -525,9 +521,9 @@
     "CLEAR_SEARCH": "Clear search",
     "FILTER_BUTTON": "Filter subscribers",
     "TOGGLE_COLUMNS": "Toggle columns",
-    "FILTER_ALL": "All",
-    "FILTER_ACTIVE": "Active",
-    "FILTER_UNSUBSCRIBED": "Unsubscribed",
+    "ALL": "All",
+    "ACTIVE": "Active",
+    "UNSUBSCRIBED": "Unsubscribed",
     "SEND_SELECTED": "Send selected ({count})",
     "SELECTED_COUNT": "{selected} selected; {limit} per batch maximum",
     "CLEAR_SELECTION": "Clear selection",
@@ -579,14 +575,14 @@
     "TOTAL_SUBSCRIBERS_LEGEND": "All newsletter subscribers",
     "STATUS_LEGEND_ACTIVE": "Active",
     "STATUS_LEGEND_UNSUBSCRIBED": "Unsubscribed",
-    "UNEXPECTED_ERROR": "\"UNEXPECTED_ERROR\": \"An unexpected error occurred\""
+    "UNEXPECTED_ERROR": "An unexpected error occurred. Please try again."
   },
   "NewsletterUnsubscribe": {
     "TITLE": "Unsubscribe from our newsletter",
     "DESCRIPTION": "You can optionally tell us why you are unsubscribing.",
     "EMAIL_LABEL": "Subscription email",
     "REASONS_LABEL": "Why are you unsubscribing?",
-     "OTHER_REASON_PLACEHOLDER": "Tell us more (optional)",
+    "OTHER_REASON_PLACEHOLDER": "Tell us more (optional)",
     "OTHER_REASON_REQUIRED": "Enter your reason or unselect “Other reason.”",
     "SUBMIT": "Unsubscribe",
     "SUBMITTING": "Unsubscribing...",
@@ -607,14 +603,12 @@
     "PROCESSING_TITLE": "Verifying Authentication",
     "PROCESSING_DESCRIPTION": "Please wait while we complete your session verification...",
     "FAILED_TITLE": "Authentication Failed",
-    "DEFAULT_ERROR_DESCRIPTION": "The sign-in procedure was canceled or permission was denied.",
     "RETURN_TO_LOGIN": "Return to Sign In",
     "SIGN_IN_SUCCESS_TOAST": "Successfully signed in!",
     "EXCHANGE_FAILED": "Failed to complete authentication exchange."
   },
   "ProductDetails": {
     "HOME": "Store",
-    "SELECT_VARIANT": "Options / Flavors",
     "OUT_OF_STOCK": "Out of stock",
     "IN_STOCK": "In stock",
     "DECREASE_QUANTITY": "Decrease quantity",
@@ -792,9 +786,7 @@
     "HOURS_AGO": "{count} h ago",
     "DAYS_AGO": "{count} d ago",
     "MONTHS_AGO": "{count} mo ago",
-    "YEARS_AGO": "{count} y ago",
-    "YOU_BADGE": "You",
-    "ADMIN_VIEW_BADGE": "Admin"
+    "YEARS_AGO": "{count} y ago"
   },
   "ProductsManagement": {
     "PAGE_TITLE": "Products Management",
@@ -846,7 +838,7 @@
     "CANCEL_BUTTON": "Cancel",
     "CANNOT_BE_UNDONE": "This action cannot be undone.",
     "CONFIRM_DELETE_BUTTON": "Delete product",
-     "DELETE_DIALOG_DESCRIPTION": "Are you sure you want to delete",
+    "DELETE_DIALOG_DESCRIPTION": "Are you sure you want to delete",
     "DELETE_DIALOG_TITLE": "Delete product?",
     "DELETE_ERROR_TOAST": "Could not delete product.",
     "DELETE_SUCCESS_TOAST": "{name} was deleted successfully.",
@@ -899,10 +891,10 @@
     "BACK_TO_LOGIN_BUTTON": "Back to Sign In"
   },
   "ReviewsManagement": {
-    "REVIEWS_MANAGEMENT": "Reviews Management",
     "META_TITLE": "Reviews Management | Marketna",
     "META_DESCRIPTION": "Manage and moderate customer reviews for your products.",
     "TOTAL_COUNT": "Total Reviews",
+    "APPROVED": "Approved",
     "APPROVED_COUNT": "Approved",
     "PENDING_COUNT": "Pending",
     "REVIEW_NAME_CONFIRMATION_REQUIRED": "Enter the reviewer name to confirm deletion.",
@@ -935,8 +927,6 @@
     "LAST_PAGE": "Last page",
     "DELETE_SUCCESS_TOAST": "Review by {name} has been deleted successfully.",
     "DELETE_ERROR_TOAST": "Failed to delete the review. Please try again.",
-    "GENERIC_ERROR_TOAST": "An unexpected error occurred.",
-    "DELETE_BUTTON": "Delete",
     "DELETE_DIALOG_TITLE": "Delete Review",
     "DELETE_DIALOG_DESCRIPTION": "Are you sure you want to delete this review from",
     "CANNOT_BE_UNDONE": "This action cannot be undone.",
@@ -959,7 +949,11 @@
     "SAVE_ERROR": "Failed to update review status.",
     "TOTAL_REVIEWS_LEGEND": "All submitted reviews",
     "STATUS_LEGEND_APPROVED": "Approved",
-    "STATUS_LEGEND_PENDING": "Pending"
+    "STATUS_LEGEND_PENDING": "Pending",
+    "UNEXPECTED_ERROR": "An unexpected error occurred. Please try again.",
+    "PAGE_TITLE": "Product Reviews",
+    "PAGE_DESCRIPTION": "Monitor customer feedback, approve legitimate reviews, and manage your store's reputation.",
+    "PENDING": "Pending"
   },
   "RolesManagement": {
     "CREATE_PAGE_TITLE": "Create New Role",
@@ -1169,31 +1163,6 @@
     "ROLE_IN_USE_ERROR": "This role is assigned to users and cannot be deleted. Please unassign users first.",
     "ROLE_DELETED_SUCCESS": "Role \\\"{name}\\\" deleted successfully."
   },
-  "SignUpForm": {
-    "TITLE": "Create Account",
-    "SUBTITLE": "Join Marketna in a few easy steps",
-    "SIGN_IN_LINK": "Sign In",
-    "DISMISS_ALERT_SR": "Dismiss notification",
-    "FIRST_NAME_LABEL": "First Name",
-    "FIRST_NAME_PLACEHOLDER": "John",
-    "LAST_NAME_LABEL": "Last Name",
-    "LAST_NAME_PLACEHOLDER": "Doe",
-    "EMAIL_LABEL": "Email Address",
-    "EMAIL_PLACEHOLDER": "you@domain.com",
-    "PASSWORD_LABEL": "Password",
-    "PASSWORD_PLACEHOLDER": "••••••••",
-    "SHOW_PASSWORD_SR": "Show password",
-    "HIDE_PASSWORD_SR": "Hide password",
-    "SUBMIT_BUTTON": "Create Account",
-    "SUBMITTING_BUTTON": "Creating account...",
-    "OR_DIVIDER": "Or",
-    "EMAIL_ALREADY_EXISTS_ERROR": "An account with this email address already exists.",
-    "GENERIC_ERROR": "An unexpected error occurred during signup. Please try again."
-  },
-  "SignUpPage": {
-    "META_TITLE": "Create Account",
-    "META_DESCRIPTION": "Join Marketna to enjoy personalized deals, track deliveries, and manage your orders."
-  },
   "StaffAccessManagement": {
     "PAGE_META_TITLE": "User Access & Roles",
     "PAGE_META_DESCRIPTION": "Manage system user roles and security privilege assignments.",
@@ -1240,7 +1209,10 @@
     "CONFIRM_ASSIGN_BUTTON": "Assign Role",
     "TOTAL_STAFF_LEGEND": "All staff members",
     "STATUS_LEGEND_ASSIGNED": "Roles Assigned",
-    "STATUS_LEGEND_UNASSIGNED": "No Roles"
+    "STATUS_LEGEND_UNASSIGNED": "No Roles",
+    "UNEXPECTED_ERROR": "An unexpected error occurred. Please try again.",
+    "PAGE_TITLE": "Staff Access Management",
+    "PAGE_DESCRIPTION": "Assign security roles and monitor authorization privileges granted to platform users."
   },
   "UsersManagement": {
     "META_TITLE": "User Accounts Management",
@@ -1260,7 +1232,6 @@
     "STATUS_BANNED": "Banned",
     "COLUMN_JOINED": "Joined",
     "ANONYMOUS_USER": "Anonymous User",
-    "CUSTOMER_ROLE": "Customer",
     "ACTIONS_LABEL": "Actions",
     "COPY_EMAIL_ACTION": "Copy Email",
     "EMAIL_COPIED_SUCCESS": "Email copied to clipboard",
@@ -1339,11 +1310,87 @@
     "META_DESCRIPTION": "Browse the products you have saved to your wishlist.",
     "PAGE_TITLE": "My Wishlist",
     "PAGE_DESC": "Products you have saved for later so you can easily return to them.",
-    "EMPTY_DESCRIPTION": "You haven't added any products to your wishlist yet. Explore the store and add what you like!",
     "REMOVE_FROM_WISHLIST": "Remove from Wishlist",
     "AUTH_REQUIRED_TITLE": "Sign in required",
     "GENERAL_ERROR": "Something went wrong, please try again later.",
     "NO_PRODUCTS_AVAILABLE": "No products available.",
     "LOADING": "Loading more products..."
+  },
+  "SignUpPage": {
+    "META_TITLE": "Create Your Account",
+    "META_DESCRIPTION": "Sign up to access your personalized dashboard and manage your account settings."
+  },
+  "SignUpForm": {
+    "WELCOME_TITLE": "Create an Account",
+    "SIGN_UP_SUBTITLE": "Enter your phone number to receive a verification code via WhatsApp.",
+    "SIGN_IN_LINK": "Sign in",
+    "DISMISS_ALERT_SR": "Dismiss alert",
+    "PHONE_LABEL": "Phone Number",
+    "PHONE_PLACEHOLDER": "+963 9XXXXXXXX",
+    "LAST_USED_BADGE": "Last Used",
+    "SIGN_UP_BUTTON": "Continue with WhatsApp",
+    "SIGN_UP_SUBMITTING": "Sending code...",
+    "GENERIC_ERROR": "An unexpected error occurred. Please try again."
+  },
+  "PhoneOtp": {
+    "WHATSAPP_MESSAGE": "Welcome! Your verification code is: *{code}*\n\nValid for 10 minutes.",
+    "WHATSAPP_SESSION_NOT_CONFIGURED": "WhatsApp session is not configured.",
+    "FAILED_TO_STORE_OTP": "Failed to store verification code in database.",
+    "FAILED_TO_SEND_WHATSAPP_MESSAGE": "Failed to send WhatsApp message."
+  },
+  "PhoneVerifyPage": {
+    "META_TITLE": "Verify Phone Number",
+    "META_DESCRIPTION": "Enter the verification code sent via WhatsApp."
+  },
+  "PhoneVerifyForm": {
+    "WELCOME_TITLE": "Enter Verification Code",
+    "VERIFY_SUBTITLE": "We have sent a 6-digit code to {phone}",
+    "BACK_BUTTON": "Back",
+    "DISMISS_ALERT_SR": "Dismiss alert",
+    "CODE_LABEL": "Verification Code",
+    "CODE_PLACEHOLDER": "123456",
+    "VERIFY_BUTTON": "Verify & Sign In",
+    "VERIFYING_BUTTON": "Verifying...",
+    "DID_NOT_RECEIVE": "Didn't receive the code?",
+    "RESEND_BUTTON": "Resend Code",
+    "GENERIC_ERROR": "An unexpected error occurred. Please try again.",
+    "ERRORS": {
+      "UNEXPECTED_ERROR": "An unexpected error occurred. Please try again.",
+      "VALIDATION_ERROR": "Please check the entered code and try again.",
+      "INVALID_OR_EXPIRED_OTP": "The verification code is invalid or has expired. Please request a new one.",
+      "WHATSAPP_SESSION_NOT_CONFIGURED": "WhatsApp session is not configured properly.",
+      "FAILED_TO_VERIFY_OTP": "Failed to verify code. Please try again."
+    }
+  },
+  "CompleteProfilePage": {
+    "TITLE": "Complete Your Profile",
+    "SUBTITLE": "Fill in your profile details to complete your account setup.",
+    "META_TITLE": "Complete Your Profile",
+    "META_DESCRIPTION": "Fill in your profile details to complete your account setup.",
+    "WELCOME_TITLE": "Complete Your Profile",
+    "COMPLETE_SUBTITLE": "Please provide the following information to complete your account setup.",
+    "DISMISS_ALERT_SR": "Dismiss notification",
+    "FIRST_NAME_LABEL": "First Name",
+    "UNEXPECTED_ERROR": "An unexpected error occurred. Please try again.",
+    "VALIDATION_ERROR": "Please check the entered information and try again.",
+    "FAILED_TO_COMPLETE_PROFILE": "Failed to complete profile. Please try again.",
+    "SIGN_IN_LINK": "Sign In",
+    "ALERT_TITLE": "Action Required",
+    "NAME_LABEL": "Full Name",
+    "NAME_PLACEHOLDER": "John Doe",
+    "FIRST_NAME_PLACEHOLDER": "John",
+    "LAST_NAME_LABEL": "Last Name",
+    "LAST_NAME_PLACEHOLDER": "Doe",
+    "EMAIL_LABEL": "Email Address",
+    "EMAIL_PLACEHOLDER": "you@domain.com",
+    "PASSWORD_LABEL": "Password",
+    "PASSWORD_PLACEHOLDER": "••••••••",
+    "SHOW_PASSWORD_SR": "Show password",
+    "HIDE_PASSWORD_SR": "Hide password",
+    "SUBMIT_BUTTON": "Create Account",
+    "SUBMITTING_BUTTON": "Creating account...",
+    "OR_DIVIDER": "Or",
+    "EMAIL_ALREADY_EXISTS_ERROR": "An account with this email address already exists.",
+    "GENERIC_ERROR": "An unexpected error occurred during signup. Please try again."
   }
 }
