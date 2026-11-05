@@ -1,53 +1,67 @@
 /**
- * @file components/authentication/sign-up-form.tsx
- * @description Accessible, client-side phone sign-up form utilizing react-phone-number-input
- * for dynamic international formatting and validation.
+ * @file components/auth/signup-form.tsx
+ * @description Customer registration form with client validation,
+ * inline field bindings, and Section 12 destructive alert management.
  */
 
 "use client"
 
 import * as React from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useTranslations, useLocale } from "next-intl"
+import { useRouter } from "next/navigation"
+import { useLocale, useTranslations } from "next-intl"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
-import PhoneInput from "react-phone-number-input"
-import "react-phone-number-input/style.css" // Import default styling (can be overridden with Tailwind)
-import { AlertCircleIcon, XIcon } from "lucide-react"
+import {
+  EyeIcon,
+  EyeOffIcon,
+  LockIcon,
+  MailIcon,
+  UserIcon,
+  AlertCircleIcon,
+  XIcon,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { ActionFieldError } from "@/components/shared/action-field-error"
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+} from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
-import { Badge } from "@/components/ui/badge"
+import { IconInput } from "@/components/ui/icon-input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AuthHeader } from "./auth-header"
+import { GoogleSignInButton } from "./google-sign-in-button"
 
 import {
-  sendPhoneOtp,
-  sendOtpSchema,
-  type SendOtpFormValues,
-} from "@/lib/actions/phone-otps"
+  signUpWithPassword,
+  signUpWithPasswordSchema,
+  type SignUpWithPasswordInput,
+} from "@/lib/actions/authentication"
 import { appRoutes } from "@/lib/config/app-routes"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 
-interface SignUpFormProps {
-  lastSignupPhone?: string | null
-}
 
-export function SignUpForm({ lastSignupPhone }: SignUpFormProps) {
+export function SignUpForm() {
+  // Load translations and navigation for the registration flow.
   const t = useTranslations("SignUpForm")
   const locale = useLocale()
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const redirectTarget = searchParams.get("redirect") || appRoutes.home
 
+  // Track password visibility and server-side errors.
+  const [showPassword, setShowPassword] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
-  const form = useForm<SendOtpFormValues>({
-    resolver: zodResolver(sendOtpSchema),
+  // Configure registration validation and initial form values.
+  const form = useForm<SignUpWithPasswordInput>({
+    resolver: zodResolver(signUpWithPasswordSchema),
     defaultValues: {
-      phoneNumber: lastSignupPhone || "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
     },
   })
 
@@ -55,41 +69,49 @@ export function SignUpForm({ lastSignupPhone }: SignUpFormProps) {
     formState: { isSubmitting, errors },
   } = form
 
-  async function onSubmit(data: SendOtpFormValues) {
+  // Create the account and display field or account-level errors.
+  async function onSubmit(data: SignUpWithPasswordInput) {
     setErrorMessage(null)
-    const result = await sendPhoneOtp(data, locale)
-    if (!result.success) {
-      console.error(
-        "sendPhoneOtp failed with error:",
-        result.error,
-        "and details:",
-        result.details
-      )
-      const errorKey = getActionErrorKey(result.error)
-      setErrorMessage(`ERRORS.${errorKey}`)
+    const result = await signUpWithPassword({ ...data, locale })
+
+    if (result.success) {
+      router.refresh()
+      router.replace(appRoutes.home)
       return
     }
 
-    if (result.success && result.data) {
-      router.refresh()
-      router.replace(
-        `/${locale}/auth/phone-verify?phone=${encodeURIComponent(result.data.phoneNumber)}&redirect=${encodeURIComponent(redirectTarget)}`
-      )
+    // Intercept Server Action validation errors and bind directly to form fields
+    if (result.error === "VALIDATION_ERROR" && result.details) {
+      Object.entries(result.details).forEach(([field, msgs]) => {
+        form.setError(field as keyof SignUpWithPasswordInput, {
+          message: msgs[0],
+        })
+      })
       return
+    }
+
+    // Handle duplicate account errors via Section 12 Alert
+    if (result.error === "EMAIL_ALREADY_EXISTS") {
+      setErrorMessage(t("EMAIL_ALREADY_EXISTS_ERROR"))
+    } else {
+      setErrorMessage(
+        result.error ? t(getActionErrorKey(result.error)) : t("GENERIC_ERROR")
+      )
     }
   }
-  const isPhoneLastUsed = Boolean(lastSignupPhone)
 
+  // Render registration fields, error feedback, and OAuth sign-up.
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
       <FieldGroup className="space-y-4">
         <AuthHeader
-          title={t("WELCOME_TITLE")}
-          description={t("SIGN_UP_SUBTITLE")}
+          title={t("TITLE")}
+          description={t("SUBTITLE")}
           linkText={t("SIGN_IN_LINK")}
           linkHref={appRoutes.auth.login}
         />
 
+        {/* Section 12 Form-Level Server Error Alert */}
         {errorMessage && (
           <Alert variant="destructive" className="relative pe-9">
             <AlertCircleIcon className="size-4 shrink-0" />
@@ -107,25 +129,131 @@ export function SignUpForm({ lastSignupPhone }: SignUpFormProps) {
           </Alert>
         )}
 
+        {/* Name Fields Row */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {/* firstName Field */}
+          <Controller
+            name="firstName"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="firstName" className="text-xs">
+                  {t("FIRST_NAME_LABEL")}
+                </FieldLabel>
+                <IconInput
+                  {...field}
+                  id="firstName"
+                  type="text"
+                  placeholder={t("FIRST_NAME_PLACEHOLDER")}
+                  aria-invalid={fieldState.invalid}
+                  autoComplete="given-name"
+                  className="h-9 text-xs"
+                  prefixIcon={
+                    <UserIcon className="size-4 text-muted-foreground" />
+                  }
+                />
+                {fieldState.invalid && (
+                  <ActionFieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          {/* lastName Field */}
+          <Controller
+            name="lastName"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="lastName" className="text-xs">
+                  {t("LAST_NAME_LABEL")}
+                </FieldLabel>
+                <IconInput
+                  {...field}
+                  id="lastName"
+                  type="text"
+                  placeholder={t("LAST_NAME_PLACEHOLDER")}
+                  aria-invalid={fieldState.invalid}
+                  autoComplete="family-name"
+                  className="h-9 text-xs"
+                />
+                {fieldState.invalid && (
+                  <ActionFieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+        </div>
+
+        {/* Email Field */}
         <Controller
-          name="phoneNumber"
+          name="email"
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="phoneNumber" className="text-xs">
-                {t("PHONE_LABEL")}
+              <FieldLabel htmlFor="email" className="text-xs">
+                {t("EMAIL_LABEL")}
               </FieldLabel>
-              <div className="phone-input-wrapper [&_.PhoneInputCountry]:me-2 [&_input]:h-9 [&_input]:w-full [&_input]:rounded-md [&_input]:border [&_input]:border-input [&_input]:bg-background [&_input]:px-3 [&_input]:font-mono [&_input]:text-xs [&_input]:shadow-xs [&_input]:focus-visible:ring-1 [&_input]:focus-visible:ring-ring [&_input]:focus-visible:outline-none">
-                <PhoneInput
-                  international
-                  defaultCountry="SY"
-                  value={field.value}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  id="phoneNumber"
-                  placeholder={t("PHONE_PLACEHOLDER")}
-                />
-              </div>
+              <IconInput
+                {...field}
+                id="email"
+                type="email"
+                placeholder={t("EMAIL_PLACEHOLDER")}
+                aria-invalid={fieldState.invalid}
+                autoComplete="email"
+                className="h-9 text-xs"
+                prefixIcon={
+                  <MailIcon className="size-4 text-muted-foreground" />
+                }
+              />
+              {fieldState.invalid && (
+                <ActionFieldError errors={[fieldState.error]} />
+              )}
+            </Field>
+          )}
+        />
+
+        {/* Password Field */}
+        <Controller
+          name="password"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="password" className="text-xs">
+                {t("PASSWORD_LABEL")}
+              </FieldLabel>
+              <IconInput
+                {...field}
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder={t("PASSWORD_PLACEHOLDER")}
+                aria-invalid={fieldState.invalid}
+                autoComplete="new-password"
+                className="h-9 text-xs"
+                prefixIcon={
+                  <LockIcon className="size-4 text-muted-foreground" />
+                }
+                suffixIcon={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="size-7 cursor-pointer text-muted-foreground hover:bg-transparent hover:text-foreground focus:outline-none"
+                  >
+                    {showPassword ? (
+                      <EyeIcon className="size-4" />
+                    ) : (
+                      <EyeOffIcon className="size-4" />
+                    )}
+                    <span className="sr-only">
+                      {showPassword
+                        ? t("HIDE_PASSWORD_SR")
+                        : t("SHOW_PASSWORD_SR")}
+                    </span>
+                  </Button>
+                }
+              />
               {fieldState.invalid && (
                 <ActionFieldError errors={[fieldState.error]} />
               )}
@@ -137,33 +265,31 @@ export function SignUpForm({ lastSignupPhone }: SignUpFormProps) {
           <ActionFieldError errors={[{ message: errors.root.message }]} />
         )}
 
+        {/* Submit Action */}
         <Field className="pt-1">
-          <div className="relative w-full">
-            {isPhoneLastUsed && (
-              <div className="pointer-events-none absolute -inset-e-2.5 -top-2.5 z-10">
-                <Badge
-                  variant="secondary"
-                  className="h-4 border border-border/80 bg-secondary px-1.5 text-[9px] font-medium tracking-wide text-foreground shadow-xs"
-                >
-                  {t("LAST_USED_BADGE")}
-                </Badge>
-              </div>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="h-9 w-full text-xs font-medium uppercase shadow-xs"
+          >
+            {isSubmitting ? (
+              <>
+                <Spinner className="me-2 size-3.5" />
+                <span>{t("SUBMITTING_BUTTON")}</span>
+              </>
+            ) : (
+              t("SUBMIT_BUTTON")
             )}
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="h-9 w-full text-xs font-medium uppercase shadow-xs"
-            >
-              {isSubmitting ? (
-                <>
-                  <Spinner className="me-2 size-3.5" />
-                  <span>{t("SIGN_UP_SUBMITTING")}</span>
-                </>
-              ) : (
-                t("SIGN_UP_BUTTON")
-              )}
-            </Button>
-          </div>
+          </Button>
+        </Field>
+
+        <FieldSeparator className="my-1 text-xs">
+          {t("OR_DIVIDER")}
+        </FieldSeparator>
+
+        {/* OAuth Section */}
+        <Field>
+          <GoogleSignInButton />
         </Field>
       </FieldGroup>
     </form>

@@ -19,7 +19,7 @@ export interface ReviewWithUser extends ProductReview {
   user?: {
     first_name?: string | null
     last_name?: string | null
-    profile_image?: string | null
+    avatar?: string | null
   } | null
 }
 

@@ -229,9 +229,9 @@ export function StaffAccessTable({
           return (
             <div className="flex items-center gap-2.5">
               <Avatar className="size-7 shrink-0 rounded-lg after:rounded-lg">
-                {row.original.profile_image && (
+                {row.original.avatar && (
                   <AvatarImage
-                    src={row.original.profile_image}
+                    src={row.original.avatar}
                     alt={fullName || t("ANONYMOUS_USER")}
                     className="rounded-lg"
                   />

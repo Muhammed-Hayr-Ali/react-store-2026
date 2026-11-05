@@ -13,7 +13,7 @@ export interface ReviewerProfile {
   id: string
   first_name: string | null
   last_name: string | null
-  profile_image: string | null
+  avatar: string | null
 }
 
 export interface ProductReviewItem {
@@ -92,7 +92,7 @@ export async function getProductReviews(
           id,
           first_name,
           last_name,
-          profile_image
+          avatar
         )
       `
       )

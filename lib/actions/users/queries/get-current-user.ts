@@ -16,7 +16,7 @@ export type CurrentUser = {
   first_name: string | null
   last_name: string | null
   phone_number: string | null
-  profile_image: string | null
+  avatar: string | null
   gender: "male" | "female" | "other" | null
   status: string | null
   created_at: string | null

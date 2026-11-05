@@ -40,8 +40,8 @@ export async function signUpWithPassword(
     lastName,
     email,
     password,
-    phone_number,
-    phone_verified_at,
+    phone,
+    phone_verified,
     locale,
   } = validation.data
 
@@ -54,8 +54,8 @@ export async function signUpWithPassword(
       data: {
         first_name: firstName,
         last_name: lastName,
-        phone_number: phone_number,
-        phone_verified_at: phone_verified_at,
+        phone: phone,
+        phone_verified: phone_verified,
       },
     },
   })
@@ -92,7 +92,7 @@ export async function signUpWithPassword(
     console.error("Non-blocking email delivery error:", emailError)
   }
 
-  if (phone_number && phone_verified_at) {
+  if (phone && phone_verified) {
     const sessionId = process.env.OPENWA_SESSION_ID
     if (!sessionId) {
       console.error("WhatsApp session ID is not configured.")
@@ -107,7 +107,7 @@ export async function signUpWithPassword(
     try {
       const openWA = createOpenWAClient()
       await openWA.messages.sendText(sessionId, {
-        chatId: `${phone_number.replace(/[^0-9]/g, "")}@c.us`,
+        chatId: `${phone.replace(/[^0-9]/g, "")}@c.us`,
         text: messageText,
       })
     } catch (whatsappError) {

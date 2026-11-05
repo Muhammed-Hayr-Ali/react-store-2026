@@ -101,7 +101,7 @@ export function CreateUserSheet({ children, onSuccess }: CreateUserSheetProps) {
         first_name: data.firstName || null,
         last_name: data.lastName || null,
         phone_number: data.phoneNumber || null,
-        profile_image: null,
+        avatar: null,
         status: "active" as const,
         ban_reason: null,
         banned_at: null,

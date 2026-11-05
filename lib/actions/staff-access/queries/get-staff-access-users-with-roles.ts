@@ -8,7 +8,7 @@
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
- import type { StaffAccessRole, UserWithRoles } from "../types"
+import type { StaffAccessRole, UserWithRoles } from "../types"
 
 interface UserRoleRow {
   user_id: string
@@ -21,12 +21,11 @@ interface UserRoleRow {
 export async function getStaffAccessUsersWithRoles(): Promise<
   ApiResult<UserWithRoles[]>
 > {
- 
   const supabase = await createServerClient()
 
   const { data: profiles, error: profilesError } = await supabase
     .from("profiles")
-    .select("id, first_name, last_name, email, profile_image")
+    .select("id, first_name, last_name, email, avatar")
     .order("created_at", { ascending: false })
 
   if (profilesError) {
@@ -82,7 +81,7 @@ export async function getStaffAccessUsersWithRoles(): Promise<
     first_name: profile.first_name,
     last_name: profile.last_name,
     email: profile.email,
-    profile_image: profile.profile_image,
+    avatar: profile.avatar,
     roles: rolesMap.get(profile.id) ?? [],
   }))
 

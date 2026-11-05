@@ -7,7 +7,7 @@
 import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 
-import { CompleteProfilePage } from "@/components/authentication/complete_your_profile"
+import { CompleteProfilePage } from "@/components/authentication/sign-up-form"
 import { appConfig } from "@/lib/config/app_config"
 import { appRoutes } from "@/lib/config/app-routes"
 import { createMetadata } from "@/lib/config/metadata_generator"

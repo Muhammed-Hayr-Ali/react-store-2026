@@ -4,7 +4,7 @@
  * @file components/dashboard/users/users-table.tsx
  * @description Standard TanStack Table v8 data table for user accounts management.
  * Fully compliant with React 19, strict VisibilityState, mobile column isolation,
-  */
+ */
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
@@ -202,9 +202,9 @@ export function UsersTable({
           return (
             <div className="flex items-center gap-2.5">
               <Avatar className="size-7 shrink-0 rounded-lg after:rounded-lg">
-                {row.original.profile_image && (
+                {row.original.avatar && (
                   <AvatarImage
-                    src={row.original.profile_image}
+                    src={row.original.avatar}
                     alt={fullName || t("ANONYMOUS_USER")}
                     className="rounded-lg"
                   />
@@ -221,7 +221,7 @@ export function UsersTable({
                 <span className="text-sm font-normal text-foreground">
                   {fullName || t("ANONYMOUS_USER")}
                 </span>
-                 <span className="truncate font-mono text-[11px] text-muted-foreground">
+                <span className="truncate font-mono text-[11px] text-muted-foreground">
                   /{row.original.email}
                 </span>
               </div>
@@ -254,7 +254,7 @@ export function UsersTable({
                 <Badge
                   key={r}
                   variant="secondary"
-                  className="truncate px-1.5 py-0.5 text-xs font-normal leading-tight text-muted-foreground"
+                  className="truncate px-1.5 py-0.5 text-xs leading-tight font-normal text-muted-foreground"
                 >
                   {r}
                 </Badge>
@@ -262,7 +262,7 @@ export function UsersTable({
             ) : (
               <Badge
                 variant="secondary"
-                className="truncate px-1.5 py-0.5 text-xs font-normal leading-tight text-muted-foreground"
+                className="truncate px-1.5 py-0.5 text-xs leading-tight font-normal text-muted-foreground"
               >
                 {t("NO_ROLES")}
               </Badge>
@@ -282,7 +282,7 @@ export function UsersTable({
             <div className="flex justify-center">
               <Badge
                 variant="outline"
-                className={`gap-1 truncate px-1.5 py-0.5 text-xs font-normal leading-tight ${
+                className={`gap-1 truncate px-1.5 py-0.5 text-xs leading-tight font-normal ${
                   status === "active"
                     ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                     : status === "suspended"
@@ -367,69 +367,66 @@ export function UsersTable({
                     {t("COPY_EMAIL_ACTION")}
                   </DropdownMenuItem>
 
-                     <EditUserDialog
-                      user={row.original}
-                      onSuccess={(updatedUser) => {
-                        setData((prev) =>
-                          prev.map((u) =>
-                            u.id === updatedUser.id ? updatedUser : u
-                          )
+                  <EditUserDialog
+                    user={row.original}
+                    onSuccess={(updatedUser) => {
+                      setData((prev) =>
+                        prev.map((u) =>
+                          u.id === updatedUser.id ? updatedUser : u
                         )
-                      }}
+                      )
+                    }}
+                  >
+                    <DropdownMenuItem
+                      onSelect={(e) => e.preventDefault()}
+                      className="cursor-pointer"
                     >
-                      <DropdownMenuItem
-                        onSelect={(e) => e.preventDefault()}
-                        className="cursor-pointer"
-                      >
-                        <PencilIcon className="me-2 size-3.5" />
-                        {t("EDIT_USER_ACTION")}
-                      </DropdownMenuItem>
-                    </EditUserDialog>
- 
-                     <UserStatusDialog
-                      user={row.original}
-                      onSuccess={(userId, newStatus, banReason) => {
-                        setData((prev) =>
-                          prev.map((u) =>
-                            u.id === userId
-                              ? {
-                                  ...u,
-                                  status: newStatus,
-                                  ban_reason: banReason || null,
-                                }
-                              : u
-                          )
+                      <PencilIcon className="me-2 size-3.5" />
+                      {t("EDIT_USER_ACTION")}
+                    </DropdownMenuItem>
+                  </EditUserDialog>
+
+                  <UserStatusDialog
+                    user={row.original}
+                    onSuccess={(userId, newStatus, banReason) => {
+                      setData((prev) =>
+                        prev.map((u) =>
+                          u.id === userId
+                            ? {
+                                ...u,
+                                status: newStatus,
+                                ban_reason: banReason || null,
+                              }
+                            : u
                         )
-                      }}
+                      )
+                    }}
+                  >
+                    <DropdownMenuItem
+                      onSelect={(e) => e.preventDefault()}
+                      className="cursor-pointer"
                     >
-                      <DropdownMenuItem
-                        onSelect={(e) => e.preventDefault()}
-                        className="cursor-pointer"
-                      >
-                        <ShieldAlertIcon className="me-2 size-3.5" />
-                        {t("CHANGE_STATUS_ACTION")}
-                      </DropdownMenuItem>
-                    </UserStatusDialog>
- 
-                     <DropdownMenuSeparator />
-                    <DeleteUserDialog
-                      userId={row.original.id}
-                      userName={userDisplayName}
-                      onDeleted={(deletedId) => {
-                        setData((prev) =>
-                          prev.filter((u) => u.id !== deletedId)
-                        )
-                      }}
+                      <ShieldAlertIcon className="me-2 size-3.5" />
+                      {t("CHANGE_STATUS_ACTION")}
+                    </DropdownMenuItem>
+                  </UserStatusDialog>
+
+                  <DropdownMenuSeparator />
+                  <DeleteUserDialog
+                    userId={row.original.id}
+                    userName={userDisplayName}
+                    onDeleted={(deletedId) => {
+                      setData((prev) => prev.filter((u) => u.id !== deletedId))
+                    }}
+                  >
+                    <DropdownMenuItem
+                      onSelect={(e) => e.preventDefault()}
+                      className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
                     >
-                      <DropdownMenuItem
-                        onSelect={(e) => e.preventDefault()}
-                        className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
-                      >
-                        <Trash2Icon className="me-2 size-3.5" />
-                        {t("DELETE_ACCOUNT")}
-                      </DropdownMenuItem>
-                    </DeleteUserDialog>
-                  
+                      <Trash2Icon className="me-2 size-3.5" />
+                      {t("DELETE_ACCOUNT")}
+                    </DropdownMenuItem>
+                  </DeleteUserDialog>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -653,37 +650,36 @@ export function UsersTable({
           </DropdownMenu>
 
           {/* Responsive user creation buttons */}
-             <CreateUserSheet
-              onSuccess={(newUser) => {
-                setData((prev) => [newUser, ...prev])
-              }}
+          <CreateUserSheet
+            onSuccess={(newUser) => {
+              setData((prev) => [newUser, ...prev])
+            }}
+          >
+            <Button
+              variant="default"
+              size="icon"
+              className="size-8 sm:hidden"
+              title={t("CREATE_USER_BUTTON")}
             >
-              <Button
-                variant="default"
-                size="icon"
-                className="size-8 sm:hidden"
-                title={t("CREATE_USER_BUTTON")}
-              >
-                <PlusIcon className="size-3.5" />
-                <span className="sr-only">{t("CREATE_USER_BUTTON")}</span>
-              </Button>
-            </CreateUserSheet>
+              <PlusIcon className="size-3.5" />
+              <span className="sr-only">{t("CREATE_USER_BUTTON")}</span>
+            </Button>
+          </CreateUserSheet>
 
-            <CreateUserSheet
-              onSuccess={(newUser) => {
-                setData((prev) => [newUser, ...prev])
-              }}
+          <CreateUserSheet
+            onSuccess={(newUser) => {
+              setData((prev) => [newUser, ...prev])
+            }}
+          >
+            <Button
+              variant="default"
+              size="sm"
+              className="hidden h-8 gap-1.5 px-3 text-xs sm:inline-flex"
             >
-              <Button
-                variant="default"
-                size="sm"
-                className="hidden h-8 gap-1.5 px-3 text-xs sm:inline-flex"
-              >
-                <PlusIcon className="size-3.5" />
-                <span>{t("CREATE_USER_BUTTON")}</span>
-              </Button>
-            </CreateUserSheet>
-          
+              <PlusIcon className="size-3.5" />
+              <span>{t("CREATE_USER_BUTTON")}</span>
+            </Button>
+          </CreateUserSheet>
         </div>
       </div>
 

@@ -6,14 +6,14 @@
 import { z } from "zod"
 
 export const sendOtpSchema = z.object({
-  phoneNumber: z
+  phone: z
     .string()
     .min(8, { message: "Phone number is too short" })
     .max(20, { message: "Phone number is too long" }),
 })
 
 export const verifyOtpSchema = z.object({
-  phoneNumber: z
+  phone: z
     .string()
     .min(8, { message: "Phone number is required" }),
   code: z

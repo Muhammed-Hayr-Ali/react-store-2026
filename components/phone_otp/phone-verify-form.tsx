@@ -18,7 +18,7 @@ import { ActionFieldError } from "@/components/shared/action-field-error"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AuthHeader } from "./auth-header"
+
 import {
   CustomInputOTP,
   CustomInputOTPGroup,
@@ -33,6 +33,7 @@ import {
 } from "@/lib/actions/phone-otps"
 import { appRoutes } from "@/lib/config/app-routes"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
+import { AuthHeader } from "../authentication/auth-header"
 
 interface PhoneVerifyFormProps {
   initialPhoneNumber: string | null
@@ -60,7 +61,7 @@ export function PhoneVerifyForm({
   const form = useForm<VerifyOtpFormValues>({
     resolver: zodResolver(verifyOtpSchema),
     defaultValues: {
-      phoneNumber: initialPhoneNumber || "",
+      phone: initialPhoneNumber || "",
       code: "",
     },
   })
@@ -76,7 +77,9 @@ export function PhoneVerifyForm({
     if (result.success) {
       router.refresh()
       // go to completed registration page or redirect target wit phone number as query parameter
-      router.replace(`/${locale}/auth/complete-registration?phone=${encodeURIComponent(data.phoneNumber)}&redirect=${encodeURIComponent(redirectTarget)}`)
+      router.replace(
+        `/${locale}/auth/complete-registration?phone=${encodeURIComponent(data.phone)}&verifiedPhoneNumber=true&redirect=${encodeURIComponent(redirectTarget)}`
+      )
       return
     }
 
@@ -103,10 +106,7 @@ export function PhoneVerifyForm({
     setErrorMessage(null)
     setIsResending(true)
 
-    const result = await sendPhoneOtp(
-      { phoneNumber: initialPhoneNumber },
-      locale
-    )
+    const result = await sendPhoneOtp({ phone: initialPhoneNumber }, locale)
     setIsResending(false)
 
     if (!result.success) {

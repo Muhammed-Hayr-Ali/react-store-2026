@@ -12,8 +12,8 @@ import { appConfig } from "@/lib/config/app_config"
 import { appRoutes } from "@/lib/config/app-routes"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
-import { PhoneVerifyForm } from "@/components/authentication/phone-verify-form"
-
+import { PhoneVerifyForm } from "@/components/phone_otp/phone-verify-form"
+ 
 interface PhoneVerifyPageProps {
   params: Promise<{
     locale: string

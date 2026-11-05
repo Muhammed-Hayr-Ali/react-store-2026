@@ -1320,17 +1320,25 @@
     "META_TITLE": "Create Your Account",
     "META_DESCRIPTION": "Sign up to access your personalized dashboard and manage your account settings."
   },
-  "SignUpForm": {
-    "WELCOME_TITLE": "Create an Account",
+  "SendPhoneOtp": {
+    "META_TITLE": "Phone Verification",
+    "META_DESCRIPTION": "Enter your phone number to receive an instant verification code via WhatsApp.",
+    "WELCOME_TITLE": "Verify Your Phone Number",
     "SIGN_UP_SUBTITLE": "Enter your phone number to receive a verification code via WhatsApp.",
     "SIGN_IN_LINK": "Sign in",
     "DISMISS_ALERT_SR": "Dismiss alert",
     "PHONE_LABEL": "Phone Number",
-    "PHONE_PLACEHOLDER": "+963 9XXXXXXXX",
-    "LAST_USED_BADGE": "Last Used",
+    "PHONE_PLACEHOLDER": "Enter phone number",
     "SIGN_UP_BUTTON": "Continue with WhatsApp",
     "SIGN_UP_SUBMITTING": "Sending code...",
-    "GENERIC_ERROR": "An unexpected error occurred. Please try again."
+    "GENERIC_ERROR": "An unexpected error occurred. Please try again.",
+    "ERRORS": {
+      "UNEXPECTED_ERROR": "An unexpected error occurred. Please try again.",
+      "VALIDATION_ERROR": "Please enter a valid phone number.",
+      "WHATSAPP_SESSION_NOT_CONFIGURED": "WhatsApp session is not configured.",
+      "FAILED_TO_STORE_OTP": "Failed to store verification code in database.",
+      "FAILED_TO_SEND_WHATSAPP_MESSAGE": "Failed to send WhatsApp message."
+    }
   },
   "PhoneOtp": {
     "WHATSAPP_MESSAGE": "Welcome! Your verification code is: *{code}*\n\nValid for 10 minutes.",
@@ -1362,12 +1370,13 @@
       "FAILED_TO_VERIFY_OTP": "Failed to verify code. Please try again."
     }
   },
-  "CompleteProfilePage": {
+  "SignUpForm": {
+    "WELCOME_TITLE": "Create an Account",
+    "SIGN_UP_SUBTITLE": "Enter your phone number to receive a verification code via WhatsApp.",
     "TITLE": "Complete Your Profile",
     "SUBTITLE": "Fill in your profile details to complete your account setup.",
     "META_TITLE": "Complete Your Profile",
     "META_DESCRIPTION": "Fill in your profile details to complete your account setup.",
-    "WELCOME_TITLE": "Complete Your Profile",
     "COMPLETE_SUBTITLE": "Please provide the following information to complete your account setup.",
     "DISMISS_ALERT_SR": "Dismiss notification",
     "FIRST_NAME_LABEL": "First Name",

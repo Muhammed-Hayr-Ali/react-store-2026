@@ -71,7 +71,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
         <div className="flex items-center gap-3">
           <Avatar className="size-9">
             <AvatarImage
-              src={review.user?.profile_image || undefined}
+              src={review.user?.avatar || undefined}
               alt={reviewerName}
             />
             <AvatarFallback className="text-xs">

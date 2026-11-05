@@ -219,7 +219,7 @@ export function ReviewsTable({
         enableHiding: false,
         cell: ({ row }) => {
           const review = row.original
-          const imageUrl = review.user?.profile_image
+          const imageUrl = review.user?.avatar
           const fullName = review.user?.first_name
             ? `${review.user.first_name} ${review.user.last_name || ""}`.trim()
             : t("ANONYMOUS")

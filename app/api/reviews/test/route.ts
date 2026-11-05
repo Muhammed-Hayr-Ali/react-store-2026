@@ -20,7 +20,7 @@ export async function GET() {
           first_name,
           last_name,
           email,
-          profile_image
+          avatar
         ),
         products:product_id (
           id,

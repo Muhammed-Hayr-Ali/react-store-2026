@@ -25,7 +25,7 @@ CREATE TABLE public.profiles (
   last_name text,
   email text UNIQUE,
   phone_number text UNIQUE,
-  profile_image text,
+  avatar text,
   gender text CHECK (gender = ANY (ARRAY['male'::text, 'female'::text, 'other'::text])),
   status text NOT NULL DEFAULT 'active'::text CHECK (status = ANY (ARRAY['active'::text, 'suspended'::text, 'banned'::text])),
   ban_reason text,

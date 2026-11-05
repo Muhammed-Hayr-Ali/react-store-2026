@@ -34,7 +34,7 @@ export interface AuthenticatedUser {
   email: string
   first_name: string | null
   last_name: string | null
-  profile_image: string | null
+  avatar: string | null
   // These fields are populated from raw_app_meta_data by the database trigger.
   role?: string
   permissions?: Json

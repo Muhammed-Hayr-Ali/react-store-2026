@@ -10,15 +10,13 @@ import { revalidatePath } from "next/cache"
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createAdminClient } from "@/lib/database/supabase/admin"
 
- import { getValidationDetails } from "../../validation"
+import { getValidationDetails } from "../../validation"
 import { createUserSchema, type CreateUserFormValues } from "../schemas"
 import type { AdminUserSummary } from "../types"
 
 export async function createUser(
   input: CreateUserFormValues
 ): Promise<ApiResult<AdminUserSummary>> {
- 
-
   const validation = createUserSchema.safeParse(input)
   if (!validation.success) {
     return {
@@ -86,7 +84,7 @@ export async function createUser(
       first_name: safeData.firstName || null,
       last_name: safeData.lastName || null,
       phone_number: safeData.phoneNumber || null,
-      profile_image: profileData?.profile_image || null,
+      avatar: profileData?.avatar || null,
       status: "active",
       ban_reason: null,
       banned_at: null,

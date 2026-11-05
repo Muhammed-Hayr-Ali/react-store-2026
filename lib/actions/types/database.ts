@@ -110,7 +110,7 @@ export type Database = {
           last_name: string | null
           phone_number: string | null
           phone_verified_at: string | null
-          profile_image: string | null
+          avatar: string | null
           status: string
           updated_at: string
         }
@@ -126,7 +126,7 @@ export type Database = {
           last_name?: string | null
           phone_number?: string | null
           phone_verified_at?: string | null
-          profile_image?: string | null
+          avatar?: string | null
           status?: string
           updated_at?: string
         }
@@ -142,7 +142,7 @@ export type Database = {
           last_name?: string | null
           phone_number?: string | null
           phone_verified_at?: string | null
-          profile_image?: string | null
+          avatar?: string | null
           status?: string
           updated_at?: string
         }
@@ -232,7 +232,7 @@ export type Database = {
           id: string
           last_name: string
           phone_number: string
-          profile_image: string
+          avatar: string
           roles: string[]
           status: string
         }[]
@@ -253,10 +253,7 @@ export type Database = {
     }
     Enums: {
       flash_sale_discount_type:
-        | "percentage"
-        | "fixed_amount"
-        | "fixed_price"
-        | "none"
+        "percentage" | "fixed_amount" | "fixed_price" | "none"
       report_status: "pending" | "under_review" | "resolved" | "dismissed"
       report_target_type: "product" | "review" | "technical_issue" | "general"
     }
@@ -301,8 +298,7 @@ export type Tables<
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -326,8 +322,7 @@ export type TablesInsert<
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -351,8 +346,7 @@ export type TablesUpdate<
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["Enums"] | { schema: keyof DatabaseWithoutInternals },
   EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }

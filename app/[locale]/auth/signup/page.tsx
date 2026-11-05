@@ -4,7 +4,6 @@
  * and unified metadata resolution.
  */
 
-import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 
@@ -40,8 +39,5 @@ export default async function SignUpPage({ params }: SignUpPageProps) {
     redirect(appRoutes.home)
   }
 
-  const cookieStore = await cookies()
-  const lastSignupPhone = cookieStore.get("signup_phone")?.value ?? null
-
-  return <SignUpForm lastSignupPhone={lastSignupPhone} />
+  return <SignUpForm  />
 }
