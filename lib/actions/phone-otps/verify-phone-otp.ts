@@ -22,10 +22,10 @@ export async function verifyPhoneOtp(
     }
   }
 
-  const { phoneNumber, code } = validation.data
+  const { phone, code } = validation.data
 
   // remove any spaces or non-digit characters from the phone number for consistency
-  const cleanDigits = phoneNumber.replace(/[^0-9]/g, "")
+  const cleanDigits = phone.replace(/[^0-9]/g, "")
 
   console.log(
     "Verifying OTP for phone number:",
