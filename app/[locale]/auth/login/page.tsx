@@ -8,7 +8,6 @@
  * and unified metadata resolution.
  */
 
-import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 
@@ -44,8 +43,6 @@ export default async function LoginPage({ params }: LoginPageProps) {
     redirect(appRoutes.home)
   }
 
-  const cookieStore = await cookies()
-  const lastLoginMethod = cookieStore.get("login_method")?.value ?? null
-
-  return <LoginForm lastLoginMethod={lastLoginMethod} />
+ 
+  return <LoginForm  />
 }
