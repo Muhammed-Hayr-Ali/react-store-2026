@@ -9,4 +9,3 @@ export { verifyPhoneOtp } from "./verify-phone-otp"
 
 // Schemas & Types
 export * from "./schemas"
-export * from "./types"
