@@ -26,7 +26,7 @@ export async function sendPhoneOtp(
     }
   }
 
-  const { phoneNumber } = validation.data
+  const { phone  } = validation.data
 
   const sessionId = process.env.OPENWA_SESSION_ID
   if (!sessionId) {
@@ -34,7 +34,7 @@ export async function sendPhoneOtp(
   }
 
   // Clean the phone number to remove any non-digit characters for consistency
-  const cleanDigits = phoneNumber.replace(/[^0-9]/g, "")
+  const cleanDigits = phone.replace(/[^0-9]/g, "")
   // Format the phone number for WhatsApp by appending "@c.us" if not already present
   const formattedPhoneNumber = `${cleanDigits}@c.us`
   // create a random 6-digit verification code
@@ -87,6 +87,6 @@ export async function sendPhoneOtp(
 
   return {
     success: true,
-    data: { phoneNumber: phoneNumber },
+    data: { phoneNumber: phone },
   }
 }
