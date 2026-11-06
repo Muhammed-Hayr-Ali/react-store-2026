@@ -12,6 +12,13 @@ import { appRoutes } from "@/lib/config/app-routes"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 import { SignUpForm } from "@/components/authentication/sign-up-form"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 
 interface SignUpPageProps {
   params: Promise<{
@@ -30,8 +37,8 @@ export async function generateMetadata({ params }: SignUpPageProps) {
   })
 }
 
-export default async function SignUpPage({ params }: SignUpPageProps) {
-  await params
+export default async function SignUpPage() {
+  const t = await getTranslations("SignUp")
 
   // Zero-Trust Session Check: Redirect active authenticated users
   const userResult = await getCurrentUser()
@@ -39,5 +46,15 @@ export default async function SignUpPage({ params }: SignUpPageProps) {
     redirect(appRoutes.home)
   }
 
-  return <SignUpForm />
+  return (
+    <Card>
+      <CardHeader className="text-center">
+        <CardTitle className="text-xl">{t("TITLE")}</CardTitle>
+        <CardDescription>{t("SUBTITLE")}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <SignUpForm />
+      </CardContent>
+    </Card>
+  )
 }

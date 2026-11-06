@@ -15,7 +15,7 @@ interface HandleBanCheckParams {
 }
 
 const AUTH_ROUTE_PREFIXES = [
-  appRoutes.auth.login,
+  appRoutes.auth.signin,
   appRoutes.auth.signup,
   appRoutes.auth.forgotPassword,
   appRoutes.auth.resetPassword,

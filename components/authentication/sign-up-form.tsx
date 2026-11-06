@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button"
 import { ActionFieldError } from "@/components/shared/action-field-error"
 import {
   Field,
+  FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
@@ -42,6 +43,7 @@ import {
 import { appRoutes } from "@/lib/config/app-routes"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { GoogleSignInButton } from "./google-sign-in-button"
+import Link from "next/link"
 
 export function SignUpForm() {
   // Load translations and navigation for the registration flow.
@@ -105,14 +107,7 @@ export function SignUpForm() {
   // Render registration fields, error feedback, and OAuth sign-up.
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
-      {/* تقليل المسافة العامة على الجوال لـ space-y-3 وجعلها space-y-4 للشاشات الكبيرة */}
-      <FieldGroup className="space-y-3 sm:space-y-4">
-        <AuthHeader
-          title={t("TITLE")}
-          description={t("DESCRIPTION")}
-          linkText={t("BACK_LINK")}
-          linkHref={appRoutes.auth.login}
-        />
+      <FieldGroup>
         {/* Section 12 Form-Level Server Error Alert */}
         {errorMessage && (
           <Alert variant="destructive" className="relative pe-9">
@@ -130,61 +125,58 @@ export function SignUpForm() {
             </button>
           </Alert>
         )}
-        {/* Name Fields Row - تم استبدال space-y-6 بـ gap-3 لضبط المسافة بين الاسم الأول والأخير على الجوال */}
-        <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2">
-          {/* firstName Field */}
-          <Controller
-            name="firstName"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="firstName" className="text-xs">
-                  {t("FIRST_NAME_LABEL")}
-                </FieldLabel>
-                <IconInput
-                  {...field}
-                  id="firstName"
-                  type="text"
-                  placeholder={t("FIRST_NAME_PLACEHOLDER")}
-                  aria-invalid={fieldState.invalid}
-                  autoComplete="given-name"
-                  className="h-9 text-xs"
-                  prefixIcon={
-                    <UserIcon className="size-4 text-muted-foreground" />
-                  }
-                />
-                {fieldState.invalid && (
-                  <ActionFieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
+        {/* firstName Field */}
+        <Controller
+          name="firstName"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="firstName" className="text-xs">
+                {t("FIRST_NAME_LABEL")}
+              </FieldLabel>
+              <IconInput
+                {...field}
+                id="firstName"
+                type="text"
+                placeholder={t("FIRST_NAME_PLACEHOLDER")}
+                aria-invalid={fieldState.invalid}
+                autoComplete="given-name"
+                className="h-9 text-xs"
+                prefixIcon={
+                  <UserIcon className="size-4 text-muted-foreground" />
+                }
+              />
+              {fieldState.invalid && (
+                <ActionFieldError errors={[fieldState.error]} />
+              )}
+            </Field>
+          )}
+        />
 
-          {/* lastName Field */}
-          <Controller
-            name="lastName"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="lastName" className="text-xs">
-                  {t("LAST_NAME_LABEL")}
-                </FieldLabel>
-                <IconInput
-                  {...field}
-                  id="lastName"
-                  type="text"
-                  placeholder={t("LAST_NAME_PLACEHOLDER")}
-                  aria-invalid={fieldState.invalid}
-                  autoComplete="family-name"
-                  className="h-9 text-xs"
-                />
-                {fieldState.invalid && (
-                  <ActionFieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-        </div>
+        {/* lastName Field */}
+        <Controller
+          name="lastName"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="lastName" className="text-xs">
+                {t("LAST_NAME_LABEL")}
+              </FieldLabel>
+              <IconInput
+                {...field}
+                id="lastName"
+                type="text"
+                placeholder={t("LAST_NAME_PLACEHOLDER")}
+                aria-invalid={fieldState.invalid}
+                autoComplete="family-name"
+                className="h-9 text-xs"
+              />
+              {fieldState.invalid && (
+                <ActionFieldError errors={[fieldState.error]} />
+              )}
+            </Field>
+          )}
+        />
         {/* Email Field */}
         <Controller
           name="email"
@@ -279,12 +271,21 @@ export function SignUpForm() {
             )}
           </Button>
         </Field>
-        <FieldSeparator className="my-1 text-xs">
+
+        <FieldSeparator className="my-2 *:data-[slot=field-separator-content]:bg-card">
           {t("OR_DIVIDER")}
         </FieldSeparator>
+
         {/* OAuth Section */}
         <Field>
           <GoogleSignInButton />
+        </Field>
+
+        <Field>
+          <FieldDescription className="text-center">
+            {t("ALREADY_HAVE_ACCOUNT")}{" "}
+            <Link href={appRoutes.auth.signin}>{t("Sign in")}</Link>
+          </FieldDescription>
         </Field>
       </FieldGroup>
     </form>

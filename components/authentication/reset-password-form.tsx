@@ -52,7 +52,7 @@ interface ResetPasswordFormProps {
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   // Load translations and navigation for the reset flow.
   const t = useTranslations("ResetPasswordForm")
-   const router = useRouter()
+  const router = useRouter()
 
   // Track password visibility and server-side errors.
   const [showPassword, setShowPassword] = React.useState(false)
@@ -85,7 +85,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     if (result.success) {
       toast.success(t("PASSWORD_UPDATED_TOAST"))
       router.refresh()
-      router.replace(appRoutes.auth.login)
+      router.replace(appRoutes.auth.signin)
       return
     }
 
@@ -102,9 +102,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       setErrorMessage(t("INVALID_OR_EXPIRED_TOKEN_ERROR"))
     } else {
       setErrorMessage(
-        result.error
-          ? t(getActionErrorKey(result.error))
-          : t("GENERIC_ERROR")
+        result.error ? t(getActionErrorKey(result.error)) : t("GENERIC_ERROR")
       )
     }
   }
@@ -117,7 +115,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           title={t("TITLE")}
           description={t("SUBTITLE")}
           linkText={t("SIGN_IN_LINK")}
-          linkHref={appRoutes.auth.login}
+          linkHref={appRoutes.auth.signin}
         />
 
         {/* Section 12 Form-Level Server Error Alert */}

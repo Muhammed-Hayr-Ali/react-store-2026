@@ -82,7 +82,7 @@ export function SendPhoneOtp() {
           title={t("WELCOME_TITLE")}
           description={t("SIGN_UP_SUBTITLE")}
           linkText={t("SIGN_IN_LINK")}
-          linkHref={appRoutes.auth.login}
+          linkHref={appRoutes.auth.signin}
         />
 
         {errorMessage && (

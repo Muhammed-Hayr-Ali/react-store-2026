@@ -30,7 +30,7 @@ import { getActionErrorKey } from "@/lib/actions/error-keys"
 
 export function ForgotPasswordForm() {
   const t = useTranslations("ForgotPasswordForm")
-   const locale = useLocale()
+  const locale = useLocale()
 
   // Track the request outcome and any server-side error.
   const [submittedEmail, setSubmittedEmail] = React.useState<string | null>(
@@ -70,9 +70,7 @@ export function ForgotPasswordForm() {
     }
 
     setErrorMessage(
-      result.error
-        ? t(getActionErrorKey(result.error))
-        : t("GENERIC_ERROR")
+      result.error ? t(getActionErrorKey(result.error)) : t("GENERIC_ERROR")
     )
   }
 
@@ -97,7 +95,7 @@ export function ForgotPasswordForm() {
           title={t("TITLE")}
           description={t("SUBTITLE")}
           linkText={t("SIGN_IN_LINK")}
-          linkHref={appRoutes.auth.login}
+          linkHref={appRoutes.auth.signin}
         />
 
         {/* Section 12 Form-Level Server Error Alert */}

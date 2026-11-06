@@ -46,12 +46,12 @@ export function OAuthCallbackView({ code, error }: OAuthCallbackViewProps) {
                 ? t(getActionErrorKey(result.error))
                 : t("EXCHANGE_FAILED")
             )
-            router.replace(appRoutes.auth.login)
+            router.replace(appRoutes.auth.signin)
           }
         } catch (err) {
           console.error("OAuth callback error:", err)
           toast.error(t("EXCHANGE_FAILED"))
-          router.replace(appRoutes.auth.login)
+          router.replace(appRoutes.auth.signin)
         }
       }
 
@@ -75,7 +75,7 @@ export function OAuthCallbackView({ code, error }: OAuthCallbackViewProps) {
         <Button
           variant="outline"
           className="mt-6 h-9 w-full text-xs font-medium shadow-xs"
-          onClick={() => router.replace(appRoutes.auth.login)}
+          onClick={() => router.replace(appRoutes.auth.signin)}
         >
           {t("RETURN_TO_LOGIN")}
         </Button>

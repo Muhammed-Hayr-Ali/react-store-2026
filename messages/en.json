@@ -455,9 +455,11 @@
     "LOADING": "Loading more products..."
   },
   "LoginForm": {
-    "WELCOME_TITLE": "Welcome back,",
-    "SIGN_IN_SUBTITLE": "Sign in to continue to Marketna",
-    "SIGN_UP_LINK": "Create Account",
+    "META_TITLE": "Sign In",
+    "META_DESCRIPTION": "Sign in to your Marketna account to access your shopping cart and order history.",
+    "TITLE": "Welcome back,",
+    "SUBTITLE": "Sign in to continue to Marketna",
+    "BACK_LINK": "Create Account",
     "DISMISS_ALERT_SR": "Dismiss notification",
     "EMAIL_LABEL": "Email Address",
     "EMAIL_PLACEHOLDER": "you@domain.com",
@@ -469,14 +471,12 @@
     "LAST_USED_BADGE": "Last used",
     "SIGN_IN_BUTTON": "Sign In",
     "SIGN_IN_SUBMITTING": "Signing in...",
-    "OR_DIVIDER": "Or",
+    "OR_DIVIDER": "Or continue with",
     "INVALID_CREDENTIALS_ERROR": "Invalid email or password. Please verify your credentials.",
     "EMAIL_NOT_CONFIRMED_ERROR": "Please verify your email address before signing in.",
-    "GENERIC_ERROR": "Unable to complete sign in. Please try again later."
-  },
-  "LoginPage": {
-    "META_TITLE": "Sign In",
-    "META_DESCRIPTION": "Sign in to your Marketna account to access your shopping cart and order history."
+    "GENERIC_ERROR": "Unable to complete sign in. Please try again later.",
+    "Sign up": "Sign up",
+    "DONT_HAVE_ACCOUNT": "Don't have an account?"
   },
   "Navigation": {
     "links": {
@@ -1371,7 +1371,7 @@
     "META_TITLE": "Create Your Account",
     "META_DESCRIPTION": "Sign up to access your personalized dashboard and manage your account settings.",
     "TITLE": "Create an Account",
-    "DESCRIPTION": "Fill in your profile details to complete your account setup.",
+    "SUBTITLE": "Fill in your profile details to complete your account setup.",
     "DISMISS_ALERT_SR": "Dismiss notification",
     "FIRST_NAME_LABEL": "First Name",
     "BACK_LINK": "Sign In",
@@ -1388,7 +1388,9 @@
     "SUBMITTING_BUTTON": "Creating account...",
     "OR_DIVIDER": "Or",
     "EMAIL_ALREADY_EXISTS_ERROR": "An account with this email address already exists.",
-    "GENERIC_ERROR": "An unexpected error occurred during signup. Please try again."
+    "GENERIC_ERROR": "An unexpected error occurred during signup. Please try again.",
+    "ALREADY_HAVE_ACCOUNT": " Already have an account?",
+    "Sign in": "Sign in"
   },
   "GetStartedForm": {
     "TITLE": "Start your journey with us",

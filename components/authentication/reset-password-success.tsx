@@ -88,8 +88,8 @@ export function ResetPasswordSuccess({
         className="h-9 w-full text-xs font-medium shadow-xs"
         asChild
       >
-        <Link href={appRoutes.auth.login}>
-          <ArrowLeftIcon className="size-3.5 me-2 rtl:rotate-180" />
+        <Link href={appRoutes.auth.signin}>
+          <ArrowLeftIcon className="me-2 size-3.5 rtl:rotate-180" />
           <span>{t("BACK_TO_LOGIN_BUTTON")}</span>
         </Link>
       </Button>

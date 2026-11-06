@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button"
 import { ActionFieldError } from "@/components/shared/action-field-error"
 import {
   Field,
+  FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
@@ -33,7 +34,6 @@ import { Spinner } from "@/components/ui/spinner"
 import { Badge } from "@/components/ui/badge"
 import { IconInput } from "@/components/ui/icon-input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AuthHeader } from "./auth-header"
 import { GoogleSignInButton } from "./google-sign-in-button"
 
 import {
@@ -113,14 +113,7 @@ export function LoginForm() {
   // Render credential fields, submit action, and OAuth alternative.
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
-      <FieldGroup className="space-y-4">
-        <AuthHeader
-          title={t("WELCOME_TITLE")}
-          description={t("SIGN_IN_SUBTITLE")}
-          linkText={t("SIGN_UP_LINK")}
-          linkHref={appRoutes.auth.signup}
-        />
-
+      <FieldGroup >
         {/* Section 12 Form-Level Server Error Alert */}
         {errorMessage && (
           <Alert variant="destructive" className="relative pe-9">
@@ -258,13 +251,20 @@ export function LoginForm() {
           </div>
         </Field>
 
-        <FieldSeparator className="my-1 text-xs">
+        <FieldSeparator className="my-2 *:data-[slot=field-separator-content]:bg-card">
           {t("OR_DIVIDER")}
         </FieldSeparator>
 
         {/* OAuth Section */}
         <Field>
           <GoogleSignInButton />
+        </Field>
+
+        <Field>
+          <FieldDescription className="text-center">
+            {t("DONT_HAVE_ACCOUNT")}{" "}
+            <Link href={appRoutes.auth.signup}>{t("Sign up")}</Link>
+          </FieldDescription>
         </Field>
       </FieldGroup>
     </form>
