@@ -70,7 +70,7 @@ export default async function RootLayout({
       suppressHydrationWarning
       className={cn("antialiased", rubik.variable, fontMono.variable)}
     >
-      <body className="min-h-screen bg-background font-sans text-foreground">
+      <body>
         <ThemeProvider>
           <NextIntlClientProvider>
             <TooltipProvider>

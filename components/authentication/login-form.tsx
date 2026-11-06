@@ -44,12 +44,9 @@ import {
 import { appRoutes } from "@/lib/config/app-routes"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 
-interface LoginFormProps {
-  lastLoginMethod?: string | null
-}
-
-export function LoginForm({ lastLoginMethod }: LoginFormProps) {
+export function LoginForm() {
   // Load translations and resolve the post-login destination.
+  const tErrors = useTranslations("ActionErrors")
   const t = useTranslations("LoginForm")
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -58,6 +55,11 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
   // Track password visibility and authentication errors.
   const [showPassword, setShowPassword] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
+
+  const [lastLoginMethod] = React.useState<string | null>(() => {
+    if (typeof window === "undefined") return null
+    return localStorage.getItem("lastLoginMethod")
+  })
 
   // Configure credential validation and initial form values.
   const form = useForm<SignInWithPasswordInput>({
@@ -78,6 +80,7 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
     const result = await signInWithPassword(data)
 
     if (result.success) {
+      localStorage.setItem("lastLoginMethod", "email")
       router.refresh()
       router.replace(redirectTarget)
       return
@@ -95,19 +98,17 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
 
     // Handle authentication failures via persistent Section 12 Alert
     if (result.error === "INVALID_CREDENTIALS") {
-      setErrorMessage(t("INVALID_CREDENTIALS_ERROR"))
+      setErrorMessage(tErrors("INVALID_CREDENTIALS_ERROR"))
     } else if (result.error === "EMAIL_NOT_CONFIRMED") {
-      setErrorMessage(t("EMAIL_NOT_CONFIRMED_ERROR"))
+      setErrorMessage(tErrors("EMAIL_NOT_CONFIRMED_ERROR"))
     } else {
       setErrorMessage(
         result.error
-          ? t(getActionErrorKey(result.error))
-          : t("GENERIC_ERROR")
+          ? tErrors(getActionErrorKey(result.error))
+          : tErrors("GENERIC_ERROR")
       )
     }
   }
-
-  const isEmailLastUsed = lastLoginMethod === "email"
 
   // Render credential fields, submit action, and OAuth alternative.
   return (
@@ -230,7 +231,7 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
         {/* Submit Action */}
         <Field className="pt-1">
           <div className="relative w-full">
-            {isEmailLastUsed && (
+            {lastLoginMethod === "email" && (
               <div className="pointer-events-none absolute -inset-e-2.5 -top-2.5 z-10">
                 <Badge
                   variant="secondary"
@@ -263,7 +264,7 @@ export function LoginForm({ lastLoginMethod }: LoginFormProps) {
 
         {/* OAuth Section */}
         <Field>
-          <GoogleSignInButton lastLoginMethod={lastLoginMethod} />
+          <GoogleSignInButton />
         </Field>
       </FieldGroup>
     </form>

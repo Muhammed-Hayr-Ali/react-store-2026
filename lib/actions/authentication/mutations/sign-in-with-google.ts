@@ -5,7 +5,7 @@
 
 "use server"
 
-import { cookies } from "next/headers"
+
 
 import { createServerClient } from "@/lib/database/supabase/server"
 
@@ -39,13 +39,8 @@ export async function signInWithGoogle(): Promise<
     }
   }
 
-  const cookieStore = await cookies()
-  cookieStore.set("login_method", "google", {
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-  })
+
+  
 
   return {
     success: true,

@@ -136,7 +136,8 @@
     "SAVE_ERROR": "Save Error",
     "PAGE_TITLE": "My Wishlist",
     "EMPTY_DESCRIPTION": "No products available in your wishlist right now",
-    "PAGE_DESC": "Explore all your saved favorite products."
+    "PAGE_DESC": "Explore all your saved favorite products.",
+    "DISMISS_ALERT_SR": "Dismiss notification"
   },
   "AuthLayout": {
     "BACK_TO_HOME_SR": "Return to homepage",
@@ -1316,10 +1317,6 @@
     "NO_PRODUCTS_AVAILABLE": "No products available.",
     "LOADING": "Loading more products..."
   },
-  "SignUpPage": {
-    "META_TITLE": "Create Your Account",
-    "META_DESCRIPTION": "Sign up to access your personalized dashboard and manage your account settings."
-  },
   "SendPhoneOtp": {
     "META_TITLE": "Phone Verification",
     "META_DESCRIPTION": "Enter your phone number to receive an instant verification code via WhatsApp.",
@@ -1370,23 +1367,14 @@
       "FAILED_TO_VERIFY_OTP": "Failed to verify code. Please try again."
     }
   },
-  "SignUpForm": {
-    "WELCOME_TITLE": "Create an Account",
-    "SIGN_UP_SUBTITLE": "Enter your phone number to receive a verification code via WhatsApp.",
-    "TITLE": "Complete Your Profile",
-    "SUBTITLE": "Fill in your profile details to complete your account setup.",
-    "META_TITLE": "Complete Your Profile",
-    "META_DESCRIPTION": "Fill in your profile details to complete your account setup.",
-    "COMPLETE_SUBTITLE": "Please provide the following information to complete your account setup.",
+  "SignUp": {
+    "META_TITLE": "Create Your Account",
+    "META_DESCRIPTION": "Sign up to access your personalized dashboard and manage your account settings.",
+    "TITLE": "Create an Account",
+    "DESCRIPTION": "Fill in your profile details to complete your account setup.",
     "DISMISS_ALERT_SR": "Dismiss notification",
     "FIRST_NAME_LABEL": "First Name",
-    "UNEXPECTED_ERROR": "An unexpected error occurred. Please try again.",
-    "VALIDATION_ERROR": "Please check the entered information and try again.",
-    "FAILED_TO_COMPLETE_PROFILE": "Failed to complete profile. Please try again.",
-    "SIGN_IN_LINK": "Sign In",
-    "ALERT_TITLE": "Action Required",
-    "NAME_LABEL": "Full Name",
-    "NAME_PLACEHOLDER": "John Doe",
+    "BACK_LINK": "Sign In",
     "FIRST_NAME_PLACEHOLDER": "John",
     "LAST_NAME_LABEL": "Last Name",
     "LAST_NAME_PLACEHOLDER": "Doe",
@@ -1401,5 +1389,27 @@
     "OR_DIVIDER": "Or",
     "EMAIL_ALREADY_EXISTS_ERROR": "An account with this email address already exists.",
     "GENERIC_ERROR": "An unexpected error occurred during signup. Please try again."
+  },
+  "GetStartedForm": {
+    "TITLE": "Start your journey with us",
+    "SUBTITLE": "Pick the way that suits you best to join, and we'll take you to the next step in seconds.",
+    "CONTINUE_GOOGLE": "Continue with Google",
+    "OR": "or",
+    "METHOD_LABEL": "Sign-up method",
+    "TAB_PHONE": "WhatsApp",
+    "TAB_EMAIL": "Email",
+    "LABEL_PHONE": "Phone number",
+    "LABEL_EMAIL": "Email address",
+    "PLACEHOLDER_PHONE": "963 9XXXXXXXX",
+    "PLACEHOLDER_EMAIL": "name@example.com",
+    "HINT_PHONE": "We'll send your instant verification code directly via WhatsApp.",
+    "HINT_EMAIL": "We'll send a verification code straight to your inbox.",
+    "ERROR_PHONE_REQUIRED": "Please enter your phone number.",
+    "ERROR_PHONE_INVALID": "That phone number looks invalid. Include country code.",
+    "ERROR_EMAIL_REQUIRED": "Please enter your email address.",
+    "ERROR_EMAIL_INVALID": "That email address isn't valid.",
+    "CONTINUE": "Continue",
+    "HAVE_ACCOUNT": "Already have an account?",
+    "SIGN_IN": "Sign in"
   }
 }

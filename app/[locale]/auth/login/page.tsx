@@ -1,3 +1,7 @@
+
+
+
+
 /**
  * @file app/[locale]/(auth)/login/page.tsx
  * @description Server Component page for customer sign-in with active session protection

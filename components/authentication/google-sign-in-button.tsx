@@ -16,17 +16,16 @@ import { Spinner } from "@/components/ui/spinner"
 import { Badge } from "@/components/ui/badge"
 import { signInWithGoogle } from "@/lib/actions/authentication"
 
-interface GoogleSignInButtonProps {
-  lastLoginMethod?: string | null
-}
-
-export function GoogleSignInButton({
-  lastLoginMethod,
-}: GoogleSignInButtonProps) {
+export function GoogleSignInButton() {
   const t = useTranslations("GoogleSignInButton")
- 
+
   // Track the OAuth request while it is being dispatched.
   const [isPending, startTransition] = React.useTransition()
+
+  const [lastLoginMethod] = React.useState<string | null>(() => {
+    if (typeof window === "undefined") return null
+    return localStorage.getItem("lastLoginMethod")
+  })
 
   // Start Google sign-in and report unsuccessful or unexpected responses.
   const handleGoogleSignIn = () => {
@@ -35,6 +34,7 @@ export function GoogleSignInButton({
         const result = await signInWithGoogle()
 
         if (result.success && result.data?.url) {
+          localStorage.setItem("lastLoginMethod", "google")
           window.location.href = result.data.url
           return
         }

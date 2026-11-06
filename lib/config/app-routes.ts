@@ -10,6 +10,7 @@ export const appRoutes = {
   privacy: "/privacy",
   newsletterUnsubscribe: "/unsubscribe",
   auth: {
+    getStarted: "/auth/signup",
     login: "/auth/login",
     signup: "/auth/signup",
     forgotPassword: "/auth/forgot-password",

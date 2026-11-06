@@ -60,7 +60,7 @@ export default function DesktopNavbar({ className }: DesktopNavbarProps) {
             aria-label="Get Started"
             asChild
           >
-            <Link href={appRoutes.auth.signup}>Get Started</Link>
+            <Link href={appRoutes.auth.getStarted}>Get Started</Link>
           </Button>
         </div>
       )}

@@ -12,7 +12,7 @@ import { appRoutes } from "@/lib/config/app-routes"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 import { SignUpForm } from "@/components/authentication/sign-up-form"
- 
+
 interface SignUpPageProps {
   params: Promise<{
     locale: string
@@ -21,7 +21,7 @@ interface SignUpPageProps {
 
 export async function generateMetadata({ params }: SignUpPageProps) {
   await params
-  const t = await getTranslations("SignUpPage")
+  const t = await getTranslations("SignUp")
 
   return createMetadata({
     siteName: appConfig.name,
@@ -39,5 +39,5 @@ export default async function SignUpPage({ params }: SignUpPageProps) {
     redirect(appRoutes.home)
   }
 
-  return <SignUpForm  />
+  return <SignUpForm />
 }

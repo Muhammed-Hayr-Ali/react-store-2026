@@ -33,7 +33,6 @@ import { Spinner } from "@/components/ui/spinner"
 import { IconInput } from "@/components/ui/icon-input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AuthHeader } from "./auth-header"
-import { GoogleSignInButton } from "./google-sign-in-button"
 
 import {
   signUpWithPassword,
@@ -42,11 +41,12 @@ import {
 } from "@/lib/actions/authentication"
 import { appRoutes } from "@/lib/config/app-routes"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
-
+import { GoogleSignInButton } from "./google-sign-in-button"
 
 export function SignUpForm() {
   // Load translations and navigation for the registration flow.
-  const t = useTranslations("SignUpForm")
+  const tErrors = useTranslations("ActionErrors")
+  const t = useTranslations("SignUp")
   const locale = useLocale()
   const router = useRouter()
 
@@ -92,10 +92,12 @@ export function SignUpForm() {
 
     // Handle duplicate account errors via Section 12 Alert
     if (result.error === "EMAIL_ALREADY_EXISTS") {
-      setErrorMessage(t("EMAIL_ALREADY_EXISTS_ERROR"))
+      setErrorMessage(tErrors("EMAIL_ALREADY_EXISTS_ERROR"))
     } else {
       setErrorMessage(
-        result.error ? t(getActionErrorKey(result.error)) : t("GENERIC_ERROR")
+        result.error
+          ? tErrors(getActionErrorKey(result.error))
+          : tErrors("GENERIC_ERROR")
       )
     }
   }
@@ -103,14 +105,14 @@ export function SignUpForm() {
   // Render registration fields, error feedback, and OAuth sign-up.
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
-      <FieldGroup className="space-y-4">
+      {/* تقليل المسافة العامة على الجوال لـ space-y-3 وجعلها space-y-4 للشاشات الكبيرة */}
+      <FieldGroup className="space-y-3 sm:space-y-4">
         <AuthHeader
           title={t("TITLE")}
-          description={t("SUBTITLE")}
-          linkText={t("SIGN_IN_LINK")}
+          description={t("DESCRIPTION")}
+          linkText={t("BACK_LINK")}
           linkHref={appRoutes.auth.login}
         />
-
         {/* Section 12 Form-Level Server Error Alert */}
         {errorMessage && (
           <Alert variant="destructive" className="relative pe-9">
@@ -128,9 +130,8 @@ export function SignUpForm() {
             </button>
           </Alert>
         )}
-
-        {/* Name Fields Row */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {/* Name Fields Row - تم استبدال space-y-6 بـ gap-3 لضبط المسافة بين الاسم الأول والأخير على الجوال */}
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2">
           {/* firstName Field */}
           <Controller
             name="firstName"
@@ -184,7 +185,6 @@ export function SignUpForm() {
             )}
           />
         </div>
-
         {/* Email Field */}
         <Controller
           name="email"
@@ -212,7 +212,6 @@ export function SignUpForm() {
             </Field>
           )}
         />
-
         {/* Password Field */}
         <Controller
           name="password"
@@ -260,11 +259,9 @@ export function SignUpForm() {
             </Field>
           )}
         />
-
         {errors.root && (
           <ActionFieldError errors={[{ message: errors.root.message }]} />
         )}
-
         {/* Submit Action */}
         <Field className="pt-1">
           <Button
@@ -282,11 +279,9 @@ export function SignUpForm() {
             )}
           </Button>
         </Field>
-
         <FieldSeparator className="my-1 text-xs">
           {t("OR_DIVIDER")}
         </FieldSeparator>
-
         {/* OAuth Section */}
         <Field>
           <GoogleSignInButton />
