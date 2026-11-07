@@ -11,6 +11,7 @@ import { getTranslations } from "next-intl/server"
 
 import { appRoutes } from "@/lib/config/app-routes"
 import { FieldDescription } from "@/components/ui/field"
+import { AppLogo } from "@/components/ui/app-logo"
 
 interface AuthLayoutProps {
   children: React.ReactNode
@@ -29,6 +30,15 @@ export default async function AuthLayout({
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
       <div className="flex w-full max-w-md flex-col gap-6">
+
+
+        <Link href={appRoutes.home} className="flex items-center gap-2 self-center font-medium">
+          <div className="flex size-10 items-center justify-center bg-primary text-primary-foreground rounded-[50%] corner-squircle">
+            <AppLogo className="size-6" />
+          </div>
+        </Link>
+
+
         <div className="flex flex-col gap-6">
           {children}
           <FieldDescription className="px-6 text-center text-[10px] leading-relaxed text-muted-foreground/80">

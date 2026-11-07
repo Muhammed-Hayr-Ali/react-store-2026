@@ -33,7 +33,6 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { IconInput } from "@/components/ui/icon-input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AuthHeader } from "./auth-header"
 
 import {
   signUpWithPassword,
@@ -53,6 +52,7 @@ export function SignUpForm() {
   const router = useRouter()
 
   // Track password visibility and server-side errors.
+  const [googleLoading, setGoogleLoading] = React.useState(false)
   const [showPassword, setShowPassword] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
@@ -142,6 +142,8 @@ export function SignUpForm() {
                 aria-invalid={fieldState.invalid}
                 autoComplete="given-name"
                 className="h-9 text-xs"
+                disabled={isSubmitting || googleLoading}
+
                 prefixIcon={
                   <UserIcon className="size-4 text-muted-foreground" />
                 }
@@ -170,6 +172,7 @@ export function SignUpForm() {
                 aria-invalid={fieldState.invalid}
                 autoComplete="family-name"
                 className="h-9 text-xs"
+                disabled={isSubmitting || googleLoading}
               />
               {fieldState.invalid && (
                 <ActionFieldError errors={[fieldState.error]} />
@@ -194,6 +197,8 @@ export function SignUpForm() {
                 aria-invalid={fieldState.invalid}
                 autoComplete="email"
                 className="h-9 text-xs"
+                disabled={isSubmitting || googleLoading}
+
                 prefixIcon={
                   <MailIcon className="size-4 text-muted-foreground" />
                 }
@@ -221,6 +226,8 @@ export function SignUpForm() {
                 aria-invalid={fieldState.invalid}
                 autoComplete="new-password"
                 className="h-9 text-xs"
+                disabled={isSubmitting || googleLoading}
+
                 prefixIcon={
                   <LockIcon className="size-4 text-muted-foreground" />
                 }
@@ -258,7 +265,7 @@ export function SignUpForm() {
         <Field className="pt-1">
           <Button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || googleLoading}
             className="h-9 w-full text-xs font-medium uppercase shadow-xs"
           >
             {isSubmitting ? (
@@ -278,13 +285,16 @@ export function SignUpForm() {
 
         {/* OAuth Section */}
         <Field>
-          <GoogleSignInButton />
+          <GoogleSignInButton
+            disabled={isSubmitting}
+            onLoading={setGoogleLoading}
+          />
         </Field>
 
         <Field>
           <FieldDescription className="text-center">
             {t("ALREADY_HAVE_ACCOUNT")}{" "}
-            <Link href={appRoutes.auth.signin}>{t("Sign in")}</Link>
+            <Link href={appRoutes.auth.login}>{t("Sign in")}</Link>
           </FieldDescription>
         </Field>
       </FieldGroup>

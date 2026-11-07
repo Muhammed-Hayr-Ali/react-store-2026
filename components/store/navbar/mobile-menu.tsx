@@ -115,7 +115,7 @@ function MobileMenuDrawer({
                   className="h-9 w-full text-xs font-medium uppercase shadow-xs"
                   asChild
                 >
-                  <Link href={appRoutes.auth.signin} onClick={onClose}>
+                  <Link href={appRoutes.auth.login} onClick={onClose}>
                     Login
                   </Link>
                 </Button>

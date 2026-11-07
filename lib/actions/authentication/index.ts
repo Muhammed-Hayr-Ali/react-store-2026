@@ -7,7 +7,7 @@ export { signUpWithPassword } from "./mutations/sign-up-with-password"
 export { signOut } from "./mutations/sign-out"
 export { requestPasswordReset } from "./mutations/request-password-reset"
 export { confirmPasswordReset } from "./mutations/confirm-password-reset"
-export { handleOAuthCallback } from "./mutations/handle-oauth-callback"
+export { handleAuthCallback } from "./mutations/handle-auth-callback"
 
 // Schemas and types
 export {
@@ -15,7 +15,7 @@ export {
   signUpWithPasswordSchema,
   requestPasswordResetSchema,
   confirmPasswordResetSchema,
-  oauthCallbackSchema,
+  authCallbackSchema,
 } from "./schemas"
 
 export type {
@@ -23,6 +23,6 @@ export type {
   SignUpWithPasswordInput,
   RequestPasswordResetInput,
   ConfirmPasswordResetInput,
-  OAuthCallbackInput,
+  AuthCallbackInput,
   AuthenticatedUser,
 } from "./types"

@@ -11,6 +11,13 @@ import { appConfig } from "@/lib/config/app_config"
 import { appRoutes } from "@/lib/config/app-routes"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 
 interface ForgotPasswordPageProps {
   params: Promise<{
@@ -20,7 +27,7 @@ interface ForgotPasswordPageProps {
 
 export async function generateMetadata({ params }: ForgotPasswordPageProps) {
   await params
-  const t = await getTranslations("ForgotPasswordPage")
+  const t = await getTranslations("ForgotPassword")
 
   return createMetadata({
     siteName: appConfig.name,
@@ -29,10 +36,8 @@ export async function generateMetadata({ params }: ForgotPasswordPageProps) {
   })
 }
 
-export default async function ForgotPasswordPage({
-  params,
-}: ForgotPasswordPageProps) {
-  await params
+export default async function ForgotPasswordPage() {
+  const t = await getTranslations("ForgotPassword")
 
   // Zero-Trust Session Check: Redirect active authenticated users
   const userResult = await getCurrentUser()
@@ -40,5 +45,15 @@ export default async function ForgotPasswordPage({
     redirect(appRoutes.home)
   }
 
-  return <ForgotPasswordForm />
+  return (
+    <Card>
+      <CardHeader className="text-center">
+        <CardTitle className="text-xl">{t("TITLE")}</CardTitle>
+        <CardDescription>{t("SUBTITLE")}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ForgotPasswordForm />
+      </CardContent>
+    </Card>
+  )
 }

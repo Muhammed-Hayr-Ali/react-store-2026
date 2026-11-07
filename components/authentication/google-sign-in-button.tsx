@@ -16,40 +16,41 @@ import { Spinner } from "@/components/ui/spinner"
 import { Badge } from "@/components/ui/badge"
 import { signInWithGoogle } from "@/lib/actions/authentication"
 
-export function GoogleSignInButton() {
+interface GoogleSignInButtonProps {
+  lastLoginMethod?: string | undefined
+  disabled?:boolean
+  onLoading?: (isLoading: boolean) => void
+}
+
+export function GoogleSignInButton({
+  lastLoginMethod,
+  disabled = false,
+  onLoading,
+}: GoogleSignInButtonProps) {
   const t = useTranslations("GoogleSignInButton")
 
   // Track the OAuth request while it is being dispatched.
-  const [isPending, startTransition] = React.useTransition()
 
-  const [lastLoginMethod] = React.useState<string | null>(() => {
-    if (typeof window === "undefined") return null
-    return localStorage.getItem("lastLoginMethod")
-  })
+  const [isLoading, setIsLoading] = React.useState<boolean>(false)
 
+  // نفس أسلوب الـ mounted المعتمد في المشروع لتفادي Hydration والتحذيرات
   // Start Google sign-in and report unsuccessful or unexpected responses.
-  const handleGoogleSignIn = () => {
-    startTransition(async () => {
-      try {
-        const result = await signInWithGoogle()
+  const handleGoogleSignIn = async () => {
+    if (onLoading) onLoading(true)
+    setIsLoading(true)
+    const result = await signInWithGoogle()
 
-        if (result.success && result.data?.url) {
-          localStorage.setItem("lastLoginMethod", "google")
-          window.location.href = result.data.url
-          return
-        }
+    if (!result.success) {
+      const errorMessage = result.error
+        ? getActionErrorKey(result.error)
+        : "SIGN_IN_FAILED_FALLBACK"
+      toast.error(t(errorMessage))
+      if (onLoading) onLoading(false)
+      setIsLoading(false)
+      return
+    }
 
-        const errorMessage =
-          !result.success && result.error
-            ? t(getActionErrorKey(result.error))
-            : t("SIGN_IN_FAILED_FALLBACK")
-
-        toast.error(errorMessage)
-      } catch (err) {
-        console.error("Google OAuth dispatch error:", err)
-        toast.error(t("UNEXPECTED_ERROR"))
-      }
-    })
+    window.location.href = result.data.url
   }
 
   const isLastUsed = lastLoginMethod === "google"
@@ -73,10 +74,10 @@ export function GoogleSignInButton() {
         type="button"
         variant="outline"
         onClick={handleGoogleSignIn}
-        disabled={isPending}
+        disabled={isLoading || disabled}
         className="relative flex h-9 w-full items-center justify-center gap-2 text-xs font-medium hover:bg-muted/50"
       >
-        {isPending ? (
+        {isLoading ? (
           <>
             <Spinner className="size-3.5" />
             <span>{t("CONNECTING")}</span>

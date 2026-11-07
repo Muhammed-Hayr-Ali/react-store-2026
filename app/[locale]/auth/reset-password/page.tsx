@@ -12,6 +12,13 @@ import { ResetPasswordForm } from "@/components/authentication/reset-password-fo
 import { appConfig } from "@/lib/config/app_config"
 import { appRoutes } from "@/lib/config/app-routes"
 import { createMetadata } from "@/lib/config/metadata_generator"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 
 interface ResetPasswordPageProps {
   params: Promise<{
@@ -24,7 +31,7 @@ interface ResetPasswordPageProps {
 
 export async function generateMetadata({ params }: ResetPasswordPageProps) {
   await params
-  const t = await getTranslations("ResetPasswordPage")
+  const t = await getTranslations("ResetPassword")
 
   return createMetadata({
     siteName: appConfig.name,
@@ -39,33 +46,51 @@ export default async function ResetPasswordPage({
 }: ResetPasswordPageProps) {
   await params
   const { token } = await searchParams
-  const t = await getTranslations("ResetPasswordPage")
+  const t = await getTranslations("ResetPassword")
 
   // Fallback view when token query param is missing
   if (!token) {
     return (
-      <div className="flex w-full flex-col items-center text-center">
-        <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-          <AlertTriangleIcon className="size-6" />
-        </div>
-        <h1 className="text-xl font-bold tracking-tight text-foreground">
-          {t("MISSING_TOKEN_TITLE")}
-        </h1>
-        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-          {t("MISSING_TOKEN_DESCRIPTION")}
-        </p>
-        <Button
-          variant="outline"
-          className="mt-6 h-9 w-full text-xs font-medium shadow-xs"
-          asChild
-        >
-          <Link href={appRoutes.auth.forgotPassword}>
-            {t("REQUEST_NEW_LINK_BUTTON")}
-          </Link>
-        </Button>
-      </div>
+      <Card>
+        <CardHeader className="text-center">
+          <CardTitle className="text-xl">{t("TITLE")}</CardTitle>
+          <CardDescription>{t("SUBTITLE")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex w-full flex-col items-center text-center">
+            <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+              <AlertTriangleIcon className="size-6" />
+            </div>
+            <h1 className="text-xl font-bold tracking-tight text-foreground">
+              {t("MISSING_TOKEN_TITLE")}
+            </h1>
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+              {t("MISSING_TOKEN_DESCRIPTION")}
+            </p>
+            <Button
+              variant="outline"
+              className="mt-6 h-9 w-full text-xs font-medium shadow-xs"
+              asChild
+            >
+              <Link href={appRoutes.auth.forgotPassword}>
+                {t("REQUEST_NEW_LINK_BUTTON")}
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
-  return <ResetPasswordForm token={token} />
+  return (
+    <Card>
+      <CardHeader className="text-center">
+        <CardTitle className="text-xl">{t("TITLE")}</CardTitle>
+        <CardDescription>{t("SUBTITLE")}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ResetPasswordForm token={token} />
+      </CardContent>
+    </Card>
+  )
 }

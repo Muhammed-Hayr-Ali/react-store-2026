@@ -85,7 +85,7 @@ export async function signUpWithPassword(
       reactComponent: React.createElement(WelcomeEmail, {
         locale: emailLocale,
         userName: `${firstName} ${lastName}`,
-        loginUrl: `${baseUrl}${appRoutes.auth.signin}`,
+        loginUrl: `${baseUrl}${appRoutes.auth.login}`,
       }),
     })
   } catch (emailError) {

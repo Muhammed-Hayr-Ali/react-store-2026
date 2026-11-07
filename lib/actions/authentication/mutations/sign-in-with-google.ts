@@ -9,13 +9,13 @@
 
 import { createServerClient } from "@/lib/database/supabase/server"
 
-import type { ApiResult, OAuthSignInResult } from "../types"
+import type { ApiResult, AuthSignInResult } from "../types"
 
 /**
  * تبدأ تسجيل الدخول عبر Google OAuth.
  */
 export async function signInWithGoogle(): Promise<
-  ApiResult<OAuthSignInResult>
+  ApiResult<AuthSignInResult>
 > {
   const supabase = await createServerClient()
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"

@@ -424,7 +424,9 @@
     "instagram": "Instagram",
     "rights_reserved": "All rights reserved"
   },
-  "ForgotPasswordForm": {
+  "ForgotPassword": {
+    "META_TITLE": "Reset Password Request",
+    "META_DESCRIPTION": "Request a secure password recovery link for your Marketna account.",
     "TITLE": "Forgot Password",
     "SUBTITLE": "Enter your email to receive a recovery link",
     "SIGN_IN_LINK": "Sign In",
@@ -433,11 +435,9 @@
     "EMAIL_PLACEHOLDER": "you@domain.com",
     "SUBMIT_BUTTON": "Send Recovery Link",
     "SUBMITTING_BUTTON": "Sending link...",
-    "GENERIC_ERROR": "Failed to send password reset link. Please try again later."
-  },
-  "ForgotPasswordPage": {
-    "META_TITLE": "Reset Password Request",
-    "META_DESCRIPTION": "Request a secure password recovery link for your Marketna account."
+    "GENERIC_ERROR": "Failed to send password reset link. Please try again later.",
+    "ALREADY_HAVE_ACCOUNT": "Already have an account? ",
+    "Sign in": "Sign in"
   },
   "GoogleSignInButton": {
     "CONTINUE_WITH_GOOGLE": "Continue with Google",
@@ -476,7 +476,8 @@
     "EMAIL_NOT_CONFIRMED_ERROR": "Please verify your email address before signing in.",
     "GENERIC_ERROR": "Unable to complete sign in. Please try again later.",
     "Sign up": "Sign up",
-    "DONT_HAVE_ACCOUNT": "Don't have an account?"
+    "DONT_HAVE_ACCOUNT": "Don't have an account?",
+    "CONNECTING": "Continue with Google"
   },
   "Navigation": {
     "links": {
@@ -598,9 +599,11 @@
     "DESCRIPTION": "The page you are looking for doesn't exist, has been removed, or is temporarily unavailable.",
     "BACK_TO_HOME": "Back to Home"
   },
-  "OAuthCallback": {
+  "AuthCallback": {
     "META_TITLE": "Authenticating...",
     "META_DESCRIPTION": "Completing secure sign-in verification.",
+    "TITLE": "Authenticating...",
+    "SUBTITLE": "Completing secure sign-in verification.",
     "PROCESSING_TITLE": "Verifying Authentication",
     "PROCESSING_DESCRIPTION": "Please wait while we complete your session verification...",
     "FAILED_TITLE": "Authentication Failed",
@@ -859,7 +862,7 @@
     "TYPE_PRODUCT_NAME_TO_CONFIRM": "Type",
     "TO_CONFIRM": "to confirm"
   },
-  "ResetPasswordForm": {
+  "ResetPassword": {
     "TITLE": "Reset Password",
     "SUBTITLE": "Create a new secure password for your account",
     "SIGN_IN_LINK": "Sign In",
@@ -873,23 +876,21 @@
     "SUBMITTING_BUTTON": "Updating password...",
     "PASSWORD_UPDATED_TOAST": "Password updated successfully. Please sign in.",
     "INVALID_OR_EXPIRED_TOKEN_ERROR": "The reset link is invalid or has expired. Please request a new one.",
-    "GENERIC_ERROR": "Failed to update password. Please try again later."
-  },
-  "ResetPasswordPage": {
+    "GENERIC_ERROR": "Failed to update password. Please try again later.",
     "META_TITLE": "Set New Password",
     "META_DESCRIPTION": "Update your Marketna account credentials securely.",
     "MISSING_TOKEN_TITLE": "Invalid Reset Link",
     "MISSING_TOKEN_DESCRIPTION": "Your password reset link is invalid or has expired. Please request a new link to proceed.",
-    "REQUEST_NEW_LINK_BUTTON": "Request New Link"
-  },
-  "ResetPasswordSuccess": {
+    "REQUEST_NEW_LINK_BUTTON": "Request New Link",
     "CHECK_EMAIL_TITLE": "Check your email",
     "CHECK_EMAIL_DESCRIPTION": "We have dispatched a password reset link to your email address.",
     "DIDNT_RECEIVE_TITLE": "Didn't receive the email?",
     "DIDNT_RECEIVE_PREFIX": "Check your spam folder or",
     "TRY_ANOTHER_EMAIL": "try another email",
     "TOKEN_EXPIRATION_NOTICE": "The reset link expires in 15 minutes",
-    "BACK_TO_LOGIN_BUTTON": "Back to Sign In"
+    "BACK_TO_LOGIN_BUTTON": "Back to Sign In",
+    "ALREADY_HAVE_ACCOUNT": " Already have an account?",
+    "Sign in": "Sign in"
   },
   "ReviewsManagement": {
     "META_TITLE": "Reviews Management | Marketna",
@@ -1386,7 +1387,7 @@
     "HIDE_PASSWORD_SR": "Hide password",
     "SUBMIT_BUTTON": "Create Account",
     "SUBMITTING_BUTTON": "Creating account...",
-    "OR_DIVIDER": "Or",
+    "OR_DIVIDER": "Or continue with",
     "EMAIL_ALREADY_EXISTS_ERROR": "An account with this email address already exists.",
     "GENERIC_ERROR": "An unexpected error occurred during signup. Please try again.",
     "ALREADY_HAVE_ACCOUNT": " Already have an account?",

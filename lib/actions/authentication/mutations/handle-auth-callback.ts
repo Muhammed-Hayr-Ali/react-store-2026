@@ -11,16 +11,16 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
 import { getValidationDetails } from "../../validation"
-import type { OAuthCallbackInput } from "../types"
-import { oauthCallbackSchema } from "../schemas"
+import type { AuthCallbackInput } from "../types"
+import { authCallbackSchema } from "../schemas"
 
 /**
  * تستبدل رمز OAuth بجلسة مستخدم نشطة.
  */
-export async function handleOAuthCallback(
-  input: OAuthCallbackInput
+export async function handleAuthCallback(
+  input: AuthCallbackInput
 ): Promise<ApiResult<null>> {
-  const validation = oauthCallbackSchema.safeParse(input)
+  const validation = authCallbackSchema.safeParse(input)
 
   if (!validation.success) {
     return {

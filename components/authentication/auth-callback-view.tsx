@@ -14,16 +14,17 @@ import { XCircleIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
-import { handleOAuthCallback } from "@/lib/actions/authentication"
+import { handleAuthCallback } from "@/lib/actions/authentication"
 import { appRoutes } from "@/lib/config/app-routes"
 
-interface OAuthCallbackViewProps {
+interface AuthCallbackViewProps {
   code?: string
   error?: string
 }
 
-export function OAuthCallbackView({ code, error }: OAuthCallbackViewProps) {
-  const t = useTranslations("OAuthCallback")
+export function AuthCallbackView({ code, error }: AuthCallbackViewProps) {
+   const tErrors = useTranslations("ActionErrors")
+  const t = useTranslations("AuthCallback")
   const router = useRouter()
   const hasProcessed = React.useRef(false)
 
@@ -35,7 +36,7 @@ export function OAuthCallbackView({ code, error }: OAuthCallbackViewProps) {
     if (code) {
       const processExchange = async () => {
         try {
-          const result = await handleOAuthCallback({ code })
+          const result = await handleAuthCallback({ code })
           if (result.success) {
             toast.success(t("SIGN_IN_SUCCESS_TOAST"))
             router.refresh()
@@ -43,21 +44,21 @@ export function OAuthCallbackView({ code, error }: OAuthCallbackViewProps) {
           } else {
             toast.error(
               result.error
-                ? t(getActionErrorKey(result.error))
-                : t("EXCHANGE_FAILED")
+                ? tErrors(getActionErrorKey(result.error))
+                : tErrors("EXCHANGE_FAILED")
             )
-            router.replace(appRoutes.auth.signin)
+            router.replace(appRoutes.auth.login)
           }
         } catch (err) {
           console.error("OAuth callback error:", err)
-          toast.error(t("EXCHANGE_FAILED"))
-          router.replace(appRoutes.auth.signin)
+          toast.error(tErrors("EXCHANGE_FAILED"))
+          router.replace(appRoutes.auth.login)
         }
       }
 
       processExchange()
     }
-  }, [code, router, t])
+  }, [code, router, t, tErrors])
 
   // Error view when OAuth provider returns an error parameter
   if (error) {
@@ -75,7 +76,7 @@ export function OAuthCallbackView({ code, error }: OAuthCallbackViewProps) {
         <Button
           variant="outline"
           className="mt-6 h-9 w-full text-xs font-medium shadow-xs"
-          onClick={() => router.replace(appRoutes.auth.signin)}
+          onClick={() => router.replace(appRoutes.auth.login)}
         >
           {t("RETURN_TO_LOGIN")}
         </Button>
@@ -86,7 +87,7 @@ export function OAuthCallbackView({ code, error }: OAuthCallbackViewProps) {
   // Active processing loader
   return (
     <div className="flex w-full flex-col items-center justify-center py-6 text-center">
-      <Spinner className="size-7 text-primary" />
+      <Spinner className="text-primary" />
       <h1 className="mt-4 text-base font-semibold text-foreground">
         {t("PROCESSING_TITLE")}
       </h1>

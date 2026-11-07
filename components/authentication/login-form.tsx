@@ -44,7 +44,11 @@ import {
 import { appRoutes } from "@/lib/config/app-routes"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 
-export function LoginForm() {
+export function LoginForm({
+  lastLoginMethod,
+}: {
+  lastLoginMethod?: string | undefined
+}) {
   // Load translations and resolve the post-login destination.
   const tErrors = useTranslations("ActionErrors")
   const t = useTranslations("LoginForm")
@@ -54,12 +58,8 @@ export function LoginForm() {
 
   // Track password visibility and authentication errors.
   const [showPassword, setShowPassword] = React.useState(false)
+  const [googleLoading, setGoogleLoading] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
-
-  const [lastLoginMethod] = React.useState<string | null>(() => {
-    if (typeof window === "undefined") return null
-    return localStorage.getItem("lastLoginMethod")
-  })
 
   // Configure credential validation and initial form values.
   const form = useForm<SignInWithPasswordInput>({
@@ -80,7 +80,6 @@ export function LoginForm() {
     const result = await signInWithPassword(data)
 
     if (result.success) {
-      localStorage.setItem("lastLoginMethod", "email")
       router.refresh()
       router.replace(redirectTarget)
       return
@@ -110,10 +109,12 @@ export function LoginForm() {
     }
   }
 
+  
+
   // Render credential fields, submit action, and OAuth alternative.
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
-      <FieldGroup >
+      <FieldGroup>
         {/* Section 12 Form-Level Server Error Alert */}
         {errorMessage && (
           <Alert variant="destructive" className="relative pe-9">
@@ -150,6 +151,7 @@ export function LoginForm() {
                 aria-invalid={fieldState.invalid}
                 autoComplete="email"
                 className="h-9 text-xs"
+              disabled={isSubmitting || googleLoading}
                 prefixIcon={
                   <MailIcon className="size-4 text-muted-foreground" />
                 }
@@ -186,6 +188,7 @@ export function LoginForm() {
                 aria-invalid={fieldState.invalid}
                 autoComplete="current-password"
                 className="h-9 text-xs"
+              disabled={isSubmitting || googleLoading}
                 prefixIcon={
                   <LockIcon className="size-4 text-muted-foreground" />
                 }
@@ -236,7 +239,7 @@ export function LoginForm() {
             )}
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || googleLoading}
               className="h-9 w-full text-xs font-medium uppercase shadow-xs"
             >
               {isSubmitting ? (
@@ -257,7 +260,7 @@ export function LoginForm() {
 
         {/* OAuth Section */}
         <Field>
-          <GoogleSignInButton />
+          <GoogleSignInButton disabled={isSubmitting} onLoading={setGoogleLoading} />
         </Field>
 
         <Field>

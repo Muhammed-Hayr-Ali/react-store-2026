@@ -29,7 +29,7 @@ export function ResetPasswordSuccess({
   email,
   onRetry,
 }: ResetPasswordSuccessProps) {
-  const t = useTranslations("ResetPasswordSuccess")
+  const t = useTranslations("ResetPassword")
 
   // Render the request confirmation, retry guidance, and login link.
   return (
@@ -88,7 +88,7 @@ export function ResetPasswordSuccess({
         className="h-9 w-full text-xs font-medium shadow-xs"
         asChild
       >
-        <Link href={appRoutes.auth.signin}>
+        <Link href={appRoutes.auth.login}>
           <ArrowLeftIcon className="me-2 size-3.5 rtl:rotate-180" />
           <span>{t("BACK_TO_LOGIN_BUTTON")}</span>
         </Link>

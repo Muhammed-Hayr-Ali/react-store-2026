@@ -13,11 +13,10 @@ import { MailIcon, AlertCircleIcon, XIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { ActionFieldError } from "@/components/shared/action-field-error"
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { IconInput } from "@/components/ui/icon-input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AuthHeader } from "./auth-header"
 import { ResetPasswordSuccess } from "./reset-password-success"
 
 import {
@@ -25,11 +24,12 @@ import {
   requestPasswordResetSchema,
   type RequestPasswordResetInput,
 } from "@/lib/actions/authentication"
-import { appRoutes } from "@/lib/config/app-routes"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
+import Link from "next/link"
+import { appRoutes } from "@/lib/config/app-routes"
 
 export function ForgotPasswordForm() {
-  const t = useTranslations("ForgotPasswordForm")
+  const t = useTranslations("ForgotPassword")
   const locale = useLocale()
 
   // Track the request outcome and any server-side error.
@@ -91,13 +91,6 @@ export function ForgotPasswordForm() {
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
       <FieldGroup className="space-y-4">
-        <AuthHeader
-          title={t("TITLE")}
-          description={t("SUBTITLE")}
-          linkText={t("SIGN_IN_LINK")}
-          linkHref={appRoutes.auth.signin}
-        />
-
         {/* Section 12 Form-Level Server Error Alert */}
         {errorMessage && (
           <Alert variant="destructive" className="relative pe-9">
@@ -161,7 +154,12 @@ export function ForgotPasswordForm() {
               t("SUBMIT_BUTTON")
             )}
           </Button>
-        </Field>
+        </Field>  <Field>
+                  <FieldDescription className="text-center">
+                    {t("ALREADY_HAVE_ACCOUNT")}{" "}
+                    <Link href={appRoutes.auth.login}>{t("Sign in")}</Link>
+                  </FieldDescription>
+                </Field>
       </FieldGroup>
     </form>
   )

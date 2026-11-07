@@ -9,16 +9,18 @@ import { cache } from "react"
 
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
-
+// ,"email_verified":false,"phone_verified":null}
 export type CurrentUser = {
   id: string
-  email: string | null
   first_name: string | null
   last_name: string | null
-  phone_number: string | null
+  email: string | null
+  phone: string | null
   avatar: string | null
   gender: "male" | "female" | "other" | null
   status: string | null
+  email_verified: boolean
+  phone_verified: boolean
   created_at: string | null
   updated_at: string | null
   role: string

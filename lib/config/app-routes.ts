@@ -11,8 +11,8 @@ export const appRoutes = {
   newsletterUnsubscribe: "/unsubscribe",
   auth: {
     getStarted: "/auth/signup",
-    signin: "/auth/sign_in",
-    signup: "/auth/sign_up",
+    login: "/auth/login",
+    signup: "/auth/signup",
     forgotPassword: "/auth/forgot-password",
     resetPassword: "/auth/reset-password",
     callback: "/auth/callback",

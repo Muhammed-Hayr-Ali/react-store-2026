@@ -9,7 +9,7 @@ import {
   signUpWithPasswordSchema,
   requestPasswordResetSchema,
   confirmPasswordResetSchema,
-  oauthCallbackSchema,
+  authCallbackSchema,
 } from "./schemas"
 import type { Json } from "../types/database"
 
@@ -23,9 +23,9 @@ export type RequestPasswordResetInput = z.infer<
 export type ConfirmPasswordResetInput = z.infer<
   typeof confirmPasswordResetSchema
 >
-export type OAuthCallbackInput = z.infer<typeof oauthCallbackSchema>
+export type AuthCallbackInput = z.infer<typeof authCallbackSchema>
 
-export interface OAuthSignInResult {
+export interface AuthSignInResult {
   url: string
 }
 

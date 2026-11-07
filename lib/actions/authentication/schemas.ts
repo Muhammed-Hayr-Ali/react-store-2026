@@ -44,6 +44,6 @@ export const confirmPasswordResetSchema = z
     path: ["confirmPassword"],
   })
 
-export const oauthCallbackSchema = z.object({
+export const authCallbackSchema = z.object({
   code: z.string().min(1, "CODE_REQUIRED"),
 })
