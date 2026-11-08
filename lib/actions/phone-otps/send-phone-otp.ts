@@ -12,6 +12,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { getValidationDetails } from "../validation"
 import { sendOtpSchema, type SendOtpFormValues } from "./schemas"
 import type { ApiResult } from "@/lib/actions/types/utils"
+import { APP_CONFIG } from "@/lib/config/app_config"
 
 export async function sendPhoneOtp(
   input: SendOtpFormValues,
@@ -26,7 +27,7 @@ export async function sendPhoneOtp(
     }
   }
 
-  const { phone  } = validation.data
+  const { phone } = validation.data
 
   const sessionId = process.env.OPENWA_SESSION_ID
   if (!sessionId) {
@@ -70,7 +71,10 @@ export async function sendPhoneOtp(
   // format code 123-456
   const formattedCode = verificationCode.replace(/(\d{3})(\d{3})/, "$1-$2")
   // set the message text with the formatted code
-  const messageText = t("WHATSAPP_MESSAGE", { code: formattedCode })
+  const messageText = t("WHATSAPP_MESSAGE", {
+    appName: APP_CONFIG.NAME,
+    code: formattedCode,
+  })
 
   // initialize the OpenWA client and send the message
   const openWA = createOpenWAClient()

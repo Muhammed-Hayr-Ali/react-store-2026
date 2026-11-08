@@ -138,10 +138,11 @@
     "EMPTY_DESCRIPTION": "No products available in your wishlist right now",
     "PAGE_DESC": "Explore all your saved favorite products.",
     "DISMISS_ALERT_SR": "Dismiss notification",
-    "EXCHANGE_FAILED": "Failed to exchange authorization code. Please try logging in again."
+    "EXCHANGE_FAILED": "Failed to exchange authorization code. Please try logging in again.",
+    "GENERIC_ERROR": "Unable to complete sign in. Please try again later.",
+    "EMAIL_ALREADY_EXISTS_ERROR": "An account with this email address already exists."
   },
   "AuthLayout": {
-    "BACK_TO_HOME_SR": "Return to homepage",
     "TERMS_PREFIX": "By continuing, you agree to our",
     "TERMS_OF_SERVICE": "Terms of Service",
     "TERMS_AND": "and",
@@ -430,7 +431,6 @@
     "META_DESCRIPTION": "Request a secure password recovery link for your Marketna account.",
     "TITLE": "Forgot Password",
     "SUBTITLE": "Enter your email to receive a recovery link",
-    "SIGN_IN_LINK": "Sign In",
     "DISMISS_ALERT_SR": "Dismiss notification",
     "EMAIL_LABEL": "Email Address",
     "EMAIL_PLACEHOLDER": "you@domain.com",
@@ -443,9 +443,8 @@
   "GoogleSignInButton": {
     "CONTINUE_WITH_GOOGLE": "Continue with Google",
     "CONNECTING": "Connecting to Google...",
-    "LAST_USED_BADGE": "Last used",
-    "SIGN_IN_FAILED_FALLBACK": "Failed to initiate Google sign in.",
-    "UNEXPECTED_ERROR": "An unexpected error occurred during Google sign in."
+    "LAST_USED": "Last used",
+    "SIGN_IN_FAILED_FALLBACK": "Failed to initiate Google sign in."
   },
   "Home": {
     "META_TITLE": "Home",
@@ -460,7 +459,6 @@
     "META_DESCRIPTION": "Sign in to your Marketna account to access your shopping cart and order history.",
     "TITLE": "Welcome back,",
     "SUBTITLE": "Sign in to continue to Marketna",
-    "BACK_LINK": "Create Account",
     "DISMISS_ALERT_SR": "Dismiss notification",
     "EMAIL_LABEL": "Email Address",
     "EMAIL_PLACEHOLDER": "you@domain.com",
@@ -469,16 +467,11 @@
     "SHOW_PASSWORD_SR": "Show password",
     "HIDE_PASSWORD_SR": "Hide password",
     "FORGOT_PASSWORD_LINK": "Forgot password?",
-    "LAST_USED_BADGE": "Last used",
     "SIGN_IN_BUTTON": "Sign In",
     "SIGN_IN_SUBMITTING": "Signing in...",
     "OR_DIVIDER": "Or continue with",
-    "INVALID_CREDENTIALS_ERROR": "Invalid email or password. Please verify your credentials.",
-    "EMAIL_NOT_CONFIRMED_ERROR": "Please verify your email address before signing in.",
-    "GENERIC_ERROR": "Unable to complete sign in. Please try again later.",
     "Sign up": "Sign up",
-    "DONT_HAVE_ACCOUNT": "Don't have an account?",
-    "CONNECTING": "Continue with Google"
+    "DONT_HAVE_ACCOUNT": "Don't have an account?"
   },
   "Navigation": {
     "links": {
@@ -863,7 +856,6 @@
   "ResetPassword": {
     "TITLE": "Reset Password",
     "SUBTITLE": "Create a new secure password for your account",
-    "SIGN_IN_LINK": "Sign In",
     "DISMISS_ALERT_SR": "Dismiss notification",
     "PASSWORD_LABEL": "New Password",
     "CONFIRM_PASSWORD_LABEL": "Confirm Password",
@@ -1317,7 +1309,6 @@
     "LOADING": "Loading more products..."
   },
   "SendPhoneOtp": {
-    "META_TITLE": "Phone Verification",
     "META_DESCRIPTION": "Enter your phone number to receive an instant verification code via WhatsApp.",
     "WELCOME_TITLE": "Verify Your Phone Number",
     "SIGN_UP_SUBTITLE": "Enter your phone number to receive a verification code via WhatsApp.",
@@ -1335,16 +1326,6 @@
       "FAILED_TO_STORE_OTP": "Failed to store verification code in database.",
       "FAILED_TO_SEND_WHATSAPP_MESSAGE": "Failed to send WhatsApp message."
     }
-  },
-  "PhoneOtp": {
-    "WHATSAPP_MESSAGE": "Welcome! Your verification code is: *{code}*\n\nValid for 10 minutes.",
-    "WHATSAPP_SESSION_NOT_CONFIGURED": "WhatsApp session is not configured.",
-    "FAILED_TO_STORE_OTP": "Failed to store verification code in database.",
-    "FAILED_TO_SEND_WHATSAPP_MESSAGE": "Failed to send WhatsApp message."
-  },
-  "PhoneVerifyPage": {
-    "META_TITLE": "Verify Phone Number",
-    "META_DESCRIPTION": "Enter the verification code sent via WhatsApp."
   },
   "PhoneVerifyForm": {
     "WELCOME_TITLE": "Enter Verification Code",
@@ -1373,7 +1354,6 @@
     "SUBTITLE": "Fill in your profile details to complete your account setup.",
     "DISMISS_ALERT_SR": "Dismiss notification",
     "FIRST_NAME_LABEL": "First Name",
-    "BACK_LINK": "Sign In",
     "FIRST_NAME_PLACEHOLDER": "John",
     "LAST_NAME_LABEL": "Last Name",
     "LAST_NAME_PLACEHOLDER": "Doe",
@@ -1386,31 +1366,10 @@
     "SUBMIT_BUTTON": "Create Account",
     "SUBMITTING_BUTTON": "Creating account...",
     "OR_DIVIDER": "Or continue with",
-    "EMAIL_ALREADY_EXISTS_ERROR": "An account with this email address already exists.",
-    "GENERIC_ERROR": "An unexpected error occurred during signup. Please try again.",
     "ALREADY_HAVE_ACCOUNT": " Already have an account?",
     "Sign in": "Sign in"
   },
-  "GetStartedForm": {
-    "TITLE": "Start your journey with us",
-    "SUBTITLE": "Pick the way that suits you best to join, and we'll take you to the next step in seconds.",
-    "CONTINUE_GOOGLE": "Continue with Google",
-    "OR": "or",
-    "METHOD_LABEL": "Sign-up method",
-    "TAB_PHONE": "WhatsApp",
-    "TAB_EMAIL": "Email",
-    "LABEL_PHONE": "Phone number",
-    "LABEL_EMAIL": "Email address",
-    "PLACEHOLDER_PHONE": "963 9XXXXXXXX",
-    "PLACEHOLDER_EMAIL": "name@example.com",
-    "HINT_PHONE": "We'll send your instant verification code directly via WhatsApp.",
-    "HINT_EMAIL": "We'll send a verification code straight to your inbox.",
-    "ERROR_PHONE_REQUIRED": "Please enter your phone number.",
-    "ERROR_PHONE_INVALID": "That phone number looks invalid. Include country code.",
-    "ERROR_EMAIL_REQUIRED": "Please enter your email address.",
-    "ERROR_EMAIL_INVALID": "That email address isn't valid.",
-    "CONTINUE": "Continue",
-    "HAVE_ACCOUNT": "Already have an account?",
-    "SIGN_IN": "Sign in"
+  "PhoneOtp": {
+    "WHATSAPP_MESSAGE": "Welcome! Your verification code for {appName} is: {code}"
   }
 }

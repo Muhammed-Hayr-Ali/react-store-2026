@@ -230,7 +230,9 @@ export function LoginForm({
         <Field className="pt-1">
           <div className="relative w-full">
             {/* Logical RTL Placement: -inset-e-2.5 */}
-      {isLastUsed && <LastUsedBadge className="pointer-events-none absolute -inset-e-2.5 -top-2.5 z-10" />}
+            {isLastUsed && (
+              <LastUsedBadge className="absolute -inset-e-2.5 -top-2.5 z-10" />
+            )}
             <Button
               type="submit"
               disabled={isSubmitting || googleLoading}

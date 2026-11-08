@@ -45,7 +45,7 @@ export function GoogleSignInButton({
     if (!result.success) {
       const errorMessage = result.error
         ? getActionErrorKey(result.error)
-        : "SIGN_IN_FAILED_FALLBACK"
+        : t("SIGN_IN_FAILED_FALLBACK")
       toast.error(t(errorMessage))
       if (onLoading) onLoading(false)
       setIsLoading(false)
@@ -61,7 +61,7 @@ export function GoogleSignInButton({
   return (
     <div className="relative w-full">
       {/* Logical RTL Placement: -inset-e-2.5 */}
-      {isLastUsed && <LastUsedBadge className="pointer-events-none absolute -inset-e-2.5 -top-2.5 z-10" />}
+      {isLastUsed && <LastUsedBadge className="absolute -inset-e-2.5 -top-2.5 z-10" />}
 
       <Button
         type="button"
