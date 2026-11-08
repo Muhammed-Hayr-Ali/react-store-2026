@@ -7,7 +7,7 @@
 
 import type { ApiResult } from "@/lib/actions/types/utils"
 
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 import { sendEmail } from "@/lib/services/email/send-email"
 import { resolveEmailLocale } from "@/lib/services/email/locale"
 import NewsletterConfirmationEmail from "@/lib/services/email/templates/newsletter-confirmation-email"

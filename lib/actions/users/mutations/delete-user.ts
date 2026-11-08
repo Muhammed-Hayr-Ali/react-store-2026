@@ -9,7 +9,7 @@ import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
 import type { ApiResult } from "@/lib/actions/types/utils"
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 import { createAdminClient } from "@/lib/database/supabase/admin"
 
 interface DeleteUserInput {

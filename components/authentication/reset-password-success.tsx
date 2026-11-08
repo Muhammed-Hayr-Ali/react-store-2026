@@ -18,7 +18,7 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 
 interface ResetPasswordSuccessProps {
   email: string

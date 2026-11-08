@@ -10,7 +10,7 @@ import { AlertTriangleIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ResetPasswordForm } from "@/components/authentication/reset-password-form"
 import { APP_CONFIG } from "@/lib/config/app_config"
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import {
   Card,

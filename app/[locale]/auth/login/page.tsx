@@ -10,7 +10,7 @@ import { cookies } from "next/headers"
 
 import { LoginForm } from "@/components/authentication/login-form"
 import { APP_CONFIG, COOKIES_KEYS } from "@/lib/config/app_config"
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 import {

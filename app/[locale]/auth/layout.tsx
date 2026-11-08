@@ -9,7 +9,7 @@ import * as React from "react"
 import Link from "next/link"
 import { getTranslations } from "next-intl/server"
 
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 import { FieldDescription } from "@/components/ui/field"
 import { AppLogo } from "@/components/ui/app-logo"
 

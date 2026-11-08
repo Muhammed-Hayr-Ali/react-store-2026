@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { signOut } from "@/lib/actions/authentication"
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 
 interface LogoutAlertDialogProps {
   open: boolean

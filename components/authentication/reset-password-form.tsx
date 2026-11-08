@@ -33,7 +33,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AuthHeader } from "./auth-header"
 
 import { confirmPasswordReset } from "@/lib/actions/authentication"
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 import { IconInput } from "@/components/ui/icon-input"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import Link from "next/link"

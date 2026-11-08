@@ -33,7 +33,7 @@ import { createRole } from "@/lib/actions/role"
 import { updateRole } from "@/lib/actions/role"
 import type { AppPermission } from "@/lib/actions/role"
 import type { RoleRecord } from "@/lib/actions/role"
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 import { PERMISSION_GROUPS } from "@/lib/actions/role/permission-groups"
 
 interface RoleFormProps {

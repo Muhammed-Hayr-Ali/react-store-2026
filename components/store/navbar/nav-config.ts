@@ -23,7 +23,7 @@ import {
   Undo2,
   type LucideIcon,
 } from "lucide-react"
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 import { AppPermission } from "@/lib/actions/role"
 
 // ==========================================

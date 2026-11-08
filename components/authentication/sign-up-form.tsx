@@ -39,7 +39,7 @@ import {
   signUpWithPasswordSchema,
   type SignUpWithPasswordInput,
 } from "@/lib/actions/authentication"
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { GoogleSignInButton } from "./google-sign-in-button"
 import Link from "next/link"

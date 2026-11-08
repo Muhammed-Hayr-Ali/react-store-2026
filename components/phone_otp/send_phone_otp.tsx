@@ -26,7 +26,7 @@ import {
   sendOtpSchema,
   type SendOtpFormValues,
 } from "@/lib/actions/phone-otps"
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { AuthHeader } from "../authentication/auth-header"
 

@@ -31,7 +31,7 @@ import {
 } from "@/lib/actions/authentication"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import Link from "next/link"
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 
 export function ForgotPasswordForm() {
   const t = useTranslations("ForgotPassword")

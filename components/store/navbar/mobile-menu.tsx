@@ -13,7 +13,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 import { useUser } from "@/lib/context/user-context"
 
 import { UserProfileHeader } from "./user-profile-header"

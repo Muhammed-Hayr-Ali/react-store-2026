@@ -69,7 +69,7 @@ import {
 import { PERMISSIONS } from "@/lib/actions/role"
 import { useIsMobile } from "@/hooks/use-mobile"
 import type { RoleRecord } from "@/lib/actions/role"
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 import { DeleteRoleDialog } from "./delete-role-dialog"
 
 const HIDEABLE_COLUMNS = ["permissions"]

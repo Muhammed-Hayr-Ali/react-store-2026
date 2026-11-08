@@ -11,7 +11,7 @@ import { SearchIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 import { useUser } from "@/lib/context/user-context"
 import { cn } from "@/lib/utils"
 

@@ -5,7 +5,7 @@
 
 import { NextResponse, type NextRequest } from "next/server"
 import type { SupabaseClient, User } from "@supabase/supabase-js"
-import { appRoutes } from "../config/app-routes"
+import { APP_ROUTES } from "../config/app-routes"
 
 interface HandleBanCheckParams {
   request: NextRequest

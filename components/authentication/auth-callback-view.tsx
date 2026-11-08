@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { handleAuthCallback } from "@/lib/actions/authentication"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 
 function AuthCallbackView({ code }: { code: string }) {
   const tErrors = useTranslations("ActionErrors")

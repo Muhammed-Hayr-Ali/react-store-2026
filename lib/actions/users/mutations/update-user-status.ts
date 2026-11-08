@@ -8,7 +8,7 @@
 import { revalidatePath } from "next/cache"
 
 import type { ApiResult } from "@/lib/actions/types/utils"
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 import { createServerClient } from "@/lib/database/supabase/server"
 
 import { getValidationDetails } from "../../validation"

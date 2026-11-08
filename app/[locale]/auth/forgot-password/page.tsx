@@ -8,7 +8,7 @@ import { getTranslations } from "next-intl/server"
 
 import { ForgotPasswordForm } from "@/components/authentication/forgot-password-form"
 import { APP_CONFIG } from "@/lib/config/app_config"
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 import {

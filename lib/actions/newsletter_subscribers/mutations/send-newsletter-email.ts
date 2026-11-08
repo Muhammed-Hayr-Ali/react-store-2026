@@ -7,7 +7,7 @@
 
 import React from "react"
 
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { sendEmail } from "@/lib/services/email/send-email"
 import NewsletterBroadcastEmail from "@/lib/services/email/templates/newsletter-broadcast-email"

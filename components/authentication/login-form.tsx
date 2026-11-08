@@ -41,7 +41,7 @@ import {
   signInWithPasswordSchema,
   type SignInWithPasswordInput,
 } from "@/lib/actions/authentication"
-import { appRoutes } from "@/lib/config/app-routes"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 
 export function LoginForm({
