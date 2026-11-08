@@ -21,6 +21,8 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { SIDEBAR_CONFIG } from "./sidebar-config"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 
 interface NavMainProps {
   permissions?: string[]
