@@ -16,6 +16,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { Badge } from "@/components/ui/badge"
 import { signInWithGoogle } from "@/lib/actions/authentication"
 import { LOGIN_METHODS } from "@/lib/config/app_config"
+import LastUsedBadge from "./last_used_badge"
 
 interface GoogleSignInButtonProps {
   lastLoginMethod?: string | undefined
@@ -60,16 +61,7 @@ export function GoogleSignInButton({
   return (
     <div className="relative w-full">
       {/* Logical RTL Placement: -inset-e-2.5 */}
-      {isLastUsed && (
-        <div className="pointer-events-none absolute -inset-e-2.5 -top-2.5 z-10">
-          <Badge
-            variant="secondary"
-            className="h-3.5 bg-green-50 px-1 text-[8px] font-normal tracking-wide text-green-700 uppercase dark:bg-green-950 dark:text-green-300"
-          >
-            {t("LAST_USED_BADGE")}
-          </Badge>
-        </div>
-      )}
+      {isLastUsed && <LastUsedBadge className="pointer-events-none absolute -inset-e-2.5 -top-2.5 z-10" />}
 
       <Button
         type="button"

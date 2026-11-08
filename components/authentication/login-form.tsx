@@ -44,6 +44,7 @@ import {
 import { APP_ROUTES } from "@/lib/config/app-routes"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { LOGIN_METHODS } from "@/lib/config/app_config"
+import LastUsedBadge from "./last_used_badge"
 
 export function LoginForm({
   lastLoginMethod,
@@ -229,16 +230,7 @@ export function LoginForm({
         <Field className="pt-1">
           <div className="relative w-full">
             {/* Logical RTL Placement: -inset-e-2.5 */}
-            {isLastUsed && (
-              <div className="pointer-events-none absolute -inset-e-2.5 -top-2.5 z-10">
-                <Badge
-                  variant="secondary"
-                  className="h-3.5 bg-green-50 px-1 text-[8px] font-normal tracking-wide text-green-700 uppercase dark:bg-green-950 dark:text-green-300"
-                >
-                  {t("LAST_USED_BADGE")}
-                </Badge>
-              </div>
-            )}
+      {isLastUsed && <LastUsedBadge className="pointer-events-none absolute -inset-e-2.5 -top-2.5 z-10" />}
             <Button
               type="submit"
               disabled={isSubmitting || googleLoading}
