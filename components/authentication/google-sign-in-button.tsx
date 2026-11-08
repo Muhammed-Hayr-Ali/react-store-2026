@@ -15,6 +15,7 @@ import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { Spinner } from "@/components/ui/spinner"
 import { Badge } from "@/components/ui/badge"
 import { signInWithGoogle } from "@/lib/actions/authentication"
+import { LOGIN_METHODS } from "@/lib/config/app_config"
 
 interface GoogleSignInButtonProps {
   lastLoginMethod?: string | undefined
@@ -53,7 +54,7 @@ export function GoogleSignInButton({
     window.location.href = result.data.url
   }
 
-  const isLastUsed = lastLoginMethod === "google"
+  const isLastUsed = lastLoginMethod === LOGIN_METHODS.GOOGLE
 
   // Render the last-used indicator and the pending or idle button state.
   return (

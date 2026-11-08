@@ -43,6 +43,7 @@ import {
 } from "@/lib/actions/authentication"
 import { APP_ROUTES } from "@/lib/config/app-routes"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
+import { LOGIN_METHODS } from "@/lib/config/app_config"
 
 export function LoginForm({
   lastLoginMethod,
@@ -109,7 +110,7 @@ export function LoginForm({
     }
   }
 
-  const isLastUsed = lastLoginMethod === "email"
+  const isLastUsed = lastLoginMethod === LOGIN_METHODS.EMAIL
 
   // Render credential fields, submit action, and OAuth alternative.
   return (
