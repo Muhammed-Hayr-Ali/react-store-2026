@@ -596,11 +596,12 @@
   "AuthCallback": {
     "META_TITLE": "Authentication Callback",
     "META_DESCRIPTION": "Processing your authentication request. Please wait while we securely log you in.",
-    "TITLE": "Completing Sign In",
-    "SUBTITLE": "Please wait a moment while we securely process your authentication.",
-    "FAILED_TITLE": "Authentication Failed",
-    "RETURN_TO_LOGIN": "Return to Login",
-    "SIGN_IN_SUCCESS_TOAST": "Successfully signed in!"
+    "LOADING_TITLE": "Completing authentication...",
+    "LOADING_SUBTITLE": "We are verifying your credentials, please wait...",
+    "SUCCESS_TITLE": "Sign in successful",
+    "SUCCESS_SUBTITLE": "Welcome back, redirecting you now...",
+    "FAILED_TITLE": "Authentication failed",
+    "RETURN_TO_LOGIN": "Return to login"
   },
   "ProductDetails": {
     "HOME": "Store",
