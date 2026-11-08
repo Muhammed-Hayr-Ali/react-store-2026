@@ -9,8 +9,8 @@ import {
   PackageIcon,
   MessageSquareIcon, // <-- 1. أضفنا هذه الأيقونة
 } from "lucide-react"
-import { appRoutes } from "@/lib/config/app-routes"
 import { PERMISSIONS, AppPermission } from "@/lib/actions/role"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 
 // Define the shape of a dashboard navigation entry and its nested links.
 export interface SidebarItem {
@@ -30,12 +30,12 @@ export interface SidebarItem {
 
 // Group the sidebar's primary navigation entries.
 interface SidebarConfig {
-  navMain: SidebarItem[]
+  MAV_MAIN: SidebarItem[]
 }
 
 // Configure the dashboard links and their access requirements.
-export const sidebarConfig: SidebarConfig = {
-  navMain: [
+export const SIDEBAR_CONFIG: SidebarConfig = {
+  MAV_MAIN: [
     {
       key: "store",
       label: "STORE",

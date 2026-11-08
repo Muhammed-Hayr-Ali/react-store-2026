@@ -21,8 +21,6 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { sidebarConfig } from "./sidebar-config"
-import { appRoutes } from "@/lib/config/app-routes"
 
 interface NavMainProps {
   permissions?: string[]
@@ -48,7 +46,7 @@ export function NavMain({ permissions = [] }: NavMainProps) {
   }
 
   // Filter navigation entries and nested links by permission.
-  const filteredItems = sidebarConfig.navMain
+  const filteredItems = SIDEBAR_CONFIG.MAV_MAIN
     .filter((item) => hasPermission(item.requiredPermission))
     .map((item) => {
       if (item.items) {
