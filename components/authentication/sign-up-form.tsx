@@ -78,7 +78,7 @@ export function SignUpForm() {
 
     if (result.success) {
       router.refresh()
-      router.replace(appRoutes.home)
+      router.replace(APP_ROUTES.HOME)
       return
     }
 
@@ -294,7 +294,7 @@ export function SignUpForm() {
         <Field>
           <FieldDescription className="text-center">
             {t("ALREADY_HAVE_ACCOUNT")}{" "}
-            <Link href={appRoutes.auth.login}>{t("Sign in")}</Link>
+            <Link href={APP_ROUTES.AUTH.LOGIN}>{t("Sign in")}</Link>
           </FieldDescription>
         </Field>
       </FieldGroup>

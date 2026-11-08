@@ -22,7 +22,12 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { ActionFieldError } from "@/components/shared/action-field-error"
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AuthHeader } from "./auth-header"
@@ -86,7 +91,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     if (result.success) {
       toast.success(t("PASSWORD_UPDATED_TOAST"))
       router.refresh()
-      router.replace(appRoutes.auth.login)
+      router.replace(APP_ROUTES.AUTH.LOGIN)
       return
     }
 
@@ -247,7 +252,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         <Field>
           <FieldDescription className="text-center">
             {t("ALREADY_HAVE_ACCOUNT")}{" "}
-            <Link href={appRoutes.auth.login}>{t("Sign in")}</Link>
+            <Link href={APP_ROUTES.AUTH.LOGIN}>{t("Sign in")}</Link>
           </FieldDescription>
         </Field>
       </FieldGroup>

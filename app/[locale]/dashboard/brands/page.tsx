@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: PageProps) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "BrandsManagement" })
   return createMetadata({
-    siteName: APP_CONFIG.name,
+    siteName: APP_CONFIG.NAME,
     title: t("META_TITLE"),
     description: t("META_DESCRIPTION"),
   })

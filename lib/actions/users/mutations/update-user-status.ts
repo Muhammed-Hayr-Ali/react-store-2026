@@ -11,7 +11,7 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { appRoutes } from "@/lib/config/app-routes"
 import { createServerClient } from "@/lib/database/supabase/server"
 
- import { getValidationDetails } from "../../validation"
+import { getValidationDetails } from "../../validation"
 import {
   updateUserStatusSchema,
   type UpdateUserStatusFormValues,
@@ -20,7 +20,6 @@ import {
 export async function updateUserStatus(
   input: UpdateUserStatusFormValues
 ): Promise<ApiResult<null>> {
- 
   const validation = updateUserStatusSchema.safeParse(input)
   if (!validation.success) {
     return {
@@ -58,7 +57,7 @@ export async function updateUserStatus(
       }
     }
 
-    revalidatePath(appRoutes.dashboard.users)
+    revalidatePath(APP_ROUTES.DASHBOARD.USERS)
     return { success: true, data: null }
   } catch {
     return { success: false, error: "UNEXPECTED_ERROR" }

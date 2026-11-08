@@ -12,7 +12,6 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { appRoutes } from "@/lib/config/app-routes"
 import { createAdminClient } from "@/lib/database/supabase/admin"
 
- 
 interface DeleteUserInput {
   userId: string
 }
@@ -20,7 +19,6 @@ interface DeleteUserInput {
 export async function deleteUser(
   input: DeleteUserInput
 ): Promise<ApiResult<null>> {
- 
   const idValidation = z.string().uuid().safeParse(input.userId)
   if (!idValidation.success) {
     return { success: false, error: "INVALID_USER_ID" }
@@ -50,7 +48,7 @@ export async function deleteUser(
       console.error("Error deleting user profile:", profileError.message)
     }
 
-    revalidatePath(appRoutes.dashboard.users)
+    revalidatePath(APP_ROUTES.DASHBOARD.USERS)
     return { success: true, data: null }
   } catch {
     return { success: false, error: "UNEXPECTED_ERROR" }

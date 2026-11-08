@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: ResetPasswordPageProps) {
   const t = await getTranslations("ResetPassword")
 
   return createMetadata({
-    siteName: APP_CONFIG.name,
+    siteName: APP_CONFIG.NAME,
     title: t("META_TITLE"),
     description: t("META_DESCRIPTION"),
   })
@@ -72,7 +72,7 @@ export default async function ResetPasswordPage({
               className="mt-6 h-9 w-full text-xs font-medium shadow-xs"
               asChild
             >
-              <Link href={appRoutes.auth.forgotPassword}>
+              <Link href={APP_ROUTES.AUTH.FORGOT_PASSWORD}>
                 {t("REQUEST_NEW_LINK_BUTTON")}
               </Link>
             </Button>

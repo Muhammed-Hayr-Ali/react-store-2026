@@ -45,7 +45,7 @@ export function LogoutAlertDialog({
         }
 
         onOpenChange(false)
-        window.location.href = appRoutes.home
+        window.location.href = APP_ROUTES.HOME
       } catch {
         toast.error(t("LOGOUT_ERROR"))
       }

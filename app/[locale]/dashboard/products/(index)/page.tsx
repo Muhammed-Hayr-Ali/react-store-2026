@@ -22,7 +22,7 @@ export async function generateMetadata({
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "ProductsManagement" })
   return createMetadata({
-    siteName: APP_CONFIG.name,
+    siteName: APP_CONFIG.NAME,
     title: t("PAGE_TITLE"),
     description: t("PAGE_DESCRIPTION"),
   })

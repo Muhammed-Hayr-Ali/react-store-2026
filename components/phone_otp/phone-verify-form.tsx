@@ -54,7 +54,7 @@ export function PhoneVerifyForm({
   // إذا لم يكن رقم الهاتف موجوداً، يمكن توجيه المستخدم لصفحة التسجيل
   React.useEffect(() => {
     if (!initialPhoneNumber) {
-      router.replace(appRoutes.auth.signup)
+      router.replace(APP_ROUTES.AUTH.SIGNUP)
     }
   }, [initialPhoneNumber, router])
 
@@ -129,7 +129,7 @@ export function PhoneVerifyForm({
           title={t("WELCOME_TITLE")}
           description={t("VERIFY_SUBTITLE", { phone: initialPhoneNumber })}
           linkText={t("BACK_BUTTON")}
-          linkHref={appRoutes.auth.signup}
+          linkHref={APP_ROUTES.AUTH.SIGNUP}
         />
 
         {errorMessage && (

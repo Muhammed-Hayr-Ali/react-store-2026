@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: WishlistPageProps) {
   const t = await getTranslations({ locale, namespace: "Wishlist" })
 
   return createMetadata({
-    siteName: APP_CONFIG.name,
+    siteName: APP_CONFIG.NAME,
     title: t("META_TITLE", { default: "My Wishlist" }),
     description: t("META_DESCRIPTION", {
       default: "View and manage your saved favorite products.",
@@ -38,14 +38,13 @@ export default async function WishlistPage({ params }: WishlistPageProps) {
   }
 
   const { locale } = await params
-   const errors = await getTranslations({ locale, namespace: "ActionErrors" })
+  const errors = await getTranslations({ locale, namespace: "ActionErrors" })
 
   // 1. جلب الكوكيز لتحديد عرض الشبكة أو القائمة (مطابق تماماً لصفحة التصنيفات)
   const cookieStore = await cookies()
-  const viewModeCookie = cookieStore.get(
-    COOKIES_KEYS.PRODUCT_MODE
-  )?.value
-  const viewMode = (viewModeCookie === PRODUCT_MODE.LIST ? PRODUCT_MODE.LIST : PRODUCT_MODE.GRID)
+  const viewModeCookie = cookieStore.get(COOKIES_KEYS.PRODUCT_MODE)?.value
+  const viewMode =
+    viewModeCookie === PRODUCT_MODE.LIST ? PRODUCT_MODE.LIST : PRODUCT_MODE.GRID
 
   const PAGE_LIMIT = 12
 

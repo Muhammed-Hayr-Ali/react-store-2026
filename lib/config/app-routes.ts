@@ -1,35 +1,36 @@
+
 /**
- * @file lib/config/routes.ts
- * @description Application routes configuration.
+ * @file lib/config/app-routes.ts
+ * @description Centralized application route definitions with uppercase keys.
  */
 
-export const appRoutes = {
-  home: "/",
-  wishlist: "/wishlist",
-  terms: "/terms",
-  privacy: "/privacy",
-  newsletterUnsubscribe: "/unsubscribe",
-  auth: {
-    getStarted: "/auth/signup",
-    login: "/auth/login",
-    signup: "/auth/signup",
-    forgotPassword: "/auth/forgot-password",
-    resetPassword: "/auth/reset-password",
-    callback: "/auth/callback",
-    verifyOtp: "/auth/verify-otp",
+export const APP_ROUTES = {
+  HOME: "/",
+  WISHLIST: "/wishlist",
+  TERMS: "/terms",
+  PRIVACY: "/privacy",
+  NEWSLETTER_UNSUBSCRIBE: "/unsubscribe",
+  AUTH: {
+    GET_STARTED: "/auth/signup",
+    LOGIN: "/auth/login",
+    SIGNUP: "/auth/signup",
+    FORGOT_PASSWORD: "/auth/forgot-password",
+    RESET_PASSWORD: "/auth/reset-password",
+    CALLBACK: "/auth/callback",
+    VERIFY_OTP: "/auth/verify-otp",
   },
-  dashboard: {
-    overview: "/dashboard",
-    categories: "/dashboard/categories",
-    brands: "/dashboard/brands",
-    products: "/dashboard/products",
-    reviews: "/dashboard/reviews",
-    users: "/dashboard/users",
-    newsletterSubscribers: "/dashboard/newsletter-subscribers",
-    team: {
-      roles: "/dashboard/team/roles",
-      create_roles: "/dashboard/team/roles/create",
-      staffAccess: "/dashboard/team/staff-access",
+  DASHBOARD: {
+    OVERVIEW: "/dashboard",
+    CATEGORIES: "/dashboard/categories",
+    BRANDS: "/dashboard/brands",
+    PRODUCTS: "/dashboard/products",
+    REVIEWS: "/dashboard/reviews",
+    USERS: "/dashboard/users",
+    NEWSLETTER_SUBSCRIBERS: "/dashboard/newsletter-subscribers",
+    TEAM: {
+      ROLES: "/dashboard/team/roles",
+      CREATE_ROLES: "/dashboard/team/roles/create",
+      STAFF_ACCESS: "/dashboard/team/staff-access",
     },
   },
 } as const

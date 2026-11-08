@@ -13,7 +13,12 @@ import { MailIcon, AlertCircleIcon, XIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { ActionFieldError } from "@/components/shared/action-field-error"
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { IconInput } from "@/components/ui/icon-input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -109,7 +114,6 @@ export function ForgotPasswordForm() {
             </button>
           </Alert>
         )}
-
         {/* Email Field */}
         <Controller
           name="email"
@@ -137,7 +141,6 @@ export function ForgotPasswordForm() {
             </Field>
           )}
         />
-
         {/* Submit Action */}
         <Field className="pt-1">
           <Button
@@ -154,12 +157,13 @@ export function ForgotPasswordForm() {
               t("SUBMIT_BUTTON")
             )}
           </Button>
-        </Field>  <Field>
-                  <FieldDescription className="text-center">
-                    {t("ALREADY_HAVE_ACCOUNT")}{" "}
-                    <Link href={appRoutes.auth.login}>{t("Sign in")}</Link>
-                  </FieldDescription>
-                </Field>
+        </Field>{" "}
+        <Field>
+          <FieldDescription className="text-center">
+            {t("ALREADY_HAVE_ACCOUNT")}{" "}
+            <Link href={APP_ROUTES.AUTH.LOGIN}>{t("Sign in")}</Link>
+          </FieldDescription>
+        </Field>
       </FieldGroup>
     </form>
   )

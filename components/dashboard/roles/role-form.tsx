@@ -137,7 +137,7 @@ export function RoleForm({ initialData, roleId }: RoleFormProps) {
               ? t("ROLE_UPDATED_SUCCESS")
               : t("ROLE_CREATED_SUCCESS", { name: res.data?.name ?? name })
           )
-          router.push(appRoutes.dashboard.team.roles)
+          router.push(APP_ROUTES.DASHBOARD.TEAM.ROLES)
           router.refresh()
         } else {
           const validationMessage =

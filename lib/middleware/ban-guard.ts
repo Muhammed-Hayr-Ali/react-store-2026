@@ -15,10 +15,10 @@ interface HandleBanCheckParams {
 }
 
 const AUTH_ROUTE_PREFIXES = [
-  appRoutes.auth.login,
-  appRoutes.auth.signup,
-  appRoutes.auth.forgotPassword,
-  appRoutes.auth.resetPassword,
+  APP_ROUTES.AUTH.LOGIN,
+  APP_ROUTES.AUTH.SIGNUP,
+  APP_ROUTES.AUTH.FORGOT_PASSWORD,
+  APP_ROUTES.AUTH.RESET_PASSWORD,
 ]
 
 export async function handleBanCheck({
@@ -71,7 +71,7 @@ export async function handleBanCheck({
 
     // 2. إذا لم يكن محظوراً وحاول فتح /banned يدوياً
     if (!isBanned && isBannedRoute) {
-      return createRedirect(appRoutes.home)
+      return createRedirect(APP_ROUTES.HOME)
     }
   } catch {
     // في حال حدوث أي خطأ عارض نتابع الطلب بأمان

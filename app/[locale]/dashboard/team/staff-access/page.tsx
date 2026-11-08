@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: PageProps) {
   })
 
   return createMetadata({
-    siteName: APP_CONFIG.name,
+    siteName: APP_CONFIG.NAME,
     title: t("PAGE_META_TITLE"),
     description: t("PAGE_META_DESCRIPTION"),
   })

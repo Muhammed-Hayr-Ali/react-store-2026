@@ -19,7 +19,11 @@ import WelcomeEmail from "@/lib/services/email/templates/welcome-email"
 import { getValidationDetails } from "../../validation"
 import { signUpWithPasswordSchema } from "../schemas"
 import { createOpenWAClient } from "@/lib/openwa/openWAClient"
-import { APP_CONFIG, COOKIES_KEYS, LOGIN_METHODS } from "@/lib/config/app_config"
+import {
+  APP_CONFIG,
+  COOKIES_KEYS,
+  LOGIN_METHODS,
+} from "@/lib/config/app_config"
 
 /**
  * تنشئ حسابًا جديدًا بالبريد الإلكتروني وكلمة المرور.
@@ -86,7 +90,7 @@ export async function signUpWithPassword(
       reactComponent: React.createElement(WelcomeEmail, {
         locale: emailLocale,
         userName: `${firstName} ${lastName}`,
-        loginUrl: `${baseUrl}${appRoutes.auth.login}`,
+        loginUrl: `${baseUrl}${APP_ROUTES.AUTH.LOGIN}`,
       }),
     })
   } catch (emailError) {

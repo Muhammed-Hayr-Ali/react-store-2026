@@ -35,7 +35,7 @@ export function SendPhoneOtp() {
   const locale = useLocale()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTarget = searchParams.get("redirect") || appRoutes.home
+  const redirectTarget = searchParams.get("redirect") || APP_ROUTES.HOME
 
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
@@ -82,7 +82,7 @@ export function SendPhoneOtp() {
           title={t("WELCOME_TITLE")}
           description={t("SIGN_UP_SUBTITLE")}
           linkText={t("SIGN_IN_LINK")}
-          linkHref={appRoutes.auth.login}
+          linkHref={APP_ROUTES.AUTH.LOGIN}
         />
 
         {errorMessage && (

@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: CategoryPageProps) {
   const categoryName = category?.name || "Category"
 
   return createMetadata({
-    siteName: APP_CONFIG.name,
+    siteName: APP_CONFIG.NAME,
     title: t("META_TITLE", {
       category: categoryName,
       default: `${categoryName} Products`,
@@ -64,7 +64,8 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   // 2. جلب الكوكيز لتحديد عرض الشبكة أو القائمة
   const cookieStore = await cookies()
   const viewModeCookie = cookieStore.get(COOKIES_KEYS.PRODUCT_MODE)?.value
-  const viewMode = (viewModeCookie === PRODUCT_MODE.LIST ? PRODUCT_MODE.LIST : PRODUCT_MODE.GRID)
+  const viewMode =
+    viewModeCookie === PRODUCT_MODE.LIST ? PRODUCT_MODE.LIST : PRODUCT_MODE.GRID
 
   const PAGE_LIMIT = 12
 

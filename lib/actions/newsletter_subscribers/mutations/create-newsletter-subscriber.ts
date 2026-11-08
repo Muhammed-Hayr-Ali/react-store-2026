@@ -62,7 +62,7 @@ export async function createNewsletterSubscriber(
     }
     const emailLocale = resolveEmailLocale(validation.data.locale)
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-    const unsubscribeUrl = new URL(appRoutes.newsletterUnsubscribe, baseUrl)
+    const unsubscribeUrl = new URL(APP_ROUTES.NEWSLETTER_UNSUBSCRIBE, baseUrl)
     unsubscribeUrl.searchParams.set("token", token)
     const emailResult = await sendEmail({
       to: validation.data.email,

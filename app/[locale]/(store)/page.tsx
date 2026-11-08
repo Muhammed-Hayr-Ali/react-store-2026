@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: PageProps) {
   const t = await getTranslations({ locale, namespace: "Home" })
 
   return createMetadata({
-    siteName: APP_CONFIG.name,
+    siteName: APP_CONFIG.NAME,
     title: t("META_TITLE", { default: "Home" }),
     description: t("META_DESCRIPTION", {
       default:
@@ -38,10 +38,9 @@ export default async function Page({ params }: PageProps) {
 
   const cookieStore = await cookies()
 
-  const viewModeCookie = cookieStore.get(
-    COOKIES_KEYS.PRODUCT_MODE
-  )?.value
-  const viewMode = (viewModeCookie === PRODUCT_MODE.LIST ? PRODUCT_MODE.LIST : PRODUCT_MODE.GRID)
+  const viewModeCookie = cookieStore.get(COOKIES_KEYS.PRODUCT_MODE)?.value
+  const viewMode =
+    viewModeCookie === PRODUCT_MODE.LIST ? PRODUCT_MODE.LIST : PRODUCT_MODE.GRID
 
   const PAGE_LIMIT = 12 // عدد المنتجات في الدفعة الأولى وعند التمرير
 

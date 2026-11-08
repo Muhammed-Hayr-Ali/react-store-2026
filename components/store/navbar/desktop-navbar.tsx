@@ -51,7 +51,7 @@ export default function DesktopNavbar({ className }: DesktopNavbarProps) {
             aria-label="Login"
             asChild
           >
-            <Link href={appRoutes.auth.login}>Login</Link>
+            <Link href={APP_ROUTES.AUTH.LOGIN}>Login</Link>
           </Button>
           <Button
             size="default"
@@ -60,7 +60,7 @@ export default function DesktopNavbar({ className }: DesktopNavbarProps) {
             aria-label="Get Started"
             asChild
           >
-            <Link href={appRoutes.auth.getStarted}>Get Started</Link>
+            <Link href={APP_ROUTES.AUTH.GET_STARTED}>Get Started</Link>
           </Button>
         </div>
       )}

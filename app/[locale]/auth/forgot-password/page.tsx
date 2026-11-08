@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: ForgotPasswordPageProps) {
   const t = await getTranslations("ForgotPassword")
 
   return createMetadata({
-    siteName: APP_CONFIG.name,
+    siteName: APP_CONFIG.NAME,
     title: t("META_TITLE"),
     description: t("META_DESCRIPTION"),
   })
@@ -42,7 +42,7 @@ export default async function ForgotPasswordPage() {
   // Zero-Trust Session Check: Redirect active authenticated users
   const userResult = await getCurrentUser()
   if (userResult.success && userResult.data) {
-    redirect(appRoutes.home)
+    redirect(APP_ROUTES.HOME)
   }
 
   return (

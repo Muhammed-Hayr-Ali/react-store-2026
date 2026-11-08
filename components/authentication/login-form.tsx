@@ -54,7 +54,7 @@ export function LoginForm({
   const t = useTranslations("LoginForm")
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTarget = searchParams.get("redirect") || appRoutes.home
+  const redirectTarget = searchParams.get("redirect") || APP_ROUTES.HOME
 
   // Track password visibility and authentication errors.
   const [showPassword, setShowPassword] = React.useState(false)
@@ -109,8 +109,7 @@ export function LoginForm({
     }
   }
 
-    const isLastUsed = lastLoginMethod === "email"
-
+  const isLastUsed = lastLoginMethod === "email"
 
   // Render credential fields, submit action, and OAuth alternative.
   return (
@@ -152,7 +151,7 @@ export function LoginForm({
                 aria-invalid={fieldState.invalid}
                 autoComplete="email"
                 className="h-9 text-xs"
-              disabled={isSubmitting || googleLoading}
+                disabled={isSubmitting || googleLoading}
                 prefixIcon={
                   <MailIcon className="size-4 text-muted-foreground" />
                 }
@@ -175,7 +174,7 @@ export function LoginForm({
                   {t("PASSWORD_LABEL")}
                 </FieldLabel>
                 <Link
-                  href={appRoutes.auth.forgotPassword}
+                  href={APP_ROUTES.AUTH.FORGOT_PASSWORD}
                   className="text-xs font-medium text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
                 >
                   {t("FORGOT_PASSWORD_LINK")}
@@ -189,7 +188,7 @@ export function LoginForm({
                 aria-invalid={fieldState.invalid}
                 autoComplete="current-password"
                 className="h-9 text-xs"
-              disabled={isSubmitting || googleLoading}
+                disabled={isSubmitting || googleLoading}
                 prefixIcon={
                   <LockIcon className="size-4 text-muted-foreground" />
                 }
@@ -229,16 +228,16 @@ export function LoginForm({
         <Field className="pt-1">
           <div className="relative w-full">
             {/* Logical RTL Placement: -inset-e-2.5 */}
-                 {isLastUsed && (
-                   <div className="pointer-events-none absolute -inset-e-2.5 -top-2.5 z-10">
-                     <Badge
-                       variant="secondary"
-                       className="h-3.5 bg-green-50 px-1 text-[8px] font-normal tracking-wide text-green-700 uppercase dark:bg-green-950 dark:text-green-300"
-                     >
-                       {t("LAST_USED_BADGE")}
-                     </Badge>
-                   </div>
-                 )}
+            {isLastUsed && (
+              <div className="pointer-events-none absolute -inset-e-2.5 -top-2.5 z-10">
+                <Badge
+                  variant="secondary"
+                  className="h-3.5 bg-green-50 px-1 text-[8px] font-normal tracking-wide text-green-700 uppercase dark:bg-green-950 dark:text-green-300"
+                >
+                  {t("LAST_USED_BADGE")}
+                </Badge>
+              </div>
+            )}
             <Button
               type="submit"
               disabled={isSubmitting || googleLoading}
@@ -262,13 +261,17 @@ export function LoginForm({
 
         {/* OAuth Section */}
         <Field>
-          <GoogleSignInButton lastLoginMethod={lastLoginMethod} disabled={isSubmitting} onLoading={setGoogleLoading} />
+          <GoogleSignInButton
+            lastLoginMethod={lastLoginMethod}
+            disabled={isSubmitting}
+            onLoading={setGoogleLoading}
+          />
         </Field>
 
         <Field>
           <FieldDescription className="text-center">
             {t("DONT_HAVE_ACCOUNT")}{" "}
-            <Link href={appRoutes.auth.signup}>{t("Sign up")}</Link>
+            <Link href={APP_ROUTES.AUTH.SIGNUP}>{t("Sign up")}</Link>
           </FieldDescription>
         </Field>
       </FieldGroup>

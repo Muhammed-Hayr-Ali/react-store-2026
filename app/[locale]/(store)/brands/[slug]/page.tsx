@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: BrandPageProps) {
   const brandName = brand?.name || "Brand"
 
   return createMetadata({
-    siteName: APP_CONFIG.name,
+    siteName: APP_CONFIG.NAME,
     title: t("META_TITLE", {
       brand: brandName,
       default: `${brandName} Products`,
@@ -65,7 +65,7 @@ export default async function BrandPage({ params }: BrandPageProps) {
   // 2. جلب الكوكيز لتحديد طريقة عرض الشبكة أو القائمة
   const cookieStore = await cookies()
   const viewModeCookie = cookieStore.get(COOKIES_KEYS.PRODUCT_MODE)?.value
-  
+
   const viewMode =
     viewModeCookie === PRODUCT_MODE.LIST ? PRODUCT_MODE.LIST : PRODUCT_MODE.GRID
 

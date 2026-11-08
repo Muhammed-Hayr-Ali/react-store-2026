@@ -12,7 +12,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { sendEmail } from "@/lib/services/email/send-email"
 import NewsletterBroadcastEmail from "@/lib/services/email/templates/newsletter-broadcast-email"
 
- import { getValidationDetails } from "../../validation"
+import { getValidationDetails } from "../../validation"
 import { sendNewsletterEmailSchema } from "../schemas"
 import {
   createNewsletterUnsubscribeToken,
@@ -39,8 +39,6 @@ type NewsletterEmailSendResult =
 export async function sendNewsletterEmail(
   input: unknown
 ): Promise<NewsletterEmailSendResult> {
- 
-
   const validation = sendNewsletterEmailSchema.safeParse(input)
   if (!validation.success) {
     return {
@@ -86,7 +84,7 @@ export async function sendNewsletterEmail(
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-  const baseUnsubscribeUrl = new URL(appRoutes.newsletterUnsubscribe, baseUrl)
+  const baseUnsubscribeUrl = new URL(APP_ROUTES.NEWSLETTER_UNSUBSCRIBE, baseUrl)
   let sentCount = 0
   let failedCount = 0
   const failedSubscriberIds: string[] = []

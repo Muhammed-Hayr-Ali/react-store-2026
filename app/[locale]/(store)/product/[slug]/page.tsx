@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: ProductDetailsPageProps) {
 
   if (!productResult.success || !productResult.data) {
     return createMetadata({
-      siteName: APP_CONFIG.name,
+      siteName: APP_CONFIG.NAME,
       title: "Product Not Found",
       description: "The requested product could not be found.",
     })
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: ProductDetailsPageProps) {
   const product = productResult.data
 
   return createMetadata({
-    siteName: APP_CONFIG.name,
+    siteName: APP_CONFIG.NAME,
     title: product.meta_title || product.name || product.slug,
     description:
       product.meta_description || product.description || product.slug,

@@ -41,14 +41,14 @@ export default async function AuthLayout({
         <p className="text-[10px] leading-relaxed text-muted-foreground/80">
           {t("TERMS_PREFIX")}{" "}
           <Link
-            href={`/${locale}${appRoutes.terms ?? "#"}`}
+            href={`/${locale}${APP_ROUTES.TERMS ?? "#"}`}
             className="text-primary underline-offset-4 hover:underline"
           >
             {t("TERMS_OF_SERVICE")}
           </Link>{" "}
           {t("TERMS_AND")}{" "}
           <Link
-            href={`/${locale}${appRoutes.privacy ?? "#"}`}
+            href={`/${locale}${APP_ROUTES.PRIVACY ?? "#"}`}
             className="text-primary underline-offset-4 hover:underline"
           >
             {t("PRIVACY_POLICY")}

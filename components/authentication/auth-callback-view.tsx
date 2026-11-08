@@ -25,7 +25,7 @@ function AuthCallbackView({ code }: { code: string }) {
 
     const fail = (key: string) => {
       toast.error(tErrors(key))
-      router.replace(appRoutes.auth.login)
+      router.replace(APP_ROUTES.AUTH.LOGIN)
     }
 
     handleAuthCallback({ code })
@@ -36,7 +36,7 @@ function AuthCallbackView({ code }: { code: string }) {
           )
         }
         toast.success(t("SIGN_IN_SUCCESS_TOAST"))
-        router.replace(appRoutes.home)
+        router.replace(APP_ROUTES.HOME)
         router.refresh()
       })
       .catch(() => fail("EXCHANGE_FAILED"))
@@ -73,7 +73,7 @@ function AuthCallbackError({ error }: { error?: string }) {
         className="mt-6 h-9 w-full text-xs font-medium shadow-xs"
         asChild
       >
-        <Link href={appRoutes.auth.login}>{t("RETURN_TO_LOGIN")}</Link>
+        <Link href={APP_ROUTES.AUTH.LOGIN}>{t("RETURN_TO_LOGIN")}</Link>
       </Button>
     </div>
   )

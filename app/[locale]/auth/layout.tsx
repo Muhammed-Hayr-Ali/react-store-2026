@@ -30,33 +30,33 @@ export default async function AuthLayout({
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
       <div className="flex w-full max-w-md flex-col gap-6">
-
-
-        <Link href={appRoutes.home} className="flex items-center gap-2 self-center font-medium">
-          <div className="flex size-10 items-center justify-center bg-primary text-primary-foreground rounded-[50%] corner-squircle">
+        <Link
+          href={APP_ROUTES.HOME}
+          className="flex items-center gap-2 self-center font-medium"
+        >
+          <div className="flex size-10 items-center justify-center rounded-[50%] bg-primary text-primary-foreground corner-squircle">
             <AppLogo className="size-6" />
           </div>
         </Link>
 
-
         <div className="flex flex-col gap-6">
           {children}
           <FieldDescription className="px-6 text-center text-[10px] leading-relaxed text-muted-foreground/80">
-          {t("TERMS_PREFIX")}{" "}
-          <Link
-            href={`/${locale}${appRoutes.terms ?? "#"}`}
-            className="text-primary underline-offset-4 hover:underline"
-          >
-            {t("TERMS_OF_SERVICE")}
-          </Link>{" "}
-          {t("TERMS_AND")}{" "}
-          <Link
-            href={`/${locale}${appRoutes.privacy ?? "#"}`}
-            className="text-primary underline-offset-4 hover:underline"
-          >
-            {t("PRIVACY_POLICY")}
-          </Link>
-          {t("TERMS_SUFFIX")}
+            {t("TERMS_PREFIX")}{" "}
+            <Link
+              href={`/${locale}${APP_ROUTES.TERMS ?? "#"}`}
+              className="text-primary underline-offset-4 hover:underline"
+            >
+              {t("TERMS_OF_SERVICE")}
+            </Link>{" "}
+            {t("TERMS_AND")}{" "}
+            <Link
+              href={`/${locale}${APP_ROUTES.PRIVACY ?? "#"}`}
+              className="text-primary underline-offset-4 hover:underline"
+            >
+              {t("PRIVACY_POLICY")}
+            </Link>
+            {t("TERMS_SUFFIX")}
           </FieldDescription>
         </div>
       </div>

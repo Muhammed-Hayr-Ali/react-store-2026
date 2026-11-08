@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: SignUpPageProps) {
   const t = await getTranslations("SignUp")
 
   return createMetadata({
-    siteName: APP_CONFIG.name,
+    siteName: APP_CONFIG.NAME,
     title: t("META_TITLE"),
     description: t("META_DESCRIPTION"),
   })
@@ -43,7 +43,7 @@ export default async function SignUpPage() {
   // Zero-Trust Session Check: Redirect active authenticated users
   const userResult = await getCurrentUser()
   if (userResult.success && userResult.data) {
-    redirect(appRoutes.home)
+    redirect(APP_ROUTES.HOME)
   }
 
   return (

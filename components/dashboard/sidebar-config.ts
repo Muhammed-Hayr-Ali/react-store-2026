@@ -39,33 +39,33 @@ export const sidebarConfig: SidebarConfig = {
     {
       key: "store",
       label: "STORE",
-      url: appRoutes.home,
+      url: APP_ROUTES.HOME,
       icon: StoreIcon,
     },
     {
       key: "overview",
       label: "OVERVIEW",
-      url: appRoutes.dashboard.overview,
+      url: APP_ROUTES.DASHBOARD.OVERVIEW,
       icon: LayoutDashboard,
     },
     {
       key: "categories-management",
       label: "CATEGORIES_MANAGEMENT",
-      url: appRoutes.dashboard.categories,
+      url: APP_ROUTES.DASHBOARD.CATEGORIES,
       icon: Tags,
       requiredPermission: PERMISSIONS.VIEW_CATEGORIES_DASHBOARD,
     },
     {
       key: "brands-management",
       label: "BRANDS_MANAGEMENT",
-      url: appRoutes.dashboard.brands,
+      url: APP_ROUTES.DASHBOARD.BRANDS,
       icon: Tags,
       requiredPermission: PERMISSIONS.VIEW_BRANDS_DASHBOARD,
     },
     {
       key: "products-management",
       label: "PRODUCTS_MANAGEMENT",
-      url: appRoutes.dashboard.products,
+      url: APP_ROUTES.DASHBOARD.PRODUCTS,
       icon: PackageIcon,
       requiredPermission: PERMISSIONS.VIEW_PRODUCTS_DASHBOARD,
     },
@@ -74,7 +74,7 @@ export const sidebarConfig: SidebarConfig = {
     {
       key: "reviews-management",
       label: "REVIEWS_MANAGEMENT",
-      url: appRoutes.dashboard.reviews, // تأكد أن هذا المسار موجود في appRoutes
+      url: APP_ROUTES.DASHBOARD.REVIEWS, // تأكد أن هذا المسار موجود في appRoutes
       icon: MessageSquareIcon,
       requiredPermission: PERMISSIONS.VIEW_REVIEWS_DASHBOARD,
     },
@@ -83,14 +83,14 @@ export const sidebarConfig: SidebarConfig = {
     {
       key: "users-management",
       label: "USERS_MANAGEMENT",
-      url: appRoutes.dashboard.users,
+      url: APP_ROUTES.DASHBOARD.USERS,
       icon: Users,
       requiredPermission: PERMISSIONS.VIEW_USERS_DASHBOARD,
     },
     {
       key: "newsletter-subscribers",
       label: "NEWSLETTER_SUBSCRIBERS",
-      url: appRoutes.dashboard.newsletterSubscribers,
+      url: APP_ROUTES.DASHBOARD.NEWSLETTER_SUBSCRIBERS,
       icon: Mail,
       requiredPermission: PERMISSIONS.VIEW_NEWSLETTER_DASHBOARD,
     },
@@ -105,12 +105,12 @@ export const sidebarConfig: SidebarConfig = {
         {
           key: "roles-and-permissions",
           label: "ROLES_AND_PERMISSIONS",
-          url: appRoutes.dashboard.team.roles,
+          url: APP_ROUTES.DASHBOARD.TEAM.ROLES,
         },
         {
           key: "staff-access",
           label: "STAFF_ACCESS",
-          url: appRoutes.dashboard.team.staffAccess,
+          url: APP_ROUTES.DASHBOARD.TEAM.STAFF_ACCESS,
         },
       ],
     },

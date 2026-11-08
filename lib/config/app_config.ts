@@ -1,11 +1,11 @@
 export const APP_NAME = "Marketna"
 
 export const APP_CONFIG = {
-  name: APP_NAME,
-  description: `Marketna: Your smart destination for everyday essentials where quality, variety, and speed come together.`,
-  url: "https://marketna.vercel.app",
-  robots: "index, follow",
-  keywords: [
+  NAME: APP_NAME,
+  DESCIRIPTION: `Marketna: Your smart destination for everyday essentials where quality, variety, and speed come together.`,
+  URL: "https://marketna.vercel.app",
+  ROBOTS: "index, follow",
+  KEYWORDS: [
     "Marketna",
     "E-commerce",
     "Fresh Food",
@@ -16,9 +16,9 @@ export const APP_CONFIG = {
     "توصيل سريع",
     "مواد غذائية",
   ],
-  locale: "en_US",
-  twitterHandle: "@marketna",
-  icons: {
+  LOCALE: "en_US",
+  TWITTER_HANDLE: "@marketna",
+  ICONS: {
     icon: "/favicon.ico",
     shortcut: "/favicon-16x16.png",
     apple: "/apple-touch-icon.png",

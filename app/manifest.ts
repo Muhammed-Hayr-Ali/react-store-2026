@@ -3,9 +3,9 @@ import { MetadataRoute } from "next"
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: APP_CONFIG.name,
-    short_name: APP_CONFIG.name,
-    description: APP_CONFIG.description,
+    name: APP_CONFIG.NAME,
+    short_name: APP_CONFIG.NAME,
+    description: APP_CONFIG.DESCIRIPTION,
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",

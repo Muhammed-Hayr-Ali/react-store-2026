@@ -25,7 +25,7 @@ export async function generateMetadata({
     result.success && result.data ? result.data.name : t("UPDATE_PAGE_TITLE")
 
   return createMetadata({
-    siteName: APP_CONFIG.name,
+    siteName: APP_CONFIG.NAME,
     title: t("UPDATE_PAGE_META_TITLE", { name: productName }),
     description: t("UPDATE_PAGE_META_DESCRIPTION", { name: productName }),
   })

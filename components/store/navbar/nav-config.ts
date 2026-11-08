@@ -30,17 +30,94 @@ import { AppPermission } from "@/lib/actions/role"
 // 1. العملات المدعومة (SUPPORTED_CURRENCIES) - [تمت إضافة export]
 // ==========================================
 export const SUPPORTED_CURRENCIES = {
-  USD: { key: "USD", code: "USD", name: "US Dollar", name_ar: "دولار أمريكي", symbol: "$", locale: "en-US" },
-  EUR: { key: "EUR", code: "EUR", name: "Euro", name_ar: "يورو", symbol: "€", locale: "de-DE" },
-  SAR: { key: "SAR", code: "SAR", name: "Saudi Riyal", name_ar: "ريال سعودي", symbol: "ر.س", locale: "ar-SA" },
-  AED: { key: "AED", code: "AED", name: "UAE Dirham", name_ar: "درهم إماراتي", symbol: "د.إ", locale: "ar-AE" },
-  KWD: { key: "KWD", code: "KWD", name: "Kuwaiti Dinar", name_ar: "دينار كويتي", symbol: "د.ك", locale: "ar-KW" },
-  QAR: { key: "QAR", code: "QAR", name: "Qatari Riyal", name_ar: "ريال قطري", symbol: "ر.ق", locale: "ar-QA" },
-  BHD: { key: "BHD", code: "BHD", name: "Bahraini Dinar", name_ar: "دينار بحريني", symbol: "د.ب", locale: "ar-BH" },
-  TRY: { key: "TRY", code: "TRY", name: "Turkish Lira", name_ar: "ليرة تركية", symbol: "₺", locale: "tr-TR" },
-  EGP: { key: "EGP", code: "EGP", name: "Egyptian Pound", name_ar: "جنيه مصري", symbol: "ج.م", locale: "ar-EG" },
-  IQD: { key: "IQD", code: "IQD", name: "Iraqi Dinar", name_ar: "دينار عراقي", symbol: "د.ع", locale: "ar-IQ" },
-  SYP: { key: "SYP", code: "SYP", name: "Syrian Pound", name_ar: "ليرة سورية", symbol: "ل.س", locale: "ar-SY" },
+  USD: {
+    key: "USD",
+    code: "USD",
+    name: "US Dollar",
+    name_ar: "دولار أمريكي",
+    symbol: "$",
+    locale: "en-US",
+  },
+  EUR: {
+    key: "EUR",
+    code: "EUR",
+    name: "Euro",
+    name_ar: "يورو",
+    symbol: "€",
+    locale: "de-DE",
+  },
+  SAR: {
+    key: "SAR",
+    code: "SAR",
+    name: "Saudi Riyal",
+    name_ar: "ريال سعودي",
+    symbol: "ر.س",
+    locale: "ar-SA",
+  },
+  AED: {
+    key: "AED",
+    code: "AED",
+    name: "UAE Dirham",
+    name_ar: "درهم إماراتي",
+    symbol: "د.إ",
+    locale: "ar-AE",
+  },
+  KWD: {
+    key: "KWD",
+    code: "KWD",
+    name: "Kuwaiti Dinar",
+    name_ar: "دينار كويتي",
+    symbol: "د.ك",
+    locale: "ar-KW",
+  },
+  QAR: {
+    key: "QAR",
+    code: "QAR",
+    name: "Qatari Riyal",
+    name_ar: "ريال قطري",
+    symbol: "ر.ق",
+    locale: "ar-QA",
+  },
+  BHD: {
+    key: "BHD",
+    code: "BHD",
+    name: "Bahraini Dinar",
+    name_ar: "دينار بحريني",
+    symbol: "د.ب",
+    locale: "ar-BH",
+  },
+  TRY: {
+    key: "TRY",
+    code: "TRY",
+    name: "Turkish Lira",
+    name_ar: "ليرة تركية",
+    symbol: "₺",
+    locale: "tr-TR",
+  },
+  EGP: {
+    key: "EGP",
+    code: "EGP",
+    name: "Egyptian Pound",
+    name_ar: "جنيه مصري",
+    symbol: "ج.م",
+    locale: "ar-EG",
+  },
+  IQD: {
+    key: "IQD",
+    code: "IQD",
+    name: "Iraqi Dinar",
+    name_ar: "دينار عراقي",
+    symbol: "د.ع",
+    locale: "ar-IQ",
+  },
+  SYP: {
+    key: "SYP",
+    code: "SYP",
+    name: "Syrian Pound",
+    name_ar: "ليرة سورية",
+    symbol: "ل.س",
+    locale: "ar-SY",
+  },
 } as const
 
 // ==========================================
@@ -57,9 +134,27 @@ export const SUPPORTED_LANGUAGES = {
 // 3. الثيمات المدعومة (SUPPORTED_THEMES)
 // ==========================================
 export const SUPPORTED_THEMES = {
-  light: { key: "light", code: "light", name: "Light", name_ar: "فاتح", icon: Sun },
-  dark: { key: "dark", code: "dark", name: "Dark", name_ar: "داكن", icon: Moon },
-  system: { key: "system", code: "system", name: "System", name_ar: "النظام", icon: Monitor },
+  light: {
+    key: "light",
+    code: "light",
+    name: "Light",
+    name_ar: "فاتح",
+    icon: Sun,
+  },
+  dark: {
+    key: "dark",
+    code: "dark",
+    name: "Dark",
+    name_ar: "داكن",
+    icon: Moon,
+  },
+  system: {
+    key: "system",
+    code: "system",
+    name: "System",
+    name_ar: "النظام",
+    icon: Monitor,
+  },
 } as const
 
 export interface NavLinkItem {
@@ -93,13 +188,13 @@ export const NAV_LINKS: NavLinkItem[] = [
   {
     title: "Home",
     key: "home",
-    url: appRoutes.home,
+    url: APP_ROUTES.HOME,
     icon: House,
   },
   {
     title: "Dashboard",
     key: "overview",
-    url: appRoutes.dashboard.overview,
+    url: APP_ROUTES.DASHBOARD.OVERVIEW,
     icon: LayoutDashboard,
   },
   {
@@ -111,7 +206,7 @@ export const NAV_LINKS: NavLinkItem[] = [
   {
     title: "Wishlist",
     key: "wishlist",
-    url: appRoutes.wishlist,
+    url: APP_ROUTES.WISHLIST,
     icon: Heart,
   },
   {
@@ -163,11 +258,13 @@ export const PREFERENCES_CONFIG = {
   language: {
     name: "language",
     icon: Languages,
-    options: Object.values(SUPPORTED_LANGUAGES).map((lang): PreferenceOption => ({
-      label: lang.name,
-      key: lang.key,
-      value: lang.code,
-    })),
+    options: Object.values(SUPPORTED_LANGUAGES).map(
+      (lang): PreferenceOption => ({
+        label: lang.name,
+        key: lang.key,
+        value: lang.code,
+      })
+    ),
   },
   appearance: {
     name: "appearance",

@@ -26,21 +26,22 @@ export default function NotFound() {
         <h1 className="mt-5 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
           {t("TITLE", { default: "Page Not Found" })}
         </h1>
-        
-        <p className="mt-2.5 text-xs leading-relaxed text-muted-foreground sm:text-sm max-w-xs">
+
+        <p className="mt-2.5 max-w-xs text-xs leading-relaxed text-muted-foreground sm:text-sm">
           {t("DESCRIPTION", {
-            default: "The page you’re looking for doesn’t exist or has been moved.",
+            default:
+              "The page you’re looking for doesn’t exist or has been moved.",
           })}
         </p>
 
         {/* Single Minimalist Action Button */}
         <div className="mt-8 w-full sm:w-auto">
-          <Button 
-            asChild 
-            size="sm" 
-            className="h-10 w-full sm:w-auto text-xs font-medium px-6 rounded-full shadow-none transition-transform active:scale-95"
+          <Button
+            asChild
+            size="sm"
+            className="h-10 w-full rounded-full px-6 text-xs font-medium shadow-none transition-transform active:scale-95 sm:w-auto"
           >
-            <Link href={appRoutes.home}>
+            <Link href={APP_ROUTES.HOME}>
               <span>{t("BACK_TO_HOME", { default: "Back to Home" })}</span>
             </Link>
           </Button>

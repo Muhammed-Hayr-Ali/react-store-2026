@@ -106,7 +106,7 @@ export default function Footer() {
         <div className="mt-10 border-t border-border/50 pt-6">
           <div className="flex flex-col-reverse items-center justify-between gap-4 sm:flex-row">
             <p className="text-xs text-muted-foreground">
-              &copy; {new Date().getFullYear()} {APP_CONFIG.name}.{" "}
+              &copy; {new Date().getFullYear()} {APP_CONFIG.NAME}.{" "}
               {t("rights_reserved")}
             </p>
             <div className="flex items-center gap-2">

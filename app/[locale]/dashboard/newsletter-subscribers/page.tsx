@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: PageProps) {
     namespace: "NewsletterSubscribersManagement",
   })
   return createMetadata({
-    siteName: APP_CONFIG.name,
+    siteName: APP_CONFIG.NAME,
     title: t("META_TITLE"),
     description: t("META_DESCRIPTION"),
   })

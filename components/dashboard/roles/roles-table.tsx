@@ -104,7 +104,7 @@ function RoleRowActions({ role, onDeleted }: RoleRowActionsProps) {
           <DropdownMenuContent align="end" className="w-40 text-xs">
             <DropdownMenuItem asChild>
               <Link
-                href={`${appRoutes.dashboard.team.roles}/${role.id}/edit`}
+                href={`${APP_ROUTES.DASHBOARD.TEAM.ROLES}/${role.id}/edit`}
                 className="flex cursor-pointer items-center"
               >
                 <PencilIcon className="me-2 size-3.5" />
@@ -509,7 +509,7 @@ export function RolesTable({
           </DropdownMenu>
 
           {/* Dual Responsive CTA Button */}
-          <Link href={appRoutes.dashboard.team.create_roles}>
+          <Link href={APP_ROUTES.DASHBOARD.TEAM.CREATE_ROLES}>
             <Button
               variant="default"
               size="icon"

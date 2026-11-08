@@ -68,7 +68,7 @@ export async function requestPasswordReset(
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-    const resetUrl = `${baseUrl}${appRoutes.auth.resetPassword}?token=${token}`
+    const resetUrl = `${baseUrl}${APP_ROUTES.AUTH.RESET_PASSWORD}?token=${token}`
     const emailLocale = resolveEmailLocale(validation.data.locale)
 
     await sendEmail({
