@@ -38,8 +38,7 @@ export default async function WishlistPage({ params }: WishlistPageProps) {
   }
 
   const { locale } = await params
-  const t = await getTranslations({ locale, namespace: "Wishlist" })
-  const errors = await getTranslations({ locale, namespace: "ActionErrors" })
+   const errors = await getTranslations({ locale, namespace: "ActionErrors" })
 
   // 1. جلب الكوكيز لتحديد عرض الشبكة أو القائمة (مطابق تماماً لصفحة التصنيفات)
   const cookieStore = await cookies()

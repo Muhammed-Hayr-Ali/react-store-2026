@@ -24,7 +24,7 @@ export const APP_CONFIG = {
     apple: "/apple-touch-icon.png",
   },
 
-} as const
+}
 
 export const COOKIES_KEYS = {
   LOGIN_METHOD: "login_method",
