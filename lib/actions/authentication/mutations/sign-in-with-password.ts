@@ -13,7 +13,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 
 import { getValidationDetails } from "../../validation"
 import { signInWithPasswordSchema } from "../schemas"
-import { APP_CONFIG, COOKIES_KEYS } from "@/lib/config/app_config"
+import { APP_CONFIG, COOKIES_KEYS, LOGIN_METHODS } from "@/lib/config/app_config"
 
 /**
  * تسجل دخول المستخدم بالبريد الإلكتروني وكلمة المرور.
@@ -54,7 +54,7 @@ export async function signInWithPassword(
   }
 
   const cookieStore = await cookies()
-  cookieStore.set(COOKIES_KEYS.LOGIN_METHOD, "email")
+  cookieStore.set(COOKIES_KEYS.LOGIN_METHOD, LOGIN_METHODS.EMAIL)
 
   revalidatePath("/", "layout")
 

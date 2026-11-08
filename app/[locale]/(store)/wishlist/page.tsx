@@ -5,7 +5,7 @@
 
 import { getWishlist } from "@/lib/actions/wishlists"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
-import { APP_CONFIG, COOKIES_KEYS } from "@/lib/config/app_config"
+import { APP_CONFIG, COOKIES_KEYS, PRODUCT_MODE } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { cookies } from "next/headers"
 import { getTranslations } from "next-intl/server"
@@ -46,8 +46,7 @@ export default async function WishlistPage({ params }: WishlistPageProps) {
   const viewModeCookie = cookieStore.get(
     COOKIES_KEYS.PRODUCT_MODE
   )?.value
-  const viewMode = (viewModeCookie === "list" ? "list" : "grid") as
-    "grid" | "list"
+  const viewMode = (viewModeCookie === PRODUCT_MODE.LIST ? PRODUCT_MODE.LIST : PRODUCT_MODE.GRID)
 
   const PAGE_LIMIT = 12
 

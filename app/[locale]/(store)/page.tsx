@@ -37,12 +37,11 @@ export default async function Page({ params }: PageProps) {
   const t = await getTranslations({ locale, namespace: "Home" })
 
   const cookieStore = await cookies()
-  // viewMode: "grid" | "list"
+
   const viewModeCookie = cookieStore.get(
     COOKIES_KEYS.PRODUCT_MODE
   )?.value
-  const viewMode = (viewModeCookie === PRODUCT_MODE.LIST ? PRODUCT_MODE.LIST : PRODUCT_MODE.GRID) as
-    "grid" | "list"
+  const viewMode = (viewModeCookie === PRODUCT_MODE.LIST ? PRODUCT_MODE.LIST : PRODUCT_MODE.GRID)
 
   const PAGE_LIMIT = 12 // عدد المنتجات في الدفعة الأولى وعند التمرير
 

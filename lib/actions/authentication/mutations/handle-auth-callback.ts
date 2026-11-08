@@ -14,7 +14,11 @@ import { getValidationDetails } from "../../validation"
 import type { AuthCallbackInput } from "../types"
 import { authCallbackSchema } from "../schemas"
 import { cookies } from "next/headers"
-import { APP_CONFIG, COOKIES_KEYS } from "@/lib/config/app_config"
+import {
+  APP_CONFIG,
+  COOKIES_KEYS,
+  LOGIN_METHODS,
+} from "@/lib/config/app_config"
 
 /**
  * تستبدل رمز OAuth بجلسة مستخدم نشطة.
@@ -48,7 +52,7 @@ export async function handleAuthCallback(
 
   const cookieStore = await cookies()
 
-  cookieStore.set(COOKIES_KEYS.LOGIN_METHOD, "google")
+  cookieStore.set(COOKIES_KEYS.LOGIN_METHOD, LOGIN_METHODS.GOOGLE)
 
   revalidatePath("/", "layout")
   return { success: true, data: null }
