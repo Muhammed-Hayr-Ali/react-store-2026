@@ -1,22 +1,20 @@
 import { ShieldCheckIcon } from "lucide-react"
 import { notFound } from "next/navigation"
 import { getTranslations } from "next-intl/server"
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { RoleForm } from "@/components/dashboard/roles/role-form"
 import type { RoleRecord } from "@/lib/actions/role"
- import { getRoleById } from "@/lib/actions/role"
+import { getRoleById } from "@/lib/actions/role"
 
-
-export const dynamic = 'force-dynamic'
-
+export const dynamic = "force-dynamic"
 
 export async function generateMetadata({ params }: EditRolePageProps) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "RolesManagement" })
 
   return createMetadata({
-    siteName: appConfig.name,
+    siteName: APP_CONFIG.name,
     title: t("EDIT_PAGE_META_TITLE"),
     description: t("EDIT_PAGE_META_DESCRIPTION"),
   })
@@ -32,8 +30,6 @@ interface EditRolePageProps {
 export default async function EditRolePage({ params }: EditRolePageProps) {
   const { id, locale } = await params
   const t = await getTranslations({ locale, namespace: "RolesManagement" })
-
-  
 
   const res = await getRoleById({ roleId: id })
 

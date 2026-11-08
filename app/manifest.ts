@@ -1,11 +1,11 @@
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG } from "@/lib/config/app_config"
 import { MetadataRoute } from "next"
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: appConfig.name,
-    short_name: appConfig.name,
-    description: appConfig.description,
+    name: APP_CONFIG.name,
+    short_name: APP_CONFIG.name,
+    description: APP_CONFIG.description,
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",

@@ -9,7 +9,7 @@ import { AlertTriangleIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { ResetPasswordForm } from "@/components/authentication/reset-password-form"
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG } from "@/lib/config/app_config"
 import { appRoutes } from "@/lib/config/app-routes"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import {
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: ResetPasswordPageProps) {
   const t = await getTranslations("ResetPassword")
 
   return createMetadata({
-    siteName: appConfig.name,
+    siteName: APP_CONFIG.name,
     title: t("META_TITLE"),
     description: t("META_DESCRIPTION"),
   })

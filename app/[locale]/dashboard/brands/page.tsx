@@ -4,7 +4,7 @@ import { BrandsManagement } from "@/components/dashboard/brands/brands-managemen
 import { getBrandsPageData } from "@/lib/actions/brands"
 import { getBrandsSummary } from "@/lib/actions/brands"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { notFound } from "next/navigation"
@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: PageProps) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "BrandsManagement" })
   return createMetadata({
-    siteName: appConfig.name,
+    siteName: APP_CONFIG.name,
     title: t("META_TITLE"),
     description: t("META_DESCRIPTION"),
   })
@@ -29,7 +29,7 @@ export default async function Page() {
     notFound()
   }
 
-  const t = await getTranslations("BrandsManagement" )
+  const t = await getTranslations("BrandsManagement")
 
   const [pageDataResult, summaryResult] = await Promise.all([
     getBrandsPageData(),

@@ -5,7 +5,7 @@
 
 import { getWishlist } from "@/lib/actions/wishlists"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG, COOKIES_KEYS } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { cookies } from "next/headers"
 import { getTranslations } from "next-intl/server"
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: WishlistPageProps) {
   const t = await getTranslations({ locale, namespace: "Wishlist" })
 
   return createMetadata({
-    siteName: appConfig.name,
+    siteName: APP_CONFIG.name,
     title: t("META_TITLE", { default: "My Wishlist" }),
     description: t("META_DESCRIPTION", {
       default: "View and manage your saved favorite products.",
@@ -43,7 +43,9 @@ export default async function WishlistPage({ params }: WishlistPageProps) {
 
   // 1. جلب الكوكيز لتحديد عرض الشبكة أو القائمة (مطابق تماماً لصفحة التصنيفات)
   const cookieStore = await cookies()
-  const viewModeCookie = cookieStore.get("store_product_view_mode")?.value
+  const viewModeCookie = cookieStore.get(
+    COOKIES_KEYS.PRODUCT_MODE
+  )?.value
   const viewMode = (viewModeCookie === "list" ? "list" : "grid") as
     "grid" | "list"
 
@@ -82,7 +84,7 @@ export default async function WishlistPage({ params }: WishlistPageProps) {
   return (
     <div className="container space-y-8 py-8">
       <WishlistProductGrid
-         viewMode={viewMode}
+        viewMode={viewMode}
         initialProducts={initialProducts}
         fetchMoreAction={loadMoreProducts}
       />

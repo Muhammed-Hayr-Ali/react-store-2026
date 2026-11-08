@@ -1,57 +1,40 @@
-/**
- * @file app/[locale]/(auth)/callback/page.tsx
- * @description OAuth redirect landing route resolving authorization parameters.
- */
-
 import { getTranslations } from "next-intl/server"
 
-import { AuthCallbackView } from "@/components/authentication/auth-callback-view"
-import { appConfig } from "@/lib/config/app_config"
-import { createMetadata } from "@/lib/config/metadata_generator"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+  AuthCallbackError,
+  AuthCallbackView,
+} from "@/components/authentication/auth-callback-view"
+import { Card, CardContent } from "@/components/ui/card"
+import { APP_CONFIG } from "@/lib/config/app_config"
+import { createMetadata } from "@/lib/config/metadata_generator"
 
 interface CallbackPageProps {
-  params: Promise<{
-    locale: string
-  }>
-  searchParams: Promise<{
-    code?: string
-    error?: string
-    error_description?: string
-  }>
+  searchParams: Promise<{ code?: string; error?: string }>
 }
 
-export async function generateMetadata({ params }: CallbackPageProps) {
-  await params
+export async function generateMetadata() {
   const t = await getTranslations("AuthCallback")
 
   return createMetadata({
-    siteName: appConfig.name,
+    siteName: APP_CONFIG.name,
     title: t("META_TITLE"),
     description: t("META_DESCRIPTION"),
   })
 }
 
 export default async function CallbackPage({
-   searchParams,
+  searchParams,
 }: CallbackPageProps) {
-  const t = await getTranslations("AuthCallback")
   const { code, error } = await searchParams
 
   return (
     <Card>
-      <CardHeader className="text-center">
-        <CardTitle className="text-xl">{t("TITLE")}</CardTitle>
-        <CardDescription>{t("SUBTITLE")}</CardDescription>
-      </CardHeader>
       <CardContent>
-        <AuthCallbackView code={code} error={error} />
+        {code && !error ? (
+          <AuthCallbackView code={code} />
+        ) : (
+          <AuthCallbackError error={error} />
+        )}
       </CardContent>
     </Card>
   )

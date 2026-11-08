@@ -28,8 +28,6 @@ export async function signOut(): Promise<ApiResult<null>> {
       }
     }
 
-    const cookieStore = await cookies()
-    cookieStore.delete("login_method")
 
     revalidatePath("/", "layout")
 

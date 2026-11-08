@@ -137,7 +137,8 @@
     "PAGE_TITLE": "My Wishlist",
     "EMPTY_DESCRIPTION": "No products available in your wishlist right now",
     "PAGE_DESC": "Explore all your saved favorite products.",
-    "DISMISS_ALERT_SR": "Dismiss notification"
+    "DISMISS_ALERT_SR": "Dismiss notification",
+    "EXCHANGE_FAILED": "Failed to exchange authorization code. Please try logging in again."
   },
   "AuthLayout": {
     "BACK_TO_HOME_SR": "Return to homepage",
@@ -600,16 +601,13 @@
     "BACK_TO_HOME": "Back to Home"
   },
   "AuthCallback": {
-    "META_TITLE": "Authenticating...",
-    "META_DESCRIPTION": "Completing secure sign-in verification.",
-    "TITLE": "Authenticating...",
-    "SUBTITLE": "Completing secure sign-in verification.",
-    "PROCESSING_TITLE": "Verifying Authentication",
-    "PROCESSING_DESCRIPTION": "Please wait while we complete your session verification...",
+    "META_TITLE": "Authentication Callback",
+    "META_DESCRIPTION": "Processing your authentication request. Please wait while we securely log you in.",
+    "TITLE": "Completing Sign In",
+    "SUBTITLE": "Please wait a moment while we securely process your authentication.",
     "FAILED_TITLE": "Authentication Failed",
-    "RETURN_TO_LOGIN": "Return to Sign In",
-    "SIGN_IN_SUCCESS_TOAST": "Successfully signed in!",
-    "EXCHANGE_FAILED": "Failed to complete authentication exchange."
+    "RETURN_TO_LOGIN": "Return to Login",
+    "SIGN_IN_SUCCESS_TOAST": "Successfully signed in!"
   },
   "ProductDetails": {
     "HOME": "Store",

@@ -9,7 +9,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { notFound } from "next/navigation"
 import { cookies } from "next/headers"
 import { getTranslations } from "next-intl/server"
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG, COOKIES_KEYS } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 
 interface BrandPageProps {
@@ -31,8 +31,11 @@ export async function generateMetadata({ params }: BrandPageProps) {
   const brandName = brand?.name || "Brand"
 
   return createMetadata({
-    siteName: appConfig.name,
-    title: t("META_TITLE", { brand: brandName, default: `${brandName} Products` }),
+    siteName: APP_CONFIG.name,
+    title: t("META_TITLE", {
+      brand: brandName,
+      default: `${brandName} Products`,
+    }),
     description: t("META_DESCRIPTION", {
       brand: brandName,
       default: `Explore all products, offers, and latest releases from ${brandName}.`,
@@ -61,8 +64,11 @@ export default async function BrandPage({ params }: BrandPageProps) {
 
   // 2. جلب الكوكيز لتحديد طريقة عرض الشبكة أو القائمة
   const cookieStore = await cookies()
-  const viewModeCookie = cookieStore.get("store_product_view_mode")?.value
-  const viewMode = (viewModeCookie === "list" ? "list" : "grid") as "grid" | "list"
+  const viewModeCookie = cookieStore.get(
+    COOKIES_KEYS.PRODUCT_MODE
+  )?.value
+  const viewMode = (viewModeCookie === "list" ? "list" : "grid") as
+    "grid" | "list"
 
   const PAGE_LIMIT = 12
 
@@ -93,13 +99,18 @@ export default async function BrandPage({ params }: BrandPageProps) {
   }
 
   return (
-    <div className="container py-8 space-y-8">
+    <div className="container space-y-8 py-8">
       <ProductGrid
         title={brand.name}
-        description={t("PAGE_DESC", { brand: brand.name, default: `Explore all available products from ${brand.name}` })}
+        description={t("PAGE_DESC", {
+          brand: brand.name,
+          default: `Explore all available products from ${brand.name}`,
+        })}
         viewMode={viewMode}
         initialProducts={initialProducts}
-        emptyMessage={t("NO_PRODUCTS", { default: "No products available from this brand right now." })}
+        emptyMessage={t("NO_PRODUCTS", {
+          default: "No products available from this brand right now.",
+        })}
         fetchMoreAction={loadMoreProducts}
       />
     </div>

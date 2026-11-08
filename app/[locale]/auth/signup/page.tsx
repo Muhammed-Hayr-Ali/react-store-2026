@@ -7,7 +7,7 @@
 import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG } from "@/lib/config/app_config"
 import { appRoutes } from "@/lib/config/app-routes"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: SignUpPageProps) {
   const t = await getTranslations("SignUp")
 
   return createMetadata({
-    siteName: appConfig.name,
+    siteName: APP_CONFIG.name,
     title: t("META_TITLE"),
     description: t("META_DESCRIPTION"),
   })

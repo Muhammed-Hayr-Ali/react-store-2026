@@ -2,7 +2,7 @@ import { notFound } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { PackageIcon } from "lucide-react"
 
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getProductForEditBySlug } from "@/lib/actions/products/queries/get-product-for-edit-by-slug"
 import { getCategories, type Category } from "@/lib/actions/categories"
@@ -25,7 +25,7 @@ export async function generateMetadata({
     result.success && result.data ? result.data.name : t("UPDATE_PAGE_TITLE")
 
   return createMetadata({
-    siteName: appConfig.name,
+    siteName: APP_CONFIG.name,
     title: t("UPDATE_PAGE_META_TITLE", { name: productName }),
     description: t("UPDATE_PAGE_META_DESCRIPTION", { name: productName }),
   })

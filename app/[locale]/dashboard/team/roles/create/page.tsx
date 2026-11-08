@@ -1,6 +1,6 @@
 import { ShieldCheckIcon } from "lucide-react"
 
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { RoleForm } from "@/components/dashboard/roles/role-form"
 import { getTranslations } from "next-intl/server"
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: PageProps) {
   const t = await getTranslations({ locale, namespace: "RolesManagement" })
 
   return createMetadata({
-    siteName: appConfig.name,
+    siteName: APP_CONFIG.name,
     title: t("CREATE_PAGE_META_TITLE"),
     description: t("CREATE_PAGE_META_DESCRIPTION"),
   })

@@ -9,7 +9,7 @@ import { getRootCategories } from "@/lib/actions/store/queries/get-root-categori
 import FeaturedHeroSlider from "@/components/store/home/featured-hero-slider"
 import CategoriesScroll from "@/components/store/home/categories-scroll"
 import { ProductGrid } from "@/components/store/home/product-grid"
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG, COOKIES_KEYS, PRODUCT_MODE } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { cookies } from "next/headers"
 import { getTranslations } from "next-intl/server"
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: PageProps) {
   const t = await getTranslations({ locale, namespace: "Home" })
 
   return createMetadata({
-    siteName: appConfig.name,
+    siteName: APP_CONFIG.name,
     title: t("META_TITLE", { default: "Home" }),
     description: t("META_DESCRIPTION", {
       default:
@@ -38,8 +38,10 @@ export default async function Page({ params }: PageProps) {
 
   const cookieStore = await cookies()
   // viewMode: "grid" | "list"
-  const viewModeCookie = cookieStore.get("store_product_view_mode")?.value
-  const viewMode = (viewModeCookie === "list" ? "list" : "grid") as
+  const viewModeCookie = cookieStore.get(
+    COOKIES_KEYS.PRODUCT_MODE
+  )?.value
+  const viewMode = (viewModeCookie === PRODUCT_MODE.LIST ? PRODUCT_MODE.LIST : PRODUCT_MODE.GRID) as
     "grid" | "list"
 
   const PAGE_LIMIT = 12 // عدد المنتجات في الدفعة الأولى وعند التمرير

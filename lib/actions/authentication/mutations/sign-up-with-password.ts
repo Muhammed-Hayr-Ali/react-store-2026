@@ -19,6 +19,7 @@ import WelcomeEmail from "@/lib/services/email/templates/welcome-email"
 import { getValidationDetails } from "../../validation"
 import { signUpWithPasswordSchema } from "../schemas"
 import { createOpenWAClient } from "@/lib/openwa/openWAClient"
+import { APP_CONFIG, COOKIES_KEYS, LOGIN_METHODS } from "@/lib/config/app_config"
 
 /**
  * تنشئ حسابًا جديدًا بالبريد الإلكتروني وكلمة المرور.
@@ -116,12 +117,7 @@ export async function signUpWithPassword(
   }
 
   const cookieStore = await cookies()
-  cookieStore.set("login_method", "email", {
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-  })
+  cookieStore.set(COOKIES_KEYS.LOGIN_METHOD, LOGIN_METHODS.EMAIL)
 
   revalidatePath("/", "layout")
 

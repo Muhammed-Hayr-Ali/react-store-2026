@@ -9,7 +9,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { notFound } from "next/navigation"
 import { cookies } from "next/headers"
 import { getTranslations } from "next-intl/server"
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 
 interface CategoryPageProps {
@@ -31,8 +31,11 @@ export async function generateMetadata({ params }: CategoryPageProps) {
   const categoryName = category?.name || "Category"
 
   return createMetadata({
-    siteName: appConfig.name,
-    title: t("META_TITLE", { category: categoryName, default: `${categoryName} Products` }),
+    siteName: APP_CONFIG.name,
+    title: t("META_TITLE", {
+      category: categoryName,
+      default: `${categoryName} Products`,
+    }),
     description: t("META_DESCRIPTION", {
       category: categoryName,
       default: `Browse our collection of ${categoryName} items and everyday essentials.`,
@@ -62,8 +65,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const cookieStore = await cookies()
   const viewModeCookie = cookieStore.get("store_product_view_mode")?.value
   const viewMode = (viewModeCookie === "list" ? "list" : "grid") as
-    | "grid"
-    | "list"
+    "grid" | "list"
 
   const PAGE_LIMIT = 12
 
@@ -97,10 +99,15 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     <div className="container space-y-8 py-8">
       <ProductGrid
         title={category.name}
-        description={t("PAGE_DESC", { category: category.name, default: `Explore all available products in ${category.name}` })}
+        description={t("PAGE_DESC", {
+          category: category.name,
+          default: `Explore all available products in ${category.name}`,
+        })}
         viewMode={viewMode}
         initialProducts={initialProducts}
-        emptyMessage={t("NO_PRODUCTS", { default: "No products available in this category." })}
+        emptyMessage={t("NO_PRODUCTS", {
+          default: "No products available in this category.",
+        })}
         fetchMoreAction={loadMoreProducts}
       />
     </div>

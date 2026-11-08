@@ -9,7 +9,7 @@ import { getTranslations } from "next-intl/server"
 import { cookies } from "next/headers"
 
 import { LoginForm } from "@/components/authentication/login-form"
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG, COOKIES_KEYS } from "@/lib/config/app_config"
 import { appRoutes } from "@/lib/config/app-routes"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: LoginPageProps) {
   const t = await getTranslations("LoginForm")
 
   return createMetadata({
-    siteName: appConfig.name,
+    siteName: APP_CONFIG.name,
     title: t("META_TITLE"),
     description: t("META_DESCRIPTION"),
   })
@@ -49,7 +49,7 @@ export default async function LoginPage() {
     redirect(appRoutes.home)
   }
 
-  const lastLoginMethod = cookieStore.get("lastLoginMethod")
+  const loginMethod = cookieStore.get(COOKIES_KEYS.LOGIN_METHOD)?.value
 
   return (
     <Card>
@@ -58,7 +58,7 @@ export default async function LoginPage() {
         <CardDescription>{t("SUBTITLE")}</CardDescription>
       </CardHeader>
       <CardContent>
-        <LoginForm />
+        <LoginForm lastLoginMethod={loginMethod} />
       </CardContent>
     </Card>
   )

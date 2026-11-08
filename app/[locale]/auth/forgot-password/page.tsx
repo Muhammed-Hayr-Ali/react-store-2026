@@ -7,7 +7,7 @@ import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 
 import { ForgotPasswordForm } from "@/components/authentication/forgot-password-form"
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG } from "@/lib/config/app_config"
 import { appRoutes } from "@/lib/config/app-routes"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: ForgotPasswordPageProps) {
   const t = await getTranslations("ForgotPassword")
 
   return createMetadata({
-    siteName: appConfig.name,
+    siteName: APP_CONFIG.name,
     title: t("META_TITLE"),
     description: t("META_DESCRIPTION"),
   })

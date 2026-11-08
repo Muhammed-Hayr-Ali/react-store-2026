@@ -15,7 +15,7 @@
  */
 
 import { Metadata } from "next"
-import { appConfig } from "./app_config"
+import { APP_CONFIG } from "./app_config"
 
 /**
  * Configuration interface for creating page-specific metadata.
@@ -84,28 +84,28 @@ interface SeoConfig {
  */
 export function createMetadata({
   title,
-  description = appConfig.description,
+  description = APP_CONFIG.description,
   path = "",
   keywords,
-  locale = appConfig.locale,
-  siteName = appConfig.name,
+  locale = APP_CONFIG.locale,
+  siteName = APP_CONFIG.name,
   noindex = false,
   image,
   type = "website",
 }: SeoConfig): Metadata {
   const fullTitle = `${title} | ${siteName}`
-  const robots = noindex ? "noindex, follow" : appConfig.robots
-  const url = `${appConfig.url}${path}`
+  const robots = noindex ? "noindex, follow" : APP_CONFIG.robots
+  const url = `${APP_CONFIG.url}${path}`
 
   // Process keywords: combine page keywords with site defaults
   const combinedKeywords = Array.isArray(keywords)
-    ? [...keywords, ...appConfig.keywords]
+    ? [...keywords, ...APP_CONFIG.keywords]
     : keywords
-      ? [keywords, ...appConfig.keywords]
-      : appConfig.keywords
+      ? [keywords, ...APP_CONFIG.keywords]
+      : APP_CONFIG.keywords
 
   // Default image fallback
-  const finalImage = image || appConfig.icons.apple || "/logo.png"
+  const finalImage = image || APP_CONFIG.icons.apple || "/logo.png"
 
   return {
     title: fullTitle,
@@ -115,7 +115,7 @@ export function createMetadata({
     alternates: {
       canonical: url,
     },
-    metadataBase: new URL(appConfig.url),
+    metadataBase: new URL(APP_CONFIG.url),
 
     openGraph: {
       title: fullTitle,
@@ -139,10 +139,10 @@ export function createMetadata({
       title: fullTitle,
       description,
       images: [finalImage],
-      creator: appConfig.twitterHandle,
+      creator: APP_CONFIG.twitterHandle,
     },
 
-    icons: appConfig.icons,
+    icons: APP_CONFIG.icons,
     manifest: "/manifest.json",
     appleWebApp: {
       capable: true,

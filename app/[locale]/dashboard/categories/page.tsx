@@ -6,7 +6,7 @@ import { CategoriesSummary } from "@/components/dashboard/categories/categories-
 import { getCategoriesPageData } from "@/lib/actions/categories/queries/get-categories-page-data"
 import { getCategoriesSummary } from "@/lib/actions/categories/queries/get-categories-summary"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { notFound } from "next/navigation"
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: PageProps) {
     namespace: "CategoriesManagement",
   })
   return createMetadata({
-    siteName: appConfig.name,
+    siteName: APP_CONFIG.name,
     title: t("META_TITLE"),
     description: t("META_DESCRIPTION"),
   })

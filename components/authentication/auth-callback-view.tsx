@@ -1,99 +1,82 @@
-/**
- * @file components/auth/oauth-callback-view.tsx
- * @description Client-side view orchestrating OAuth code exchange and rendering accessible progress feedback.
- */
-
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { toast } from "sonner"
-import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { XCircleIcon } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { handleAuthCallback } from "@/lib/actions/authentication"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { appRoutes } from "@/lib/config/app-routes"
 
-interface AuthCallbackViewProps {
-  code?: string
-  error?: string
-}
-
-export function AuthCallbackView({ code, error }: AuthCallbackViewProps) {
-   const tErrors = useTranslations("ActionErrors")
+function AuthCallbackView({ code }: { code: string }) {
+  const tErrors = useTranslations("ActionErrors")
   const t = useTranslations("AuthCallback")
   const router = useRouter()
-  const hasProcessed = React.useRef(false)
+  const started = React.useRef(false)
 
-  // Exchange the OAuth code once, then redirect based on the result.
   React.useEffect(() => {
-    if (hasProcessed.current) return
-    hasProcessed.current = true
+    if (started.current) return // يمنع التنفيذ المزدوج في Strict Mode
+    started.current = true
 
-    if (code) {
-      const processExchange = async () => {
-        try {
-          const result = await handleAuthCallback({ code })
-          if (result.success) {
-            toast.success(t("SIGN_IN_SUCCESS_TOAST"))
-            router.refresh()
-            router.replace(appRoutes.home)
-          } else {
-            toast.error(
-              result.error
-                ? tErrors(getActionErrorKey(result.error))
-                : tErrors("EXCHANGE_FAILED")
-            )
-            router.replace(appRoutes.auth.login)
-          }
-        } catch (err) {
-          console.error("OAuth callback error:", err)
-          toast.error(tErrors("EXCHANGE_FAILED"))
-          router.replace(appRoutes.auth.login)
-        }
-      }
-
-      processExchange()
+    const fail = (key: string) => {
+      toast.error(tErrors(key))
+      router.replace(appRoutes.auth.login)
     }
+
+    handleAuthCallback({ code })
+      .then((result) => {
+        if (!result.success) {
+          return fail(
+            result.error ? getActionErrorKey(result.error) : "EXCHANGE_FAILED"
+          )
+        }
+        toast.success(t("SIGN_IN_SUCCESS_TOAST"))
+        router.replace(appRoutes.home)
+        router.refresh()
+      })
+      .catch(() => fail("EXCHANGE_FAILED"))
   }, [code, router, t, tErrors])
 
-  // Error view when OAuth provider returns an error parameter
-  if (error) {
-    return (
-      <div className="flex w-full flex-col items-center text-center">
-        <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-          <XCircleIcon className="size-6" />
-        </div>
-        <h1 className="text-xl font-bold tracking-tight text-foreground">
-          {t("FAILED_TITLE")}
-        </h1>
-        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-          {t(getActionErrorKey(error))}
-        </p>
-        <Button
-          variant="outline"
-          className="mt-6 h-9 w-full text-xs font-medium shadow-xs"
-          onClick={() => router.replace(appRoutes.auth.login)}
-        >
-          {t("RETURN_TO_LOGIN")}
-        </Button>
-      </div>
-    )
-  }
-
-  // Active processing loader
   return (
     <div className="flex w-full flex-col items-center justify-center py-6 text-center">
       <Spinner className="text-primary" />
       <h1 className="mt-4 text-base font-semibold text-foreground">
-        {t("PROCESSING_TITLE")}
+        {t("TITLE")}
       </h1>
-      <p className="mt-1 text-xs text-muted-foreground">
-        {t("PROCESSING_DESCRIPTION")}
-      </p>
+      <p className="mt-1 text-xs text-muted-foreground">{t("SUBTITLE")}</p>
     </div>
   )
 }
+
+function AuthCallbackError({ error }: { error?: string }) {
+  const tErrors = useTranslations("ActionErrors")
+  const t = useTranslations("AuthCallback")
+
+  return (
+    <div className="flex w-full flex-col items-center text-center">
+      <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+        <XCircleIcon className="size-6" />
+      </div>
+      <h1 className="text-xl font-bold tracking-tight text-foreground">
+        {t("FAILED_TITLE")}
+      </h1>
+      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+        {tErrors(error ? getActionErrorKey(error) : "EXCHANGE_FAILED")}
+      </p>
+      <Button
+        variant="outline"
+        className="mt-6 h-9 w-full text-xs font-medium shadow-xs"
+        asChild
+      >
+        <Link href={appRoutes.auth.login}>{t("RETURN_TO_LOGIN")}</Link>
+      </Button>
+    </div>
+  )
+}
+
+export { AuthCallbackView, AuthCallbackError }

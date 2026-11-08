@@ -5,7 +5,7 @@ import { NewsletterSubscribersTable } from "@/components/dashboard/newsletter-su
 import { getSubscribersPageData } from "@/lib/actions/newsletter_subscribers/queries/get-subscribers-page-data"
 import { getNewsletterSubscribersSummary } from "@/lib/actions/newsletter_subscribers/queries/get-newsletter-subscribers-summary"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { SubscribersSummary } from "@/components/dashboard/newsletter-subscribers/subscribers-summary"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: PageProps) {
     namespace: "NewsletterSubscribersManagement",
   })
   return createMetadata({
-    siteName: appConfig.name,
+    siteName: APP_CONFIG.name,
     title: t("META_TITLE"),
     description: t("META_DESCRIPTION"),
   })
@@ -80,7 +80,6 @@ export default async function Page({ params }: PageProps) {
         totalCount={summaryResult.data.total}
         activeCount={summaryResult.data.active}
         unsubscribedCount={summaryResult.data.unsubscribed}
-     
       />
 
       <NewsletterSubscribersTable

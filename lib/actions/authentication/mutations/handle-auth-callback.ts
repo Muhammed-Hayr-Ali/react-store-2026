@@ -13,6 +13,8 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { getValidationDetails } from "../../validation"
 import type { AuthCallbackInput } from "../types"
 import { authCallbackSchema } from "../schemas"
+import { cookies } from "next/headers"
+import { APP_CONFIG, COOKIES_KEYS } from "@/lib/config/app_config"
 
 /**
  * تستبدل رمز OAuth بجلسة مستخدم نشطة.
@@ -30,30 +32,24 @@ export async function handleAuthCallback(
     }
   }
 
-  try {
-    const supabase = await createServerClient()
+  const supabase = await createServerClient()
 
-    const { error } = await supabase.auth.exchangeCodeForSession(
-      validation.data.code
-    )
+  const { error } = await supabase.auth.exchangeCodeForSession(
+    validation.data.code
+  )
 
-    if (error) {
-      return {
-        success: false,
-        error: "EXCHANGE_OAUTH_CODE_ERROR",
-        details: { auth: [error.message] },
-      }
-    }
-
-    revalidatePath("/", "layout")
-    return { success: true, data: null }
-  } catch (error) {
+  if (error) {
     return {
       success: false,
-      error: "HANDLE_OAUTH_CALLBACK_ERROR",
-      details: {
-        system: [error instanceof Error ? error.message : "Unknown error"],
-      },
+      error: "EXCHANGE_OAUTH_CODE_ERROR",
+      details: { auth: [error.message] },
     }
   }
+
+  const cookieStore = await cookies()
+
+  cookieStore.set(COOKIES_KEYS.LOGIN_METHOD, "google")
+
+  revalidatePath("/", "layout")
+  return { success: true, data: null }
 }

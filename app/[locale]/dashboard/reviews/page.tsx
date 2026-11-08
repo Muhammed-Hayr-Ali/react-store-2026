@@ -6,7 +6,7 @@ import { ReviewsSummary } from "@/components/dashboard/reviews/reviews-summary"
 import { getReviewsPageData } from "@/lib/actions/reviews/queries/get-reviews-page-data"
 // نستخدم الـ Page Data الذي يجمع كل شيء، لكن لو احتجنا الملخص منفصلاً سنستخدمه من الداخل
 import { getActionErrorKey } from "@/lib/actions/error-keys"
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { notFound } from "next/navigation"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: PageProps) {
     namespace: "ReviewsManagement",
   })
   return createMetadata({
-    siteName: appConfig.name,
+    siteName: APP_CONFIG.name,
     title: t("META_TITLE"),
     description: t("META_DESCRIPTION"),
   })

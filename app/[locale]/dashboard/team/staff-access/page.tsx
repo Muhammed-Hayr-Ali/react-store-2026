@@ -1,7 +1,7 @@
- import { getTranslations } from "next-intl/server"
+import { getTranslations } from "next-intl/server"
 import { UsersIcon } from "lucide-react"
 
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 
 import { getStaffAccessPageData } from "@/lib/actions/staff-access/queries/get-staff-access-page-data"
@@ -9,7 +9,7 @@ import { getStaffAccessPageData } from "@/lib/actions/staff-access/queries/get-s
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import StaffAccessTable from "@/components/dashboard/staff-access/staff-access-table"
 import { StaffAccessSummary } from "@/components/dashboard/staff-access/staff-access-summary"
- 
+
 interface PageProps {
   params: Promise<{
     locale: string
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: PageProps) {
   })
 
   return createMetadata({
-    siteName: appConfig.name,
+    siteName: APP_CONFIG.name,
     title: t("PAGE_META_TITLE"),
     description: t("PAGE_META_DESCRIPTION"),
   })
@@ -37,11 +37,10 @@ export default async function Page({ params }: PageProps) {
     namespace: "StaffAccessManagement",
   })
 
-
   const pageDataResult = await getStaffAccessPageData()
   if (!pageDataResult.success) {
     throw new Error(
-      t(getActionErrorKey(pageDataResult.error) ??  t("UNEXPECTED_ERROR"))
+      t(getActionErrorKey(pageDataResult.error) ?? t("UNEXPECTED_ERROR"))
     )
   }
 

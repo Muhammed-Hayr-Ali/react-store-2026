@@ -11,7 +11,7 @@ import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import { AppLogo } from "@/components/ui/app-logo"
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG } from "@/lib/config/app_config"
 
 import { footerConfig } from "./footer-config"
 import { ThemeToggle } from "./theme-toggle"
@@ -106,7 +106,7 @@ export default function Footer() {
         <div className="mt-10 border-t border-border/50 pt-6">
           <div className="flex flex-col-reverse items-center justify-between gap-4 sm:flex-row">
             <p className="text-xs text-muted-foreground">
-              &copy; {new Date().getFullYear()} {appConfig.name}.{" "}
+              &copy; {new Date().getFullYear()} {APP_CONFIG.name}.{" "}
               {t("rights_reserved")}
             </p>
             <div className="flex items-center gap-2">

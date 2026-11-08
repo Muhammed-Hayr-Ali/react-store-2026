@@ -8,7 +8,7 @@ import { notFound } from "next/navigation"
 import { getProductDetails } from "@/lib/actions/store/product-details/details/queries/get-product-details"
 import { getProductReviews } from "@/lib/actions/store/product-details/reviews/queries/get-product-reviews"
 import { ProductReviewsSection } from "@/components/product-details/reviews/product-reviews-section"
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { ProductInfoSection } from "@/components/product-details/details/product-info-section"
 
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: ProductDetailsPageProps) {
 
   if (!productResult.success || !productResult.data) {
     return createMetadata({
-      siteName: appConfig.name,
+      siteName: APP_CONFIG.name,
       title: "Product Not Found",
       description: "The requested product could not be found.",
     })
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: ProductDetailsPageProps) {
   const product = productResult.data
 
   return createMetadata({
-    siteName: appConfig.name,
+    siteName: APP_CONFIG.name,
     title: product.meta_title || product.name || product.slug,
     description:
       product.meta_description || product.description || product.slug,

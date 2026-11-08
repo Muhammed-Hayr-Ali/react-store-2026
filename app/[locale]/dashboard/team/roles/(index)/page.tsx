@@ -6,7 +6,7 @@
 import { getTranslations } from "next-intl/server"
 import { ShieldCheckIcon } from "lucide-react"
 
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import RolesTable from "@/components/dashboard/roles/roles-table"
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: PageProps) {
   const t = await getTranslations({ locale, namespace: "RolesManagement" })
 
   return createMetadata({
-    siteName: appConfig.name,
+    siteName: APP_CONFIG.name,
     title: t("PAGE_META_TITLE"),
     description: t("PAGE_META_DESCRIPTION"),
   })

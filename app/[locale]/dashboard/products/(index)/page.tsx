@@ -4,7 +4,7 @@ import { PackageIcon } from "lucide-react"
 import { getAdminProductsList } from "@/lib/actions/products/queries/get-admin-products-list"
 import { getAdminProductsSummary } from "@/lib/actions/products/queries/get-admin-products-summary"
 import type { AdminProductSummary } from "@/lib/actions/products/types"
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import {} from "@/lib/config/app-routes"
 import { DataTable } from "@/components/dashboard/product/products-table"
@@ -13,7 +13,7 @@ import { getTranslations } from "next-intl/server"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { notFound } from "next/navigation"
- 
+
 export async function generateMetadata({
   params,
 }: {
@@ -22,7 +22,7 @@ export async function generateMetadata({
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "ProductsManagement" })
   return createMetadata({
-    siteName: appConfig.name,
+    siteName: APP_CONFIG.name,
     title: t("PAGE_TITLE"),
     description: t("PAGE_DESCRIPTION"),
   })
@@ -33,14 +33,11 @@ export default async function Page({
 }: {
   params: Promise<{ locale: string }>
 }) {
+  const canView = await hasPermission(PERMISSIONS.MANAGE_PRODUCTS)
 
-    const canView = await hasPermission(PERMISSIONS.MANAGE_PRODUCTS)
-  
   if (!canView) {
     notFound()
   }
-
-
 
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "ProductsManagement" })

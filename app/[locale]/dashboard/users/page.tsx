@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server"
 import { UsersIcon } from "lucide-react"
 
-import { appConfig } from "@/lib/config/app_config"
+import { APP_CONFIG } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getUsersPageData } from "@/lib/actions/users/queries/get-users-page-data"
 import { UsersTable } from "@/components/dashboard/users/users-table"
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps) {
   const t = await getTranslations({ locale, namespace: "UsersManagement" })
 
   return createMetadata({
-    siteName: appConfig.name,
+    siteName: APP_CONFIG.name,
     title: t("META_TITLE"),
     description: t("META_DESCRIPTION"),
   })
@@ -33,7 +33,7 @@ export default async function Page() {
     notFound()
   }
 
-  const t = await getTranslations("UsersManagement" )
+  const t = await getTranslations("UsersManagement")
 
   const pageDataResult = await getUsersPageData()
   if (!pageDataResult.success) {
