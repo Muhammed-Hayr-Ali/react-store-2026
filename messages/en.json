@@ -140,7 +140,8 @@
     "DISMISS_ALERT_SR": "Dismiss notification",
     "EXCHANGE_FAILED": "Failed to exchange authorization code. Please try logging in again.",
     "GENERIC_ERROR": "Unable to complete sign in. Please try again later.",
-    "EMAIL_ALREADY_EXISTS_ERROR": "An account with this email address already exists."
+    "EMAIL_ALREADY_EXISTS_ERROR": "An account with this email address already exists.",
+    "ACCESS_DENIED": "Access denied. Please check your account permissions."
   },
   "AuthLayout": {
     "TERMS_PREFIX": "By continuing, you agree to our",

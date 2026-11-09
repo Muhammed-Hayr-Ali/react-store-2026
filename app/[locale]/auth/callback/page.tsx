@@ -1,12 +1,9 @@
 import { getTranslations } from "next-intl/server"
 
-import {
-  AuthCallbackError,
-  AuthCallbackView,
-} from "@/components/authentication/auth-callback-view"
-import { Card, CardContent } from "@/components/ui/card"
+ import { Card, CardContent } from "@/components/ui/card"
 import { APP_CONFIG } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
+import { AuthCallbackView } from "@/components/authentication/auth-callback-view"
 
 interface CallbackPageProps {
   searchParams: Promise<{ code?: string; error?: string }>
@@ -30,11 +27,7 @@ export default async function CallbackPage({
   return (
     <Card>
       <CardContent>
-        {code && !error ? (
-          <AuthCallbackView code={code} />
-        ) : (
-          <AuthCallbackError error={error} />
-        )}
+        <AuthCallbackView  code={code} error={error} />
       </CardContent>
     </Card>
   )

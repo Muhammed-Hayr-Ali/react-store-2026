@@ -9,25 +9,29 @@ import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { CheckCircle2Icon, XCircleIcon } from "lucide-react"
-import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-import { Spinner } from "@/components/ui/spinner"
+import {
+  LoadingStatusAnimation,
+  type ProcessStatus,
+} from "@/components/shared/loading_states_animation"
 import { handleAuthCallback } from "@/lib/actions/authentication"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { APP_ROUTES } from "@/lib/config/app-routes"
 
-export type ResponserStatus = "loading" | "success" | "error"
+export type ResponserStatus = ProcessStatus
+
+const SUCCESS_REDIRECT_DELAY_MS = 1500
 
 interface AuthCallbackViewProps {
-  code?: string
-  error?: string
+  code: string | undefined
+  error: string | undefined
 }
 
-function AuthCallbackView({ code }: AuthCallbackViewProps) {
+function AuthCallbackView({ code, error }: AuthCallbackViewProps) {
   const router = useRouter()
   const started = React.useRef(false)
+  const redirectTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   const [responserStatus, setResponserStatus] =
     React.useState<ResponserStatus>("loading")
   const [errorMessage, setErrorMessage] = React.useState<string | undefined>()
@@ -45,12 +49,11 @@ function AuthCallbackView({ code }: AuthCallbackViewProps) {
         }
 
         setResponserStatus("success")
-        toast.success("تم تسجيل الدخول بنجاح")
 
-        setTimeout(() => {
+        redirectTimer.current = setTimeout(() => {
           router.replace(APP_ROUTES.HOME)
           router.refresh()
-        }, 1500)
+        }, SUCCESS_REDIRECT_DELAY_MS)
       })
       .catch(() => {
         setErrorMessage("EXCHANGE_FAILED")
@@ -58,77 +61,95 @@ function AuthCallbackView({ code }: AuthCallbackViewProps) {
       })
   }, [code, router])
 
-  if (responserStatus === "error") {
-    return <AuthCallbackError error={errorMessage} />
-  }
+  // تنظيف مؤقت إعادة التوجيه عند مغادرة الصفحة
+  React.useEffect(() => {
+    return () => {
+      if (redirectTimer.current) clearTimeout(redirectTimer.current)
+    }
+  }, [])
 
-  if (responserStatus === "success") {
-    return <AuthCallbackSuccess />
-  }
+  const hasError = responserStatus === "error" || Boolean(error)
+  const status: ProcessStatus = hasError ? "error" : responserStatus
 
-  return <AuthCallbackLoading />
+  // نفس المكوّن (AuthCallbackPanel) يبقى مركّبًا في كل الحالات،
+  // فيستمر نفس الـ Rive instance وتظهر الانتقالات (loading → success/error) بسلاسة.
+  return <AuthCallbackPanel status={status} error={error ?? errorMessage} />
 }
 
-function AuthCallbackSuccess() {
-  const t = useTranslations("AuthCallback")
-
-  return (
-    <div className="flex w-full flex-col items-center text-center">
-      <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-        <CheckCircle2Icon className="size-6" />
-      </div>
-      <h1 className="text-xl font-bold tracking-tight text-foreground">
-        {t("SUCCESS_TITLE")}
-      </h1>
-      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-        {t("SUCCESS_SUBTITLE")}
-      </p>
-    </div>
-  )
+interface AuthCallbackPanelProps {
+  status: ProcessStatus
+  error?: string
 }
 
-function AuthCallbackLoading() {
-  const t = useTranslations("AuthCallback")
-
-  return (
-    <div className="flex w-full flex-col items-center justify-center py-6 text-center">
-      <Spinner className="size-6 text-primary" />
-      <h1 className="mt-4 text-base font-semibold text-foreground">
-        {t("LOADING_TITLE")}
-      </h1>
-      <p className="mt-1 text-xs text-muted-foreground">
-        {t("LOADING_SUBTITLE")}
-      </p>
-    </div>
-  )
-}
-
-function AuthCallbackError({ error }: { error?: string }) {
+function AuthCallbackPanel({ status, error }: AuthCallbackPanelProps) {
   const tErrors = useTranslations("ActionErrors")
   const t = useTranslations("AuthCallback")
 
   const errorKey = error ? getActionErrorKey(error) : "EXCHANGE_FAILED"
 
   return (
-    <div className="flex w-full flex-col items-center text-center">
-      <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-        <XCircleIcon className="size-6" />
-      </div>
-      <h1 className="text-xl font-bold tracking-tight text-foreground">
-        {t("FAILED_TITLE")}
-      </h1>
-      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-        {tErrors(errorKey)}
-      </p>
-      <Button
-        variant="outline"
-        className="mt-6 h-9 w-full text-xs font-medium shadow-xs"
-        asChild
-      >
-        <Link href={APP_ROUTES.AUTH.LOGIN}>{t("RETURN_TO_LOGIN")}</Link>
-      </Button>
+    <div
+      className="flex min-h-48 w-full flex-col items-center justify-center py-6 text-center"
+      aria-live="polite"
+    >
+      <LoadingStatusAnimation status={status} className="mb-2 size-28" />
+
+      {status === "loading" && (
+        <>
+          <h1 className="text-base font-semibold text-foreground">
+            {t("LOADING_TITLE")}
+          </h1>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {t("LOADING_SUBTITLE")}
+          </p>
+        </>
+      )}
+
+      {status === "success" && (
+        <>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">
+            {t("SUCCESS_TITLE")}
+          </h1>
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+            {t("SUCCESS_SUBTITLE")}
+          </p>
+        </>
+      )}
+
+      {status === "error" && (
+        <>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">
+            {t("FAILED_TITLE")}
+          </h1>
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+            {error === "access_denied"
+              ? tErrors("ACCESS_DENIED")
+              : tErrors(errorKey)}
+          </p>
+          <Button
+            variant="outline"
+            className="mt-6 h-9 w-full text-xs font-medium shadow-xs"
+            asChild
+          >
+            <Link href={APP_ROUTES.AUTH.LOGIN}>{t("RETURN_TO_LOGIN")}</Link>
+          </Button>
+        </>
+      )}
     </div>
   )
+}
+
+// أغلفة رفيعة للحفاظ على الـ exports القديمة (مثل استخدام Loading كـ Suspense fallback)
+function AuthCallbackLoading() {
+  return <AuthCallbackPanel status="loading" />
+}
+
+function AuthCallbackSuccess() {
+  return <AuthCallbackPanel status="success" />
+}
+
+function AuthCallbackError({ error }: { error?: string }) {
+  return <AuthCallbackPanel status="error" error={error} />
 }
 
 export {

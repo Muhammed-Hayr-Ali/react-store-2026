@@ -28,8 +28,9 @@ export default async function AuthLayout({
   const t = await getTranslations("AuthLayout")
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
-      <div className="flex w-full max-w-md flex-col gap-6">
+    <div className="flex min-h-svh flex-col items-center justify-between gap-6 bg-muted">
+      <div />
+      <div className="flex w-full max-w-md flex-col justify-center gap-6">
         <Link
           href={APP_ROUTES.HOME}
           className="flex items-center gap-2 self-center font-medium"
@@ -39,27 +40,25 @@ export default async function AuthLayout({
           </div>
         </Link>
 
-        <div className="flex flex-col gap-6">
-          {children}
-          <FieldDescription className="px-6 text-center text-[10px] leading-relaxed text-muted-foreground/80">
-            {t("TERMS_PREFIX")}{" "}
-            <Link
-              href={`/${locale}${APP_ROUTES.TERMS ?? "#"}`}
-              className="text-primary underline-offset-4 hover:underline"
-            >
-              {t("TERMS_OF_SERVICE")}
-            </Link>{" "}
-            {t("TERMS_AND")}{" "}
-            <Link
-              href={`/${locale}${APP_ROUTES.PRIVACY ?? "#"}`}
-              className="text-primary underline-offset-4 hover:underline"
-            >
-              {t("PRIVACY_POLICY")}
-            </Link>
-            {t("TERMS_SUFFIX")}
-          </FieldDescription>
-        </div>
+        {children}
       </div>
+      <FieldDescription className="mb-0 p-0 text-center text-[10px] leading-relaxed text-muted-foreground/80">
+        {t("TERMS_PREFIX")}{" "}
+        <Link
+          href={`/${locale}${APP_ROUTES.TERMS ?? "#"}`}
+          className="text-primary underline-offset-4 hover:underline"
+        >
+          {t("TERMS_OF_SERVICE")}
+        </Link>{" "}
+        {t("TERMS_AND")}{" "}
+        <Link
+          href={`/${locale}${APP_ROUTES.PRIVACY ?? "#"}`}
+          className="text-primary underline-offset-4 hover:underline"
+        >
+          {t("PRIVACY_POLICY")}
+        </Link>
+        {t("TERMS_SUFFIX")}
+      </FieldDescription>
     </div>
   )
 }

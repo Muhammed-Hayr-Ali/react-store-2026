@@ -40,6 +40,7 @@
     "@radix-ui/react-tooltip": "^1.2.16",
     "@react-email/components": "^1.0.12",
     "@react-email/render": "^2.1.0",
+    "@rive-app/react-canvas": "^4.38.1",
     "@rmyndharis/openwa": "^0.9.0",
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.8",
