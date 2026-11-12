@@ -47,7 +47,7 @@ export default async function Page({ params }: PageProps) {
   const [featuredResult, latestResult, categoriesResult] = await Promise.all([
     getFeaturedProducts({ limit: 5, activeOnly: true }),
     getLatestRegularProducts({ limit: PAGE_LIMIT, page: 1, activeOnly: true }),
-    getRootCategories({ limit: 10 }),
+    getRootCategories(),
   ])
 
   const slides = featuredResult.success ? featuredResult.data : []

@@ -312,7 +312,7 @@
     "IMAGE_SECTION": "Category image",
     "IMAGE_DESCRIPTION": "Choose an image from the library or enter an image URL.",
     "IMAGE_URL_LABEL": "Image URL",
-    "IMAGE_URL_PLACEHOLDER": "https://example.com/category.jpg",
+    "IMAGE_URL_PLACEHOLDER": "https://example.com/category.jpg or /categories/categorise.png",
     "IMAGE_PREVIEW_LABEL": "Image preview",
     "IMAGE_ALT_LABEL": "Image alt text",
     "IMAGE_ALT_PLACEHOLDER": "Home and garden category",

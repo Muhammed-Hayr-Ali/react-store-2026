@@ -1,20 +1,25 @@
-"use client"
-
 /**
  * @file components/store/home/categories-scroll.tsx
- * @description Horizontal scrollable categories component with flawless localized gradient mask for RTL and LTR.
+ * @description Horizontal scrollable categories component utilizing shadcn Carousel with localized gradient mask and RTL support.
  */
+
+"use client"
 
 import * as React from "react"
 import Link from "next/link"
 import { useLocale, useTranslations } from "next-intl"
-import useEmblaCarousel from "embla-carousel-react"
 import { ChevronLeftIcon, ChevronRightIcon, LayoutGridIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { SimplifiedRootCategory } from "@/lib/actions/store/queries/get-root-categories"
 import { getSiteAssetUrl } from "@/lib/database/supabase/storage"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel"
 
 interface CategoriesScrollProps {
   categories: SimplifiedRootCategory[]
@@ -27,43 +32,39 @@ export default function CategoriesScroll({
   const t = useTranslations("CategoriesScroll")
   const isRtl = locale === "ar"
 
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    align: "start",
-    containScroll: "trimSnaps",
-    direction: isRtl ? "rtl" : "ltr",
-  })
-
+  const [carouselApi, setCarouselApi] = React.useState<CarouselApi>()
   const [canScrollPrev, setCanScrollPrev] = React.useState(false)
   const [canScrollNext, setCanScrollNext] = React.useState(false)
 
   const scrollPrev = React.useCallback(() => {
-    if (emblaApi) emblaApi.scrollPrev()
-  }, [emblaApi])
+    carouselApi?.scrollPrev()
+  }, [carouselApi])
 
   const scrollNext = React.useCallback(() => {
-    if (emblaApi) emblaApi.scrollNext()
-  }, [emblaApi])
+    carouselApi?.scrollNext()
+  }, [carouselApi])
 
   React.useEffect(() => {
-    if (!emblaApi) return
+    if (!carouselApi) return
 
-    const updateScrollButtons = () => {
-      setCanScrollPrev(emblaApi.canScrollPrev())
-      setCanScrollNext(emblaApi.canScrollNext())
+    const updateScrollState = () => {
+      setCanScrollPrev(carouselApi.canScrollPrev())
+      setCanScrollNext(carouselApi.canScrollNext())
     }
 
-    emblaApi.on("select", updateScrollButtons)
-    emblaApi.on("reInit", updateScrollButtons)
-    updateScrollButtons()
+    updateScrollState()
+    carouselApi.on("select", updateScrollState)
+    carouselApi.on("reInit", updateScrollState)
 
     return () => {
-      emblaApi.off("select", updateScrollButtons)
-      emblaApi.off("reInit", updateScrollButtons)
+      carouselApi.off("select", updateScrollState)
+      carouselApi.off("reInit", updateScrollState)
     }
-  }, [emblaApi])
+  }, [carouselApi])
 
   if (!categories || categories.length === 0) return null
 
+  // حساب أقنعة التلاشي (Gradient Mask) بناءً على إمكانية التمرير واتجاه اللغة
   const leftHasScroll = isRtl ? canScrollNext : canScrollPrev
   const rightHasScroll = isRtl ? canScrollPrev : canScrollNext
 
@@ -106,56 +107,69 @@ export default function CategoriesScroll({
         </div>
       </div>
 
-      {/* مسار السحب مع تطبيق التلاشي التلقائي */}
-      <div
-        className="overflow-hidden transition-all duration-300"
-        ref={emblaRef}
-        style={{
-          maskImage: maskStyle,
-          WebkitMaskImage: maskStyle,
+      {/* شريط الـ Carousel مع تطبيق تأثير التلاشي وحفظ الـ API للتحكم */}
+      <Carousel
+        setApi={setCarouselApi}
+        opts={{
+          align: "start",
+          containScroll: "trimSnaps",
+          direction: isRtl ? "rtl" : "ltr",
         }}
+        className="w-full"
       >
-        <div className="flex gap-2 py-1 sm:gap-3">
-          {categories.map((category) => {
-            const displayName =
-              locale === "ar"
-                ? category.name_ar || category.name
-                : category.name
+        <div
+          className="overflow-hidden transition-all duration-300"
+          style={{
+            maskImage: maskStyle,
+            WebkitMaskImage: maskStyle,
+          }}
+        >
+          <CarouselContent className="-ml-2 md:-ml-3">
+            {categories.map((category) => {
+              const displayName =
+                locale === "ar"
+                  ? category.name_ar || category.name
+                  : category.name
 
-            const imageUrl = getSiteAssetUrl(category.image_url)
+              const imageUrl = getSiteAssetUrl(category.image_url)
 
-            return (
-              <Link
-                key={category.slug}
-                href={`/${locale}/categories/${category.slug}`}
-                className="group flex shrink-0 items-center gap-2.5 rounded-xl bg-muted/50 px-3.5 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none sm:px-4 sm:py-2.5 sm:text-sm"
-              >
-                {/* أيقونة أو صورة التصنيف */}
-                <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-background text-muted-foreground transition-transform duration-200 group-hover:scale-105 sm:size-8">
-                  <AspectRatio
-                    ratio={1 / 1}
-                    className="flex w-full items-center justify-center"
+              return (
+                <CarouselItem
+                  key={category.slug}
+                  className="basis-auto pl-2 md:pl-3"
+                >
+                  <Link
+                    href={`/${locale}/categories/${category.slug}`}
+                    className="group flex shrink-0 items-center gap-2.5 rounded-xl bg-muted/50 px-3.5 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none sm:px-4 sm:py-2.5 sm:text-sm"
                   >
-                    {imageUrl ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={imageUrl}
-                        alt={category.image_alt || displayName}
-                        loading="lazy"
-                        className="size-full rounded-lg object-contain p-1 transition-all duration-200 dark:invert"
-                      />
-                    ) : (
-                      <LayoutGridIcon className="size-3.5 sm:size-4" />
-                    )}
-                  </AspectRatio>
-                </div>
+                    {/* أيقونة أو صورة التصنيف */}
+                    <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-background text-muted-foreground transition-transform duration-200 group-hover:scale-105 sm:size-8">
+                      <AspectRatio
+                        ratio={1 / 1}
+                        className="flex w-full items-center justify-center"
+                      >
+                        {imageUrl ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            src={imageUrl}
+                            alt={category.image_alt || displayName}
+                            loading="lazy"
+                            className="size-full rounded-lg object-contain p-1 transition-all duration-200 dark:invert"
+                          />
+                        ) : (
+                          <LayoutGridIcon className="size-3.5 sm:size-4" />
+                        )}
+                      </AspectRatio>
+                    </div>
 
-                <span className="whitespace-nowrap">{displayName}</span>
-              </Link>
-            )
-          })}
+                    <span className="whitespace-nowrap">{displayName}</span>
+                  </Link>
+                </CarouselItem>
+              )
+            })}
+          </CarouselContent>
         </div>
-      </div>
+      </Carousel>
     </div>
   )
 }

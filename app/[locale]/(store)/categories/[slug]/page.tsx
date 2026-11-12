@@ -3,32 +3,34 @@
  * @description Category storefront page displaying filtered products with infinite scroll support and dynamic metadata.
  */
 
-import { getFilteredProducts } from "@/lib/actions/store/queries/get-filtered-products"
-import { ProductGrid } from "@/components/store/home/product-grid"
-import { createServerClient } from "@/lib/database/supabase/server"
 import { notFound } from "next/navigation"
 import { cookies } from "next/headers"
 import { getTranslations } from "next-intl/server"
+
+import { getFilteredProducts } from "@/lib/actions/store/queries/get-filtered-products"
+import { ProductGrid } from "@/components/store/home/product-grid"
 import { APP_CONFIG, COOKIES_KEYS, PRODUCT_MODE } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
+import { getCategoryBySlug } from "@/lib/actions/categories/queries/get-category-by-slug"
 
 interface CategoryPageProps {
   params: Promise<{ slug: string; locale: string }>
 }
 
-// دالة لتوليد الميتا داتا ديناميكياً استناداً إلى اسم التصنيف واللغة
+/**
+ * دالة لتوليد الميتا داتا ديناميكياً استناداً إلى اسم التصنيف واللغة
+ */
 export async function generateMetadata({ params }: CategoryPageProps) {
   const { slug, locale } = await params
-  const supabase = await createServerClient()
   const t = await getTranslations({ locale, namespace: "Category" })
 
-  const { data: category } = await supabase
-    .from("categories")
-    .select("name")
-    .eq("slug", slug)
-    .single()
+  const result = await getCategoryBySlug(slug)
 
-  const categoryName = category?.name || "Category"
+  let name
+
+  if (result.success) name = result.data.name
+
+  const categoryName = name ?? "Category"
 
   return createMetadata({
     siteName: APP_CONFIG.NAME,
@@ -46,30 +48,24 @@ export async function generateMetadata({ params }: CategoryPageProps) {
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { slug, locale } = await params
   const t = await getTranslations({ locale, namespace: "Category" })
-  const supabase = await createServerClient()
 
-  // 1. جلب التصنيف بالـ slug لنحصل على الـ id الخاص به والاسم
-  const { data: category, error } = await supabase
-    .from("categories")
-    .select("id, name")
-    .eq("slug", slug)
-    .single()
-
-  if (error || !category) {
-    notFound()
-  }
-
-  const categoryId = category.id
-
-  // 2. جلب الكوكيز لتحديد عرض الشبكة أو القائمة
   const cookieStore = await cookies()
   const viewModeCookie = cookieStore.get(COOKIES_KEYS.PRODUCT_MODE)?.value
   const viewMode =
     viewModeCookie === PRODUCT_MODE.LIST ? PRODUCT_MODE.LIST : PRODUCT_MODE.GRID
 
+  const result = await getCategoryBySlug(slug)
+
+  if (!result.success || !result.data) {
+    notFound()
+  }
+
+  const category = result.data
+
+  const categoryId = category.slug === "*" ? undefined : category.id
   const PAGE_LIMIT = 12
 
-  // 3. جلب المنتجات الأولية باستخدام دالتك الجديدة
+  // 3. جلب المنتجات الأولية
   const productsResult = await getFilteredProducts({
     categoryId: categoryId,
     limit: PAGE_LIMIT,

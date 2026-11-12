@@ -2,7 +2,7 @@
  * @file app/[locale]/(auth)/layout.tsx
  * @description Master authentication layout providing unified card boundaries,
  * localized RTL navigation, and accessible legal compliance footer pinned at the bottom
- * with a seamless inverted gradient background.
+ * with centered containment and proper mobile padding.
  */
 
 import * as React from "react"
@@ -28,9 +28,11 @@ export default async function AuthLayout({
   const t = await getTranslations("AuthLayout")
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-between gap-6 bg-muted">
+    <div className="flex min-h-svh flex-col items-center justify-between gap-6 bg-muted p-6 md:p-10 pb-0 md:pb-0">
       <div />
-      <div className="flex w-full max-w-md flex-col justify-center gap-6">
+      
+      {/* الحاوية الأوسط: تأخذ عرضاً أقصى ثابتاً وتتمركز في المنتصف مع حشوة أفقية للشاشات الصغيرة */}
+      <div className="flex w-full max-w-md flex-col items-center justify-center gap-6 px-4 sm:px-0">
         <Link
           href={APP_ROUTES.HOME}
           className="flex items-center gap-2 self-center font-medium"
@@ -40,8 +42,10 @@ export default async function AuthLayout({
           </div>
         </Link>
 
-        {children}
+        {/* تغليف الأطفال لضمان أخذهم عرض الحاوية بالكامل حتى الـ max-w-md */}
+        <div className="w-full">{children}</div>
       </div>
+
       <FieldDescription className="mb-0 p-0 text-center text-[10px] leading-relaxed text-muted-foreground/80">
         {t("TERMS_PREFIX")}{" "}
         <Link
