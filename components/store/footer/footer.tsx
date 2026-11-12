@@ -110,7 +110,7 @@ export default function Footer() {
               {t("rights_reserved")}
             </p>
             <div className="flex items-center gap-2">
-              <ThemeToggle />
+              <ThemeToggle/>
             </div>
           </div>
         </div>

@@ -15,8 +15,9 @@ import { ScrollToTop } from "@/components/shared/scroll-to-top"
 
 import { UserProvider } from "@/lib/context/user-context"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
+import { cookies } from "next/headers"
+import { COOKIES_KEYS } from "@/lib/config/app_config"
 
-// إعداد خط Rubik مع دعم اللغة العربية وربطه بـ Tailwind
 const rubik = Rubik({
   subsets: ["arabic", "latin"],
   variable: "--font-sans",
@@ -49,7 +50,7 @@ export default async function RootLayout({
   params,
 }: RootLayoutProps) {
   const { locale } = await params
-
+  const cookieStore = await cookies()
   if (!hasLocale(routing.locales, locale)) {
     notFound()
   }
@@ -57,6 +58,11 @@ export default async function RootLayout({
   const isRtl = ["ar", "fa", "ur", "he"].includes(locale)
   const dir = isRtl ? "rtl" : "ltr"
 
+  // التصحيح هنا: قراءة الكوكي بالقيمة الصحيحة مع افتراضي "system"
+  const initialTheme = cookieStore.get(COOKIES_KEYS.APP_THEME)?.value || "system"
+  
+  // تحديد ما إذا كان الكلاس الأولي يجب أن يكون dark لمنع الوميض
+  const isDark = initialTheme === "dark"
 
   const currentUserResult = await getCurrentUser()
   const currentUser = currentUserResult.success ? currentUserResult.data : null
@@ -68,10 +74,11 @@ export default async function RootLayout({
       lang={locale}
       dir={dir}
       suppressHydrationWarning
-      className={cn("antialiased", rubik.variable, fontMono.variable)}
+      // حقن كلاس dark مسبقاً من السيرفر لمنع وميض الشاشة الأبيض
+      className={cn("antialiased", rubik.variable, fontMono.variable, isDark && "dark")}
     >
       <body>
-        <ThemeProvider>
+        <ThemeProvider initialTheme={initialTheme}>
           <NextIntlClientProvider>
             <TooltipProvider>
               <ScrollToTop />

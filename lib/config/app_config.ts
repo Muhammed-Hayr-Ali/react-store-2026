@@ -30,6 +30,7 @@ export const COOKIES_KEYS = {
   LOGIN_METHOD: "login_method",
   CURRENCY: "app_currency",
   PRODUCT_MODE: "store_product_view_mode",
+  APP_THEME: "app_theme"
 } as const
 
 

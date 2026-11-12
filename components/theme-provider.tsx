@@ -1,24 +1,53 @@
 "use client"
 
 import * as React from "react"
-import { ThemeProvider as NextThemesProvider } from "next-themes"
+import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes"
+import saveTheme from "@/lib/actions/theme-provider/save-theme"
+import { COOKIES_KEYS } from "@/lib/config/app_config"
 
-function ThemeProvider({
+interface CustomThemeProviderProps extends React.ComponentProps<
+  typeof NextThemesProvider
+> {
+  initialTheme?: string
+}
+
+export function ThemeProvider({
+  initialTheme,
   children,
   ...props
-}: React.ComponentProps<typeof NextThemesProvider>) {
+}: CustomThemeProviderProps) {
   return (
     <NextThemesProvider
       attribute="class"
-      defaultTheme="system"
+      defaultTheme={initialTheme || "system"}
       enableSystem
       disableTransitionOnChange
+      storageKey={COOKIES_KEYS.APP_THEME}
       scriptProps={{ type: "application/json" }}
       {...props}
     >
+      <AppThemeProviderHelper />
       {children}
     </NextThemesProvider>
   )
 }
 
-export { ThemeProvider }
+/**
+ * مكون مساعد لحفظ الثيم الفعلي في الكوكي عند تغييره يدوياً
+ */
+function AppThemeProviderHelper() {
+  const { resolvedTheme } = useTheme()
+  const isMounted = React.useRef(false)
+
+  React.useEffect(() => {
+    isMounted.current = true
+  }, [])
+
+  React.useEffect(() => {
+    if (isMounted.current && resolvedTheme) {
+      saveTheme(resolvedTheme)
+    }
+  }, [resolvedTheme])
+
+  return null
+}

@@ -14,7 +14,7 @@ import { getCart } from "@/lib/actions/cart"
 import Navbar from "@/components/store/navbar/navbar"
 import Footer from "@/components/store/footer/footer"
 import type { AppLocale } from "@/i18n/routing"
-import { APP_CONFIG, COOKIES_KEYS } from "@/lib/config/app_config"
+import { COOKIES_KEYS } from "@/lib/config/app_config"
 
 interface MainLayoutProps {
   children: React.ReactNode
@@ -37,8 +37,7 @@ export default async function MainLayout({
 
   // 2. قراءة العملة المخزنة في الكوكيز أو الاعتماد على USD كافتراضي
   const cookieStore = await cookies()
-  const savedCurrency =
-    cookieStore.get(COOKIES_KEYS.CURRENCY)?.value || "USD"
+  const savedCurrency = cookieStore.get(COOKIES_KEYS.CURRENCY)?.value || "USD"
 
   // 3. جلب معرفات المفضلة واستخراج الـ data الصافية
   const wishlistResult = await getWishlistProductIds()
@@ -61,7 +60,7 @@ export default async function MainLayout({
             <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
               {children}
             </main>
-            <Footer />
+            <Footer/>
           </div>
         </CartProvider>
       </WishlistProvider>
