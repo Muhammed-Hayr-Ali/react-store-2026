@@ -2,7 +2,7 @@
 
 /**
  * @file components/store/featured-hero-slider.tsx
- * @description Hero banner slider for storefront displaying featured products with fixed aspect ratio and responsive image scaling.
+ * @description Clean hero banner slider for storefront displaying featured products with 21/9 aspect ratio and primary colored active indicator.
  */
 
 import * as React from "react"
@@ -13,11 +13,12 @@ import Autoplay from "embla-carousel-autoplay"
 import { ChevronLeftIcon, ChevronRightIcon, ImageIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { SimplifiedFeaturedProduct } from "@/lib/actions/store/queries/get-featured-products"
+
 import { AspectRatio } from "@/components/ui/aspect-ratio"
+import { SimpliProduct } from "@/lib/actions/store/queries/get_filtered_products"
 
 interface FeaturedHeroSliderProps {
-  slides: SimplifiedFeaturedProduct[]
+  slides: SimpliProduct[]
   exchangeRate?: number
 }
 
@@ -25,26 +26,25 @@ function SlideItem({
   slide,
   locale,
 }: {
-  slide: SimplifiedFeaturedProduct
+  slide: SimpliProduct
   locale: string
 }) {
   const [imageError, setImageError] = React.useState(false)
 
   return (
-    <div className="relative min-w-0 flex-[0_0_100%] transition-opacity duration-300">
+    <div className="relative min-w-0 flex-[0_0_95%] px-2.5 transition-opacity duration-300">
       <Link
         href={`/${locale}/product/${slide.slug}`}
-        className="relative block w-full overflow-hidden rounded-2xl bg-muted/40 sm:rounded-3xl"
+        className="relative block w-full overflow-hidden rounded-sm bg-muted/40 sm:rounded-xl"
       >
         <AspectRatio
           ratio={21 / 9}
-          className="flex w-full items-center justify-center"
+          className="flex w-full items-center justify-center overflow-hidden"
         >
-          {slide.image_url && !imageError ? (
-            // تم ضبط النسبة هنا (مثلاً 21/9 لتناسب بانر الـ Hero العريض أو 16/9)
+          {slide.imageUrl && !imageError ? (
             <img
-              src={slide.image_url}
-              alt={slide.image_alt || slide.name}
+              src={slide.imageUrl}
+              alt={slide.imageAlt || slide.name}
               loading="lazy"
               onError={() => setImageError(true)}
               className="size-full border-0 object-cover object-center transition-transform duration-500 hover:scale-[1.01]"
@@ -81,7 +81,7 @@ export default function FeaturedHeroSlider({
   const [emblaRef, emblaApi] = useEmblaCarousel(
     {
       loop: true,
-      align: "start",
+      align: "center",
       direction: isRtl ? "rtl" : "ltr",
     },
     plugins
@@ -136,11 +136,8 @@ export default function FeaturedHeroSlider({
 
   return (
     <div>
-      <div
-        className="group relative overflow-hidden rounded-2xl border-0 sm:rounded-3xl"
-        ref={emblaRef}
-      >
-        <div className="flex touch-pan-y">
+      <div className="group relative overflow-hidden" ref={emblaRef}>
+        <div className="-mx-1 flex touch-pan-y">
           {slides.map((slide) => (
             <SlideItem key={slide.id} slide={slide} locale={locale} />
           ))}
@@ -171,18 +168,18 @@ export default function FeaturedHeroSlider({
           </div>
         )}
 
-        {/* مؤشرات التمرير السفلية */}
+        {/* مؤشرات التمرير السفلية فوق الصورة (اللون الأساسي للنقطة المحددة) */}
         {slides.length > 1 && (
-          <div className="absolute inset-x-0 bottom-2 z-20 flex items-center justify-center gap-1 sm:bottom-2.5 sm:gap-1.5">
+          <div className="absolute inset-x-0 bottom-3 z-20 flex items-center justify-center gap-1 sm:gap-1.5 pointer-events-none">
             {scrollSnaps.map((_, index) => (
               <button
                 key={index}
                 onClick={() => scrollTo(index)}
                 aria-label={`Go to slide ${index + 1}`}
-                className={`h-1 rounded-full transition-all duration-300 sm:h-1.5 ${
+                className={`pointer-events-auto h-1 rounded-full transition-all duration-300 sm:h-1.5 ${
                   index === selectedIndex
                     ? "w-4 bg-primary sm:w-5"
-                    : "w-1 bg-foreground/25 hover:bg-foreground/40 sm:w-1.5"
+                    : "w-1 bg-white/60 hover:bg-white sm:w-1.5"
                 }`}
               />
             ))}

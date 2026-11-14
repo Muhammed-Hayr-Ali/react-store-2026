@@ -1,14 +1,13 @@
 /**
  * @file components/store/home/categories-scroll.tsx
- * @description Horizontal scrollable categories component utilizing shadcn Carousel with localized gradient mask and RTL support.
+ * @description Horizontal scrollable categories component utilizing shadcn Carousel with gradient mask and RTL support.
  */
 
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
 import { useLocale, useTranslations } from "next-intl"
-import { ChevronLeftIcon, ChevronRightIcon, LayoutGridIcon } from "lucide-react"
+import { LayoutGridIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { SimplifiedRootCategory } from "@/lib/actions/store/queries/get-root-categories"
@@ -20,30 +19,28 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel"
+import { cn } from "@/lib/utils"
 
 interface CategoriesScrollProps {
   categories: SimplifiedRootCategory[]
+  value: string
+  onSelect: (category: string) => void
 }
 
 export default function CategoriesScroll({
   categories,
+  value,
+  onSelect,
 }: CategoriesScrollProps) {
   const locale = useLocale()
   const t = useTranslations("CategoriesScroll")
-  const isRtl = locale === "ar"
+  const isRtl = ["ar", "fa", "ur", "he"].includes(locale)
 
   const [carouselApi, setCarouselApi] = React.useState<CarouselApi>()
   const [canScrollPrev, setCanScrollPrev] = React.useState(false)
   const [canScrollNext, setCanScrollNext] = React.useState(false)
 
-  const scrollPrev = React.useCallback(() => {
-    carouselApi?.scrollPrev()
-  }, [carouselApi])
-
-  const scrollNext = React.useCallback(() => {
-    carouselApi?.scrollNext()
-  }, [carouselApi])
-
+  // الحفاظ على مراقبة التمرير فقط لتحديث تأثير التلاشي (Gradient Mask) بشكل تلقائي واحترافي
   React.useEffect(() => {
     if (!carouselApi) return
 
@@ -64,50 +61,27 @@ export default function CategoriesScroll({
 
   if (!categories || categories.length === 0) return null
 
-  // حساب أقنعة التلاشي (Gradient Mask) بناءً على إمكانية التمرير واتجاه اللغة
+  // حساب أقنعة التلاشي (Gradient Mask) بناءً على اتجاه اللغة وإمكانية التمرير
   const leftHasScroll = isRtl ? canScrollNext : canScrollPrev
   const rightHasScroll = isRtl ? canScrollPrev : canScrollNext
 
-  const leftStop = leftHasScroll ? "transparent 0%, black 48px" : "black 0%"
+  const leftStop = leftHasScroll ? "transparent 0%, black 32px" : "black 0%"
   const rightStop = rightHasScroll
-    ? "black calc(100% - 48px), transparent 100%"
+    ? "black calc(100% - 32px), transparent 100%"
     : "black 100%"
 
   const maskStyle = `linear-gradient(to right, ${leftStop}, ${rightStop})`
 
   return (
-    <div className="py-3">
-      {/* الترويسة وأزرار التمرير السريعة */}
+    <div>
+      {/* الترويسة بدون أزرار */}
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
           {t("title", { default: "Categories" })}
         </h2>
-
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={scrollPrev}
-            disabled={!canScrollPrev}
-            className="size-7 rounded-full text-muted-foreground hover:bg-muted disabled:opacity-30 sm:size-8"
-            aria-label={t("previous_aria", { default: "Previous categories" })}
-          >
-            <ChevronLeftIcon className="size-4 rtl:rotate-180" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={scrollNext}
-            disabled={!canScrollNext}
-            className="size-7 rounded-full text-muted-foreground hover:bg-muted disabled:opacity-30 sm:size-8"
-            aria-label={t("next_aria", { default: "Next categories" })}
-          >
-            <ChevronRightIcon className="size-4 rtl:rotate-180" />
-          </Button>
-        </div>
       </div>
 
-      {/* شريط الـ Carousel مع تطبيق تأثير التلاشي وحفظ الـ API للتحكم */}
+      {/* شريط الـ Carousel مع استرجاع تأثير الظلال والتلاشي الجانبي */}
       <Carousel
         setApi={setCarouselApi}
         opts={{
@@ -138,12 +112,15 @@ export default function CategoriesScroll({
                   key={category.slug}
                   className="basis-auto pl-2 md:pl-3"
                 >
-                  <Link
-                    href={`/${locale}/categories/${category.slug}`}
-                    className="group flex shrink-0 items-center gap-2.5 rounded-xl bg-muted/50 px-3.5 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none sm:px-4 sm:py-2.5 sm:text-sm"
+                  <Button
+                    className={cn(
+                      "group flex shrink-0 items-center gap-2.5 rounded-xl bg-muted/50 px-3.5 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none sm:px-4 sm:py-2.5 sm:text-sm",
+                      category.slug === value && "invert"
+                    )}
+                    onClick={() => onSelect(category.slug)}
                   >
                     {/* أيقونة أو صورة التصنيف */}
-                    <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-background text-muted-foreground transition-transform duration-200 group-hover:scale-105 sm:size-8">
+                    <div className="hidden size-7 shrink-0 items-center justify-center rounded-lg bg-background text-muted-foreground transition-transform duration-200 group-hover:scale-105 sm:size-8 lg:flex">
                       <AspectRatio
                         ratio={1 / 1}
                         className="flex w-full items-center justify-center"
@@ -163,7 +140,7 @@ export default function CategoriesScroll({
                     </div>
 
                     <span className="whitespace-nowrap">{displayName}</span>
-                  </Link>
+                  </Button>
                 </CarouselItem>
               )
             })}

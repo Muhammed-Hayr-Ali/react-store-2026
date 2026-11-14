@@ -9,17 +9,17 @@ import * as React from "react"
 import { useTranslations } from "next-intl"
 import { LayoutGridIcon, ListIcon, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { SimplifiedRegularProduct } from "@/lib/actions/store/queries/get-latest-regular-products"
 import { WishlistProductCard } from "./wishlist-product-card"
 import { useWishlist } from "@/lib/context/wishlist-context"
+import { SimpliProduct } from "@/lib/actions/store/queries/get_filtered_products"
 
 interface WishlistProductGridProps {
-  initialProducts: SimplifiedRegularProduct[]
+  initialProducts: SimpliProduct[]
   emptyMessage?: string
   viewMode: "grid" | "list"
   fetchMoreAction: (page: number) => Promise<{
     success: boolean
-    data?: SimplifiedRegularProduct[]
+    data?: SimpliProduct[]
     hasMore?: boolean
   }>
 
@@ -37,7 +37,7 @@ export function WishlistProductGrid({
   const { wishlistIds } = useWishlist() // جلب معرفات المفضلة المحدثة من السياق
   const [mode, setMode] = React.useState<"grid" | "list">(initialViewMode)
   const [products, setProducts] =
-    React.useState<SimplifiedRegularProduct[]>(initialProducts)
+    React.useState<SimpliProduct[]>(initialProducts)
   const [page, setPage] = React.useState(1)
   const [hasMore, setHasMore] = React.useState(initialProducts.length >= 12)
   const [isLoading, setIsLoading] = React.useState(false)
@@ -120,9 +120,7 @@ export function WishlistProductGrid({
     }
   }, [loadMore, hasMore, isLoading])
 
-  const resolvedEmptyMessage =
-    emptyMessage ||
-    t("NO_PRODUCTS_AVAILABLE")
+  const resolvedEmptyMessage = emptyMessage || t("NO_PRODUCTS_AVAILABLE")
 
   const isEmpty = !displayedProducts || displayedProducts.length === 0
 

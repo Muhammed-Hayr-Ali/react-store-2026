@@ -3,8 +3,9 @@
  * @description API endpoint to fetch concise featured products for the storefront slider using the getFeaturedProducts action.
  */
 
+import { getFilteredProducts } from "@/lib/actions/store/queries/get_filtered_products";
 import { NextResponse } from "next/server";
-import { getFeaturedProducts } from "@/lib/actions/store/queries/get-featured-products";
+
 
 export async function GET(request: Request) {
   try {
@@ -13,7 +14,7 @@ export async function GET(request: Request) {
     const limit = limitParam ? Number.parseInt(limitParam, 10) : 10;
 
     // استخدام دالة جلب المنتجات المتميزة التي قمنا بإنشائها مسبقاً
-    const result = await getFeaturedProducts({ limit, activeOnly: true });
+    const result = await getFilteredProducts({ limit, activeOnly: true });
 
     if (!result.success) {
       return NextResponse.json(

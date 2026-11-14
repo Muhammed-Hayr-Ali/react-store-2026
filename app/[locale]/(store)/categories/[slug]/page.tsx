@@ -7,12 +7,12 @@ import { notFound } from "next/navigation"
 import { cookies } from "next/headers"
 import { getTranslations } from "next-intl/server"
 
-import { getFilteredProducts } from "@/lib/actions/store/queries/get-filtered-products"
 import { ProductGrid } from "@/components/store/home/product-grid"
 import { APP_CONFIG, COOKIES_KEYS, PRODUCT_MODE } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getCategoryBySlug } from "@/lib/actions/categories/queries/get-category-by-slug"
-
+import { getFilteredProducts } from "@/lib/actions/store/queries/get_filtered_products"
+ 
 interface CategoryPageProps {
   params: Promise<{ slug: string; locale: string }>
 }

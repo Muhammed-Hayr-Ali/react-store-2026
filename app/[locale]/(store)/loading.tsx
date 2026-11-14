@@ -15,7 +15,7 @@ export default function StoreLoading() {
   return (
     <div className="space-y-12 pb-12 animate-pulse">
       {/* 1. هيكل السلايدر الوهمي (Hero Slider Skeleton) */}
-      <div className="aspect-[21/9] w-full rounded-3xl bg-muted/60" />
+      <div className="aspect-21/9 w-full rounded-3xl bg-muted/60" />
 
       {/* 2. هيكل شريط التصنيفات الأفقية (Categories Scroll Skeleton) */}
       <div className="space-y-3">

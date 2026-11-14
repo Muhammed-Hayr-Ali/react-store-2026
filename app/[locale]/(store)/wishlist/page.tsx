@@ -3,7 +3,6 @@
  * @description User wishlist page displaying saved products with infinite scroll support, matching category and brand page architecture.
  */
 
-import { getWishlist } from "@/lib/actions/wishlists"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { APP_CONFIG, COOKIES_KEYS, PRODUCT_MODE } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
@@ -12,6 +11,7 @@ import { getTranslations } from "next-intl/server"
 import { WishlistProductGrid } from "@/components/wishlist/wishlist-product-grid"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 import { notFound } from "next/navigation"
+import { getWishlistProducts } from "@/lib/actions/wishlists"
 
 interface WishlistPageProps {
   params: Promise<{ locale: string }>
@@ -49,7 +49,7 @@ export default async function WishlistPage({ params }: WishlistPageProps) {
   const PAGE_LIMIT = 12
 
   // 2. جلب المنتجات الأولية للمفضلة باستخدام دالة getWishlist المدعومة بالصفحات
-  const productsResult = await getWishlist({
+  const productsResult = await getWishlistProducts({
     limit: PAGE_LIMIT,
     page: 1,
     activeOnly: true,
@@ -66,7 +66,7 @@ export default async function WishlistPage({ params }: WishlistPageProps) {
   // 3. Server Action للتحميل التلقائي (Infinite Scroll) مطابق تماماً لصفحة التصنيفات
   async function loadMoreProducts(pageNumber: number) {
     "use server"
-    const res = await getWishlist({
+    const res = await getWishlistProducts({
       limit: PAGE_LIMIT,
       page: pageNumber,
       activeOnly: true,

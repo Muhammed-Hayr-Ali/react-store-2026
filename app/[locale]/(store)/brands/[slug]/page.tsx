@@ -3,14 +3,14 @@
  * @description Brand storefront page displaying filtered products with infinite scroll support and dynamic metadata.
  */
 
-import { getFilteredProducts } from "@/lib/actions/store/queries/get-filtered-products"
-import { ProductGrid } from "@/components/store/home/product-grid"
+ import { ProductGrid } from "@/components/store/home/product-grid"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { notFound } from "next/navigation"
 import { cookies } from "next/headers"
 import { getTranslations } from "next-intl/server"
 import { APP_CONFIG, COOKIES_KEYS, PRODUCT_MODE } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
+import { getFilteredProducts } from "@/lib/actions/store/queries/get_filtered_products"
 
 interface BrandPageProps {
   params: Promise<{ slug: string; locale: string }>

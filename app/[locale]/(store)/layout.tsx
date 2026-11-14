@@ -15,6 +15,7 @@ import Navbar from "@/components/store/navbar/navbar"
 import Footer from "@/components/store/footer/footer"
 import type { AppLocale } from "@/i18n/routing"
 import { COOKIES_KEYS } from "@/lib/config/app_config"
+import BottomNavigationBar from "@/components/store/bottom-navigation-bar/bottom-navigation-bar"
 
 interface MainLayoutProps {
   children: React.ReactNode
@@ -55,12 +56,14 @@ export default async function MainLayout({
     >
       <WishlistProvider initialWishlistIds={wishlistIds}>
         <CartProvider initialCart={initialCart}>
-          <div className="relative flex min-h-screen flex-col bg-background text-foreground">
+          <div className="flex min-h-screen flex-col bg-background text-foreground">
             <Navbar />
-            <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
+            {/* <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 lg:px-8"> */}
+            <main className="mx-auto w-full max-w-6xl flex-1 sm:px-6 lg:px-8">
               {children}
             </main>
-            <Footer/>
+            <Footer />
+            <BottomNavigationBar/>
           </div>
         </CartProvider>
       </WishlistProvider>

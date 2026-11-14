@@ -11,10 +11,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { useTranslations } from "next-intl"
+import { cn } from "@/lib/utils"
 
 export function ThemeToggle() {
   const { setTheme } = useTheme()
-
+  const isMobile = useIsMobile()
+  const t = useTranslations("Footer")
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -24,15 +28,24 @@ export function ThemeToggle() {
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          Light
+      <DropdownMenuContent align={isMobile ? "center" : "end"}>
+        <DropdownMenuItem
+          onClick={() => setTheme("light")}
+          className={cn(isMobile && "flex justify-center")}
+        >
+          {t("LIGHT")}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark
+        <DropdownMenuItem
+          onClick={() => setTheme("dark")}
+          className={cn(isMobile && "flex justify-center")}
+        >
+          {t("DARK")}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          System
+        <DropdownMenuItem
+          onClick={() => setTheme("system")}
+          className={cn(isMobile && "flex justify-center")}
+        >
+          {t("SYSTEM")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -8,7 +8,7 @@ export { addToWishlist } from "./mutations/add-to-wishlist"
 export { removeFromWishlist } from "./mutations/remove-from-wishlist"
 
 // Queries
-export { getWishlist } from "./queries/get-wishlist"
+export { getWishlistProducts } from "./queries/get-wishlist-products"
 export { getWishlistProductIds } from "./queries/get-wishlist-product-ids"
 
 // Types & Schemas

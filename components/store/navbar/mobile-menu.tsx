@@ -29,7 +29,7 @@ export function MobileMenu() {
 
   return (
     <>
-      <div className="flex items-center gap-4 md:hidden">
+      <div className="flex items-center gap-4">
         <CartButton
           iconClassName="size-4.5"
           variant="ghost"

@@ -425,7 +425,10 @@
     "twitter": "X (Twitter)",
     "facebook": "Facebook",
     "instagram": "Instagram",
-    "rights_reserved": "All rights reserved"
+    "rights_reserved": "All rights reserved",
+    "LIGHT": "Light",
+    "DARK": "dark",
+    "SYSTEM": "System"
   },
   "ForgotPassword": {
     "META_TITLE": "Reset Password Request",
@@ -1373,5 +1376,15 @@
   },
   "PhoneOtp": {
     "WHATSAPP_MESSAGE": "Welcome! Your verification code for {appName} is: {code}"
+  },
+  "SearchBar": {
+    "search_placeholder": "Search for products..."
+  },
+  "BottomNavigationBar": {
+    "HOME": "Home",
+    "SEARCH": "Search",
+    "WISHLIST": "Wishlist",
+    "CART": "Cart",
+    "PROFILE": "Profile"
   }
 }

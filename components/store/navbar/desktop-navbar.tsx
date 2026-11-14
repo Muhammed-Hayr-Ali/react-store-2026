@@ -27,7 +27,7 @@ export default function DesktopNavbar({ className }: DesktopNavbarProps) {
   const { user } = useUser()
 
   return (
-    <div className={cn("hidden items-center gap-3.5 md:flex", className)}>
+    <div className={cn("flex items-center gap-3.5", className)}>
       {/* قائمة تبديل العملة */}
       <CurrencySwitcher />
 

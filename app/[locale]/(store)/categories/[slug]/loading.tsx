@@ -7,7 +7,7 @@ import * as React from "react"
 
 export default function WishlistLoading() {
   return (
-    <div className="container space-y-8 py-8 animate-pulse">
+    <div className="container space-y-8 py-8 animate-pulse  px-4 sm:px-6 lg:px-8">
       {/* رأس الصفحة الوهمي */}
       <div className="flex items-center justify-between">
         <div className="space-y-2">

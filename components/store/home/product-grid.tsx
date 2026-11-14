@@ -10,17 +10,15 @@ import { useTranslations } from "next-intl"
 import { LayoutGridIcon, ListIcon, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ProductCard } from "./product-card"
-import { SimplifiedRegularProduct } from "@/lib/actions/store/queries/get-latest-regular-products"
-
-interface ProductGridProps {
-  initialProducts: SimplifiedRegularProduct[]
+import { SimpliProduct } from "@/lib/actions/store/queries/get_filtered_products"
+ 
+export interface ProductGridProps {
+  initialProducts: SimpliProduct[]
   emptyMessage?: string
   viewMode: "grid" | "list"
-  fetchMoreAction: (
-    page: number
-  ) => Promise<{
+  fetchMoreAction: (page: number) => Promise<{
     success: boolean
-    data?: SimplifiedRegularProduct[]
+    data?: SimpliProduct[]
     hasMore?: boolean
   }>
 
@@ -42,7 +40,7 @@ export function ProductGrid({
   const t = useTranslations("Home")
   const [mode, setMode] = React.useState<"grid" | "list">(initialViewMode)
   const [products, setProducts] =
-    React.useState<SimplifiedRegularProduct[]>(initialProducts)
+    React.useState<SimpliProduct[]>(initialProducts)
   const [page, setPage] = React.useState(1)
   const [hasMore, setHasMore] = React.useState(initialProducts.length >= 12)
   const [isLoading, setIsLoading] = React.useState(false)
@@ -127,7 +125,7 @@ export function ProductGrid({
   const isEmpty = !products || products.length === 0
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 px-4 sm:px-6 lg:px-8">
       {/* Header & Toolbar Section (يبقي العنوان ظاهراً دائماً) */}
       {(title || showToolbar) && (
         <div className="flex items-center justify-between">

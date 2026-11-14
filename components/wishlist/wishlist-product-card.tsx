@@ -20,12 +20,12 @@ import { Button } from "@/components/ui/button"
 import { useCurrency } from "@/lib/context/currency-context"
 import { useCart } from "@/lib/context/cart-context"
 import { useWishlist } from "@/lib/context/wishlist-context"
-import { SimplifiedRegularProduct } from "@/lib/actions/store/queries/get-latest-regular-products"
 import { toast } from "sonner"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
+import { SimpliProduct } from "@/lib/actions/store/queries/get_filtered_products"
 
 interface WishlistProductCardProps {
-  product: SimplifiedRegularProduct
+  product: SimpliProduct
   layout?: "vertical" | "horizontal"
   onRemove?: (productId: string) => void
 }
@@ -42,11 +42,10 @@ export function WishlistProductCard({
   const [isRemoving, setIsRemoving] = React.useState(false)
 
   const hasDiscount =
-    product.compare_at_price && product.compare_at_price > (product.price ?? 0)
+    product.compareAtPrice && product.compareAtPrice > (product.price ?? 0)
   const discountPercentage = hasDiscount
     ? Math.round(
-        ((product.compare_at_price! - product.price!) /
-          product.compare_at_price!) *
+        ((product.compareAtPrice! - product.price!) / product.compareAtPrice!) *
           100
       )
     : null
@@ -54,12 +53,12 @@ export function WishlistProductCard({
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation() // منع انتقال النقر للرابط الرئيسي
-    if (!product.price || !product.variant_id) return
+    if (!product.price || !product.variantId) return
 
     try {
       setIsLoading(true)
       await Promise.all([
-        addItem(product.id, product.variant_id, 1),
+        addItem(product.id, product.variantId, 1),
         new Promise((resolve) => setTimeout(resolve, 400)),
       ])
     } finally {
@@ -121,10 +120,10 @@ export function WishlistProductCard({
             className="flex w-full items-center justify-center"
           >
             {" "}
-            {product.image_url ? (
+            {product.imageUrl ? (
               <img
-                src={product.image_url}
-                alt={product.image_alt || product.name}
+                src={product.imageUrl}
+                alt={product.imageAlt || product.name}
                 className="size-full object-cover object-center transition-transform duration-500 group-hover/card:scale-105"
               />
             ) : (
@@ -155,14 +154,14 @@ export function WishlistProductCard({
             )}
 
             {/* Ratings */}
-            {product.review_count > 0 && (
+            {product.reviewCount > 0 && (
               <div className="flex items-center gap-1 pt-0.5 text-[10px] text-muted-foreground">
                 <StarIcon className="size-2.5 fill-amber-500 text-amber-500" />
                 <span className="font-medium text-foreground">
                   {product.rating}
                 </span>
                 <span className="text-muted-foreground/70">
-                  ({product.review_count})
+                  ({product.reviewCount})
                 </span>
               </div>
             )}
@@ -176,9 +175,9 @@ export function WishlistProductCard({
                 {currentCurrency.symbol}
               </span>
 
-              {hasDiscount && product.compare_at_price !== null && (
+              {hasDiscount && product.compareAtPrice !== null && (
                 <span className="text-[10px] text-destructive line-through">
-                  {formatRawPrice(product.compare_at_price ?? 0)}{" "}
+                  {formatRawPrice(product.compareAtPrice ?? 0)}{" "}
                   {currentCurrency.symbol}
                 </span>
               )}
@@ -239,10 +238,10 @@ export function WishlistProductCard({
           className="flex w-full items-center justify-center"
         >
           {" "}
-          {product.image_url ? (
+          {product.imageUrl ? (
             <img
-              src={product.image_url}
-              alt={product.image_alt || product.name}
+              src={product.imageUrl}
+              alt={product.imageAlt || product.name}
               className="size-full object-cover object-center transition-transform duration-500 group-hover/card:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
             />
@@ -277,14 +276,14 @@ export function WishlistProductCard({
           )}
 
           {/* التقييمات والنجوم */}
-          {product.review_count > 0 && (
+          {product.reviewCount > 0 && (
             <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
               <StarIcon className="size-3 fill-amber-500 text-amber-500" />
               <span className="font-medium text-foreground">
                 {product.rating}
               </span>
               <span className="text-muted-foreground/70">
-                ({product.review_count})
+                ({product.reviewCount})
               </span>
             </div>
           )}
@@ -300,9 +299,9 @@ export function WishlistProductCard({
             </span>
 
             {/* السعر القديم */}
-            {hasDiscount && product.compare_at_price !== null && (
+            {hasDiscount && product.compareAtPrice !== null && (
               <span className="text-[11px] text-destructive line-through">
-                {formatRawPrice(product.compare_at_price ?? 0)}{" "}
+                {formatRawPrice(product.compareAtPrice ?? 0)}{" "}
                 {currentCurrency.symbol}
               </span>
             )}

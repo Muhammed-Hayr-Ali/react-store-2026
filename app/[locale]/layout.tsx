@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next"
 import { notFound } from "next/navigation"
-import { Geist_Mono, Rubik } from "next/font/google"
+import { Geist, Geist_Mono } from "next/font/google"
 import { NextIntlClientProvider, hasLocale } from "next-intl"
 
 import "../globals.css"
@@ -18,15 +18,19 @@ import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 import { cookies } from "next/headers"
 import { COOKIES_KEYS } from "@/lib/config/app_config"
 
-const rubik = Rubik({
-  subsets: ["arabic", "latin"],
+
+
+const geistSans = Geist({
+  subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
 })
 
-const fontMono = Geist_Mono({
+// إعداد خط Geist Mono للأكواد والأرقام
+const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
+  display: "swap",
 })
 
 export const viewport: Viewport = {
@@ -75,7 +79,7 @@ export default async function RootLayout({
       dir={dir}
       suppressHydrationWarning
       // حقن كلاس dark مسبقاً من السيرفر لمنع وميض الشاشة الأبيض
-      className={cn("antialiased", rubik.variable, fontMono.variable, isDark && "dark")}
+      className={cn("antialiased", geistSans.variable, geistMono.variable, isDark && "dark")}
     >
       <body>
         <ThemeProvider initialTheme={initialTheme}>

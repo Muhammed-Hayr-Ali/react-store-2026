@@ -62,7 +62,7 @@ export default async function ProductDetailsPage({
   const reviewsData = reviewsResult.success ? reviewsResult.data : null
 
   return (
-    <div>
+    <div className="px-4 sm:px-6 lg:px-8 pt-8">
       {/* تفاصيل المنتج الأساسية */}
       {/* <div className="space-y-4">
         <h1 className="text-3xl font-extrabold tracking-tight">{product.name}</h1>

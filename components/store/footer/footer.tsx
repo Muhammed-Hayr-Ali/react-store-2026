@@ -21,7 +21,7 @@ export default function Footer() {
   const t = useTranslations("Footer")
 
   return (
-    <footer className="w-full border-t border-border/40 bg-background text-sm text-muted-foreground">
+    <footer className="w-full border-t border-border/40 bg-background text-sm text-muted-foreground hidden md:block">
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* 1. قسم العلامة التجارية والوصف */}
