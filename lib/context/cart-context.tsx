@@ -1,6 +1,6 @@
 /**
  * @file lib/context/cart-context.tsx
- * @description Cart context for state management, adding, updating, and removing items with strict typing and Promise returns.
+ * @description Cart context returning action results and pending state with strict typing.
  */
 
 "use client"
@@ -22,8 +22,8 @@ import { ApiResult } from "../actions/types/utils"
 interface CartContextType {
   cart: CartQueryResult | null
   addItem: (input: AddToCartInput) => Promise<ApiResult<boolean>>
-  updateItemQuantity: (itemId: string, quantity: number) => Promise<void>
-  removeItem: (itemId: string) => Promise<void>
+  updateItemQuantity: (itemId: string, quantity: number) => Promise<ApiResult<boolean>>
+  removeItem: (itemId: string) => Promise<ApiResult<boolean>>
   isPending: boolean
   totalItemsCount: number
 }
@@ -46,7 +46,6 @@ export function CartProvider({
     return cart.items.reduce((acc, item) => acc + Number(item.quantity), 0)
   }, [cart])
 
-  // دالة تحديث الحالة من السيرفر لجلب أحدث البيانات
   const refreshCart = async () => {
     const updatedCartResult = await getCart()
     if (updatedCartResult.success) {
@@ -54,42 +53,41 @@ export function CartProvider({
     }
   }
 
-  // const addItem = async (
-  //   productId: string,
-  //   variantId: string,
-  //   quantity = 1
-  // ): Promise<void> => {
-  //   return new Promise((resolve) => {
-  //     startTransition(async () => {
-  //       const result = await addToCart({
-  //         product_id: productId,
-  //         variant_id: variantId,
-  //         quantity,
-  //       })
-  //       if (result.success) {
-  //         await refreshCart()
-  //       }
-  //       resolve()
-  //     })
-  //   })
-  // }
+  // إضافة منتج مع إرجاع الـ Result
+  async function addItem(input: AddToCartInput): Promise<ApiResult<boolean>> {
+    return new Promise((resolve) => {
+      startTransition(async () => {
+        const result = await addToCart({
+          product_id: input.product_id,
+          variant_id: input.variant_id,
+          quantity: input.quantity,
+        })
 
-  async function addItem(input: AddToCartInput) {
-    const result = await addToCart({
-      product_id: input.product_id,
-      variant_id: input.variant_id,
-      quantity: input.quantity,
+        if (!result.success) {
+          if (result.error === "AUTH_REQUIRED") {
+            toast.error(
+              t("AUTH_REQUIRED_TITLE")
+            )
+          } else {
+            toast.error(
+              t("ADD_ERROR")
+            )
+          }
+        } else {
+          toast.success(t("ITEM_ADDED"))
+          await refreshCart()
+        }
+
+        resolve(result)
+      })
     })
-
-    if (result.success) await refreshCart()
-
-    return result
   }
 
+  // تحديث الكمية مع إرجاع الـ Result
   const updateItemQuantity = async (
     itemId: string,
     quantity: number
-  ): Promise<void> => {
+  ): Promise<ApiResult<boolean>> => {
     return new Promise((resolve) => {
       startTransition(async () => {
         const result = await updateCartItem({ item_id: itemId, quantity })
@@ -105,18 +103,20 @@ export function CartProvider({
             )
           }
         } else {
-          // toast.success(t("ITEM_UPDATED", { default: "Cart updated" }))
           await refreshCart()
         }
-        resolve()
+
+        resolve(result)
       })
     })
   }
 
-  const removeItem = async (itemId: string): Promise<void> => {
+  // حذف منتج مع إرجاع الـ Result
+  const removeItem = async (itemId: string): Promise<ApiResult<boolean>> => {
     return new Promise((resolve) => {
       startTransition(async () => {
         const result = await removeCartItem({ item_id: itemId })
+        
         if (!result.success) {
           if (result.error === "AUTH_REQUIRED") {
             toast.error(
@@ -128,7 +128,8 @@ export function CartProvider({
         } else {
           await refreshCart()
         }
-        resolve()
+
+        resolve(result)
       })
     })
   }

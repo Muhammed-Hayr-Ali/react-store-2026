@@ -63,7 +63,7 @@ export default async function Page() {
   const categories = categoriesResult.success ? categoriesResult.data : []
 
   return (
-    <div className="flex-1 flex flex-col space-y-6 py-4 md:py-6 lg:py-8">
+    <>
       {/* SearchBar */}
       <SearchBar />
 
@@ -76,6 +76,6 @@ export default async function Page() {
         initialProducts={initialProducts}
         categories={categories}
       />
-    </div>
+    </>
   )
 }

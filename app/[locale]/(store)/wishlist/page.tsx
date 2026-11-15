@@ -51,14 +51,16 @@ export default async function WishlistPage() {
   }
 
   return (
-    <ProductGrid
-      name={t("PAGE_TITLE")}
-      description=""
-      viewMode={viewMode}
-      hasError={!result.success}
-      initialProducts={initialProducts}
-      showHeartButton
-      className="px-4 py-6 sm:px-6 lg:px-8"
-    />
+    <main className="flex flex-1 px-4 sm:px-6 lg:px-8">
+      <ProductGrid
+        name={t("PAGE_TITLE")}
+        description=""
+        viewMode={viewMode}
+        hasError={!result.success}
+        initialProducts={initialProducts}
+        showHeartButton
+        hasAction={false}
+      />
+    </main>
   )
 }

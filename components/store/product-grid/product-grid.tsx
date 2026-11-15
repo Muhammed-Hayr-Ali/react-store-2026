@@ -96,14 +96,14 @@ export function ProductGrid({
   }, [onLoadMore, isLoadingMore, hasMore])
 
   // Error Component
-  if (hasError) return <ErrorList onRetry={onRetry} hasAction={hasAction} />
+  if (hasError) return <ErrorList onRetry={onRetry} hasAction={hasAction} className={className}/>
 
   // Empty Component
-  if (initialProducts.length === 0) return <EmptyList hasAction={hasAction} />
+  if (initialProducts.length === 0) return <EmptyList hasAction={hasAction}  className={className}/>
 
   // List Component
   return (
-    <section className={cn("space-y-6 px-4 sm:px-6 lg:px-8", className)}>
+    <section className={cn("space-y-6", className)}>
       {/* Header & Toolbar Section */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
@@ -147,11 +147,22 @@ export function ProductGrid({
   )
 }
 
-function EmptyList({ hasAction = true }: { hasAction?: boolean }) {
+interface ListProps {
+  onRetry?: () => void
+  hasAction?: boolean
+  className?: string
+}
+
+function EmptyList({ hasAction = true, className }: ListProps) {
   const t = useTranslations("ProductsView.Empty")
 
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div
+      className={cn(
+        "flex h-full w-full flex-col items-center justify-center",
+        className
+      )}
+    >
       <Empty className="w-full max-w-md rounded-2xl border border-dashed p-8 text-center">
         <EmptyHeader className="flex flex-col items-center">
           <EmptyMedia
@@ -187,16 +198,16 @@ function EmptyList({ hasAction = true }: { hasAction?: boolean }) {
   )
 }
 
-interface ErrorListProps {
-  onRetry?: () => void
-  hasAction?: boolean
-}
-
-function ErrorList({ onRetry, hasAction = true }: ErrorListProps) {
+function ErrorList({ onRetry, hasAction = true, className }: ListProps) {
   const t = useTranslations("ProductsView.Error")
 
   return (
-    <div className="flex min-h-[80vh] w-full flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+    <div
+      className={cn(
+        "flex h-full w-full flex-col items-center justify-center",
+        className
+      )}
+    >
       <Empty className="w-full max-w-lg rounded-3xl border border-dashed p-8 text-center shadow-sm">
         <EmptyHeader className="flex flex-col items-center">
           <EmptyMedia

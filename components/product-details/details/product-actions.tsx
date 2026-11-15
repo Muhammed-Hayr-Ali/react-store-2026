@@ -7,7 +7,7 @@
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
-import { ShoppingCartIcon, PlusIcon, MinusIcon } from "lucide-react"
+import { ShoppingCartIcon, PlusIcon, MinusIcon, LoaderCircleIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ProductVariantDetail } from "@/lib/actions/store/product-details/details/queries/get-product-details"
 import { useCurrency } from "@/lib/context/currency-context"
@@ -41,7 +41,7 @@ export function ProductActions({
   }
 
   const isOutOfStock = variant.track_inventory && variant.stock_quantity <= 0
-  const isDisabled = !isProductActive || isOutOfStock
+  const isDisabled = !isProductActive || isOutOfStock || isPending
 
   const unitPriceInCents = variant.price || 0
   const totalPriceInCents = unitPriceInCents * (isOutOfStock ? 0 : quantity)
@@ -57,19 +57,11 @@ export function ProductActions({
   }
 
   const handleAddToCart = async () => {
-    const result = await addItem({
+    await addItem({
       product_id: productId,
       variant_id: variant.id,
       quantity: 1,
     })
-
-    if (result.success) {
-      toast.success(t("ADD_TO_CART_SUCCESS"))
-    } else {
-      toast.error(
-        result.error ? tError(result.error) : tError("UNEXPECTED_ERROR")
-      )
-    }
   }
 
   return (
@@ -137,9 +129,10 @@ export function ProductActions({
           type="button"
           size="lg"
           className="h-12 flex-1 gap-2 rounded-2xl text-sm font-medium transition-all active:scale-[0.99]"
-          disabled={isDisabled || isPending}
+          disabled={isDisabled}
           onClick={handleAddToCart}
         >
+          {isPending && <LoaderCircleIcon className="size-5 animate-spin" />}
           <ShoppingCartIcon className="size-4" />
           {isOutOfStock
             ? t("OUT_OF_STOCK_BUTTON", { default: "Out of Stock" })

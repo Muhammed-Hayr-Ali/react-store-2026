@@ -58,7 +58,8 @@ export default async function MainLayout({
         <CartProvider initialCart={initialCart}>
           <div className="flex h-dvh flex-col">
             <Navbar />
-            {children}
+            {/* <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 lg:px-8"> */}
+            <main className="flex flex-1 flex-col py-4 md:py-6 lg:py-8 space-y-6 md:space-y-8"> {children}</main>
             <Footer />
             <BottomNavigationBar />
           </div>

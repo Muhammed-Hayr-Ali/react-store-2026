@@ -8,6 +8,10 @@ import {
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import DashboardBreadcrumb from "@/components/dashboard/dashboard-breadcrumb"
+import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
+import { redirect } from "next/navigation"
+import { APP_ROUTES } from "@/lib/config/app-routes"
+import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 
 export default async function DashboardLayout({
   children,
@@ -17,29 +21,32 @@ export default async function DashboardLayout({
   const locale = await getLocale()
   const side = locale === "ar" ? "right" : "left"
 
-  // جلب بيانات المستخدم وصلاحياته على السيرفر لمرة واحدة
+  const currentUserResult = await getCurrentUser()
+  const currentUser = currentUserResult.success ? currentUserResult.data : null
 
+  if (!currentUser) {
+    redirect(APP_ROUTES.AUTH.LOGIN)
+  }
+
+  const haper = await hasPermission(PERMISSIONS.VIEW_WISHLISTS_DASHBOARD)
+  
   return (
-      <SidebarProvider>
-        {/* الـ AppSidebar يعالج جلب بياناته وصلاحياته ذاتياً على السيرفر */}
-        <AppSidebar side={side} />
+    <SidebarProvider>
+      {/* الـ AppSidebar يعالج جلب بياناته وصلاحياته ذاتياً على السيرفر */}
+      <AppSidebar side={side} />
 
-        <SidebarInset className="flex min-h-screen w-full flex-col">
-          <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger className="-ms-1" />
-              <Separator
-                orientation="vertical"
-                className="me-2 h-4 self-auto"
-              />
+      <SidebarInset className="flex min-h-screen w-full flex-col">
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+          <div className="flex items-center gap-2">
+            <SidebarTrigger className="-ms-1" />
+            <Separator orientation="vertical" className="me-2 h-4 self-auto" />
 
-              <DashboardBreadcrumb />
-            </div>
-          </header>
+            <DashboardBreadcrumb />
+          </div>
+        </header>
 
-          <main className="flex-1 px-4 py-4 md:px-6 md:py-6">{children}</main>
-        </SidebarInset>
-      </SidebarProvider>
-   
+        <main className="flex-1 px-4 py-4 md:px-6 md:py-6">{children}</main>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }

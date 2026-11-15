@@ -89,7 +89,7 @@ export default function HomeClientWrapper({
   }
 
   return (
-    <div className="flex-1 flex flex-col space-y-6">
+    <div className="flex flex-1 flex-col space-y-6 md:space-y-8">
       <CategoriesScroll
         categories={categories}
         onSelect={handleOnSelectCategory}
@@ -104,6 +104,7 @@ export default function HomeClientWrapper({
         hasMore={hasMore}
         isLoadingMore={isLoadingMore}
         hasAction={false}
+        className="px-4 md:px-6 lg:px-8"
       />
     </div>
   )

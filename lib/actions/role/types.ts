@@ -15,6 +15,8 @@ export const ROLES = {
 export type AppRole = (typeof ROLES)[keyof typeof ROLES]
 
 export const PERMISSIONS = {
+  VIEW_DASHBOARD: "view_dashboard",
+
   // --- 1. Brands Management ---
   VIEW_BRANDS_DASHBOARD: "view_brands_dashboard",
   READ_BRANDS: "read_brands",

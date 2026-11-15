@@ -258,7 +258,9 @@
     "GENERAL_ERROR": "An error occurred",
     "UPDATE_ERROR": "Failed to update quantity",
     "REMOVE_ERROR": "Failed to remove item",
-    "AUTH_REQUIRED_TITLE": "Sign in required"
+    "AUTH_REQUIRED_TITLE": "Sign in required",
+    "ITEM_ADDED": "The product has been successfully added to the shopping cart.",
+    "ADD_ERROR": "Failed to add item to cart"
   },
   "Category": {
     "META_TITLE": "{category} Products",
