@@ -4,15 +4,15 @@
  */
 
 import { getRootCategories } from "@/lib/actions/store/queries/get-root-categories"
-import FeaturedHeroSlider from "@/components/store/home/featured-hero-slider"
+import FeaturedHeroSlider from "@/components/store/featured-hero-slider/featured-hero-slider"
 
 import { APP_CONFIG, COOKIES_KEYS, PRODUCT_MODE } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { cookies } from "next/headers"
 import { getTranslations } from "next-intl/server"
-import SearchBar from "@/components/store/home/search-bar"
-import MainSection from "@/components/store/home/main_section"
+import SearchBar from "@/components/store/search-bar/search-bar"
 import { getFilteredProducts } from "@/lib/actions/store/queries/get_filtered_products"
+import HomeClientWrapper from "@/components/store/client-wrapper/home-client-wrapper"
 
 interface PageProps {
   params: Promise<{ locale: string }>
@@ -39,11 +39,25 @@ export default async function Page() {
   const viewMode =
     viewModeCookie === PRODUCT_MODE.LIST ? PRODUCT_MODE.LIST : PRODUCT_MODE.GRID
 
-  const PAGE_LIMIT = 12 // عدد المنتجات في الدفعة الأولى وعند التمرير
+  const FEATURED_PRODUCTS = true
+  const FEATURED_LIMET = 5
+  const LATEST_LIMIT = 12
+  const PAGE_NUMBER = 1
+  const ACTIVE_ONLY = true
+
 
   const [featuredResult, latestResult, categoriesResult] = await Promise.all([
-    getFilteredProducts({ limit: 5, activeOnly: true }),
-    getFilteredProducts({ limit: PAGE_LIMIT, page: 1, activeOnly: true }),
+    getFilteredProducts({
+      limit: FEATURED_LIMET,
+      page: PAGE_NUMBER,
+      activeOnly: ACTIVE_ONLY,
+      is_featured: FEATURED_PRODUCTS,
+    }),
+    getFilteredProducts({
+      limit: LATEST_LIMIT,
+      page: PAGE_NUMBER,
+      activeOnly: ACTIVE_ONLY,
+     }),
     getRootCategories(),
   ])
 
@@ -51,31 +65,18 @@ export default async function Page() {
   const initialProducts = latestResult.success ? latestResult.data : []
   const categories = categoriesResult.success ? categoriesResult.data : []
 
-  // Server Action لجلب الدفعات التالية تلقائياً عند التمرير
-  async function loadMoreProducts(pageNumber: number) {
-    "use server"
-    const res = await getFilteredProducts({
-      limit: PAGE_LIMIT,
-      page: pageNumber,
-      activeOnly: true,
-    })
-    return {
-      success: res.success,
-      data: res.success ? res.data : [],
-      hasMore: res.success && res.data ? res.data.length === PAGE_LIMIT : false,
-    }
-  }
-
   return (
     <div className="space-y-6 py-4 md:py-6 lg:py-8">
       {/* SearchBar */}
       <SearchBar />
+
       {/* 1. السلايدر التفاعلي للمنتجات المميزة */}
       <FeaturedHeroSlider slides={slides} />
 
       {/* 2. شريط التصنيفات الرئيسية */}
-      <MainSection
+      <HomeClientWrapper
         viewMode={viewMode}
+
         initialProducts={initialProducts}
         // fetchMoreAction={loadMoreProducts}
         categories={categories}

@@ -11,7 +11,8 @@ import { useTranslations } from "next-intl"
 import { WishlistProductCard } from "./wishlist-product-card"
 
 import { WishlistProduct } from "@/lib/actions/wishlists/queries/get-wishlist"
-import ViewMode from "../shared/view_mode"
+import ViewMode from "@/components/shared/view_mode"
+
 
 interface WishlistProductGridProps {
   initialProducts: WishlistProduct[]

@@ -1,111 +1,97 @@
 /**
- * @file app/[locale]/(store)/categories/[slug]/page.tsx
- * @description Category storefront page displaying filtered products with infinite scroll support and dynamic metadata.
+ * @file app/[locale]/(store)/brands/[slug]/page.tsx
+ * @description Brand storefront page displaying filtered products with infinite scroll support and dynamic metadata.
  */
 
 import { notFound } from "next/navigation"
 import { cookies } from "next/headers"
-import { getTranslations } from "next-intl/server"
-
-import { ProductGrid } from "@/components/store/home/product-grid"
 import { APP_CONFIG, COOKIES_KEYS, PRODUCT_MODE } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import { getCategoryBySlug } from "@/lib/actions/categories/queries/get-category-by-slug"
 import { getFilteredProducts } from "@/lib/actions/store/queries/get_filtered_products"
- 
-interface CategoryPageProps {
+ import { getCategoryByFilter } from "@/lib/actions/store/queries/get_category_by_filter"
+import CategoryClientWrapper from "@/components/store/client-wrapper/category-client-wrapper"
+
+interface PageProps {
   params: Promise<{ slug: string; locale: string }>
 }
 
-/**
- * دالة لتوليد الميتا داتا ديناميكياً استناداً إلى اسم التصنيف واللغة
- */
-export async function generateMetadata({ params }: CategoryPageProps) {
+// دالة لتوليد الميتا داتا ديناميكياً استناداً إلى اسم البراند واللغة
+export async function generateMetadata({ params }: PageProps) {
   const { slug, locale } = await params
-  const t = await getTranslations({ locale, namespace: "Category" })
 
-  const result = await getCategoryBySlug(slug)
+  const result = await getCategoryByFilter({ categorySlug: slug })
 
   let name
+  let description
 
-  if (result.success) name = result.data.name
+  if (result.success && result.data) {
+    const category = result.data
 
-  const categoryName = name ?? "Category"
+    name = locale === "ar" ? category.name_ar || category.name : category.name
+
+    description =
+      locale === "ar"
+        ? category.description_ar || category.description || "الوصف غير متوفر"
+        : category.description || "Description not available"
+  }
 
   return createMetadata({
     siteName: APP_CONFIG.NAME,
-    title: t("META_TITLE", {
-      category: categoryName,
-      default: `${categoryName} Products`,
-    }),
-    description: t("META_DESCRIPTION", {
-      category: categoryName,
-      default: `Browse our collection of ${categoryName} items and everyday essentials.`,
-    }),
+    title: name ?? "unknown",
+    description: description ?? "unknown",
   })
 }
 
-export default async function CategoryPage({ params }: CategoryPageProps) {
+export default async function Page({ params }: PageProps) {
   const { slug, locale } = await params
-  const t = await getTranslations({ locale, namespace: "Category" })
 
-  const cookieStore = await cookies()
-  const viewModeCookie = cookieStore.get(COOKIES_KEYS.PRODUCT_MODE)?.value
-  const viewMode =
-    viewModeCookie === PRODUCT_MODE.LIST ? PRODUCT_MODE.LIST : PRODUCT_MODE.GRID
-
-  const result = await getCategoryBySlug(slug)
+  const result = await getCategoryByFilter({ categorySlug: slug })
 
   if (!result.success || !result.data) {
-    notFound()
+    return notFound()
   }
 
   const category = result.data
 
-  const categoryId = category.slug === "*" ? undefined : category.id
-  const PAGE_LIMIT = 12
+  // استخدام Fallback (إذا لم تتوفر الترجمة العربية، يعرض النص الأصلي)
+  const name = locale === "ar" ? category.name_ar || category.name : category.name
 
-  // 3. جلب المنتجات الأولية
+  const description =
+    locale === "ar"
+        ? category.description_ar || category.description || "الوصف غير متوفر"
+        : category.description || "Description not available"
+
+  const categoryId = result.data.id
+
+  // 2. جلب الكوكيز لتحديد طريقة عرض الشبكة أو القائمة
+  const cookieStore = await cookies()
+  const viewModeCookie = cookieStore.get(COOKIES_KEYS.PRODUCT_MODE)?.value
+
+  const viewMode =
+    viewModeCookie === PRODUCT_MODE.LIST ? PRODUCT_MODE.LIST : PRODUCT_MODE.GRID
+
+  const QUERY = categoryId
+  const PAGE_LIMIT = 12
+  const PAGE_NUMBER = 1
+  const ACTIVE_ONLY = true
+
+  // 3. جلب المنتجات الأولية للعلامة التجارية
   const productsResult = await getFilteredProducts({
-    categoryId: categoryId,
+    categoryId: QUERY,
     limit: PAGE_LIMIT,
-    page: 1,
-    activeOnly: true,
+    page: PAGE_NUMBER,
+    activeOnly: ACTIVE_ONLY,
   })
 
   const initialProducts = productsResult.success ? productsResult.data : []
 
-  // 4. Server Action للتحميل التلقائي (Infinite Scroll)
-  async function loadMoreProducts(pageNumber: number) {
-    "use server"
-    const res = await getFilteredProducts({
-      categoryId: categoryId,
-      limit: PAGE_LIMIT,
-      page: pageNumber,
-      activeOnly: true,
-    })
-    return {
-      success: res.success,
-      data: res.success ? res.data : [],
-      hasMore: res.success && res.data ? res.data.length === PAGE_LIMIT : false,
-    }
-  }
-
   return (
-    <div className="container space-y-8 py-8">
-      <ProductGrid
-        title={category.name}
-        description={t("PAGE_DESC", {
-          category: category.name,
-          default: `Explore all available products in ${category.name}`,
-        })}
-        viewMode={viewMode}
-        initialProducts={initialProducts}
-        emptyMessage={t("NO_PRODUCTS", {
-          default: "No products available in this category.",
-        })}
-        fetchMoreAction={loadMoreProducts}
-      />
-    </div>
+    <CategoryClientWrapper
+      id={categoryId}
+      name={name}
+      description={description}
+      initialProducts={initialProducts}
+      viewMode={viewMode}
+    />
   )
 }

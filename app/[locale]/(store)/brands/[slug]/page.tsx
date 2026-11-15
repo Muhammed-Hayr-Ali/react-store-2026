@@ -3,64 +3,65 @@
  * @description Brand storefront page displaying filtered products with infinite scroll support and dynamic metadata.
  */
 
- import { ProductGrid } from "@/components/store/home/product-grid"
-import { createServerClient } from "@/lib/database/supabase/server"
 import { notFound } from "next/navigation"
 import { cookies } from "next/headers"
-import { getTranslations } from "next-intl/server"
 import { APP_CONFIG, COOKIES_KEYS, PRODUCT_MODE } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getFilteredProducts } from "@/lib/actions/store/queries/get_filtered_products"
+import BrandClientWrapper from "@/components/store/client-wrapper/brand-client-wrapper"
+import { getBrandByFilter } from "@/lib/actions/store/queries/get_brand_by_filter"
 
-interface BrandPageProps {
+interface PageProps {
   params: Promise<{ slug: string; locale: string }>
 }
 
 // دالة لتوليد الميتا داتا ديناميكياً استناداً إلى اسم البراند واللغة
-export async function generateMetadata({ params }: BrandPageProps) {
+export async function generateMetadata({ params }: PageProps) {
   const { slug, locale } = await params
-  const supabase = await createServerClient()
-  const t = await getTranslations({ locale, namespace: "Brand" })
 
-  const { data: brand } = await supabase
-    .from("brands")
-    .select("name")
-    .eq("slug", slug)
-    .single()
+  const result = await getBrandByFilter({ brandSlug: slug })
 
-  const brandName = brand?.name || "Brand"
+  let name
+  let description
+
+  if (result.success && result.data) {
+    const brand = result.data
+
+    name = locale === "ar" ? brand.name_ar || brand.name : brand.name
+
+    description =
+      locale === "ar"
+        ? brand.description_ar || brand.description || "الوصف غير متوفر"
+        : brand.description || "Description not available"
+  }
 
   return createMetadata({
     siteName: APP_CONFIG.NAME,
-    title: t("META_TITLE", {
-      brand: brandName,
-      default: `${brandName} Products`,
-    }),
-    description: t("META_DESCRIPTION", {
-      brand: brandName,
-      default: `Explore all products, offers, and latest releases from ${brandName}.`,
-    }),
+    title: name ?? "unknown",
+    description: description ?? "unknown",
   })
 }
 
-export default async function BrandPage({ params }: BrandPageProps) {
+export default async function Page({ params }: PageProps) {
   const { slug, locale } = await params
-  const t = await getTranslations({ locale, namespace: "Brand" })
-  const supabase = await createServerClient()
 
-  // 1. جلب العلامة التجارية بالـ slug لنحصل على الـ id الخاص بها والاسم
-  const { data: brand, error } = await supabase
-    .from("brands")
-    .select("id, name")
-    .eq("slug", slug)
-    .single()
+  const result = await getBrandByFilter({ brandSlug: slug })
 
-  if (error || !brand) {
-    notFound()
+  if (!result.success || !result.data) {
+    return notFound()
   }
 
-  // تخزين الـ id في ثابت لضمان الأمان ونوع البيانات داخل الـ Server Action
-  const brandId = brand.id
+  const brand = result.data
+
+  // استخدام Fallback (إذا لم تتوفر الترجمة العربية، يعرض النص الأصلي)
+  const name = locale === "ar" ? brand.name_ar || brand.name : brand.name
+
+  const description =
+    locale === "ar"
+        ? brand.description_ar || brand.description || "الوصف غير متوفر"
+        : brand.description || "Description not available"
+
+  const brandId = result.data.id
 
   // 2. جلب الكوكيز لتحديد طريقة عرض الشبكة أو القائمة
   const cookieStore = await cookies()
@@ -69,49 +70,28 @@ export default async function BrandPage({ params }: BrandPageProps) {
   const viewMode =
     viewModeCookie === PRODUCT_MODE.LIST ? PRODUCT_MODE.LIST : PRODUCT_MODE.GRID
 
+  const QUERY = brandId
   const PAGE_LIMIT = 12
+  const PAGE_NUMBER = 1
+  const ACTIVE_ONLY = true
 
   // 3. جلب المنتجات الأولية للعلامة التجارية
   const productsResult = await getFilteredProducts({
-    brandId: brandId,
+    brandId: QUERY,
     limit: PAGE_LIMIT,
-    page: 1,
-    activeOnly: true,
+    page: PAGE_NUMBER,
+    activeOnly: ACTIVE_ONLY,
   })
 
   const initialProducts = productsResult.success ? productsResult.data : []
 
-  // 4. Server Action للتحميل التلقائي (Infinite Scroll)
-  async function loadMoreProducts(pageNumber: number) {
-    "use server"
-    const res = await getFilteredProducts({
-      brandId: brandId,
-      limit: PAGE_LIMIT,
-      page: pageNumber,
-      activeOnly: true,
-    })
-    return {
-      success: res.success,
-      data: res.success ? res.data : [],
-      hasMore: res.success && res.data ? res.data.length === PAGE_LIMIT : false,
-    }
-  }
-
   return (
-    <div className="container space-y-8 py-8">
-      <ProductGrid
-        title={brand.name}
-        description={t("PAGE_DESC", {
-          brand: brand.name,
-          default: `Explore all available products from ${brand.name}`,
-        })}
-        viewMode={viewMode}
-        initialProducts={initialProducts}
-        emptyMessage={t("NO_PRODUCTS", {
-          default: "No products available from this brand right now.",
-        })}
-        fetchMoreAction={loadMoreProducts}
-      />
-    </div>
+    <BrandClientWrapper
+      id={brandId}
+      name={name}
+      description={description}
+      initialProducts={initialProducts}
+      viewMode={viewMode}
+    />
   )
 }

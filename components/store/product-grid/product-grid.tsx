@@ -1,6 +1,6 @@
 /**
  * @file components/shared/products-view/product-grid.tsx
- * @description Flexible and generic product grid component with built-in next-intl translations.
+ * @description Flexible and generic product grid component with built-in next-intl translations and dummy time delay for infinite scroll testing.
  */
 
 "use client"
@@ -10,9 +10,8 @@ import Link from "next/link"
 import { useTranslations } from "next-intl"
 import {
   AlertTriangleIcon,
-  HeartOffIcon,
   HomeIcon,
-  PackageOpen,
+  Loader2,
   PackageOpenIcon,
   RotateCcwIcon,
 } from "lucide-react"
@@ -21,7 +20,7 @@ import ViewMode from "@/components/shared/view_mode"
 import {
   ProductCard,
   SimpliProduct,
-} from "@/components/shared/products-view/product-card"
+} from "@/components/store/product-grid/product-card"
 import { Button } from "@/components/ui/button"
 import {
   Empty,
@@ -35,7 +34,9 @@ import { APP_ROUTES } from "@/lib/config/app-routes"
 import { cn } from "@/lib/utils"
 
 export interface ProductGridProps {
-  title: string
+  name?: string
+  description?: string
+
   hasError?: boolean
   initialProducts: SimpliProduct[] | []
   viewMode: "grid" | "list"
@@ -43,10 +44,15 @@ export interface ProductGridProps {
   showHeartButton?: boolean
   showCartButton?: boolean
   className?: string
+
+  onLoadMore?: () => Promise<void> | void
+  hasMore?: boolean
+  isLoadingMore?: boolean
 }
 
 export function ProductGrid({
-  title,
+  name,
+  description,
   hasError = false,
   initialProducts,
   viewMode: initialViewMode,
@@ -54,19 +60,51 @@ export function ProductGrid({
   showHeartButton,
   showCartButton,
   className,
+  onLoadMore,
+  hasMore,
+  isLoadingMore,
 }: ProductGridProps) {
+  const t = useTranslations("ProductsView.List")
+
+  // View Mode
   const [mode, setMode] = React.useState<"grid" | "list">(initialViewMode)
 
+  const loadMoreRef = React.useRef<HTMLDivElement>(null)
+
+  // مراقبة السكرول لتشغيل دالة التحميل القادمة من الأب
+  React.useEffect(() => {
+    const currentRef = loadMoreRef.current
+    if (!currentRef || !onLoadMore || !hasMore) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isLoadingMore && hasMore) {
+          onLoadMore()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    observer.observe(currentRef)
+
+    return () => {
+      if (currentRef) observer.unobserve(currentRef)
+    }
+  }, [onLoadMore, isLoadingMore, hasMore])
+
+  // Error Component
   if (hasError) return <ErrorList onRetry={onRetry} />
 
+  // Empty Component
   if (initialProducts.length === 0) return <EmptyList />
 
+  // List Component
   return (
-    <section className={cn("space-y-6", className)}>
+    <section className={cn("space-y-6 px-4 sm:px-6 lg:px-8", className)}>
       {/* Header & Toolbar Section */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
-          {title}
+          {name}
         </h2>
 
         <ViewMode initValue={mode} onChange={setMode} />
@@ -89,6 +127,20 @@ export function ProductGrid({
           />
         ))}
       </div>
+
+      {onLoadMore && (
+        <div ref={loadMoreRef} className="flex min-h-12.5 justify-center py-8">
+          {isLoadingMore && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="size-5 animate-spin" />
+              <span>{t("LOADING")}</span>
+            </div>
+          )}
+          {!hasMore && initialProducts.length > 0 && (
+            <p className="text-xs text-muted-foreground">{t("END")}</p>
+          )}
+        </div>
+      )}
     </section>
   )
 }

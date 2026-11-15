@@ -1,15 +1,14 @@
 /**
  * @file lib/actions/store/queries/get-store-root-categories.ts
- * @description Retrieves active root categories with specific concise fields ordered by sort_order.
+ * @description Retrieves active root categories with specific concise fields ordered by sort_order with robust Next.js unstable_cache support.
  */
 
 "use server"
 
-import { cache } from "react"
+import { unstable_cache } from "next/cache"
 import type { ApiResult } from "../../types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
-// واجهة البيانات المبسطة المطلوبة حصرياً
 export interface SimplifiedRootCategory {
   id: string
   name: string
@@ -28,16 +27,9 @@ interface CategoryQueryResult {
   image_alt: string | null
 }
 
-interface GetStoreRootCategoriesOptions {
-  limit?: number
-}
-
-export const getRootCategories = cache(
-  async (
-    options: GetStoreRootCategoriesOptions = {}
-  ): Promise<ApiResult<SimplifiedRootCategory[]>> => {
-    const { limit = 0 } = options
-
+// دالة الكاش الداخلية تستقبل المعاملات بشكل مفرد لضمان استقرار الكاش
+const getCachedRootCategories = unstable_cache(
+  async (limit: number): Promise<SimplifiedRootCategory[]> => {
     const supabase = await createServerClient()
 
     let query = supabase
@@ -55,30 +47,51 @@ export const getRootCategories = cache(
     const { data, error } = await query
 
     if (error) {
-      console.error("[getStoreRootCategories] Database query failed", {
-        code: error.code,
-        message: error.message,
-      })
-      return {
-        success: false,
-        error: "GET_STORE_CATEGORIES_ERROR",
-        details: { database: [error.message] },
-      }
+      throw new Error(error.message)
     }
 
     const rawCategories = (data ?? []) as unknown as CategoryQueryResult[]
 
-    const simplifiedCategories: SimplifiedRootCategory[] = rawCategories.map(
-      (category) => ({
-        id: category.id,
-        name: category.name,
-        name_ar: category.name_ar,
-        slug: category.slug,
-        image_url: category.image_url,
-        image_alt: category.image_alt,
-      })
-    )
-
-    return { success: true, data: simplifiedCategories }
+    return rawCategories.map((category) => ({
+      id: category.id,
+      name: category.name,
+      name_ar: category.name_ar,
+      slug: category.slug,
+      image_url: category.image_url,
+      image_alt: category.image_alt,
+    }))
+  },
+  ["root-categories-cache"],
+  {
+    revalidate: 3600, // إعادة التحقق التلقائي كل ساعة
+    tags: ["categories"], // لتحديث الكاش فوراً عند تعديل التصنيفات من لوحة التحكم عبر revalidateTag("categories")
   }
 )
+
+interface GetStoreRootCategoriesOptions {
+  limit?: number
+}
+
+export async function getRootCategories(
+  options: GetStoreRootCategoriesOptions = {}
+): Promise<ApiResult<SimplifiedRootCategory[]>> {
+  const { limit = 0 } = options
+
+  try {
+    const simplifiedCategories = await getCachedRootCategories(limit)
+
+    return { success: true, data: simplifiedCategories }
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown database error"
+
+    console.error("[getStoreRootCategories] Database query failed", {
+      message: errorMessage,
+    })
+
+    return {
+      success: false,
+      error: "GET_STORE_CATEGORIES_ERROR",
+      details: { database: [errorMessage] },
+    }
+  }
+}

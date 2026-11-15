@@ -3,20 +3,16 @@
  * @description User wishlist page displaying saved products with infinite scroll support, matching category and brand page architecture.
  */
 
-import { getActionErrorKey } from "@/lib/actions/error-keys"
 import { APP_CONFIG, COOKIES_KEYS, PRODUCT_MODE } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { cookies } from "next/headers"
 import { getTranslations } from "next-intl/server"
-import { WishlistProductGrid } from "@/components/wishlist/wishlist-product-grid"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 import { getWishlistProducts } from "@/lib/actions/wishlists"
 import { APP_ROUTES } from "@/lib/config/app-routes"
 import { redirect } from "next/navigation"
-import EmptyWishlist from "@/components/wishlist/empty-wishlist"
-import ErrorWishlist from "@/components/wishlist/error-wishlist"
-import { ProductGrid } from "@/components/shared/products-view/product-grid"
-import { SimpliProduct } from "@/components/shared/products-view/product-card"
+import { ProductGrid } from "@/components/store/product-grid/product-grid"
+import { SimpliProduct } from "@/components/store/product-grid/product-card"
 
 // توليد الميتا داتا ديناميكياً باستخدام مفترس الترجمة الخاص بالـ Wishlist
 export async function generateMetadata() {
@@ -56,12 +52,13 @@ export default async function WishlistPage() {
 
   return (
     <ProductGrid
-      title={t("PAGE_TITLE")}
+      name={t("PAGE_TITLE")}
+      description=""
       viewMode={viewMode}
       hasError={!result.success}
       initialProducts={initialProducts}
       showHeartButton
-      className="py-6   px-4 sm:px-6 lg:px-8"
+      className="px-4 py-6 sm:px-6 lg:px-8"
     />
   )
 }

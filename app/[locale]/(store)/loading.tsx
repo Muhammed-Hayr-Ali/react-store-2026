@@ -5,7 +5,6 @@
 
 import { ProductCardSkeleton } from "@/omponents/store/skeletons/product-card-skeleton"
 
- 
 export default function StoreLoading() {
   // مصفوفة وهمية لتمثيل 8 كارتات منتجات
   const productSkeletons = Array.from({ length: 8 }, (_, i) => i)
@@ -13,7 +12,7 @@ export default function StoreLoading() {
   const categorySkeletons = Array.from({ length: 6 }, (_, i) => i)
 
   return (
-    <div className="space-y-12 pb-12 animate-pulse">
+    <div className="animate-pulse space-y-12 px-4 pb-12 sm:px-6 lg:px-8">
       {/* 1. هيكل السلايدر الوهمي (Hero Slider Skeleton) */}
       <div className="aspect-21/9 w-full rounded-3xl bg-muted/60" />
 

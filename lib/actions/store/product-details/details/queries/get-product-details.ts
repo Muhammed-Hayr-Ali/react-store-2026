@@ -1,11 +1,11 @@
 /**
  * @file lib/actions/store/product-details/queries/get-product-details.ts
- * @description Retrieves full product details including variants, filtering product images to variant-specific ones only safely.
+ * @description Retrieves full product details including variants with robust Next.js unstable_cache support and strict typing.
  */
 
 "use server"
 
-import { cache } from "react"
+import { unstable_cache } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import type { ApiResult } from "@/lib/actions/types/utils"
 
@@ -96,94 +96,68 @@ interface DatabaseProductQueryResult {
   product_images: ProductImageDetail[] | null
 }
 
-export const getProductDetails = cache(
-  async (slug: string): Promise<ApiResult<FullProductDetails>> => {
-    if (!slug || typeof slug !== "string") {
-      return {
-        success: false,
-        error: "INVALID_SLUG",
-        details: { database: ["Product slug is required."] },
-      }
-    }
-
+const getCachedProductDetails = unstable_cache(
+  async (slug: string): Promise<FullProductDetails | null> => {
     const supabase = await createServerClient()
 
     const { data: productData, error } = await supabase
       .from("products")
       .select(
         `
-      id,
-      name,
-      slug,
-      description,
-      is_active,
-      is_featured,
-      created_at,
-      meta_title,
-      meta_description,
-      category:categories!products_category_id_fkey (
         id,
         name,
-        name_ar,
         slug,
-        parent_id
-      ),
-      brand:brands!products_brand_id_fkey (
-        id,
-        name,
-        name_ar,
-        slug,
-        image_url,
-        image_alt
-      ),
-      product_variants (
-        id,
-        sku,
-        name,
-        price,
-        compare_at_price,
-        stock_quantity,
-        track_inventory,
+        description,
         is_active,
-        attributes
-      ),
-      product_images (
-        id,
-        url,
-        alt_text,
-        is_primary,
-        variant_sku
-      )
-    `
+        is_featured,
+        created_at,
+        meta_title,
+        meta_description,
+        category:categories!products_category_id_fkey (
+          id,
+          name,
+          name_ar,
+          slug,
+          parent_id
+        ),
+        brand:brands!products_brand_id_fkey (
+          id,
+          name,
+          name_ar,
+          slug,
+          image_url,
+          image_alt
+        ),
+        product_variants (
+          id,
+          sku,
+          name,
+          price,
+          compare_at_price,
+          stock_quantity,
+          track_inventory,
+          is_active,
+          attributes
+        ),
+        product_images (
+          id,
+          url,
+          alt_text,
+          is_primary,
+          variant_sku
+        )
+      `
       )
       .eq("slug", slug)
       .eq("is_active", true)
       .maybeSingle()
 
-    if (error) {
-      console.error("[getProductDetails] Database query failed", {
-        slug,
-        code: error.code,
-        message: error.message,
-      })
-      return {
-        success: false,
-        error: "FETCH_PRODUCT_ERROR",
-        details: { database: [error.message] },
-      }
-    }
-
-    if (!productData) {
-      return {
-        success: false,
-        error: "PRODUCT_NOT_FOUND",
-        details: { database: [`No active product found for slug: ${slug}`] },
-      }
+    if (error || !productData) {
+      return null
     }
 
     const rawProduct = productData as unknown as DatabaseProductQueryResult
 
-    // معالجة التصنيف
     let processedCategory: CategoryDetail | null = null
     if (rawProduct.category) {
       const cat = Array.isArray(rawProduct.category)
@@ -201,7 +175,6 @@ export const getProductDetails = cache(
       }
     }
 
-    // إذا كان التصنيف يمتلك تصنيف أب (parent_id)، نقوم بجلبه بشكل مستقل وآمن
     let parentCategory: CategoryDetail | null = null
     if (processedCategory?.parent_id) {
       const { data: parentData } = await supabase
@@ -215,7 +188,6 @@ export const getProductDetails = cache(
       }
     }
 
-    // معالجة العلامة التجارية (Brand)
     let processedBrand: BrandDetail | null = null
     if (rawProduct.brand) {
       const brd = Array.isArray(rawProduct.brand)
@@ -234,7 +206,6 @@ export const getProductDetails = cache(
       }
     }
 
-    // تصفية الصور برمجياً لضمان جلب الصور المرتبطة بمتغيرات فقط (حيث variant_sku ليس فارغاً أو null)
     const allImages = rawProduct.product_images ?? []
     const variantSpecificImages = allImages.filter(
       (img) => img.variant_sku !== null && img.variant_sku !== undefined && String(img.variant_sku).trim() !== ""
@@ -254,9 +225,53 @@ export const getProductDetails = cache(
       parent_category: parentCategory,
       brand: processedBrand,
       product_variants: rawProduct.product_variants ?? [],
-      product_images: variantSpecificImages, // استخدام الصور المصفاة للمتغيرات فقط
+      product_images: variantSpecificImages,
     }
 
-    return { success: true, data: formattedProduct }
+    return formattedProduct
+  },
+  ["product-details-cache"],
+  {
+    revalidate: 3600,
+    tags: ["products"],
   }
 )
+
+export async function getProductDetails(
+  slug: string
+): Promise<ApiResult<FullProductDetails>> {
+  if (!slug || typeof slug !== "string") {
+    return {
+      success: false,
+      error: "INVALID_SLUG",
+      details: { database: ["Product slug is required."] },
+    }
+  }
+
+  try {
+    const product = await getCachedProductDetails(slug)
+
+    if (!product) {
+      return {
+        success: false,
+        error: "PRODUCT_NOT_FOUND",
+        details: { database: [`No active product found for slug: ${slug}`] },
+      }
+    }
+
+    return { success: true, data: product }
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown database error"
+    
+    console.error("[getProductDetails] Failed to retrieve product", {
+      slug,
+      message: errorMessage,
+    })
+
+    return {
+      success: false,
+      error: "FETCH_PRODUCT_ERROR",
+      details: { database: [errorMessage] },
+    }
+  }
+}

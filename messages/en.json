@@ -362,7 +362,8 @@
   "CategoriesScroll": {
     "title": "Categories",
     "previous_aria": "Previous categories",
-    "next_aria": "Next categories"
+    "next_aria": "Next categories",
+    "SEE_ALL": "See all"
   },
   "DashboardBreadcrumb": {
     "DASHBOARD": "Dashboard",
@@ -1418,6 +1419,10 @@
       "description": "An error occurred while loading the products. Please try again.",
       "retry": "Try Again",
       "home": "Home"
+    },
+    "List": {
+      "LOADING": "Loading...",
+      "END": "You have reached the end"
     }
   }
 }
