@@ -63,7 +63,7 @@ export default async function ProductDetailsPage({
   const reviewsData = reviewsResult.success ? reviewsResult.data : null
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="space-y-6 md:space-y-8 px-4 sm:px-6 lg:px-8 py-6 md:py-8">
       <ProductBreadcrumb
         category={product.category}
         parentCategory={product.parent_category}
