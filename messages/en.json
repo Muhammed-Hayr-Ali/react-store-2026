@@ -636,7 +636,8 @@
     "FAST_DISPATCH": "Fast Dispatch",
     "EASY_RETURNS": "Easy Returns",
     "SECURE_CHECKOUT": "Secure Checkout",
-    "OPTION": "Option"
+    "OPTION": "Option",
+    "ADD_TO_CART_SUCCESS": "The product has been successfully added to the shopping cart."
   },
   "ProductForm": {
     "ALERT_TITLE": "Action Required",

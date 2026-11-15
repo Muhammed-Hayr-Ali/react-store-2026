@@ -13,6 +13,7 @@ import { ProductVariantDetail } from "@/lib/actions/store/product-details/detail
 import { useCurrency } from "@/lib/context/currency-context"
 import { WishlistButton } from "@/components/wishlist/wishlist-button"
 import { useCart } from "@/lib/context/cart-context"
+import { toast } from "sonner"
 
 interface ProductActionsProps {
   productId: string
@@ -25,6 +26,7 @@ export function ProductActions({
   variant,
   isProductActive,
 }: ProductActionsProps) {
+  const tError = useTranslations("ActionErrors")
   const t = useTranslations("ProductDetails")
   const { formatRawPrice, currentCurrency } = useCurrency()
   const { addItem, isPending } = useCart()
@@ -54,7 +56,19 @@ export function ProductActions({
   }
 
   const handleAddToCart = async () => {
-    await addItem(productId, variant.id, quantity)
+    const result = await addItem({
+      product_id: productId,
+      variant_id: variant.id,
+      quantity: 1,
+    })
+
+    if (result.success) {
+      toast.success(t("ADD_TO_CART_SUCCESS"))
+    } else {
+      toast.error(
+        result.error ? tError(result.error) : tError("UNEXPECTED_ERROR")
+      )
+    }
   }
 
   return (
