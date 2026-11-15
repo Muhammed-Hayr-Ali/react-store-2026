@@ -44,9 +44,12 @@ export function ProductCard({
     try {
       setIsLoading(true)
       await Promise.all([
-        addItem(product.id, product.variantId, 1),
-        new Promise((resolve) => setTimeout(resolve, 400)),
-      ])
+      await addItem({
+      product_id: product.id,
+      variant_id: product.variantId,
+      quantity: 1,
+    })
+    ])
     } finally {
       setIsLoading(false)
     }
