@@ -30,48 +30,18 @@ interface WishlistProductCardProps {
   onRemove?: (productId: string) => void
 }
 
-export function WishlistProductCard({
-  product,
-  layout = "vertical",
-}: WishlistProductCardProps) {
+// Heart button to remove an item from the wishlist
+function HeartButton({ productId }: { productId: string }) {
   const t = useTranslations("Wishlist")
-  const { addItem } = useCart()
-  const { formatRawPrice, currentCurrency } = useCurrency()
   const { toggleWishlist } = useWishlist()
-  const [isLoading, setIsLoading] = React.useState(false)
   const [isRemoving, setIsRemoving] = React.useState(false)
-
-  const hasDiscount =
-    product.compareAtPrice && product.compareAtPrice > (product.price ?? 0)
-  const discountPercentage = hasDiscount
-    ? Math.round(
-        ((product.compareAtPrice! - product.price!) / product.compareAtPrice!) *
-          100
-      )
-    : null
-
-  const handleAddToCart = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation() // منع انتقال النقر للرابط الرئيسي
-    if (!product.price || !product.variantId) return
-
-    try {
-      setIsLoading(true)
-      await Promise.all([
-        addItem(product.id, product.variantId, 1),
-        new Promise((resolve) => setTimeout(resolve, 400)),
-      ])
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const handleRemoveFromWishlist = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation() // منع انتقال النقر للرابط الرئيسي
     try {
       setIsRemoving(true)
-      const result = await toggleWishlist(product.id)
+      const result = await toggleWishlist(productId)
       if (!result.success) {
         if (result.error === "AUTH_REQUIRED") {
           toast(t("AUTH_REQUIRED_TITLE"))
@@ -83,43 +53,115 @@ export function WishlistProductCard({
       setIsRemoving(false)
     }
   }
+  return (
+    <button
+      type="button"
+      disabled={isRemoving}
+      onClick={handleRemoveFromWishlist}
+      className="group flex size-7 items-center justify-center rounded-full bg-background/80 text-destructive shadow-xs backdrop-blur-md transition-colors hover:bg-destructive hover:text-white"
+      aria-label={t("REMOVE_FROM_WISHLIST", {
+        default: "Remove from wishlist",
+      })}
+    >
+      {isRemoving ? (
+        <LoaderCircleIcon
+          fill="none"
+          className="size-3.5 animate-spin text-destructive transition-colors group-hover:text-white"
+        />
+      ) : (
+        <HeartIcon className="size-3.5 fill-destructive text-destructive transition-colors group-hover:fill-white group-hover:text-white" />
+      )}
+    </button>
+  )
+}
+
+// Add item to cart button
+function AddToCartButton({
+  productId,
+  price,
+  variantId,
+}: {
+  productId: string
+  price: number | null
+  variantId: string | null
+}) {
+  const tError = useTranslations("ActionErrors")
+  const t = useTranslations("Wishlist")
+  const { addItem } = useCart()
+  const [isLoading, setIsLoading] = React.useState(false)
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation() // منع انتقال النقر للرابط الرئيسي
+
+    if (!price || !variantId) return
+
+    try {
+      setIsLoading(true)
+
+      const result = await addItem({
+        product_id: productId,
+        variant_id: variantId,
+        quantity: 1,
+      })
+
+      if (result.success) {
+        toast.success(t("ADD_TO_CART_SUCCESS"))
+      } else {
+        toast.error(
+          result.error ? tError(result.error) : tError("UNEXPECTED_ERROR")
+        )
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <Button
+      size="icon"
+      variant="secondary"
+      className="size-7 rounded-full bg-background shadow-xs transition-transform hover:bg-background/90 active:scale-95"
+      aria-label="Add to cart"
+      disabled={isLoading}
+      onClick={handleAddToCart}
+    >
+      {isLoading ? (
+        <Loader2Icon className="size-3.5 animate-spin text-primary" />
+      ) : (
+        <ShoppingCartIcon className="size-3.5" />
+      )}
+    </Button>
+  )
+}
+
+export function WishlistProductCard({
+  product,
+  layout = "vertical",
+}: WishlistProductCardProps) {
+  const { formatRawPrice, currentCurrency } = useCurrency()
+  const hasDiscount =
+    product.compareAtPrice && product.compareAtPrice > (product.price ?? 0)
+  const discountPercentage = hasDiscount
+    ? Math.round(
+        ((product.compareAtPrice! - product.price!) / product.compareAtPrice!) *
+          100
+      )
+    : null
 
   // ==================== 1. التصميم الأفقي (Horizontal Layout) ====================
   if (layout === "horizontal") {
     return (
       <Link
         href={`/product/${product.slug}`}
-        className="group/card relative flex items-center gap-3 overflow-hidden rounded-2xl bg-muted/50 p-2.5 transition-all duration-300 hover:bg-muted/40"
+        className="group/card flex items-center gap-3 overflow-hidden rounded-2xl bg-muted/50 p-2.5 transition-all duration-300 hover:bg-muted/40"
       >
-        {/* زر القلب للإزالة */}
-        <div className="absolute inset-s-3 top-3 z-10">
-          <button
-            type="button"
-            disabled={isRemoving}
-            onClick={handleRemoveFromWishlist}
-            className="group flex size-7 items-center justify-center rounded-full bg-background/80 text-destructive shadow-xs backdrop-blur-md transition-colors hover:bg-destructive hover:text-white"
-            aria-label={t("REMOVE_FROM_WISHLIST", {
-              default: "Remove from wishlist",
-            })}
-          >
-            {isRemoving ? (
-              <LoaderCircleIcon
-                fill="none"
-                className="size-3.5 animate-spin text-destructive transition-colors group-hover:text-white"
-              />
-            ) : (
-              <HeartIcon className="size-3.5 fill-destructive text-destructive transition-colors group-hover:fill-white group-hover:text-white" />
-            )}
-          </button>
-        </div>
-
         {/* Image Container */}
         <div className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-background/50 sm:size-24">
           <AspectRatio
             ratio={1 / 1}
             className="flex w-full items-center justify-center"
           >
-            {" "}
             {product.imageUrl ? (
               <img
                 src={product.imageUrl}
@@ -182,21 +224,16 @@ export function WishlistProductCard({
                 </span>
               )}
             </div>
+            <div className="flex space-x-2">
+              {/* زر القلب للإزالة */}
+              <HeartButton productId={product.id} />
 
-            <Button
-              size="icon"
-              variant="secondary"
-              className="size-7 rounded-full bg-background shadow-xs transition-transform hover:bg-background/90 active:scale-95"
-              aria-label="Add to cart"
-              disabled={isLoading}
-              onClick={handleAddToCart}
-            >
-              {isLoading ? (
-                <Loader2Icon className="size-3.5 animate-spin text-primary" />
-              ) : (
-                <ShoppingCartIcon className="size-3.5" />
-              )}
-            </Button>
+              <AddToCartButton
+                productId={product.id}
+                price={product.price}
+                variantId={product.variantId}
+              />
+            </div>
           </div>
         </div>
       </Link>
@@ -207,37 +244,14 @@ export function WishlistProductCard({
   return (
     <Link
       href={`/product/${product.slug}`}
-      className="group/card relative flex flex-col overflow-hidden rounded-2xl bg-muted/50 p-2.5 transition-all duration-300 hover:bg-muted/40"
+      className="group/card flex flex-col overflow-hidden rounded-2xl bg-muted/50 p-2.5 transition-all duration-300 hover:bg-muted/40"
     >
-      {/* زر القلب للإزالة في الزاوية العليا */}
-      <div className="absolute inset-e-4 top-4 z-10">
-        <button
-          type="button"
-          disabled={isRemoving}
-          onClick={handleRemoveFromWishlist}
-          className="group flex size-7 items-center justify-center rounded-full bg-background/80 text-destructive shadow-xs backdrop-blur-md transition-colors hover:bg-destructive hover:text-white"
-          aria-label={t("REMOVE_FROM_WISHLIST", {
-            default: "Remove from wishlist",
-          })}
-        >
-          {isRemoving ? (
-            <LoaderCircleIcon
-              fill="none"
-              className="size-3.5 animate-spin text-destructive transition-colors group-hover:text-white"
-            />
-          ) : (
-            <HeartIcon className="size-3.5 fill-destructive text-destructive transition-colors group-hover:fill-white group-hover:text-white" />
-          )}
-        </button>
-      </div>
-
       {/* Image Container */}
       <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-background/50">
         <AspectRatio
           ratio={1 / 1}
           className="flex w-full items-center justify-center"
         >
-          {" "}
           {product.imageUrl ? (
             <img
               src={product.imageUrl}
@@ -307,20 +321,14 @@ export function WishlistProductCard({
             )}
           </div>
 
-          <Button
-            size="icon"
-            variant="secondary"
-            className="size-7 rounded-full bg-background shadow-xs transition-transform hover:bg-background/90 active:scale-95"
-            aria-label="Add to cart"
-            disabled={isLoading}
-            onClick={handleAddToCart}
-          >
-            {isLoading ? (
-              <Loader2Icon className="size-3.5 animate-spin text-primary" />
-            ) : (
-              <ShoppingCartIcon className="size-3.5" />
-            )}
-          </Button>
+          <div className="flex gap-2">
+            <HeartButton productId={product.id} />
+            <AddToCartButton
+              productId={product.id}
+              price={product.price}
+              variantId={product.variantId}
+            />
+          </div>
         </div>
       </div>
     </Link>

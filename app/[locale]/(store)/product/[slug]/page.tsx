@@ -11,6 +11,7 @@ import { ProductReviewsSection } from "@/components/product-details/reviews/prod
 import { APP_CONFIG } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { ProductInfoSection } from "@/components/product-details/details/product-info-section"
+import { ProductBreadcrumb } from "@/components/product-details/details/product-breadcrumb"
 
 interface ProductDetailsPageProps {
   params: Promise<{
@@ -62,14 +63,13 @@ export default async function ProductDetailsPage({
   const reviewsData = reviewsResult.success ? reviewsResult.data : null
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 pt-8">
-      {/* تفاصيل المنتج الأساسية */}
-      {/* <div className="space-y-4">
-        <h1 className="text-3xl font-extrabold tracking-tight">{product.name}</h1>
-        <p className="text-muted-foreground">{product.description}</p>
-      </div> */}
+    <div className="space-y-6 md:space-y-8">
+      <ProductBreadcrumb
+        category={product.category}
+        parentCategory={product.parent_category}
+        productName={product.name}
+      />
       <ProductInfoSection locale={locale} product={product} />
-
       {/* 3. دمج وإرسال بيانات التقييمات والمراجعات للمكون الرئيسي */}
       <ProductReviewsSection reviewsData={reviewsData} />
     </div>

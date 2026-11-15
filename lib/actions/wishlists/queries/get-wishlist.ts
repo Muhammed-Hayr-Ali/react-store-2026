@@ -83,18 +83,13 @@ export interface WishlistProduct {
 }
 
 interface FilterOptions {
-  limit?: number
-  page?: number
   activeOnly?: boolean
 }
 
 export async function getWishlistProducts(
   options: FilterOptions = {}
 ): Promise<ApiResult<WishlistProduct[]>> {
-  const { limit = 12, page = 1, activeOnly = true } = options
-
-  const from = (Math.max(page, 1) - 1) * limit
-  const to = from + limit - 1
+  const { activeOnly = true } = options
 
   const supabase = await createServerClient()
 
@@ -162,7 +157,6 @@ export async function getWishlistProducts(
   query = query
     .order("created_at", { ascending: false })
     .order("id", { ascending: false })
-    .range(from, to)
 
   const { data: rows, error } = await query
 

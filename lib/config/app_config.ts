@@ -23,22 +23,20 @@ export const APP_CONFIG = {
     shortcut: "/favicon-16x16.png",
     apple: "/apple-touch-icon.png",
   },
-
 }
 
 export const COOKIES_KEYS = {
   LOGIN_METHOD: "login_method",
   CURRENCY: "app_currency",
   PRODUCT_MODE: "store_product_view_mode",
-  APP_THEME: "app_theme"
+  VIEW_MODE: "view_mode",
+  APP_THEME: "app_theme",
 } as const
-
 
 export const PRODUCT_MODE = {
   GRID: "grid",
   LIST: "list",
 } as const
-
 
 export const LOGIN_METHODS = {
   EMAIL: "email",

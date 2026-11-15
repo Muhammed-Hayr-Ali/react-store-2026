@@ -3,7 +3,6 @@
  * @description Storefront home page displaying the featured hero slider, root categories, and latest regular products grid.
  */
 
-
 import { getRootCategories } from "@/lib/actions/store/queries/get-root-categories"
 import FeaturedHeroSlider from "@/components/store/home/featured-hero-slider"
 
@@ -68,7 +67,7 @@ export default async function Page() {
   }
 
   return (
-    <div className="space-y-6 pt-4 lg:pt-8">
+    <div className="space-y-6 py-4 md:py-6 lg:py-8">
       {/* SearchBar */}
       <SearchBar />
       {/* 1. السلايدر التفاعلي للمنتجات المميزة */}
@@ -78,7 +77,7 @@ export default async function Page() {
       <MainSection
         viewMode={viewMode}
         initialProducts={initialProducts}
-        fetchMoreAction={loadMoreProducts}
+        // fetchMoreAction={loadMoreProducts}
         categories={categories}
       />
     </div>

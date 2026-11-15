@@ -15,15 +15,13 @@ import {
   removeCartItem,
   getCart,
   type CartQueryResult,
+  AddToCartInput,
 } from "@/lib/actions/cart"
+import { ApiResult } from "../actions/types/utils"
 
 interface CartContextType {
   cart: CartQueryResult | null
-  addItem: (
-    productId: string,
-    variantId: string,
-    quantity?: number
-  ) => Promise<void>
+  addItem: (input: AddToCartInput) => Promise<ApiResult<boolean>>
   updateItemQuantity: (itemId: string, quantity: number) => Promise<void>
   removeItem: (itemId: string) => Promise<void>
   isPending: boolean
@@ -56,38 +54,36 @@ export function CartProvider({
     }
   }
 
-  const addItem = async (
-    productId: string,
-    variantId: string,
-    quantity = 1
-  ): Promise<void> => {
-    return new Promise((resolve) => {
-      startTransition(async () => {
-        const result = await addToCart({
-          product_id: productId,
-          variant_id: variantId,
-          quantity,
-        })
-        if (!result.success) {
-          if (result.error === "AUTH_REQUIRED") {
-            toast.error(
-              t("AUTH_REQUIRED_TITLE", {
-                default: "Please sign in to add items to cart",
-              })
-            )
-          } else {
-            toast.error(
-              t("GENERAL_ERROR", {
-                default: "Failed to add item",
-              })
-            )
-          }
-        } else {
-          await refreshCart()
-        }
-        resolve()
-      })
+  // const addItem = async (
+  //   productId: string,
+  //   variantId: string,
+  //   quantity = 1
+  // ): Promise<void> => {
+  //   return new Promise((resolve) => {
+  //     startTransition(async () => {
+  //       const result = await addToCart({
+  //         product_id: productId,
+  //         variant_id: variantId,
+  //         quantity,
+  //       })
+  //       if (result.success) {
+  //         await refreshCart()
+  //       }
+  //       resolve()
+  //     })
+  //   })
+  // }
+
+  async function addItem(input: AddToCartInput) {
+    const result = await addToCart({
+      product_id: input.product_id,
+      variant_id: input.variant_id,
+      quantity: input.quantity,
     })
+
+    if (result.success) await refreshCart()
+
+    return result
   }
 
   const updateItemQuantity = async (
@@ -130,7 +126,6 @@ export function CartProvider({
             toast.error(t("REMOVE_ERROR", { default: "Failed to remove item" }))
           }
         } else {
-         
           await refreshCart()
         }
         resolve()

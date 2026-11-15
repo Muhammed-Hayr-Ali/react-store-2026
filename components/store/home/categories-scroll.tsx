@@ -73,9 +73,9 @@ export default function CategoriesScroll({
   const maskStyle = `linear-gradient(to right, ${leftStop}, ${rightStop})`
 
   return (
-    <div>
+    <div className="flex flex-col space-y-2">
       {/* الترويسة بدون أزرار */}
-      <div className="mb-3 flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
           {t("title", { default: "Categories" })}
         </h2>
@@ -112,9 +112,9 @@ export default function CategoriesScroll({
                   key={category.slug}
                   className="basis-auto pl-2 md:pl-3"
                 >
-                  <Button
+                  <button
                     className={cn(
-                      "group flex shrink-0 items-center gap-2.5 rounded-xl bg-muted/50 px-3.5 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none sm:px-4 sm:py-2.5 sm:text-sm",
+                      "group flex shrink-0 items-center gap-2.5 rounded-xl bg-muted/50 px-3.5 py-3.5 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none sm:px-4 sm:py-2.5 sm:text-sm",
                       category.slug === value && "invert"
                     )}
                     onClick={() => onSelect(category.slug)}
@@ -140,7 +140,7 @@ export default function CategoriesScroll({
                     </div>
 
                     <span className="whitespace-nowrap">{displayName}</span>
-                  </Button>
+                  </button>
                 </CarouselItem>
               )
             })}

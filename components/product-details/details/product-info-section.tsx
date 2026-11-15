@@ -117,15 +117,6 @@ export function ProductInfoSection({
 
   return (
     <div className="flex flex-col gap-8">
-      {/* ================================================================= */}
-      {/* 0. مسار التنقل (Breadcrumb) */}
-      {/* ================================================================= */}
-      <ProductBreadcrumb
-        locale={locale}
-        category={product.category}
-        parentCategory={product.parent_category}
-        productName={product.name}
-      />
 
       {/* تخطيط الشبكة الرئيسي */}
       <div className="grid grid-cols-1 items-start gap-12 md:grid-cols-12">

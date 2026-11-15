@@ -141,7 +141,11 @@
     "EXCHANGE_FAILED": "Failed to exchange authorization code. Please try logging in again.",
     "GENERIC_ERROR": "Unable to complete sign in. Please try again later.",
     "EMAIL_ALREADY_EXISTS_ERROR": "An account with this email address already exists.",
-    "ACCESS_DENIED": "Access denied. Please check your account permissions."
+    "ACCESS_DENIED": "Access denied. Please check your account permissions.",
+    "CART_FETCH_ERROR": "Error retrieving the shopping cart",
+    "CART_CREATE_ERROR": "Error creating shopping cart",
+    "CART_UPDATE_ERROR": "An error occurred while updating the shopping cart.",
+    "CART_ADD_ERROR": "Error adding the product to the shopping cart"
   },
   "AuthLayout": {
     "TERMS_PREFIX": "By continuing, you agree to our",
@@ -1150,7 +1154,8 @@
       "delete_role": "Delete Role",
       "delete_role_desc": "Remove and delete custom roles.",
       "manage_roles": "Full Roles Management",
-      "manage_roles_desc": "Comprehensive administrative control over security and roles."
+      "manage_roles_desc": "Comprehensive administrative control over security and roles.",
+      "AUTH_REQUIRED": "Sign in required"
     },
     "no_roles_found": "No roles found",
     "NO_DESCRIPTION": "No description.",
@@ -1311,7 +1316,21 @@
     "AUTH_REQUIRED_TITLE": "Sign in required",
     "GENERAL_ERROR": "Something went wrong, please try again later.",
     "NO_PRODUCTS_AVAILABLE": "No products available.",
-    "LOADING": "Loading more products..."
+    "LOADING": "Loading more products...",
+    "ADD_TO_CART_SUCCESS": "The product has been successfully added to the shopping cart.",
+    "Empty": {
+      "action": "Explore Products",
+      "description": "An unexpected error occurred while processing your request. Please try again or return home.",
+      "title": "Something went wrong!",
+      "home": "Go to Home",
+      "retry": "Try again"
+    },
+    "Error": {
+      "title": "Something went wrong!",
+      "description": "An unexpected error occurred while processing your request. Please try again or return home.",
+      "retry": "Try again",
+      "home": "Go to Home"
+    }
   },
   "SendPhoneOtp": {
     "META_DESCRIPTION": "Enter your phone number to receive an instant verification code via WhatsApp.",
@@ -1386,5 +1405,18 @@
     "WISHLIST": "Wishlist",
     "CART": "Cart",
     "PROFILE": "Profile"
+  },
+  "ProductsView": {
+    "Empty": {
+      "title": "No products found",
+      "description": "There are no products available to display right now.",
+      "home": "Home"
+    },
+    "Error": {
+      "title": "Something went wrong",
+      "description": "An error occurred while loading the products. Please try again.",
+      "retry": "Try Again",
+      "home": "Home"
+    }
   }
 }

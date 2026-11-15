@@ -42,7 +42,7 @@ export default function NotFound() {
             className="h-10 w-full rounded-full px-6 text-xs font-medium shadow-none transition-transform active:scale-95 sm:w-auto"
           >
             <Link href={APP_ROUTES.HOME}>
-              <span>{t("BACK_TO_HOME", { default: "Back to Home" })}</span>
+              <span>{t("BACK_TO_HOME")}</span>
             </Link>
           </Button>
         </div>

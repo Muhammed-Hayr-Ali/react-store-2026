@@ -17,8 +17,7 @@ import { UserProvider } from "@/lib/context/user-context"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 import { cookies } from "next/headers"
 import { COOKIES_KEYS } from "@/lib/config/app_config"
-
-
+import ScreenSizeIndicator from "@/components/shared/screen_size_indicator"
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -63,8 +62,9 @@ export default async function RootLayout({
   const dir = isRtl ? "rtl" : "ltr"
 
   // التصحيح هنا: قراءة الكوكي بالقيمة الصحيحة مع افتراضي "system"
-  const initialTheme = cookieStore.get(COOKIES_KEYS.APP_THEME)?.value || "system"
-  
+  const initialTheme =
+    cookieStore.get(COOKIES_KEYS.APP_THEME)?.value || "system"
+
   // تحديد ما إذا كان الكلاس الأولي يجب أن يكون dark لمنع الوميض
   const isDark = initialTheme === "dark"
 
@@ -79,7 +79,12 @@ export default async function RootLayout({
       dir={dir}
       suppressHydrationWarning
       // حقن كلاس dark مسبقاً من السيرفر لمنع وميض الشاشة الأبيض
-      className={cn("antialiased", geistSans.variable, geistMono.variable, isDark && "dark")}
+      className={cn(
+        "antialiased",
+        geistSans.variable,
+        geistMono.variable,
+        isDark && "dark"
+      )}
     >
       <body>
         <ThemeProvider initialTheme={initialTheme}>
@@ -93,6 +98,7 @@ export default async function RootLayout({
           </NextIntlClientProvider>
         </ThemeProvider>
         <Toaster />
+        {/* <ScreenSizeIndicator /> */}
       </body>
     </html>
   )

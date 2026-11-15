@@ -35,7 +35,7 @@ export const BOTTOM_NAV_BAR: BottomNavigationBar[] = [
   {
     key: "wishlist",
     label: "WISHLIST",
-    url: APP_ROUTES.DASHBOARD.CATEGORIES,
+    url: APP_ROUTES.WISHLIST,
     icon: HeartIcon,
   },
   {

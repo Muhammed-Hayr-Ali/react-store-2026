@@ -10,6 +10,7 @@ export const APP_ROUTES = {
   TERMS: "/terms",
   PRIVACY: "/privacy",
   NEWSLETTER_UNSUBSCRIBE: "/unsubscribe",
+  CATEGORIES: "/categories",
   AUTH: {
     GET_STARTED: "/auth/signup",
     LOGIN: "/auth/login",

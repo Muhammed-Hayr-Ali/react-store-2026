@@ -7,7 +7,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -17,21 +17,21 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { CategoryDetail } from "@/lib/actions/store/product-details/details/queries/get-product-details"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 
 interface ProductBreadcrumbProps {
   category: CategoryDetail | null
   parentCategory?: CategoryDetail | null
   productName: string
-  locale: string
 }
 
 export function ProductBreadcrumb({
   category,
   parentCategory,
   productName,
-  locale,
 }: ProductBreadcrumbProps) {
   const t = useTranslations("ProductDetails")
+  const locale = useLocale()
 
   const rootCategory = locale === "ar" ? category?.name_ar : category?.name
   const parentCat =
@@ -43,7 +43,7 @@ export function ProductBreadcrumb({
         {/* الصفحة الرئيسية للمتجر مع دعم اللغة */}
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link href={`/${locale}`}>{t("HOME", { default: "Home" })}</Link>
+            <Link href={APP_ROUTES.HOME}>{t("HOME")}</Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
@@ -53,7 +53,7 @@ export function ProductBreadcrumb({
           <>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href={`/${locale}/categories/${parentCategory.slug}`}>
+                <Link href={`${APP_ROUTES.CATEGORIES}/${parentCategory.slug}`}>
                   {parentCat}
                 </Link>
               </BreadcrumbLink>
@@ -67,7 +67,7 @@ export function ProductBreadcrumb({
           <>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href={`/${locale}/categories/${category.slug}`}>
+                <Link href={`${APP_ROUTES.CATEGORIES}/${category.slug}`}>
                   {rootCategory}
                 </Link>
               </BreadcrumbLink>

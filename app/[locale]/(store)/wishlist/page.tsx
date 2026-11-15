@@ -10,17 +10,17 @@ import { cookies } from "next/headers"
 import { getTranslations } from "next-intl/server"
 import { WishlistProductGrid } from "@/components/wishlist/wishlist-product-grid"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
-import { notFound } from "next/navigation"
 import { getWishlistProducts } from "@/lib/actions/wishlists"
-
-interface WishlistPageProps {
-  params: Promise<{ locale: string }>
-}
+import { APP_ROUTES } from "@/lib/config/app-routes"
+import { redirect } from "next/navigation"
+import EmptyWishlist from "@/components/wishlist/empty-wishlist"
+import ErrorWishlist from "@/components/wishlist/error-wishlist"
+import { ProductGrid } from "@/components/shared/products-view/product-grid"
+import { SimpliProduct } from "@/components/shared/products-view/product-card"
 
 // توليد الميتا داتا ديناميكياً باستخدام مفترس الترجمة الخاص بالـ Wishlist
-export async function generateMetadata({ params }: WishlistPageProps) {
-  const { locale } = await params
-  const t = await getTranslations({ locale, namespace: "Wishlist" })
+export async function generateMetadata() {
+  const t = await getTranslations("Wishlist")
 
   return createMetadata({
     siteName: APP_CONFIG.NAME,
@@ -31,60 +31,37 @@ export async function generateMetadata({ params }: WishlistPageProps) {
   })
 }
 
-export default async function WishlistPage({ params }: WishlistPageProps) {
+export default async function WishlistPage() {
+  const t = await getTranslations("Wishlist")
+
   const userResult = await getCurrentUser()
   if (!userResult.success) {
-    return notFound()
+    redirect(APP_ROUTES.AUTH.LOGIN)
   }
-
-  const { locale } = await params
-  const errors = await getTranslations({ locale, namespace: "ActionErrors" })
 
   // 1. جلب الكوكيز لتحديد عرض الشبكة أو القائمة (مطابق تماماً لصفحة التصنيفات)
   const cookieStore = await cookies()
-  const viewModeCookie = cookieStore.get(COOKIES_KEYS.PRODUCT_MODE)?.value
+  const viewModeCookie = cookieStore.get(COOKIES_KEYS.VIEW_MODE)?.value
   const viewMode =
     viewModeCookie === PRODUCT_MODE.LIST ? PRODUCT_MODE.LIST : PRODUCT_MODE.GRID
 
-  const PAGE_LIMIT = 12
-
   // 2. جلب المنتجات الأولية للمفضلة باستخدام دالة getWishlist المدعومة بالصفحات
-  const productsResult = await getWishlistProducts({
-    limit: PAGE_LIMIT,
-    page: 1,
-    activeOnly: true,
-  })
+  const result = await getWishlistProducts()
 
-  if (!productsResult.success) {
-    throw new Error(
-      errors(getActionErrorKey(productsResult.error ?? "UNEXPECTED_ERROR"))
-    )
-  }
+  let initialProducts = [] as SimpliProduct[]
 
-  const initialProducts = productsResult.success ? productsResult.data : []
-
-  // 3. Server Action للتحميل التلقائي (Infinite Scroll) مطابق تماماً لصفحة التصنيفات
-  async function loadMoreProducts(pageNumber: number) {
-    "use server"
-    const res = await getWishlistProducts({
-      limit: PAGE_LIMIT,
-      page: pageNumber,
-      activeOnly: true,
-    })
-    return {
-      success: res.success,
-      data: res.success ? res.data : [],
-      hasMore: res.success && res.data ? res.data.length === PAGE_LIMIT : false,
-    }
+  if (result.success) {
+    initialProducts = result.data
   }
 
   return (
-    <div className="container space-y-8 py-8">
-      <WishlistProductGrid
-        viewMode={viewMode}
-        initialProducts={initialProducts}
-        fetchMoreAction={loadMoreProducts}
-      />
-    </div>
+    <ProductGrid
+      title={t("PAGE_TITLE")}
+      viewMode={viewMode}
+      hasError={!result.success}
+      initialProducts={initialProducts}
+      showHeartButton
+      className="py-6   px-4 sm:px-6 lg:px-8"
+    />
   )
 }
