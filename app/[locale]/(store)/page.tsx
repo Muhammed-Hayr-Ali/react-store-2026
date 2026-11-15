@@ -24,11 +24,8 @@ export async function generateMetadata({ params }: PageProps) {
 
   return createMetadata({
     siteName: APP_CONFIG.NAME,
-    title: t("META_TITLE", { default: "Home" }),
-    description: t("META_DESCRIPTION", {
-      default:
-        "Welcome to our store. Discover our featured products, categories, and latest arrivals.",
-    }),
+    title: t("META_TITLE"),
+    description: t("META_DESCRIPTION"),
   })
 }
 
@@ -66,7 +63,7 @@ export default async function Page() {
   const categories = categoriesResult.success ? categoriesResult.data : []
 
   return (
-    <div className="space-y-6 py-4 md:py-6 lg:py-8">
+    <div className="flex-1 flex flex-col space-y-6 py-4 md:py-6 lg:py-8">
       {/* SearchBar */}
       <SearchBar />
 
@@ -76,9 +73,7 @@ export default async function Page() {
       {/* 2. شريط التصنيفات الرئيسية */}
       <HomeClientWrapper
         viewMode={viewMode}
-
         initialProducts={initialProducts}
-        // fetchMoreAction={loadMoreProducts}
         categories={categories}
       />
     </div>

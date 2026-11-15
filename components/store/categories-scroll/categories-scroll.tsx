@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils"
 
 interface CategoriesScrollProps {
   categories: SimplifiedRootCategory[]
-  onSelect?: (category: string) => void
+  onSelect?: (categoryId: string) => void
   onSeeAll?: () => void
 }
 
@@ -45,9 +45,10 @@ export default function CategoriesScroll({
 
   if (!categories || categories.length === 0) return null
 
-  const handleOnSelect = (slug: string) => {
+  const handleOnSelect = (slug: string, id: string) => {
+    const categoryId = slug === "*" ? "*" : id
     setSelectedCategory(slug)
-    onSelect?.(slug)
+    onSelect?.(categoryId)
   }
 
   return (
@@ -103,7 +104,7 @@ export default function CategoriesScroll({
                   <button
                     type="button"
                     aria-pressed={isActive}
-                    onClick={() => handleOnSelect(category.slug)}
+                    onClick={() => handleOnSelect(category.slug, category.id)}
                     className={cn(
                       "group flex shrink-0 items-center gap-2.5 rounded-xl px-3.5 py-3.5 text-xs font-medium transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none sm:px-4 sm:py-2.5 sm:text-sm",
                       isActive

@@ -48,6 +48,8 @@ export interface ProductGridProps {
   onLoadMore?: () => Promise<void> | void
   hasMore?: boolean
   isLoadingMore?: boolean
+
+  hasAction?: boolean
 }
 
 export function ProductGrid({
@@ -63,6 +65,7 @@ export function ProductGrid({
   onLoadMore,
   hasMore,
   isLoadingMore,
+  hasAction = true,
 }: ProductGridProps) {
   const t = useTranslations("ProductsView.List")
 
@@ -93,10 +96,10 @@ export function ProductGrid({
   }, [onLoadMore, isLoadingMore, hasMore])
 
   // Error Component
-  if (hasError) return <ErrorList onRetry={onRetry} />
+  if (hasError) return <ErrorList onRetry={onRetry} hasAction={hasAction} />
 
   // Empty Component
-  if (initialProducts.length === 0) return <EmptyList />
+  if (initialProducts.length === 0) return <EmptyList hasAction={hasAction} />
 
   // List Component
   return (
@@ -106,10 +109,9 @@ export function ProductGrid({
         <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
           {name}
         </h2>
-
         <ViewMode initValue={mode} onChange={setMode} />
       </div>
-
+      <p>{description}</p>
       <div
         className={cn(
           mode === "grid"
@@ -145,11 +147,11 @@ export function ProductGrid({
   )
 }
 
-function EmptyList() {
+function EmptyList({ hasAction = true }: { hasAction?: boolean }) {
   const t = useTranslations("ProductsView.Empty")
 
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center py-12">
+    <div className="flex h-full w-full flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
       <Empty className="w-full max-w-md rounded-2xl border border-dashed p-8 text-center">
         <EmptyHeader className="flex flex-col items-center">
           <EmptyMedia
@@ -165,19 +167,21 @@ function EmptyList() {
             {t("description")}
           </EmptyDescription>
         </EmptyHeader>
-        <EmptyContent className="mt-6 flex justify-center">
-          <Button
-            size="lg"
-            variant="outline"
-            asChild
-            className="w-1/2 gap-2 font-medium"
-          >
-            <Link href={APP_ROUTES.HOME}>
-              <HomeIcon className="size-4" />
-              <span>{t("home")}</span>
-            </Link>
-          </Button>
-        </EmptyContent>
+        {hasAction && (
+          <EmptyContent className="mt-6 flex justify-center">
+            <Button
+              size="lg"
+              variant="outline"
+              asChild
+              className="w-1/2 gap-2 font-medium"
+            >
+              <Link href={APP_ROUTES.HOME}>
+                <HomeIcon className="size-4" />
+                <span>{t("home")}</span>
+              </Link>
+            </Button>
+          </EmptyContent>
+        )}
       </Empty>
     </div>
   )
@@ -185,13 +189,14 @@ function EmptyList() {
 
 interface ErrorListProps {
   onRetry?: () => void
+  hasAction?: boolean
 }
 
-function ErrorList({ onRetry }: ErrorListProps) {
+function ErrorList({ onRetry, hasAction = true }: ErrorListProps) {
   const t = useTranslations("ProductsView.Error")
 
   return (
-    <div className="flex min-h-[80vh] w-full flex-col items-center justify-center px-4 py-12">
+    <div className="flex min-h-[80vh] w-full flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
       <Empty className="w-full max-w-lg rounded-3xl border border-dashed p-8 text-center shadow-sm">
         <EmptyHeader className="flex flex-col items-center">
           <EmptyMedia
@@ -210,37 +215,39 @@ function ErrorList({ onRetry }: ErrorListProps) {
           </EmptyDescription>
         </EmptyHeader>
 
-        <EmptyContent className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Button
-            variant="default"
-            asChild={!onRetry}
-            onClick={onRetry || (() => window.location.reload())}
-            className="w-full gap-2 font-medium sm:w-auto"
-          >
-            {onRetry ? (
-              <>
-                <RotateCcwIcon className="size-4" />
-                <span>{t("retry")}</span>
-              </>
-            ) : (
-              <Link href={APP_ROUTES.HOME}>
-                <RotateCcwIcon className="size-4" />
-                <span>{t("retry")}</span>
-              </Link>
-            )}
-          </Button>
+        {hasAction && (
+          <EmptyContent className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Button
+              variant="default"
+              asChild={!onRetry}
+              onClick={onRetry || (() => window.location.reload())}
+              className="w-full gap-2 font-medium sm:w-auto"
+            >
+              {onRetry ? (
+                <>
+                  <RotateCcwIcon className="size-4" />
+                  <span>{t("retry")}</span>
+                </>
+              ) : (
+                <Link href={APP_ROUTES.HOME}>
+                  <RotateCcwIcon className="size-4" />
+                  <span>{t("retry")}</span>
+                </Link>
+              )}
+            </Button>
 
-          <Button
-            variant="outline"
-            asChild
-            className="w-full gap-2 font-medium sm:w-auto"
-          >
-            <Link href={APP_ROUTES.HOME}>
-              <HomeIcon className="size-4" />
-              <span>{t("home")}</span>
-            </Link>
-          </Button>
-        </EmptyContent>
+            <Button
+              variant="outline"
+              asChild
+              className="w-full gap-2 font-medium sm:w-auto"
+            >
+              <Link href={APP_ROUTES.HOME}>
+                <HomeIcon className="size-4" />
+                <span>{t("home")}</span>
+              </Link>
+            </Button>
+          </EmptyContent>
+        )}
       </Empty>
     </div>
   )

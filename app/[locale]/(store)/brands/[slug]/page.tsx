@@ -15,10 +15,12 @@ interface PageProps {
   params: Promise<{ slug: string; locale: string }>
 }
 
-// دالة لتوليد الميتا داتا ديناميكياً استناداً إلى اسم البراند واللغة
-export async function generateMetadata({ params }: PageProps) {
-  const { slug, locale } = await params
 
+
+export async function generateMetadata({ params }: PageProps) {
+
+  
+  const { slug, locale } = await params
   const result = await getBrandByFilter({ brandSlug: slug })
 
   let name
@@ -38,7 +40,7 @@ export async function generateMetadata({ params }: PageProps) {
   return createMetadata({
     siteName: APP_CONFIG.NAME,
     title: name ?? "unknown",
-    description: description ?? "unknown",
+    description: description,
   })
 }
 

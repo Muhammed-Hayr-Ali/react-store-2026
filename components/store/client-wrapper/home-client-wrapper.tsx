@@ -27,6 +27,9 @@ export default function HomeClientWrapper({
   const [isLoadingMore, setIsLoadingMore] = React.useState<boolean>(false)
   const [hasMore, setHasMore] = React.useState<boolean>(true)
 
+  // Selected Category (تبدأ بـ "*" التي تعني الكل)
+  const [selectedCategory, setSelectedCategory] = React.useState<string>("*")
+
   const handleLoadMore = async () => {
     if (isLoadingMore || !hasMore) return
 
@@ -34,12 +37,12 @@ export default function HomeClientWrapper({
     try {
       const LATEST_LIMIT = 12
       const NEXT_PAGE = page + 1
-      const ACTIVE_ONLY = true
 
+      // إذا كانت القيمة "*" نترك categoryId غير مرسل أو undefined
       const results = await getFilteredProducts({
+        categoryId: selectedCategory === "*" ? undefined : selectedCategory,
         limit: LATEST_LIMIT,
         page: NEXT_PAGE,
-        activeOnly: ACTIVE_ONLY,
       })
 
       if (!results.success || results.data.length === 0) {
@@ -55,19 +58,52 @@ export default function HomeClientWrapper({
     }
   }
 
+  const handleOnSelectCategory = async (categoryId: string) => {
+    try {
+      setSelectedCategory(categoryId)
+      setPage(1)
+      setHasMore(true) // إعادة تفعيل حالة التحمرير للتصنيف الجديد
+
+      const LATEST_LIMIT = 12
+      const results = await getFilteredProducts({
+        categoryId: categoryId === "*" ? undefined : categoryId,
+        limit: LATEST_LIMIT,
+        page: 1,
+      })
+
+      if (results.success) {
+        setProducts(results.data)
+        setPage(2) // الصفحة الأولى تمت، والصفحة القادمة ستكون 2
+
+        // إذا كانت المنتجات المسترجعة أقل من الحد الأقصى، فهذا يعني أنه لا يوجد المزيد
+        if (results.data.length < LATEST_LIMIT) {
+          setHasMore(false)
+        }
+      } else {
+        setProducts([])
+        setHasMore(false)
+      }
+    } catch (error) {
+      console.error("Failed to filter products by category:", error)
+    }
+  }
+
   return (
-    <div className="flex flex-col space-y-6">
-      <CategoriesScroll categories={categories} />
+    <div className="flex-1 flex flex-col space-y-6">
+      <CategoriesScroll
+        categories={categories}
+        onSelect={handleOnSelectCategory}
+      />
 
       <ProductGrid
         name={t("NEW_ARRIVALS")}
         viewMode={viewMode}
         hasError={false}
         initialProducts={products}
-
         onLoadMore={handleLoadMore}
         hasMore={hasMore}
         isLoadingMore={isLoadingMore}
+        hasAction={false}
       />
     </div>
   )

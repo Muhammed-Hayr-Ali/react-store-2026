@@ -6,8 +6,8 @@
 "use server"
 
 import { unstable_cache } from "next/cache"
-import { createServerClient } from "@/lib/database/supabase/server"
 import type { ApiResult } from "@/lib/actions/types/utils"
+import { createPublicServerClient } from "@/lib/database/supabase/public"
 
 export interface ProductVariantDetail {
   id: string
@@ -98,7 +98,7 @@ interface DatabaseProductQueryResult {
 
 const getCachedProductDetails = unstable_cache(
   async (slug: string): Promise<FullProductDetails | null> => {
-    const supabase = await createServerClient()
+    const supabase = await createPublicServerClient()
 
     const { data: productData, error } = await supabase
       .from("products")
@@ -208,7 +208,10 @@ const getCachedProductDetails = unstable_cache(
 
     const allImages = rawProduct.product_images ?? []
     const variantSpecificImages = allImages.filter(
-      (img) => img.variant_sku !== null && img.variant_sku !== undefined && String(img.variant_sku).trim() !== ""
+      (img) =>
+        img.variant_sku !== null &&
+        img.variant_sku !== undefined &&
+        String(img.variant_sku).trim() !== ""
     )
 
     const formattedProduct: FullProductDetails = {
@@ -261,8 +264,9 @@ export async function getProductDetails(
 
     return { success: true, data: product }
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown database error"
-    
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown database error"
+
     console.error("[getProductDetails] Failed to retrieve product", {
       slug,
       message: errorMessage,

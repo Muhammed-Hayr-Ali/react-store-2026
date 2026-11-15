@@ -25,7 +25,7 @@ interface SeoConfig {
    * The page-specific title (required).
    * Will be combined with the site name as: `{title} | {siteName}`.
    */
-  title: string
+  title?: string
 
   /**
    * Page description (optional).
@@ -93,7 +93,7 @@ export function createMetadata({
   image,
   type = "website",
 }: SeoConfig): Metadata {
-  const fullTitle = `${title} | ${siteName}`
+  const fullTitle = title ? `${title} | ${siteName}` : siteName
   const robots = noindex ? "noindex, follow" : APP_CONFIG.ROBOTS
   const url = `${APP_CONFIG.URL}${path}`
 
