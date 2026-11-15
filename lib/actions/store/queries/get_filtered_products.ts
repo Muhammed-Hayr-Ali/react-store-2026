@@ -6,8 +6,8 @@
 "use server"
 
 import { unstable_cache } from "next/cache"
-import { createServerClient } from "@/lib/database/supabase/server"
 import type { ApiResult } from "../../types/utils"
+import { createPublicServerClient } from "@/lib/database/supabase/public"
 
 interface ProductVariantRecord {
   id: string
@@ -100,7 +100,7 @@ const getCachedFilteredProducts = unstable_cache(
     const from = (Math.max(page, 1) - 1) * limit
     const to = from + limit - 1
 
-    const supabase = await createServerClient()
+    const supabase = await createPublicServerClient()
 
     let query = supabase.from("products").select(
       `
@@ -183,7 +183,8 @@ const getCachedFilteredProducts = unstable_cache(
         reviewCount > 0
           ? Number(
               (
-                reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviewCount
+                reviews.reduce((acc, curr) => acc + curr.rating, 0) /
+                reviewCount
               ).toFixed(1)
             )
           : 0
@@ -265,7 +266,8 @@ export async function getFilteredProducts(
 
     return { success: true, data }
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown database error"
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown database error"
 
     console.error("[getFilteredProducts] Database query failed", {
       message: errorMessage,

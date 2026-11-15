@@ -7,7 +7,7 @@
 
 import { unstable_cache } from "next/cache"
 import type { ApiResult } from "../../types/utils"
-import { createServerClient } from "@/lib/database/supabase/server"
+import { createPublicServerClient } from "@/lib/database/supabase/public"
 
 export interface SimplifiedRootCategory {
   id: string
@@ -30,7 +30,7 @@ interface CategoryQueryResult {
 // دالة الكاش الداخلية تستقبل المعاملات بشكل مفرد لضمان استقرار الكاش
 const getCachedRootCategories = unstable_cache(
   async (limit: number): Promise<SimplifiedRootCategory[]> => {
-    const supabase = await createServerClient()
+    const supabase = await createPublicServerClient()
 
     let query = supabase
       .from("categories")

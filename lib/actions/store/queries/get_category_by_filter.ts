@@ -7,8 +7,8 @@
 
 import { unstable_cache } from "next/cache"
 import type { ApiResult } from "@/lib/actions/types/utils"
-import { createServerClient } from "@/lib/database/supabase/server"
-
+import { createPublicServerClient } from "@/lib/database/supabase/public"
+ 
 export interface SimpliCategory {
   id: string
   slug: string
@@ -29,7 +29,7 @@ const getCachedCategoryByFilter = unstable_cache(
     categoryId?: string,
     categorySlug?: string
   ): Promise<SimpliCategory | null> => {
-    const supabase = await createServerClient()
+    const supabase = await createPublicServerClient()
 
     let query = supabase.from("categories").select(
       `

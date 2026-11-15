@@ -45,7 +45,6 @@ export default async function Page() {
   const PAGE_NUMBER = 1
   const ACTIVE_ONLY = true
 
-
   const [featuredResult, latestResult, categoriesResult] = await Promise.all([
     getFilteredProducts({
       limit: FEATURED_LIMET,
@@ -57,7 +56,8 @@ export default async function Page() {
       limit: LATEST_LIMIT,
       page: PAGE_NUMBER,
       activeOnly: ACTIVE_ONLY,
-     }),
+      is_featured: false,
+    }),
     getRootCategories(),
   ])
 
