@@ -1,70 +1,33 @@
 /**
  * @file app/[locale]/(store)/layout.tsx
- * @description Main storefront layout with Navbar, Footer, Multi-Currency Provider, Wishlist Provider, and Cart Provider.
+ * @description Main storefront layout with sticky top navbar, scrollable content, footer, and a Tailwind-gradient fading bottom navigation for mobile.
  */
 
 import * as React from "react"
-import { cookies } from "next/headers"
-import { createServerClient } from "@/lib/database/supabase/server"
-import { CurrencyProvider } from "@/lib/context/currency-context"
-import { WishlistProvider } from "@/lib/context/wishlist-context"
-import { CartProvider } from "@/lib/context/cart-context"
-import { getWishlistProductIds } from "@/lib/actions/wishlists"
-import { getCart } from "@/lib/actions/cart"
 import Navbar from "@/components/store/navbar/navbar"
 import Footer from "@/components/store/footer/footer"
-import type { AppLocale } from "@/i18n/routing"
-import { COOKIES_KEYS } from "@/lib/config/app_config"
 import BottomNavigationBar from "@/components/store/bottom-navigation-bar/bottom-navigation-bar"
 
-interface MainLayoutProps {
+interface StoreLayoutProps {
   children: React.ReactNode
   params: Promise<{ locale: string }>
 }
 
-export default async function MainLayout({
-  children,
-  params,
-}: MainLayoutProps) {
-  const { locale } = await params
-  const typedLocale = locale as AppLocale
-  const supabase = await createServerClient()
-
-  // 1. جلب العملات المفعلة من قاعدة البيانات
-  const { data: currencies } = await supabase
-    .from("currencies")
-    .select("code, name, name_ar, symbol, rate_factor")
-    .eq("is_active", true)
-
-  // 2. قراءة العملة المخزنة في الكوكيز أو الاعتماد على USD كافتراضي
-  const cookieStore = await cookies()
-  const savedCurrency = cookieStore.get(COOKIES_KEYS.CURRENCY)?.value || "USD"
-
-  // 3. جلب معرفات المفضلة واستخراج الـ data الصافية
-  const wishlistResult = await getWishlistProductIds()
-  const wishlistIds = wishlistResult.success ? wishlistResult.data : []
-
-  // 4. جلب سلة المشتريات الأولية للمستخدم الحالي
-  const cartResult = await getCart()
-  const initialCart = cartResult.success ? cartResult.data : null
-
+export default async function StoreLayout({ children }: StoreLayoutProps) {
   return (
-    <CurrencyProvider
-      initialCurrencies={currencies || []}
-      defaultCurrencyCode={savedCurrency}
-      locale={typedLocale}
-    >
-      <WishlistProvider initialWishlistIds={wishlistIds}>
-        <CartProvider initialCart={initialCart}>
-          <div className="flex h-dvh flex-col">
-            <Navbar />
-            {/* <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 lg:px-8"> */}
-            <main className="flex flex-1 flex-col py-4 md:py-6 lg:py-8 space-y-6 md:space-y-8"> {children}</main>
-            <Footer />
-            <BottomNavigationBar />
-          </div>
-        </CartProvider>
-      </WishlistProvider>
-    </CurrencyProvider>
+    <div className="relative flex min-h-dvh flex-col">
+      {/* 1. Navbar is sticky at the top */}
+      <Navbar />
+      {/* 2. Main content area */}
+      <main className="w-full flex-1 space-y-6 pt-4 pb-24 md:space-y-8 md:py-6 lg:py-8">
+        {children}
+      </main>
+      {/* 3. Storefront Footer */}
+      <Footer />
+      {/* Mobile Floating Bottom Notch */}
+      <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center bg-linear-to-t from-[#fafafa] via-[#FAFAFA]/80 to-transparent pt-6 pb-4 md:hidden dark:from-[#000000] dark:via-[#000000]/80 dark:to-transparent">
+        <BottomNavigationBar />
+      </div>
+    </div>
   )
 }

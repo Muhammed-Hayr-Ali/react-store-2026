@@ -1,3 +1,8 @@
+/**
+ * @file app/[locale]/layout.tsx
+ * @description Root layout wrapping the entire app with global providers, themes, and server-fetched state.
+ */
+
 import type { Metadata, Viewport } from "next"
 import { notFound } from "next/navigation"
 import { Geist, Geist_Mono } from "next/font/google"
@@ -17,7 +22,14 @@ import { UserProvider } from "@/lib/context/user-context"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 import { cookies } from "next/headers"
 import { COOKIES_KEYS } from "@/lib/config/app_config"
-import ScreenSizeIndicator from "@/components/shared/screen_size_indicator"
+
+import { createServerClient } from "@/lib/database/supabase/server"
+import { CurrencyProvider } from "@/lib/context/currency-context"
+import { WishlistProvider } from "@/lib/context/wishlist-context"
+import { CartProvider } from "@/lib/context/cart-context"
+import { getWishlistProductIds } from "@/lib/actions/wishlists"
+import { getCart } from "@/lib/actions/cart"
+import type { AppLocale } from "@/i18n/routing"
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -25,7 +37,6 @@ const geistSans = Geist({
   display: "swap",
 })
 
-// إعداد خط Geist Mono للأكواد والأرقام
 const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
@@ -53,7 +64,9 @@ export default async function RootLayout({
   params,
 }: RootLayoutProps) {
   const { locale } = await params
+  const typedLocale = locale as AppLocale
   const cookieStore = await cookies()
+
   if (!hasLocale(routing.locales, locale)) {
     notFound()
   }
@@ -61,24 +74,37 @@ export default async function RootLayout({
   const isRtl = ["ar", "fa", "ur", "he"].includes(locale)
   const dir = isRtl ? "rtl" : "ltr"
 
-  // التصحيح هنا: قراءة الكوكي بالقيمة الصحيحة مع افتراضي "system"
   const initialTheme =
     cookieStore.get(COOKIES_KEYS.APP_THEME)?.value || "system"
-
-  // تحديد ما إذا كان الكلاس الأولي يجب أن يكون dark لمنع الوميض
   const isDark = initialTheme === "dark"
 
+  // 1. Fetch current authenticated user
   const currentUserResult = await getCurrentUser()
   const currentUser = currentUserResult.success ? currentUserResult.data : null
-
   const permissions = currentUser?.permissions || []
+
+  // 2. Fetch active currencies from database
+  const supabase = await createServerClient()
+  const { data: currencies } = await supabase
+    .from("currencies")
+    .select("code, name, name_ar, symbol, rate_factor")
+    .eq("is_active", true)
+
+  const savedCurrency = cookieStore.get(COOKIES_KEYS.CURRENCY)?.value || "USD"
+
+  // 3. Fetch wishlist product IDs
+  const wishlistResult = await getWishlistProductIds()
+  const wishlistIds = wishlistResult.success ? wishlistResult.data : []
+
+  // 4. Fetch initial shopping cart state
+  const cartResult = await getCart()
+  const initialCart = cartResult.success ? cartResult.data : null
 
   return (
     <html
       lang={locale}
       dir={dir}
       suppressHydrationWarning
-      // حقن كلاس dark مسبقاً من السيرفر لمنع وميض الشاشة الأبيض
       className={cn(
         "antialiased",
         geistSans.variable,
@@ -86,19 +112,30 @@ export default async function RootLayout({
         isDark && "dark"
       )}
     >
-      <body>
+      <body className="bg-[#FAFAFA] dark:bg-[#000000]">
         <ThemeProvider initialTheme={initialTheme}>
           <NextIntlClientProvider>
             <TooltipProvider>
               <ScrollToTop />
               <UserProvider user={currentUser} permissions={permissions}>
-                <DirectionProvider dir={dir}>{children}</DirectionProvider>
+                <DirectionProvider dir={dir}>
+                  <CurrencyProvider
+                    initialCurrencies={currencies || []}
+                    defaultCurrencyCode={savedCurrency}
+                    locale={typedLocale}
+                  >
+                    <WishlistProvider initialWishlistIds={wishlistIds}>
+                      <CartProvider initialCart={initialCart}>
+                        {children}
+                      </CartProvider>
+                    </WishlistProvider>
+                  </CurrencyProvider>
+                </DirectionProvider>
               </UserProvider>
             </TooltipProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
         <Toaster />
-        {/* <ScreenSizeIndicator /> */}
       </body>
     </html>
   )

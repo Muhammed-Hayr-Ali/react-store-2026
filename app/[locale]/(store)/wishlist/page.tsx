@@ -51,7 +51,7 @@ export default async function WishlistPage() {
   }
 
   return (
-    <main className="flex flex-1 px-4 sm:px-6 lg:px-8">
+    <div className="w-full flex-1 px-4 sm:px-6 lg:px-8">
       <ProductGrid
         name={t("PAGE_TITLE")}
         description=""
@@ -61,6 +61,6 @@ export default async function WishlistPage() {
         showHeartButton
         hasAction={false}
       />
-    </main>
+    </div>
   )
 }
