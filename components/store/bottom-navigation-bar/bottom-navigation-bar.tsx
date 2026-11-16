@@ -82,7 +82,11 @@ export default function BottomNavigationBar() {
                       className="size-4"
                       strokeWidth={isActive ? 2.25 : 2}
                     />
-                    <span className="">{t(item.label)}</span>
+                    <span className="">
+                      {t(item.label, {
+                        default: item.label,
+                      })}
+                    </span>
                   </Link>
                 </Can>
               )
@@ -113,7 +117,11 @@ export default function BottomNavigationBar() {
                   className="size-4"
                   strokeWidth={isActive ? 2.25 : 2}
                 />
-                <span className="">{t(item.label)}</span>
+                <span className="">
+                  {t(item.label, {
+                    default: item.label,
+                  })}
+                </span>
               </Link>
             )
           })}
