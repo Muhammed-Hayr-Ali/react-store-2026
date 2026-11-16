@@ -262,7 +262,9 @@
     "ITEM_ADDED": "The product has been successfully added to the shopping cart.",
     "ADD_ERROR": "Failed to add item to cart",
     "title": "Shopping Cart",
-    "description": "View and manage items in your shopping cart at Marketna."
+    "description": "View and manage items in your shopping cart at Marketna.",
+    "emptyTitle": "Your cart is empty",
+    "emptyDescription": "Looks like you haven't added anything to your cart yet."
   },
   "Category": {
     "META_TITLE": "{category} Products",
@@ -1435,11 +1437,17 @@
   },
   "Account": {
     "title": "My Account",
-    "description": "Manage your account profile and settings at Marketna."
+    "description": "Manage your account profile and settings at Marketna.",
+    "emptyTitle": "Account details not found",
+    "emptyDescription": "Please sign in to view your profile and manage your orders."
   },
   "Search": {
     "resultsFor": "Search results for \"${searchQuery}\"",
     "title": "Search Store",
-    "description": "Search through products, categories, and brands at Marketna."
+    "description": "Search through products, categories, and brands at Marketna.",
+    "noResultsTitle": "No results found for \"${searchQuery}\"",
+    "emptyTitle": "Start your search",
+    "noResultsDescription": "Try checking your spelling or using more general terms.",
+    "emptyDescription": "Type a product name, category, or brand to find what you are looking for."
   }
 }

@@ -59,20 +59,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             {searchQuery
               ? t("noResultsTitle", {
                   query: searchQuery,
-                  default: `No results found for "${searchQuery}"`,
                 })
-              : t("emptyTitle", { default: "Start your search" })}
+              : t("emptyTitle")}
           </EmptyTitle>
           <EmptyDescription className="mt-1.5 max-w-xs text-sm text-muted-foreground">
             {searchQuery
-              ? t("noResultsDescription", {
-                  default:
-                    "Try checking your spelling or using more general terms.",
-                })
-              : t("emptyDescription", {
-                  default:
-                    "Type a product name, category, or brand to find what you are looking for.",
-                })}
+              ? t("noResultsDescription")
+              : t("emptyDescription")}
           </EmptyDescription>
         </EmptyHeader>
       </Empty>

@@ -55,13 +55,10 @@ export default async function AccountPage() {
             <UserIcon className="size-8 stroke-[1.5]" />
           </EmptyMedia>
           <EmptyTitle className="text-lg font-semibold tracking-tight text-foreground">
-            {t("emptyTitle", { default: "Account details not found" })}
+            {t("emptyTitle")}
           </EmptyTitle>
           <EmptyDescription className="mt-1.5 max-w-xs text-sm text-muted-foreground">
-            {t("emptyDescription", {
-              default:
-                "Please sign in to view your profile and manage your orders.",
-            })}
+            {t("emptyDescription")}
           </EmptyDescription>
         </EmptyHeader>
       </Empty>

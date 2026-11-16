@@ -45,12 +45,10 @@ export default async function CartPage() {
             <ShoppingCartIcon className="size-8 stroke-[1.5]" />
           </EmptyMedia>
           <EmptyTitle className="text-lg font-semibold tracking-tight text-foreground">
-            {t("emptyTitle", { default: "Your cart is empty" })}
+            {t("emptyTitle")}
           </EmptyTitle>
           <EmptyDescription className="mt-1.5 max-w-xs text-sm text-muted-foreground">
-            {t("emptyDescription", {
-              default: "Looks like you haven't added anything to your cart yet.",
-            })}
+            {t("emptyDescription")}
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
