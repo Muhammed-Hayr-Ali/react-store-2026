@@ -9,7 +9,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import DashboardBreadcrumb from "@/components/dashboard/dashboard-breadcrumb"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
-import { redirect } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { APP_ROUTES } from "@/lib/config/app-routes"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 
@@ -28,8 +28,12 @@ export default async function DashboardLayout({
     redirect(APP_ROUTES.AUTH.LOGIN)
   }
 
-  const haper = await hasPermission(PERMISSIONS.VIEW_WISHLISTS_DASHBOARD)
-  
+  const permission = await hasPermission(PERMISSIONS.VIEW_WISHLISTS_DASHBOARD)
+
+  if (!permission) {
+    return notFound()
+  }
+
   return (
     <SidebarProvider>
       {/* الـ AppSidebar يعالج جلب بياناته وصلاحياته ذاتياً على السيرفر */}

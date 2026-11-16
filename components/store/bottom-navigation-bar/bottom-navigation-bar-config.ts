@@ -5,8 +5,9 @@ import {
   ShoppingCartIcon,
   UserIcon,
   HeartIcon,
+  LayoutDashboardIcon,
 } from "lucide-react"
-import { AppPermission } from "@/lib/actions/role"
+import { AppPermission, PERMISSIONS } from "@/lib/actions/role"
 import { APP_ROUTES } from "@/lib/config/app-routes"
 
 // Define the shape of a dashboard navigation entry and its nested links.
@@ -29,7 +30,7 @@ export const BOTTOM_NAV_BAR: BottomNavigationBar[] = [
   {
     key: "search",
     label: "SEARCH",
-    url: APP_ROUTES.DASHBOARD.OVERVIEW,
+    url: APP_ROUTES.SEARCH,
     icon: SearchIcon,
   },
   {
@@ -41,13 +42,20 @@ export const BOTTOM_NAV_BAR: BottomNavigationBar[] = [
   {
     key: "cart",
     label: "CART",
-    url: APP_ROUTES.DASHBOARD.BRANDS,
+    url: APP_ROUTES.CART,
     icon: ShoppingCartIcon,
   },
   {
-    key: "profile",
-    label: "PROFILE",
-    url: APP_ROUTES.DASHBOARD.PRODUCTS,
+    key: "account",
+    label: "ACCOUNT",
+    url: APP_ROUTES.ACCOUNT,
     icon: UserIcon,
+  },
+  {
+    key: "dashboard",
+    label: "DASHBOARD",
+    url: APP_ROUTES.DASHBOARD.OVERVIEW,
+    icon: LayoutDashboardIcon,
+    requiredPermission:PERMISSIONS.VIEW_WISHLISTS_DASHBOARD
   },
 ]

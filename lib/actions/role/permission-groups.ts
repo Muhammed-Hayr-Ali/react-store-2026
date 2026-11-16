@@ -29,31 +29,6 @@ export const PERMISSION_GROUPS = [
         label: "view_dashboard",
         description: "view_dashboard_desc",
       },
-      {
-        key: PERMISSIONS.READ_BRANDS,
-        label: "read_brands",
-        description: "read_brands_desc",
-      },
-      {
-        key: PERMISSIONS.CREATE_BRAND,
-        label: "create_brand",
-        description: "create_brand_desc",
-      },
-      {
-        key: PERMISSIONS.UPDATE_BRAND,
-        label: "update_brand",
-        description: "update_brand_desc",
-      },
-      {
-        key: PERMISSIONS.DELETE_BRAND,
-        label: "delete_brand",
-        description: "delete_brand_desc",
-      },
-      {
-        key: PERMISSIONS.MANAGE_BRANDS,
-        label: "manage_brands",
-        description: "manage_brands_desc",
-      },
     ],
   },
 

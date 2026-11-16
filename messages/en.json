@@ -1034,6 +1034,9 @@
     "SAVE_ROLE_BUTTON": "Create Role",
     "DISCARD_CHANGES_BUTTON": "Discard Changes",
     "Permission_Groups": {
+      "general_group": "General Permission Management",
+      "view_dashboard": "View Dashboard",     
+      "view_dashboard_desc": "Access the dashboard page.",     
       "brands_group": "Brands Management",
       "brands_group_desc": "Moderate store brands, manufacturers, and logos.",
       "view_brands_dashboard": "View Brands Dashboard",
@@ -1408,7 +1411,8 @@
     "SEARCH": "Search",
     "WISHLIST": "Wishlist",
     "CART": "Cart",
-    "PROFILE": "Profile"
+    "ACCOUNT": "Account",
+    "DASHBOARD": "Dashboard"
   },
   "ProductsView": {
     "Empty": {

@@ -1,4 +1,3 @@
-
 /**
  * @file lib/config/app-routes.ts
  * @description Centralized application route definitions with uppercase keys.
@@ -6,7 +5,10 @@
 
 export const APP_ROUTES = {
   HOME: "/",
+  SEARCH: "/search",
   WISHLIST: "/wishlist",
+  CART: "/cart",
+  ACCOUNT: "/account",
   TERMS: "/terms",
   PRIVACY: "/privacy",
   NEWSLETTER_UNSUBSCRIBE: "/unsubscribe",

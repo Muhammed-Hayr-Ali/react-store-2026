@@ -10,6 +10,7 @@ import { usePathname } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
 import { BOTTOM_NAV_BAR } from "./bottom-navigation-bar-config"
 import { cn } from "@/lib/utils"
+import { Can } from "@/components/shared/can"
 
 const NAV_LABELS: Record<string, string> = {
   ar: "التنقل الرئيسي",
@@ -52,6 +53,40 @@ export default function BottomNavigationBar() {
                 ? currentPath === "/"
                 : currentPath === item.url ||
                   currentPath.startsWith(`${item.url}/`)
+
+            if (item.requiredPermission != undefined) {
+              return (
+                <Can key={item.key} permission={item.requiredPermission}>
+                  <Link
+                    href={href}
+                    aria-current={isActive ? "page" : undefined}
+                    className={cn(
+                      "relative flex h-full flex-1 touch-manipulation flex-col items-center justify-center gap-1 text-xs font-medium transition-[color,transform] duration-200 select-none active:scale-95",
+                      isActive
+                        ? "font-semibold text-primary"
+                        : "text-muted-foreground hover:text-primary"
+                    )}
+                  >
+                    {/* مؤشر التبويب النشط — إشارة غير لونية besides اللون */}
+                    <span
+                      aria-hidden
+                      className={cn(
+                        "absolute top-0 h-0.5 w-8 rounded-full bg-primary transition-all duration-300",
+                        isActive
+                          ? "scale-x-100 opacity-100"
+                          : "scale-x-0 opacity-0"
+                      )}
+                    />
+                    <item.icon
+                      aria-hidden
+                      className="size-4"
+                      strokeWidth={isActive ? 2.25 : 2}
+                    />
+                    <span className="">{t(item.label)}</span>
+                  </Link>
+                </Can>
+              )
+            }
 
             return (
               <Link
