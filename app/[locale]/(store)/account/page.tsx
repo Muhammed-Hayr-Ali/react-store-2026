@@ -28,10 +28,8 @@ export async function generateMetadata() {
 
   return createMetadata({
     siteName: APP_CONFIG.NAME,
-    title: t("title", { default: "My Account" }),
-    description: t("description", {
-      default: "Manage your account profile and settings at Marketna.",
-    }),
+    title: t("title"),
+    description: t("description"),
     noindex: true, // صفحات الحساب الشخصي لا تحتاج لأرشفة محركات البحث
   })
 }

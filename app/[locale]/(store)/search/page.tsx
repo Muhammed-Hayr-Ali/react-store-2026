@@ -27,11 +27,9 @@ export async function generateMetadata({ searchParams }: SearchPageProps) {
 
   const searchQuery = q ? decodeURIComponent(q) : ""
   const title = searchQuery
-    ? `${t("resultsFor", { query: searchQuery, default: `Search results for "${searchQuery}"` })}`
-    : t("title", { default: "Search Store" })
-  const description = t("description", {
-    default: "Search through products, categories, and brands at Marketna.",
-  })
+    ? `${t("resultsFor", { query: searchQuery })}`
+    : t("title")
+  const description = t("description")
 
   return createMetadata({
     siteName: APP_CONFIG.NAME,

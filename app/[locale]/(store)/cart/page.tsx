@@ -25,10 +25,8 @@ export async function generateMetadata() {
 
   return createMetadata({
     siteName: APP_CONFIG.NAME,
-    title: t("title", { default: "Shopping Cart" }),
-    description: t("description", {
-      default: "View and manage items in your shopping cart at Marketna.",
-    }),
+    title: t("title"),
+    description: t("description"),
     noindex: true, // صفحة عربة التسوق لا تحتاج لأرشفة محركات البحث
   })
 }

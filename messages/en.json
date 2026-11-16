@@ -260,7 +260,9 @@
     "REMOVE_ERROR": "Failed to remove item",
     "AUTH_REQUIRED_TITLE": "Sign in required",
     "ITEM_ADDED": "The product has been successfully added to the shopping cart.",
-    "ADD_ERROR": "Failed to add item to cart"
+    "ADD_ERROR": "Failed to add item to cart",
+    "title": "Shopping Cart",
+    "description": "View and manage items in your shopping cart at Marketna."
   },
   "Category": {
     "META_TITLE": "{category} Products",
@@ -1035,8 +1037,8 @@
     "DISCARD_CHANGES_BUTTON": "Discard Changes",
     "Permission_Groups": {
       "general_group": "General Permission Management",
-      "view_dashboard": "View Dashboard",     
-      "view_dashboard_desc": "Access the dashboard page.",     
+      "view_dashboard": "View Dashboard",
+      "view_dashboard_desc": "Access the dashboard page.",
       "brands_group": "Brands Management",
       "brands_group_desc": "Moderate store brands, manufacturers, and logos.",
       "view_brands_dashboard": "View Brands Dashboard",
@@ -1430,5 +1432,14 @@
       "LOADING": "Loading...",
       "END": "You have reached the end"
     }
+  },
+  "Account": {
+    "title": "My Account",
+    "description": "Manage your account profile and settings at Marketna."
+  },
+  "Search": {
+    "resultsFor": "Search results for \"${searchQuery}\"",
+    "title": "Search Store",
+    "description": "Search through products, categories, and brands at Marketna."
   }
 }
