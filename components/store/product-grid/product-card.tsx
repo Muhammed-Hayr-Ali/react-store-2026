@@ -202,12 +202,15 @@ export function ProductCard({
               {product.name}
             </h3>
 
+            {/* الوصف */}
             {product.description && (
-              <p className="line-clamp-1 text-[11px] text-muted-foreground/80">
-                {product.description}
-              </p>
+              <></>
+              // <p className="line-clamp-1 text-[11px] text-muted-foreground/80">
+              //   {product.description}
+              // </p>
             )}
 
+            
             {/* Ratings */}
             {product.reviewCount > 0 && (
               <div className="flex items-center gap-1 pt-0.5 text-[10px] text-muted-foreground">
@@ -299,9 +302,10 @@ export function ProductCard({
 
           {/* الوصف */}
           {product.description && (
-            <p className="line-clamp-1 text-[11px] text-muted-foreground/80">
-              {product.description}
-            </p>
+            <></>
+            // <p className="line-clamp-1 text-[11px] text-muted-foreground/80">
+            //   {product.description}
+            // </p>
           )}
 
           {/* التقييمات والنجوم */}
