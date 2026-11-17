@@ -89,14 +89,14 @@ export default function HomeClientWrapper({
   }
 
   return (
-    <div className="flex flex-1 flex-col space-y-6 md:space-y-8">
+    <div className="flex flex-1 flex-col space-y-4 md:space-y-6">
       <CategoriesScroll
         categories={categories}
         onSelect={handleOnSelectCategory}
       />
 
       <ProductGrid
-        name={t("NEW_ARRIVALS")}
+        // name={t("NEW_ARRIVALS")}
         viewMode={viewMode}
         hasError={false}
         initialProducts={products}

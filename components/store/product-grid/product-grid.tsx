@@ -16,7 +16,6 @@ import {
   RotateCcwIcon,
 } from "lucide-react"
 
-import ViewMode from "@/components/shared/view_mode"
 import {
   ProductCard,
   SimpliProduct,
@@ -32,10 +31,12 @@ import {
 } from "@/components/ui/empty"
 import { APP_ROUTES } from "@/lib/config/app-routes"
 import { cn } from "@/lib/utils"
+import ViewModeButton from "./view_mode_button"
 
 export interface ProductGridProps {
   name?: string
   description?: string
+  viewModeButton?: boolean
 
   hasError?: boolean
   initialProducts: SimpliProduct[] | []
@@ -55,6 +56,7 @@ export interface ProductGridProps {
 export function ProductGrid({
   name,
   description,
+  viewModeButton = false,
   hasError = false,
   initialProducts,
   viewMode: initialViewMode,
@@ -96,20 +98,30 @@ export function ProductGrid({
   }, [onLoadMore, isLoadingMore, hasMore])
 
   // Error Component
-  if (hasError) return <ErrorList onRetry={onRetry} hasAction={hasAction} className={className}/>
+  if (hasError)
+    return (
+      <ErrorList
+        onRetry={onRetry}
+        hasAction={hasAction}
+        className={className}
+      />
+    )
 
   // Empty Component
-  if (initialProducts.length === 0) return <EmptyList hasAction={hasAction}  className={className}/>
+  if (initialProducts.length === 0)
+    return <EmptyList hasAction={hasAction} className={className} />
 
   // List Component
   return (
-    <section className={cn("space-y-6", className)}>
+    <section className={cn("", className)}>
       {/* Header & Toolbar Section */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
           {name}
         </h2>
-        <ViewMode initValue={mode} onChange={setMode} />
+        {viewModeButton && (
+          <ViewModeButton initValue={mode} onChange={setMode} />
+        )}
       </div>
       <p>{description}</p>
       <div

@@ -9,12 +9,12 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { saveViewMode } from "@/lib/actions/shared/save-view-mode"
 import { LayoutGridIcon, ListIcon } from "lucide-react"
 
-interface ViewModeProps {
+interface ViewModeButtonProps {
   initValue: "grid" | "list"
   onChange: (value: "grid" | "list") => void
 }
 
-export default function ViewMode({ initValue, onChange }: ViewModeProps) {
+export default function ViewModeButton({ initValue, onChange }: ViewModeButtonProps) {
   const handleOnValueChange = (value: string) => {
     if (value !== "grid" && value !== "list") return
     saveViewMode(value)
