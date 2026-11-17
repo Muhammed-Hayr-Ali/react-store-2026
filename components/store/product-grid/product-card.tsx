@@ -14,6 +14,7 @@ import {
   StarIcon,
   HeartIcon,
   LoaderCircleIcon,
+  PlusIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -118,19 +119,11 @@ function AddToCartButton({
     try {
       setIsLoading(true)
 
-      const result = await addItem({
+      await addItem({
         product_id: productId,
         variant_id: variantId,
         quantity: 1,
       })
-
-      if (result.success) {
-        toast.success(t("ADD_TO_CART_SUCCESS"))
-      } else {
-        toast.error(
-          result.error ? tError(result.error) : tError("UNEXPECTED_ERROR")
-        )
-      }
     } finally {
       setIsLoading(false)
     }
@@ -139,16 +132,15 @@ function AddToCartButton({
   return (
     <Button
       size="icon"
-      variant="secondary"
-      className="size-7 rounded-full bg-background shadow-xs transition-transform hover:bg-background/90 active:scale-95"
+      className="size-7 rounded-full bg-foreground shadow-xs transition-transform active:scale-95"
       aria-label="Add to cart"
       disabled={isLoading}
       onClick={handleAddToCart}
     >
       {isLoading ? (
-        <Loader2Icon className="size-3.5 animate-spin text-primary" />
+        <Loader2Icon className="animate-spin text-primary" />
       ) : (
-        <ShoppingCartIcon className="size-3.5" />
+        <PlusIcon />
       )}
     </Button>
   )

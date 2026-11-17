@@ -14,6 +14,7 @@ import { useCart } from "@/lib/context/cart-context"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
+import { ShoppingCartIcon } from "lucide-react"
 
 export default function Navbar() {
   return (
@@ -49,13 +50,13 @@ function MobileBar() {
 
       {/* Action Button */}
       <Button
-        variant="ghost"
+        variant="outline"
         size="icon"
         className="relative rounded-full"
 
         aria-label="Notifications"
       >
-        <CartIcon className="text-foreground" />
+        <ShoppingCartIcon />
 
         {totalItemsCount > 0 && (
           <div
