@@ -1,25 +1,25 @@
+import { AppPermission } from "@/lib/actions/role"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 import {
-  type LucideIcon,
   HomeIcon,
   SearchIcon,
-  ShoppingCartIcon,
-  UserIcon,
-  HeartIcon,
-  LayoutDashboardIcon,
-} from "lucide-react"
-import { AppPermission, PERMISSIONS } from "@/lib/actions/role"
-import { APP_ROUTES } from "@/lib/config/app-routes"
+  FavoriteIcon,
+  ProfileIcon,
+} from "@/components/store/bottom-navigation-bar/bottom-navbar-icons" // استبدل المسار بمكان ملف الأيقونات الخاص بك
 
-// Define the shape of a dashboard navigation entry and its nested links.
+// 1. تحديث شكل الأيقونة لتتوافق مع مكوناتنا المخصصة (تستقبل status كـ boolean وتعود بـ JSX.Element أو ElementType)
 export interface BottomNavigationBar {
   key: string
   label: string
   url: string
-  icon: LucideIcon
+  icon: React.ElementType<{
+    status?: boolean
+    size?: "default" | "xs" | "sm" | "md" | "lg"
+  }>
   requiredPermission?: AppPermission
 }
 
-// Configure the dashboard links and their access requirements.
+// 2. تكوين روابط شريط التنقل السفلي باستخدام أيقوناتنا المخصصة
 export const BOTTOM_NAV_BAR: BottomNavigationBar[] = [
   {
     key: "home",
@@ -37,25 +37,12 @@ export const BOTTOM_NAV_BAR: BottomNavigationBar[] = [
     key: "wishlist",
     label: "WISHLIST",
     url: APP_ROUTES.WISHLIST,
-    icon: HeartIcon,
-  },
-  {
-    key: "cart",
-    label: "CART",
-    url: APP_ROUTES.CART,
-    icon: ShoppingCartIcon,
+    icon: FavoriteIcon, 
   },
   {
     key: "account",
     label: "ACCOUNT",
     url: APP_ROUTES.ACCOUNT,
-    icon: UserIcon,
-  },
-  {
-    key: "dashboard",
-    label: "DASHBOARD",
-    url: APP_ROUTES.DASHBOARD.OVERVIEW,
-    icon: LayoutDashboardIcon,
-    requiredPermission:PERMISSIONS.VIEW_WISHLISTS_DASHBOARD
+    icon: ProfileIcon,
   },
 ]

@@ -3,13 +3,19 @@
  * @description Simplified responsive store navigation bar for desktop and mobile.
  */
 
+"use client"
+
 import Link from "next/link"
 import { AppLogo } from "@/components/ui/app-logo"
 import { Button } from "@/components/ui/button"
-import { Bell } from "lucide-react"
 import DesktopNavbar from "./desktop-navbar"
+import { CartIcon } from "../bottom-navigation-bar/bottom-navbar-icons"
+import { useCart } from "@/lib/context/cart-context"
+import { Spinner } from "@/components/ui/spinner"
+import { cn } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
 
-export default async function Navbar() {
+export default function Navbar() {
   return (
     <>
       <DesktopBar />
@@ -32,6 +38,8 @@ function DesktopBar() {
 }
 
 function MobileBar() {
+  const { totalItemsCount, isPending } = useCart()
+
   return (
     <nav className="sticky top-0 z-50 flex h-14 w-full shrink-0 items-center justify-between border-b border-border/40 bg-background/80 px-4 backdrop-blur-md transition-colors md:hidden">
       {/* Brand Logo */}
@@ -40,8 +48,26 @@ function MobileBar() {
       </Link>
 
       {/* Action Button */}
-      <Button variant="ghost" size="icon" className="rounded-full" aria-label="Notifications">
-        <Bell className="size-5" />
+      <Button
+        variant="ghost"
+        size="icon"
+        className="relative rounded-full"
+
+        aria-label="Notifications"
+      >
+        <CartIcon className="text-foreground" />
+
+        {totalItemsCount > 0 && (
+          <div
+            aria-hidden
+            className={cn(
+              "absolute -top-1 -right-1 flex h-3.5 items-center justify-center rounded-full bg-foreground text-[9px] font-normal text-background transition-all duration-500 ease-in-out",
+              isPending || totalItemsCount < 99 ? "w-3.5" : "w-5.5"
+            )}
+          >
+            {isPending ? "+" : totalItemsCount > 99 ? "99+" : totalItemsCount}
+          </div>
+        )}
       </Button>
     </nav>
   )

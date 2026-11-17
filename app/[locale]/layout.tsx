@@ -112,7 +112,7 @@ export default async function RootLayout({
         isDark && "dark"
       )}
     >
-      <body className="bg-[#FAFAFA] dark:bg-[#000000]">
+      <body>
         <ThemeProvider initialTheme={initialTheme}>
           <NextIntlClientProvider>
             <TooltipProvider>
