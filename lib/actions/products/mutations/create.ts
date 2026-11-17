@@ -8,17 +8,15 @@
 
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
- import { createProductSchema, type CreateProductInput } from "../schemas"
+import { createProductSchema, type CreateProductInput } from "../schemas"
 
 export type CreateProductResult =
-  | { success: true }
-  | { success: false; error: string }
+  { success: true } | { success: false; error: string }
 
 export async function createProduct(
   input: CreateProductInput
 ): Promise<CreateProductResult> {
   try {
- 
     const validation = createProductSchema.safeParse(input)
     if (!validation.success) {
       return { success: false, error: "VALIDATION_ERROR" }
@@ -93,10 +91,12 @@ export async function createProduct(
     revalidatePath("/dashboard/products")
     revalidatePath("/products")
 
+    revalidatePath("/", "page")
+    revalidatePath("/product/[slug]", "page")
+
     return { success: true }
   } catch (error) {
     console.error("[createProduct] Unexpected error:", error)
     return { success: false, error: "UNEXPECTED_ERROR" }
   }
 }
-
