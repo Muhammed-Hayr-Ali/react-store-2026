@@ -42,7 +42,7 @@ function MobileBar() {
   const { totalItemsCount, isPending } = useCart()
 
   return (
-    <nav className="sticky top-0 z-50 flex h-14 w-full shrink-0 items-center justify-between  bg-background/80 px-4 backdrop-blur-md transition-colors md:hidden">
+    <nav className="sticky top-0 z-50 flex h-14 w-full shrink-0 items-center justify-between bg-background/80 px-4 backdrop-blur-md transition-colors md:hidden">
       {/* Brand Logo */}
       <Link href="/" className="flex items-center">
         <AppLogo className="size-6" />
@@ -57,6 +57,7 @@ function MobileBar() {
         aria-label="Notifications"
       >
         <ShoppingCartIcon />
+        {isPending && <Spinner className="absolute size-9 stroke-[1px]" />}
 
         {totalItemsCount > 0 && (
           <div
@@ -66,7 +67,7 @@ function MobileBar() {
               isPending || totalItemsCount < 99 ? "w-3.5" : "w-5.5"
             )}
           >
-            {isPending ? "+" : totalItemsCount > 99 ? "99+" : totalItemsCount}
+            {totalItemsCount > 99 ? "99+" : totalItemsCount}
           </div>
         )}
       </Button>
