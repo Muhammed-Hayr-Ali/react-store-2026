@@ -132,8 +132,6 @@ export async function updateProduct(
       return { success: false, error: "UPDATE_IMAGES_FAILED" }
     }
 
-    revalidatePath("/[locale]/product/[id]", "page")
-    // أو إعادة تحديث الصفحة الرئيسية إن كان البنر/المنتج يظهر هناك
     revalidatePath("/", "page")
     revalidatePath("/product/[slug]", "page")
 

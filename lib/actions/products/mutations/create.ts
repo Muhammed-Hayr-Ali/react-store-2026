@@ -88,8 +88,7 @@ export async function createProduct(
       return { success: false, error: "CREATE_IMAGES_FAILED" }
     }
 
-    revalidatePath("/dashboard/products")
-    revalidatePath("/products")
+
 
     revalidatePath("/", "page")
     revalidatePath("/product/[slug]", "page")
