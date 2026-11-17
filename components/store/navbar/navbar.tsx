@@ -57,7 +57,7 @@ function MobileBar() {
         aria-label="Notifications"
       >
         <ShoppingCartIcon />
-        {isPending && <Spinner className="absolute size-9 stroke-[1px]" />}
+        {isPending && <Spinner className="absolute size-9 stroke-[0.5px]" />}
 
         {totalItemsCount > 0 && (
           <div

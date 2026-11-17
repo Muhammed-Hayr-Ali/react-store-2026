@@ -7,9 +7,8 @@
 
 import { useRouter, useSearchParams } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
-import { Button } from "@/components/ui/button"
-import { IconInput } from "@/components/ui/icon-input"
-import { MicIcon, SearchIcon, SlidersVerticalIcon } from "lucide-react"
+ import { IconInput } from "@/components/ui/icon-input"
+import {   SearchIcon } from "lucide-react"
 
 interface SearchBarProps {
   onOpenFilters?: () => void
@@ -19,6 +18,7 @@ export default function SearchBar({ onOpenFilters }: SearchBarProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const locale = useLocale()
+  
   const t = useTranslations("SearchBar") // أو ملف الترجمة الخاص بك
 
   const currentQuery = searchParams.get("q") || ""
@@ -51,7 +51,7 @@ export default function SearchBar({ onOpenFilters }: SearchBarProps) {
         autoComplete="off"
         aria-label="Search for products"
         placeholder={t("search_placeholder")}
-        className="h-11 min-w-0 flex-1 border-none bg-input text-base sm:text-sm"
+        className="h-11 min-w-0 flex-1 border-none bg-muted text-base sm:text-sm"
         suffixIcon={
           <SearchIcon aria-hidden className="size-5 text-muted-foreground" />
         }

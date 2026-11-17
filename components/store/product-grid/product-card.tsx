@@ -105,8 +105,6 @@ function AddToCartButton({
   price: number | null
   variantId: string | null
 }) {
-  const tError = useTranslations("ActionErrors")
-  const t = useTranslations("Wishlist")
   const { addItem } = useCart()
   const [isLoading, setIsLoading] = React.useState(false)
 
@@ -131,17 +129,16 @@ function AddToCartButton({
 
   return (
     <Button
-      size="icon"
-      className="size-7 rounded-full bg-foreground shadow-xs transition-transform active:scale-95"
+      size="icon-xs"
+      className="relative rounded-full bg-foreground shadow-xs transition-transform active:scale-95"
       aria-label="Add to cart"
       disabled={isLoading}
       onClick={handleAddToCart}
     >
-      {isLoading ? (
-        <Loader2Icon className="animate-spin text-primary" />
-      ) : (
-        <PlusIcon />
+      {isLoading && (
+        <Loader2Icon className="absolute stroke-1 size-6 animate-spin text-primary" />
       )}
+      <PlusIcon />
     </Button>
   )
 }
@@ -210,7 +207,6 @@ export function ProductCard({
               // </p>
             )}
 
-            
             {/* Ratings */}
             {product.reviewCount > 0 && (
               <div className="flex items-center gap-1 pt-0.5 text-[10px] text-muted-foreground">
@@ -262,10 +258,10 @@ export function ProductCard({
   return (
     <Link
       href={`/product/${product.slug}`}
-      className="group/card flex flex-col overflow-hidden rounded-2xl bg-muted/50 p-2.5 transition-all duration-300 hover:bg-muted/40"
+      className="group/card flex flex-col overflow-hidden rounded-t-2xl transition-all duration-300 hover:bg-muted/40"
     >
       {/* Image Container */}
-      <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-background/50">
+      <div className="relative aspect-square w-full overflow-hidden  rounded-br-xl bg-muted">
         <AspectRatio
           ratio={1 / 1}
           className="flex w-full items-center justify-center"
@@ -296,10 +292,19 @@ export function ProductCard({
       <div className="mt-2 flex flex-1 flex-col justify-between gap-2 px-1">
         <div className="space-y-1">
           {/* اسم المنتج */}
-          <h3 className="line-clamp-1 text-xs font-medium text-foreground transition-colors group-hover/card:text-primary sm:text-sm">
-            {product.name}
-          </h3>
-
+          <div className="flex items-center justify-between">
+            <h3 className="line-clamp-1 text-xs font-semibold text-muted-foreground transition-colors group-hover/card:text-primary sm:text-sm">
+              {product.name}
+            </h3>
+            {product.reviewCount > 0 && (
+              <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                <StarIcon className="size-3 fill-amber-500 text-amber-500" />
+                <span className="font-medium text-foreground">
+                  {product.rating.toFixed(1)}
+                </span>
+              </div>
+            )}
+          </div>
           {/* الوصف */}
           {product.description && (
             <></>
@@ -309,17 +314,6 @@ export function ProductCard({
           )}
 
           {/* التقييمات والنجوم */}
-          {product.reviewCount > 0 && (
-            <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-              <StarIcon className="size-3 fill-amber-500 text-amber-500" />
-              <span className="font-medium text-foreground">
-                {product.rating}
-              </span>
-              <span className="text-muted-foreground/70">
-                ({product.reviewCount})
-              </span>
-            </div>
-          )}
         </div>
 
         {/* Price & Action Row */}

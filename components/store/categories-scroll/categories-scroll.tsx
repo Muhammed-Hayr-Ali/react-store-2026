@@ -102,19 +102,18 @@ export default function CategoriesScroll({
               return (
                 <CarouselItem key={category.slug} className="basis-auto p-0">
                   <Button
+                    variant={isActive ? "default" : "outline"}
                     type="button"
                     aria-pressed={isActive}
                     onClick={() => handleOnSelect(category.slug, category.id)}
                     className={cn(
-                      // "group flex shrink-0 items-center gap-2.5 rounded-xl px-3.5 py-3.5 text-xs font-medium transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none sm:px-4 sm:py-2.5 sm:text-sm",
-                      "h-10 px-4",
-                      isActive
-                        ? "bg-primary text-primary-foreground  border border-primary"
-                        : "bg-muted/50 text-foreground hover:bg-muted border border-input"
+                      "h-10 rounded-lg px-4",
+                      isActive ? "border-primary" : "border-muted-foreground",
+                      "transition-all ease-in-out duration-200"
                     )}
                   >
                     {/* أيقونة أو صورة التصنيف */}
-                    <div className="shrink-0 sm:size-8 hidden size-7 lg:flex">
+                    <div className="hidden size-7 shrink-0 sm:size-8 lg:flex">
                       {imageUrl ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
                         <img

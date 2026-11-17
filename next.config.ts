@@ -2,7 +2,7 @@ import { NextConfig } from "next"
 import createNextIntlPlugin from "next-intl/plugin"
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["192.168.2.2", "192.168.4.4"],
+  allowedDevOrigins: ["192.168.2.2", "192.168.4.4", "192.168.5.14"],
   devIndicators: { position: "top-left" },
   images: {
     remotePatterns: [
