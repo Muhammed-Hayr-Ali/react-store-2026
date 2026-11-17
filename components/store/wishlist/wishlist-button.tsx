@@ -14,6 +14,7 @@ import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 
 interface WishlistButtonProps {
+  children: React.ReactNode
   productId: string
   className?: string
 }
@@ -44,25 +45,25 @@ export function WishlistButton({ productId }: WishlistButtonProps) {
   }
 
   return (
-       <Button
-        size="icon-lg"
-        variant="outline"
-        type="button"
-        disabled={isLoading}
-        onClick={handlToggleWishlist}
-        aria-label={active ? "remove from wishlist" : "add to wishlist"}
-        className="size-12 rounded-2xl"
-      >
-        {isLoading ? (
-          <LoaderCircleIcon className="size-5 animate-spin" />
-        ) : (
-          <Heart
-            className={cn(
-              "size-5 transition-transform duration-200 active:scale-90",
-              active && "scale-105 fill-current text-destructive"
-            )}
-          />
-        )}
-      </Button>
-   )
+    <Button
+      size="icon-lg"
+      variant="outline"
+      type="button"
+      disabled={isLoading}
+      onClick={handlToggleWishlist}
+      aria-label={active ? "remove from wishlist" : "add to wishlist"}
+      className="size-12 rounded-2xl"
+    >
+      {isLoading ? (
+        <LoaderCircleIcon className="size-5 animate-spin" />
+      ) : (
+        <Heart
+          className={cn(
+            "size-5 transition-transform duration-200 active:scale-90",
+            active && "scale-105 fill-current text-destructive"
+          )}
+        />
+      )}
+    </Button>
+  )
 }

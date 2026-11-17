@@ -7,11 +7,9 @@ import { notFound } from "next/navigation"
 
 import { getProductDetails } from "@/lib/actions/store/product-details/details/queries/get-product-details"
 import { getProductReviews } from "@/lib/actions/store/product-details/reviews/queries/get-product-reviews"
-import { ProductReviewsSection } from "@/components/product-details/reviews/product-reviews-section"
 import { APP_CONFIG } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import { ProductInfoSection } from "@/components/product-details/details/product-info-section"
-import { ProductBreadcrumb } from "@/components/product-details/details/product-breadcrumb"
+import ProductDetailsClientWrapper from "@/components/product-details/product-details-client-wrapper"
 
 interface ProductDetailsPageProps {
   params: Promise<{
@@ -47,7 +45,6 @@ export default async function ProductDetailsPage({
   params,
 }: ProductDetailsPageProps) {
   const { slug } = await params
-  const { locale } = await params
 
   // 1. جلب تفاصيل المنتج أولاً للحصول على الـ id الخاص به
   const productResult = await getProductDetails(slug)
@@ -63,15 +60,6 @@ export default async function ProductDetailsPage({
   const reviewsData = reviewsResult.success ? reviewsResult.data : null
 
   return (
-    <div className="space-y-4 md:space-y-6 lg:space-y-8 px-4 sm:px-6 lg:px-8">
-      <ProductBreadcrumb
-        category={product.category}
-        parentCategory={product.parent_category}
-        productName={product.name}
-      />
-      <ProductInfoSection locale={locale} product={product} />
-      {/* 3. دمج وإرسال بيانات التقييمات والمراجعات للمكون الرئيسي */}
-      <ProductReviewsSection reviewsData={reviewsData} />
-    </div>
+    <ProductDetailsClientWrapper product={product} reviewsData={reviewsData} />
   )
 }

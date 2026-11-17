@@ -6,7 +6,6 @@
  */
 
 import * as React from "react"
-import { ProductBreadcrumb } from "./product-breadcrumb"
 import { ProductHeader } from "./product-header"
 import { ProductGallery } from "./product-gallery"
 import { ProductVariants } from "./product-variants"
@@ -22,12 +21,12 @@ import { useTranslations } from "next-intl"
 
 interface ProductInfoSectionProps {
   product: FullProductDetails
-  locale: string
+  onSelectVariants: (selectedVariant: ProductVariantDetail) => void
 }
 
 export function ProductInfoSection({
-  locale,
   product,
+  onSelectVariants,
 }: ProductInfoSectionProps) {
   const t = useTranslations("ProductDetails")
   const [selectedVariant, setSelectedVariant] =
@@ -115,9 +114,13 @@ export function ProductInfoSection({
     return options
   }, [product.product_variants, selectedVariant, t])
 
+  const handleSelectedVariant = (variants: ProductVariantDetail) => {
+    setSelectedVariant(variants)
+    onSelectVariants(variants)
+  }
+
   return (
     <div className="flex flex-col gap-8">
-
       {/* تخطيط الشبكة الرئيسي */}
       <div className="grid grid-cols-1 items-start gap-12 md:grid-cols-12">
         {/* ================================================================= */}
@@ -133,7 +136,7 @@ export function ProductInfoSection({
               selectedVariant?.track_inventory &&
               selectedVariant?.stock_quantity <= 0
             }
-            onVariantSelect={setSelectedVariant}
+            onVariantSelect={handleSelectedVariant}
           />
         </div>
 
@@ -143,7 +146,6 @@ export function ProductInfoSection({
         <div className="flex flex-col gap-6 md:col-span-6">
           <ProductCategoryBrand
             slug={product.slug}
-            locale={locale}
             category={product.category}
             brand={product.brand}
           />
@@ -163,7 +165,7 @@ export function ProductInfoSection({
                 (v) => v.id === valueId
               )
               if (found) {
-                setSelectedVariant(found)
+                handleSelectedVariant(found)
               }
             }}
           />

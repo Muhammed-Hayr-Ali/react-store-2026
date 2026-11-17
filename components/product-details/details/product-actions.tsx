@@ -13,8 +13,7 @@ import { ProductVariantDetail } from "@/lib/actions/store/product-details/detail
 import { useCurrency } from "@/lib/context/currency-context"
 
 import { useCart } from "@/lib/context/cart-context"
-import { toast } from "sonner"
-import { WishlistButton } from "@/components/store/wishlist/wishlist-button"
+
 
 interface ProductActionsProps {
   productId: string
@@ -27,7 +26,6 @@ export function ProductActions({
   variant,
   isProductActive,
 }: ProductActionsProps) {
-  const tError = useTranslations("ActionErrors")
   const t = useTranslations("ProductDetails")
   const { formatRawPrice, currentCurrency } = useCurrency()
   const { addItem, isPending } = useCart()
@@ -146,8 +144,7 @@ export function ProductActions({
                 : t("ADD_TO_CART", { default: "Add to Bag" })}
         </Button>
 
-        {/* زر القلب للمفضلة بتصميم متناسق تماماً مع زر السلة */}
-        <WishlistButton productId={productId} />
+        
       </div>
     </div>
   )
