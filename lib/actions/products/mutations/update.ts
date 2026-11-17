@@ -130,9 +130,7 @@ export async function updateProduct(
       return { success: false, error: "UPDATE_IMAGES_FAILED" }
     }
 
-    revalidatePath("/dashboard/products")
-    revalidatePath("/products")
-    revalidatePath(`/products/${productData.slug}`)
+    revalidatePath("/")
 
     console.info("[updateProduct] Product updated", {
       productId: id,
