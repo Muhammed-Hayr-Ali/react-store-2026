@@ -7,19 +7,22 @@
 "use server"
 
 import { z } from "zod"
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import type { ApiResult } from "../../types/utils"
- import { getValidationDetails } from "../../validation"
+import { getValidationDetails } from "../../validation"
+import { CACHE_TAG } from "@/lib/config/app_config"
 
 export async function deleteProduct(
   productId: string
 ): Promise<ApiResult<{ id: string }>> {
-  
   // 1. التحقق من صحة المعرف (UUID)
-  const idValidation = z.string().uuid("INVALID_PRODUCT_ID").safeParse(productId)
-  
+  const idValidation = z
+    .string()
+    .uuid("INVALID_PRODUCT_ID")
+    .safeParse(productId)
+
   if (!idValidation.success) {
     return {
       success: false,
@@ -27,10 +30,9 @@ export async function deleteProduct(
       details: getValidationDetails(idValidation.error),
     }
   }
-  
+
   const validProductId = idValidation.data
 
- 
   const supabase = await createServerClient()
 
   // 3. التحقق من وجود المنتج للحصول على הSlug (من أجل مسح الكاش لاحقاً)
@@ -62,10 +64,8 @@ export async function deleteProduct(
     }
   }
 
-  // 5. مسح الكاش (Revalidation) لتحديث الواجهات
-  revalidatePath(`/product/${product.slug}`) // تنظيف صفحة المنتج من الكاش
-  revalidatePath("/dashboard/products") // تنظيف لوحة التحكم
-  revalidatePath("/", "layout") // تنظيف القوائم العامة
+  revalidateTag(CACHE_TAG.PRODUCTS, { expire: 0 })
+  revalidatePath("/", "layout")
 
   return {
     success: true,

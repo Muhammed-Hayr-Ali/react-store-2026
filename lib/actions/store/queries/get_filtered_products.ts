@@ -8,6 +8,7 @@
 import { unstable_cache } from "next/cache"
 import type { ApiResult } from "../../types/utils"
 import { createPublicServerClient } from "@/lib/database/supabase/public"
+import { CACHE_TAG } from "@/lib/config/app_config"
 
 interface ProductVariantRecord {
   id: string
@@ -231,10 +232,11 @@ const getCachedFilteredProducts = unstable_cache(
       }
     })
   },
+
   ["products"],
   {
-    revalidate: 1800, // إعادة التحقق كل نصف ساعة مثلاً
-    tags: ["products"], // لتحديث الكاش تلقائياً عبر revalidateTag عند التعديل
+    revalidate: 3600,
+    tags: [CACHE_TAG.PRODUCTS],
   }
 )
 

@@ -43,3 +43,11 @@ export const LOGIN_METHODS = {
   GOOGLE: "google",
   PHONE: "phone",
 } as const
+
+export const CACHE_TAG = {
+  CATEGORIES: "categories",
+  BRANDS: "brands",
+  PRODUCTS: "products",
+  WISHLIST: "wishlist",
+  cart: "cart",
+} as const

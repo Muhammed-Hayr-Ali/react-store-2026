@@ -5,7 +5,7 @@
 
 "use server"
 
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
@@ -14,6 +14,7 @@ import { getValidationDetails } from "../../validation"
 import { updateBrandSchema, type UpdateBrandInput } from "../schemas"
 import type { BrandRecord } from "../types"
 import { getTranslations } from "next-intl/server"
+import { CACHE_TAG } from "@/lib/config/app_config"
 
 export async function updateBrand(
   input: UpdateBrandInput
@@ -67,6 +68,9 @@ export async function updateBrand(
     return { success: false, error: "BRAND_NOT_FOUND" }
   }
 
+
+  revalidateTag(CACHE_TAG.BRANDS, { expire: 0 })
   revalidatePath("/", "layout")
+  
   return { success: true, data: data as BrandRecord }
 }

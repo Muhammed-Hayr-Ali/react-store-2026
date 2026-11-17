@@ -8,7 +8,8 @@
 import { unstable_cache } from "next/cache"
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createPublicServerClient } from "@/lib/database/supabase/public"
- 
+import { CACHE_TAG } from "@/lib/config/app_config"
+
 export interface SimpliCategory {
   id: string
   slug: string
@@ -58,10 +59,11 @@ const getCachedCategoryByFilter = unstable_cache(
 
     return (data as SimpliCategory) || null
   },
-  ["category-by-filter-cache"],
+  
+  ["categories"],
   {
     revalidate: 3600,
-    tags: ["categories"], // تصحيح الوسم ليتطابق مع بقية النظام (categories بدلاً من categorys)
+    tags: [CACHE_TAG.CATEGORIES],
   }
 )
 

@@ -5,20 +5,21 @@
 
 "use server"
 
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
- import { getValidationDetails } from "../../validation"
+import { getValidationDetails } from "../../validation"
 import { validateCategoryParent } from "../helpers"
 import { categoryFormSchema, type CategoryInput } from "../schemas"
 import type { Category } from "../types"
+import { CACHE_TAG } from "@/lib/config/app_config"
 
 export async function createCategory(
   input: CategoryInput
 ): Promise<ApiResult<Category>> {
-   const validation = categoryFormSchema.safeParse(input)
+  const validation = categoryFormSchema.safeParse(input)
   if (!validation.success) {
     return {
       success: false,
@@ -62,6 +63,9 @@ export async function createCategory(
     }
   }
 
+
+  revalidateTag(CACHE_TAG.CATEGORIES, { expire: 0 })
   revalidatePath("/", "layout")
+  
   return { success: true, data: data as Category }
 }

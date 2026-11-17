@@ -5,18 +5,18 @@
 
 "use server"
 
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
- import { getValidationDetails } from "../../validation"
+import { getValidationDetails } from "../../validation"
 import { categoryIdSchema, type CategoryIdInput } from "../schemas"
+import { CACHE_TAG } from "@/lib/config/app_config"
 
 export async function deleteCategory(
   input: CategoryIdInput
 ): Promise<ApiResult<null>> {
- 
   const validation = categoryIdSchema.safeParse(input)
   if (!validation.success) {
     return {
@@ -46,6 +46,9 @@ export async function deleteCategory(
     return { success: false, error: "CATEGORY_NOT_FOUND" }
   }
 
+
+  revalidateTag(CACHE_TAG.CATEGORIES, { expire: 0 })
   revalidatePath("/", "layout")
+  
   return { success: true, data: null }
 }

@@ -9,6 +9,7 @@
 import { revalidatePath, revalidateTag } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { updateProductSchema, type UpdateProductInput } from "../schemas"
+import { CACHE_TAG } from "@/lib/config/app_config"
 
 export type UpdateProductResult =
   | { success: true }
@@ -132,14 +133,17 @@ export async function updateProduct(
       return { success: false, error: "UPDATE_IMAGES_FAILED" }
     }
 
-    
-    revalidateTag("products", { expire: 0 })
+    revalidateTag(CACHE_TAG.PRODUCTS, { expire: 0 })
+    revalidatePath("/", "layout")
 
     console.info("[updateProduct] Product updated", {
       productId: id,
       variantCount: variants.length,
       imageCount: imagesToInsert.length,
     })
+
+    revalidateTag(CACHE_TAG.PRODUCTS, { expire: 0 })
+    revalidatePath("/", "layout")
 
     return { success: true }
   } catch (error) {

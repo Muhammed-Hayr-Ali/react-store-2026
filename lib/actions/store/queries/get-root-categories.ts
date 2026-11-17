@@ -8,6 +8,7 @@
 import { unstable_cache } from "next/cache"
 import type { ApiResult } from "../../types/utils"
 import { createPublicServerClient } from "@/lib/database/supabase/public"
+import { CACHE_TAG } from "@/lib/config/app_config"
 
 export interface SimplifiedRootCategory {
   id: string
@@ -61,10 +62,11 @@ const getCachedRootCategories = unstable_cache(
       image_alt: category.image_alt,
     }))
   },
-  ["root-categories-cache"],
+
+  ["categories"],
   {
-    revalidate: 3600, // إعادة التحقق التلقائي كل ساعة
-    tags: ["categories"], // لتحديث الكاش فوراً عند تعديل التصنيفات من لوحة التحكم عبر revalidateTag("categories")
+    revalidate: 3600,
+    tags: [CACHE_TAG.CATEGORIES],
   }
 )
 
@@ -82,7 +84,8 @@ export async function getRootCategories(
 
     return { success: true, data: simplifiedCategories }
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown database error"
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown database error"
 
     console.error("[getStoreRootCategories] Database query failed", {
       message: errorMessage,

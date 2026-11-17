@@ -8,6 +8,7 @@
 import { unstable_cache } from "next/cache"
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
+import { CACHE_TAG } from "@/lib/config/app_config"
 
 export interface SimpliBrand {
   id: string
@@ -26,10 +27,6 @@ interface FilterOptions {
 // دالة الكاش الداخلية تستقبل بارامترات مفردة (Primitives) لضمان استقرار مفتاح الكاش وثباته
 export const getCachedBrandByFilter = unstable_cache(
   async (brandId?: string, brandSlug?: string): Promise<SimpliBrand | null> => {
-
-
-
-    
     const supabase = await createServerClient()
 
     let query = supabase.from("brands").select(
@@ -59,10 +56,11 @@ export const getCachedBrandByFilter = unstable_cache(
 
     return (data as SimpliBrand) || null
   },
-  ["brand-by-filter-cache"],
+
+  ["brands"],
   {
     revalidate: 3600,
-    tags: ["brands"],
+    tags: [CACHE_TAG.BRANDS],
   }
 )
 
@@ -84,7 +82,8 @@ export async function getBrandByFilter(
 
     return { success: true, data: brand }
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown database error"
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown database error"
 
     return {
       success: false,

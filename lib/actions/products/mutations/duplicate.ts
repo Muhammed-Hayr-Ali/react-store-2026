@@ -6,28 +6,29 @@
  * Generates unique slugs and SKUs for the new copy and correctly remaps image-to-variant relationships.
  */
 
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
- import type { ProductVariantItem, ProductImageItem } from "../types"
+import type { ProductVariantItem, ProductImageItem } from "../types"
+import { CACHE_TAG } from "@/lib/config/app_config"
 
 export type DuplicateProductResult =
-  | { success: true }
-  | { success: false; error: string }
+  { success: true } | { success: false; error: string }
 
 export async function duplicateProduct(
   productId: string
 ): Promise<DuplicateProductResult> {
   try {
- 
     const supabase = await createServerClient()
 
     const { data: originalProduct, error: fetchError } = await supabase
       .from("products")
-      .select(`
+      .select(
+        `
         *,
         product_variants(*),
         product_images(*)
-      `)
+      `
+      )
       .eq("id", productId)
       .single()
 
@@ -60,7 +61,8 @@ export async function duplicateProduct(
     }
 
     const skuMapping: Record<string, string> = {}
-    const typedVariants = originalProduct.product_variants as ProductVariantItem[] | undefined
+    const typedVariants = originalProduct.product_variants as
+      ProductVariantItem[] | undefined
 
     if (typedVariants && typedVariants.length > 0) {
       const variantsToInsert = typedVariants.map((variant) => {
@@ -93,7 +95,8 @@ export async function duplicateProduct(
       }
     }
 
-    const typedImages = originalProduct.product_images as ProductImageItem[] | undefined
+    const typedImages = originalProduct.product_images as
+      ProductImageItem[] | undefined
 
     if (typedImages && typedImages.length > 0) {
       const imagesToInsert = typedImages.map((img) => {
@@ -116,8 +119,8 @@ export async function duplicateProduct(
       }
     }
 
-    revalidatePath("/dashboard/products")
-    revalidatePath(`/products/${newProduct.slug}`)
+    revalidateTag(CACHE_TAG.PRODUCTS, { expire: 0 })
+    revalidatePath("/", "layout")
 
     return { success: true }
   } catch (error) {

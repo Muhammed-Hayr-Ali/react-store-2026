@@ -8,7 +8,8 @@
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { createProductSchema, type CreateProductInput } from "../schemas"
-import { revalidateTag } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
+import { CACHE_TAG } from "@/lib/config/app_config"
 
 export type CreateProductResult =
   { success: true } | { success: false; error: string }
@@ -88,8 +89,10 @@ export async function createProduct(
       return { success: false, error: "CREATE_IMAGES_FAILED" }
     }
 
-    revalidateTag("products", { expire: 0 })
 
+  revalidateTag(CACHE_TAG.PRODUCTS, { expire: 0 })
+  revalidatePath("/", "layout")
+  
     return { success: true }
   } catch (error) {
     console.error("[createProduct] Unexpected error:", error)
