@@ -101,19 +101,20 @@ export default function CategoriesScroll({
 
               return (
                 <CarouselItem key={category.slug} className="basis-auto p-0">
-                  <button
+                  <Button
                     type="button"
                     aria-pressed={isActive}
                     onClick={() => handleOnSelect(category.slug, category.id)}
                     className={cn(
-                      "group flex shrink-0 items-center gap-2.5 rounded-xl px-3.5 py-3.5 text-xs font-medium transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none sm:px-4 sm:py-2.5 sm:text-sm",
+                      // "group flex shrink-0 items-center gap-2.5 rounded-xl px-3.5 py-3.5 text-xs font-medium transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none sm:px-4 sm:py-2.5 sm:text-sm",
+                      "h-10 px-4",
                       isActive
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted/50 text-foreground hover:bg-muted"
+                        ? "bg-primary text-primary-foreground  border border-primary"
+                        : "bg-muted/50 text-foreground hover:bg-muted border border-input"
                     )}
                   >
                     {/* أيقونة أو صورة التصنيف */}
-                    <div className="hidden size-7 shrink-0 items-center justify-center rounded-lg bg-background text-muted-foreground transition-transform duration-200 group-hover:scale-105 sm:size-8 lg:flex">
+                    <div className="shrink-0 sm:size-8 hidden size-7 lg:flex">
                       {imageUrl ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
                         <img
@@ -128,7 +129,7 @@ export default function CategoriesScroll({
                     </div>
 
                     <span className="whitespace-nowrap">{displayName}</span>
-                  </button>
+                  </Button>
                 </CarouselItem>
               )
             })}

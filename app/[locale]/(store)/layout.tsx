@@ -19,7 +19,7 @@ export default async function StoreLayout({ children }: StoreLayoutProps) {
       {/* 1. Navbar is sticky at the top */}
       <Navbar />
       {/* 2. Main content area */}
-      <main className="w-full flex-1 space-y-6 pt-2 pb-24 md:space-y-8 md:py-6 lg:py-8">
+      <main className="w-full flex-1 space-y-5 pt-2 pb-24 md:space-y-8 md:py-6 lg:py-8">
         {children}
       </main>
       {/* 3. Storefront Footer */}

@@ -35,11 +35,11 @@ function SlideItem({
     <div className="relative min-w-0 flex-[0_0_95%] px-2.5 transition-opacity duration-300">
       <Link
         href={`/${locale}/product/${slide.slug}`}
-        className="relative block w-full overflow-hidden rounded-sm bg-muted/40 sm:rounded-xl"
+        className="relative block w-full "
       >
         <AspectRatio
           ratio={21 / 9}
-          className="flex w-full items-center justify-center overflow-hidden"
+          className="flex w-full items-center justify-center"
         >
           {slide.imageUrl && !imageError ? (
             <img
@@ -47,10 +47,10 @@ function SlideItem({
               alt={slide.imageAlt || slide.name}
               loading="lazy"
               onError={() => setImageError(true)}
-              className="size-full border-0 object-cover object-center transition-transform duration-500 hover:scale-[1.01]"
+              className="object-contain object-center transition-transform duration-500 hover:scale-[1.01]  overflow-hidden rounded-lg sm:rounded-xl"
             />
           ) : (
-            <div className="flex size-full flex-col items-center justify-center gap-2 bg-muted/50 text-muted-foreground/60">
+            <div className="flex size-full flex-col items-center justify-center gap-2 bg-muted overflow-hidden rounded-xl sm:rounded-xl text-muted-foreground/60">
               <ImageIcon className="size-10 stroke-[1.5] sm:size-12" />
               <span className="text-xs font-medium">{slide.name}</span>
             </div>
@@ -170,7 +170,7 @@ export default function FeaturedHeroSlider({
 
         {/* مؤشرات التمرير السفلية فوق الصورة (اللون الأساسي للنقطة المحددة) */}
         {slides.length > 1 && (
-          <div className="absolute inset-x-0 bottom-3 z-20 flex items-center justify-center gap-1 sm:gap-1.5 pointer-events-none">
+          <div className="pointer-events-none absolute inset-x-0 bottom-3 z-20 flex items-center justify-center gap-1 sm:gap-1.5">
             {scrollSnaps.map((_, index) => (
               <button
                 key={index}
