@@ -8,22 +8,25 @@
 
 import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
- import { updateProductSchema, type UpdateProductInput } from "../schemas"
+import { updateProductSchema, type UpdateProductInput } from "../schemas"
 
 export type UpdateProductResult =
   | { success: true }
-  | { 
+  | {
       success: false
       error: string
       details?: Record<string, string[] | undefined>
     }
 
-function logDatabaseError(stage: string, error: {
-  code?: string
-  message: string
-  details?: string | null
-  hint?: string | null
-}) {
+function logDatabaseError(
+  stage: string,
+  error: {
+    code?: string
+    message: string
+    details?: string | null
+    hint?: string | null
+  }
+) {
   console.error(`[updateProduct] ${stage} failed`, {
     code: error.code,
     message: error.message,
@@ -36,7 +39,6 @@ export async function updateProduct(
   input: UpdateProductInput
 ): Promise<UpdateProductResult> {
   try {
- 
     const validation = updateProductSchema.safeParse(input)
     if (!validation.success) {
       return {
@@ -130,7 +132,10 @@ export async function updateProduct(
       return { success: false, error: "UPDATE_IMAGES_FAILED" }
     }
 
-    revalidatePath("/")
+    revalidatePath("/[locale]/product/[id]", "page")
+    // أو إعادة تحديث الصفحة الرئيسية إن كان البنر/المنتج يظهر هناك
+    revalidatePath("/", "page")
+    revalidatePath("/product/[slug]", "page")
 
     console.info("[updateProduct] Product updated", {
       productId: id,
