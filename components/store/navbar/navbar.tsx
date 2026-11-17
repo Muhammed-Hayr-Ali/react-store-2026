@@ -41,7 +41,7 @@ function MobileBar() {
   const { totalItemsCount, isPending } = useCart()
 
   return (
-    <nav className="sticky top-0 z-50 flex h-14 w-full shrink-0 items-center justify-between border-b border-border/40 bg-background/80 px-4 backdrop-blur-md transition-colors md:hidden">
+    <nav className="sticky top-0 z-50 flex h-14 w-full shrink-0 items-center justify-between  bg-background/80 px-4 backdrop-blur-md transition-colors md:hidden">
       {/* Brand Logo */}
       <Link href="/" className="flex items-center">
         <AppLogo className="size-6" />

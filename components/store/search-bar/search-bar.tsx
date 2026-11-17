@@ -51,34 +51,11 @@ export default function SearchBar({ onOpenFilters }: SearchBarProps) {
         autoComplete="off"
         aria-label="Search for products"
         placeholder={t("search_placeholder")}
-        className="h-11 min-w-0 flex-1 text-base sm:text-sm"
-        prefixIcon={
+        className="h-11 min-w-0 flex-1 border-none bg-input text-base sm:text-sm"
+        suffixIcon={
           <SearchIcon aria-hidden className="size-5 text-muted-foreground" />
         }
-        suffixIcon={
-          <button
-            type="button"
-            aria-label="Voice search"
-            className="focus:outline-hidden hover:text-foreground transition-colors"
-            onClick={() => {
-              // يمكنك إضافة منطق البحث الصوتي هنا مستقبلاً
-              console.log("Voice search clicked")
-            }}
-          >
-            <MicIcon aria-hidden className="size-5 text-muted-foreground hover:text-primary" />
-          </button>
-        }
       />
-      <Button
-        type="button"
-        variant="outline"
-        size="icon"
-        aria-label="Filter products"
-        onClick={onOpenFilters}
-        className="size-11 shrink-0"
-      >
-        <SlidersVerticalIcon aria-hidden className="size-5" />
-      </Button>
     </form>
   )
 }
