@@ -6,7 +6,7 @@
 
 "use server"
 
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { updateProductSchema, type UpdateProductInput } from "../schemas"
 
@@ -132,8 +132,8 @@ export async function updateProduct(
       return { success: false, error: "UPDATE_IMAGES_FAILED" }
     }
 
-    revalidatePath("/", "page")
-    revalidatePath("/product/[slug]", "page")
+    
+    revalidateTag("products", { expire: 0 })
 
     console.info("[updateProduct] Product updated", {
       productId: id,

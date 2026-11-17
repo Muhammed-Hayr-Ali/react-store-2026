@@ -6,9 +6,9 @@
  * Ensures atomicity (All-or-Nothing) using cascading rollbacks if any step fails.
  */
 
-import { revalidatePath } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { createProductSchema, type CreateProductInput } from "../schemas"
+import { revalidateTag } from "next/cache"
 
 export type CreateProductResult =
   { success: true } | { success: false; error: string }
@@ -88,10 +88,7 @@ export async function createProduct(
       return { success: false, error: "CREATE_IMAGES_FAILED" }
     }
 
-
-
-    revalidatePath("/", "page")
-    revalidatePath("/product/[slug]", "page")
+    revalidateTag("products", { expire: 0 })
 
     return { success: true }
   } catch (error) {

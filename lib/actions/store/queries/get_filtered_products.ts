@@ -231,7 +231,7 @@ const getCachedFilteredProducts = unstable_cache(
       }
     })
   },
-  ["filtered-products-cache"],
+  ["products"],
   {
     revalidate: 1800, // إعادة التحقق كل نصف ساعة مثلاً
     tags: ["products"], // لتحديث الكاش تلقائياً عبر revalidateTag عند التعديل
