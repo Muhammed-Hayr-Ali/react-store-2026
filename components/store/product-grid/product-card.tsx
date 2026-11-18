@@ -258,7 +258,7 @@ export function ProductCard({
   return (
     <Link
       href={`/product/${product.slug}`}
-      className="group/card flex flex-col overflow-hidden rounded-xl bg-muted/50 px-0.5 pb-1.5 transition-all duration-300 hover:bg-muted/40"
+      className="group/card flex flex-col overflow-hidden px-0.5 pb-1.5 transition-all duration-300 hover:bg-muted/40"
     >
       {/* Image Container */}
       <div className="relative aspect-square w-full overflow-hidden bg-muted rounded-xl">

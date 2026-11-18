@@ -5,7 +5,7 @@
 
 import type { Metadata, Viewport } from "next"
 import { notFound } from "next/navigation"
-import { Geist } from "next/font/google"
+import { Rubik } from "next/font/google"
 import { NextIntlClientProvider, hasLocale } from "next-intl"
 
 import "../globals.css"
@@ -22,7 +22,6 @@ import { UserProvider } from "@/lib/context/user-context"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 import { cookies } from "next/headers"
 import { COOKIES_KEYS } from "@/lib/config/app_config"
-import localFont from "next/font/local"
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { CurrencyProvider } from "@/lib/context/currency-context"
@@ -32,18 +31,11 @@ import { getWishlistProductIds } from "@/lib/actions/wishlists"
 import { getCart } from "@/lib/actions/cart"
 import type { AppLocale } from "@/i18n/routing"
 
-const googleSans = localFont({
-  src: [
-    {
-      path: "../fonts/GoogleSans-VariableFont_GRAD,opsz,wght.ttf",
-      style: "normal",
-    },
-    {
-      path: "../fonts/GoogleSans-Italic-VariableFont_GRAD,opsz,wght.ttf",
-      style: "italic",
-    },
-  ],
-  variable: "--font-google-sans",
+const rubik = Rubik({
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  variable: "--font-rubik",
 })
 
 export const viewport: Viewport = {
@@ -110,11 +102,8 @@ export default async function RootLayout({
       suppressHydrationWarning
       className={cn(
         "antialiased",
-        googleSans.className,
-        // googleSans.variable,
-        // "googleSans.className",
-        // geistSans.variable,
-        // geistMono.variable,
+        rubik.variable,
+
         isDark && "dark"
       )}
     >
