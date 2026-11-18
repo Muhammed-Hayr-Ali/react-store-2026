@@ -5,7 +5,9 @@ import {
   SearchIcon,
   FavoriteIcon,
   ProfileIcon,
-} from "@/components/store/bottom-navigation-bar/bottom-navbar-icons" // استبدل المسار بمكان ملف الأيقونات الخاص بك
+  ExploreIcon,
+  CartIcon,
+} from "@/components/shared/icons" // استبدل المسار بمكان ملف الأيقونات الخاص بك
 
 // 1. تحديث شكل الأيقونة لتتوافق مع مكوناتنا المخصصة (تستقبل status كـ boolean وتعود بـ JSX.Element أو ElementType)
 export interface BottomNavigationBar {
@@ -28,17 +30,24 @@ export const BOTTOM_NAV_BAR: BottomNavigationBar[] = [
     icon: HomeIcon,
   },
   {
-    key: "search",
-    label: "SEARCH",
-    url: APP_ROUTES.SEARCH,
-    icon: SearchIcon,
+    key: "explore",
+    label: "EXPLORE",
+    url: APP_ROUTES.EXPLORE,
+    icon: ExploreIcon,
   },
   {
     key: "wishlist",
     label: "WISHLIST",
     url: APP_ROUTES.WISHLIST,
-    icon: FavoriteIcon, 
+    icon: FavoriteIcon,
   },
+  {
+    key: "cart",
+    label: "CART",
+    url: APP_ROUTES.CART,
+    icon: CartIcon,
+  },
+
   {
     key: "account",
     label: "ACCOUNT",

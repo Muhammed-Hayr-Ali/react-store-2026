@@ -3,11 +3,12 @@
 import React, { createContext, useContext, useMemo } from "react"
 import { CurrentUser } from "../actions/users/queries/get-current-user"
 
-
 export type FormattedUser = {
   id: string
   name: string
-  email: string
+  initials: string // أول حرفين من اسم المستخدم
+  email: string    // البريد الإلكتروني كاملاً (مثال: m.thelord963@gmail.com)
+  username: string // البريد بصيغة @username (مثال: @m.thelord963)
   avatar: string
   role: string
 }
@@ -38,10 +39,25 @@ export function UserProvider({
       rawUser.email?.split("@")[0] ||
       "User"
 
+    // استخراج أول حرفين من الاسم
+    const initials = name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase()
+
+    // البريد الإلكتروني كاملاً والصيغة المختصرة
+    const email = rawUser.email || "you@domain.com"
+    const usernamePart = email.split("@")[0]
+    const username = `@${usernamePart}`
+
     return {
       id: rawUser.id,
       name,
-      email: rawUser.email || "you@domain.com",
+      initials,
+      email,
+      username,
       avatar: rawUser.avatar || "images/user.png",
       role: rawUser.role,
     }
@@ -66,6 +82,15 @@ export function UserProvider({
   )
 }
 
+/**
+ * Hook للوصول إلى بيانات المستخدم الحالي وصلاحياته.
+ * 
+ * @returns {UserContextType} يعيد الكائن التالي:
+ * - `rawUser`: بيانات المستخدم الخام القادمة من قاعدة البيانات.
+ * - `user`: بيانات المستخدم منسقة (الاسم، أول الحرفين `initials`، البريد الكامل `email`، صيغة `@username` عبر `username`، الصورة، والدور).
+ * - `permissions`: قائمة الصلاحيات الخاصة بالمستخدم.
+ * - `hasPermission(permission)`: دالة لفحص ما إذا كان المستخدم يملك صلاحية معينة.
+ */
 export function useUser() {
   const context = useContext(UserContext)
   if (!context) {

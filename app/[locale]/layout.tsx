@@ -5,7 +5,7 @@
 
 import type { Metadata, Viewport } from "next"
 import { notFound } from "next/navigation"
-import { Geist, Geist_Mono } from "next/font/google"
+import { Geist, Geist_Mono, Rubik } from "next/font/google"
 import { NextIntlClientProvider, hasLocale } from "next-intl"
 
 import "../globals.css"
@@ -40,6 +40,10 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
+  display: "swap",
+})
+
+const rubik = Rubik({
   display: "swap",
 })
 
@@ -107,9 +111,10 @@ export default async function RootLayout({
       suppressHydrationWarning
       className={cn(
         "antialiased",
-        geistSans.variable,
-        geistMono.variable,
-        isDark && "dark"
+        // geistSans.variable,
+        // geistMono.variable,
+        isDark && "dark",
+        "rubik.className"
       )}
     >
       <body>

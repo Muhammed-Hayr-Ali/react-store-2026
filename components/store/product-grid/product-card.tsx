@@ -136,7 +136,7 @@ function AddToCartButton({
       onClick={handleAddToCart}
     >
       {isLoading && (
-        <Loader2Icon className="absolute stroke-1 size-6 animate-spin text-primary" />
+        <Loader2Icon className="absolute size-6 animate-spin stroke-1 text-primary" />
       )}
       <PlusIcon />
     </Button>
@@ -258,27 +258,22 @@ export function ProductCard({
   return (
     <Link
       href={`/product/${product.slug}`}
-      className="group/card flex flex-col overflow-hidden rounded-t-2xl transition-all duration-300 hover:bg-muted/40"
+      className="group/card flex flex-col overflow-hidden rounded-xl bg-muted px-0.5 pb-1.5 transition-all duration-300 hover:bg-muted/40"
     >
       {/* Image Container */}
-      <div className="relative aspect-square w-full overflow-hidden  rounded-br-xl bg-muted">
-        <AspectRatio
-          ratio={1 / 1}
-          className="flex w-full items-center justify-center"
-        >
-          {product.imageUrl ? (
-            <img
-              src={product.imageUrl}
-              alt={product.imageAlt || product.name}
-              className="size-full object-cover object-center transition-transform duration-500 group-hover/card:scale-105"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-[11px] text-muted-foreground">
-              No image
-            </div>
-          )}
-        </AspectRatio>
+      <div className="relative aspect-square w-full overflow-hidden rounded-xl">
+        {product.imageUrl ? (
+          <img
+            src={product.imageUrl}
+            alt={product.imageAlt || product.name}
+            className="size-full object-cover object-center transition-transform duration-500 group-hover/card:scale-105"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-[11px] text-muted-foreground">
+            No image
+          </div>
+        )}
 
         {/* Discount Badge */}
         {discountPercentage && (
@@ -320,7 +315,7 @@ export function ProductCard({
         <div className="flex items-center justify-between">
           <div className="flex items-baseline gap-1.5">
             {/* السعر الحالي */}
-            <span className="text-xs font-semibold text-foreground sm:text-sm">
+            <span className="text-sm font-semibold text-foreground sm:text-sm">
               {product.price !== null ? formatRawPrice(product.price) : "—"}{" "}
               {currentCurrency.symbol}
             </span>

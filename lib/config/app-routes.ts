@@ -5,6 +5,7 @@
 
 export const APP_ROUTES = {
   HOME: "/",
+  EXPLORE: "/explore",
   SEARCH: "/search",
   WISHLIST: "/wishlist",
   CART: "/cart",

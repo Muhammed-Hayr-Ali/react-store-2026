@@ -36,7 +36,7 @@ export default function BottomNavigationBar() {
   return (
     <nav
       aria-label={NAV_LABELS[locale] ?? NAV_LABELS.en}
-      className="fixed inset-x-0 bottom-0 z-50 w-full shrink-0 border-t border-border/40 bg-background/90 backdrop-blur-md pb-[env(safe-area-inset-bottom)] md:hidden shadow-lg"
+      className="fixed inset-x-0 bottom-0 z-50 w-full shrink-0 border-t border-border/40 bg-background pb-[env(safe-area-inset-bottom)] shadow-lg md:hidden"
     >
       <div className="mx-auto max-w-6xl px-4">
         <div className="flex h-14 items-stretch">
@@ -57,7 +57,7 @@ export default function BottomNavigationBar() {
                 href={href}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "relative flex h-full flex-1  touch-manipulation flex-col items-center justify-center gap-1 text-xs font-medium select-none active:scale-95 transition-colors",
+                  "relative flex h-full flex-1 touch-manipulation flex-col items-center justify-center gap-1 text-xs font-medium transition-colors select-none active:scale-95",
                   isActive
                     ? "font-semibold text-primary"
                     : "text-muted-foreground hover:text-primary"
@@ -71,13 +71,9 @@ export default function BottomNavigationBar() {
                     isActive ? "scale-x-100 opacity-100" : "scale-x-0 opacity-0"
                   )}
                 />
-                
+
                 {/* تمرير الـ status كـ boolean لتغيير لون وشكل الأيقونة تلقائياً */}
-                <IconComponent
-                  aria-hidden
-                  status={isActive}
-                  size="sm"
-                />
+                <IconComponent aria-hidden status={isActive} size="xs" />
 
                 <span>
                   {t(item.label, {

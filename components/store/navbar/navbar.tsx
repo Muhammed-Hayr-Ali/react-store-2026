@@ -9,12 +9,12 @@ import Link from "next/link"
 import { AppLogo } from "@/components/ui/app-logo"
 import { Button } from "@/components/ui/button"
 import DesktopNavbar from "./desktop-navbar"
-import { CartIcon } from "../bottom-navigation-bar/bottom-navbar-icons"
 import { useCart } from "@/lib/context/cart-context"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
-import { Skeleton } from "@/components/ui/skeleton"
 import { ShoppingCartIcon } from "lucide-react"
+import { NotificationIcon } from "@/components/shared/icons"
+import { useUser } from "@/lib/context/user-context"
 
 export default function Navbar() {
   return (
@@ -39,7 +39,7 @@ function DesktopBar() {
 }
 
 function MobileBar() {
-  const { totalItemsCount, isPending } = useCart()
+  const { user, rawUser } = useUser()
 
   return (
     <nav className="sticky top-0 z-50 flex h-14 w-full shrink-0 items-center justify-between bg-background/80 px-4 backdrop-blur-md transition-colors md:hidden">
@@ -50,26 +50,14 @@ function MobileBar() {
 
       {/* Action Button */}
       <Button
-        variant="outline"
+        variant="secondary"
         size="icon"
         className="relative rounded-full"
 
         aria-label="Notifications"
       >
-        <ShoppingCartIcon />
-        {isPending && <Spinner className="absolute size-9 stroke-[0.5px]" />}
-
-        {totalItemsCount > 0 && (
-          <div
-            aria-hidden
-            className={cn(
-              "absolute -top-1 -right-1 flex h-3.5 items-center justify-center rounded-full bg-foreground text-[9px] font-normal text-background transition-all duration-500 ease-in-out",
-              isPending || totalItemsCount < 99 ? "w-3.5" : "w-5.5"
-            )}
-          >
-            {totalItemsCount > 99 ? "99+" : totalItemsCount}
-          </div>
-        )}
+        <div className="absolute -top-0.5 -right-0.5 size-3 rounded-full border-2 border-background bg-red-600" />
+        <NotificationIcon className="size-4 text-foreground" />
       </Button>
     </nav>
   )
