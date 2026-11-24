@@ -28,6 +28,30 @@ const updateMobileProfileSchema = z.object({
 const PROFILE_COLUMNS =
   "id, first_name, last_name, email, phone, avatar, gender, email_verified, phone_verified"
 
+function mapRowToProfileData(row: {
+  id: string
+  first_name: string | null
+  last_name: string | null
+  email: string | null
+  phone: string | null
+  avatar: string | null
+  gender: string | null
+  email_verified: boolean | null
+  phone_verified: boolean | null
+}): MobileProfileData {
+  return {
+    id: row.id,
+    first_name: row.first_name,
+    last_name: row.last_name,
+    email: row.email,
+    phone: row.phone,
+    avatar: row.avatar,
+    gender: row.gender as MobileProfileData["gender"],
+    email_verified: Boolean(row.email_verified),
+    phone_verified: Boolean(row.phone_verified),
+  }
+}
+
 /**
  * يستخرج معرّف المستخدم الحالي من Access Token القادم من تطبيق Flutter.
  */
@@ -44,6 +68,33 @@ async function resolveUserIdFromToken(
   }
 
   return data.user.id
+}
+
+/**
+ * يزامن بيانات الاسم والصورة الرمزية مع user_metadata في auth.users (Raw JSON).
+ */
+async function syncAuthUserMetadata(
+  supabaseAdmin: ReturnType<typeof createAdminClient>,
+  userId: string,
+  profile: MobileProfileData
+): Promise<void> {
+  const fullName = [profile.first_name, profile.last_name]
+    .filter((part): part is string => Boolean(part && part.trim()))
+    .join(" ")
+
+  const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+    user_metadata: {
+      first_name: profile.first_name,
+      last_name: profile.last_name,
+      full_name: fullName || null,
+      avatar_url: profile.avatar,
+    },
+  })
+
+  if (error) {
+    // لا نُفشل عملية تحديث البروفايل بسبب مزامنة metadata، بل نسجل التنبيه فقط
+    console.warn("[syncAuthUserMetadata] failed:", error.message)
+  }
 }
 
 /**
@@ -75,17 +126,7 @@ export async function getMobileProfile(
 
     return {
       success: true,
-      data: {
-        id: data.id,
-        first_name: data.first_name,
-        last_name: data.last_name,
-        email: data.email,
-        phone: data.phone,
-        avatar: data.avatar,
-        gender: data.gender as MobileProfileData["gender"],
-        email_verified: Boolean(data.email_verified),
-        phone_verified: Boolean(data.phone_verified),
-      },
+      data: mapRowToProfileData(data),
     }
   } catch (error) {
     return {
@@ -99,7 +140,7 @@ export async function getMobileProfile(
 }
 
 /**
- * تحديث بيانات الملف الشخصي في جدول public.profiles.
+ * تحديث بيانات الملف الشخصي في جدول public.profiles ومزامنة user_metadata في auth.users.
  */
 export async function updateMobileProfile(
   accessToken: string,
@@ -148,7 +189,6 @@ export async function updateMobileProfile(
       .single()
 
     if (error || !data) {
-      // معالجة تكرار رقم الهاتف (عمود phone يحمل قيد UNIQUE)
       if (error?.code === "23505") {
         return {
           success: false,
@@ -163,19 +203,12 @@ export async function updateMobileProfile(
       }
     }
 
+    const updatedProfile = mapRowToProfileData(data)
+    await syncAuthUserMetadata(supabaseAdmin, userId, updatedProfile)
+
     return {
       success: true,
-      data: {
-        id: data.id,
-        first_name: data.first_name,
-        last_name: data.last_name,
-        email: data.email,
-        phone: data.phone,
-        avatar: data.avatar,
-        gender: data.gender as MobileProfileData["gender"],
-        email_verified: Boolean(data.email_verified),
-        phone_verified: Boolean(data.phone_verified),
-      },
+      data: updatedProfile,
     }
   } catch (error) {
     return {
