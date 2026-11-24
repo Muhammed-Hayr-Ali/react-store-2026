@@ -5,7 +5,7 @@ import { NextResponse } from "next/server"
 export async function GET() {
   try {
     const result = await getFilteredProducts({
-      activeOnly: false,
+      activeOnly: true,
       categoryId: undefined,
       categorySlug: undefined,
       is_featured: true,

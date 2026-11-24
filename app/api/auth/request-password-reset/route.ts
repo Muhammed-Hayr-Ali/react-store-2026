@@ -1,0 +1,30 @@
+import { NextRequest, NextResponse } from "next/server"
+
+import { requestPasswordReset } from "@/lib/actions/authentication/mutations/request-password-reset"
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json()
+    const result = await requestPasswordReset(body)
+
+    if (!result.success) {
+      const status = result.error === "VALIDATION_ERROR" ? 400 : 500
+      return NextResponse.json(result, { status })
+    }
+
+    return NextResponse.json(result, { status: 200 })
+  } catch (error) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: "INVALID_REQUEST_BODY",
+        details: {
+          request: [
+            error instanceof Error ? error.message : "Invalid JSON payload",
+          ],
+        },
+      },
+      { status: 400 }
+    )
+  }
+}

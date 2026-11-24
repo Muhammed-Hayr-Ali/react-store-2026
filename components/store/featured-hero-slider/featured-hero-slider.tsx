@@ -32,7 +32,8 @@ function SlideItem({
   const [imageError, setImageError] = React.useState(false)
 
   return (
-    <div className="relative min-w-0 flex-[0_0_95%] px-2.5 transition-opacity duration-300">
+    //  px-4 sm:px-6 lg:px-8
+    <div className="relative min-w-0 flex-[0_0_95%] px-2.5 transition-opacity duration-300 mx-auto max-w-6xl">
       <Link
         href={`/${locale}/product/${slide.slug}`}
         className="relative block w-full "

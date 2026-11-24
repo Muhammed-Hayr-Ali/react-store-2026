@@ -261,7 +261,7 @@ export function ProductCard({
       className="group/card flex flex-col overflow-hidden px-0.5 pb-1.5 transition-all duration-300 hover:bg-muted/40"
     >
       {/* Image Container */}
-      <div className="relative aspect-square w-full overflow-hidden bg-muted rounded-xl">
+      <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted">
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
@@ -292,7 +292,7 @@ export function ProductCard({
               {product.name}
             </h3>
             {product.reviewCount > 0 && (
-              <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <StarIcon className="size-3 fill-amber-500 text-amber-500" />
                 <span className="font-medium text-foreground">
                   {product.rating.toFixed(1)}
@@ -316,8 +316,8 @@ export function ProductCard({
           <div className="flex items-baseline gap-1.5">
             {/* السعر الحالي */}
             <span className="text-sm font-semibold text-foreground sm:text-sm">
-              {product.price !== null ? formatRawPrice(product.price) : "—"}{" "}
               {currentCurrency.symbol}
+              {product.price !== null ? formatRawPrice(product.price) : "—"}
             </span>
 
             {/* السعر القديم */}
