@@ -6,11 +6,12 @@
 "use client"
 
 import Link from "next/link"
-import { AppLogo } from "@/components/ui/app-logo"
+import { AppLogo } from "@/components/shared/app-logo"
 import { Button } from "@/components/ui/button"
 import DesktopNavbar from "./desktop-navbar"
-import { NotificationIcon } from "@/components/shared/icons"
-import { useUser } from "@/lib/context/user-context"
+import { CartIcon } from "@/components/shared/icons"
+import { useCart } from "@/lib/context/cart-context"
+import { cn } from "@/lib/utils"
 
 export default function Navbar() {
   return (
@@ -35,7 +36,7 @@ function DesktopBar() {
 }
 
 function MobileBar() {
-  const { user, rawUser } = useUser()
+  const { totalItemsCount } = useCart()
 
   return (
     <nav className="sticky top-0 z-50 flex h-14 w-full shrink-0 items-center justify-between bg-background/80 px-4 backdrop-blur-md transition-colors md:hidden">
@@ -52,8 +53,15 @@ function MobileBar() {
 
         aria-label="Notifications"
       >
-        <div className="absolute -top-0.5 -right-0.5 size-3 rounded-full border-2 border-background bg-red-600" />
-        <NotificationIcon className="size-4 text-foreground" />
+        <div
+          className={cn(
+            "absolute -top-1.5 -right-1.5 flex items-center justify-center rounded-full border-2 border-background bg-red-600 text-[9px] text-white",
+            totalItemsCount > 99 ? "h-4.5 w-5.5" : "size-4"
+          )}
+        >
+          <span className="translate-y-[0.5px]">{totalItemsCount}</span>
+        </div>
+        <CartIcon className="size-4 text-foreground" />
       </Button>
     </nav>
   )

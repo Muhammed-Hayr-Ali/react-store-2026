@@ -3,7 +3,7 @@
 import React, { useState } from "react"
 import Link from "next/link"
 
-import MenuButton from "@/components/ui/menu_button"
+import MenuButton from "@/components/shared/menu_button"
 import {
   MobileMenu as MenuDrawer,
   MobileMenuBody,

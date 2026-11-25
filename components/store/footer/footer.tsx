@@ -10,7 +10,7 @@ import Link from "next/link"
 import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
-import { AppLogo } from "@/components/ui/app-logo"
+import { AppLogo } from "@/components/shared/app-logo"
 import { APP_CONFIG } from "@/lib/config/app_config"
 
 import { footerConfig } from "./footer-config"
@@ -110,7 +110,7 @@ export default function Footer() {
               {t("rights_reserved")}
             </p>
             <div className="flex items-center gap-2">
-              <ThemeToggle/>
+              <ThemeToggle />
             </div>
           </div>
         </div>

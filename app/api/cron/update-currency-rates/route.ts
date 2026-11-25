@@ -10,6 +10,7 @@ const CURRENCY_METADATA: Record<
   string,
   { name: string; name_ar: string; symbol: string }
 > = {
+  SYP: { name: "Syrian Pound", name_ar: "ليرة سورية", symbol: "ل.س" },
   USD: { name: "US Dollar", name_ar: "دولار أمريكي", symbol: "$" },
   EUR: { name: "Euro", name_ar: "يورو", symbol: "€" },
   SAR: { name: "Saudi Riyal", name_ar: "ريال سعودي", symbol: "ر.س" },
@@ -20,7 +21,6 @@ const CURRENCY_METADATA: Record<
   TRY: { name: "Turkish Lira", name_ar: "ليرة تركية", symbol: "₺" },
   EGP: { name: "Egyptian Pound", name_ar: "جنيه مصري", symbol: "ج.م" },
   IQD: { name: "Iraqi Dinar", name_ar: "دينار عراقي", symbol: "د.ع" },
-  SYP: { name: "Syrian Pound", name_ar: "ليرة سورية", symbol: "ل.س" },
 } as const
 
 interface ExchangeRateResponse {

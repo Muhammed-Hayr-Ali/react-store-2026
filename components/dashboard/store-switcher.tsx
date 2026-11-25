@@ -8,11 +8,10 @@ import {
   SidebarMenuButton,
   useSidebar,
 } from "@/components/ui/sidebar"
-import {
-} from "@/components/ui/tooltip"
+import {} from "@/components/ui/tooltip"
 import { Button } from "@/components/ui/button"
 import { APP_NAME } from "@/lib/config/app_config"
-import { AppLogo } from "../ui/app-logo"
+import { AppLogo } from "../shared/app-logo"
 import { XIcon } from "lucide-react"
 
 export function StoreSwitcher() {

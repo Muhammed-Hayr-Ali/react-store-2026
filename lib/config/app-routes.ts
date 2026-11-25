@@ -8,12 +8,17 @@ export const APP_ROUTES = {
   EXPLORE: "/explore",
   SEARCH: "/search",
   WISHLIST: "/wishlist",
-  CART: "/cart",
+  CART: "/shop-cart",
   ACCOUNT: "/account",
   TERMS: "/terms",
   PRIVACY: "/privacy",
   NEWSLETTER_UNSUBSCRIBE: "/unsubscribe",
   CATEGORIES: "/categories",
+  COLLECTIONS: {
+    NEWEST: "/explore?sort=newest",
+    FEATURED: "/explore?featured=true",
+    OFFERS: "/explore?offers=true",
+  },
   AUTH: {
     GET_STARTED: "/auth/signup",
     LOGIN: "/auth/login",

@@ -14,19 +14,20 @@ export default function MenuButton({
 }: MenuButtonProps) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className={cn(
-        "relative flex flex-col items-center justify-center focus:outline-none space-y-1.5",
+        "group relative flex flex-col items-center justify-center space-y-1.5 focus:outline-none",
         className
       )}
-      aria-label={`${isOpen ? "clse menu" : "open menu"}`}
+      aria-label={isOpen ? "close menu" : "open menu"}
     >
       {/* الخط العلوي */}
       <motion.div
-        className="h-[1.5px] w-4 bg-foreground transition-colors hover:bg-muted-foreground"
+        className="h-0.5 w-4 bg-foreground transition-colors group-hover:bg-muted-foreground"
         variants={{
           closed: { rotate: 0, translateY: 0 },
-          open: { rotate: 45, translateY: 3.5 },
+          open: { rotate: 45, translateY: 4 },
         }}
         animate={isOpen ? "open" : "closed"}
         transition={{ duration: 0.3, ease: [0.65, 0, 0.35, 1] }}
@@ -34,10 +35,10 @@ export default function MenuButton({
 
       {/* الخط السفلي */}
       <motion.div
-        className="h-[1.5px] w-4 bg-foreground transition-colors hover:bg-muted-foreground"
+        className="h-0.5 w-4 bg-foreground transition-colors group-hover:bg-muted-foreground"
         variants={{
           closed: { rotate: 0, translateY: 0 },
-          open: { rotate: -45, translateY: -3.5 },
+          open: { rotate: -45, translateY: -4 },
         }}
         animate={isOpen ? "open" : "closed"}
         transition={{ duration: 0.3, ease: [0.65, 0, 0.35, 1] }}

@@ -147,6 +147,28 @@
     "CART_UPDATE_ERROR": "An error occurred while updating the shopping cart.",
     "CART_ADD_ERROR": "Error adding the product to the shopping cart"
   },
+  "StoreHeader": {
+    "menuAriaLabel": "Menu",
+    "searchPlaceholder": "Search for a product...",
+    "account": "Account",
+    "accountMenu": "Account Menu",
+    "signIn": "Sign In",
+    "signUp": "Create Account",
+    "wishlist": "Favorite Products",
+    "cart": "Shopping Cart",
+    "cartAriaLabel": "Shopping Cart",
+    "categories": "Store Categories",
+    "newest": "Newest Arrivals",
+    "featured": "Featured Products",
+    "offers": "Special Offers",
+    "home": "Home",
+    "CONTINUE_WITH_GOOGLE": "Continue with Google",
+    "SIGN_IN_FAILED_FALLBACK": "Failed to initiate Google sign in.",
+    "profile": "Profile",
+    "my_orders": "My Orders",
+    "log_out": "Log Out",
+    "LOGOUT_ERROR": "Could not sign out. Please try again."
+  },
   "AuthLayout": {
     "TERMS_PREFIX": "By continuing, you agree to our",
     "TERMS_OF_SERVICE": "Terms of Service",

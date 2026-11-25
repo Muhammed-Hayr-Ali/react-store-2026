@@ -11,7 +11,7 @@ import { getTranslations } from "next-intl/server"
 
 import { APP_ROUTES } from "@/lib/config/app-routes"
 import { FieldDescription } from "@/components/ui/field"
-import { AppLogo } from "@/components/ui/app-logo"
+import { AppLogo } from "@/components/shared/app-logo"
 
 interface AuthLayoutProps {
   children: React.ReactNode
@@ -28,9 +28,9 @@ export default async function AuthLayout({
   const t = await getTranslations("AuthLayout")
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-between gap-6 bg-muted p-6 md:p-10 pb-0 md:pb-0">
+    <div className="flex min-h-svh flex-col items-center justify-between gap-6 bg-muted p-6 pb-0 md:p-10 md:pb-0">
       <div />
-      
+
       {/* الحاوية الأوسط: تأخذ عرضاً أقصى ثابتاً وتتمركز في المنتصف مع حشوة أفقية للشاشات الصغيرة */}
       <div className="flex w-full max-w-md flex-col items-center justify-center gap-6 px-4 sm:px-0">
         <Link
