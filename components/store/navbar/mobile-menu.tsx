@@ -17,7 +17,6 @@ import { APP_ROUTES } from "@/lib/config/app-routes"
 import { useUser } from "@/lib/context/user-context"
 
 import { UserProfileHeader } from "./user-profile-header"
-import { PreferencesSubNav } from "./preferences-sub-nav"
 import { NavItemsList } from "./nav-items-list"
 import { LogoutAlertDialog } from "@/components/shared/logout-alert"
 import MobileCardDrawer from "../../cart/mobile-cart"
@@ -85,7 +84,6 @@ function MobileMenuDrawer({
 
           <Separator className="my-2" />
 
-          <PreferencesSubNav />
         </MobileMenuBody>
 
         <MobileMenuFooter>
