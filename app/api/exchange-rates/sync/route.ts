@@ -4,13 +4,6 @@ import { createClient } from "@supabase/supabase-js"
 interface CityRatePayload {
   buy: number
   sell: number
-  change?: number
-  prev_close?: number
-  day_high?: number
-  day_low?: number
-  change_week?: number
-  change_month?: number
-  change_year?: number
 }
 
 interface SpTodayCurrencyResponse {
@@ -45,22 +38,40 @@ function getSupabaseAdminClient() {
   })
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    // التحقق الاختياري من سر الاستدعاء إذا تم ضبط EXCHANGE_RATE_CRON_SECRET
-    const cronSecret = process.env.EXCHANGE_RATE_CRON_SECRET
-    if (cronSecret) {
-      const authHeader = request.headers.get("authorization")
-      const headerSecret = request.headers.get("x-cron-secret")
-      const isAuthorized =
-        authHeader === `Bearer ${cronSecret}` || headerSecret === cronSecret
+function isAuthorizedRequest(request: NextRequest): boolean {
+  const expectedSecret =
+    process.env.EXCHANGE_RATE_CRON_SECRET || process.env.CRON_SECRET
 
-      if (!isAuthorized) {
-        return NextResponse.json(
-          { ok: false, error: "Unauthorized" },
-          { status: 401 }
-        )
-      }
+  // إذا لم يُضبط أي سر مطلقاً، يُسمح بالطلب
+  if (!expectedSecret) {
+    return true
+  }
+
+  const authHeader = request.headers.get("authorization")
+  const headerSecret = request.headers.get("x-cron-secret")
+
+  const matchesBearer = authHeader === `Bearer ${expectedSecret}`
+  const matchesHeader = headerSecret === expectedSecret
+
+  if (matchesBearer || matchesHeader) {
+    return true
+  }
+
+  // السماح بالاختبار المباشر من المتصفح فقط أثناء التطوير المحلي
+  if (process.env.NODE_ENV === "development") {
+    return true
+  }
+
+  return false
+}
+
+async function handleSync(request: NextRequest) {
+  try {
+    if (!isAuthorizedRequest(request)) {
+      return NextResponse.json(
+        { ok: false, error: "Unauthorized" },
+        { status: 401 }
+      )
     }
 
     const apiKey = process.env.SP_TODAY_API_KEY
@@ -98,8 +109,7 @@ export async function POST(request: NextRequest) {
     const currency = payload.data.currency
     const currencyCode = (currency.code ?? "USD").toUpperCase()
     const unit = (payload.data.unit ?? "new").toLowerCase()
-    const cities = currency.cities ?? {}
-    const cityEntries = Object.entries(cities)
+    const cityEntries = Object.entries(currency.cities ?? {})
 
     if (cityEntries.length === 0) {
       return NextResponse.json(
@@ -145,7 +155,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// دعم GET لتسهيل الاختبار السريع من المتصفح أو أدوات الفحص
 export async function GET(request: NextRequest) {
-  return POST(request)
+  return handleSync(request)
+}
+
+export async function POST(request: NextRequest) {
+  return handleSync(request)
 }
