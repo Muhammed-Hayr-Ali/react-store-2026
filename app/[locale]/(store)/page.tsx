@@ -3,16 +3,16 @@
  * @description Storefront home page displaying the featured hero slider, root categories, and latest regular products grid.
  */
 
-import { getRootCategories } from "@/lib/actions/store/queries/get-root-categories"
 import FeaturedHeroSlider from "@/components/store/featured-hero-slider/featured-hero-slider"
 
 import { APP_CONFIG, COOKIES_KEYS, PRODUCT_MODE } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { cookies } from "next/headers"
 import { getTranslations } from "next-intl/server"
-import SearchBar from "@/components/store/search-bar/search-bar"
 import { getFilteredProducts } from "@/lib/actions/store/queries/get_filtered_products"
 import HomeClientWrapper from "@/components/store/client-wrapper/home-client-wrapper"
+import { StoreHeader } from "@/components/store/store-header/store-header"
+import { getAllCategories } from "@/lib/actions/store/queries/get-all-categories"
 
 interface PageProps {
   params: Promise<{ locale: string }>
@@ -42,7 +42,8 @@ export default async function Page() {
   const PAGE_NUMBER = 1
   const ACTIVE_ONLY = true
 
-  const [featuredResult, latestResult, categoriesResult] = await Promise.all([
+  const [categoriesResult, featuredResult, latestResult] = await Promise.all([
+    getAllCategories(),
     getFilteredProducts({
       limit: FEATURED_LIMET,
       page: PAGE_NUMBER,
@@ -55,27 +56,53 @@ export default async function Page() {
       activeOnly: ACTIVE_ONLY,
       is_featured: false,
     }),
-    getRootCategories(),
   ])
 
+  const categories = categoriesResult.success ? categoriesResult.data : []
   const slides = featuredResult.success ? featuredResult.data : []
   const initialProducts = latestResult.success ? latestResult.data : []
-  const categories = categoriesResult.success ? categoriesResult.data : []
 
   return (
     <>
-      {/* SearchBar */}
-      <SearchBar />
+      <StoreHeader categories={categories} />
 
-      {/* 1. السلايدر التفاعلي للمنتجات المميزة */}
-      <FeaturedHeroSlider slides={slides} />
+      {/* 3. المحتوى الرئيسي */}
+      <main id="main-content" className="w-full flex-1">
+        {/* حاوية المحتوى: max-w-7xl هي المعيار العالمي لعرض المحتوى مع هوامش متجاوبة */}
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-12 lg:px-8">
+          {/* 1. السلايدر التفاعلي للمنتجات المميزة */}
+          <FeaturedHeroSlider slides={slides} />
 
-      {/* 2. شريط التصنيفات الرئيسية */}
-      <HomeClientWrapper
-        viewMode={viewMode}
-        initialProducts={initialProducts}
-        categories={categories}
-      />
+          {/* 2. شريط التصنيفات الرئيسية */}
+          <HomeClientWrapper
+            viewMode={viewMode}
+            initialProducts={initialProducts}
+            categories={categories}
+          />
+        </div>
+      </main>
+
+      {/* 4. الفوتر */}
+      <footer className="border-t border-border bg-muted/30">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          {/* شبكة روابط الفوتر: تتجاوب من عمود واحد إلى 4 أعمدة */}
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <h3 className="mb-4 text-lg font-semibold">عن المتجر</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                وصف مختصر عن المتجر ورسالته للعملاء.
+              </p>
+            </div>
+            {/* يمكنك إضافة أعمدة أخرى للروابط والدعم هنا */}
+          </div>
+
+          {/* حقوق الملكية والسوشيال ميديا */}
+          <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 text-sm text-muted-foreground sm:flex-row">
+            <p>© {new Date().getFullYear()} Store. جميع الحقوق محفوظة.</p>
+            <div className="flex gap-4">{/* أيقونات السوشيال ميديا هنا */}</div>
+          </div>
+        </div>
+      </footer>
     </>
   )
 }

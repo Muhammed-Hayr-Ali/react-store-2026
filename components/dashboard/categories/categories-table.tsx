@@ -344,12 +344,6 @@ export function CategoriesTable({
         cell: ({ row }) => {
           const isActive = row.original.is_active === true
           return (
-            // <Badge
-            //   variant={isActive ? "secondary" : "outline"}
-            //   className="px-1.5 py-0.5 text-[10px] font-medium"
-            // >
-            //   {t(isActive ? "ACTIVE" : "INACTIVE")}
-            // </Badge>
             <Badge
               variant="outline"
               className={`gap-1 truncate px-1.5 py-0.5 text-xs leading-tight font-normal ${
@@ -364,7 +358,6 @@ export function CategoriesTable({
                 <CircleAlertIcon className="size-3 fill-amber-500 text-background" />
               )}
               <span className="capitalize">
-                {t(isActive ? "ACTIVE" : "INACTIVE")}
                 {isActive ? t("ACTIVE") : t("INACTIVE")}
               </span>
             </Badge>

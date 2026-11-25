@@ -5,7 +5,7 @@
 
 import type { Metadata, Viewport } from "next"
 import { notFound } from "next/navigation"
-import { Rubik } from "next/font/google"
+import { IBM_Plex_Sans_Arabic, Rubik } from "next/font/google"
 import { NextIntlClientProvider, hasLocale } from "next-intl"
 
 import "../globals.css"
@@ -37,6 +37,13 @@ const rubik = Rubik({
   style: ["normal", "italic"],
   subsets: ["latin"],
   variable: "--font-rubik",
+})
+
+const plexArabic = IBM_Plex_Sans_Arabic({
+  subsets: ["arabic", "latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-plex-arabic",
 })
 
 export const viewport: Viewport = {
@@ -103,7 +110,7 @@ export default async function RootLayout({
       suppressHydrationWarning
       className={cn(
         "antialiased",
-        rubik.variable,
+        plexArabic.variable,
 
         isDark && "dark"
       )}
@@ -132,7 +139,7 @@ export default async function RootLayout({
           </NextIntlClientProvider>
         </ThemeProvider>
         <Toaster />
-        <ScreenSizeIndicator/>
+        <ScreenSizeIndicator />
       </body>
     </html>
   )

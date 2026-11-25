@@ -1,38 +1,21 @@
 "use client"
 
-import { useThemePreference } from "@/lib/hooks/use-store-preferences"
+import * as React from "react"
 import { useTranslations } from "next-intl"
-import React from "react"
-import { PreferenceOption, PREFERENCES_CONFIG } from "./store-header-config"
+import { Check, ChevronDown, Loader2Icon } from "lucide-react"
 
- import {
+import { useThemePreference } from "@/lib/hooks/use-store-preferences"
+import { PreferenceOption, PREFERENCES_CONFIG } from "./store-header-config"
+import { menuItemClass, selectorTriggerClass } from "./store-header-shared"
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Check, ChevronDown, Loader2Icon } from "lucide-react"
-import { cn } from "cn"
- 
-
 
 interface ThemeSelectorProps {
   compact?: boolean
 }
-
-
-const getTriggerClass = (compact = false, disabled = false) =>
-  cn(
-    "flex items-center gap-1.5 rounded-lg bg-muted/60 px-2.5 text-[11px] font-normal text-foreground/85 transition-colors hover:bg-muted hover:text-foreground",
-    compact ? "h-8" : "h-9",
-    disabled && "pointer-events-none opacity-70"
-  )
-
-const getMenuItemClass = (isSelected = false) =>
-  cn(
-    "flex min-h-8 w-full items-center justify-between gap-2.5 rounded-md px-2.5 py-1.5 text-xs font-normal transition-colors hover:bg-muted",
-    isSelected ? "bg-muted/70 text-primary" : "text-foreground/85"
-  )
-
 
 export function ThemeSelector({ compact = false }: ThemeSelectorProps) {
   const [open, setOpen] = React.useState(false)
@@ -44,8 +27,7 @@ export function ThemeSelector({ compact = false }: ThemeSelectorProps) {
   const effectiveThemeKey = isMounted ? (theme ?? "system") : "system"
   const activeOption =
     appearance.options.find((opt) => opt.value === effectiveThemeKey) ??
-    appearance.options[1] ??
-    appearance.options[0]
+    appearance.options[appearance.options.length - 1]
   const ActiveIcon = activeOption?.icon
 
   return (
@@ -54,44 +36,62 @@ export function ThemeSelector({ compact = false }: ThemeSelectorProps) {
         <button
           type="button"
           disabled={isPending}
-          className={getTriggerClass(compact, isPending)}
+          className={selectorTriggerClass(compact, isPending)}
           aria-label={t(appearance.name)}
         >
           {isPending ? (
-            <Loader2Icon className="size-3 animate-spin text-primary" />
+            <Loader2Icon
+              aria-hidden="true"
+              className="size-3 animate-spin text-primary"
+            />
           ) : (
             ActiveIcon && (
-              <ActiveIcon className="size-3.5 text-muted-foreground" />
+              <ActiveIcon
+                aria-hidden="true"
+                className="size-3.5 text-muted-foreground"
+              />
             )
           )}
           <span>{t(activeOption?.key ?? "system")}</span>
-          <ChevronDown className="size-3 text-muted-foreground" />
+          <ChevronDown
+            aria-hidden="true"
+            className="size-3 text-muted-foreground"
+          />
         </button>
       </PopoverTrigger>
+
       <PopoverContent align="end" className="w-40 p-1.5 font-normal">
         <div className="space-y-1">
           {appearance.options.map((opt: PreferenceOption) => {
-            const isSelected = isMounted && theme === opt.value
+            // نقارن مع effectiveThemeKey (وليس theme) ليتطابق التحديد مع ما يعرضه الزر
+            const isSelected = isMounted && effectiveThemeKey === opt.value
             const OptIcon = opt.icon
             return (
               <button
                 key={opt.key}
                 type="button"
                 disabled={isPending}
+                aria-pressed={isSelected}
                 onClick={() => {
                   handleThemeChange(opt.value)
                   setOpen(false)
                 }}
-                className={getMenuItemClass(isSelected)}
+                className={menuItemClass(isSelected)}
               >
                 <span className="flex items-center gap-2.5">
                   {OptIcon && (
-                    <OptIcon className="size-3.5 shrink-0 text-muted-foreground" />
+                    <OptIcon
+                      aria-hidden="true"
+                      className="size-3.5 shrink-0 text-muted-foreground"
+                    />
                   )}
                   <span>{t(opt.key)}</span>
                 </span>
                 {isSelected && !isPending && (
-                  <Check className="size-3.5 shrink-0 text-primary" />
+                  <Check
+                    aria-hidden="true"
+                    className="size-3.5 shrink-0 text-primary"
+                  />
                 )}
               </button>
             )
