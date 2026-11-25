@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/exchange-rates/sync",
-      "schedule": "0 0 * * *"
+      "schedule": "0 3 * * *"
     }
   ]
 }
