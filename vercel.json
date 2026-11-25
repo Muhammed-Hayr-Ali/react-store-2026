@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/cron/update-currency-rates",
+      "path": "/api/exchange-rates/sync",
       "schedule": "0 0 * * *"
     }
   ]
