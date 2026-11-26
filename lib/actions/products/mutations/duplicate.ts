@@ -60,14 +60,15 @@ export async function duplicateProduct(
       return { success: false, error: "DUPLICATE_PRODUCT_FAILED" }
     }
 
-    const skuMapping: Record<string, string> = {}
+    const variantIdMapping = new Map<string, string>()
     const typedVariants = originalProduct.product_variants as
       ProductVariantItem[] | undefined
 
     if (typedVariants && typedVariants.length > 0) {
+      const originalVariantIdByNewSku = new Map<string, string>()
       const variantsToInsert = typedVariants.map((variant) => {
         const newSku = `${variant.sku}-COPY-${uniqueSuffix}`
-        skuMapping[variant.sku] = newSku
+        originalVariantIdByNewSku.set(newSku, variant.id)
 
         return {
           product_id: newProduct.id,
@@ -85,13 +86,32 @@ export async function duplicateProduct(
         }
       })
 
-      const { error: variantsError } = await supabase
+      const { data: insertedVariants, error: variantsError } = await supabase
         .from("product_variants")
         .insert(variantsToInsert)
+        .select("id, sku")
 
-      if (variantsError) {
+      if (
+        variantsError ||
+        !insertedVariants ||
+        insertedVariants.length !== variantsToInsert.length
+      ) {
+        console.error("[duplicateProduct] Failed to insert variants", {
+          productId: newProduct.id,
+          error:
+            variantsError ?? "Variant rows were not returned after insert.",
+        })
         await supabase.from("products").delete().eq("id", newProduct.id)
         return { success: false, error: "DUPLICATE_VARIANTS_FAILED" }
+      }
+
+      for (const insertedVariant of insertedVariants) {
+        const originalVariantId = originalVariantIdByNewSku.get(
+          insertedVariant.sku
+        )
+        if (originalVariantId) {
+          variantIdMapping.set(originalVariantId, insertedVariant.id)
+        }
       }
     }
 
@@ -105,9 +125,26 @@ export async function duplicateProduct(
           url: img.url,
           alt_text: img.alt_text,
           is_primary: img.is_primary,
-          variant_sku: img.variant_sku ? skuMapping[img.variant_sku] : null,
+          variant_id: img.variant_id
+            ? (variantIdMapping.get(img.variant_id) ?? null)
+            : null,
         }
       })
+
+      if (
+        typedImages.some(
+          (img) => img.variant_id && !variantIdMapping.has(img.variant_id)
+        )
+      ) {
+        console.error(
+          "[duplicateProduct] Image references an unmapped variant",
+          {
+            productId: newProduct.id,
+          }
+        )
+        await supabase.from("products").delete().eq("id", newProduct.id)
+        return { success: false, error: "DUPLICATE_IMAGES_FAILED" }
+      }
 
       const { error: imagesError } = await supabase
         .from("product_images")

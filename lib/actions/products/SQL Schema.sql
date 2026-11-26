@@ -6,7 +6,7 @@
 CREATE TABLE IF NOT EXISTS products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   category_id UUID NOT NULL REFERENCES categories(id) ON DELETE RESTRICT,
-  brand_id UUID REFERENCES brands(id) ON DELETE SET NULL,
+  brand_id UUID NOT NULL REFERENCES brands(id) ON DELETE RESTRICT,
   
   name VARCHAR(255) NOT NULL,
   slug VARCHAR(255) NOT NULL UNIQUE,
@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS products (
 CREATE TABLE IF NOT EXISTS product_variants (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  CONSTRAINT product_variants_id_product_id_key UNIQUE (id, product_id),
   
   sku VARCHAR(100) NOT NULL UNIQUE,
   name VARCHAR(255),
@@ -61,11 +62,36 @@ CREATE TABLE IF NOT EXISTS product_images (
   alt_text VARCHAR(255),
   is_primary BOOLEAN NOT NULL DEFAULT false,
   
-  -- ربط الصورة بمتغير محدد (اختياري)
-  variant_sku VARCHAR(100) REFERENCES product_variants(sku) ON DELETE SET NULL,
+  -- ربط الصورة بمتغير محدد (اختياري) مع ضمان تبعيته للمنتج نفسه
+  variant_id UUID,
+
+  CONSTRAINT product_images_variant_product_fkey
+    FOREIGN KEY (variant_id, product_id)
+    REFERENCES product_variants(id, product_id)
+    ON DELETE CASCADE,
   
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+CREATE INDEX IF NOT EXISTS products_category_id_idx
+  ON products (category_id);
+
+CREATE INDEX IF NOT EXISTS products_brand_id_idx
+  ON products (brand_id);
+
+CREATE UNIQUE INDEX IF NOT EXISTS product_images_one_primary_per_product_idx
+  ON product_images (product_id)
+  WHERE is_primary;
+
+CREATE INDEX IF NOT EXISTS product_variants_product_id_idx
+  ON product_variants (product_id);
+
+CREATE INDEX IF NOT EXISTS product_images_product_id_idx
+  ON product_images (product_id);
+
+CREATE INDEX IF NOT EXISTS product_images_variant_id_product_id_idx
+  ON product_images (variant_id, product_id);
+
 
 -- ============================================================================
 -- 2. تطبيق سياسات الأمان (RLS Policies) باستخدام الدالة المخصصة

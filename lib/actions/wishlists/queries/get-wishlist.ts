@@ -13,13 +13,15 @@ interface ProductVariantRecord {
   sku: string
   price: number
   compare_at_price?: number | null
+  stock_quantity: number
+  track_inventory: boolean
 }
 
 interface ProductImageRecord {
   url: string
   alt_text?: string | null
   is_primary: boolean
-  variant_sku?: string | null
+  variant_id?: string | null
 }
 
 interface ProductReviewRecord {
@@ -68,6 +70,7 @@ export interface WishlistProduct {
   variantId: string | null
   price: number | null
   compareAtPrice?: number | null
+  inStock: boolean
   imageUrl?: string | null
   imageAlt?: string | null
   rating: number
@@ -120,13 +123,15 @@ export async function getWishlistProducts(
           id,
           sku,
           price,
-          compare_at_price
+          compare_at_price,
+          stock_quantity,
+          track_inventory
         ),
         product_images (
           url,
           alt_text,
           is_primary,
-          variant_sku
+          variant_id
         ),
         product_reviews (
           rating
@@ -206,12 +211,12 @@ export async function getWishlistProducts(
       images.find(
         (img) =>
           img.is_primary &&
-          (!img.variant_sku || img.variant_sku === cheapestVariant?.sku)
+          (!img.variant_id || img.variant_id === cheapestVariant?.id)
       ) ||
       images.find((img) => img.is_primary) ||
-      images.find((img) => !img.variant_sku) ||
-      (cheapestVariant?.sku
-        ? images.find((img) => img.variant_sku === cheapestVariant.sku)
+      images.find((img) => !img.variant_id) ||
+      (cheapestVariant?.id
+        ? images.find((img) => img.variant_id === cheapestVariant.id)
         : undefined) ||
       images[0] ||
       null
@@ -224,6 +229,9 @@ export async function getWishlistProducts(
       variantId: cheapestVariant?.id ?? null,
       price: cheapestVariant?.price ?? null,
       compareAtPrice: cheapestVariant?.compare_at_price ?? null,
+      inStock: cheapestVariant
+        ? !cheapestVariant.track_inventory || cheapestVariant.stock_quantity > 0
+        : false,
       imageUrl: selectedImage?.url ?? null,
       imageAlt: selectedImage?.alt_text ?? null,
       rating,

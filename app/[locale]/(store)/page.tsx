@@ -13,6 +13,8 @@ import { getFilteredProducts } from "@/lib/actions/store/queries/get_filtered_pr
 import HomeClientWrapper from "@/components/store/client-wrapper/home-client-wrapper"
 import { StoreHeader } from "@/components/store/store-header/store-header"
 import { getAllCategories } from "@/lib/actions/store/queries/get-all-categories"
+import { storeContainer } from "@/components/store/store-header/store-header-shared"
+import { cn } from "@/lib/utils"
 
 interface PageProps {
   params: Promise<{ locale: string }>
@@ -68,8 +70,10 @@ export default async function Page() {
 
       {/* 3. المحتوى الرئيسي */}
       <main id="main-content" className="w-full flex-1">
-        {/* حاوية المحتوى: max-w-7xl هي المعيار العالمي لعرض المحتوى مع هوامش متجاوبة */}
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-12 lg:px-8">
+        {/* الحاوية نفسها المستخدمة في الهيدر والفوتر */}
+        <div
+          className={cn(storeContainer, "space-y-8 py-4 md:space-y-12 md:py-6")}
+        >
           {/* 1. السلايدر التفاعلي للمنتجات المميزة */}
           <FeaturedHeroSlider slides={slides} />
 
@@ -84,7 +88,7 @@ export default async function Page() {
 
       {/* 4. الفوتر */}
       <footer className="border-t border-border bg-muted/30">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className={cn(storeContainer, "py-12")}>
           {/* شبكة روابط الفوتر: تتجاوب من عمود واحد إلى 4 أعمدة */}
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <div>

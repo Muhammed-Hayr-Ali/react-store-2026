@@ -37,6 +37,8 @@ import {
   Wand2Icon,
   PencilIcon,
   AlertCircleIcon,
+  CornerDownRightIcon,
+  ImageOffIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -87,12 +89,67 @@ import { AspectRatio } from "@/components/ui/aspect-ratio"
 
 type FormValues = CreateProductInput
 
+interface CategoryTreeRow {
+  category: Category
+  depth: number
+}
+
+function flattenCategoryTree(categories: Category[]): CategoryTreeRow[] {
+  const categoryIds = new Set(categories.map((category) => category.id))
+  const childrenByParent = new Map<string | null, Category[]>()
+
+  for (const category of categories) {
+    const parentId =
+      category.parent_id &&
+      category.parent_id !== category.id &&
+      categoryIds.has(category.parent_id)
+        ? category.parent_id
+        : null
+    const siblings = childrenByParent.get(parentId) ?? []
+    siblings.push(category)
+    childrenByParent.set(parentId, siblings)
+  }
+
+  const sortCategories = (items: Category[]) =>
+    items.sort(
+      (left, right) =>
+        (left.sort_order ?? 0) - (right.sort_order ?? 0) ||
+        left.name.localeCompare(right.name)
+    )
+  const rows: CategoryTreeRow[] = []
+  const visited = new Set<string>()
+
+  const addBranch = (category: Category, depth: number) => {
+    if (visited.has(category.id)) return
+    visited.add(category.id)
+    rows.push({ category, depth })
+
+    for (const child of sortCategories(
+      childrenByParent.get(category.id) ?? []
+    )) {
+      addBranch(child, depth + 1)
+    }
+  }
+
+  for (const root of sortCategories(childrenByParent.get(null) ?? [])) {
+    addBranch(root, 0)
+  }
+
+  for (const category of sortCategories([...categories])) {
+    addBranch(category, 0)
+  }
+
+  return rows
+}
+
 function ProductFieldError({ error }: { error?: RHFFieldError }) {
   const t = useTranslations("ProductForm")
-  const message = error?.message ?? ""
-  const translatedMessage = t.has(message) ? t(message as never) : message
 
   if (!error) return null
+
+  const message = error.message ?? ""
+  const translatedMessage =
+    message && t.has(message as never) ? t(message as never) : message
 
   return <FieldError errors={[{ ...error, message: translatedMessage }]} />
 }
@@ -118,21 +175,109 @@ const DEFAULT_IMAGE = {
   variant_sku: "",
 }
 
-const PRESET_ATTRIBUTE_KEYS = [
-  { label: "Color", value: "color", placeholder: "e.g., Red or #FF0000" },
-  { label: "Weight", value: "weight", placeholder: "e.g., 250g or 1kg" },
-  { label: "Size", value: "size", placeholder: "e.g., Medium or 42" },
-  {
-    label: "Flavor",
-    value: "flavor",
-    placeholder: "e.g., Barbecue or Vanilla",
-  },
-  {
-    label: "Material",
-    value: "material",
-    placeholder: "e.g., Cotton or Plastic",
-  },
-]
+function normalizeGeneralImagePrimary<
+  T extends { is_primary: boolean; variant_sku?: string | null },
+>(images: T[]): T[] {
+  const primaryGeneralIndex = images.findIndex(
+    (image) => !image.variant_sku?.trim() && image.is_primary
+  )
+  const primaryIndex =
+    primaryGeneralIndex >= 0
+      ? primaryGeneralIndex
+      : images.findIndex((image) => !image.variant_sku?.trim())
+
+  return images.map((image, index) => ({
+    ...image,
+    is_primary: !image.variant_sku?.trim() && index === primaryIndex,
+  }))
+}
+
+function setImageVariantSku(
+  index: number,
+  variantSku: string,
+  getValues: UseFormGetValues<FormValues>,
+  setValue: UseFormSetValue<FormValues>
+) {
+  const normalizedSku = variantSku.trim()
+  const images = getValues("images") ?? []
+  const updatedImages = images.map((image, imageIndex) =>
+    imageIndex === index ? { ...image, variant_sku: normalizedSku } : image
+  )
+
+  if (normalizedSku) {
+    const primaryIndex = updatedImages.findIndex(
+      (image, imageIndex) => imageIndex !== index && !image.variant_sku?.trim()
+    )
+    updatedImages.forEach((image, imageIndex) => {
+      setValue(`images.${imageIndex}.is_primary`, imageIndex === primaryIndex, {
+        shouldDirty: true,
+        shouldValidate: true,
+      })
+    })
+  } else {
+    const hasOtherPrimaryGeneralImage = updatedImages.some(
+      (image, imageIndex) =>
+        imageIndex !== index && !image.variant_sku?.trim() && image.is_primary
+    )
+    updatedImages.forEach((image, imageIndex) => {
+      const isPrimary =
+        imageIndex === index
+          ? !hasOtherPrimaryGeneralImage
+          : !image.variant_sku?.trim() && image.is_primary
+      setValue(`images.${imageIndex}.is_primary`, isPrimary, {
+        shouldDirty: true,
+        shouldValidate: true,
+      })
+    })
+  }
+
+  setValue(`images.${index}.variant_sku`, normalizedSku, {
+    shouldDirty: true,
+    shouldValidate: true,
+  })
+}
+
+const PRESET_ATTRIBUTE_KEYS = ["color", "weight", "size", "flavor", "material"]
+
+type NumberInputProps = Omit<
+  React.ComponentProps<typeof Input>,
+  "value" | "onChange" | "type"
+> & {
+  value: number | null | undefined
+  emptyValue: number | null
+  onValueChange: (value: number | null) => void
+}
+
+// يحتفظ بالنص أثناء الكتابة حتى يمكن مسح الحقل وكتابة الكسور دون أن تُعاد القيمة إلى 0
+function NumberInput({
+  value,
+  emptyValue,
+  onValueChange,
+  onBlur,
+  ...props
+}: NumberInputProps) {
+  const [draft, setDraft] = React.useState<string | null>(null)
+
+  return (
+    <Input
+      {...props}
+      type="number"
+      value={draft ?? value ?? ""}
+      onChange={(e) => {
+        const raw = e.target.value
+        setDraft(raw)
+        onValueChange(raw === "" ? emptyValue : Number(raw))
+      }}
+      onFocus={(e) => e.target.select()}
+      onBlur={(e) => {
+        setDraft(null)
+        onBlur?.(e)
+      }}
+      // يمنع تغيير القيمة بالخطأ عند تمرير الصفحة بعجلة الفأرة
+      onWheel={(e) => e.currentTarget.blur()}
+    />
+  )
+}
 
 function generateSlug(name: string): string {
   return slugify(name, {
@@ -172,12 +317,18 @@ export default function ProductForm({
   const locale = useLocale()
   const t = useTranslations("ProductForm")
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
+  const [isRedirecting, setIsRedirecting] = React.useState(false)
+  const formRef = React.useRef<HTMLFormElement>(null)
 
   const isEditing = Boolean(product)
 
   const categoriesList = React.useMemo(
     () => initialCategories ?? [],
     [initialCategories]
+  )
+  const categoryTree = React.useMemo(
+    () => flattenCategoryTree(categoriesList),
+    [categoriesList]
   )
   const brandsList = React.useMemo(() => initialBrands ?? [], [initialBrands])
 
@@ -195,28 +346,42 @@ export default function ProductForm({
     if (!product?.product_images || product.product_images.length === 0) {
       return [DEFAULT_IMAGE]
     }
-    return product.product_images.map((img) => {
-      return {
-        url: img.url,
-        alt_text: img.alt_text || "",
-        is_primary: img.is_primary,
-        variant_sku: img.variant_sku || "",
-      }
-    })
+    const variantSkuById = new Map(
+      (product.product_variants ?? []).map((variant) => [
+        variant.id,
+        variant.sku,
+      ])
+    )
+
+    return normalizeGeneralImagePrimary(
+      product.product_images.map((img) => {
+        return {
+          url: img.url,
+          alt_text: img.alt_text || "",
+          is_primary: img.is_primary,
+          variant_sku: img.variant_id
+            ? (variantSkuById.get(img.variant_id) ?? "")
+            : "",
+        }
+      })
+    )
   }, [product])
 
   const initialVariants = React.useMemo(() => {
     if (!product?.product_variants || product.product_variants.length === 0) {
       return [DEFAULT_VARIANT]
     }
-    return product.product_variants.map((v, idx) => ({
+    // الترتيب مهم: sort_order يُعاد حسابه من موضع العنصر عند الحفظ
+    const sortedVariants = [...product.product_variants].sort(
+      (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)
+    )
+    return sortedVariants.map((v, idx) => ({
       sku: v.sku,
       name: v.name || "",
       attributes: (v.attributes as Record<string, string>) || {},
       price: Number(v.price) / 100,
-      compare_at_price: v.compare_at_price
-        ? Number(v.compare_at_price) / 100
-        : null,
+      compare_at_price:
+        v.compare_at_price != null ? Number(v.compare_at_price) / 100 : null,
       stock_quantity: v.stock_quantity,
       track_inventory: v.track_inventory,
       low_stock_threshold: v.low_stock_threshold,
@@ -234,7 +399,7 @@ export default function ProductForm({
       name: product?.name || "",
       slug: product?.slug || "",
       category_id: product?.category_id || "",
-      brand_id: product?.brand_id || null,
+      brand_id: product?.brand_id || "",
       description: product?.description || null,
       meta_title: product?.meta_title || null,
       meta_description: product?.meta_description || null,
@@ -246,17 +411,33 @@ export default function ProductForm({
   })
 
   const {
-    formState: { isSubmitting },
+    formState: { isSubmitting, isDirty },
     control,
     setValue,
-    getFieldState,
+    setFocus,
     getValues,
   } = form
+
+  const isBusy = isSubmitting || isRedirecting
+  // في وضع التعديل لا نغيّر الرابط تلقائياً حتى لا تنكسر الروابط المنشورة
+  const isSlugLockedRef = React.useRef(isEditing)
+
+  // تحذير قبل إغلاق الصفحة أو تحديثها مع وجود تغييرات غير محفوظة
+  React.useEffect(() => {
+    if (!isDirty || isRedirecting) return
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault()
+      event.returnValue = ""
+    }
+    window.addEventListener("beforeunload", warn)
+    return () => window.removeEventListener("beforeunload", warn)
+  }, [isDirty, isRedirecting])
 
   const {
     fields: variantFields,
     append: appendVariant,
     remove: removeVariant,
+    insert: insertVariant,
   } = useFieldArray({
     control,
     name: "variants",
@@ -266,6 +447,7 @@ export default function ProductForm({
     fields: imageFields,
     append: appendImage,
     remove: removeImage,
+    insert: insertImage,
   } = useFieldArray({
     control,
     name: "images",
@@ -275,7 +457,6 @@ export default function ProductForm({
   const currentProductName = useWatch({ control, name: "name" }) || ""
   const selectedBrandId = useWatch({ control, name: "brand_id" })
   const selectedCategoryId = useWatch({ control, name: "category_id" })
-  const watchedImages = useWatch({ control, name: "images" }) || []
 
   const selectedCategoryObject = React.useMemo(() => {
     return categoriesList.find((cat) => cat.id === selectedCategoryId) || null
@@ -287,8 +468,8 @@ export default function ProductForm({
 
   const handleGenerateAllSeo = () => {
     if (!currentProductName.trim()) {
-      setErrorMessage(t("ENTER_NAME_FOR_SEO_ERROR"))
-      window.scrollTo({ top: 0, behavior: "smooth" })
+      toast.error(t("ENTER_NAME_FOR_SEO_ERROR"))
+      setFocus("name")
       return
     }
 
@@ -324,10 +505,13 @@ export default function ProductForm({
 
       generatedDescription = (
         locale === "ar"
-          ? `تسوق ${currentProductName.trim()}${brandPart ? ` لـ ${brandName}` : ""}. جودة عالية وأسعار مناسبة مع توصيل سريع وموثوق.`
+          ? `تسوق ${currentProductName.trim()}${brandName ? ` من ${brandName}` : ""}${categoryName ? ` ضمن ${categoryName}` : ""}. جودة عالية وأسعار مناسبة مع توصيل سريع وموثوق.`
           : `Shop ${currentProductName.trim()}${brandPart}${categoryPart}. High quality at the best prices with fast and reliable delivery.`
       ).slice(0, 160)
     }
+
+    const previousTitle = getValues("meta_title")
+    const previousDescription = getValues("meta_description")
 
     setValue("meta_title", generatedTitle, {
       shouldValidate: true,
@@ -337,7 +521,25 @@ export default function ProductForm({
       shouldValidate: true,
       shouldDirty: true,
     })
-    toast.success(t("SEO_GENERATED_SUCCESS"))
+    toast.success(t("SEO_GENERATED_SUCCESS"), {
+      // التراجع يظهر فقط إذا استبدلنا نصاً كان موجوداً
+      action:
+        previousTitle || previousDescription
+          ? {
+              label: t("UNDO"),
+              onClick: () => {
+                setValue("meta_title", previousTitle, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                })
+                setValue("meta_description", previousDescription, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                })
+              },
+            }
+          : undefined,
+    })
   }
 
   async function onSubmit(data: FormValues) {
@@ -345,7 +547,6 @@ export default function ProductForm({
 
     const payload: CreateProductInput = {
       ...data,
-      brand_id: data.brand_id || null,
       description: data.description || null,
       meta_title: data.meta_title || null,
       meta_description: data.meta_description || null,
@@ -368,33 +569,136 @@ export default function ProductForm({
       })),
     }
 
-    let result
-    if (isEditing && product) {
-      result = await updateProduct({ ...payload, id: product.id })
-    } else {
-      result = await createProduct(payload)
-    }
-
-    if (result.success) {
-      toast.success(t(isEditing ? "UPDATE_SUCCESS" : "CREATE_SUCCESS"))
-      router.push("/dashboard/products")
-      router.refresh()
-    } else {
-      console.error("Submission Error:", result)
-      const errorMsg = result.error
-        ? t(result.error)
-        : isEditing
-          ? t("UPDATE_ERROR")
-          : t("CREATE_ERROR")
-
-      setErrorMessage(errorMsg)
+    const showError = (message: string) => {
+      setErrorMessage(message)
       window.scrollTo({ top: 0, behavior: "smooth" })
+    }
+    const fallbackError = t(isEditing ? "UPDATE_ERROR" : "CREATE_ERROR")
+
+    try {
+      const result =
+        isEditing && product
+          ? await updateProduct({ ...payload, id: product.id })
+          : await createProduct(payload)
+
+      if (result.success) {
+        setIsRedirecting(true)
+        toast.success(t(isEditing ? "UPDATE_SUCCESS" : "CREATE_SUCCESS"))
+        router.push("/dashboard/products")
+        router.refresh()
+        return
+      }
+
+      console.error("Submission Error:", result)
+      showError(
+        result.error && t.has(result.error as never)
+          ? t(result.error as never)
+          : fallbackError
+      )
+    } catch (error) {
+      console.error("Submission Error:", error)
+      showError(fallbackError)
     }
   }
 
   const onInvalid = () => {
     setErrorMessage(t("FORM_VALIDATION_ERROR"))
-    window.scrollTo({ top: 0, behavior: "smooth" })
+
+    // الانتقال إلى أول حقل فيه خطأ بدلاً من أعلى الصفحة
+    window.setTimeout(() => {
+      const invalidField = Array.from(
+        formRef.current?.querySelectorAll<HTMLElement>(
+          '[data-invalid="true"]'
+        ) ?? []
+      ).sort(
+        (a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top
+      )[0]
+
+      if (!invalidField) {
+        window.scrollTo({ top: 0, behavior: "smooth" })
+        return
+      }
+      invalidField.scrollIntoView({ behavior: "smooth", block: "center" })
+      invalidField
+        .querySelector<HTMLElement>("input, textarea, button")
+        ?.focus({ preventScroll: true })
+    }, 50)
+  }
+
+  const handleDiscard = () => {
+    if (isDirty && !window.confirm(t("DISCARD_CONFIRM"))) return
+    router.back()
+  }
+
+  // حذف متغير: فك ارتباط صوره مع إتاحة التراجع
+  const handleRemoveVariant = (index: number) => {
+    const removed = getValues(`variants.${index}`)
+    const otherSkus = getValues("variants")
+      .filter((_, i) => i !== index)
+      .map((v) => v.sku)
+    const linkedImages: number[] = []
+
+    if (removed.sku && !otherSkus.includes(removed.sku)) {
+      getValues("images").forEach((image, i) => {
+        if (image.variant_sku !== removed.sku) return
+        linkedImages.push(i)
+        setImageVariantSku(i, "", getValues, setValue)
+      })
+    }
+    removeVariant(index)
+
+    toast(t("VARIANT_REMOVED"), {
+      action: {
+        label: t("UNDO"),
+        onClick: () => {
+          insertVariant(index, removed)
+          linkedImages.forEach((i) => {
+            const image = getValues("images")[i]
+            if (image && !image.variant_sku) {
+              setImageVariantSku(i, removed.sku, getValues, setValue)
+            }
+          })
+        },
+      },
+    })
+  }
+
+  // حذف صورة: تبقى دائماً صورة رئيسية، مع إتاحة التراجع
+  const handleRemoveImage = (index: number) => {
+    const removed = getValues(`images.${index}`)
+    removeImage(index)
+    if (removed.is_primary && !removed.variant_sku?.trim()) {
+      const remainingImages = getValues("images")
+      const hasPrimaryGeneralImage = remainingImages.some(
+        (image) => !image.variant_sku?.trim() && image.is_primary
+      )
+      const fallbackIndex = remainingImages.findIndex(
+        (image) => !image.variant_sku?.trim()
+      )
+      if (!hasPrimaryGeneralImage && fallbackIndex >= 0) {
+        setValue(`images.${fallbackIndex}.is_primary`, true, {
+          shouldDirty: true,
+          shouldValidate: true,
+        })
+      }
+    }
+
+    toast(t("IMAGE_REMOVED"), {
+      action: {
+        label: t("UNDO"),
+        onClick: () => {
+          insertImage(index, removed)
+          if (removed.is_primary && !removed.variant_sku?.trim()) {
+            getValues("images").forEach((image, i) => {
+              setValue(`images.${i}.is_primary`, i === index, {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            })
+          }
+        },
+      },
+    })
   }
 
   // دالة مساعدة لعرض حقول التنظيم مع دعم الاسم العربي name_ar
@@ -418,18 +722,36 @@ export default function ProductForm({
               >
                 <SelectTrigger
                   aria-invalid={fieldState.invalid}
-                  className="h-8 flex-1 text-xs"
+                  className="h-9 min-w-0 flex-1 text-xs"
                 >
                   <SelectValue placeholder={t("SELECT_CATEGORY")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">{t("SELECT_CATEGORY")}</SelectItem>
-                  {categoriesList.map((cat) => {
+                  {categoryTree.map(({ category, depth }) => {
                     const displayName =
-                      locale === "ar" && cat.name_ar ? cat.name_ar : cat.name
+                      locale === "ar" && category.name_ar
+                        ? category.name_ar
+                        : category.name
                     return (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {displayName}
+                      <SelectItem
+                        key={category.id}
+                        value={category.id}
+                        disabled={category.is_active !== true}
+                        style={{ paddingInlineStart: `${8 + depth * 16}px` }}
+                      >
+                        {depth > 0 && (
+                          <CornerDownRightIcon
+                            className="size-3 text-muted-foreground rtl:-scale-x-100"
+                            aria-hidden="true"
+                          />
+                        )}
+                        <span>{displayName}</span>
+                        {category.is_active !== true && (
+                          <span className="text-muted-foreground">
+                            ({t("INACTIVE_CATEGORY")})
+                          </span>
+                        )}
                       </SelectItem>
                     )
                   })}
@@ -457,6 +779,7 @@ export default function ProductForm({
                     type="button"
                     variant="outline"
                     title={t("CREATE_CATEGORY")}
+                    aria-label={t("CREATE_CATEGORY")}
                     className="h-9 w-9 shrink-0 cursor-pointer p-0"
                   >
                     <PlusIcon className="size-3.5" />
@@ -490,6 +813,7 @@ export default function ProductForm({
                         type="button"
                         variant="outline"
                         title={t("EDIT_CATEGORY")}
+                        aria-label={t("EDIT_CATEGORY")}
                         className="h-9 w-9 shrink-0 cursor-pointer p-0 text-muted-foreground hover:text-foreground"
                       >
                         <PencilIcon className="size-3.5" />
@@ -527,6 +851,7 @@ export default function ProductForm({
                       type="button"
                       variant="outline"
                       title={t("DELETE_CATEGORY")}
+                      aria-label={t("DELETE_CATEGORY")}
                       className="h-9 w-9 shrink-0 cursor-pointer p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
                     >
                       <Trash2Icon className="size-3.5" />
@@ -546,22 +871,25 @@ export default function ProductForm({
       <Controller
         name="brand_id"
         control={control}
-        render={({ field }) => (
-          <Field>
-            <FieldLabel className="text-xs">{t("BRAND_OPTIONAL")}</FieldLabel>
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel className="text-xs">
+              {t("BRAND")} <span className="text-destructive">*</span>
+            </FieldLabel>
 
             <div className="flex items-center gap-1.5">
               <Select
-                onValueChange={(val) =>
-                  field.onChange(val === "none" ? null : val)
-                }
-                value={field.value ?? "none"}
+                // Radix قد يرسل قيمة فارغة قبل وصول العلامة الجديدة إلى القائمة
+                onValueChange={(val) => val && field.onChange(val)}
+                value={field.value || ""}
               >
-                <SelectTrigger className="h-8 flex-1 text-xs">
+                <SelectTrigger
+                  aria-invalid={fieldState.invalid}
+                  className="h-9 min-w-0 flex-1 text-xs"
+                >
                   <SelectValue placeholder={t("SELECT_BRAND")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">{t("NO_BRAND")}</SelectItem>
                   {brandsList.map((brand) => {
                     const displayBrandName =
                       locale === "ar" && brand.name_ar
@@ -600,6 +928,7 @@ export default function ProductForm({
                     type="button"
                     variant="outline"
                     title={t("CREATE_BRAND")}
+                    aria-label={t("CREATE_BRAND")}
                     className="h-9 w-9 shrink-0 cursor-pointer p-0"
                   >
                     <PlusIcon className="size-3.5" />
@@ -632,6 +961,7 @@ export default function ProductForm({
                         type="button"
                         variant="outline"
                         title={t("EDIT_BRAND")}
+                        aria-label={t("EDIT_BRAND")}
                         className="h-9 w-9 shrink-0 cursor-pointer p-0 text-muted-foreground hover:text-foreground"
                       >
                         <PencilIcon className="size-3.5" />
@@ -654,7 +984,7 @@ export default function ProductForm({
                     }
                     onDeleted={(deletedBrand) => {
                       if (form.getValues("brand_id") === deletedBrand.id) {
-                        setValue("brand_id", null, {
+                        setValue("brand_id", "", {
                           shouldValidate: true,
                           shouldDirty: true,
                         })
@@ -667,6 +997,7 @@ export default function ProductForm({
                       type="button"
                       variant="outline"
                       title={t("DELETE_BRAND")}
+                      aria-label={t("DELETE_BRAND")}
                       className="h-9 w-9 shrink-0 cursor-pointer p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
                     >
                       <Trash2Icon className="size-3.5" />
@@ -675,6 +1006,9 @@ export default function ProductForm({
                 </>
               )}
             </div>
+            {fieldState.invalid && (
+              <ProductFieldError error={fieldState.error} />
+            )}
           </Field>
         )}
       />
@@ -684,12 +1018,19 @@ export default function ProductForm({
   return (
     <>
       <form
+        ref={formRef}
         noValidate
-        onSubmit={form.handleSubmit(onSubmit, onInvalid)}
+        onSubmit={(event) => {
+          // أحداث React تصعد عبر الـ Portal: نتجاهل إرسال نماذج النوافذ المنبثقة
+          if (event.target !== event.currentTarget) return
+          event.preventDefault()
+          if (isBusy) return
+          void form.handleSubmit(onSubmit, onInvalid)(event)
+        }}
         className="space-y-6"
       >
         {errorMessage && (
-          <Alert variant="destructive" className="relative pr-9">
+          <Alert variant="destructive" className="relative pe-9">
             <AlertCircleIcon className="size-4" />
             <AlertTitle>{t("ALERT_TITLE")}</AlertTitle>
             <AlertDescription className="text-xs">
@@ -698,7 +1039,7 @@ export default function ProductForm({
             <button
               type="button"
               onClick={() => setErrorMessage(null)}
-              className="absolute top-3 right-3 cursor-pointer text-muted-foreground hover:text-foreground"
+              className="absolute end-3 top-3 cursor-pointer text-muted-foreground hover:text-foreground"
               aria-label={t("CLOSE_ERROR_ALERT")}
             >
               <XIcon className="size-4" />
@@ -707,9 +1048,10 @@ export default function ProductForm({
         )}
 
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-          <div className="min-w-0 space-y-6 lg:col-span-2">
+          {/* على الجوال: contents + order لترتيب البطاقات، وعلى الشاشات الكبيرة: عمودان */}
+          <div className="contents lg:col-span-2 lg:flex lg:min-w-0 lg:flex-col lg:gap-6">
             {/* Basic Information */}
-            <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+            <div className="order-1 min-w-0 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-none">
               <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
                 <PackageIcon className="size-4 text-primary" />
                 <div>
@@ -740,10 +1082,10 @@ export default function ProductForm({
                           className="h-9 text-xs"
                           onChange={(e) => {
                             field.onChange(e)
-                            const slugState = getFieldState("slug")
-                            if (!slugState.isDirty) {
+                            if (!isSlugLockedRef.current) {
                               setValue("slug", generateSlug(e.target.value), {
                                 shouldValidate: true,
+                                shouldDirty: true,
                               })
                             }
                           }}
@@ -769,6 +1111,20 @@ export default function ProductForm({
                           id="product-slug"
                           placeholder="premium-oxford-cotton-shirt"
                           className="h-9 font-mono text-xs"
+                          dir="ltr"
+                          onChange={(e) => {
+                            // إفراغ الحقل يعيد التوليد التلقائي في المنتج الجديد
+                            isSlugLockedRef.current =
+                              isEditing || e.target.value !== ""
+                            field.onChange(e)
+                          }}
+                          onBlur={() => {
+                            const cleanSlug = generateSlug(field.value ?? "")
+                            if (cleanSlug && cleanSlug !== field.value) {
+                              field.onChange(cleanSlug)
+                            }
+                            field.onBlur()
+                          }}
                         />
                         {fieldState.invalid && (
                           <ProductFieldError error={fieldState.error} />
@@ -790,7 +1146,9 @@ export default function ProductForm({
                         >
                           {t("DESCRIPTION")}
                         </FieldLabel>
-                        <span className="text-[10px] text-muted-foreground tabular-nums">
+                        <span
+                          className={`text-[10px] tabular-nums ${descriptionValue.length > 500 ? "text-destructive" : "text-muted-foreground"}`}
+                        >
                           {descriptionValue.length}/500
                         </span>
                       </div>
@@ -804,6 +1162,7 @@ export default function ProductForm({
                           }
                           placeholder={t("DESCRIPTION_PLACEHOLDER")}
                           rows={4}
+                          maxLength={500}
                           className="resize-y text-xs"
                         />
                       </InputGroup>
@@ -816,24 +1175,8 @@ export default function ProductForm({
               </FieldGroup>
             </div>
 
-            {/* 📱 Organization Card for Mobile: يظهر أسفل المعلومات الأساسية على الجوال فقط */}
-            <div className="block rounded-xl border border-border bg-card p-5 shadow-xs lg:hidden">
-              <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
-                <TagIcon className="size-4 text-primary" />
-                <div>
-                  <h2 className="text-sm font-semibold text-card-foreground">
-                    {t("ORGANIZATION")}
-                  </h2>
-                  <p className="text-xs text-muted-foreground">
-                    {t("ORGANIZATION_DESCRIPTION")}
-                  </p>
-                </div>
-              </div>
-              {renderOrganizationFields()}
-            </div>
-
             {/* Variants & Pricing */}
-            <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+            <div className="order-3 min-w-0 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-none">
               <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
                 <div className="flex items-center gap-2">
                   <LayersIcon className="size-4 text-primary" />
@@ -871,15 +1214,16 @@ export default function ProductForm({
                     index={index}
                     control={control}
                     setValue={setValue}
+                    getValues={getValues}
                     totalVariants={variantFields.length}
-                    onRemove={() => removeVariant(index)}
+                    onRemove={() => handleRemoveVariant(index)}
                   />
                 ))}
               </div>
             </div>
 
             {/* Media Gallery */}
-            <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+            <div className="order-4 min-w-0 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-none">
               <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
                 <div className="flex items-center gap-2">
                   <ImageIcon className="size-4 text-primary" />
@@ -915,9 +1259,8 @@ export default function ProductForm({
                     control={control}
                     setValue={setValue}
                     getValues={getValues}
-                    watchedImages={watchedImages}
                     totalImages={imageFields.length}
-                    onRemove={() => removeImage(index)}
+                    onRemove={() => handleRemoveImage(index)}
                   />
                 ))}
               </div>
@@ -925,9 +1268,9 @@ export default function ProductForm({
           </div>
 
           {/* Sidebar */}
-          <div className="min-w-0 space-y-6 lg:col-span-1">
+          <div className="contents lg:col-span-1 lg:flex lg:min-w-0 lg:flex-col lg:gap-6">
             {/* Status Card */}
-            <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+            <div className="order-5 min-w-0 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-none">
               <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
                 <SparklesIcon className="size-4 text-primary" />
                 <div>
@@ -985,8 +1328,8 @@ export default function ProductForm({
               </div>
             </div>
 
-            {/* 💻 Organization Card for Desktop: يظهر في السايدبار للكمبيوتر فقط */}
-            <div className="hidden rounded-xl border border-border bg-card p-5 shadow-xs lg:block">
+            {/* Organization Card: نسخة واحدة فقط لكل الشاشات */}
+            <div className="order-2 min-w-0 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-none">
               <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
                 <TagIcon className="size-4 text-primary" />
                 <div>
@@ -1002,7 +1345,7 @@ export default function ProductForm({
             </div>
 
             {/* SEO Details Card */}
-            <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+            <div className="order-6 min-w-0 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-none">
               <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
                 <div className="flex items-center gap-2">
                   <GlobeIcon className="size-4 text-primary" />
@@ -1038,7 +1381,9 @@ export default function ProductForm({
                         <FieldLabel htmlFor="meta-title" className="text-xs">
                           {t("META_TITLE")}
                         </FieldLabel>
-                        <span className="text-[10px] text-muted-foreground tabular-nums">
+                        <span
+                          className={`text-[10px] tabular-nums ${(field.value ?? "").length > 70 ? "text-destructive" : "text-muted-foreground"}`}
+                        >
                           {(field.value ?? "").length}/70
                         </span>
                       </div>
@@ -1047,6 +1392,7 @@ export default function ProductForm({
                         id="meta-title"
                         value={field.value ?? ""}
                         placeholder={t("META_TITLE_PLACEHOLDER")}
+                        maxLength={70}
                         className="h-9 text-xs"
                       />
                       {fieldState.invalid && (
@@ -1068,7 +1414,9 @@ export default function ProductForm({
                         >
                           {t("META_DESCRIPTION")}
                         </FieldLabel>
-                        <span className="text-[10px] text-muted-foreground tabular-nums">
+                        <span
+                          className={`text-[10px] tabular-nums ${(field.value ?? "").length > 160 ? "text-destructive" : "text-muted-foreground"}`}
+                        >
                           {(field.value ?? "").length}/160
                         </span>
                       </div>
@@ -1082,6 +1430,7 @@ export default function ProductForm({
                           }
                           placeholder={t("META_DESCRIPTION_PLACEHOLDER")}
                           rows={3}
+                          maxLength={160}
                           className="resize-y text-xs"
                         />
                       </InputGroup>
@@ -1095,7 +1444,7 @@ export default function ProductForm({
             </div>
 
             {/* Actions Card */}
-            <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+            <div className="order-7 min-w-0 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-none">
               <div className="mb-4 border-b border-border/60 pb-3">
                 <h2 className="text-sm font-semibold text-card-foreground">
                   {t("ACTIONS")}
@@ -1107,12 +1456,12 @@ export default function ProductForm({
               <div className="flex flex-col gap-2">
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isBusy}
                   className="h-9 w-full cursor-pointer text-xs shadow-xs"
                 >
-                  {isSubmitting ? (
+                  {isBusy ? (
                     <>
-                      <Spinner className="mr-2 size-4" />
+                      <Spinner className="me-2 size-4" />
                       {t("SAVING")}
                     </>
                   ) : (
@@ -1123,8 +1472,8 @@ export default function ProductForm({
                 <Button
                   type="button"
                   variant="outline"
-                  disabled={isSubmitting}
-                  onClick={() => router.back()}
+                  disabled={isBusy}
+                  onClick={handleDiscard}
                   className="h-9 w-full text-xs"
                 >
                   {t("DISCARD_CHANGES")}
@@ -1142,6 +1491,7 @@ interface VariantCardProps {
   index: number
   control: Control<FormValues>
   setValue: UseFormSetValue<FormValues>
+  getValues: UseFormGetValues<FormValues>
   totalVariants: number
   onRemove: () => void
 }
@@ -1150,6 +1500,7 @@ function VariantCard({
   index,
   control,
   setValue,
+  getValues,
   totalVariants,
   onRemove,
 }: VariantCardProps) {
@@ -1164,9 +1515,37 @@ function VariantCard({
   )
   const variantName = useWatch({ control, name: `variants.${index}.name` })
   const productName = useWatch({ control, name: "name" })
+  const price = useWatch({ control, name: `variants.${index}.price` })
+  const tracksInventory = useWatch({
+    control,
+    name: `variants.${index}.track_inventory`,
+  })
+  // الصور المرتبطة بهذا المتغير، تُلتقط عند بدء تعديل الـ SKU
+  const linkedImagesRef = React.useRef<number[]>([])
+
+  const captureLinkedImages = () => {
+    const sku = getValues(`variants.${index}.sku`)
+    const isShared = getValues("variants").some(
+      (v, i) => i !== index && v.sku === sku
+    )
+    linkedImagesRef.current =
+      sku && !isShared
+        ? getValues("images").flatMap((image, i) =>
+            image.variant_sku === sku ? [i] : []
+          )
+        : []
+  }
+
+  const syncLinkedImages = (sku: string) => {
+    linkedImagesRef.current.forEach((i) => {
+      setImageVariantSku(i, sku, getValues, setValue)
+    })
+  }
 
   const handleGenerateSku = () => {
     const newSku = generateRandomSku(productName, variantName)
+    captureLinkedImages()
+    syncLinkedImages(newSku)
     setValue(`variants.${index}.sku`, newSku, {
       shouldValidate: true,
       shouldDirty: true,
@@ -1192,6 +1571,7 @@ function VariantCard({
           className="size-7 cursor-pointer text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
           onClick={onRemove}
           disabled={totalVariants === 1}
+          aria-label={t("REMOVE_VARIANT")}
         >
           <Trash2Icon className="size-3.5" />
         </Button>
@@ -1210,7 +1590,20 @@ function VariantCard({
                 <Input
                   {...field}
                   placeholder={t("SKU_PLACEHOLDER")}
-                  className="h-8 pe-8 text-xs uppercase"
+                  className="h-8 pr-8 text-xs"
+                  dir="ltr"
+                  onFocus={captureLinkedImages}
+                  onChange={(e) => {
+                    const input = e.target
+                    const caret = input.selectionStart
+                    // القيمة المحفوظة تطابق المعروضة (أحرف كبيرة وبلا فراغات)
+                    const sku = input.value.replace(/\s/g, "-").toUpperCase()
+                    field.onChange(sku)
+                    syncLinkedImages(sku)
+                    window.requestAnimationFrame(() =>
+                      input.setSelectionRange(caret, caret)
+                    )
+                  }}
                 />
                 <Button
                   type="button"
@@ -1218,7 +1611,8 @@ function VariantCard({
                   size="icon"
                   onClick={handleGenerateSku}
                   title={t("GENERATE_SKU")}
-                  className="absolute inset-e-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
+                  aria-label={t("GENERATE_SKU")}
+                  className="absolute top-1/2 right-1 size-6 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-primary"
                 >
                   <Wand2Icon className="size-3.5" />
                 </Button>
@@ -1261,13 +1655,14 @@ function VariantCard({
               <FieldLabel className="text-xs">
                 {t("PRICE")} <span className="text-destructive">*</span>
               </FieldLabel>
-              <Input
+              <NumberInput
                 {...field}
-                type="number"
+                emptyValue={0}
+                onValueChange={field.onChange}
                 step="0.01"
                 min="0"
+                inputMode="decimal"
                 className="h-8 text-xs"
-                onChange={(e) => field.onChange(Number(e.target.value))}
               />
               {fieldState.invalid && (
                 <ProductFieldError error={fieldState.error} />
@@ -1284,20 +1679,21 @@ function VariantCard({
               <FieldLabel className="text-xs">
                 {t("COMPARE_AT_PRICE")}
               </FieldLabel>
-              <Input
+              <NumberInput
                 {...field}
-                value={field.value ?? ""}
-                type="number"
+                emptyValue={null}
+                onValueChange={field.onChange}
                 step="0.01"
                 min="0"
+                inputMode="decimal"
                 placeholder={t("OPTIONAL")}
                 className="h-8 text-xs"
-                onChange={(e) =>
-                  field.onChange(
-                    e.target.value === "" ? null : Number(e.target.value)
-                  )
-                }
               />
+              {field.value != null && field.value <= price && (
+                <p className="text-[11px] text-amber-600 dark:text-amber-500">
+                  {t("COMPARE_AT_PRICE_HINT")}
+                </p>
+              )}
               {fieldState.invalid && (
                 <ProductFieldError error={fieldState.error} />
               )}
@@ -1316,12 +1712,15 @@ function VariantCard({
                 {t("STOCK_QUANTITY")}{" "}
                 <span className="text-destructive">*</span>
               </FieldLabel>
-              <Input
+              <NumberInput
                 {...field}
-                type="number"
+                emptyValue={0}
+                onValueChange={field.onChange}
+                step="1"
                 min="0"
+                inputMode="numeric"
+                disabled={!tracksInventory}
                 className="h-8 text-xs"
-                onChange={(e) => field.onChange(Number(e.target.value))}
               />
               {fieldState.invalid && (
                 <ProductFieldError error={fieldState.error} />
@@ -1378,6 +1777,9 @@ function VariantCard({
                 <PopoverContent align="start" className="w-auto p-0">
                   <Calendar
                     mode="single"
+                    defaultMonth={
+                      field.value ? parseISO(field.value) : undefined
+                    }
                     captionLayout="dropdown"
                     startMonth={expirationMinDate}
                     endMonth={expirationMaxDate}
@@ -1403,6 +1805,56 @@ function VariantCard({
         />
       </div>
 
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {(
+          [
+            ["track_inventory", "TRACK_INVENTORY"],
+            ["is_active", "VARIANT_ACTIVE"],
+          ] as const
+        ).map(([key, labelKey]) => (
+          <Controller
+            key={key}
+            name={`variants.${index}.${key}`}
+            control={control}
+            render={({ field }) => (
+              <label className="flex cursor-pointer items-center justify-between gap-2 rounded-lg border border-border bg-muted/15 px-3 py-2 text-xs font-medium">
+                {t(labelKey)}
+                <Switch
+                  checked={Boolean(field.value)}
+                  onCheckedChange={field.onChange}
+                />
+              </label>
+            )}
+          />
+        ))}
+
+        {tracksInventory && (
+          <Controller
+            name={`variants.${index}.low_stock_threshold`}
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel className="text-xs">
+                  {t("LOW_STOCK_THRESHOLD")}
+                </FieldLabel>
+                <NumberInput
+                  {...field}
+                  emptyValue={0}
+                  onValueChange={field.onChange}
+                  step="1"
+                  min="0"
+                  inputMode="numeric"
+                  className="h-8 text-xs"
+                />
+                {fieldState.invalid && (
+                  <ProductFieldError error={fieldState.error} />
+                )}
+              </Field>
+            )}
+          />
+        )}
+      </div>
+
       <div className="mt-3 pt-1">
         <Controller
           name={`variants.${index}.attributes`}
@@ -1424,7 +1876,6 @@ interface ImageCardProps {
   control: Control<FormValues>
   setValue: UseFormSetValue<FormValues>
   getValues: UseFormGetValues<FormValues>
-  watchedImages: FormValues["images"]
   totalImages: number
   onRemove: () => void
 }
@@ -1434,7 +1885,6 @@ function ImageCard({
   control,
   setValue,
   getValues,
-  watchedImages,
   totalImages,
   onRemove,
 }: ImageCardProps) {
@@ -1448,11 +1898,15 @@ function ImageCard({
     name: `images.${index}.variant_sku`,
   })
 
-  const usedVariantSkus = React.useMemo(() => {
-    return watchedImages
-      .map((img, i) => (i !== index ? img?.variant_sku : null))
-      .filter((sku): sku is string => Boolean(sku))
-  }, [watchedImages, index])
+  const watchedImages = useWatch({ control, name: "images" }) || []
+  const usedVariantSkus = watchedImages
+    .map((img, i) => (i !== index ? img?.variant_sku : null))
+    .filter((sku): sku is string => Boolean(sku))
+  const isPrimary = watchedImages[index]?.is_primary ?? false
+  const isGeneralImage = !selectedVariantSku?.trim()
+  // نحفظ الرابط الذي فشل، فتعود المعاينة تلقائياً عند تغييره
+  const [failedUrl, setFailedUrl] = React.useState<string | null>(null)
+  const hasImageError = Boolean(currentUrl) && failedUrl === currentUrl
 
   const handleGenerateImageAlt = () => {
     if (!productName.trim()) {
@@ -1478,15 +1932,14 @@ function ImageCard({
   }
 
   const handlePrimaryChange = (checked: boolean) => {
-    if (checked) {
-      const allImages = getValues("images") || []
-      allImages.forEach((_, i: number) => {
-        if (i !== index) {
-          setValue(`images.${i}.is_primary`, false, { shouldDirty: true })
-        }
+    if (!checked || !isGeneralImage) return
+    const allImages = getValues("images") || []
+    allImages.forEach((_, i: number) => {
+      setValue(`images.${i}.is_primary`, i === index, {
+        shouldDirty: true,
+        shouldValidate: true,
       })
-    }
-    setValue(`images.${index}.is_primary`, checked, { shouldDirty: true })
+    })
   }
 
   return (
@@ -1496,18 +1949,19 @@ function ImageCard({
           ratio={1 / 1}
           className="flex w-full items-center justify-center"
         >
-          {currentUrl ? (
+          {hasImageError ? (
+            <ImageOffIcon className="size-6 stroke-[1.5] text-destructive" />
+          ) : currentUrl ? (
             <img
+              key={currentUrl}
               src={currentUrl}
               alt={t("IMAGE_PREVIEW")}
               className="size-full object-cover"
-              onError={(e) => {
-                e.currentTarget.style.display = "none"
-              }}
+              onError={() => setFailedUrl(currentUrl)}
             />
           ) : (
             <ImageIcon className="size-6 stroke-[1.5]" />
-          )}{" "}
+          )}
         </AspectRatio>
       </div>
 
@@ -1523,6 +1977,7 @@ function ImageCard({
             className="size-7 cursor-pointer text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
             onClick={onRemove}
             disabled={totalImages === 1}
+            aria-label={t("REMOVE_IMAGE")}
           >
             <Trash2Icon className="size-3.5" />
           </Button>
@@ -1532,35 +1987,12 @@ function ImageCard({
         {index === 0 && (
           <div className="space-y-1 rounded-md border border-primary/20 bg-primary/5 p-2.5 text-[11px] text-muted-foreground">
             <p className="font-medium text-foreground">
-              {t("IMAGE_GUIDE_TITLE", {
-                default: "💡 Product Image Guidelines:",
-              })}
+              {t("IMAGE_GUIDE_TITLE")}
             </p>
             <ul className="list-inside list-disc space-y-0.5 ps-1">
-              <li>
-                {t("IMAGE_GUIDE_FEATURED", {
-                  default:
-                    "Featured products use a 21/9 aspect ratio (Hero Slider).",
-                })}
-              </li>
-              <li>
-                {t("IMAGE_GUIDE_REGULAR", {
-                  default:
-                    "Regular products and cards use a 1/1 square aspect ratio.",
-                })}
-              </li>
-              <li>
-                {t("IMAGE_GUIDE_GENERAL", {
-                  default:
-                    "General image (unlinked): Serves as the primary image across lists and homepage.",
-                })}
-              </li>
-              <li>
-                {t("IMAGE_GUIDE_VARIANT", {
-                  default:
-                    "Variant-linked image: Appears exclusively on the product details page when that variant is selected.",
-                })}
-              </li>
+              <li>{t("IMAGE_GUIDE_SPECS")}</li>
+              <li>{t("IMAGE_GUIDE_GENERAL")}</li>
+              <li>{t("IMAGE_GUIDE_VARIANT")}</li>
             </ul>
           </div>
         )}
@@ -1575,7 +2007,15 @@ function ImageCard({
                 value={field.value ?? ""}
                 placeholder="https://example.com/images/product.jpg"
                 className="h-8 text-xs"
+                type="url"
+                dir="ltr"
+                aria-label={t("IMAGE_URL")}
               />
+              {hasImageError && (
+                <p className="text-[11px] text-destructive">
+                  {t("IMAGE_LOAD_ERROR")}
+                </p>
+              )}
               {fieldState.invalid && (
                 <ProductFieldError error={fieldState.error} />
               )}
@@ -1593,9 +2033,11 @@ function ImageCard({
                   {t("LINK_TO_VARIANT")}
                 </FieldLabel>
                 <Select
-                  onValueChange={(val) =>
-                    field.onChange(val === "none" ? "" : val)
-                  }
+                  onValueChange={(val) => {
+                    const variantSku = val === "none" ? "" : val
+                    field.onChange(variantSku)
+                    setImageVariantSku(index, variantSku, getValues, setValue)
+                  }}
                   value={field.value || "none"}
                 >
                   <SelectTrigger className="h-8 text-xs">
@@ -1626,18 +2068,18 @@ function ImageCard({
                             ? `SKU: ${currentSku}`
                             : `Variant #${i + 1}`
 
-                      const itemValue = currentSku || `variant-${i}`
+                      // لا يمكن الربط بمتغير بلا SKU
+                      const itemValue = currentSku || `__no-sku-${i}`
 
                       return (
                         <SelectItem
                           key={i}
                           value={itemValue}
-                          disabled={isAlreadyUsed}
+                          disabled={!currentSku || isAlreadyUsed}
                         >
                           {displayLabel}{" "}
-                          {isAlreadyUsed
-                            ? `(${t("ALREADY_USED", { default: "Already used" })})`
-                            : ""}
+                          {isAlreadyUsed ? `(${t("ALREADY_USED")})` : ""}
+                          {!currentSku ? `(${t("ADD_SKU_FIRST")})` : ""}
                         </SelectItem>
                       )
                     })}
@@ -1660,7 +2102,7 @@ function ImageCard({
                     {...field}
                     value={field.value ?? ""}
                     placeholder={t("IMAGE_ALT_TEXT")}
-                    className="h-9 pe-8 text-xs"
+                    className="h-8 pe-8 text-xs"
                   />
                   <Button
                     type="button"
@@ -1668,6 +2110,7 @@ function ImageCard({
                     size="icon"
                     onClick={handleGenerateImageAlt}
                     title={t("GENERATE_ALT_TEXT")}
+                    aria-label={t("GENERATE_ALT_TEXT")}
                     className="absolute inset-e-1 size-6 cursor-pointer text-muted-foreground hover:text-primary"
                   >
                     <Wand2Icon className="size-3.5" />
@@ -1684,11 +2127,13 @@ function ImageCard({
         <Controller
           name={`images.${index}.is_primary`}
           control={control}
-          render={({ field }) => (
+          render={() => (
             <div className="flex items-center gap-2 pt-1">
               <Switch
-                checked={field.value}
+                checked={isPrimary}
                 onCheckedChange={handlePrimaryChange}
+                // لتغيير الصورة الرئيسية فعّل صورة أخرى
+                disabled={!isGeneralImage || isPrimary}
                 id={`primary-${index}`}
               />
               <label
@@ -1759,12 +2204,18 @@ function VariantAttributesManager({
               key={key}
               className="inline-flex items-center gap-1.5 rounded-md border bg-background px-2.5 py-1 text-xs font-medium shadow-xs transition-colors hover:border-muted-foreground/30"
             >
-              <span className="text-muted-foreground uppercase">{key}:</span>
+              <span className="text-muted-foreground uppercase">
+                {PRESET_ATTRIBUTE_KEYS.includes(key)
+                  ? t(`ATTRIBUTE_${key.toUpperCase()}` as never)
+                  : key}
+                :
+              </span>
               <span className="font-semibold text-foreground">{value}</span>
               <button
                 type="button"
                 onClick={() => removeAttribute(key)}
-                className="ml-0.5 cursor-pointer rounded p-0.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                aria-label={`${t("REMOVE_ATTRIBUTE")}: ${key}`}
+                className="ms-0.5 cursor-pointer rounded p-0.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
               >
                 <XIcon className="size-3" />
               </button>
@@ -1784,13 +2235,9 @@ function VariantAttributesManager({
             <SelectValue placeholder={t("SELECT_ATTRIBUTE")} />
           </SelectTrigger>
           <SelectContent>
-            {PRESET_ATTRIBUTE_KEYS.map((item) => (
-              <SelectItem
-                key={item.value}
-                value={item.value}
-                className="text-xs"
-              >
-                {t(`ATTRIBUTE_${item.value.toUpperCase()}`)}
+            {PRESET_ATTRIBUTE_KEYS.map((key) => (
+              <SelectItem key={key} value={key} className="text-xs">
+                {t(`ATTRIBUTE_${key.toUpperCase()}`)}
               </SelectItem>
             ))}
             <SelectItem
@@ -1807,6 +2254,12 @@ function VariantAttributesManager({
             placeholder={t("ATTRIBUTE_NAME_PLACEHOLDER")}
             value={customKey}
             onChange={(e) => setCustomKey(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault()
+                addAttribute()
+              }
+            }}
             className="h-8 w-32 bg-background text-xs"
             autoFocus
           />
@@ -1832,10 +2285,15 @@ function VariantAttributesManager({
           onClick={addAttribute}
           className="h-8 shrink-0 cursor-pointer px-3 text-xs"
         >
-          <PlusIcon className="mr-1 size-3.5" />
+          <PlusIcon className="me-1 size-3.5" />
           {t("ADD")}
         </Button>
       </div>
+      {attrVal.trim() && (
+        <p className="text-[11px] text-amber-600 dark:text-amber-500">
+          {t("ATTRIBUTE_PENDING_HINT")}
+        </p>
+      )}
     </div>
   )
 }

@@ -8,9 +8,11 @@
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
- import { getValidationDetails } from "../../validation"
+import { getValidationDetails } from "../../validation"
 import { getCategoriesSchema, type GetCategoriesInput } from "../schemas"
 import type { Category } from "../types"
+
+const CATEGORIES_PAGE_SIZE = 500
 
 export async function getCategories(
   input: GetCategoriesInput = {}
@@ -25,32 +27,45 @@ export async function getCategories(
   }
 
   const { includeInactive, parentId } = validation.data
- 
+
   const supabase = await createServerClient()
-  let query = supabase
-    .from("categories")
-    .select("*")
-    .order("sort_order", { ascending: true, nullsFirst: false })
-    .order("name", { ascending: true })
 
-  if (!includeInactive) {
-    query = query.eq("is_active", true)
-  }
+  const categories: Category[] = []
+  for (let offset = 0; ; offset += CATEGORIES_PAGE_SIZE) {
+    let query = supabase
+      .from("categories")
+      .select("*")
+      .order("sort_order", { ascending: true, nullsFirst: false })
+      .order("name", { ascending: true })
+      .order("id", { ascending: true })
 
-  if (parentId === null) {
-    query = query.is("parent_id", null)
-  } else if (parentId) {
-    query = query.eq("parent_id", parentId)
-  }
-
-  const { data, error } = await query
-  if (error) {
-    return {
-      success: false,
-      error: "GET_CATEGORIES_ERROR",
-      details: { database: [error.message] },
+    if (!includeInactive) {
+      query = query.eq("is_active", true)
     }
+
+    if (parentId === null) {
+      query = query.is("parent_id", null)
+    } else if (parentId) {
+      query = query.eq("parent_id", parentId)
+    }
+
+    const { data, error } = await query.range(
+      offset,
+      offset + CATEGORIES_PAGE_SIZE - 1
+    )
+    if (error) {
+      return {
+        success: false,
+        error: "GET_CATEGORIES_ERROR",
+        details: { database: [error.message] },
+      }
+    }
+
+    const page = (data ?? []) as Category[]
+    categories.push(...page)
+
+    if (page.length < CATEGORIES_PAGE_SIZE) break
   }
 
-  return { success: true, data: (data ?? []) as Category[] }
+  return { success: true, data: categories }
 }

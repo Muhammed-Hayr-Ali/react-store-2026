@@ -8,6 +8,7 @@ import ProductForm from "@/components/dashboard/product/product-form"
 import { getTranslations } from "next-intl/server"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
 import { notFound } from "next/navigation"
+import { getActionErrorKey } from "@/lib/actions/error-keys"
 
 export async function generateMetadata({
   params,
@@ -38,16 +39,20 @@ export default async function Page({
   const t = await getTranslations({ locale, namespace: "ProductsManagement" })
 
   const [resultCategories, resultBrands] = await Promise.all([
-    getCategories(),
+    getCategories({ includeInactive: true }),
     getBrands(),
   ])
 
-  let categories: Category[] = []
-  let brands: BrandRecord[] = []
-
-  if (resultCategories.success && resultCategories.data) {
-    categories = resultCategories.data
+  if (!resultCategories.success) {
+    console.error("[product create page] Failed to load categories", {
+      error: resultCategories.error,
+      details: resultCategories.details,
+    })
+    throw new Error(t(getActionErrorKey(resultCategories.error)))
   }
+
+  const categories: Category[] = resultCategories.data
+  let brands: BrandRecord[] = []
 
   if (resultBrands.success && resultBrands.data) {
     brands = resultBrands.data

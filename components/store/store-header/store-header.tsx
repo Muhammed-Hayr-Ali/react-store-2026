@@ -28,6 +28,7 @@ import {
   hideScrollbar,
   isRtlLocale,
   navLinkClass,
+  storeContainer,
 } from "./store-header-shared"
 import { MobileStoreCategoriesButton } from "./mobile_store-categories-button"
 
@@ -159,7 +160,7 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
         ref={mainHeaderRef}
         className="w-full border-b border-border/60 bg-background font-normal"
       >
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className={storeContainer}>
           <div className="flex h-20 items-center justify-between gap-4 sm:gap-6">
             <Link
               href={APP_ROUTES.HOME}
@@ -177,7 +178,7 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
               className="hidden max-w-lg flex-1 md:block"
             />
 
-            <div className="flex shrink-0 items-center">
+            <div className="-me-3 flex shrink-0 items-center">
               <AccountSelector />
 
               <Link
@@ -216,16 +217,16 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
 
         <div className="border-t border-border/60" />
 
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className={storeContainer}>
           <div
             className={cn(
-              "-mx-1 flex h-13 items-center justify-between gap-2 overflow-x-auto px-1 sm:gap-4",
+              "-mx-3 flex h-13 items-center justify-between gap-2 overflow-x-auto px-3 sm:gap-4",
               hideScrollbar
             )}
           >
             <nav
               aria-label={t("categories")}
-              className="flex shrink-0 items-center gap-2 text-[13px] font-normal"
+              className="-ms-2.5 flex shrink-0 items-center gap-2 text-[13px] font-normal"
             >
               <StoreCategoriesButton categories={rootCategories} />
               <MobileStoreCategoriesButton categories={rootCategories} />
@@ -297,7 +298,7 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
             : "pointer-events-none -translate-y-full opacity-0"
         )}
       >
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className={storeContainer}>
           <div className="flex h-16 items-center justify-between gap-4 sm:gap-6">
             <Link
               href={APP_ROUTES.HOME}
@@ -316,7 +317,7 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
               href={APP_ROUTES.CART}
               aria-label={cartLabel}
               className={cn(
-                "relative flex size-10 shrink-0 items-center justify-center rounded-xl text-foreground transition-colors hover:bg-muted/60 hover:text-primary",
+                "relative -me-2.5 flex size-10 shrink-0 items-center justify-center rounded-xl text-foreground transition-colors hover:bg-muted/60 hover:text-primary",
                 focusRing
               )}
             >
@@ -329,7 +330,7 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
         <div className="border-t border-border/50" />
 
         {/* شريط التصنيفات الرئيسية مع أزرار التمرير */}
-        <div className="container mx-auto max-w-7xl px-2 sm:px-4 lg:px-6">
+        <div className={storeContainer}>
           <div className="flex h-11 items-center gap-1.5 text-xs">
             <button
               type="button"
@@ -356,7 +357,9 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
               aria-label={t("categories")}
               style={stickyFadeStyle}
               className={cn(
-                "flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto scroll-smooth text-foreground/85 motion-reduce:scroll-auto",
+                // دون أزرار تمرير: نص أول تصنيف يحاذي الشعار
+                "-mx-2.5 flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto scroll-smooth text-foreground/85 motion-reduce:scroll-auto",
+                hasOverflow && "sm:mx-0",
                 hideScrollbar
               )}
             >

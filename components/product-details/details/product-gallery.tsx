@@ -27,7 +27,7 @@ interface ProductGalleryProps {
   images: ProductImageDetail[]
   variants: ProductVariantDetail[]
   productName: string
-  selectedVariantSku?: string
+  selectedVariantId?: string
   isOutOfStock?: boolean
   discountPercentage?: number | null
   onVariantSelect: (variant: ProductVariantDetail) => void
@@ -37,7 +37,7 @@ export function ProductGallery({
   images,
   variants,
   productName,
-  selectedVariantSku,
+  selectedVariantId,
   isOutOfStock = false,
   discountPercentage = null,
   onVariantSelect,
@@ -53,7 +53,7 @@ export function ProductGallery({
 
   const primaryImage = images.find((img) => img.is_primary) || images[0]
   const activeVariantImage = images.find(
-    (img) => img.variant_sku === selectedVariantSku
+    (img) => img.variant_id === selectedVariantId
   )
   const activeImage = activeVariantImage?.url || primaryImage?.url || ""
 
@@ -70,9 +70,9 @@ export function ProductGallery({
 
   const handleImageChange = React.useCallback(
     (targetImage: ProductImageDetail) => {
-      if (targetImage?.variant_sku) {
+      if (targetImage?.variant_id) {
         const matchedVariant = variants.find(
-          (v) => v.sku === targetImage.variant_sku
+          (v) => v.id === targetImage.variant_id
         )
         if (matchedVariant) {
           onVariantSelect(matchedVariant)

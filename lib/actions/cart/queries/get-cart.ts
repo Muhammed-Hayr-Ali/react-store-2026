@@ -12,7 +12,7 @@ import type { CartQueryResult, CartItemQueryResult } from "../types"
 interface ProductImageRecord {
   url: string
   is_primary: boolean
-  variant_sku?: string | null
+  variant_id?: string | null
 }
 
 export async function getCart(): Promise<ApiResult<CartQueryResult | null>> {
@@ -67,7 +67,7 @@ export async function getCart(): Promise<ApiResult<CartQueryResult | null>> {
         name,
         slug,
          description,
-     product_images (url, is_primary, variant_sku)
+     product_images (url, is_primary, variant_id)
       ),
       product_variants (
         id,
@@ -100,11 +100,11 @@ export async function getCart(): Promise<ApiResult<CartQueryResult | null>> {
 
     const productImages = (product?.product_images ??
       []) as ProductImageRecord[]
-    const variantSku = variant?.sku ?? null
+    const variantId = variant?.id ?? null
 
-    // تصفية الصور الخاصة بهذا المتغير فقط عبر الـ variant_sku
-    const variantImages = variantSku
-      ? productImages.filter((img) => img.variant_sku === variantSku)
+    // تصفية الصور الخاصة بهذا المتغير فقط عبر variant_id
+    const variantImages = variantId
+      ? productImages.filter((img) => img.variant_id === variantId)
       : []
 
     // البحث عن الصورة الأساسية للمتغير أو أول صورة للمتغير (وإلا إرجاع null تماماً)
@@ -127,7 +127,7 @@ export async function getCart(): Promise<ApiResult<CartQueryResult | null>> {
         product_images: productImages.map((img) => ({
           url: img.url,
           is_primary: img.is_primary,
-          variant_sku: img.variant_sku,
+          variant_id: img.variant_id,
         })),
       },
       product_variants: {

@@ -131,7 +131,7 @@ export function ProductInfoSection({
             images={product.product_images}
             variants={product.product_variants}
             productName={product.name}
-            selectedVariantSku={selectedVariant?.sku}
+            selectedVariantId={selectedVariant?.id}
             isOutOfStock={
               selectedVariant?.track_inventory &&
               selectedVariant?.stock_quantity <= 0

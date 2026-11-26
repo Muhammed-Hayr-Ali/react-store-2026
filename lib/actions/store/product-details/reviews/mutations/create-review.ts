@@ -77,6 +77,17 @@ export async function createReview(
     .single()
 
   if (insertError || !insertedReview) {
+    if (
+      insertError?.code === "23505" &&
+      insertError.message.includes("product_reviews_product_user_unique_idx")
+    ) {
+      return {
+        success: false,
+        error: "REVIEW_ALREADY_EXISTS",
+        details: { database: ["You have already reviewed this product."] },
+      }
+    }
+
     console.error("[createReview] Database insert failed", {
       productId,
       userId: currentUser.id,

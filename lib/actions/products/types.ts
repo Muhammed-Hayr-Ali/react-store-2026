@@ -6,10 +6,7 @@
 // ============================================================================
 // 1 & 2. أنواع الإدخال الرئيسية (Create & Update)
 // ============================================================================
-export type {
-  CreateProductInput,
-  UpdateProductInput,
-} from "./schemas"
+export type { CreateProductInput, UpdateProductInput } from "./schemas"
 
 // ============================================================================
 // Relational Entity Types (للاستخدام في الواجهات والمكونات Client/Server)
@@ -35,12 +32,12 @@ export interface ProductImageItem {
   url: string
   alt_text: string | null
   is_primary: boolean
-  variant_sku: string | null
+  variant_id: string | null
 }
 
 export interface ProductWithRelations {
   id: string
-  brand_id: string | null
+  brand_id: string
   category_id: string
   name: string
   slug: string

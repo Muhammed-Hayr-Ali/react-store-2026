@@ -26,7 +26,7 @@ export interface ProductImageDetail {
   url: string
   alt_text: string | null
   is_primary: boolean
-  variant_sku: string | null
+  variant_id: string | null
 }
 
 export interface CategoryDetail {
@@ -144,7 +144,7 @@ const getCachedProductDetails = unstable_cache(
           url,
           alt_text,
           is_primary,
-          variant_sku
+          variant_id
         )
       `
       )
@@ -208,10 +208,7 @@ const getCachedProductDetails = unstable_cache(
 
     const allImages = rawProduct.product_images ?? []
     const variantSpecificImages = allImages.filter(
-      (img) =>
-        img.variant_sku !== null &&
-        img.variant_sku !== undefined &&
-        String(img.variant_sku).trim() !== ""
+      (img) => img.variant_id !== null
     )
 
     const formattedProduct: FullProductDetails = {

@@ -49,3 +49,6 @@ export const navLinkClass = cn(
 /** إخفاء شريط التمرير في كل المتصفحات (scrollbar-none ليست أداة افتراضية في Tailwind v4) */
 export const hideScrollbar =
   "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+
+/** حاوية المتجر الموحدة: المصدر الوحيد للعرض الأقصى والهوامش الجانبية */
+export const storeContainer = "mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8"

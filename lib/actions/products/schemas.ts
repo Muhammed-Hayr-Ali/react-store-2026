@@ -11,7 +11,7 @@ import { z } from "zod"
 
 const variantBaseSchema = z
   .object({
-    sku: z.string().min(1, "SKU_REQUIRED"),
+    sku: z.string().trim().min(1, "SKU_REQUIRED"),
     name: z.string().optional().or(z.literal("")),
     attributes: z.record(z.string(), z.string()).optional(),
     price: z.number().min(0, "PRICE_MUST_BE_POSITIVE"),
@@ -50,7 +50,7 @@ const imageBaseSchema = z.object({
   url: z.string().min(1, "IMAGE_LINK_INVALID"),
   alt_text: z.string().optional().or(z.literal("")),
   is_primary: z.boolean(),
-  variant_sku: z.string().optional().or(z.literal("")),
+  variant_sku: z.string().trim().optional().or(z.literal("")),
 })
 
 // ============================================================================
@@ -60,7 +60,7 @@ const imageBaseSchema = z.object({
 export const createProductSchema = z
   .object({
     category_id: z.string().uuid("INVALID_CATEGORY_ID"),
-    brand_id: z.string().uuid("INVALID_BRAND_ID").nullable().optional(),
+    brand_id: z.string().uuid("INVALID_BRAND_ID"),
     name: z.string().min(1, "NAME_REQUIRED"),
     slug: z
       .string()
@@ -71,7 +71,9 @@ export const createProductSchema = z
     meta_description: z.string().nullable().optional(),
     is_active: z.boolean(),
     is_featured: z.boolean(),
-    variants: z.array(variantBaseSchema).min(1, "AT_LEAST_ONE_VARIANT_REQUIRED"),
+    variants: z
+      .array(variantBaseSchema)
+      .min(1, "AT_LEAST_ONE_VARIANT_REQUIRED"),
     images: z.array(imageBaseSchema).min(1, "AT_LEAST_ONE_IMAGE_REQUIRED"),
   })
   .refine(
@@ -100,6 +102,35 @@ export const createProductSchema = z
       path: ["images"],
     }
   )
+  .refine(
+    (data) => {
+      const variantSkus = new Set(data.variants.map((variant) => variant.sku))
+      return data.images.every((image) => {
+        const sku = image.variant_sku?.trim()
+        return !sku || variantSkus.has(sku)
+      })
+    },
+    {
+      message: "IMAGE_VARIANT_NOT_FOUND",
+      path: ["images"],
+    }
+  )
+  .superRefine((data, ctx) => {
+    const seenSkus = new Set<string>()
+
+    data.variants.forEach((variant, index) => {
+      const normalizedSku = variant.sku.toUpperCase()
+      if (seenSkus.has(normalizedSku)) {
+        ctx.addIssue({
+          code: "custom",
+          message: "DUPLICATE_VARIANT_SKU",
+          path: ["variants", index, "sku"],
+        })
+      } else {
+        seenSkus.add(normalizedSku)
+      }
+    })
+  })
 
 export type CreateProductInput = z.infer<typeof createProductSchema>
 

@@ -1,6 +1,6 @@
 /**
  * @file lib/actions/cart/types.ts
- * @description TypeScript types and interfaces for Cart system, updated with variant_sku and resolved image support.
+ * @description TypeScript types and interfaces for Cart system with variant-specific image support.
  */
 
 export interface CartRecord {
@@ -29,7 +29,7 @@ export interface CartItemQueryResult extends CartItemRecord {
     product_images: {
       url: string
       is_primary: boolean
-      variant_sku?: string | null
+      variant_id?: string | null
     }[]
     brand?: {
       name: string

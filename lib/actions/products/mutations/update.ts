@@ -10,6 +10,7 @@ import { revalidatePath, revalidateTag } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { updateProductSchema, type UpdateProductInput } from "../schemas"
 import { CACHE_TAG } from "@/lib/config/app_config"
+import { normalizePrimaryImages } from "../normalize-primary-images"
 
 export type UpdateProductResult =
   | { success: true }
@@ -44,7 +45,11 @@ export async function updateProduct(
     if (!validation.success) {
       return {
         success: false,
-        error: "VALIDATION_ERROR",
+        error: validation.error.issues.some(
+          (issue) => issue.message === "DUPLICATE_VARIANT_SKU"
+        )
+          ? "DUPLICATE_VARIANT_SKU"
+          : "VALIDATION_ERROR",
         details: validation.error.flatten().fieldErrors,
       }
     }
@@ -67,6 +72,27 @@ export async function updateProduct(
       return { success: false, error: "PRODUCT_SLUG_ALREADY_EXISTS" }
     }
 
+    const incomingSkus = variants.map((variant) => variant.sku)
+    const { data: matchingVariants, error: skuCheckError } = await supabase
+      .from("product_variants")
+      .select("id, sku, product_id")
+      .in("sku", incomingSkus)
+
+    if (skuCheckError) {
+      logDatabaseError("Check variant SKUs", skuCheckError)
+      return { success: false, error: "DATABASE_ERROR" }
+    }
+
+    if (matchingVariants?.some((variant) => variant.product_id !== id)) {
+      return { success: false, error: "VARIANT_SKU_ALREADY_EXISTS" }
+    }
+
+    const existingVariantIdsBySku = new Map(
+      (matchingVariants ?? [])
+        .filter((variant) => variant.product_id === id)
+        .map((variant) => [variant.sku, variant.id])
+    )
+
     const { error: updateError } = await supabase
       .from("products")
       .update({
@@ -80,7 +106,40 @@ export async function updateProduct(
       return { success: false, error: "UPDATE_PRODUCT_FAILED" }
     }
 
-    const incomingSkus = variants.map((v) => v.sku)
+    const variantsToUpsert = variants.map((variant) => ({
+      ...variant,
+      ...(existingVariantIdsBySku.has(variant.sku)
+        ? { id: existingVariantIdsBySku.get(variant.sku) }
+        : {}),
+      product_id: id,
+      expiration_date: variant.expiration_date || null,
+    }))
+
+    const { data: upsertedVariants, error: upsertVariantsError } =
+      await supabase
+        .from("product_variants")
+        .upsert(variantsToUpsert, { onConflict: "id" })
+        .select("id, sku")
+
+    if (
+      upsertVariantsError ||
+      !upsertedVariants ||
+      upsertedVariants.length !== variantsToUpsert.length
+    ) {
+      logDatabaseError(
+        "Upsert variants",
+        upsertVariantsError ?? {
+          message: "Variant rows were not returned after upsert.",
+        }
+      )
+      return {
+        success: false,
+        error:
+          upsertVariantsError?.code === "23505"
+            ? "VARIANT_SKU_ALREADY_EXISTS"
+            : "UPDATE_VARIANTS_FAILED",
+      }
+    }
 
     const { error: deleteVariantsError } = await supabase
       .from("product_variants")
@@ -93,19 +152,20 @@ export async function updateProduct(
       return { success: false, error: "SYNC_VARIANTS_FAILED" }
     }
 
-    const variantsToUpsert = variants.map((variant) => ({
-      ...variant,
-      product_id: id,
-      expiration_date: variant.expiration_date || null,
-    }))
-
-    const { error: upsertVariantsError } = await supabase
-      .from("product_variants")
-      .upsert(variantsToUpsert, { onConflict: "sku" })
-
-    if (upsertVariantsError) {
-      logDatabaseError("Upsert variants", upsertVariantsError)
-      return { success: false, error: "UPDATE_VARIANTS_FAILED" }
+    const variantIdsBySku = new Map(
+      upsertedVariants.map((variant) => [variant.sku, variant.id])
+    )
+    if (
+      images.some(
+        (img) =>
+          img.variant_sku?.trim() &&
+          !variantIdsBySku.has(img.variant_sku.trim())
+      )
+    ) {
+      logDatabaseError("Resolve image variant", {
+        message: "An image references a variant that was not upserted.",
+      })
+      return { success: false, error: "IMAGE_VARIANT_NOT_FOUND" }
     }
 
     const { error: deleteImagesError } = await supabase
@@ -118,11 +178,18 @@ export async function updateProduct(
       return { success: false, error: "SYNC_IMAGES_FAILED" }
     }
 
-    const imagesToInsert = images.map((img) => ({
-      ...img,
-      product_id: id,
-      variant_sku: img.variant_sku?.trim() || null,
-    }))
+    const imagesToInsert = normalizePrimaryImages(
+      images.map((img) => {
+        const variantSku = img.variant_sku?.trim()
+        return {
+          url: img.url,
+          alt_text: img.alt_text || null,
+          is_primary: img.is_primary,
+          product_id: id,
+          variant_id: variantSku ? variantIdsBySku.get(variantSku)! : null,
+        }
+      })
+    )
 
     const { error: insertImagesError } = await supabase
       .from("product_images")

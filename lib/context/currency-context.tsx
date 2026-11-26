@@ -58,8 +58,9 @@ export function CurrencyProvider({
 }: CurrencyProviderProps) {
   // سعر الصرف المعتمد للمتجر (المقرب للأعلى في قاعدة البيانات)
   const storeRate = exchangeRateData?.store_rate ?? 1
+  const hasValidRate = (exchangeRateData?.store_rate ?? 0) > 0
 
-  const [currentCurrency, setCurrentCurrency] = React.useState<StoreCurrency>(
+  const [selectedCurrency, setSelectedCurrency] = React.useState<StoreCurrency>(
     () => {
       return (
         STORE_CURRENCIES.find((c) => c.code === defaultCurrencyCode) ||
@@ -72,10 +73,16 @@ export function CurrencyProvider({
     const normalized = code.toUpperCase()
     const found = STORE_CURRENCIES.find((c) => c.code === normalized)
     if (found) {
-      setCurrentCurrency(found)
+      setSelectedCurrency(found)
       document.cookie = `app_currency=${found.code}; path=/; max-age=31536000; SameSite=Lax`
     }
   }, [])
+
+  // دون سعر صرف صالح نعرض الدولار، بدل مبلغ دولاري عليه رمز الليرة
+  const currentCurrency =
+    selectedCurrency.code === "SYP" && !hasValidRate
+      ? STORE_CURRENCIES[0]
+      : selectedCurrency
 
   // تحويل السعر من سنتات الدولار إلى القيمة الرقمية النهائية حسب العملة المختارة
   const convertFromCents = React.useCallback(

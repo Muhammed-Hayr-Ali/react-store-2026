@@ -67,7 +67,7 @@ export async function getProductForEditBySlug(
         url,
         alt_text,
         is_primary,
-        variant_sku
+        variant_id
       )
     `
     )

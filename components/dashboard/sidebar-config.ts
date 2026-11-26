@@ -39,7 +39,7 @@ export const SIDEBAR_CONFIG: SidebarConfig = {
     {
       key: "store",
       label: "STORE",
-      url: APP_ROUTES.HOME,
+      url: process.env.NEXT_PUBLIC_APP_URL ?? APP_ROUTES.HOME,
       icon: StoreIcon,
     },
     {

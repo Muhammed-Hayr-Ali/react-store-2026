@@ -47,7 +47,7 @@ export default async function Page({
 
   const [productResult, categoriesResult, brandsResult] = await Promise.all([
     getProductForEditBySlug(slug, { activeOnly: false }),
-    getCategories(),
+    getCategories({ includeInactive: true }),
     getBrands(),
   ])
 
