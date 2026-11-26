@@ -66,6 +66,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 // استيراد دوال السيرفر
 import { createProduct } from "@/lib/actions/products/mutations/create"
@@ -318,6 +328,8 @@ export default function ProductForm({
   const t = useTranslations("ProductForm")
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
   const [isRedirecting, setIsRedirecting] = React.useState(false)
+  const [isDiscardDialogOpen, setIsDiscardDialogOpen] = React.useState(false)
+  const [pendingHref, setPendingHref] = React.useState<string | null>(null)
   const formRef = React.useRef<HTMLFormElement>(null)
 
   const isEditing = Boolean(product)
@@ -431,6 +443,65 @@ export default function ProductForm({
     }
     window.addEventListener("beforeunload", warn)
     return () => window.removeEventListener("beforeunload", warn)
+  }, [isDirty, isRedirecting])
+
+  React.useEffect(() => {
+    if (!isDirty || isRedirecting) return
+
+    const interceptInternalLinks = (event: MouseEvent) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return
+      }
+
+      const target = event.target
+      if (!(target instanceof Element)) return
+
+      const anchor = target.closest<HTMLAnchorElement>("a[href]")
+      if (
+        !anchor ||
+        anchor.hasAttribute("download") ||
+        (anchor.target && anchor.target.toLowerCase() !== "_self")
+      ) {
+        return
+      }
+
+      const href = anchor.getAttribute("href")?.trim()
+      if (!href || href.startsWith("#")) return
+
+      const destination = new URL(anchor.href, window.location.href)
+      if (
+        destination.origin !== window.location.origin ||
+        (destination.protocol !== "http:" && destination.protocol !== "https:")
+      ) {
+        return
+      }
+
+      const current = new URL(window.location.href)
+      if (
+        destination.pathname === current.pathname &&
+        destination.search === current.search &&
+        destination.hash
+      ) {
+        return
+      }
+
+      event.preventDefault()
+      setPendingHref(
+        `${destination.pathname}${destination.search}${destination.hash}`
+      )
+      setIsDiscardDialogOpen(true)
+    }
+
+    document.addEventListener("click", interceptInternalLinks, true)
+    return () =>
+      document.removeEventListener("click", interceptInternalLinks, true)
   }, [isDirty, isRedirecting])
 
   const {
@@ -626,8 +697,25 @@ export default function ProductForm({
   }
 
   const handleDiscard = () => {
-    if (isDirty && !window.confirm(t("DISCARD_CONFIRM"))) return
+    if (isDirty) {
+      setPendingHref(null)
+      setIsDiscardDialogOpen(true)
+      return
+    }
+
+    setIsRedirecting(true)
     router.back()
+  }
+
+  const handleConfirmDiscard = () => {
+    setIsDiscardDialogOpen(false)
+    setIsRedirecting(true)
+
+    if (pendingHref) {
+      router.push(pendingHref)
+    } else {
+      router.back()
+    }
   }
 
   // حذف متغير: فك ارتباط صوره مع إتاحة التراجع
@@ -1483,6 +1571,37 @@ export default function ProductForm({
           </div>
         </div>
       </form>
+      <AlertDialog
+        open={isDiscardDialogOpen}
+        onOpenChange={setIsDiscardDialogOpen}
+      >
+        <AlertDialogContent
+          dir={locale === "ar" ? "rtl" : "ltr"}
+          className="text-start"
+        >
+          <AlertDialogHeader className="text-start">
+            <AlertDialogTitle>{t("UNSAVED_CHANGES_TITLE")}</AlertDialogTitle>
+            <AlertDialogDescription className="text-start">
+              {t("UNSAVED_CHANGES_DESCRIPTION")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              className="text-xs"
+              onClick={() => setPendingHref(null)}
+            >
+              {t("KEEP_EDITING")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              className="text-xs"
+              onClick={handleConfirmDiscard}
+            >
+              {t("DISCARD_CHANGES")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
@@ -1586,7 +1705,7 @@ function VariantCard({
               <FieldLabel className="text-xs">
                 {t("SKU_CODE")} <span className="text-destructive">*</span>
               </FieldLabel>
-              <div className="relative flex items-center">
+              <div className="relative">
                 <Input
                   {...field}
                   placeholder={t("SKU_PLACEHOLDER")}
@@ -1605,17 +1724,19 @@ function VariantCard({
                     )
                   }}
                 />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleGenerateSku}
-                  title={t("GENERATE_SKU")}
-                  aria-label={t("GENERATE_SKU")}
-                  className="absolute top-1/2 right-1 size-6 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-primary"
-                >
-                  <Wand2Icon className="size-3.5" />
-                </Button>
+                <div className="pointer-events-none absolute inset-y-0 right-1 flex items-center">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleGenerateSku}
+                    title={t("GENERATE_SKU")}
+                    aria-label={t("GENERATE_SKU")}
+                    className="pointer-events-auto size-6 cursor-pointer text-muted-foreground transition-none hover:text-primary"
+                  >
+                    <Wand2Icon className="size-3.5" />
+                  </Button>
+                </div>
               </div>
               {fieldState.invalid && (
                 <ProductFieldError error={fieldState.error} />
