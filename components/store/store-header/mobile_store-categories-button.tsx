@@ -25,11 +25,13 @@ export interface MobileStoreCategoriesButtonProps {
   categories?: SimplifiedRootCategory[]
 }
 
+const MOBILE_MAX_QUERY = "(max-width: 895.98px)"
+
 /**
- * تصميم بديل: مستوى واحد (أكورديون) بدل التنقل بين شاشتين.
- * - كل تصنيف بطاقة بصورة مصغّرة، ينفتح مكانه
- * - التصنيفات الفرعية على شكل حبوب (نفس شكل زر "عرض الكل" في سطح المكتب)
- * - تصنيف واحد مفتوح في كل مرة، والأول مفتوح افتراضياً (مثل سطح المكتب)
+- تصميم بديل: مستوى واحد (أكورديون) بدل التنقل بين شاشتين.
+- - كل تصنيف بطاقة بصورة مصغّرة، ينفتح مكانه
+- - التصنيفات الفرعية على شكل حبوب (نفس شكل زر "عرض الكل" في سطح المكتب)
+- - تصنيف واحد مفتوح في كل مرة، والأول مفتوح افتراضياً (مثل سطح المكتب)
  */
 const chipClass = cn(
   "inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border/80 px-3.5 text-xs font-normal text-foreground/80 transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary active:bg-primary/10",
@@ -63,8 +65,19 @@ export function MobileStoreCategoriesButton({
   }
   const close = React.useCallback(() => setOpen(false), [])
 
+  // إغلاق قائمة الموبايل إذا وصل عرض الشاشة إلى 896px أو أكبر
+  React.useEffect(() => {
+    const mq = window.matchMedia(MOBILE_MAX_QUERY)
+    const onChange = (e: MediaQueryListEvent) => {
+      if (!e.matches) setOpen(false)
+    }
+    mq.addEventListener("change", onChange)
+    return () => mq.removeEventListener("change", onChange)
+  }, [])
+
+  // ظاهر وفعّال على كل القياسات الأقل من 896px، ويختفي فقط عند >= 896px
   const triggerClassName = cn(
-    "flex items-center rounded-lg px-2.5 font-normal text-foreground transition-colors hover:bg-muted/60 hover:text-primary lg:hidden",
+    "inline-flex items-center rounded-lg px-2.5 font-normal text-foreground transition-colors hover:bg-muted/60 hover:text-primary min-[896px]:hidden",
     compact ? "h-8 gap-1" : "h-9 gap-1.5",
     focusRing,
     className
@@ -100,7 +113,7 @@ export function MobileStoreCategoriesButton({
         <ChevronDown
           aria-hidden="true"
           className={cn(
-            "hidden size-3.5 text-muted-foreground transition-transform duration-200 md:inline-block",
+            "size-3.5 text-muted-foreground transition-transform duration-200",
             open && "rotate-90 text-primary ltr:-rotate-90"
           )}
         />
@@ -108,7 +121,7 @@ export function MobileStoreCategoriesButton({
 
       <MobileMenu
         isOpen={open}
-        className="top-0"
+        className="top-0 min-[896px]:hidden"
         onOpenChange={(next: boolean) => (next ? openMenu() : close())}
       >
         <MobileMenuHeader showCloseButton onClose={close}>
@@ -147,7 +160,7 @@ export function MobileStoreCategoriesButton({
                         ? "font-medium text-foreground"
                         : "font-normal text-foreground/85",
                       focusRing,
-                      "focus-visible:ring-inset focus-visible:ring-offset-0"
+                      "focus-visible:ring-offset-0 focus-visible:ring-inset"
                     )}
                   >
                     <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border/60 bg-muted/40">

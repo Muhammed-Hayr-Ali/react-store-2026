@@ -25,7 +25,7 @@ export interface StoreCategoriesButtonProps {
   categories?: SimplifiedRootCategory[]
 }
 
-const DESKTOP_QUERY = "(min-width: 768px)"
+const DESKTOP_QUERY = "(min-width: 896px)"
 
 export function StoreCategoriesButton({
   compact = false,
@@ -62,8 +62,7 @@ export function StoreCategoriesButton({
 
   const close = React.useCallback(() => setOpen(false), [])
 
-  // إغلاق النافذة إذا صغرت الشاشة عن md أثناء فتحها
-  // (المحتوى مخفي على الجوال، فكان يبقى الـ overlay وحده)
+  // إغلاق النافذة إذا صغرت الشاشة عن 896px أثناء فتحها
   React.useEffect(() => {
     const mq = window.matchMedia(DESKTOP_QUERY)
     const onChange = (e: MediaQueryListEvent) => {
@@ -76,7 +75,7 @@ export function StoreCategoriesButton({
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen) {
       const isDesktop = window.matchMedia(DESKTOP_QUERY).matches
-      // على الجوال أو بدون تصنيفات: ننتقل لصفحة التصنيفات بدل زر "ميت"
+      // أقل من 896px أو بدون تصنيفات: ننتقل لصفحة التصنيفات بدل زر "ميت"
       if (!isDesktop || categories.length === 0) {
         router.push(APP_ROUTES.CATEGORIES)
         return
@@ -86,7 +85,7 @@ export function StoreCategoriesButton({
   }
 
   const triggerClassName = cn(
-    "hidden items-center rounded-lg px-2.5 font-normal text-foreground transition-colors hover:bg-muted/60 hover:text-primary lg:flex",
+    "hidden items-center rounded-lg px-2.5 font-normal text-foreground transition-colors hover:bg-muted/60 hover:text-primary min-[896px]:flex",
     compact ? "h-8 gap-1" : "h-9 gap-1.5",
     focusRing,
     className
@@ -104,7 +103,7 @@ export function StoreCategoriesButton({
             <ChevronDown
               aria-hidden="true"
               className={cn(
-                "hidden size-3.5 text-muted-foreground transition-transform duration-200 md:inline-block",
+                "size-3.5 text-muted-foreground transition-transform duration-200",
                 open && "rotate-90 text-primary ltr:-rotate-90"
               )}
             />
@@ -117,7 +116,7 @@ export function StoreCategoriesButton({
           aria-describedby={undefined}
           closeLabel={t("close")}
           // عرض ثابت: لا يتغير حجم النافذة عند التنقل بين التصنيفات
-          className="hidden max-h-[90vh] w-[min(64rem,92vw)] gap-0 overflow-hidden bg-background p-0 font-normal md:flex"
+          className="hidden max-h-[90vh] w-[min(64rem,92vw)] gap-0 overflow-hidden bg-background p-0 font-normal min-[896px]:flex"
         >
           {/* رأس النافذة */}
           <div className="shrink-0 border-b border-border/70 px-7 py-4 pe-14 text-start">

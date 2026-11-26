@@ -129,6 +129,16 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
     el.scrollBy({ left: delta, behavior: "smooth" })
   }
 
+  const stickyFadeStyle: React.CSSProperties | undefined =
+    canScrollPrev || canScrollNext
+      ? {
+          maskImage:
+            "linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent)",
+          WebkitMaskImage:
+            "linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent)",
+        }
+      : undefined
+
   return (
     <>
       {/* 1. الناف بار الأساسي الكبير */}
@@ -307,6 +317,7 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
               ref={stickyNavRef}
               onScroll={updateScrollButtons}
               aria-label={t("categories")}
+              style={stickyFadeStyle}
               className={cn(
                 "flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto scroll-smooth text-foreground/85 motion-reduce:scroll-auto",
                 hideScrollbar

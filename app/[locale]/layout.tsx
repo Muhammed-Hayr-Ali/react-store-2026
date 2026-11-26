@@ -124,7 +124,7 @@ export default async function RootLayout({
           </NextIntlClientProvider>
         </ThemeProvider>
         <Toaster />
-        {/* <ScreenSizeIndicator /> */}
+        <ScreenSizeIndicator />
       </body>
     </html>
   )

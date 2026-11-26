@@ -1,8 +1,3 @@
-/**
- * @file components/ui/mobile-menu.tsx
- * @description Mobile menu drawer component with vertically centered close button and default button interaction states.
- */
-
 "use client"
 
 import * as React from "react"
@@ -36,7 +31,7 @@ const MobileMenu = ({
   return (
     <div
       className={cn(
-        "fixed inset-0 top-12 z-50 transition-opacity duration-300 md:hidden",
+        "fixed inset-0 top-12 z-50 transition-opacity duration-300",
         isOpen
           ? "pointer-events-auto opacity-100"
           : "pointer-events-none opacity-0",
@@ -80,7 +75,6 @@ const MobileMenuHeader = React.forwardRef<
     {showCloseButton && (
       <button
         type="button"
-        // التوسيط الرأسي مع بقاء تأثيرات الزر الافتراضية كما هي
         className="absolute inset-e-4 top-1/2 -translate-y-1/2"
         onClick={onClose}
         aria-label="Close menu"
