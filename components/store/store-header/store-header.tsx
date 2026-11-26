@@ -29,6 +29,7 @@ import {
   isRtlLocale,
   navLinkClass,
 } from "./store-header-shared"
+import { MobileStoreCategoriesButton } from "./mobile_store-categories-button"
 
 interface StoreHeaderProps {
   categories?: SimplifiedRootCategory[]
@@ -201,6 +202,7 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
               className="flex shrink-0 items-center gap-2 text-[13px] font-normal"
             >
               <StoreCategoriesButton categories={rootCategories} />
+              <MobileStoreCategoriesButton categories={rootCategories} />
 
               <span
                 aria-hidden="true"

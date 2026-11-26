@@ -5,7 +5,7 @@
 
 import type { Metadata, Viewport } from "next"
 import { notFound } from "next/navigation"
-import { IBM_Plex_Sans_Arabic, Rubik } from "next/font/google"
+import { IBM_Plex_Sans_Arabic } from "next/font/google"
 import { NextIntlClientProvider, hasLocale } from "next-intl"
 
 import "../globals.css"
@@ -23,21 +23,14 @@ import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 import { cookies } from "next/headers"
 import { COOKIES_KEYS } from "@/lib/config/app_config"
 
-import { createServerClient } from "@/lib/database/supabase/server"
 import { CurrencyProvider } from "@/lib/context/currency-context"
+import { getStoreExchangeRate } from "@/lib/actions/store/queries/get-exchange-rate"
 import { WishlistProvider } from "@/lib/context/wishlist-context"
 import { CartProvider } from "@/lib/context/cart-context"
 import { getWishlistProductIds } from "@/lib/actions/wishlists"
 import { getCart } from "@/lib/actions/cart"
 import type { AppLocale } from "@/i18n/routing"
 import ScreenSizeIndicator from "@/components/shared/screen_size_indicator"
-
-const rubik = Rubik({
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
-  style: ["normal", "italic"],
-  subsets: ["latin"],
-  variable: "--font-rubik",
-})
 
 const plexArabic = IBM_Plex_Sans_Arabic({
   subsets: ["arabic", "latin"],
@@ -86,12 +79,9 @@ export default async function RootLayout({
   const currentUser = currentUserResult.success ? currentUserResult.data : null
   const permissions = currentUser?.permissions || []
 
-  // 2. Fetch active currencies from database
-  const supabase = await createServerClient()
-  const { data: currencies } = await supabase
-    .from("currencies")
-    .select("code, name, name_ar, symbol, rate_factor")
-    .eq("is_active", true)
+  // 2. Fetch store exchange rate from database (USD -> SYP new unit)
+  const exchangeRateResult = await getStoreExchangeRate("USD", "new")
+  const exchangeRateData = exchangeRateResult.ok ? exchangeRateResult.rate : null
 
   const savedCurrency = cookieStore.get(COOKIES_KEYS.CURRENCY)?.value || "USD"
 
@@ -108,12 +98,7 @@ export default async function RootLayout({
       lang={locale}
       dir={dir}
       suppressHydrationWarning
-      className={cn(
-        "antialiased",
-        plexArabic.variable,
-
-        isDark && "dark"
-      )}
+      className={cn("antialiased", plexArabic.variable, isDark && "dark")}
     >
       <body>
         <ThemeProvider initialTheme={initialTheme}>
@@ -123,7 +108,7 @@ export default async function RootLayout({
               <UserProvider user={currentUser} permissions={permissions}>
                 <DirectionProvider dir={dir}>
                   <CurrencyProvider
-                    initialCurrencies={currencies || []}
+                    exchangeRateData={exchangeRateData}
                     defaultCurrencyCode={savedCurrency}
                     locale={typedLocale}
                   >
@@ -139,7 +124,7 @@ export default async function RootLayout({
           </NextIntlClientProvider>
         </ThemeProvider>
         <Toaster />
-        <ScreenSizeIndicator />
+        {/* <ScreenSizeIndicator /> */}
       </body>
     </html>
   )

@@ -86,7 +86,7 @@ export function StoreCategoriesButton({
   }
 
   const triggerClassName = cn(
-    "flex items-center rounded-lg px-2.5 font-normal text-foreground transition-colors hover:bg-muted/60 hover:text-primary",
+    "hidden items-center rounded-lg px-2.5 font-normal text-foreground transition-colors hover:bg-muted/60 hover:text-primary lg:flex",
     compact ? "h-8 gap-1" : "h-9 gap-1.5",
     focusRing,
     className
@@ -105,7 +105,7 @@ export function StoreCategoriesButton({
               aria-hidden="true"
               className={cn(
                 "hidden size-3.5 text-muted-foreground transition-transform duration-200 md:inline-block",
-                open && "rotate-180 text-primary"
+                open && "rotate-90 text-primary ltr:-rotate-90"
               )}
             />
           )}
@@ -178,7 +178,7 @@ export function StoreCategoriesButton({
             <div className="px-7 py-5">
               <div
                 key={activeCategory.id}
-                className="flex animate-in items-start gap-7 fade-in-0 duration-200 motion-reduce:animate-none"
+                className="flex animate-in items-start gap-7 duration-200 fade-in-0 motion-reduce:animate-none"
               >
                 {/* صورة التصنيف */}
                 <Link
@@ -275,7 +275,7 @@ export function StoreCategoriesButton({
               href={APP_ROUTES.CATEGORIES}
               onClick={close}
               className={cn(
-                "group inline-flex items-center gap-2 whitespace-nowrap rounded-md transition-colors hover:text-primary",
+                "group inline-flex items-center gap-2 rounded-md whitespace-nowrap transition-colors hover:text-primary",
                 focusRing
               )}
             >
@@ -292,7 +292,7 @@ export function StoreCategoriesButton({
                   href={APP_ROUTES.ACCOUNT}
                   onClick={close}
                   className={cn(
-                    "whitespace-nowrap rounded-md transition-colors hover:text-primary",
+                    "rounded-md whitespace-nowrap transition-colors hover:text-primary",
                     focusRing
                   )}
                 >
@@ -304,7 +304,7 @@ export function StoreCategoriesButton({
                   href={APP_ROUTES.WISHLIST}
                   onClick={close}
                   className={cn(
-                    "whitespace-nowrap rounded-md transition-colors hover:text-primary",
+                    "rounded-md whitespace-nowrap transition-colors hover:text-primary",
                     focusRing
                   )}
                 >

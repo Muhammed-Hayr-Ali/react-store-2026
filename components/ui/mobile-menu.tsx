@@ -7,15 +7,21 @@
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
- import { XIcon } from "lucide-react"
+import { XIcon } from "lucide-react"
 
 interface MobileMenuProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   children?: React.ReactNode
+  className?: string
 }
 
-const MobileMenu = ({ isOpen, onOpenChange, children }: MobileMenuProps) => {
+const MobileMenu = ({
+  isOpen,
+  onOpenChange,
+  children,
+  className,
+}: MobileMenuProps) => {
   React.useEffect(() => {
     if (isOpen) {
       const originalStyle = window.getComputedStyle(document.body).overflow
@@ -33,20 +39,21 @@ const MobileMenu = ({ isOpen, onOpenChange, children }: MobileMenuProps) => {
         "fixed inset-0 top-12 z-50 transition-opacity duration-300 md:hidden",
         isOpen
           ? "pointer-events-auto opacity-100"
-          : "pointer-events-none opacity-0"
+          : "pointer-events-none opacity-0",
+        className
       )}
       onClick={() => onOpenChange(false)}
     >
       <div
         className={cn(
-          "absolute left-0 h-screen w-full transform border-t border-r bg-background transition-transform duration-300 ease-in-out rtl:right-0 rtl:left-0",
+          "absolute inset-0 h-full w-full transform border-t border-r bg-background transition-transform duration-300 ease-in-out rtl:border-r-0 rtl:border-l",
           isOpen
             ? "translate-x-0"
             : "ltr:-translate-x-full rtl:translate-x-full"
         )}
         onClick={(e) => e.stopPropagation()}
       >
-        <nav className="flex h-[calc(100vh-7rem)] flex-col">{children}</nav>
+        <nav className="flex h-full flex-col">{children}</nav>
       </div>
     </div>
   )
@@ -55,7 +62,6 @@ const MobileMenu = ({ isOpen, onOpenChange, children }: MobileMenuProps) => {
 interface MobileMenuHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   showCloseButton?: boolean
   onClose?: () => void
-  
 }
 
 const MobileMenuHeader = React.forwardRef<
@@ -64,18 +70,22 @@ const MobileMenuHeader = React.forwardRef<
 >(({ className, children, showCloseButton = true, onClose, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("relative flex items-center gap-2 shrink-0 border-b p-4 pe-12", className)}
+    className={cn(
+      "relative flex shrink-0 items-center gap-2 border-b p-4 pe-12",
+      className
+    )}
     {...props}
   >
     {children}
     {showCloseButton && (
       <button
-         // التوسيط الرأسي مع بقاء تأثيرات الزر الافتراضية كما هي
-        className="absolute top-1/2 inset-e-4 -translate-y-1/2"
-         onClick={onClose}
+        type="button"
+        // التوسيط الرأسي مع بقاء تأثيرات الزر الافتراضية كما هي
+        className="absolute inset-e-4 top-1/2 -translate-y-1/2"
+        onClick={onClose}
         aria-label="Close menu"
       >
-        <XIcon className="size-4"/>
+        <XIcon className="size-4" />
         <span className="sr-only">Close</span>
       </button>
     )}
@@ -89,7 +99,7 @@ const MobileMenuBody = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("grow overflow-y-auto py-4", className)}
+    className={cn("min-h-0 flex-1 overflow-y-auto py-4", className)}
     {...props}
   >
     <nav className="grid gap-2">{children}</nav>
@@ -103,7 +113,7 @@ const MobileMenuFooter = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("shrink-0 border-t border-muted p-4", className)}
+    className={cn("mt-auto shrink-0 border-t border-muted p-4", className)}
     {...props}
   >
     {children}

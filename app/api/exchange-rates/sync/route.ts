@@ -42,7 +42,6 @@ function isAuthorizedRequest(request: NextRequest): boolean {
   const expectedSecret =
     process.env.EXCHANGE_RATE_CRON_SECRET || process.env.CRON_SECRET
 
-  // إذا لم يُضبط أي سر مطلقاً، يُسمح بالطلب
   if (!expectedSecret) {
     return true
   }
@@ -57,7 +56,6 @@ function isAuthorizedRequest(request: NextRequest): boolean {
     return true
   }
 
-  // السماح بالاختبار المباشر من المتصفح فقط أثناء التطوير المحلي
   if (process.env.NODE_ENV === "development") {
     return true
   }
@@ -109,45 +107,44 @@ async function handleSync(request: NextRequest) {
     const currency = payload.data.currency
     const currencyCode = (currency.code ?? "USD").toUpperCase()
     const unit = (payload.data.unit ?? "new").toLowerCase()
-    const cityEntries = Object.entries(currency.cities ?? {})
+    const damascusRate = currency.cities?.damascus
 
-    if (cityEntries.length === 0) {
+    if (!damascusRate) {
       return NextResponse.json(
-        { ok: false, error: "No city rates found in SPToday response" },
+        {
+          ok: false,
+          error: "Damascus exchange rate not found in SPToday response",
+        },
         { status: 422 }
       )
     }
 
     const supabase = getSupabaseAdminClient()
-    const savedRates = []
 
-    for (const [cityKey, cityRate] of cityEntries) {
-      const { data: row, error } = await supabase.rpc("upsert_exchange_rate", {
-        p_currency_code: currencyCode,
-        p_city: cityKey,
-        p_unit: unit,
-        p_raw_buy: Number(cityRate.buy),
-        p_raw_sell: Number(cityRate.sell),
-        p_source_updated_at: currency.updated_at ?? null,
-      })
+    const { data: row, error } = await supabase.rpc("upsert_exchange_rate", {
+      p_city: "damascus",
+      p_currency_code: currencyCode,
+      p_raw_buy: Number(damascusRate.buy),
+      p_raw_sell: Number(damascusRate.sell),
+      p_source_updated_at: currency.updated_at ?? null,
+      p_unit: unit,
+    })
 
-      if (error) {
-        return NextResponse.json(
-          { ok: false, error: `Database error for ${cityKey}: ${error.message}` },
-          { status: 500 }
-        )
-      }
-
-      savedRates.push(row)
+    if (error) {
+      return NextResponse.json(
+        { ok: false, error: `Database error: ${error.message}` },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({
       ok: true,
       unit,
       currencyCode,
+      city: "damascus",
       sourceUpdatedAt: currency.updated_at ?? null,
-      count: savedRates.length,
-      rates: savedRates,
+      count: 1,
+      rate: row,
     })
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unexpected error"
