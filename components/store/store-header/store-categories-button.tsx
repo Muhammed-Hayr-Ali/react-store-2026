@@ -183,7 +183,9 @@ export function StoreCategoriesButton({
                 <Link
                   href={activeHref}
                   onClick={close}
-                  aria-label={activeTitle}
+                  // رابط مكرر لزر "عرض الكل": نخفيه عن لوحة المفاتيح وقارئات الشاشة
+                  tabIndex={-1}
+                  aria-hidden="true"
                   className={cn(
                     "group relative block aspect-4/3 w-52.5 shrink-0 overflow-hidden rounded-xl border border-border/60 bg-muted/40",
                     focusRing
@@ -196,7 +198,7 @@ export function StoreCategoriesButton({
                       alt={activeCategory.image_alt || activeTitle}
                       loading="lazy"
                       decoding="async"
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center">

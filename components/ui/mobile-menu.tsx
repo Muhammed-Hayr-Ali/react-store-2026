@@ -4,6 +4,15 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { XIcon } from "lucide-react"
 
+const FOCUSABLE_SELECTOR = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled]):not([type='hidden'])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  "[tabindex]:not([tabindex='-1'])",
+].join(",")
+
 interface MobileMenuProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
@@ -17,38 +26,115 @@ const MobileMenu = ({
   children,
   className,
 }: MobileMenuProps) => {
-  React.useEffect(() => {
-    if (isOpen) {
-      const originalStyle = window.getComputedStyle(document.body).overflow
-      document.body.style.overflow = "hidden"
+  const panelRef = React.useRef<HTMLDivElement>(null)
 
-      return () => {
-        document.body.style.overflow = originalStyle
+  // يمنع إعادة تشغيل التأثير عند تغير مرجع الدالة
+  const onOpenChangeRef = React.useRef(onOpenChange)
+  React.useEffect(() => {
+    onOpenChangeRef.current = onOpenChange
+  }, [onOpenChange])
+
+  React.useEffect(() => {
+    if (!isOpen) return
+
+    const panel = panelRef.current
+    if (!panel) return
+
+    const previousFocus = document.activeElement as HTMLElement | null
+    const previousOverflow = document.body.style.overflow
+
+    document.body.style.overflow = "hidden"
+    panel.focus({ preventScroll: true })
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return
+
+      if (event.key === "Escape") {
+        event.preventDefault()
+        onOpenChangeRef.current(false)
+        return
+      }
+
+      if (event.key !== "Tab") return
+
+      // حصر التنقل بلوحة المفاتيح داخل القائمة
+      const items = Array.from(
+        panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
+      ).filter((el) => !el.closest("[inert]") && el.getClientRects().length > 0)
+
+      const first = items[0]
+      const last = items[items.length - 1]
+
+      if (!first || !last) {
+        event.preventDefault()
+        return
+      }
+
+      const active = document.activeElement
+      const isOutside = !panel.contains(active)
+
+      if (
+        event.shiftKey &&
+        (active === first || active === panel || isOutside)
+      ) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && (active === last || isOutside)) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown)
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown)
+      document.body.style.overflow = previousOverflow
+
+      if (previousFocus?.isConnected) {
+        previousFocus.focus({ preventScroll: true })
       }
     }
   }, [isOpen])
 
   return (
     <div
+      inert={!isOpen}
       className={cn(
-        "fixed inset-0 top-12 z-50 transition-opacity duration-300",
+        "fixed inset-0 top-12 z-50 overflow-hidden",
+        // عند الإغلاق: تبقى القائمة مرئية حتى تنتهي الحركة
         isOpen
-          ? "pointer-events-auto opacity-100"
-          : "pointer-events-none opacity-0",
+          ? "visible"
+          : "pointer-events-none invisible transition-[visibility] duration-300",
         className
       )}
-      onClick={() => onOpenChange(false)}
     >
+      {/* لوحة بملء المساحة: تصعد من الأسفل مع تلاشٍ */}
       <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menu"
+        tabIndex={-1}
         className={cn(
-          "absolute inset-0 h-full w-full transform border-t border-r bg-background transition-transform duration-300 ease-in-out rtl:border-r-0 rtl:border-l",
+          "absolute inset-0 flex flex-col border-t bg-background/90 backdrop-blur-xl outline-none",
+          "transition-[translate,transform,opacity] will-change-[translate,opacity]",
           isOpen
-            ? "translate-x-0"
-            : "ltr:-translate-x-full rtl:translate-x-full"
+            ? "translate-y-0 opacity-100 duration-280 ease-[cubic-bezier(0.16,1,0.3,1)] starting:translate-y-8"
+            : "opacity-0 duration-180 ease-out motion-safe:translate-y-8"
         )}
-        onClick={(e) => e.stopPropagation()}
       >
-        <nav className="flex h-full flex-col">{children}</nav>
+        {/* ظهور المحتوى بتأخير بسيط بعد اللوحة */}
+        <div
+          className={cn(
+            "flex min-h-0 flex-1 flex-col transition-[translate,transform,opacity] ease-out",
+            isOpen
+              ? "translate-y-0 opacity-100 delay-100 duration-300"
+              : "opacity-0 duration-150 motion-safe:translate-y-4"
+          )}
+        >
+          {children}
+        </div>
       </div>
     </div>
   )
@@ -66,7 +152,7 @@ const MobileMenuHeader = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "relative flex shrink-0 items-center gap-2 border-b p-4 pe-12",
+      "relative flex shrink-0 items-center gap-2 border-b p-4 pe-14",
       className
     )}
     {...props}
@@ -75,12 +161,11 @@ const MobileMenuHeader = React.forwardRef<
     {showCloseButton && (
       <button
         type="button"
-        className="absolute inset-e-4 top-1/2 -translate-y-1/2"
         onClick={onClose}
         aria-label="Close menu"
+        className="absolute inset-e-2 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-[background-color,color,scale] hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-95"
       >
-        <XIcon className="size-4" />
-        <span className="sr-only">Close</span>
+        <XIcon aria-hidden="true" className="size-4" />
       </button>
     )}
   </div>
@@ -93,7 +178,10 @@ const MobileMenuBody = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("min-h-0 flex-1 overflow-y-auto py-4", className)}
+    className={cn(
+      "min-h-0 flex-1 overflow-y-auto overscroll-contain py-4",
+      className
+    )}
     {...props}
   >
     <nav className="grid gap-2">{children}</nav>
@@ -107,7 +195,10 @@ const MobileMenuFooter = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("mt-auto shrink-0 border-t border-muted p-4", className)}
+    className={cn(
+      "mt-auto shrink-0 border-t border-muted p-4 pb-[max(1rem,env(safe-area-inset-bottom))]",
+      className
+    )}
     {...props}
   >
     {children}

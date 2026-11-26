@@ -12,7 +12,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { PreferenceSegmented } from "./preference-segmented"
 
 interface LocaleSelectorProps {
   compact?: boolean
@@ -51,13 +51,16 @@ export function LocaleSelector({ compact = false }: LocaleSelectorProps) {
     <>
       {/* الشاشات الأصغر من lg: Popover */}
       <div className="lg:hidden">
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover
+          open={open}
+          onOpenChange={(next) => setOpen(next && !isPending)}
+        >
           <PopoverTrigger asChild>
             <button
               type="button"
-              disabled={isPending}
+              aria-busy={isPending}
               className={selectorTriggerClass(compact, isPending)}
-              aria-label={t(language.name)}
+              aria-label={`${t(language.name)}: ${shownOption.label}`}
             >
               {isPending ? (
                 <Loader2Icon
@@ -70,7 +73,8 @@ export function LocaleSelector({ compact = false }: LocaleSelectorProps) {
                   className="size-3.5 text-muted-foreground"
                 />
               )}
-              <span>{shownOption.label}</span>
+              {/* على الجوال تكفي الأيقونة، مثل زر المظهر */}
+              <span className="hidden sm:inline">{shownOption.label}</span>
               <ChevronDown
                 aria-hidden="true"
                 className="size-3 text-muted-foreground"
@@ -93,7 +97,7 @@ export function LocaleSelector({ compact = false }: LocaleSelectorProps) {
                     onClick={() => onSelectLanguage(opt.value)}
                     className={menuItemClass(isSelected)}
                   >
-                    <span>{opt.label}</span>
+                    <span lang={opt.value}>{opt.label}</span>
                     {isRowLoading ? (
                       <Loader2Icon
                         aria-hidden="true"
@@ -115,43 +119,26 @@ export function LocaleSelector({ compact = false }: LocaleSelectorProps) {
         </Popover>
       </div>
 
-      {/* الشاشات الأكبر من lg: Tabs */}
+      {/* الشاشات الأكبر من lg: أزرار مجزأة */}
       <div className="hidden lg:inline-flex">
-        <Tabs
+        <PreferenceSegmented
+          ariaLabel={t(language.name)}
           value={shownOption.value}
-          onValueChange={(value) => onSelectLanguage(value)}
-        >
-          <TabsList
-            aria-label={t(language.name)}
-            className="h-8 rounded-xl bg-muted/60 p-0.5"
-          >
-            {language.options.map((opt: PreferenceOption) => {
-              const isRowLoading = activeLoadingLocale === opt.value
-
-              return (
-                <TabsTrigger
-                  key={opt.key}
-                  value={opt.value}
-                  disabled={isPending}
-                  className="h-7 gap-1.5 rounded-lg px-2.5 text-xs font-medium transition-all data-[state=active]:bg-background data-[state=active]:shadow-xs"
-                >
-                  {isRowLoading ? (
-                    <Loader2Icon
-                      aria-hidden="true"
-                      className="size-3 animate-spin text-primary"
-                    />
-                  ) : (
-                    <Globe
-                      aria-hidden="true"
-                      className="size-3 text-muted-foreground"
-                    />
-                  )}
-                  <span>{opt.label}</span>
-                </TabsTrigger>
-              )
-            })}
-          </TabsList>
-        </Tabs>
+          onSelect={onSelectLanguage}
+          isPending={isPending}
+          loadingValue={activeLoadingLocale}
+          options={language.options.map((opt: PreferenceOption) => ({
+            value: opt.value,
+            label: opt.label,
+            lang: opt.value,
+            icon: (
+              <Globe
+                aria-hidden="true"
+                className="size-3 text-muted-foreground"
+              />
+            ),
+          }))}
+        />
       </div>
     </>
   )

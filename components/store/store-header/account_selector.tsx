@@ -13,6 +13,7 @@ import {
   UserPlus,
 } from "lucide-react"
 
+import { cn } from "@/lib/utils"
 import { Link } from "@/i18n/navigation"
 import { APP_ROUTES } from "@/lib/config/app-routes"
 import { useUser } from "@/lib/context/user-context"
@@ -45,6 +46,15 @@ export function AccountSelector() {
 
   const dir = isRtlLocale(locale) ? "rtl" : "ltr"
 
+  // الرجوع من صفحة Google قد يستعيد الصفحة من bfcache وزر التحميل عالق
+  React.useEffect(() => {
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) setIsGoogleLoading(false)
+    }
+    window.addEventListener("pageshow", onPageShow)
+    return () => window.removeEventListener("pageshow", onPageShow)
+  }, [])
+
   const handleGoogleSignIn = async () => {
     if (user || isGoogleLoading) return
     setIsGoogleLoading(true)
@@ -53,10 +63,11 @@ export function AccountSelector() {
       const result = await signInWithGoogle()
 
       if (!result.success) {
-        const errorMessage = result.error
+        // نختار المفتاح أولاً ثم نترجمه مرة واحدة فقط
+        const errorKey = result.error
           ? getActionErrorKey(result.error)
-          : t("SIGN_IN_FAILED_FALLBACK")
-        toast.error(t(errorMessage))
+          : "SIGN_IN_FAILED_FALLBACK"
+        toast.error(t(errorKey))
         setIsGoogleLoading(false)
         return
       }
@@ -82,7 +93,10 @@ export function AccountSelector() {
             <span className="hidden lg:inline">{t("account")}</span>
             <ChevronDown
               aria-hidden="true"
-              className="size-3 text-muted-foreground"
+              className={cn(
+                "hidden size-3 text-muted-foreground transition-transform duration-200 lg:block",
+                open && "rotate-180"
+              )}
             />
           </button>
         </PopoverTrigger>
@@ -150,9 +164,7 @@ export function AccountSelector() {
                 }}
                 className={menuItemClass()}
               >
-                <span
-                  className="flex items-center gap-2.5 group-hover:text-destructive"
-                >
+                <span className="flex items-center gap-2.5 group-hover:text-destructive">
                   <LogOutIcon
                     aria-hidden="true"
                     className="size-3.5 shrink-0 text-muted-foreground group-hover:text-destructive"

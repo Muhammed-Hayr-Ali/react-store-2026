@@ -12,7 +12,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { PreferenceSegmented } from "./preference-segmented"
 
 interface ThemeSelectorProps {
   compact?: boolean
@@ -51,13 +51,16 @@ export function ThemeSelector({ compact = false }: ThemeSelectorProps) {
     <>
       {/* الشاشات الأصغر من lg: Popover */}
       <div className="lg:hidden">
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover
+          open={open}
+          onOpenChange={(next) => setOpen(next && !isPending)}
+        >
           <PopoverTrigger asChild>
             <button
               type="button"
-              disabled={isPending}
+              aria-busy={isPending}
               className={selectorTriggerClass(compact, isPending)}
-              aria-label={t(appearance.name)}
+              aria-label={`${t(appearance.name)}: ${t(activeOption?.key ?? "system")}`}
             >
               {isPending ? (
                 <Loader2Icon
@@ -72,7 +75,10 @@ export function ThemeSelector({ compact = false }: ThemeSelectorProps) {
                   />
                 )
               )}
-              <span>{t(activeOption?.key ?? "system")}</span>
+              {/* على الشاشات الضيقة تكفي الأيقونة حتى لا يفيض الصف */}
+              <span className="hidden sm:inline">
+                {t(activeOption?.key ?? "system")}
+              </span>
               <ChevronDown
                 aria-hidden="true"
                 className="size-3 text-muted-foreground"
@@ -126,48 +132,29 @@ export function ThemeSelector({ compact = false }: ThemeSelectorProps) {
         </Popover>
       </div>
 
-      {/* الشاشات الأكبر من lg: Tabs */}
+      {/* الشاشات الأكبر من lg: أزرار مجزأة */}
       <div className="hidden lg:inline-flex">
-        <Tabs
+        <PreferenceSegmented
+          ariaLabel={t(appearance.name)}
           value={effectiveThemeKey}
-          onValueChange={(value) => onSelectTheme(value)}
-        >
-          <TabsList
-            aria-label={t(appearance.name)}
-            className="h-8 rounded-xl bg-muted/60 p-0.5"
-          >
-            {appearance.options.map((opt: PreferenceOption) => {
-              const isRowLoading = activeLoadingTheme === opt.value
-              const OptIcon = opt.icon
-
-              return (
-                <TabsTrigger
-                  key={opt.key}
-                  value={opt.value}
-                  disabled={isPending}
-                  title={t(opt.key)}
-                  aria-label={t(opt.key)}
-                  className="h-7 gap-1.5 rounded-lg px-2.5 text-xs font-medium transition-all data-[state=active]:bg-background data-[state=active]:shadow-xs"
-                >
-                  {isRowLoading ? (
-                    <Loader2Icon
-                      aria-hidden="true"
-                      className="size-3 animate-spin text-primary"
-                    />
-                  ) : (
-                    OptIcon && (
-                      <OptIcon
-                        aria-hidden="true"
-                        className="size-3.5 text-muted-foreground"
-                      />
-                    )
-                  )}
-                  <span className="hidden xl:inline">{t(opt.key)}</span>
-                </TabsTrigger>
-              )
-            })}
-          </TabsList>
-        </Tabs>
+          onSelect={onSelectTheme}
+          isPending={isPending}
+          loadingValue={activeLoadingTheme}
+          collapseLabels
+          options={appearance.options.map((opt: PreferenceOption) => {
+            const OptIcon = opt.icon
+            return {
+              value: opt.value,
+              label: t(opt.key),
+              icon: OptIcon && (
+                <OptIcon
+                  aria-hidden="true"
+                  className="size-3.5 text-muted-foreground"
+                />
+              ),
+            }
+          })}
+        />
       </div>
     </>
   )

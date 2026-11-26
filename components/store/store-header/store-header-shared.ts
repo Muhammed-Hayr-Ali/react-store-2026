@@ -29,7 +29,7 @@ export const selectorTriggerClass = (compact = false, disabled = false) =>
 /** عنصر القائمة داخل الـ Popover (حجم خط موحّد 13px) */
 export const menuItemClass = (isSelected = false) =>
   cn(
-    "group flex min-h-8 w-full items-center justify-between gap-2.5 rounded-md px-2.5 py-1.5 text-start text-[13px] font-normal transition-colors hover:bg-muted",
+    "group flex min-h-9 w-full items-center justify-between gap-2.5 rounded-md px-2.5 py-1.5 text-start text-[13px] font-normal transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-60",
     menuFocusRing,
     isSelected ? "bg-muted/70 text-primary" : "text-foreground/85"
   )

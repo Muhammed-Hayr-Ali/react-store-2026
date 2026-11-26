@@ -28,13 +28,17 @@ export interface MobileStoreCategoriesButtonProps {
 const MOBILE_MAX_QUERY = "(max-width: 895.98px)"
 
 /**
-- تصميم بديل: مستوى واحد (أكورديون) بدل التنقل بين شاشتين.
-- - كل تصنيف بطاقة بصورة مصغّرة، ينفتح مكانه
-- - التصنيفات الفرعية على شكل حبوب (نفس شكل زر "عرض الكل" في سطح المكتب)
-- - تصنيف واحد مفتوح في كل مرة، والأول مفتوح افتراضياً (مثل سطح المكتب)
+ * قائمة تصنيفات الجوال: مستوى واحد (أكورديون).
+ * - تصنيف واحد مفتوح في كل مرة، والأول مفتوح افتراضياً.
+ * - صورة مربعة 80px بجانب حتى 3 أسطر من التصنيفات الفرعية.
  */
-const chipClass = cn(
-  "inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border/80 px-3.5 text-xs font-normal text-foreground/80 transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary active:bg-primary/10",
+const compactChipClass = cn(
+  "inline-flex h-6 max-w-full items-center gap-1 rounded-md border border-border/60 bg-background px-2 text-[11px] leading-none text-foreground/80 transition-colors hover:bg-muted",
+  focusRing
+)
+
+const footerLinkClass = cn(
+  "inline-flex min-h-9 items-center gap-2 rounded-md whitespace-nowrap transition-colors hover:text-primary",
   focusRing
 )
 
@@ -57,6 +61,24 @@ export function MobileStoreCategoriesButton({
     (name: string, nameAr: string | null) => (isRtl && nameAr ? nameAr : name),
     [isRtl]
   )
+
+  // الروابط المخفية في الهيدر على الجوال
+  const quickLinks = [
+    { href: APP_ROUTES.COLLECTIONS.NEWEST, label: t("newest") },
+    { href: APP_ROUTES.COLLECTIONS.FEATURED, label: t("featured") },
+    { href: APP_ROUTES.COLLECTIONS.OFFERS, label: t("offers") },
+  ]
+
+  // بعد فتح بطاقة: نضمن بقاءها ظاهرة (قد تنزاح عند إغلاق بطاقة فوقها)
+  const revealSection = (panel: HTMLElement) => {
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches
+    panel.parentElement?.scrollIntoView({
+      block: "nearest",
+      behavior: reduceMotion ? "auto" : "smooth",
+    })
+  }
 
   const openMenu = () => {
     // الأول مفتوح افتراضياً، ونعيد الضبط عند الفتح لا الإغلاق (لتفادي الوميض أثناء الإغلاق)
@@ -121,16 +143,38 @@ export function MobileStoreCategoriesButton({
 
       <MobileMenu
         isOpen={open}
-        className="top-0 min-[896px]:hidden"
+        // z أعلى من الشريط اللاصق (z-50)
+        className="top-0 z-60 min-[896px]:hidden"
         onOpenChange={(next: boolean) => (next ? openMenu() : close())}
       >
-        <MobileMenuHeader showCloseButton onClose={close}>
+        <MobileMenuHeader
+          showCloseButton
+          onClose={close}
+          className="pt-[max(1rem,env(safe-area-inset-top))]"
+        >
           <h2 className="text-lg font-medium text-foreground">
             {t("categories")}
           </h2>
         </MobileMenuHeader>
 
         <MobileMenuBody className="space-y-2 px-4 py-4">
+          <ul className="grid grid-cols-3 gap-2">
+            {quickLinks.map((item) => (
+              <li key={item.href} className="min-w-0">
+                <Link
+                  href={item.href}
+                  onClick={close}
+                  className={cn(
+                    "flex min-h-10 items-center justify-center rounded-lg border border-border/70 bg-background px-2 text-xs text-foreground/85 transition-colors hover:border-primary/50 hover:text-primary",
+                    focusRing
+                  )}
+                >
+                  <span className="truncate">{item.label}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+
           {categories.map((category) => {
             const isOpen = openId === category.id
             const title = getCategoryTitle(category.name, category.name_ar)
@@ -147,7 +191,7 @@ export function MobileStoreCategoriesButton({
                     : "border-border/70 bg-background"
                 )}
               >
-                {/* رأس البطاقة: صورة مصغّرة + الاسم + سهم */}
+                {/* رأس البطاقة: الاسم + السهم */}
                 <h3>
                   <button
                     type="button"
@@ -155,7 +199,7 @@ export function MobileStoreCategoriesButton({
                     aria-controls={panelId}
                     onClick={() => setOpenId(isOpen ? null : category.id)}
                     className={cn(
-                      "flex min-h-14 w-full items-center gap-3 p-2.5 text-start text-[13px] transition-colors hover:bg-muted/40",
+                      "flex min-h-12 w-full items-center justify-between gap-3 px-3.5 py-2.5 text-start text-[13px] transition-colors hover:bg-muted/40",
                       isOpen
                         ? "font-medium text-foreground"
                         : "font-normal text-foreground/85",
@@ -163,24 +207,6 @@ export function MobileStoreCategoriesButton({
                       "focus-visible:ring-offset-0 focus-visible:ring-inset"
                     )}
                   >
-                    <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border/60 bg-muted/40">
-                      {category.image_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={category.image_url}
-                          alt=""
-                          loading="lazy"
-                          decoding="async"
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <LayoutGrid
-                          aria-hidden="true"
-                          className="size-4 text-muted-foreground/50"
-                        />
-                      )}
-                    </span>
-
                     <span className="min-w-0 flex-1 truncate">{title}</span>
 
                     <ChevronDown
@@ -193,47 +219,89 @@ export function MobileStoreCategoriesButton({
                   </button>
                 </h3>
 
-                {/* المحتوى: انتقال سلس للارتفاع عبر grid-rows */}
+                {/* المحتوى عند الفتح: الصورة والتصنيفات الفرعية على نفس السطر */}
                 <div
                   id={panelId}
                   role="region"
                   aria-label={title}
                   inert={!isOpen}
+                  onTransitionEnd={(event) => {
+                    if (isOpen && event.target === event.currentTarget) {
+                      revealSection(event.currentTarget)
+                    }
+                  }}
                   className={cn(
                     "grid transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none",
                     isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
                   )}
                 >
                   <div className="min-h-0 overflow-hidden">
-                    <div className="flex flex-wrap gap-2 border-t border-border/50 px-3 pt-3 pb-3.5">
+                    <div className="flex items-start gap-2.5 border-t border-border/50 p-3">
+                      {/* صورة التصنيف بنسبة 1:1 */}
                       <Link
                         href={href}
                         onClick={close}
+                        // رابط مكرر لزر "عرض الكل"
+                        tabIndex={-1}
+                        aria-hidden="true"
                         className={cn(
-                          chipClass,
-                          "border-primary/40 bg-primary/10 text-primary hover:bg-primary/15"
+                          "group relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border/60 bg-muted/40",
+                          focusRing
                         )}
                       >
-                        <span>{t("viewAll")}</span>
-                        <ArrowIcon aria-hidden="true" className="size-3.5" />
+                        {category.image_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={category.image_url}
+                            alt={category.image_alt || title}
+                            loading="lazy"
+                            decoding="async"
+                            className="size-full object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none"
+                          />
+                        ) : (
+                          <LayoutGrid
+                            aria-hidden="true"
+                            className="size-6 text-muted-foreground/45"
+                          />
+                        )}
                       </Link>
 
-                      {category.subcategories.length > 0 ? (
-                        category.subcategories.map((sub: StoreSubcategory) => (
-                          <Link
-                            key={sub.id}
-                            href={`${href}/${sub.slug}`}
-                            onClick={close}
-                            className={chipClass}
-                          >
-                            {getCategoryTitle(sub.name, sub.name_ar)}
-                          </Link>
-                        ))
-                      ) : (
-                        <p className="w-full py-1 text-xs font-normal text-muted-foreground">
-                          {t("noSubcategories")}
-                        </p>
-                      )}
+                      {/* التصنيفات الفرعية: 3 أسطر = ارتفاع الصورة */}
+                      <div className="flex min-h-20 min-w-0 flex-1 flex-wrap content-center items-center gap-1">
+                        {category.subcategories.length > 0 ? (
+                          category.subcategories.map(
+                            (sub: StoreSubcategory) => (
+                              <Link
+                                key={sub.id}
+                                href={`${href}/${sub.slug}`}
+                                onClick={close}
+                                className={compactChipClass}
+                              >
+                                <span className="truncate leading-normal">
+                                  {getCategoryTitle(sub.name, sub.name_ar)}
+                                </span>
+                              </Link>
+                            )
+                          )
+                        ) : (
+                          <p className="w-full text-[11px] font-normal text-muted-foreground">
+                            {t("noSubcategories")}
+                          </p>
+                        )}
+
+                        {/* عرض الكل في نهاية القائمة */}
+                        <Link
+                          href={href}
+                          onClick={close}
+                          className={cn(
+                            compactChipClass,
+                            "border-primary/40 bg-primary/10 text-primary hover:bg-primary/15"
+                          )}
+                        >
+                          <span>{t("viewAll")}</span>
+                          <ArrowIcon aria-hidden="true" className="size-3" />
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -243,15 +311,12 @@ export function MobileStoreCategoriesButton({
         </MobileMenuBody>
 
         {/* الشريط السفلي: نفس شريط سطح المكتب */}
-        <MobileMenuFooter className="border-t border-border/70 bg-muted/30 px-4 py-3">
+        <MobileMenuFooter className="border-t border-border/70 bg-muted/30 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <div className="flex items-center justify-between gap-4 text-xs font-normal text-foreground/80">
             <Link
               href={APP_ROUTES.CATEGORIES}
               onClick={close}
-              className={cn(
-                "inline-flex min-h-9 items-center gap-2 rounded-md whitespace-nowrap transition-colors hover:text-primary",
-                focusRing
-              )}
+              className={footerLinkClass}
             >
               <span>{t("allCategories")}</span>
               <ArrowIcon aria-hidden="true" className="size-3.5" />
@@ -262,10 +327,7 @@ export function MobileStoreCategoriesButton({
                 <Link
                   href={APP_ROUTES.ACCOUNT}
                   onClick={close}
-                  className={cn(
-                    "inline-flex min-h-9 items-center rounded-md whitespace-nowrap transition-colors hover:text-primary",
-                    focusRing
-                  )}
+                  className={footerLinkClass}
                 >
                   {t("account")}
                 </Link>
@@ -274,10 +336,7 @@ export function MobileStoreCategoriesButton({
                 <Link
                   href={APP_ROUTES.WISHLIST}
                   onClick={close}
-                  className={cn(
-                    "inline-flex min-h-9 items-center rounded-md whitespace-nowrap transition-colors hover:text-primary",
-                    focusRing
-                  )}
+                  className={footerLinkClass}
                 >
                   {t("wishlist")}
                 </Link>

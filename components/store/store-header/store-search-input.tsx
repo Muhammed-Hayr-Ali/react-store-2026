@@ -27,9 +27,8 @@ const searchInputVariants = cva(
   }
 )
 
-export interface StoreSearchInputProps extends VariantProps<
-  typeof searchInputVariants
-> {
+export interface StoreSearchInputProps
+  extends VariantProps<typeof searchInputVariants> {
   className?: string
   inputClassName?: string
 }
@@ -74,7 +73,17 @@ export function StoreSearchInput({
     const input = inputRef.current
     if (!input || phrases.length === 0) return
 
-    if (!isVisible || isFocused || query.trim().length > 0) {
+    // احترام إعداد تقليل الحركة في الجهاز
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches
+
+    if (
+      prefersReducedMotion ||
+      !isVisible ||
+      isFocused ||
+      query.trim().length > 0
+    ) {
       input.placeholder = `${prefix}${phrases[0]}`
       return
     }

@@ -15,7 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { PreferenceSegmented } from "./preference-segmented"
 
 interface CurrencyItem {
   code: string
@@ -63,13 +63,16 @@ export function CurrencySelector({ compact = false }: CurrencySelectorProps) {
     <>
       {/* الشاشات الأصغر من lg: Popover */}
       <div className="lg:hidden">
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover
+          open={open}
+          onOpenChange={(next) => setOpen(next && !isPending)}
+        >
           <PopoverTrigger asChild>
             <button
               type="button"
-              disabled={isPending}
+              aria-busy={isPending}
               className={selectorTriggerClass(compact, isPending)}
-              aria-label={t(PREFERENCES_CONFIG.currency.name)}
+              aria-label={`${t(PREFERENCES_CONFIG.currency.name)}: ${shownCurrency.code}`}
             >
               {isPending ? (
                 <Loader2Icon
@@ -77,7 +80,10 @@ export function CurrencySelector({ compact = false }: CurrencySelectorProps) {
                   className="size-3 animate-spin text-primary"
                 />
               ) : (
-                <span className="text-primary">{shownCurrency.symbol}</span>
+                /* على الجوال يكفي كود العملة، والرمز يظهر من sm */
+                <bdi className="hidden text-primary sm:inline">
+                  {shownCurrency.symbol}
+                </bdi>
               )}
               <span>{shownCurrency.code}</span>
               <ChevronDown
@@ -109,7 +115,7 @@ export function CurrencySelector({ compact = false }: CurrencySelectorProps) {
                   >
                     <span className="flex min-w-0 items-center gap-2.5">
                       <span className="w-8 shrink-0 text-start text-[11px] text-muted-foreground">
-                        {curr.symbol}
+                        <bdi>{curr.symbol}</bdi>
                       </span>
                       <span className="truncate">{displayName}</span>
                     </span>
@@ -134,42 +140,24 @@ export function CurrencySelector({ compact = false }: CurrencySelectorProps) {
         </Popover>
       </div>
 
-      {/* الشاشات الأكبر من lg: Tabs */}
+      {/* الشاشات الأكبر من lg: أزرار مجزأة */}
       <div className="hidden lg:inline-flex">
-        <Tabs
+        <PreferenceSegmented
+          ariaLabel={t(PREFERENCES_CONFIG.currency.name)}
           value={shownCurrency.code}
-          onValueChange={(value) => onSelectCurrency(value)}
-        >
-          <TabsList
-            aria-label={t(PREFERENCES_CONFIG.currency.name)}
-            className="h-8 rounded-xl bg-muted/60 p-0.5"
-          >
-            {CURRENCIES.map((curr) => {
-              const isRowLoading = activeLoadingCode === curr.code
-
-              return (
-                <TabsTrigger
-                  key={curr.code}
-                  value={curr.code}
-                  disabled={isPending}
-                  className="h-7 gap-1.5 rounded-lg px-2.5 text-xs font-medium transition-all data-[state=active]:bg-background data-[state=active]:shadow-xs"
-                >
-                  {isRowLoading ? (
-                    <Loader2Icon
-                      aria-hidden="true"
-                      className="size-3 animate-spin text-primary"
-                    />
-                  ) : (
-                    <span className="text-[11px] text-primary">
-                      {curr.symbol}
-                    </span>
-                  )}
-                  <span>{curr.code}</span>
-                </TabsTrigger>
-              )
-            })}
-          </TabsList>
-        </Tabs>
+          onSelect={onSelectCurrency}
+          isPending={isPending}
+          loadingValue={activeLoadingCode}
+          options={CURRENCIES.map((curr) => ({
+            value: curr.code,
+            label: curr.code,
+            icon: (
+              <bdi aria-hidden="true" className="text-[11px] text-primary">
+                {curr.symbol}
+              </bdi>
+            ),
+          }))}
+        />
       </div>
     </>
   )

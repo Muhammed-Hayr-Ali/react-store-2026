@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useLocale, useTranslations } from "next-intl"
-import { Link } from "@/i18n/navigation"
+import { Link, usePathname } from "@/i18n/navigation"
 import {
   ChevronLeft,
   ChevronRight,
@@ -36,7 +36,7 @@ interface StoreHeaderProps {
 }
 
 const scrollButtonClass =
-  "flex size-7 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/80 text-foreground/80 transition-colors hover:bg-muted/70 hover:text-primary"
+  "hidden size-7 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/80 text-foreground/80 transition-colors hover:bg-muted/70 hover:text-primary sm:flex"
 
 /** شارة عدد السلة: تختفي عند الصفر وتُختصر فوق 99 */
 function CartBadge({ count, className }: { count: number; className: string }) {
@@ -58,6 +58,10 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
   const t = useTranslations("StoreHeader")
   const locale = useLocale()
   const isRtl = isRtlLocale(locale)
+  const pathname = usePathname()
+
+  const isCurrent = (href: string) =>
+    pathname === href || pathname.startsWith(`${href}/`)
 
   const [showStickyNav, setShowStickyNav] = React.useState(false)
   const [canScrollPrev, setCanScrollPrev] = React.useState(false)
@@ -66,6 +70,12 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
   const mainHeaderRef = React.useRef<HTMLElement>(null)
   const stickyNavRef = React.useRef<HTMLElement>(null)
   const { totalItemsCount } = useCart()
+
+  // aria-label يحجب محتوى الرابط، لذلك نضيف العدد إليه
+  const cartLabel =
+    totalItemsCount > 0
+      ? `${t("cartAriaLabel")} (${totalItemsCount})`
+      : t("cartAriaLabel")
 
   // فلترة التصنيفات الرئيسية النشطة فقط
   const rootCategories = React.useMemo(
@@ -114,8 +124,10 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
 
     const observer = new ResizeObserver(updateScrollButtons)
     observer.observe(el)
+    // نراقب العناصر أيضاً: تغير عرض المحتوى (كتحميل الخط) لا يغير حجم الحاوية
+    Array.from(el.children).forEach((child) => observer.observe(child))
     return () => observer.disconnect()
-  }, [updateScrollButtons, rootCategories, showStickyNav])
+  }, [updateScrollButtons, rootCategories, isRtl])
 
   const scrollCategories = (direction: "prev" | "next") => {
     const el = stickyNavRef.current
@@ -129,15 +141,16 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
     el.scrollBy({ left: delta, behavior: "smooth" })
   }
 
-  const stickyFadeStyle: React.CSSProperties | undefined =
-    canScrollPrev || canScrollNext
-      ? {
-          maskImage:
-            "linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent)",
-          WebkitMaskImage:
-            "linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent)",
-        }
-      : undefined
+  const hasOverflow = canScrollPrev || canScrollNext
+
+  // التلاشي يظهر فقط في الجهة التي يوجد فيها محتوى مخفي
+  const fadeLeft = isRtl ? canScrollNext : canScrollPrev
+  const fadeRight = isRtl ? canScrollPrev : canScrollNext
+  const fadeMask = `linear-gradient(to right, ${fadeLeft ? "transparent, black 16px" : "black, black 16px"}, ${fadeRight ? "black calc(100% - 16px), transparent" : "black calc(100% - 16px), black"})`
+
+  const stickyFadeStyle: React.CSSProperties | undefined = hasOverflow
+    ? { maskImage: fadeMask, WebkitMaskImage: fadeMask }
+    : undefined
 
   return (
     <>
@@ -178,11 +191,14 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
 
               <Link
                 href={APP_ROUTES.CART}
-                aria-label={t("cartAriaLabel")}
+                aria-label={cartLabel}
                 className={headerActionClass}
               >
                 <span className="relative">
-                  <ShoppingBag aria-hidden="true" className="size-5 lg:size-4" />
+                  <ShoppingBag
+                    aria-hidden="true"
+                    className="size-5 lg:size-4"
+                  />
                   <CartBadge
                     count={totalItemsCount}
                     className="-inset-e-2 -top-1.5"
@@ -203,7 +219,7 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div
             className={cn(
-              "flex h-13 items-center justify-between gap-4 overflow-x-auto",
+              "-mx-1 flex h-13 items-center justify-between gap-2 overflow-x-auto px-1 sm:gap-4",
               hideScrollbar
             )}
           >
@@ -219,21 +235,41 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
                 className="mx-1 hidden h-4 w-px bg-border md:flex"
               />
 
-              <Link href={APP_ROUTES.COLLECTIONS.NEWEST} className={navLinkClass}>
+              <Link
+                href={APP_ROUTES.COLLECTIONS.NEWEST}
+                aria-current={
+                  isCurrent(APP_ROUTES.COLLECTIONS.NEWEST) ? "page" : undefined
+                }
+                className={cn(
+                  navLinkClass,
+                  "aria-[current=page]:bg-muted/70 aria-[current=page]:text-primary"
+                )}
+              >
                 {t("newest")}
               </Link>
 
               <Link
                 href={APP_ROUTES.COLLECTIONS.FEATURED}
-                className={navLinkClass}
+                aria-current={
+                  isCurrent(APP_ROUTES.COLLECTIONS.FEATURED)
+                    ? "page"
+                    : undefined
+                }
+                className={cn(
+                  navLinkClass,
+                  "aria-[current=page]:bg-muted/70 aria-[current=page]:text-primary"
+                )}
               >
                 {t("featured")}
               </Link>
 
               <Link
                 href={APP_ROUTES.COLLECTIONS.OFFERS}
+                aria-current={
+                  isCurrent(APP_ROUTES.COLLECTIONS.OFFERS) ? "page" : undefined
+                }
                 className={cn(
-                  "hidden h-9 items-center gap-1 rounded-lg px-2.5 text-primary transition-colors hover:bg-primary/10 md:flex",
+                  "hidden h-9 items-center gap-1 rounded-lg px-2.5 text-primary transition-colors hover:bg-primary/10 aria-[current=page]:bg-primary/10 md:flex",
                   focusRing
                 )}
               >
@@ -278,7 +314,7 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
 
             <Link
               href={APP_ROUTES.CART}
-              aria-label={t("cartAriaLabel")}
+              aria-label={cartLabel}
               className={cn(
                 "relative flex size-10 shrink-0 items-center justify-center rounded-xl text-foreground transition-colors hover:bg-muted/60 hover:text-primary",
                 focusRing
@@ -303,6 +339,7 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
               className={cn(
                 scrollButtonClass,
                 focusRing,
+                !hasOverflow && "sm:hidden",
                 !canScrollPrev && "pointer-events-none opacity-30"
               )}
             >
@@ -326,13 +363,15 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
               {rootCategories.map((category) => {
                 const title =
                   isRtl && category.name_ar ? category.name_ar : category.name
+                const href = `${APP_ROUTES.CATEGORIES}/${category.slug}`
 
                 return (
                   <Link
                     key={category.id}
-                    href={`${APP_ROUTES.CATEGORIES}/${category.slug}`}
+                    href={href}
+                    aria-current={isCurrent(href) ? "page" : undefined}
                     className={cn(
-                      "flex h-8 shrink-0 items-center rounded-lg px-2.5 whitespace-nowrap text-foreground/80 transition-colors hover:bg-muted/60 hover:text-primary",
+                      "flex h-8 shrink-0 items-center rounded-lg px-2.5 whitespace-nowrap text-foreground/80 transition-colors hover:bg-muted/60 hover:text-primary aria-[current=page]:bg-primary/10 aria-[current=page]:text-primary",
                       focusRing
                     )}
                   >
@@ -350,6 +389,7 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
               className={cn(
                 scrollButtonClass,
                 focusRing,
+                !hasOverflow && "sm:hidden",
                 !canScrollNext && "pointer-events-none opacity-30"
               )}
             >

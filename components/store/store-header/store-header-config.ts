@@ -1,5 +1,5 @@
 /**
- * @file lib/config/app_config.ts
+ * @file store-header-config.ts
  * @description الإعدادات المركزية للتطبيق، تشمل الروابط، العملات، اللغات، والثيمات.
  */
 
@@ -113,20 +113,24 @@ export const PREFERENCES_CONFIG = {
   appearance: {
     name: "appearance",
     icon: SunMoon,
-    options: Object.values(SUPPORTED_THEMES).map((theme): PreferenceOption => ({
-      label: theme.name,
-      key: theme.key,
-      value: theme.code,
-      icon: theme.icon,
-    })),
+    options: Object.values(SUPPORTED_THEMES).map(
+      (theme): PreferenceOption => ({
+        label: theme.name,
+        key: theme.key,
+        value: theme.code,
+        icon: theme.icon,
+      })
+    ),
   },
   currency: {
     name: "currency",
     icon: Coins,
-    options: Object.values(SUPPORTED_CURRENCIES).map((c): PreferenceOption => ({
-      label: `${c.code} (${c.symbol})`,
-      key: c.key,
-      value: c.code,
-    })),
+    options: Object.values(SUPPORTED_CURRENCIES).map(
+      (c): PreferenceOption => ({
+        label: `${c.code} (${c.symbol})`,
+        key: c.key,
+        value: c.code,
+      })
+    ),
   },
 } satisfies Record<string, PreferenceSection>
