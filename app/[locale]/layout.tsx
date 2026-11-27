@@ -30,8 +30,7 @@ import { CartProvider } from "@/lib/context/cart-context"
 import { getWishlistProductIds } from "@/lib/actions/wishlists"
 import { getCart } from "@/lib/actions/cart"
 import type { AppLocale } from "@/i18n/routing"
-import ScreenSizeIndicator from "@/components/shared/screen_size_indicator"
-
+ 
 const plexArabic = IBM_Plex_Sans_Arabic({
   subsets: ["arabic", "latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700"],

@@ -1,13 +1,21 @@
 "use client"
 
-import React, { createContext, useContext, useMemo } from "react"
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+} from "react"
+import { useRouter } from "next/navigation"
+import { createBrowserClient } from "@/lib/database/supabase/client"
 import { CurrentUser } from "../actions/users/queries/get-current-user"
 
 export type FormattedUser = {
   id: string
   name: string
   initials: string // أول حرفين من اسم المستخدم
-  email: string    // البريد الإلكتروني كاملاً (مثال: m.thelord963@gmail.com)
+  email: string // البريد الإلكتروني كاملاً (مثال: m.thelord963@gmail.com)
   username: string // البريد بصيغة @username (مثال: @m.thelord963)
   avatar: string
   role: string
@@ -31,6 +39,33 @@ export function UserProvider({
   permissions?: string[]
   children: React.ReactNode
 }) {
+  const router = useRouter()
+  const supabase = useMemo(() => createBrowserClient(), [])
+
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (
+        event === "SIGNED_IN" ||
+        event === "SIGNED_OUT" ||
+        event === "TOKEN_REFRESHED" ||
+        event === "USER_UPDATED"
+      ) {
+        const currentUserId = rawUser?.id ?? null
+        const nextUserId = session?.user?.id ?? null
+
+        if (currentUserId !== nextUserId || event === "SIGNED_OUT" || event === "USER_UPDATED") {
+          router.refresh()
+        }
+      }
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [supabase, router, rawUser?.id])
+
   const formattedUser = useMemo<FormattedUser | null>(() => {
     if (!rawUser) return null
 
@@ -63,10 +98,13 @@ export function UserProvider({
     }
   }, [rawUser])
 
-  const hasPermission = (permission: string) => {
-    if (!permissions) return false
-    return permissions.includes(permission)
-  }
+  const hasPermission = useCallback(
+    (permission: string) => {
+      if (!permissions) return false
+      return permissions.includes(permission)
+    },
+    [permissions]
+  )
 
   return (
     <UserContext.Provider
@@ -84,7 +122,7 @@ export function UserProvider({
 
 /**
  * Hook للوصول إلى بيانات المستخدم الحالي وصلاحياته.
- * 
+ *
  * @returns {UserContextType} يعيد الكائن التالي:
  * - `rawUser`: بيانات المستخدم الخام القادمة من قاعدة البيانات.
  * - `user`: بيانات المستخدم منسقة (الاسم، أول الحرفين `initials`، البريد الكامل `email`، صيغة `@username` عبر `username`، الصورة، والدور).
