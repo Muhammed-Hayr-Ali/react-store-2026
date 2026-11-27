@@ -37,8 +37,8 @@ export default async function AuthLayout({
           href={APP_ROUTES.HOME}
           className="flex items-center gap-2 self-center font-medium"
         >
-          <div className="flex size-10 items-center justify-center rounded-[50%] bg-primary text-primary-foreground corner-squircle">
-            <AppLogo className="size-6" />
+          <div className="flex size-10 items-center justify-center rounded-[50%] bg-primary corner-squircle">
+            <AppLogo className="size-6 text-white" />
           </div>
         </Link>
 
