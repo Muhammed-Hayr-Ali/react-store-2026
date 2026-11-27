@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl"
 import { toast } from "sonner"
 import {
   ChevronDown,
+  LayoutDashboard,
   Loader2Icon,
   LogIn,
   LogOutIcon,
@@ -153,7 +154,18 @@ export function AccountSelector() {
                   <span>{t("my_orders")}</span>
                 </span>
               </Link>
-
+              {user.role === "admin" && (
+                <Link
+                  href={`${APP_ROUTES.ACCOUNT}/orders`}
+                  onClick={() => setOpen(false)}
+                  className={menuItemClass()}
+                >
+                  <span className={labelClass}>
+                    <LayoutDashboard aria-hidden="true" className={iconClass} />
+                    <span>{t("dashboard")}</span>
+                  </span>
+                </Link>
+              )}
               <div className="my-1 border-t border-border/60" />
 
               <button

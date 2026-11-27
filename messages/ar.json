@@ -198,7 +198,8 @@
     "close": "إغلاق",
     "scrollPrev": "التمرير لليمين",
     "scrollNext": "التمرير لليسار",
-    "search": "بحث"
+    "search": "بحث",
+    "dashboard": "لوحة التحكم"
   },
   "AuthLayout": {
     "TERMS_PREFIX": "بالمتابعة، فإنك توافق على",
@@ -827,7 +828,6 @@
     "ADD_SKU_FIRST": "أضف رمز SKU أولاً",
     "URL_SLUG_PLACEHOLDER": "premium-oxford-cotton-shirt",
     "IMAGE_GUIDE_TITLE": "قواعد صور المنتج",
-    "IMAGE_GUIDE_SPECS": "المواصفات المفضلة: نسبة 1:1، أبعاد 512×512، وصيغة WebP.",
     "IMAGE_GUIDE_SPECS": "المواصفات المفضلة: نسبة 1:1، أبعاد 512×512، وصيغة WebP.",
     "IMAGE_GUIDE_GENERAL": "الصورة غير المرتبطة بمتغير تظهر كصورة رئيسية في القوائم والصفحة الرئيسية.",
     "IMAGE_GUIDE_VARIANT": "الصورة المرتبطة بمتغير تظهر في صفحة المنتج عند اختيار ذلك المتغير.",

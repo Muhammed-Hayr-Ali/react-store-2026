@@ -198,7 +198,8 @@
     "close": "Close",
     "scrollPrev": "Scroll left",
     "scrollNext": "Scroll right",
-    "search": "Search"
+    "search": "Search",
+    "dashboard": "Dashboard"
   },
   "AuthLayout": {
     "TERMS_PREFIX": "By continuing, you agree to our",
