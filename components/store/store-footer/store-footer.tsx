@@ -16,13 +16,13 @@ import { APP_CONFIG, STORE_CONTAINER } from "@/lib/config/app_config"
 import { footerConfig } from "./footer-config"
 import { ThemeToggle } from "./theme-toggle"
 import { NewsletterSection } from "./newsletter-section"
-import { menuItemClass, navLinkClass } from "./store-footer-shared"
+import {} from "./store-footer-shared"
 
 export function StoreFooter() {
   const t = useTranslations("Footer")
 
   return (
-    <footer className="hidden w-full shrink-0 border-t border-border/40 bg-background text-sm text-muted-foreground md:block">
+    <footer className="w-full shrink-0 border-t border-border/40 bg-background pt-8 text-sm text-muted-foreground md:block">
       <div className={STORE_CONTAINER}>
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* 1. قسم العلامة التجارية والوصف */}
@@ -69,7 +69,7 @@ export function StoreFooter() {
                   <li key={item.key}>
                     <Link
                       href={item.href}
-                      className={menuItemClass(false)}
+                      className=" text-xs text-muted-foreground transition-colors hover:text-primary focus-visible:underline focus-visible:outline-none"
                     >
                       {label}
                     </Link>
@@ -89,7 +89,7 @@ export function StoreFooter() {
                   <li key={item.key}>
                     <Link
                       href={item.href}
-                      className="text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:underline focus-visible:outline-none"
+                      className="text-xs text-muted-foreground transition-colors hover:text-primary focus-visible:underline focus-visible:outline-none"
                     >
                       {label}
                     </Link>

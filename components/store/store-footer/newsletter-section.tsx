@@ -75,7 +75,7 @@ export function NewsletterSection() {
           disabled={isSubmitting}
           required
           aria-invalid={Boolean(form.formState.errors.email)}
-          className="h-7.5 flex-1 rounded-xl border-0 bg-secondary text-secondary-foreground focus-visible:ring-0"
+          className="h-7.5 flex-1 border-0 bg-secondary text-secondary-foreground focus-visible:ring-0"
         />
 
         <Button
