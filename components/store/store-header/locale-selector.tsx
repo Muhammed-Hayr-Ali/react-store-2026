@@ -4,6 +4,8 @@ import * as React from "react"
 import { useTranslations } from "next-intl"
 import { Check, ChevronDown, Globe, Loader2Icon } from "lucide-react"
 
+import { cn } from "@/lib/utils"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { useLanguagePreference } from "@/lib/hooks/use-store-preferences"
 import { PreferenceOption, PREFERENCES_CONFIG } from "./store-header-config"
 import { menuItemClass, selectorTriggerClass } from "./store-header-shared"
@@ -12,16 +14,77 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import {
+  BottomSheet,
+  BottomSheetBody,
+  BottomSheetContent,
+  BottomSheetHeader,
+  BottomSheetTrigger,
+} from "@/components/shared/bottom-sheet"
 import { PreferenceSegmented } from "./preference-segmented"
 
 interface LocaleSelectorProps {
   compact?: boolean
 }
 
+interface LocaleListProps {
+  options: readonly PreferenceOption[]
+  optimisticLocale: string
+  activeLoadingLocale: string | null
+  isMounted: boolean
+  isPending: boolean
+  onSelectLanguage: (value: string) => void
+}
+
+function LocaleList({
+  options,
+  optimisticLocale,
+  activeLoadingLocale,
+  isMounted,
+  isPending,
+  onSelectLanguage,
+}: LocaleListProps) {
+  return (
+    <div className="space-y-1">
+      {options.map((opt) => {
+        const isSelected = isMounted && optimisticLocale === opt.value
+        const isRowLoading = activeLoadingLocale === opt.value
+
+        return (
+          <button
+            key={opt.key}
+            type="button"
+            disabled={isPending}
+            aria-pressed={isSelected}
+            onClick={() => onSelectLanguage(opt.value)}
+            className={menuItemClass(isSelected)}
+          >
+            <span lang={opt.value}>{opt.label}</span>
+            {isRowLoading ? (
+              <Loader2Icon
+                aria-hidden="true"
+                className="size-3.5 shrink-0 animate-spin text-primary"
+              />
+            ) : (
+              isSelected && (
+                <Check
+                  aria-hidden="true"
+                  className="size-3.5 shrink-0 text-primary"
+                />
+              )
+            )}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 export function LocaleSelector({ compact = false }: LocaleSelectorProps) {
   const [open, setOpen] = React.useState(false)
   const [loadingLocale, setLoadingLocale] = React.useState<string | null>(null)
 
+  const isMobile = useIsMobile()
   const t = useTranslations("Navigation.preferences")
   const { optimisticLocale, isMounted, isPending, handleLanguageChange } =
     useLanguagePreference()
@@ -47,82 +110,83 @@ export function LocaleSelector({ compact = false }: LocaleSelectorProps) {
     [handleLanguageChange, isPending, optimisticLocale]
   )
 
+  const handleOpenChange = React.useCallback(
+    (next: boolean) => {
+      setOpen(next && !isPending)
+    },
+    [isPending]
+  )
+
+  const languageLabel = t(language.name)
+
+  const triggerButton = (
+    <button
+      type="button"
+      aria-busy={isPending}
+      className={selectorTriggerClass(compact, isPending)}
+      aria-label={`${languageLabel}: ${shownOption.label}`}
+    >
+      {isPending ? (
+        <Loader2Icon
+          aria-hidden="true"
+          className="size-3 animate-spin text-primary"
+        />
+      ) : (
+        <Globe aria-hidden="true" className="size-3.5 text-muted-foreground" />
+      )}
+      {/* على الجوال تكفي الأيقونة، مثل زر المظهر */}
+      <span className="hidden sm:inline">{shownOption.label}</span>
+      <ChevronDown
+        aria-hidden="true"
+        className={cn(
+          "hidden size-3 text-muted-foreground transition-transform duration-200 sm:block",
+          open && "rotate-180"
+        )}
+      />
+    </button>
+  )
+
+  const listProps: LocaleListProps = {
+    options: language.options,
+    optimisticLocale,
+    activeLoadingLocale,
+    isMounted,
+    isPending,
+    onSelectLanguage,
+  }
+
   return (
     <>
-      {/* الشاشات الأصغر من lg: Popover */}
+      {/* الشاشات الأصغر من lg: BottomSheet على الجوال و Popover على الأجهزة اللوحية */}
       <div className="lg:hidden">
-        <Popover
-          open={open}
-          onOpenChange={(next) => setOpen(next && !isPending)}
-        >
-          <PopoverTrigger asChild>
-            <button
-              type="button"
-              aria-busy={isPending}
-              className={selectorTriggerClass(compact, isPending)}
-              aria-label={`${t(language.name)}: ${shownOption.label}`}
-            >
-              {isPending ? (
-                <Loader2Icon
-                  aria-hidden="true"
-                  className="size-3 animate-spin text-primary"
-                />
-              ) : (
-                <Globe
-                  aria-hidden="true"
-                  className="size-3.5 text-muted-foreground"
-                />
-              )}
-              {/* على الجوال تكفي الأيقونة، مثل زر المظهر */}
-              <span className="hidden sm:inline">{shownOption.label}</span>
-              <ChevronDown
-                aria-hidden="true"
-                className="size-3 text-muted-foreground"
-              />
-            </button>
-          </PopoverTrigger>
-
-          <PopoverContent align="end" className="w-44 p-1.5 font-normal">
-            <div className="space-y-1">
-              {language.options.map((opt: PreferenceOption) => {
-                const isSelected = isMounted && optimisticLocale === opt.value
-                const isRowLoading = activeLoadingLocale === opt.value
-
-                return (
-                  <button
-                    key={opt.key}
-                    type="button"
-                    disabled={isPending}
-                    aria-pressed={isSelected}
-                    onClick={() => onSelectLanguage(opt.value)}
-                    className={menuItemClass(isSelected)}
-                  >
-                    <span lang={opt.value}>{opt.label}</span>
-                    {isRowLoading ? (
-                      <Loader2Icon
-                        aria-hidden="true"
-                        className="size-3.5 shrink-0 animate-spin text-primary"
-                      />
-                    ) : (
-                      isSelected && (
-                        <Check
-                          aria-hidden="true"
-                          className="size-3.5 shrink-0 text-primary"
-                        />
-                      )
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-          </PopoverContent>
-        </Popover>
+        {isMobile ? (
+          <BottomSheet open={open} onOpenChange={handleOpenChange}>
+            <BottomSheetTrigger asChild>{triggerButton}</BottomSheetTrigger>
+            <BottomSheetContent ariaLabel={languageLabel}>
+              <BottomSheetHeader>
+                <span className="text-sm font-normal text-foreground">
+                  {languageLabel}
+                </span>
+              </BottomSheetHeader>
+              <BottomSheetBody className="px-2 py-2">
+                <LocaleList {...listProps} />
+              </BottomSheetBody>
+            </BottomSheetContent>
+          </BottomSheet>
+        ) : (
+          <Popover open={open} onOpenChange={handleOpenChange}>
+            <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
+            <PopoverContent align="end" className="w-44 p-1.5 font-normal">
+              <LocaleList {...listProps} />
+            </PopoverContent>
+          </Popover>
+        )}
       </div>
 
       {/* الشاشات الأكبر من lg: أزرار مجزأة */}
       <div className="hidden lg:inline-flex">
         <PreferenceSegmented
-          ariaLabel={t(language.name)}
+          ariaLabel={languageLabel}
           value={shownOption.value}
           onSelect={onSelectLanguage}
           isPending={isPending}
