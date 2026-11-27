@@ -31,6 +31,7 @@ interface ThemeListProps {
   options: readonly PreferenceOption[]
   effectiveThemeKey: string
   activeLoadingTheme: string | null
+  isMobile: boolean
   isMounted: boolean
   isPending: boolean
   onSelectTheme: (value: string) => void
@@ -41,13 +42,14 @@ function ThemeList({
   options,
   effectiveThemeKey,
   activeLoadingTheme,
+  isMobile,
   isMounted,
   isPending,
   onSelectTheme,
   t,
 }: ThemeListProps) {
   return (
-    <div className="space-y-1">
+    <div className={cn(isMobile ? "space-y-1.5" : "space-y-1")}>
       {options.map((opt) => {
         const isSelected = isMounted && effectiveThemeKey === opt.value
         const isRowLoading = activeLoadingTheme === opt.value
@@ -60,13 +62,24 @@ function ThemeList({
             disabled={isPending}
             aria-pressed={isSelected}
             onClick={() => onSelectTheme(opt.value)}
-            className={menuItemClass(isSelected)}
+            className={cn(
+              menuItemClass(isSelected),
+              isMobile && "min-h-11 rounded-xl px-3.5 py-2.5 text-sm"
+            )}
           >
-            <span className="flex items-center gap-2.5">
+            <span
+              className={cn(
+                "flex items-center",
+                isMobile ? "gap-3" : "gap-2.5"
+              )}
+            >
               {OptIcon && (
                 <OptIcon
                   aria-hidden="true"
-                  className="size-3.5 shrink-0 text-muted-foreground"
+                  className={cn(
+                    "shrink-0 text-muted-foreground",
+                    isMobile ? "size-4" : "size-3.5"
+                  )}
                 />
               )}
               <span>{t(opt.key)}</span>
@@ -74,13 +87,19 @@ function ThemeList({
             {isRowLoading ? (
               <Loader2Icon
                 aria-hidden="true"
-                className="size-3.5 shrink-0 animate-spin text-primary"
+                className={cn(
+                  "shrink-0 animate-spin text-primary",
+                  isMobile ? "size-4" : "size-3.5"
+                )}
               />
             ) : (
               isSelected && (
                 <Check
                   aria-hidden="true"
-                  className="size-3.5 shrink-0 text-primary"
+                  className={cn(
+                    "shrink-0 text-primary",
+                    isMobile ? "size-4" : "size-3.5"
+                  )}
                 />
               )
             )}
@@ -168,6 +187,7 @@ export function ThemeSelector({ compact = false }: ThemeSelectorProps) {
     options: appearance.options,
     effectiveThemeKey,
     activeLoadingTheme,
+    isMobile,
     isMounted,
     isPending,
     onSelectTheme,
@@ -183,11 +203,11 @@ export function ThemeSelector({ compact = false }: ThemeSelectorProps) {
             <BottomSheetTrigger asChild>{triggerButton}</BottomSheetTrigger>
             <BottomSheetContent ariaLabel={appearanceLabel}>
               <BottomSheetHeader>
-                <span className="text-sm font-normal text-foreground">
+                <span className="text-base font-normal text-foreground">
                   {appearanceLabel}
                 </span>
               </BottomSheetHeader>
-              <BottomSheetBody className="px-2 py-2">
+              <BottomSheetBody className="px-3 py-3">
                 <ThemeList {...listProps} />
               </BottomSheetBody>
             </BottomSheetContent>

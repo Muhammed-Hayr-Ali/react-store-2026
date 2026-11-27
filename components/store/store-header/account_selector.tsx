@@ -41,13 +41,10 @@ import {
   menuItemClass,
 } from "./store-header-shared"
 
-const iconClass =
-  "size-3.5 shrink-0 text-muted-foreground group-hover:text-primary"
-const labelClass = "flex items-center gap-2.5 group-hover:text-primary"
-
 interface AccountMenuContentProps {
   user: ReturnType<typeof useUser>["user"]
   dir: "rtl" | "ltr"
+  isMobile: boolean
   isGoogleLoading: boolean
   onClose: () => void
   onGoogleSignIn: () => Promise<void>
@@ -58,26 +55,60 @@ interface AccountMenuContentProps {
 function AccountMenuContent({
   user,
   dir,
+  isMobile,
   isGoogleLoading,
   onClose,
   onGoogleSignIn,
   onOpenLogout,
   t,
 }: AccountMenuContentProps) {
+  const itemClass = cn(
+    menuItemClass(),
+    isMobile && "min-h-11 rounded-xl px-3.5 py-2.5 text-sm"
+  )
+
+  const iconClass = cn(
+    "shrink-0 text-muted-foreground group-hover:text-primary",
+    isMobile ? "size-4" : "size-3.5"
+  )
+
+  const labelClass = cn(
+    "flex items-center group-hover:text-primary",
+    isMobile ? "gap-3" : "gap-2.5"
+  )
+
   if (user) {
     return (
-      <div className="space-y-1">
-        <div className="flex items-center gap-3 px-2 py-1.5">
-          <Avatar className="size-9 shrink-0 border-0 shadow-none ring-0">
+      <div className={cn(isMobile ? "space-y-1.5" : "space-y-1")}>
+        <div
+          className={cn(
+            "flex items-center gap-3",
+            isMobile ? "px-3 py-2" : "px-2 py-1.5"
+          )}
+        >
+          <Avatar
+            className={cn(
+              "shrink-0 border-0 shadow-none ring-0",
+              isMobile ? "size-11" : "size-9"
+            )}
+          >
             <AvatarImage src={user.avatar} alt="" />
-            <AvatarFallback className="text-[10px] font-normal">
+            <AvatarFallback
+              className={cn(
+                "font-normal",
+                isMobile ? "text-xs" : "text-[10px]"
+              )}
+            >
               {user.initials}
             </AvatarFallback>
           </Avatar>
 
           <div className="flex min-w-0 flex-1 flex-col justify-center">
             <p
-              className="truncate text-[13px] leading-tight font-normal text-foreground"
+              className={cn(
+                "truncate leading-tight font-normal text-foreground",
+                isMobile ? "text-sm" : "text-[13px]"
+              )}
               title={user.name}
             >
               {user.name}
@@ -85,7 +116,10 @@ function AccountMenuContent({
 
             <p
               dir={dir}
-              className="mt-0.5 truncate text-start font-mono text-[11px] leading-tight text-muted-foreground"
+              className={cn(
+                "mt-0.5 truncate text-start font-mono leading-tight text-muted-foreground",
+                isMobile ? "text-xs" : "text-[11px]"
+              )}
               title={`${user.role}/${user.username}`}
             >
               <bdi>{user.role}</bdi>/<bdi>{user.username}</bdi>
@@ -93,13 +127,9 @@ function AccountMenuContent({
           </div>
         </div>
 
-        <div className="my-1 border-t border-border/60" />
+        <div className="my-1.5 border-t border-border/60" />
 
-        <Link
-          href={APP_ROUTES.ACCOUNT}
-          onClick={onClose}
-          className={menuItemClass()}
-        >
+        <Link href={APP_ROUTES.ACCOUNT} onClick={onClose} className={itemClass}>
           <span className={labelClass}>
             <UserIcon aria-hidden="true" className={iconClass} />
             <span>{t("profile")}</span>
@@ -109,7 +139,7 @@ function AccountMenuContent({
         <Link
           href={`${APP_ROUTES.ACCOUNT}/orders`}
           onClick={onClose}
-          className={menuItemClass()}
+          className={itemClass}
         >
           <span className={labelClass}>
             <Package aria-hidden="true" className={iconClass} />
@@ -121,7 +151,7 @@ function AccountMenuContent({
           <Link
             href={APP_ROUTES.DASHBOARD.OVERVIEW}
             onClick={onClose}
-            className={menuItemClass()}
+            className={itemClass}
           >
             <span className={labelClass}>
               <LayoutDashboard aria-hidden="true" className={iconClass} />
@@ -130,7 +160,7 @@ function AccountMenuContent({
           </Link>
         )}
 
-        <div className="my-1 border-t border-border/60" />
+        <div className="my-1.5 border-t border-border/60" />
 
         <button
           type="button"
@@ -138,12 +168,20 @@ function AccountMenuContent({
             onClose()
             onOpenLogout()
           }}
-          className={menuItemClass()}
+          className={itemClass}
         >
-          <span className="flex items-center gap-2.5 group-hover:text-destructive">
+          <span
+            className={cn(
+              "flex items-center group-hover:text-destructive",
+              isMobile ? "gap-3" : "gap-2.5"
+            )}
+          >
             <LogOutIcon
               aria-hidden="true"
-              className="size-3.5 shrink-0 text-muted-foreground group-hover:text-destructive"
+              className={cn(
+                "shrink-0 text-muted-foreground group-hover:text-destructive",
+                isMobile ? "size-4" : "size-3.5"
+              )}
             />
             <span>{t("log_out")}</span>
           </span>
@@ -153,11 +191,11 @@ function AccountMenuContent({
   }
 
   return (
-    <div className="space-y-1">
+    <div className={cn(isMobile ? "space-y-1.5" : "space-y-1")}>
       <Link
         href={APP_ROUTES.AUTH.SIGNUP}
         onClick={onClose}
-        className={menuItemClass()}
+        className={itemClass}
       >
         <span className={labelClass}>
           <UserPlus aria-hidden="true" className={iconClass} />
@@ -168,7 +206,7 @@ function AccountMenuContent({
       <Link
         href={APP_ROUTES.AUTH.LOGIN}
         onClick={onClose}
-        className={menuItemClass()}
+        className={itemClass}
       >
         <span className={labelClass}>
           <LogIn aria-hidden="true" className={iconClass} />
@@ -176,19 +214,22 @@ function AccountMenuContent({
         </span>
       </Link>
 
-      <div className="my-1 border-t border-border/60" />
+      <div className="my-1.5 border-t border-border/60" />
 
       <button
         type="button"
         disabled={isGoogleLoading}
         onClick={onGoogleSignIn}
-        className={menuItemClass()}
+        className={itemClass}
       >
         <span className={labelClass}>
           {isGoogleLoading ? (
             <Loader2Icon
               aria-hidden="true"
-              className="size-3.5 shrink-0 animate-spin text-primary"
+              className={cn(
+                "shrink-0 animate-spin text-primary",
+                isMobile ? "size-4" : "size-3.5"
+              )}
             />
           ) : (
             <svg
@@ -276,6 +317,7 @@ export function AccountSelector() {
   const sharedContentProps: AccountMenuContentProps = {
     user,
     dir,
+    isMobile,
     isGoogleLoading,
     onClose: () => setOpen(false),
     onGoogleSignIn: handleGoogleSignIn,
@@ -290,11 +332,11 @@ export function AccountSelector() {
           <BottomSheetTrigger asChild>{triggerButton}</BottomSheetTrigger>
           <BottomSheetContent ariaLabel={t("accountMenu")}>
             <BottomSheetHeader>
-              <span className="text-sm font-normal text-foreground">
+              <span className="text-base font-normal text-foreground">
                 {t("accountMenu")}
               </span>
             </BottomSheetHeader>
-            <BottomSheetBody className="px-2 py-2">
+            <BottomSheetBody className="px-3 py-3">
               <AccountMenuContent {...sharedContentProps} />
             </BottomSheetBody>
           </BottomSheetContent>

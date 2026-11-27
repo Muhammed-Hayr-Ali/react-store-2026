@@ -80,7 +80,7 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
       ? `${t("cartAriaLabel")} (${totalItemsCount})`
       : t("cartAriaLabel")
 
-  const items = cart?.items ?? []
+  const items = React.useMemo(() => cart?.items ?? [], [cart?.items])
   const ArrowIcon = isRtl ? ArrowLeft : ArrowRight
 
   // حساب الإجمالي الفرعي بالسنتات لتمريره إلى formatPrice
@@ -148,23 +148,23 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
       <BottomSheetContent ariaLabel={cartLabel}>
         <BottomSheetHeader>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-normal text-foreground">
+            <span className="text-base font-normal text-foreground">
               {t("cart")}
             </span>
             {totalItemsCount > 0 && (
-              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
+              <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs text-primary">
                 {totalItemsCount}
               </span>
             )}
           </div>
         </BottomSheetHeader>
 
-        <BottomSheetBody className="px-4 py-3">
+        <BottomSheetBody className="px-4 py-3.5">
           {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
+            <div className="flex flex-col items-center justify-center gap-2.5 py-10 text-center">
               <ShoppingBag
                 aria-hidden="true"
-                className="size-8 text-muted-foreground/50"
+                className="size-9 text-muted-foreground/50"
               />
               <p className="text-sm text-muted-foreground">
                 {tCart("EMPTY_CART", { default: "سلة التسوق فارغة" })}
@@ -196,27 +196,27 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
                 return (
                   <li
                     key={item.id}
-                    className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
+                    className="flex items-center gap-3 py-3.5 first:pt-0 last:pb-0"
                   >
                     {/* صورة المنتج */}
                     <Link
-                      href={`/products/${product.slug}`}
+                      href={`/product/${product.slug}`}
                       onClick={() => setOpen(false)}
-                      className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/50 bg-muted/40"
+                      className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/50 bg-muted/40"
                     >
                       {imageUrl ? (
                         <Image
                           src={imageUrl}
                           alt={product.name}
-                          width={48}
-                          height={48}
+                          width={56}
+                          height={56}
                           unoptimized
                           className="size-full object-cover"
                         />
                       ) : (
                         <ShoppingBag
                           aria-hidden="true"
-                          className="size-4 text-muted-foreground/50"
+                          className="size-5 text-muted-foreground/50"
                         />
                       )}
                     </Link>
@@ -224,14 +224,14 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
                     {/* اسم المنتج، SKU، والسعر بالعملة المختارة */}
                     <div className="min-w-0 flex-1">
                       <Link
-                        href={`/products/${product.slug}`}
+                        href={`/product/${product.slug}`}
                         onClick={() => setOpen(false)}
-                        className="block truncate text-sm text-foreground transition-colors hover:text-primary"
+                        className="block truncate text-sm font-normal text-foreground transition-colors hover:text-primary"
                       >
                         {product.name}
                       </Link>
 
-                      <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+                      <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
                         {unitPriceInCents > 0 && (
                           <bdi className="font-mono tabular-nums text-foreground/85">
                             {formatPrice(unitPriceInCents)}
@@ -246,7 +246,7 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
                     </div>
 
                     {/* التحكم بالكمية */}
-                    <div className="flex shrink-0 items-center gap-1.5">
+                    <div className="flex shrink-0 items-center gap-2">
                       <button
                         type="button"
                         disabled={isPending}
@@ -258,16 +258,16 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
                             ? removeItem(item.id)
                             : updateItemQuantity(item.id, qty - 1)
                         }
-                        className="flex size-7 items-center justify-center rounded-lg border border-border/60 text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+                        className="flex size-9 items-center justify-center rounded-xl border border-border/60 text-foreground transition-colors hover:bg-muted active:scale-95 disabled:opacity-50"
                       >
                         {qty <= 1 ? (
-                          <Trash2 className="size-3.5 text-destructive" />
+                          <Trash2 className="size-4 text-destructive" />
                         ) : (
-                          <Minus className="size-3.5" />
+                          <Minus className="size-4" />
                         )}
                       </button>
 
-                      <span className="w-6 text-center text-xs tabular-nums">
+                      <span className="w-7 text-center text-sm tabular-nums">
                         {qty}
                       </span>
 
@@ -278,9 +278,9 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
                           default: "زيادة الكمية",
                         })}
                         onClick={() => updateItemQuantity(item.id, qty + 1)}
-                        className="flex size-7 items-center justify-center rounded-lg border border-border/60 text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+                        className="flex size-9 items-center justify-center rounded-xl border border-border/60 text-foreground transition-colors hover:bg-muted active:scale-95 disabled:opacity-50"
                       >
-                        <Plus className="size-3.5" />
+                        <Plus className="size-4" />
                       </button>
                     </div>
                   </li>
@@ -290,17 +290,17 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
           )}
         </BottomSheetBody>
 
-        <BottomSheetFooter className="flex flex-col gap-2.5">
+        <BottomSheetFooter className="flex flex-col gap-3">
           {items.length > 0 && subtotalInCents > 0 && (
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
               <span>{tCart("SUBTOTAL", { default: "الإجمالي الفرعي" })}</span>
-              <bdi className="font-mono text-sm font-medium tabular-nums text-foreground">
+              <bdi className="font-mono text-base font-medium tabular-nums text-foreground">
                 {formatPrice(subtotalInCents)}
               </bdi>
             </div>
           )}
 
-          <Button asChild className="w-full">
+          <Button asChild size="lg" className="h-11 w-full rounded-xl text-sm">
             <Link href={APP_ROUTES.CART} onClick={() => setOpen(false)}>
               <span>
                 {tCart("VIEW_FULL_CART", { default: "عرض السلة الكاملة" })}

@@ -31,6 +31,7 @@ interface LocaleListProps {
   options: readonly PreferenceOption[]
   optimisticLocale: string
   activeLoadingLocale: string | null
+  isMobile: boolean
   isMounted: boolean
   isPending: boolean
   onSelectLanguage: (value: string) => void
@@ -40,12 +41,13 @@ function LocaleList({
   options,
   optimisticLocale,
   activeLoadingLocale,
+  isMobile,
   isMounted,
   isPending,
   onSelectLanguage,
 }: LocaleListProps) {
   return (
-    <div className="space-y-1">
+    <div className={cn(isMobile ? "space-y-1.5" : "space-y-1")}>
       {options.map((opt) => {
         const isSelected = isMounted && optimisticLocale === opt.value
         const isRowLoading = activeLoadingLocale === opt.value
@@ -57,19 +59,28 @@ function LocaleList({
             disabled={isPending}
             aria-pressed={isSelected}
             onClick={() => onSelectLanguage(opt.value)}
-            className={menuItemClass(isSelected)}
+            className={cn(
+              menuItemClass(isSelected),
+              isMobile && "min-h-11 rounded-xl px-3.5 py-2.5 text-sm"
+            )}
           >
             <span lang={opt.value}>{opt.label}</span>
             {isRowLoading ? (
               <Loader2Icon
                 aria-hidden="true"
-                className="size-3.5 shrink-0 animate-spin text-primary"
+                className={cn(
+                  "shrink-0 animate-spin text-primary",
+                  isMobile ? "size-4" : "size-3.5"
+                )}
               />
             ) : (
               isSelected && (
                 <Check
                   aria-hidden="true"
-                  className="size-3.5 shrink-0 text-primary"
+                  className={cn(
+                    "shrink-0 text-primary",
+                    isMobile ? "size-4" : "size-3.5"
+                  )}
                 />
               )
             )}
@@ -150,6 +161,7 @@ export function LocaleSelector({ compact = false }: LocaleSelectorProps) {
     options: language.options,
     optimisticLocale,
     activeLoadingLocale,
+    isMobile,
     isMounted,
     isPending,
     onSelectLanguage,
@@ -164,11 +176,11 @@ export function LocaleSelector({ compact = false }: LocaleSelectorProps) {
             <BottomSheetTrigger asChild>{triggerButton}</BottomSheetTrigger>
             <BottomSheetContent ariaLabel={languageLabel}>
               <BottomSheetHeader>
-                <span className="text-sm font-normal text-foreground">
+                <span className="text-base font-normal text-foreground">
                   {languageLabel}
                 </span>
               </BottomSheetHeader>
-              <BottomSheetBody className="px-2 py-2">
+              <BottomSheetBody className="px-3 py-3">
                 <LocaleList {...listProps} />
               </BottomSheetBody>
             </BottomSheetContent>

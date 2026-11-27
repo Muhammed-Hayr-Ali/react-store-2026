@@ -29,13 +29,19 @@ const THEME_OPTIONS = [
 
 interface ThemeOptionsListProps {
   theme: string | undefined
+  isMobile: boolean
   onSelect: (value: string) => void
   t: ReturnType<typeof useTranslations>
 }
 
-function ThemeOptionsList({ theme, onSelect, t }: ThemeOptionsListProps) {
+function ThemeOptionsList({
+  theme,
+  isMobile,
+  onSelect,
+  t,
+}: ThemeOptionsListProps) {
   return (
-    <div className="flex flex-col gap-0.5">
+    <div className={cn("flex flex-col", isMobile ? "gap-1.5" : "gap-0.5")}>
       {THEME_OPTIONS.map(({ value, labelKey }) => {
         const isActive = theme === value
         return (
@@ -45,13 +51,19 @@ function ThemeOptionsList({ theme, onSelect, t }: ThemeOptionsListProps) {
             aria-pressed={isActive}
             onClick={() => onSelect(value)}
             className={cn(
-              "flex w-full items-center justify-between gap-2 rounded-sm px-2.5 py-2 text-sm font-normal transition-colors hover:bg-accent hover:text-accent-foreground sm:py-1.5",
+              "flex w-full items-center justify-between gap-2 text-sm font-normal transition-colors hover:bg-accent hover:text-accent-foreground",
+              isMobile
+                ? "min-h-11 rounded-xl px-3.5 py-2.5"
+                : "rounded-sm px-2.5 py-1.5",
               isActive && "bg-accent/60 text-accent-foreground"
             )}
           >
             <span>{t(labelKey)}</span>
             {isActive && (
-              <Check aria-hidden="true" className="size-3.5 shrink-0" />
+              <Check
+                aria-hidden="true"
+                className={cn("shrink-0", isMobile ? "size-4" : "size-3.5")}
+              />
             )}
           </button>
         )
@@ -87,12 +99,17 @@ export function ThemeToggle() {
       <BottomSheetTrigger asChild>{triggerButton}</BottomSheetTrigger>
       <BottomSheetContent ariaLabel="Toggle theme">
         <BottomSheetHeader>
-          <span className="text-sm font-normal text-foreground">
+          <span className="text-base font-normal text-foreground">
             {t("SYSTEM")}
           </span>
         </BottomSheetHeader>
-        <BottomSheetBody className="px-2 py-2">
-          <ThemeOptionsList theme={theme} onSelect={handleSelect} t={t} />
+        <BottomSheetBody className="px-3 py-3">
+          <ThemeOptionsList
+            theme={theme}
+            isMobile={isMobile}
+            onSelect={handleSelect}
+            t={t}
+          />
         </BottomSheetBody>
       </BottomSheetContent>
     </BottomSheet>
@@ -100,7 +117,12 @@ export function ThemeToggle() {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
       <PopoverContent align="end" className="w-36 p-1">
-        <ThemeOptionsList theme={theme} onSelect={handleSelect} t={t} />
+        <ThemeOptionsList
+          theme={theme}
+          isMobile={isMobile}
+          onSelect={handleSelect}
+          t={t}
+        />
       </PopoverContent>
     </Popover>
   )

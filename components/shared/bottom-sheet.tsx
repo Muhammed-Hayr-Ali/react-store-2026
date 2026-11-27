@@ -323,29 +323,37 @@ const BottomSheetHeader = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "relative flex shrink-0 flex-col gap-2 border-b px-4 pt-2.5 pb-3.5",
-          showCloseButton && "pe-14",
+          "flex shrink-0 flex-col border-b px-4 pt-2.5 pb-3.5",
           className
         )}
         {...props}
       >
         {showHandle && (
-          <span
-            aria-hidden="true"
-            className="mx-auto h-1 w-10 shrink-0 rounded-full bg-muted-foreground/25"
-          />
+          <div className="flex w-full justify-center pb-2">
+            <span
+              aria-hidden="true"
+              className="h-1 w-10 shrink-0 rounded-full bg-muted-foreground/25"
+            />
+          </div>
         )}
-        <div className="flex items-center gap-2">{children}</div>
-        {showCloseButton && (
-          <button
-            type="button"
-            onClick={handleClose}
-            aria-label="Close sheet"
-            className="absolute inset-e-2 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-[background-color,color,scale] hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-95"
-          >
-            <XIcon aria-hidden="true" className="size-4" />
-          </button>
-        )}
+        <div
+          className={cn(
+            "relative flex items-center gap-2",
+            showCloseButton && "min-h-8 pe-10"
+          )}
+        >
+          {children}
+          {showCloseButton && (
+            <button
+              type="button"
+              onClick={handleClose}
+              aria-label="Close sheet"
+              className="absolute inset-e-0 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-[background-color,color,scale] hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-95"
+            >
+              <XIcon aria-hidden="true" className="size-4" />
+            </button>
+          )}
+        </div>
       </div>
     )
   }

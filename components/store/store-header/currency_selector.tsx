@@ -43,6 +43,7 @@ const DEFAULT_CURRENCY = SUPPORTED_CURRENCIES.SYP as CurrencyItem
 interface CurrencyListProps {
   activeCurrencyCode: string
   activeLoadingCode: string | null
+  isMobile: boolean
   isMounted: boolean
   isPending: boolean
   optimisticLocale: string
@@ -52,13 +53,14 @@ interface CurrencyListProps {
 function CurrencyList({
   activeCurrencyCode,
   activeLoadingCode,
+  isMobile,
   isMounted,
   isPending,
   optimisticLocale,
   onSelectCurrency,
 }: CurrencyListProps) {
   return (
-    <div className="space-y-1">
+    <div className={cn(isMobile ? "space-y-1.5" : "space-y-1")}>
       {CURRENCIES.map((curr) => {
         const isSelected = isMounted && activeCurrencyCode === curr.code
         const isRowLoading = activeLoadingCode === curr.code
@@ -72,10 +74,23 @@ function CurrencyList({
             disabled={isPending}
             aria-pressed={isSelected}
             onClick={() => onSelectCurrency(curr.code)}
-            className={menuItemClass(isSelected)}
+            className={cn(
+              menuItemClass(isSelected),
+              isMobile && "min-h-11 rounded-xl px-3.5 py-2.5 text-sm"
+            )}
           >
-            <span className="flex min-w-0 items-center gap-2.5">
-              <span className="w-8 shrink-0 text-start text-[11px] text-muted-foreground">
+            <span
+              className={cn(
+                "flex min-w-0 items-center",
+                isMobile ? "gap-3" : "gap-2.5"
+              )}
+            >
+              <span
+                className={cn(
+                  "shrink-0 text-start text-muted-foreground",
+                  isMobile ? "w-9 text-xs" : "w-8 text-[11px]"
+                )}
+              >
                 <bdi>{curr.symbol}</bdi>
               </span>
               <span className="truncate">{displayName}</span>
@@ -83,13 +98,19 @@ function CurrencyList({
             {isRowLoading ? (
               <Loader2Icon
                 aria-hidden="true"
-                className="size-3.5 shrink-0 animate-spin text-primary"
+                className={cn(
+                  "shrink-0 animate-spin text-primary",
+                  isMobile ? "size-4" : "size-3.5"
+                )}
               />
             ) : (
               isSelected && (
                 <Check
                   aria-hidden="true"
-                  className="size-3.5 shrink-0 text-primary"
+                  className={cn(
+                    "shrink-0 text-primary",
+                    isMobile ? "size-4" : "size-3.5"
+                  )}
                 />
               )
             )}
@@ -170,6 +191,7 @@ export function CurrencySelector({ compact = false }: CurrencySelectorProps) {
   const listProps: CurrencyListProps = {
     activeCurrencyCode: activeCurrency.code,
     activeLoadingCode,
+    isMobile,
     isMounted,
     isPending,
     optimisticLocale,
@@ -185,11 +207,11 @@ export function CurrencySelector({ compact = false }: CurrencySelectorProps) {
             <BottomSheetTrigger asChild>{triggerButton}</BottomSheetTrigger>
             <BottomSheetContent ariaLabel={currencyLabel}>
               <BottomSheetHeader>
-                <span className="text-sm font-normal text-foreground">
+                <span className="text-base font-normal text-foreground">
                   {currencyLabel}
                 </span>
               </BottomSheetHeader>
-              <BottomSheetBody className="px-2 py-2">
+              <BottomSheetBody className="px-3 py-3">
                 <CurrencyList {...listProps} />
               </BottomSheetBody>
             </BottomSheetContent>
