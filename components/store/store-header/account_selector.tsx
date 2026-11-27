@@ -156,7 +156,7 @@ export function AccountSelector() {
               </Link>
               {user.role === "admin" && (
                 <Link
-                  href={`${APP_ROUTES.ACCOUNT}/orders`}
+                  href={APP_ROUTES.DASHBOARD.OVERVIEW}
                   onClick={() => setOpen(false)}
                   className={menuItemClass()}
                 >
