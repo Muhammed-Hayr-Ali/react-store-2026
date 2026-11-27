@@ -1,5 +1,5 @@
 // proxy.ts
-import { NextRequest, NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 import createMiddleware from "next-intl/middleware"
 import { routing } from "@/i18n/routing" // استخدام alias موحد للمسار
 import { createMiddlewareSupabaseClient } from "./lib/middleware/supabase"
@@ -8,34 +8,35 @@ import { handleBanCheck } from "./lib/middleware/ban-guard"
 const intlMiddleware = createMiddleware(routing)
 
 export async function proxy(request: NextRequest) {
-  // 1. تشغيل وسيط التدويل أولاً لالتقاط مسار اللغة الجديد أو أي Redirect
-  const response = intlMiddleware(request)
-
-  // 2. تحديث جلسة Supabase مع تمرير نفس كائن الاستجابة لمزامنة الكوكيز
+  // Refresh Supabase cookies before next-intl forwards the request downstream.
   const {
     supabase,
     user,
-    response: supabaseResponse,
+    response,
   } = await createMiddlewareSupabaseClient(request)
 
-  // 3. التحقق من حالة الحظر (Ban Guard)
   const banRedirect = await handleBanCheck({
     request,
     supabase,
     user,
-    response: supabaseResponse,
+    response,
   })
 
   if (banRedirect) {
     return banRedirect
   }
 
-  // 4. نسخ كوكيز جلسة Supabase إلى استجابة next-intl النهائية بأمان
-  supabaseResponse.cookies.getAll().forEach((cookie) => {
-    response.cookies.set(cookie.name, cookie.value)
-  })
+  const intlResponse = intlMiddleware(request)
 
-  return response
+  response.cookies.getAll().forEach((cookie) => {
+    intlResponse.cookies.set(cookie)
+  })
+  for (const header of ["cache-control", "expires", "pragma"]) {
+    const value = response.headers.get(header)
+    if (value) intlResponse.headers.set(header, value)
+  }
+
+  return intlResponse
 }
 
 export const config = {

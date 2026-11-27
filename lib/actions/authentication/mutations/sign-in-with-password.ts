@@ -13,7 +13,7 @@ import { createServerClient } from "@/lib/database/supabase/server"
 
 import { getValidationDetails } from "../../validation"
 import { signInWithPasswordSchema } from "../schemas"
-import { APP_CONFIG, COOKIES_KEYS, LOGIN_METHODS } from "@/lib/config/app_config"
+import { COOKIES_KEYS, LOGIN_METHODS } from "@/lib/config/app_config"
 
 /**
  * تسجل دخول المستخدم بالبريد الإلكتروني وكلمة المرور.
@@ -34,7 +34,7 @@ export async function signInWithPassword(
 
   const supabase = await createServerClient()
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   })
@@ -50,6 +50,14 @@ export async function signInWithPassword(
       success: false,
       error: errorCode,
       details: { auth: [error.message] },
+    }
+  }
+
+  if (!data.session || !data.user) {
+    return {
+      success: false,
+      error: "SIGN_IN_USER_ERROR",
+      details: { auth: ["Authentication succeeded without an active session."] },
     }
   }
 

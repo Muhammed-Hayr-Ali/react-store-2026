@@ -1,4 +1,5 @@
 import { createBrowserClient as supabaseCreateBrowserClient } from "@supabase/ssr"
+import { SUPABASE_COOKIE_OPTIONS } from "./cookie-options"
 import type { Database } from "./types"
 
 export function createBrowserClient() {
@@ -6,31 +7,8 @@ export function createBrowserClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      cookies: {
-        getAll() {
-          if (typeof document === "undefined") {
-            return []
-          }
-          const cookies = document.cookie.split(";").map((cookie) => {
-            const [name, value] = cookie.trim().split("=")
-            return { name, value }
-          })
-          return cookies
-        },
-        setAll(cookiesToSet) {
-          if (typeof document === "undefined") {
-            return
-          }
-          cookiesToSet.forEach(({ name, value, options }) => {
-            const cookieString = `${name}=${value}`
-            if (options?.maxAge) {
-              document.cookie = `${cookieString}; max-age=${options.maxAge}; path=/`
-            } else {
-              document.cookie = `${cookieString}; path=/`
-            }
-          })
-        },
-      },
+      cookieOptions: SUPABASE_COOKIE_OPTIONS,
+      isSingleton: true,
     }
   )
 }

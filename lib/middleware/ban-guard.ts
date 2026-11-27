@@ -59,8 +59,12 @@ export async function handleBanCheck({
       url.pathname = `/${currentLocale}${targetPath === "/" ? "" : targetPath}`
       const redirectResponse = NextResponse.redirect(url)
       response.cookies.getAll().forEach((cookie) => {
-        redirectResponse.cookies.set(cookie.name, cookie.value)
+        redirectResponse.cookies.set(cookie)
       })
+      for (const header of ["cache-control", "expires", "pragma"]) {
+        const value = response.headers.get(header)
+        if (value) redirectResponse.headers.set(header, value)
+      }
       return redirectResponse
     }
 

@@ -104,15 +104,25 @@ export default async function RootLayout({
           <NextIntlClientProvider>
             <TooltipProvider>
               <ScrollToTop />
-              <UserProvider user={currentUser} permissions={permissions}>
+              <UserProvider
+                key={currentUser?.id ?? "anonymous"}
+                user={currentUser}
+                permissions={permissions}
+              >
                 <DirectionProvider dir={dir}>
                   <CurrencyProvider
                     exchangeRateData={exchangeRateData}
                     defaultCurrencyCode={savedCurrency}
                     locale={typedLocale}
                   >
-                    <WishlistProvider initialWishlistIds={wishlistIds}>
-                      <CartProvider initialCart={initialCart}>
+                    <WishlistProvider
+                      key={currentUser?.id ?? "anonymous"}
+                      initialWishlistIds={wishlistIds}
+                    >
+                      <CartProvider
+                        key={currentUser?.id ?? "anonymous"}
+                        initialCart={initialCart}
+                      >
                         {children}
                       </CartProvider>
                     </WishlistProvider>

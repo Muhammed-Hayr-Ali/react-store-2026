@@ -6,7 +6,12 @@ import { createMetadata } from "@/lib/config/metadata_generator"
 import { AuthCallbackView } from "@/components/authentication/auth-callback-view"
 
 interface CallbackPageProps {
-  searchParams: Promise<{ code?: string; error?: string }>
+  searchParams: Promise<{
+    code?: string
+    error?: string
+    error_code?: string
+    error_description?: string
+  }>
 }
 
 export async function generateMetadata() {
@@ -22,12 +27,16 @@ export async function generateMetadata() {
 export default async function CallbackPage({
   searchParams,
 }: CallbackPageProps) {
-  const { code, error } = await searchParams
+  const { code, error, error_code, error_description } = await searchParams
 
   return (
     <Card>
       <CardContent>
-        <AuthCallbackView  code={code} error={error} />
+        <AuthCallbackView
+          code={code}
+          error={error_code ?? error}
+          errorDescription={error_description}
+        />
       </CardContent>
     </Card>
   )

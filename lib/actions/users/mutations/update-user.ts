@@ -49,6 +49,7 @@ export async function updateUser(
       }
     }
 
+    revalidatePath("/", "layout")
     revalidatePath(APP_ROUTES.DASHBOARD.USERS)
     return { success: true, data: null }
   } catch {

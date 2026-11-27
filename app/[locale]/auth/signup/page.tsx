@@ -40,11 +40,7 @@ export async function generateMetadata({ params }: SignUpPageProps) {
 export default async function SignUpPage() {
   const t = await getTranslations("SignUp")
 
-  // Zero-Trust Session Check: Redirect active authenticated users
-  const userResult = await getCurrentUser()
-  if (userResult.success && userResult.data) {
-    redirect(APP_ROUTES.HOME)
-  }
+
 
   return (
     <Card>

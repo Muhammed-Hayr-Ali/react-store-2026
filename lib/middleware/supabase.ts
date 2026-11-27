@@ -22,28 +22,38 @@ export async function createMiddlewareSupabaseClient(request: NextRequest) {
         getAll() {
           return request.cookies.getAll()
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet, headers) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           )
-          response = NextResponse.next({
-            request,
+          const nextResponse = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
           })
+          response.cookies.getAll().forEach((cookie) => {
+            nextResponse.cookies.set(cookie)
+          })
+          for (const header of ["cache-control", "expires", "pragma"]) {
+            const value = response.headers.get(header)
+            if (value) nextResponse.headers.set(header, value)
+          }
+          response = nextResponse
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
+          )
+          Object.entries(headers).forEach(([name, value]) =>
+            response.headers.set(name, value)
           )
         },
       },
     }
   )
 
-  let user = null
-  try {
-    const { data } = await supabase.auth.getUser()
-    user = data.user
-  } catch {
-    // تجاهل أخطاء انتهاء الجلسة بأمان
+  const { data, error } = await supabase.auth.getUser()
+  if (error && error.name !== "AuthSessionMissingError") {
+    console.error("Unable to refresh the Supabase auth session:", error)
   }
 
-  return { supabase, user, response }
+  return { supabase, user: data.user, response }
 }

@@ -12,6 +12,8 @@ import { getTranslations } from "next-intl/server"
 import { APP_ROUTES } from "@/lib/config/app-routes"
 import { FieldDescription } from "@/components/ui/field"
 import { AppLogo } from "@/components/shared/app-logo"
+import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
+import { redirect } from "next/navigation"
 
 interface AuthLayoutProps {
   children: React.ReactNode
@@ -26,7 +28,11 @@ export default async function AuthLayout({
 }: AuthLayoutProps) {
   const { locale } = await params
   const t = await getTranslations("AuthLayout")
-
+  // Zero-Trust Session Check: Redirect active authenticated users
+  const userResult = await getCurrentUser()
+  if (userResult.success && userResult.data) {
+    redirect(APP_ROUTES.HOME)
+  }
   return (
     <div className="flex min-h-svh flex-col items-center justify-between gap-6 bg-muted p-6 pb-0 md:p-10 md:pb-0">
       <div />

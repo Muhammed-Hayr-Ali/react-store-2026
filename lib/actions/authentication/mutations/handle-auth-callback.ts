@@ -14,11 +14,7 @@ import { getValidationDetails } from "../../validation"
 import type { AuthCallbackInput } from "../types"
 import { authCallbackSchema } from "../schemas"
 import { cookies } from "next/headers"
-import {
-  APP_CONFIG,
-  COOKIES_KEYS,
-  LOGIN_METHODS,
-} from "@/lib/config/app_config"
+import { COOKIES_KEYS, LOGIN_METHODS } from "@/lib/config/app_config"
 
 /**
  * تستبدل رمز OAuth بجلسة مستخدم نشطة.
@@ -38,7 +34,7 @@ export async function handleAuthCallback(
 
   const supabase = await createServerClient()
 
-  const { error } = await supabase.auth.exchangeCodeForSession(
+  const { data, error } = await supabase.auth.exchangeCodeForSession(
     validation.data.code
   )
 
@@ -47,6 +43,14 @@ export async function handleAuthCallback(
       success: false,
       error: "EXCHANGE_OAUTH_CODE_ERROR",
       details: { auth: [error.message] },
+    }
+  }
+
+  if (!data.session || !data.user) {
+    return {
+      success: false,
+      error: "EXCHANGE_OAUTH_CODE_ERROR",
+      details: { auth: ["The authorization code did not create an active session."] },
     }
   }
 

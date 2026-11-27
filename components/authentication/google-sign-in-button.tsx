@@ -39,9 +39,23 @@ export function GoogleSignInButton({
   const handleGoogleSignIn = async () => {
     if (onLoading) onLoading(true)
     setIsLoading(true)
-    const result = await signInWithGoogle()
+    let result: Awaited<ReturnType<typeof signInWithGoogle>>
+    try {
+      result = await signInWithGoogle()
+    } catch (error) {
+      console.error("Google OAuth initiation failed:", error)
+      toast.error(t("SIGN_IN_FAILED_FALLBACK"))
+      if (onLoading) onLoading(false)
+      setIsLoading(false)
+      return
+    }
 
     if (!result.success) {
+      console.error(
+        "Google OAuth initiation returned an error:",
+        result.error,
+        result.details
+      )
       const errorMessage = result.error
         ? getActionErrorKey(result.error)
         : t("SIGN_IN_FAILED_FALLBACK")

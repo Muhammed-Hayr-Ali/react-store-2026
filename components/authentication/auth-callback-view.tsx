@@ -26,24 +26,38 @@ const SUCCESS_REDIRECT_DELAY_MS = 1500
 interface AuthCallbackViewProps {
   code: string | undefined
   error: string | undefined
+  errorDescription: string | undefined
 }
 
-function AuthCallbackView({ code, error }: AuthCallbackViewProps) {
+function AuthCallbackView({
+  code,
+  error,
+  errorDescription,
+}: AuthCallbackViewProps) {
   const router = useRouter()
   const started = React.useRef(false)
   const redirectTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   const [responserStatus, setResponserStatus] =
-    React.useState<ResponserStatus>("loading")
-  const [errorMessage, setErrorMessage] = React.useState<string | undefined>()
+    React.useState<ResponserStatus>(() =>
+      error || !code ? "error" : "loading"
+    )
+  const [errorMessage, setErrorMessage] = React.useState<string | undefined>(
+    () => error || (!code ? "MISSING_AUTH_CODE" : undefined)
+  )
 
   React.useEffect(() => {
-    if (!code || started.current) return
+    if (error || !code || started.current) return
     started.current = true
 
     handleAuthCallback({ code })
       .then((result) => {
         if (!result.success) {
-          setErrorMessage(result.error)
+          console.error(
+            "OAuth code exchange returned an error:",
+            result.error,
+            result.details
+          )
+          setErrorMessage(result.details?.auth?.[0] ?? result.error)
           setResponserStatus("error")
           return
         }
@@ -51,15 +65,18 @@ function AuthCallbackView({ code, error }: AuthCallbackViewProps) {
         setResponserStatus("success")
 
         redirectTimer.current = setTimeout(() => {
-          router.replace(APP_ROUTES.HOME)
           router.refresh()
+          router.replace(APP_ROUTES.HOME)
         }, SUCCESS_REDIRECT_DELAY_MS)
       })
-      .catch(() => {
-        setErrorMessage("EXCHANGE_FAILED")
+      .catch((error: unknown) => {
+        console.error("OAuth callback failed:", error)
+        setErrorMessage(
+          error instanceof Error ? error.message : "EXCHANGE_FAILED"
+        )
         setResponserStatus("error")
       })
-  }, [code, router])
+  }, [code, error, router])
 
   // تنظيف مؤقت إعادة التوجيه عند مغادرة الصفحة
   React.useEffect(() => {
@@ -73,15 +90,26 @@ function AuthCallbackView({ code, error }: AuthCallbackViewProps) {
 
   // نفس المكوّن (AuthCallbackPanel) يبقى مركّبًا في كل الحالات،
   // فيستمر نفس الـ Rive instance وتظهر الانتقالات (loading → success/error) بسلاسة.
-  return <AuthCallbackPanel status={status} error={error ?? errorMessage} />
+  return (
+    <AuthCallbackPanel
+      status={status}
+      error={error ?? errorMessage}
+      errorDescription={errorDescription}
+    />
+  )
 }
 
 interface AuthCallbackPanelProps {
   status: ProcessStatus
   error?: string
+  errorDescription?: string
 }
 
-function AuthCallbackPanel({ status, error }: AuthCallbackPanelProps) {
+function AuthCallbackPanel({
+  status,
+  error,
+  errorDescription,
+}: AuthCallbackPanelProps) {
   const tErrors = useTranslations("ActionErrors")
   const t = useTranslations("AuthCallback")
 
@@ -122,9 +150,10 @@ function AuthCallbackPanel({ status, error }: AuthCallbackPanelProps) {
             {t("FAILED_TITLE")}
           </h1>
           <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-            {error === "access_denied"
-              ? tErrors("ACCESS_DENIED")
-              : tErrors(errorKey)}
+            {errorDescription ||
+              (error === "access_denied"
+                ? tErrors("ACCESS_DENIED")
+                : tErrors(errorKey))}
           </p>
           <Button
             variant="outline"

@@ -5,9 +5,8 @@
 
 "use server"
 
-
-
 import { createServerClient } from "@/lib/database/supabase/server"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 
 import type { ApiResult, AuthSignInResult } from "../types"
 
@@ -19,11 +18,12 @@ export async function signInWithGoogle(): Promise<
 > {
   const supabase = await createServerClient()
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+  const callbackUrl = new URL(APP_ROUTES.AUTH.CALLBACK, appUrl).toString()
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${appUrl}/auth/callback`,
+      redirectTo: callbackUrl,
       queryParams: {
         access_type: "offline",
         prompt: "consent",
@@ -38,9 +38,6 @@ export async function signInWithGoogle(): Promise<
       details: error ? { oauth: [error.message] } : undefined,
     }
   }
-
-
-  
 
   return {
     success: true,

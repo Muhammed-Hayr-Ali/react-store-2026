@@ -46,18 +46,16 @@ export function UserProvider({
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      if (
+      const currentUserId = rawUser?.id ?? null
+      const nextUserId = session?.user?.id ?? null
+      const identityChanged = currentUserId !== nextUserId
+      const relevantAuthEvent =
         event === "SIGNED_IN" ||
         event === "SIGNED_OUT" ||
-        event === "TOKEN_REFRESHED" ||
         event === "USER_UPDATED"
-      ) {
-        const currentUserId = rawUser?.id ?? null
-        const nextUserId = session?.user?.id ?? null
 
-        if (currentUserId !== nextUserId || event === "SIGNED_OUT" || event === "USER_UPDATED") {
-          router.refresh()
-        }
+      if (relevantAuthEvent || identityChanged) {
+        router.refresh()
       }
     })
 

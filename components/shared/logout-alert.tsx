@@ -6,6 +6,7 @@
  */
 
 import * as React from "react"
+import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import { LoaderCircleIcon } from "lucide-react"
@@ -33,6 +34,7 @@ export function LogoutAlertDialog({
   onOpenChange,
 }: LogoutAlertDialogProps) {
   const t = useTranslations("DashboardSidebar")
+  const router = useRouter()
   const [isPending, startTransition] = React.useTransition()
 
   const handleLogout = () => {
@@ -45,7 +47,8 @@ export function LogoutAlertDialog({
         }
 
         onOpenChange(false)
-        window.location.href = APP_ROUTES.HOME
+        router.refresh()
+        router.replace(APP_ROUTES.HOME)
       } catch {
         toast.error(t("LOGOUT_ERROR"))
       }

@@ -79,7 +79,14 @@ export function LoginForm({
   // Authenticate the user and display validation or sign-in errors.
   async function onSubmit(data: SignInWithPasswordInput) {
     setErrorMessage(null)
-    const result = await signInWithPassword(data)
+    let result: Awaited<ReturnType<typeof signInWithPassword>>
+    try {
+      result = await signInWithPassword(data)
+    } catch (error) {
+      console.error("Password sign-in failed:", error)
+      setErrorMessage(tErrors("SIGN_IN_USER_ERROR"))
+      return
+    }
 
     if (result.success) {
       router.refresh()

@@ -20,8 +20,8 @@ const currentUserSchema = z.object({
   avatar: z.string().nullable(),
   gender: z.enum(["male", "female", "other"]).nullable(),
   status: z.string().nullable(),
-  email_verified: z.boolean(),
-  phone_verified: z.boolean(),
+  email_verified: z.boolean().nullable(),
+  phone_verified: z.boolean().nullable(),
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
   role: z.string(),
@@ -38,16 +38,24 @@ export const getCurrentUser = cache(
 
       const { data, error } = await supabase.rpc("get_current_user")
 
-      if (!data || error) {
+      if (error) {
         return {
           success: false,
           error: "GET_CURRENT_USER_ERROR",
-          details: { database: [error?.message ?? "Unknown database error"] },
+          details: { database: [error.message] },
         }
+      }
+
+      if (data === null) {
+        return { success: true, data: null }
       }
 
       const currentUser = currentUserSchema.safeParse(data)
       if (!currentUser.success) {
+        console.error(
+          "getCurrentUser schema validation failed:",
+          currentUser.error.flatten()
+        )
         return {
           success: false,
           error: "GET_CURRENT_USER_ERROR",
