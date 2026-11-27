@@ -35,7 +35,8 @@ interface CategoryCardProps {
 
 function CategoryCard({ category, isRtl, ArrowIcon }: CategoryCardProps) {
   const [failedUrl, setFailedUrl] = React.useState<string | null>(null)
-  const showImage = Boolean(category.image_url) && failedUrl !== category.image_url
+  const showImage =
+    Boolean(category.image_url) && failedUrl !== category.image_url
   const title = (isRtl && category.name_ar) || category.name
 
   return (
@@ -43,7 +44,7 @@ function CategoryCard({ category, isRtl, ArrowIcon }: CategoryCardProps) {
       href={`/category/${category.slug}`}
       draggable={false}
       className={cn(
-        "group/cat flex flex-col gap-2 rounded-xl sm:rounded-2xl",
+        "group/cat flex flex-col gap-4 rounded-xl sm:rounded-2xl",
         focusRing
       )}
     >
@@ -114,19 +115,6 @@ export default function CategoryCarousel({
           </h2>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="flex items-center gap-1">
-              <CarouselPrevious
-                variant="ghost"
-                aria-label={t("prev")}
-                className="static size-8 translate-x-0 translate-y-0 rounded-full border-0 text-foreground/80 hover:bg-muted/70 hover:text-foreground"
-              />
-              <CarouselNext
-                variant="ghost"
-                aria-label={t("next")}
-                className="static size-8 translate-x-0 translate-y-0 rounded-full border-0 text-foreground/80 hover:bg-muted/70 hover:text-foreground"
-              />
-            </div>
-
             <Link
               href="/categories"
               className={cn(
@@ -140,6 +128,19 @@ export default function CategoryCarousel({
                 className="size-3.5 shrink-0 transition-transform group-hover/all:translate-x-0.5 rtl:group-hover/all:-translate-x-0.5"
               />
             </Link>
+
+            <div className="flex items-center gap-1">
+              <CarouselPrevious
+                variant="ghost"
+                aria-label={t("prev")}
+                className="static size-8 translate-x-0 translate-y-0 rounded-full border-0 text-foreground/80 hover:bg-muted/70 hover:text-foreground"
+              />
+              <CarouselNext
+                variant="ghost"
+                aria-label={t("next")}
+                className="static size-8 translate-x-0 translate-y-0 rounded-full border-0 text-foreground/80 hover:bg-muted/70 hover:text-foreground"
+              />
+            </div>
           </div>
         </div>
 
