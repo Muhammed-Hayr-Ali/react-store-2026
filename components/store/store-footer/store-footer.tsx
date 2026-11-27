@@ -72,18 +72,18 @@ export function StoreFooter() {
           {/* 2 و 3. القوائم كـ Accordion فلات وممتد على الجوال */}
           <Accordion
             type="multiple"
-            className="w-full space-y-1 !border-0 !bg-transparent p-0 shadow-none sm:hidden"
+            className="w-full space-y-1 border-0! bg-transparent! p-0 shadow-none sm:hidden"
           >
             {linkSections.map((section) => (
               <AccordionItem
                 key={section.key}
                 value={section.key}
-                className="!border-0 !bg-transparent p-0"
+                className="border-0! bg-transparent! p-0"
               >
-                <AccordionTrigger className="w-full rounded-none !bg-transparent px-0 py-2.5 text-sm font-semibold tracking-tight text-foreground shadow-none hover:!bg-transparent hover:no-underline data-[state=open]:!bg-transparent">
+                <AccordionTrigger className="w-full rounded-none bg-transparent! px-0 py-2.5 text-sm font-semibold tracking-tight text-foreground shadow-none hover:bg-transparent! hover:no-underline data-[state=open]:bg-transparent!">
                   {t(`${section.key}`)}
                 </AccordionTrigger>
-                <AccordionContent className="!bg-transparent px-0 pt-1 pb-3 [&>div]:!bg-transparent [&>div]:p-0">
+                <AccordionContent className="bg-transparent! px-0 pt-1 pb-3 [&>div]:bg-transparent! [&>div]:p-0">
                   <FooterLinksList items={section.items} t={t} />
                 </AccordionContent>
               </AccordionItem>

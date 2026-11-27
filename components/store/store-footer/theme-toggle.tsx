@@ -53,7 +53,6 @@ export function ThemeToggle() {
                 className={cn(
                   "flex w-full items-center justify-between gap-2 rounded-sm px-2.5 py-1.5 text-sm font-normal transition-colors hover:bg-accent hover:text-accent-foreground",
                   isActive && "bg-accent/60 text-accent-foreground",
-                  isMobile && "justify-center"
                 )}
               >
                 <span>{t(labelKey)}</span>
