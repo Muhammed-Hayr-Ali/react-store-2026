@@ -3,13 +3,7 @@
 import * as React from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { Link, usePathname } from "@/i18n/navigation"
-import {
-  ChevronLeft,
-  ChevronRight,
-  Flame,
-  Heart,
-  ShoppingBag,
-} from "lucide-react"
+import { ChevronLeft, ChevronRight, Flame, Heart } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { APP_ROUTES } from "@/lib/config/app-routes"
@@ -17,9 +11,9 @@ import { CurrencySelector } from "./currency_selector"
 import { LocaleSelector } from "./locale-selector"
 import { ThemeSelector } from "./theme-selector"
 import { AccountSelector } from "./account_selector"
+import { CartButton } from "./cart-button"
 import { StoreSearchInput } from "./store-search-input"
 import { AppLogo } from "@/components/shared/app-logo"
-import { useCart } from "@/lib/context/cart-context"
 import { StoreCategoriesButton } from "./store-categories-button"
 import { SimplifiedRootCategory } from "@/lib/actions/store/queries/get-all-categories"
 import {
@@ -28,7 +22,7 @@ import {
   hideScrollbar,
   isRtlLocale,
   navLinkClass,
- } from "./store-header-shared"
+} from "./store-header-shared"
 import { MobileStoreCategoriesButton } from "./mobile_store-categories-button"
 import { STORE_CONTAINER } from "@/lib/config/app_config"
 
@@ -38,22 +32,6 @@ interface StoreHeaderProps {
 
 const scrollButtonClass =
   "hidden size-7 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/80 text-foreground/80 transition-colors hover:bg-muted/70 hover:text-primary sm:flex"
-
-/** شارة عدد السلة: تختفي عند الصفر وتُختصر فوق 99 */
-function CartBadge({ count, className }: { count: number; className: string }) {
-  if (count <= 0) return null
-  return (
-    <span
-      aria-hidden="true"
-      className={cn(
-        "absolute flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-normal text-primary-foreground",
-        className
-      )}
-    >
-      {count > 99 ? "99+" : count}
-    </span>
-  )
-}
 
 export function StoreHeader({ categories = [] }: StoreHeaderProps) {
   const t = useTranslations("StoreHeader")
@@ -70,13 +48,6 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
 
   const mainHeaderRef = React.useRef<HTMLElement>(null)
   const stickyNavRef = React.useRef<HTMLElement>(null)
-  const { totalItemsCount } = useCart()
-
-  // aria-label يحجب محتوى الرابط، لذلك نضيف العدد إليه
-  const cartLabel =
-    totalItemsCount > 0
-      ? `${t("cartAriaLabel")} (${totalItemsCount})`
-      : t("cartAriaLabel")
 
   // فلترة التصنيفات الرئيسية النشطة فقط
   const rootCategories = React.useMemo(
@@ -190,23 +161,7 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
                 <span className="hidden lg:inline">{t("wishlist")}</span>
               </Link>
 
-              <Link
-                href={APP_ROUTES.CART}
-                aria-label={cartLabel}
-                className={headerActionClass}
-              >
-                <span className="relative">
-                  <ShoppingBag
-                    aria-hidden="true"
-                    className="size-5 lg:size-4"
-                  />
-                  <CartBadge
-                    count={totalItemsCount}
-                    className="-inset-e-2 -top-1.5"
-                  />
-                </span>
-                <span className="hidden lg:inline">{t("cart")}</span>
-              </Link>
+              <CartButton variant="header" />
             </div>
           </div>
 
@@ -313,17 +268,7 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
 
             <StoreSearchInput variant="sticky" className="max-w-lg flex-1" />
 
-            <Link
-              href={APP_ROUTES.CART}
-              aria-label={cartLabel}
-              className={cn(
-                "relative -me-2.5 flex size-10 shrink-0 items-center justify-center rounded-xl text-foreground transition-colors hover:bg-muted/60 hover:text-primary",
-                focusRing
-              )}
-            >
-              <ShoppingBag aria-hidden="true" className="size-5" />
-              <CartBadge count={totalItemsCount} className="inset-e-1 top-1" />
-            </Link>
+            <CartButton variant="sticky" />
           </div>
         </div>
 
