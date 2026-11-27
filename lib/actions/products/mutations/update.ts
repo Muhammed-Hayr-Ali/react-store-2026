@@ -1,7 +1,7 @@
 /**
- * @file lib/actions/products/update.ts
+ * @file lib/actions/products/mutations/update.ts
  * @description Server action for updating an existing product, its variants, and images.
- * Uses smart Upserting (by SKU) to preserve existing variant IDs for relational integrity.
+ * Updates existing variants by ID and inserts new variants cleanly so PostgreSQL generates UUIDs.
  */
 
 "use server"
@@ -37,6 +37,11 @@ function logDatabaseError(
   })
 }
 
+function formatPostgrestInList(values: string[]): string {
+  const escaped = values.map((val) => `"${val.replaceAll('"', '\\"')}"`)
+  return `(${escaped.join(",")})`
+}
+
 export async function updateProduct(
   input: UpdateProductInput
 ): Promise<UpdateProductResult> {
@@ -65,7 +70,11 @@ export async function updateProduct(
 
     if (slugError) {
       logDatabaseError("Check product slug", slugError)
-      return { success: false, error: "DATABASE_ERROR" }
+      return {
+        success: false,
+        error: "DATABASE_ERROR",
+        details: { database: [slugError.message] },
+      }
     }
 
     if (slugCount && slugCount > 0) {
@@ -80,7 +89,11 @@ export async function updateProduct(
 
     if (skuCheckError) {
       logDatabaseError("Check variant SKUs", skuCheckError)
-      return { success: false, error: "DATABASE_ERROR" }
+      return {
+        success: false,
+        error: "DATABASE_ERROR",
+        details: { database: [skuCheckError.message] },
+      }
     }
 
     if (matchingVariants?.some((variant) => variant.product_id !== id)) {
@@ -103,58 +116,109 @@ export async function updateProduct(
 
     if (updateError) {
       logDatabaseError("Update product", updateError)
-      return { success: false, error: "UPDATE_PRODUCT_FAILED" }
-    }
-
-    const variantsToUpsert = variants.map((variant) => ({
-      ...variant,
-      ...(existingVariantIdsBySku.has(variant.sku)
-        ? { id: existingVariantIdsBySku.get(variant.sku) }
-        : {}),
-      product_id: id,
-      expiration_date: variant.expiration_date || null,
-    }))
-
-    const { data: upsertedVariants, error: upsertVariantsError } =
-      await supabase
-        .from("product_variants")
-        .upsert(variantsToUpsert, { onConflict: "id" })
-        .select("id, sku")
-
-    if (
-      upsertVariantsError ||
-      !upsertedVariants ||
-      upsertedVariants.length !== variantsToUpsert.length
-    ) {
-      logDatabaseError(
-        "Upsert variants",
-        upsertVariantsError ?? {
-          message: "Variant rows were not returned after upsert.",
-        }
-      )
       return {
         success: false,
-        error:
-          upsertVariantsError?.code === "23505"
-            ? "VARIANT_SKU_ALREADY_EXISTS"
-            : "UPDATE_VARIANTS_FAILED",
+        error: "UPDATE_PRODUCT_FAILED",
+        details: { database: [updateError.message] },
       }
     }
 
-    const { error: deleteVariantsError } = await supabase
-      .from("product_variants")
-      .delete()
-      .eq("product_id", id)
-      .not("sku", "in", `(${incomingSkus.join(",")})`)
+    const variantsToUpdate = variants
+      .filter((variant) => existingVariantIdsBySku.has(variant.sku))
+      .map((variant) => ({
+        ...variant,
+        id: existingVariantIdsBySku.get(variant.sku)!,
+        product_id: id,
+        expiration_date: variant.expiration_date || null,
+      }))
 
-    if (deleteVariantsError) {
-      logDatabaseError("Delete removed variants", deleteVariantsError)
-      return { success: false, error: "SYNC_VARIANTS_FAILED" }
+    const variantsToInsert = variants
+      .filter((variant) => !existingVariantIdsBySku.has(variant.sku))
+      .map((variant) => ({
+        ...variant,
+        product_id: id,
+        expiration_date: variant.expiration_date || null,
+      }))
+
+    for (const variantRow of variantsToUpdate) {
+      const { id: variantId, ...variantPayload } = variantRow
+      const { error: updateVariantError } = await supabase
+        .from("product_variants")
+        .update(variantPayload)
+        .eq("id", variantId)
+        .eq("product_id", id)
+
+      if (updateVariantError) {
+        logDatabaseError("Update existing variant", updateVariantError)
+        return {
+          success: false,
+          error:
+            updateVariantError.code === "23505"
+              ? "VARIANT_SKU_ALREADY_EXISTS"
+              : "UPDATE_VARIANTS_FAILED",
+          details: { database: [updateVariantError.message] },
+        }
+      }
+    }
+
+    if (variantsToInsert.length > 0) {
+      const { error: insertVariantsError } = await supabase
+        .from("product_variants")
+        .insert(variantsToInsert)
+
+      if (insertVariantsError) {
+        logDatabaseError("Insert new variants", insertVariantsError)
+        return {
+          success: false,
+          error:
+            insertVariantsError.code === "23505"
+              ? "VARIANT_SKU_ALREADY_EXISTS"
+              : "UPDATE_VARIANTS_FAILED",
+          details: { database: [insertVariantsError.message] },
+        }
+      }
+    }
+
+    if (incomingSkus.length > 0) {
+      const { error: deleteVariantsError } = await supabase
+        .from("product_variants")
+        .delete()
+        .eq("product_id", id)
+        .not("sku", "in", formatPostgrestInList(incomingSkus))
+
+      if (deleteVariantsError) {
+        logDatabaseError("Delete removed variants", deleteVariantsError)
+        return {
+          success: false,
+          error: "SYNC_VARIANTS_FAILED",
+          details: { database: [deleteVariantsError.message] },
+        }
+      }
+    }
+
+    const { data: currentVariants, error: fetchVariantsError } = await supabase
+      .from("product_variants")
+      .select("id, sku")
+      .eq("product_id", id)
+
+    if (fetchVariantsError || !currentVariants) {
+      logDatabaseError(
+        "Fetch synced variants",
+        fetchVariantsError ?? { message: "No variants returned after sync." }
+      )
+      return {
+        success: false,
+        error: "SYNC_VARIANTS_FAILED",
+        details: fetchVariantsError?.message
+          ? { database: [fetchVariantsError.message] }
+          : undefined,
+      }
     }
 
     const variantIdsBySku = new Map(
-      upsertedVariants.map((variant) => [variant.sku, variant.id])
+      currentVariants.map((variant) => [variant.sku, variant.id])
     )
+
     if (
       images.some(
         (img) =>
@@ -163,7 +227,7 @@ export async function updateProduct(
       )
     ) {
       logDatabaseError("Resolve image variant", {
-        message: "An image references a variant that was not upserted.",
+        message: "An image references a variant that does not exist.",
       })
       return { success: false, error: "IMAGE_VARIANT_NOT_FOUND" }
     }
@@ -175,7 +239,11 @@ export async function updateProduct(
 
     if (deleteImagesError) {
       logDatabaseError("Delete existing images", deleteImagesError)
-      return { success: false, error: "SYNC_IMAGES_FAILED" }
+      return {
+        success: false,
+        error: "SYNC_IMAGES_FAILED",
+        details: { database: [deleteImagesError.message] },
+      }
     }
 
     const imagesToInsert = normalizePrimaryImages(
@@ -192,13 +260,19 @@ export async function updateProduct(
       })
     )
 
-    const { error: insertImagesError } = await supabase
-      .from("product_images")
-      .insert(imagesToInsert)
+    if (imagesToInsert.length > 0) {
+      const { error: insertImagesError } = await supabase
+        .from("product_images")
+        .insert(imagesToInsert)
 
-    if (insertImagesError) {
-      logDatabaseError("Insert images", insertImagesError)
-      return { success: false, error: "UPDATE_IMAGES_FAILED" }
+      if (insertImagesError) {
+        logDatabaseError("Insert images", insertImagesError)
+        return {
+          success: false,
+          error: "UPDATE_IMAGES_FAILED",
+          details: { database: [insertImagesError.message] },
+        }
+      }
     }
 
     revalidateTag(CACHE_TAG.PRODUCTS, { expire: 0 })
@@ -209,9 +283,6 @@ export async function updateProduct(
       variantCount: variants.length,
       imageCount: imagesToInsert.length,
     })
-
-    revalidateTag(CACHE_TAG.PRODUCTS, { expire: 0 })
-    revalidatePath("/", "layout")
 
     return { success: true }
   } catch (error) {

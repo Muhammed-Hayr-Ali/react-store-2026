@@ -1,15 +1,15 @@
 /**
  * @file lib/actions/store/product-details/queries/get-product-details.ts
- * @description Retrieves full product details including variants with robust Next.js unstable_cache support and strict typing.
+ * @description Retrieves full product details including variants with Next.js unstable_cache support and strict typing.
  */
 
 "use server"
 
 import { unstable_cache } from "next/cache"
+import { createClient } from "@supabase/supabase-js"
 import type { ApiResult } from "@/lib/actions/types/utils"
-import { createPublicServerClient } from "@/lib/database/supabase/public"
 import { CACHE_TAG } from "@/lib/config/app_config"
-import type { Tables } from "@/lib/database/supabase/types"
+import type { Database, Tables } from "@/lib/database/supabase/types"
 import { isProductAttributes } from "@/lib/actions/products/types"
 
 export type ProductVariantDetail = Omit<
@@ -64,11 +64,57 @@ export type FullProductDetails = Pick<
   product_images: ProductImageDetail[]
 }
 
+type RawProductVariant = Omit<ProductVariantDetail, "attributes"> & {
+  attributes: unknown
+}
+
+function createCacheClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !anonKey) {
+    throw new Error("Missing Supabase public environment variables.")
+  }
+  return createClient<Database>(url, anonKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+}
+
+function firstOrNull<T>(value: T | T[] | null | undefined): T | null {
+  if (!value) return null
+  return Array.isArray(value) ? (value[0] ?? null) : value
+}
+
+function parseVariants(
+  variants: RawProductVariant[] | null | undefined
+): ProductVariantDetail[] {
+  if (!variants?.length) return []
+
+  return variants.map((variant) => {
+    const attrs = variant.attributes
+
+    if (attrs !== null && attrs !== undefined) {
+      if (!isProductAttributes(attrs as never)) {
+        throw new Error(
+          `Product variant "${variant.id}" has invalid attributes data.`
+        )
+      }
+    }
+
+    return {
+      ...variant,
+      attributes:
+        attrs && typeof attrs === "object" && !Array.isArray(attrs)
+          ? (attrs as Record<string, string | number | boolean>)
+          : null,
+    }
+  })
+}
+
 const getCachedProductDetails = unstable_cache(
   async (slug: string): Promise<FullProductDetails | null> => {
-    const supabase = await createPublicServerClient()
+    const supabase = createCacheClient()
 
-    const { data: productData, error } = await supabase
+    const { data, error } = await supabase
       .from("products")
       .select(
         `
@@ -119,112 +165,42 @@ const getCachedProductDetails = unstable_cache(
       )
       .eq("slug", slug)
       .eq("is_active", true)
-      .order("sort_order", {
-        referencedTable: "product_images",
-        ascending: true,
-      })
-      .order("id", {
-        referencedTable: "product_images",
-        ascending: true,
-      })
+      .order("sort_order", { referencedTable: "product_images", ascending: true })
+      .order("id", { referencedTable: "product_images", ascending: true })
       .maybeSingle()
 
-    if (error || !productData) {
-      return null
-    }
+    if (error || !data) return null
 
-    const rawProduct = productData
-
-    let processedCategory: CategoryDetail | null = null
-    if (rawProduct.category) {
-      const cat = Array.isArray(rawProduct.category)
-        ? rawProduct.category[0]
-        : rawProduct.category
-
-      if (cat) {
-        processedCategory = {
-          id: cat.id,
-          name: cat.name,
-          name_ar: cat.name_ar,
-          slug: cat.slug,
-          parent_id: cat.parent_id,
-        }
-      }
-    }
+    const category = firstOrNull(data.category)
+    const brand = firstOrNull(data.brand)
 
     let parentCategory: CategoryDetail | null = null
-    if (processedCategory?.parent_id) {
+    if (category?.parent_id) {
       const { data: parentData } = await supabase
         .from("categories")
         .select("id, name, name_ar, slug, parent_id")
-        .eq("id", processedCategory.parent_id)
+        .eq("id", category.parent_id)
         .maybeSingle()
 
-      if (parentData) {
-        parentCategory = parentData
-      }
+      parentCategory = parentData ?? null
     }
 
-    let processedBrand: BrandDetail | null = null
-    if (rawProduct.brand) {
-      const brd = Array.isArray(rawProduct.brand)
-        ? rawProduct.brand[0]
-        : rawProduct.brand
-
-      if (brd) {
-        processedBrand = {
-          id: brd.id,
-          name: brd.name,
-          name_ar: brd.name_ar,
-          slug: brd.slug,
-          image_url: brd.image_url,
-          image_alt: brd.image_alt,
-        }
-      }
-    }
-
-    const allImages = [...(rawProduct.product_images ?? [])].sort(
-      (a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id)
-    )
-    const variantSpecificImages = allImages.filter(
-      (img) => img.variant_id !== null
-    )
-
-    const productVariants: ProductVariantDetail[] = []
-    for (const variant of rawProduct.product_variants ?? []) {
-      if (
-        variant.attributes !== null &&
-        !isProductAttributes(variant.attributes)
-      ) {
-        throw new Error(
-          `Product variant "${variant.id}" has invalid attributes data.`
-        )
-      }
-
-      productVariants.push({
-        ...variant,
-        attributes: variant.attributes,
-      })
-    }
-
-    const formattedProduct: FullProductDetails = {
-      id: rawProduct.id,
-      name: rawProduct.name,
-      slug: rawProduct.slug,
-      description: rawProduct.description,
-      is_active: rawProduct.is_active,
-      is_featured: rawProduct.is_featured,
-      meta_title: rawProduct.meta_title,
-      meta_description: rawProduct.meta_description,
-      created_at: rawProduct.created_at,
-      category: processedCategory,
+    return {
+      id: data.id,
+      name: data.name,
+      slug: data.slug,
+      description: data.description,
+      is_active: data.is_active,
+      is_featured: data.is_featured,
+      created_at: data.created_at,
+      meta_title: data.meta_title,
+      meta_description: data.meta_description,
+      category,
       parent_category: parentCategory,
-      brand: processedBrand,
-      product_variants: productVariants,
-      product_images: variantSpecificImages,
+      brand,
+      product_variants: parseVariants(data.product_variants),
+      product_images: data.product_images ?? [],
     }
-
-    return formattedProduct
   },
   ["product-details-cache"],
   {
@@ -256,15 +232,7 @@ export async function getProductDetails(
     }
 
     return { success: true, data: product }
-  } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown database error"
-
-    console.error("[getProductDetails] Failed to retrieve product", {
-      slug,
-      message: errorMessage,
-    })
-
+  } catch {
     return {
       success: false,
       error: "FETCH_PRODUCT_ERROR",

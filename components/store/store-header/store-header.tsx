@@ -263,7 +263,7 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
                 focusRing
               )}
             >
-              <AppLogo size="sm" aria-hidden="true" />
+              <AppLogo aria-hidden="true" />
             </Link>
 
             <StoreSearchInput variant="sticky" className="max-w-lg flex-1" />

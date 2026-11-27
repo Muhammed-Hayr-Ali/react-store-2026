@@ -5,7 +5,6 @@ import {
   ProductVariantDetail,
 } from "@/lib/actions/store/product-details/details/queries/get-product-details"
 import { ProductReviewsResult } from "@/lib/actions/store/product-details/reviews/queries/get-product-reviews"
-import { ProductNavbar } from "./product-navbar"
 import { ProductBreadcrumb } from "./details/product-breadcrumb"
 import { ProductInfoSection } from "./details/product-info-section"
 import { ProductReviewsSection } from "./reviews/product-reviews-section"
@@ -21,6 +20,7 @@ import {
   ShoppingBagIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { STORE_CONTAINER } from "@/lib/config/app_config"
 
 interface ProductDetailsClientWrapperProps {
   product: FullProductDetails
@@ -67,23 +67,20 @@ export default function ProductDetailsClientWrapper({
   }
 
   return (
-    <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-background">
+    <main className={cn(STORE_CONTAINER, "flex flex-col py-8 space-y-8")}>
       {/* Simplified Header for Product Details */}
+      <ProductBreadcrumb
+        category={product.category}
+        productName={product.name}
+      />
 
       {/* Scrollable Content Container */}
-      <main className="min-h-0 w-full min-w-0 flex-1 overflow-y-auto overscroll-y-contain pb-24 md:pb-12">
-        <ProductNavbar productId={product.id} productName={product.name} />
-        <div className="mx-auto w-full max-w-4xl py-4 md:py-8">
-          <div className="space-y-4 md:space-y-6 lg:space-y-8">
-            <ProductInfoSection
-              product={product}
-              onSelectVariants={setSelectedVariant}
-            />
-            {/* 3. دمج وإرسال بيانات التقييمات والمراجعات للمكون الرئيسي */}
-            <ProductReviewsSection reviewsData={reviewsData} />
-          </div>
-        </div>
-      </main>
+      <ProductInfoSection
+        product={product}
+        onSelectVariants={setSelectedVariant}
+      />
+      {/* 3. دمج وإرسال بيانات التقييمات والمراجعات للمكون الرئيسي */}
+      <ProductReviewsSection reviewsData={reviewsData} />
 
       {/* Sticky Bottom Cart Bar for mobile and quick purchase */}
       <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center border-t bg-[#fafafa] pt-6 pb-4 md:hidden dark:bg-[#000000]">
@@ -134,25 +131,25 @@ export default function ProductDetailsClientWrapper({
           </div>
         </div>
 
-    <Button
-  size="lg"
-  onClick={handleAddToCart}
-  disabled={isDisabled || isOutOfStock}
-  className={cn(
-    "h-12 rounded-lg px-6 text-lg font-semibold transition-all duration-300 active:scale-95",
-    isPending && "px-4" // تقليص الحشو الجانبي بسلاسة إذا أردت تصغيره قليلاً فقط
-  )}
->
-  {isPending ? (
-    <LoaderCircleIcon className="size-5 animate-spin" />
-  ) : (
-    <>
-      <ShoppingBagIcon className="me-2 size-5" />
-      {t("ADD_TO_CART")}
-    </>
-  )}
-</Button>
+        <Button
+          size="lg"
+          onClick={handleAddToCart}
+          disabled={isDisabled || isOutOfStock}
+          className={cn(
+            "h-12 rounded-lg px-6 text-lg font-semibold transition-all duration-300 active:scale-95",
+            isPending && "px-4" // تقليص الحشو الجانبي بسلاسة إذا أردت تصغيره قليلاً فقط
+          )}
+        >
+          {isPending ? (
+            <LoaderCircleIcon className="size-5 animate-spin" />
+          ) : (
+            <>
+              <ShoppingBagIcon className="me-2 size-5" />
+              {t("ADD_TO_CART")}
+            </>
+          )}
+        </Button>
       </div>
-    </div>
+    </main>
   )
 }

@@ -3,11 +3,18 @@
  * @description Main storefront layout with sticky top navbar, scrollable content, footer, and a Tailwind-gradient fading bottom navigation for mobile.
  */
 
-export default function StoreLayout({
+import { StoreFooter } from "@/components/store/store-footer/store-footer"
+import { StoreHeader } from "@/components/store/store-header/store-header"
+import { getAllCategories } from "@/lib/actions/store/queries/get-all-categories"
+
+export default async function StoreLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const categoriesResult = await getAllCategories()
+  const categories = categoriesResult.success ? categoriesResult.data : []
+
   return (
     // الحاوية الجذرية: تستخدم flex لضمان بقاء الفوتر في الأسفل، وتدعم الثيمات الفاتحة والداكنة
     <div className="relative flex min-h-screen flex-col bg-background text-foreground antialiased">
@@ -18,8 +25,11 @@ export default function StoreLayout({
       >
         تخطي إلى المحتوى الرئيسي
       </a>
+      <StoreHeader categories={categories} />
 
       {children}
+      {/* 4. الفوتر */}
+      <StoreFooter />
     </div>
   )
 }

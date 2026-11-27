@@ -16,12 +16,8 @@ import { cookies } from "next/headers"
 import { getTranslations } from "next-intl/server"
 import { getFilteredProducts } from "@/lib/actions/store/queries/get_filtered_products"
 import HomeClientWrapper from "@/components/store/client-wrapper/home-client-wrapper"
-import { getAllCategories } from "@/lib/actions/store/queries/get-all-categories"
 import { cn } from "@/lib/utils"
-import { StoreHeader } from "@/components/store/store-header/store-header"
-import { StoreFooter } from "@/components/store/store-footer/store-footer"
 import { getStoreExchangeRate } from "@/lib/actions/store/queries/get-exchange-rate"
-import CategoryCarousel from "@/components/store/shop-by-category-slider/shop-by-category-slider"
 
 interface PageProps {
   params: Promise<{ locale: string }>
@@ -53,8 +49,7 @@ export default async function Page() {
 
   const exchangeRate = getStoreExchangeRate("USD", "new")
 
-  const [categoriesResult, featuredResult, latestResult] = await Promise.all([
-    getAllCategories(),
+  const [featuredResult, latestResult] = await Promise.all([
     getFilteredProducts({
       limit: FEATURED_LIMET,
       page: PAGE_NUMBER,
@@ -69,15 +64,12 @@ export default async function Page() {
     }),
   ])
 
-  const categories = categoriesResult.success ? categoriesResult.data : []
   const slides = featuredResult.success ? featuredResult.data : []
   const initialProducts = latestResult.success ? latestResult.data : []
   const resolvedExchangeRate = await exchangeRate
 
   return (
     <>
-      <StoreHeader categories={categories} />
-
       {/* 3. المحتوى الرئيسي */}
       <main id="main-content" className="w-full flex-1">
         {/* الحاوية نفسها المستخدمة في الهيدر والفوتر */}
@@ -93,8 +85,6 @@ export default async function Page() {
             exchangeRate={resolvedExchangeRate}
           />
 
-          <CategoryCarousel categories={categories} />
-
           {/* 2. شريط التصنيفات الرئيسية */}
           <HomeClientWrapper
             viewMode={viewMode}
@@ -102,9 +92,6 @@ export default async function Page() {
           />
         </div>
       </main>
-
-      {/* 4. الفوتر */}
-      <StoreFooter />
     </>
   )
 }
