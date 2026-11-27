@@ -1,6 +1,6 @@
 "use client"
 
-import { Send } from "lucide-react"
+import { Send, SendIcon } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -85,7 +85,11 @@ export function NewsletterSection() {
           disabled={isSubmitting}
           aria-label={t("SUBSCRIBE_ARIA_LABEL")}
         >
-          {isSubmitting ? <Spinner /> : <Send />}
+          {isSubmitting ? (
+            <Spinner />
+          ) : (
+            <SendIcon className="rtl:-scale-x-100" />
+          )}
           <span className="sr-only">{t("SUBSCRIBE_BUTTON")}</span>
         </Button>
       </form>
