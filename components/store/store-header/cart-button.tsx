@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
 import {
   ArrowLeft,
@@ -204,9 +205,12 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
                       className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/50 bg-muted/40"
                     >
                       {imageUrl ? (
-                        <img
+                        <Image
                           src={imageUrl}
                           alt={product.name}
+                          width={48}
+                          height={48}
+                          unoptimized
                           className="size-full object-cover"
                         />
                       ) : (
@@ -229,7 +233,7 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
 
                       <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
                         {unitPriceInCents > 0 && (
-                          <bdi className="font-mono text-foreground/85 tabular-nums">
+                          <bdi className="font-mono tabular-nums text-foreground/85">
                             {formatPrice(unitPriceInCents)}
                           </bdi>
                         )}
@@ -290,7 +294,7 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
           {items.length > 0 && subtotalInCents > 0 && (
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>{tCart("SUBTOTAL", { default: "الإجمالي الفرعي" })}</span>
-              <bdi className="font-mono text-sm font-medium text-foreground tabular-nums">
+              <bdi className="font-mono text-sm font-medium tabular-nums text-foreground">
                 {formatPrice(subtotalInCents)}
               </bdi>
             </div>
