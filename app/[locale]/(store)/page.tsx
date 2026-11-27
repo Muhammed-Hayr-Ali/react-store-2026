@@ -20,6 +20,8 @@ import { getAllCategories } from "@/lib/actions/store/queries/get-all-categories
 import { cn } from "@/lib/utils"
 import { StoreHeader } from "@/components/store/store-header/store-header"
 import { StoreFooter } from "@/components/store/store-footer/store-footer"
+import { getStoreExchangeRate } from "@/lib/actions/store/queries/get-exchange-rate"
+import CategoryCarousel from "@/components/store/shop-by-category-slider/shop-by-category-slider"
 
 interface PageProps {
   params: Promise<{ locale: string }>
@@ -49,6 +51,8 @@ export default async function Page() {
   const PAGE_NUMBER = 1
   const ACTIVE_ONLY = true
 
+  const exchangeRate = getStoreExchangeRate("USD", "new")
+
   const [categoriesResult, featuredResult, latestResult] = await Promise.all([
     getAllCategories(),
     getFilteredProducts({
@@ -68,6 +72,7 @@ export default async function Page() {
   const categories = categoriesResult.success ? categoriesResult.data : []
   const slides = featuredResult.success ? featuredResult.data : []
   const initialProducts = latestResult.success ? latestResult.data : []
+  const resolvedExchangeRate = await exchangeRate
 
   return (
     <>
@@ -83,7 +88,12 @@ export default async function Page() {
           )}
         >
           {/* 1. السلايدر التفاعلي للمنتجات المميزة */}
-          <FeaturedHeroSlider slides={slides} />
+          <FeaturedHeroSlider
+            slides={slides}
+            exchangeRate={resolvedExchangeRate}
+          />
+
+          <CategoryCarousel categories={categories} />
 
           {/* 2. شريط التصنيفات الرئيسية */}
           <HomeClientWrapper

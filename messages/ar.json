@@ -1527,5 +1527,35 @@
     "emptyTitle": "ابدأ البحث",
     "noResultsDescription": "جرّب التحقق من الإملاء أو استخدام كلمات أكثر عمومية.",
     "emptyDescription": "اكتب اسم منتج أو تصنيف أو علامة تجارية للعثور على ما تبحث عنه."
+  },
+  "FeaturedHeroSlider": {
+    "region": "منتجات مميزة",
+    "slide": "شريحة",
+    "slideAriaLabel": "{index} من {total}",
+    "shopNow": "تسوّق الآن",
+    "viewProduct": "عرض المنتج",
+    "outOfStock": "نفدت الكمية",
+    "discount": "خصم {value}%",
+    "rating": "التقييم",
+    "reviews": "عدد المراجعات",
+    "oldPrice": "السعر السابق",
+    "prev": "الشريحة السابقة",
+    "next": "الشريحة التالية",
+    "goTo": "الانتقال إلى الشريحة {index}",
+    "pause": "إيقاف التشغيل التلقائي",
+    "play": "تشغيل تلقائي",
+    "currencyPair": "دولار / ل.س",
+    "buy": "شراء",
+    "sell": "بيع",
+    "lastUpdatedAgo": "آخر تحديث {time}",
+    "sourceInfoAriaLabel": "معلومات مصدر سعر الصرف",
+    "sourceDisclaimerPrefix": "سعر الصرف مقدَّم من موقع",
+    "sourceSiteName": "الليرة اليوم (sp-today.com)"
+  },
+  "CategoryCarousel": {
+    "title": "تسوّق حسب القسم",
+    "viewAll": "عرض الكل",
+    "prev": "القسم السابق",
+    "next": "القسم التالي"
   }
 }

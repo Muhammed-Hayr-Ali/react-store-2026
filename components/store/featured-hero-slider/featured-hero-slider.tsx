@@ -3,17 +3,18 @@
 /**
  * @file components/store/featured-hero-slider.tsx
  * @description سلايدر المنتجات المميزة: بطاقة بقسمين (معلومات + صورة)،
- * مع مؤشر تقدم متزامن مع التشغيل التلقائي.
+ * مع مؤشر تقدم متزامن مع التشغيل التلقائي وشريط سعر الصرف.
  */
 
 import * as React from "react"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import useEmblaCarousel from "embla-carousel-react"
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  HelpCircleIcon,
   ImageIcon,
   PauseIcon,
   PlayIcon,
@@ -24,58 +25,29 @@ import { cn } from "@/lib/utils"
 import { Link } from "@/i18n/navigation"
 import { useCurrency } from "@/lib/context/currency-context"
 import { SimpliProduct } from "@/lib/actions/store/queries/get_filtered_products"
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card"
+import { ExchangeRateActionResponse } from "@/lib/actions/store/queries/get-exchange-rate"
 
 interface FeaturedHeroSliderProps {
   slides: SimpliProduct[]
+  exchangeRate: ExchangeRateActionResponse
 }
 
+type SliderTranslations = ReturnType<
+  typeof useTranslations<"FeaturedHeroSlider">
+>
+
 const AUTOPLAY_DELAY = 6000
-
-const COPY = {
-  ar: {
-    region: "منتجات مميزة",
-    slide: "شريحة",
-    of: "من",
-    shopNow: "تسوّق الآن",
-    viewProduct: "عرض المنتج",
-    outOfStock: "نفدت الكمية",
-    // علامة LTR حتى تبقى % بعد الرقم
-    discount: (value: number) => `خصم \u2066${value}%\u2069`,
-    rating: "التقييم",
-    reviews: "عدد المراجعات",
-    oldPrice: "السعر السابق",
-    prev: "الشريحة السابقة",
-    next: "الشريحة التالية",
-    goTo: "الانتقال إلى الشريحة",
-    pause: "إيقاف التشغيل التلقائي",
-    play: "تشغيل تلقائي",
-  },
-  en: {
-    region: "Featured products",
-    slide: "Slide",
-    of: "of",
-    shopNow: "Shop now",
-    viewProduct: "View product",
-    outOfStock: "Out of stock",
-    discount: (value: number) => `${value}% OFF`,
-    rating: "Rating",
-    reviews: "Reviews",
-    oldPrice: "Previous price",
-    prev: "Previous slide",
-    next: "Next slide",
-    goTo: "Go to slide",
-    pause: "Pause autoplay",
-    play: "Start autoplay",
-  },
-} as const
-
-type Copy = (typeof COPY)[keyof typeof COPY]
 
 const focusRing =
   "outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 
-const controlClass = cn(
-  "flex size-9 shrink-0 items-center justify-center rounded-full border border-border/70 bg-background text-foreground/80 transition-[background-color,color,scale] hover:bg-muted hover:text-foreground active:scale-95",
+const simpleControlClass = cn(
+  "flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground active:scale-95",
   focusRing
 )
 
@@ -95,6 +67,38 @@ function usePrefersReducedMotion() {
   )
 }
 
+function formatRelativeUpdate(
+  dateString: string | null | undefined,
+  isRtl: boolean,
+  t: SliderTranslations
+): string | null {
+  if (!dateString) return null
+  const timestamp = Date.parse(dateString)
+  if (Number.isNaN(timestamp)) return null
+
+  const diffSeconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000))
+  const rtf = new Intl.RelativeTimeFormat(isRtl ? "ar" : "en", {
+    numeric: "auto",
+  })
+
+  let formattedRelative: string
+  if (diffSeconds < 60) {
+    formattedRelative = rtf.format(-diffSeconds, "second")
+  } else if (diffSeconds < 3600) {
+    formattedRelative = rtf.format(-Math.floor(diffSeconds / 60), "minute")
+  } else if (diffSeconds < 86400) {
+    formattedRelative = rtf.format(-Math.floor(diffSeconds / 3600), "hour")
+  } else {
+    formattedRelative = rtf.format(-Math.floor(diffSeconds / 86400), "day")
+  }
+
+  return t("lastUpdatedAgo", { time: formattedRelative })
+}
+
+function formatRateNumber(value: number): string {
+  return Number(value).toFixed(2)
+}
+
 /** ظهور متدرج لعناصر الشريحة النشطة */
 const revealClass = (isActive: boolean) =>
   cn(
@@ -109,7 +113,7 @@ interface SlideItemProps {
   index: number
   total: number
   isActive: boolean
-  copy: Copy
+  t: SliderTranslations
   isRtl: boolean
   formatPrice: (value: number) => string
   ArrowIcon: typeof ArrowRightIcon
@@ -120,7 +124,7 @@ function SlideItem({
   index,
   total,
   isActive,
-  copy,
+  t,
   isRtl,
   formatPrice,
   ArrowIcon,
@@ -148,8 +152,8 @@ function SlideItem({
   return (
     <div
       role="group"
-      aria-roledescription={copy.slide}
-      aria-label={`${index + 1} ${copy.of} ${total}`}
+      aria-roledescription={t("slide")}
+      aria-label={t("slideAriaLabel", { index: index + 1, total })}
       inert={!isActive}
       className="min-w-0 flex-[0_0_100%] ps-3"
     >
@@ -185,7 +189,9 @@ function SlideItem({
 
           {discount > 0 && (
             <span className="absolute inset-e-3 top-3 rounded-full bg-destructive px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
-              {copy.discount(discount)}
+              {isRtl
+                ? `خصم \u2066${discount}%\u2069`
+                : t("discount", { value: discount })}
             </span>
           )}
         </div>
@@ -248,11 +254,11 @@ function SlideItem({
                 aria-hidden="true"
                 className="size-3.5 fill-amber-400 text-amber-400"
               />
-              <span className="sr-only">{copy.rating}:</span>
+              <span className="sr-only">{t("rating")}:</span>
               <span className="font-medium text-foreground">
                 {slide.rating.toFixed(1)}
               </span>
-              <span className="sr-only">{copy.reviews}:</span>
+              <span className="sr-only">{t("reviews")}:</span>
               <span>({slide.reviewCount})</span>
             </p>
           )}
@@ -264,7 +270,7 @@ function SlideItem({
                 "text-xs font-medium text-destructive delay-150"
               )}
             >
-              {copy.outOfStock}
+              {t("outOfStock")}
             </p>
           )}
 
@@ -281,7 +287,7 @@ function SlideItem({
                 </bdi>
                 {hasDiscount && (
                   <del className="text-xs text-muted-foreground md:text-sm">
-                    <span className="sr-only">{copy.oldPrice}: </span>
+                    <span className="sr-only">{t("oldPrice")}: </span>
                     <bdi>{formatPrice(compareAtPrice)}</bdi>
                   </del>
                 )}
@@ -293,7 +299,7 @@ function SlideItem({
               aria-hidden="true"
               className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground shadow-md shadow-primary/20 md:h-11 md:px-6"
             >
-              {slide.inStock ? copy.shopNow : copy.viewProduct}
+              {slide.inStock ? t("shopNow") : t("viewProduct")}
               <ArrowIcon className="size-4 transition-transform group-hover/card:translate-x-1 rtl:group-hover/card:-translate-x-1" />
             </span>
           </div>
@@ -305,10 +311,11 @@ function SlideItem({
 
 export default function FeaturedHeroSlider({
   slides,
+  exchangeRate,
 }: FeaturedHeroSliderProps) {
+  const t = useTranslations("FeaturedHeroSlider")
   const locale = useLocale()
   const isRtl = locale === "ar"
-  const copy = isRtl ? COPY.ar : COPY.en
   const count = slides?.length ?? 0
   const hasMultiple = count > 1
 
@@ -432,11 +439,129 @@ export default function FeaturedHeroSlider({
   const PrevIcon = isRtl ? ChevronRightIcon : ChevronLeftIcon
   const NextIcon = isRtl ? ChevronLeftIcon : ChevronRightIcon
 
+  const hasValidRate = Boolean(exchangeRate?.ok && exchangeRate.rate)
+  const rateRow = hasValidRate ? exchangeRate!.rate! : null
+  const updatedLabel = rateRow
+    ? formatRelativeUpdate(
+        rateRow.source_updated_at ??
+          rateRow.updated_at ??
+          exchangeRate?.sourceUpdatedAt,
+        isRtl,
+        t
+      )
+    : null
+
+  const renderPlayPauseButton = () => (
+    <button
+      type="button"
+      onClick={() => setUserPaused(!isStopped)}
+      aria-label={isStopped ? t("play") : t("pause")}
+      className={simpleControlClass}
+    >
+      {isStopped ? (
+        <PlayIcon aria-hidden="true" className="size-3.5" />
+      ) : (
+        <PauseIcon aria-hidden="true" className="size-3.5" />
+      )}
+    </button>
+  )
+
+  const renderPrevNextWithDots = () => (
+    <div className="flex items-center gap-0.5 sm:gap-1">
+      <button
+        type="button"
+        onClick={() => emblaApi?.scrollPrev()}
+        aria-label={t("prev")}
+        className={simpleControlClass}
+      >
+        <PrevIcon aria-hidden="true" className="size-4" />
+      </button>
+
+      <div className="flex items-center">
+        {slides.map((slide, index) => {
+          const isSelected = index === selectedIndex
+
+          return (
+            <button
+              key={slide.id}
+              type="button"
+              onClick={() => emblaApi?.scrollTo(index)}
+              aria-label={t("goTo", { index: index + 1 })}
+              aria-current={isSelected ? "true" : undefined}
+              className={cn(
+                "group/dot flex h-6 min-w-6 items-center justify-center rounded-full px-0.5",
+                focusRing
+              )}
+            >
+              <span
+                className={cn(
+                  "relative block h-1.5 overflow-hidden rounded-full transition-[width,background-color] duration-300",
+                  isSelected
+                    ? "w-7 bg-primary/20"
+                    : "w-1.5 bg-foreground/20 group-hover/dot:bg-foreground/40"
+                )}
+              >
+                {isSelected && (
+                  <span
+                    ref={progressRef}
+                    className="absolute inset-0 origin-left rounded-full bg-primary rtl:origin-right"
+                  />
+                )}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+
+      <button
+        type="button"
+        onClick={() => emblaApi?.scrollNext()}
+        aria-label={t("next")}
+        className={simpleControlClass}
+      >
+        <NextIcon aria-hidden="true" className="size-4" />
+      </button>
+    </div>
+  )
+
+  const renderSourceHoverCard = () => (
+    <HoverCard openDelay={10} closeDelay={100}>
+      <HoverCardTrigger asChild>
+        <button
+          type="button"
+          aria-label={t("sourceInfoAriaLabel")}
+          className={cn(
+            "inline-flex size-4 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground",
+            focusRing
+          )}
+        >
+          <HelpCircleIcon aria-hidden="true" className="size-3.5" />
+        </button>
+      </HoverCardTrigger>
+      <HoverCardContent
+        align="end"
+        className="w-fit text-start text-xs leading-relaxed text-muted-foreground"
+      >
+        <p>
+          {t("sourceDisclaimerPrefix")}{" "}
+          <Link
+            href="https://sp-today.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-foreground hover:text-primary"
+          >
+            {t("sourceSiteName")}
+          </Link>
+        </p>
+      </HoverCardContent>
+    </HoverCard>
+  )
+
   return (
     <section
       ref={sectionRef}
       aria-roledescription="carousel"
-      aria-label={copy.region}
+      aria-label={t("region")}
       dir={isRtl ? "rtl" : "ltr"}
       onKeyDown={handleKeyDown}
       // الهوامش الجانبية مسؤولية الحاوية الأم
@@ -460,7 +585,7 @@ export default function FeaturedHeroSlider({
               index={index}
               total={count}
               isActive={index === selectedIndex}
-              copy={copy}
+              t={t}
               isRtl={isRtl}
               formatPrice={formatPrice}
               ArrowIcon={ArrowIcon}
@@ -469,78 +594,92 @@ export default function FeaturedHeroSlider({
         </div>
       </div>
 
-      {/* شريط التحكم أسفل البطاقة حتى لا يغطي المحتوى */}
-      {hasMultiple && (
-        <div className="mt-3 flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={() => setUserPaused(!isStopped)}
-            aria-label={isStopped ? copy.play : copy.pause}
-            className={controlClass}
-          >
-            {isStopped ? (
-              <PlayIcon aria-hidden="true" className="size-3.5" />
-            ) : (
-              <PauseIcon aria-hidden="true" className="size-3.5" />
+      {/* شريط التحكم وسعر الصرف أسفل البطاقة */}
+      {(hasMultiple || rateRow) && (
+        <div className="mt-3">
+          {/* الشاشات الكبيرة: صف واحد كما في التصميم المعتمد */}
+          <div className="hidden items-center justify-between gap-3 sm:flex">
+            {hasMultiple && (
+              <div className="flex items-center gap-1">
+                {renderPlayPauseButton()}
+                {renderPrevNextWithDots()}
+              </div>
             )}
-          </button>
 
-          <div className="flex min-w-0 flex-1 items-center justify-center">
-            {slides.map((slide, index) => {
-              const isSelected = index === selectedIndex
+            {rateRow && (
+              <div className="ms-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                <span className="text-foreground">{t("currencyPair")}</span>
 
-              return (
-                <button
-                  key={slide.id}
-                  type="button"
-                  onClick={() => emblaApi?.scrollTo(index)}
-                  aria-label={`${copy.goTo} ${index + 1}`}
-                  aria-current={isSelected ? "true" : undefined}
-                  // مساحة نقر 24px على الأقل مع مؤشر نحيف
-                  className={cn(
-                    "group/dot flex h-6 min-w-6 items-center justify-center rounded-full px-1",
-                    focusRing
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "relative block h-1.5 overflow-hidden rounded-full transition-[width,background-color] duration-300",
-                      isSelected
-                        ? "w-8 bg-primary/20"
-                        : "w-1.5 bg-foreground/20 group-hover/dot:bg-foreground/40"
-                    )}
-                  >
-                    {isSelected && (
-                      <span
-                        ref={progressRef}
-                        className="absolute inset-0 origin-left rounded-full bg-primary rtl:origin-right"
-                      />
-                    )}
-                  </span>
-                </button>
-              )
-            })}
+                <span className="text-muted-foreground">
+                  {t("buy")}{" "}
+                  <bdi className="text-foreground tabular-nums">
+                    {formatRateNumber(rateRow.raw_buy)}
+                  </bdi>
+                </span>
+
+                <span className="text-muted-foreground">
+                  {t("sell")}{" "}
+                  <bdi className="font-semibold text-foreground tabular-nums">
+                    {formatRateNumber(rateRow.raw_sell)}
+                  </bdi>
+                </span>
+
+                {updatedLabel && (
+                  <span className="text-muted-foreground">{updatedLabel}</span>
+                )}
+
+                {renderSourceHoverCard()}
+              </div>
+            )}
           </div>
 
-          <div className="flex shrink-0 gap-2">
-            <button
-              type="button"
-              onClick={() => emblaApi?.scrollPrev()}
-              aria-label={copy.prev}
-              className={cn(controlClass, "max-sm:hidden")}
-            >
-              <PrevIcon aria-hidden="true" className="size-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => emblaApi?.scrollNext()}
-              aria-label={copy.next}
-              className={cn(controlClass, "max-sm:hidden")}
-            >
-              <NextIcon aria-hidden="true" className="size-4" />
-            </button>
-            {/* يوازن زر الإيقاف على الجوال لتبقى المؤشرات في المنتصف */}
-            <span aria-hidden="true" className="size-9 sm:hidden" />
+          {/* الشاشات الصغيرة: تحكم، خط، سعر الصرف، خط، آخر تحديث وإشارة الاستفهام، ثم خط */}
+          <div className="flex flex-col sm:hidden">
+            {hasMultiple && (
+              <div className="flex items-center justify-between">
+                {renderPlayPauseButton()}
+                {renderPrevNextWithDots()}
+                <span aria-hidden="true" className="size-7 shrink-0" />
+              </div>
+            )}
+
+            {hasMultiple && rateRow && (
+              <hr className="my-2.5 border-border/60" />
+            )}
+
+            {rateRow && (
+              <div className="flex flex-col text-xs gap-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-foreground">{t("currencyPair")}</span>
+
+                  <div className="flex items-center gap-3">
+                    <span className="text-muted-foreground">
+                      {t("buy")}{" "}
+                      <bdi className="text-foreground tabular-nums">
+                        {formatRateNumber(rateRow.raw_buy)}
+                      </bdi>
+                    </span>
+
+                    <span className="text-muted-foreground">
+                      {t("sell")}{" "}
+                      <bdi className="font-semibold text-foreground tabular-nums">
+                        {formatRateNumber(rateRow.raw_sell)}
+                      </bdi>
+                    </span>
+                  </div>
+                </div>
+
+              
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground">
+                    {updatedLabel ?? ""}
+                  </span>
+                  {renderSourceHoverCard()}
+                </div>
+
+                <hr className="my-2.5 border-border/60" />
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -1529,5 +1529,35 @@
     "emptyTitle": "Start your search",
     "noResultsDescription": "Try checking your spelling or using more general terms.",
     "emptyDescription": "Type a product name, category, or brand to find what you are looking for."
+  },
+  "FeaturedHeroSlider": {
+    "region": "Featured products",
+    "slide": "Slide",
+    "slideAriaLabel": "{index} of {total}",
+    "shopNow": "Shop now",
+    "viewProduct": "View product",
+    "outOfStock": "Out of stock",
+    "discount": "{value}% OFF",
+    "rating": "Rating",
+    "reviews": "Reviews",
+    "oldPrice": "Previous price",
+    "prev": "Previous slide",
+    "next": "Next slide",
+    "goTo": "Go to slide {index}",
+    "pause": "Pause autoplay",
+    "play": "Start autoplay",
+    "currencyPair": "USD / SYP",
+    "buy": "Buy",
+    "sell": "Sell",
+    "lastUpdatedAgo": "Updated {time}",
+    "sourceInfoAriaLabel": "Exchange rate source information",
+    "sourceDisclaimerPrefix": "Exchange rates are provided by",
+    "sourceSiteName": "SP Today (sp-today.com)"
+  },
+  "CategoryCarousel": {
+    "title": "Shop by Category",
+    "viewAll": "View All",
+    "prev": "Previous categories",
+    "next": "Next categories"
   }
 }
