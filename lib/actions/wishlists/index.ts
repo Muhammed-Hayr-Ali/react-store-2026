@@ -11,6 +11,5 @@ export { removeFromWishlist } from "./mutations/remove-from-wishlist"
 export { getWishlistProducts } from "./queries/get-wishlist"
 export { getWishlistProductIds } from "./queries/get-wishlist-product-ids"
 
-// Types & Schemas
-export type { Wishlist, WishlistQueryResult } from "./types"
+// Schemas
 export { wishlistSchema, type WishlistInput } from "./schemas"

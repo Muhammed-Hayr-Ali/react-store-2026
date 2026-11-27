@@ -21,7 +21,7 @@ export async function getBrandsSummary(): Promise<ApiResult<BrandsSummary>> {
     }
   }
 
-  const brands = (data ?? []) as Array<{ is_active: boolean }>
+  const brands = data ?? []
   const active = brands.filter((brand) => brand.is_active).length
 
   return {

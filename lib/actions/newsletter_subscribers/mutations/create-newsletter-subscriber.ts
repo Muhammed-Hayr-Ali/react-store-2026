@@ -60,6 +60,14 @@ export async function createNewsletterSubscriber(
         details: { database: [error.message] },
       }
     }
+    if (!data) {
+      return {
+        success: false,
+        error: "CREATE_NEWSLETTER_SUBSCRIBER_ERROR",
+        details: { database: ["The subscriber row was not returned after upsert."] },
+      }
+    }
+
     const emailLocale = resolveEmailLocale(validation.data.locale)
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
     const unsubscribeUrl = new URL(APP_ROUTES.NEWSLETTER_UNSUBSCRIBE, baseUrl)
@@ -85,7 +93,7 @@ export async function createNewsletterSubscriber(
       }
     }
 
-    return { success: true, data: data as NewsletterSubscriber }
+    return { success: true, data }
   } catch (error) {
     if (error instanceof NewsletterUnsubscribeConfigurationError) {
       console.error("Newsletter subscription requires an unsubscribe secret.")

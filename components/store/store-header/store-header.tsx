@@ -28,9 +28,9 @@ import {
   hideScrollbar,
   isRtlLocale,
   navLinkClass,
-  storeContainer,
-} from "./store-header-shared"
+ } from "./store-header-shared"
 import { MobileStoreCategoriesButton } from "./mobile_store-categories-button"
+import { STORE_CONTAINER } from "@/lib/config/app_config"
 
 interface StoreHeaderProps {
   categories?: SimplifiedRootCategory[]
@@ -160,7 +160,7 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
         ref={mainHeaderRef}
         className="w-full border-b border-border/60 bg-background font-normal"
       >
-        <div className={storeContainer}>
+        <div className={STORE_CONTAINER}>
           <div className="flex h-20 items-center justify-between gap-4 sm:gap-6">
             <Link
               href={APP_ROUTES.HOME}
@@ -217,7 +217,7 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
 
         <div className="border-t border-border/60" />
 
-        <div className={storeContainer}>
+        <div className={STORE_CONTAINER}>
           <div
             className={cn(
               "-mx-3 flex h-13 items-center justify-between gap-2 overflow-x-auto px-3 sm:gap-4",
@@ -298,7 +298,7 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
             : "pointer-events-none -translate-y-full opacity-0"
         )}
       >
-        <div className={storeContainer}>
+        <div className={STORE_CONTAINER}>
           <div className="flex h-16 items-center justify-between gap-4 sm:gap-6">
             <Link
               href={APP_ROUTES.HOME}
@@ -330,7 +330,7 @@ export function StoreHeader({ categories = [] }: StoreHeaderProps) {
         <div className="border-t border-border/50" />
 
         {/* شريط التصنيفات الرئيسية مع أزرار التمرير */}
-        <div className={storeContainer}>
+        <div className={STORE_CONTAINER}>
           <div className="flex h-11 items-center gap-1.5 text-xs">
             <button
               type="button"

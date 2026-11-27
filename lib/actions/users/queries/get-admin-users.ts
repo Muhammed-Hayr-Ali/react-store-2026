@@ -8,9 +8,9 @@
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
- import { getValidationDetails } from "../../validation"
+import { getValidationDetails } from "../../validation"
 import { getAdminUsersSchema, type GetAdminUsersInput } from "../schemas"
-import type { AdminUserSummary } from "../types"
+import { isUserStatus, type AdminUserSummary } from "../types"
 
 /**
  * تجلب قائمة المستخدمين الإدارية مع مرشحات البحث والحالة.
@@ -32,8 +32,8 @@ export async function getAdminUsers(
     const supabase = await createServerClient()
 
     const { data, error } = await supabase.rpc("get_admin_users_list", {
-      p_search: validation.data.search || null,
-      p_status: validation.data.status || null,
+      p_search: validation.data.search || undefined,
+      p_status: validation.data.status || undefined,
     })
 
     if (error) {
@@ -44,10 +44,22 @@ export async function getAdminUsers(
       }
     }
 
-    return {
-      success: true,
-      data: (data as AdminUserSummary[]) || [],
+    const users: AdminUserSummary[] = []
+    for (const user of data ?? []) {
+      if (!isUserStatus(user.status)) {
+        return {
+          success: false,
+          error: "GET_USERS_ERROR",
+          details: {
+            database: [`Unexpected account status "${user.status}".`],
+          },
+        }
+      }
+
+      users.push({ ...user, status: user.status })
     }
+
+    return { success: true, data: users }
   } catch (error) {
     return {
       success: false,

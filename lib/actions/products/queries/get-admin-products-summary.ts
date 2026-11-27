@@ -10,14 +10,6 @@ import { addDays, format, startOfToday } from "date-fns"
 import type { ApiResult } from "../../types/utils"
 import type { AdminProductsSummary } from "../types"
 
-interface ProductSummaryRecord {
-  is_active: boolean
-  product_variants: Array<{
-    stock_quantity: number | null
-    expiration_date: string | null
-  }> | null
-}
-
 export async function getAdminProductsSummary(): Promise<
   ApiResult<AdminProductsSummary>
 > {
@@ -39,7 +31,7 @@ export async function getAdminProductsSummary(): Promise<
     }
   }
 
-  const products = (data ?? []) as unknown as ProductSummaryRecord[]
+  const products = data ?? []
   const today = startOfToday()
   const expirationLimit = addDays(today, 30)
   const todayValue = format(today, "yyyy-MM-dd")

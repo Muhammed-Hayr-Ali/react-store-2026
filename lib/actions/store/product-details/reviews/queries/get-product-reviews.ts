@@ -8,21 +8,17 @@
 import { createServerClient } from "@/lib/database/supabase/server"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 import type { ApiResult } from "@/lib/actions/types/utils"
+import type { Tables } from "@/lib/database/supabase/types"
 
-export interface ReviewerProfile {
-  id: string
-  first_name: string | null
-  last_name: string | null
-  avatar: string | null
-}
+export type ReviewerProfile = Pick<
+  Tables<"profiles">,
+  "id" | "first_name" | "last_name" | "avatar"
+>
 
-export interface ProductReviewItem {
-  id: string
-  rating: number
-  content: string | null
-  is_approved: boolean
-  created_at: string
-  user_id: string // أضفنا معرف صاحب التعليق هنا للتحقق السهل في الكارت
+export type ProductReviewItem = Pick<
+  Tables<"product_reviews">,
+  "id" | "rating" | "content" | "is_approved" | "created_at" | "user_id"
+> & {
   user: ReviewerProfile | null
 }
 
@@ -44,16 +40,6 @@ export interface ProductReviewsResult {
   hasUserReviewed: boolean | undefined
   reviews: ProductReviewItem[]
   summary: ProductReviewsSummary
-}
-
-interface DatabaseReviewQueryResult {
-  id: string
-  rating: number
-  content: string | null
-  is_approved: boolean
-  created_at: string
-  user_id: string
-  user: ReviewerProfile[] | ReviewerProfile | null
 }
 
 interface GetProductReviewsOptions {
@@ -117,7 +103,7 @@ export async function getProductReviews(
     }
   }
 
-  const rawReviews = (data ?? []) as unknown as DatabaseReviewQueryResult[]
+  const rawReviews = data ?? []
   const currentUserId =
     currentUserResult.success && currentUserResult.data
       ? currentUserResult.data.id
@@ -163,9 +149,7 @@ export async function getProductReviews(
   const formattedReviews: ProductReviewItem[] = limitedRawReviews.map(
     (review) => {
       let reviewer: ReviewerProfile | null = null
-      if (review.user) {
-        reviewer = Array.isArray(review.user) ? review.user[0] : review.user
-      }
+      if (review.user) reviewer = review.user
 
       return {
         id: review.id,

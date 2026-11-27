@@ -11,6 +11,8 @@ import { createProductSchema, type CreateProductInput } from "../schemas"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { CACHE_TAG } from "@/lib/config/app_config"
 import { normalizePrimaryImages } from "../normalize-primary-images"
+import { hasPermission } from "@/lib/actions/role/permission-checker"
+import { PERMISSIONS } from "@/lib/actions/role/types"
 
 export type CreateProductResult =
   { success: true } | { success: false; error: string }
@@ -19,6 +21,10 @@ export async function createProduct(
   input: CreateProductInput
 ): Promise<CreateProductResult> {
   try {
+    if (!(await hasPermission(PERMISSIONS.MANAGE_PRODUCTS))) {
+      return { success: false, error: "FORBIDDEN" }
+    }
+
     const validation = createProductSchema.safeParse(input)
     if (!validation.success) {
       if (
@@ -112,12 +118,13 @@ export async function createProduct(
       insertedVariants.map((variant) => [variant.sku, variant.id])
     )
     const imagesToInsert = normalizePrimaryImages(
-      images.map((img) => {
+      images.map((img, sort_order) => {
         const variantSku = img.variant_sku?.trim()
         return {
           url: img.url,
           alt_text: img.alt_text || null,
           is_primary: img.is_primary,
+          sort_order,
           product_id: newProduct.id,
           variant_id: variantSku ? variantIdsBySku.get(variantSku)! : null,
         }

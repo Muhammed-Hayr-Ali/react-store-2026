@@ -9,7 +9,7 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { getValidationDetails } from "../../validation"
 import { roleIdSchema, type RoleIdInput } from "../schemas"
-import { RoleRecord } from "../types"
+import { toRoleRecord, type RoleRecord } from "../types"
  
 /**
  * تجلب دورًا واحدًا باستخدام معرّفه.
@@ -50,8 +50,14 @@ export async function getRoleById(
     }
   }
 
-  return {
-    success: true,
-    data: data as RoleRecord,
+  const role = toRoleRecord(data)
+  if (!role) {
+    return {
+      success: false,
+      error: "GET_ROLE_ERROR",
+      details: { database: [`Role "${data.name}" has invalid permissions.`] },
+    }
   }
+
+  return { success: true, data: role }
 }

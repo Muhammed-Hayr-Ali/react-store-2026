@@ -70,7 +70,7 @@ export async function createReview(
       product_id: productId,
       user_id: currentUser.id,
       rating,
-      content: content?.trim() || null,
+      content: content?.trim() ?? "",
       is_approved: true, // أو false إذا كان يتطلب موافقة الإدارة مسبقاً
     })
     .select("id")

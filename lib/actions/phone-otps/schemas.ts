@@ -23,12 +23,3 @@ export const verifyOtpSchema = z.object({
 
 export type SendOtpFormValues = z.infer<typeof sendOtpSchema>
 export type VerifyOtpFormValues = z.infer<typeof verifyOtpSchema>
-
-export interface PhoneOtpRecord {
-  id: string
-  phone_number: string
-  code: string
-  expires_at: string
-  used: boolean
-  created_at: string
-}

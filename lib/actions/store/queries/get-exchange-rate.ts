@@ -1,19 +1,9 @@
 "use server"
 
 import { createServerClient } from "@/lib/database/supabase/server"
+import type { Tables } from "@/lib/database/supabase/types"
 
-export interface ExchangeRateRow {
-  id: string
-  currency_code: string
-  city: string
-  unit: string
-  raw_buy: number
-  raw_sell: number
-  store_rate: number
-  source_updated_at: string | null
-  fetched_at: string
-  updated_at: string
-}
+export type ExchangeRateRow = Tables<"exchange_rates">
 
 export interface ExchangeRateActionResponse {
   ok: boolean
@@ -43,7 +33,7 @@ export async function getStoreExchangeRate(
       )
       .eq("currency_code", normalizedCode)
       .eq("unit", normalizedUnit)
-      .maybeSingle<ExchangeRateRow>()
+      .maybeSingle()
 
     if (error || !data) {
       return {

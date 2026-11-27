@@ -19,15 +19,6 @@ export interface SimplifiedRootCategory {
   image_alt: string | null
 }
 
-interface CategoryQueryResult {
-  id: string
-  name: string
-  name_ar: string | null
-  slug: string
-  image_url: string | null
-  image_alt: string | null
-}
-
 // دالة الكاش الداخلية تستقبل المعاملات بشكل مفرد لضمان استقرار الكاش
 const getCachedRootCategories = unstable_cache(
   async (limit: number): Promise<SimplifiedRootCategory[]> => {
@@ -51,9 +42,7 @@ const getCachedRootCategories = unstable_cache(
       throw new Error(error.message)
     }
 
-    const rawCategories = (data ?? []) as unknown as CategoryQueryResult[]
-
-    return rawCategories.map((category) => ({
+    return (data ?? []).map((category) => ({
       id: category.id,
       name: category.name,
       name_ar: category.name_ar,

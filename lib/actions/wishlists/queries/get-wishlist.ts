@@ -8,60 +8,6 @@
 import { createServerClient } from "@/lib/database/supabase/server"
 import type { ApiResult } from "../../types/utils"
 
-interface ProductVariantRecord {
-  id: string
-  sku: string
-  price: number
-  compare_at_price?: number | null
-  stock_quantity: number
-  track_inventory: boolean
-}
-
-interface ProductImageRecord {
-  url: string
-  alt_text?: string | null
-  is_primary: boolean
-  variant_id?: string | null
-}
-
-interface ProductReviewRecord {
-  rating: number
-}
-
-interface ProductCategoriesRecord {
-  id: string
-  name: string
-  name_ar: string
-  slug: string
-}
-
-interface ProductBrandsRecord {
-  id: string
-  name: string
-  name_ar: string
-  slug: string
-}
-
-interface ProductRecord {
-  id: string
-  name: string
-  slug: string
-  is_active: boolean
-  description?: string | null
-  product_variants: ProductVariantRecord[] | null
-  product_images: ProductImageRecord[] | null
-  product_reviews: ProductReviewRecord[] | null
-  categories: ProductCategoriesRecord | null
-  brands: ProductBrandsRecord | null
-}
-
-interface WishlistRow {
-  id: string
-  product_id: string
-  created_at: string
-  products: ProductRecord | null
-}
-
 export interface WishlistProduct {
   id: string
   name: string
@@ -178,9 +124,9 @@ export async function getWishlistProducts(
   }
 
   // استخراج المنتج من كل صف مفضلة وتجاهل أي منتج فارغ
-  const rawProducts = ((rows ?? []) as unknown as WishlistRow[])
+  const rawProducts = (rows ?? [])
     .map((row) => row.products)
-    .filter((p): p is ProductRecord => p !== null)
+    .filter((product) => product !== null)
 
   const data: WishlistProduct[] = rawProducts.map((product) => {
     const variants = product.product_variants ?? []

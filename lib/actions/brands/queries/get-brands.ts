@@ -47,5 +47,5 @@ export async function getBrands(
     }
   }
 
-  return { success: true, data: (data ?? []) as BrandRecord[] }
+  return { success: true, data: data ?? [] }
 }

@@ -179,12 +179,13 @@ export async function updateProduct(
     }
 
     const imagesToInsert = normalizePrimaryImages(
-      images.map((img) => {
+      images.map((img, sort_order) => {
         const variantSku = img.variant_sku?.trim()
         return {
           url: img.url,
           alt_text: img.alt_text || null,
           is_primary: img.is_primary,
+          sort_order,
           product_id: id,
           variant_id: variantSku ? variantIdsBySku.get(variantSku)! : null,
         }

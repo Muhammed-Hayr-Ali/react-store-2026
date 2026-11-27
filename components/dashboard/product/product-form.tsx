@@ -15,6 +15,7 @@ import {
   useWatch,
   UseFormSetValue,
   UseFormGetValues,
+  UseFormTrigger,
   FieldError as RHFFieldError,
 } from "react-hook-form"
 import { toast } from "sonner"
@@ -77,11 +78,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-// استيراد دوال السيرفر
+// Server actions
 import { createProduct } from "@/lib/actions/products/mutations/create"
 import { updateProduct } from "@/lib/actions/products/mutations/update"
 
-// استيراد الأنواع والمخططات المحدثة
+// Types & schemas
 import type {
   CreateProductInput,
   ProductWithRelations,
@@ -214,32 +215,24 @@ function setImageVariantSku(
     imageIndex === index ? { ...image, variant_sku: normalizedSku } : image
   )
 
-  if (normalizedSku) {
-    const primaryIndex = updatedImages.findIndex(
-      (image, imageIndex) => imageIndex !== index && !image.variant_sku?.trim()
-    )
-    updatedImages.forEach((image, imageIndex) => {
-      setValue(`images.${imageIndex}.is_primary`, imageIndex === primaryIndex, {
+  const existingPrimaryGeneralIndex = updatedImages.findIndex(
+    (image) => !image.variant_sku?.trim() && image.is_primary
+  )
+  const primaryIndex =
+    existingPrimaryGeneralIndex >= 0
+      ? existingPrimaryGeneralIndex
+      : updatedImages.findIndex((image) => !image.variant_sku?.trim())
+
+  updatedImages.forEach((image, imageIndex) => {
+    setValue(
+      `images.${imageIndex}.is_primary`,
+      !image.variant_sku?.trim() && imageIndex === primaryIndex,
+      {
         shouldDirty: true,
         shouldValidate: true,
-      })
-    })
-  } else {
-    const hasOtherPrimaryGeneralImage = updatedImages.some(
-      (image, imageIndex) =>
-        imageIndex !== index && !image.variant_sku?.trim() && image.is_primary
+      }
     )
-    updatedImages.forEach((image, imageIndex) => {
-      const isPrimary =
-        imageIndex === index
-          ? !hasOtherPrimaryGeneralImage
-          : !image.variant_sku?.trim() && image.is_primary
-      setValue(`images.${imageIndex}.is_primary`, isPrimary, {
-        shouldDirty: true,
-        shouldValidate: true,
-      })
-    })
-  }
+  })
 
   setValue(`images.${index}.variant_sku`, normalizedSku, {
     shouldDirty: true,
@@ -258,7 +251,7 @@ type NumberInputProps = Omit<
   onValueChange: (value: number | null) => void
 }
 
-// يحتفظ بالنص أثناء الكتابة حتى يمكن مسح الحقل وكتابة الكسور دون أن تُعاد القيمة إلى 0
+// Preserves draft text while typing so the user can clear the field or enter decimals without snapping to 0
 function NumberInput({
   value,
   emptyValue,
@@ -283,7 +276,7 @@ function NumberInput({
         setDraft(null)
         onBlur?.(e)
       }}
-      // يمنع تغيير القيمة بالخطأ عند تمرير الصفحة بعجلة الفأرة
+      // Prevents accidental value changes when scrolling with the mouse wheel
       onWheel={(e) => e.currentTarget.blur()}
     />
   )
@@ -361,7 +354,7 @@ export default function ProductForm({
     const variantSkuById = new Map(
       (product.product_variants ?? []).map((variant) => [
         variant.id,
-        variant.sku,
+        variant.sku.toUpperCase(),
       ])
     )
 
@@ -383,14 +376,14 @@ export default function ProductForm({
     if (!product?.product_variants || product.product_variants.length === 0) {
       return [DEFAULT_VARIANT]
     }
-    // الترتيب مهم: sort_order يُعاد حسابه من موضع العنصر عند الحفظ
+    // Order matters: sort_order is recalculated from item index on save
     const sortedVariants = [...product.product_variants].sort(
       (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)
     )
     return sortedVariants.map((v, idx) => ({
-      sku: v.sku,
+      sku: v.sku.toUpperCase(),
       name: v.name || "",
-      attributes: (v.attributes as Record<string, string>) || {},
+      attributes: v.attributes,
       price: Number(v.price) / 100,
       compare_at_price:
         v.compare_at_price != null ? Number(v.compare_at_price) / 100 : null,
@@ -423,18 +416,19 @@ export default function ProductForm({
   })
 
   const {
-    formState: { isSubmitting, isDirty },
+    formState: { isSubmitting, isDirty, dirtyFields },
     control,
     setValue,
     setFocus,
     getValues,
+    trigger,
   } = form
 
   const isBusy = isSubmitting || isRedirecting
-  // في وضع التعديل لا نغيّر الرابط تلقائياً حتى لا تنكسر الروابط المنشورة
+  // Keep slug locked in edit mode to avoid breaking published URLs
   const isSlugLockedRef = React.useRef(isEditing)
 
-  // تحذير قبل إغلاق الصفحة أو تحديثها مع وجود تغييرات غير محفوظة
+  // Warn before closing or refreshing the browser tab when there are unsaved changes
   React.useEffect(() => {
     if (!isDirty || isRedirecting) return
     const warn = (event: BeforeUnloadEvent) => {
@@ -593,7 +587,7 @@ export default function ProductForm({
       shouldDirty: true,
     })
     toast.success(t("SEO_GENERATED_SUCCESS"), {
-      // التراجع يظهر فقط إذا استبدلنا نصاً كان موجوداً
+      // Show Undo only if existing text was replaced
       action:
         previousTitle || previousDescription
           ? {
@@ -675,7 +669,7 @@ export default function ProductForm({
   const onInvalid = () => {
     setErrorMessage(t("FORM_VALIDATION_ERROR"))
 
-    // الانتقال إلى أول حقل فيه خطأ بدلاً من أعلى الصفحة
+    // Scroll to the first invalid field instead of jumping to the top of the page
     window.setTimeout(() => {
       const invalidField = Array.from(
         formRef.current?.querySelectorAll<HTMLElement>(
@@ -718,7 +712,7 @@ export default function ProductForm({
     }
   }
 
-  // حذف متغير: فك ارتباط صوره مع إتاحة التراجع
+  // Remove variant: unlink its images and provide an Undo action
   const handleRemoveVariant = (index: number) => {
     const removed = getValues(`variants.${index}`)
     const otherSkus = getValues("variants")
@@ -751,7 +745,7 @@ export default function ProductForm({
     })
   }
 
-  // حذف صورة: تبقى دائماً صورة رئيسية، مع إتاحة التراجع
+  // Remove image: ensure a primary general image remains and provide an Undo action
   const handleRemoveImage = (index: number) => {
     const removed = getValues(`images.${index}`)
     removeImage(index)
@@ -789,9 +783,10 @@ export default function ProductForm({
     })
   }
 
-  // دالة مساعدة لعرض حقول التنظيم مع دعم الاسم العربي name_ar
+  // Render organization fields with Arabic name support (name_ar)
   const renderOrganizationFields = () => (
     <FieldGroup className="space-y-3.5">
+      {/* Category */}
       <Controller
         name="category_id"
         control={control}
@@ -810,7 +805,7 @@ export default function ProductForm({
               >
                 <SelectTrigger
                   aria-invalid={fieldState.invalid}
-                  className="h-9 min-w-0 flex-1 text-xs"
+                  className="min-w-0 flex-1 text-xs"
                 >
                   <SelectValue placeholder={t("SELECT_CATEGORY")} />
                 </SelectTrigger>
@@ -865,10 +860,11 @@ export default function ProductForm({
                 trigger={
                   <Button
                     type="button"
+                    size="icon"
                     variant="outline"
                     title={t("CREATE_CATEGORY")}
                     aria-label={t("CREATE_CATEGORY")}
-                    className="h-9 w-9 shrink-0 cursor-pointer p-0"
+                    className="size- shrink-0 cursor-pointer"
                   >
                     <PlusIcon className="size-3.5" />
                   </Button>
@@ -898,11 +894,12 @@ export default function ProductForm({
                     }}
                     trigger={
                       <Button
-                        type="button"
+                        type="button"                    size="icon"
+
                         variant="outline"
                         title={t("EDIT_CATEGORY")}
                         aria-label={t("EDIT_CATEGORY")}
-                        className="h-9 w-9 shrink-0 cursor-pointer p-0 text-muted-foreground hover:text-foreground"
+                        className="shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
                       >
                         <PencilIcon className="size-3.5" />
                       </Button>
@@ -936,11 +933,12 @@ export default function ProductForm({
                     }}
                   >
                     <Button
-                      type="button"
+                      type="button"                    size="icon"
+
                       variant="outline"
                       title={t("DELETE_CATEGORY")}
                       aria-label={t("DELETE_CATEGORY")}
-                      className="h-9 w-9 shrink-0 cursor-pointer p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      className="shrink-0 cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive"
                     >
                       <Trash2Icon className="size-3.5" />
                     </Button>
@@ -956,6 +954,7 @@ export default function ProductForm({
         )}
       />
 
+      {/* Brand */}
       <Controller
         name="brand_id"
         control={control}
@@ -967,13 +966,13 @@ export default function ProductForm({
 
             <div className="flex items-center gap-1.5">
               <Select
-                // Radix قد يرسل قيمة فارغة قبل وصول العلامة الجديدة إلى القائمة
+                // Radix may emit an empty value before a newly created brand reaches the list
                 onValueChange={(val) => val && field.onChange(val)}
                 value={field.value || ""}
               >
                 <SelectTrigger
                   aria-invalid={fieldState.invalid}
-                  className="h-9 min-w-0 flex-1 text-xs"
+                  className="min-w-0 flex-1 text-xs"
                 >
                   <SelectValue placeholder={t("SELECT_BRAND")} />
                 </SelectTrigger>
@@ -1013,11 +1012,12 @@ export default function ProductForm({
                 }}
                 trigger={
                   <Button
-                    type="button"
+                    type="button"                    size="icon"
+
                     variant="outline"
                     title={t("CREATE_BRAND")}
                     aria-label={t("CREATE_BRAND")}
-                    className="h-9 w-9 shrink-0 cursor-pointer p-0"
+                    className="shrink-0 cursor-pointer"
                   >
                     <PlusIcon className="size-3.5" />
                   </Button>
@@ -1046,11 +1046,12 @@ export default function ProductForm({
                     }}
                     trigger={
                       <Button
-                        type="button"
+                        type="button"                    size="icon"
+
                         variant="outline"
                         title={t("EDIT_BRAND")}
                         aria-label={t("EDIT_BRAND")}
-                        className="h-9 w-9 shrink-0 cursor-pointer p-0 text-muted-foreground hover:text-foreground"
+                        className="shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
                       >
                         <PencilIcon className="size-3.5" />
                       </Button>
@@ -1082,11 +1083,12 @@ export default function ProductForm({
                     }}
                   >
                     <Button
-                      type="button"
+                      type="button"                    size="icon"
+
                       variant="outline"
                       title={t("DELETE_BRAND")}
                       aria-label={t("DELETE_BRAND")}
-                      className="h-9 w-9 shrink-0 cursor-pointer p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      className="shrink-0 cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive"
                     >
                       <Trash2Icon className="size-3.5" />
                     </Button>
@@ -1109,7 +1111,7 @@ export default function ProductForm({
         ref={formRef}
         noValidate
         onSubmit={(event) => {
-          // أحداث React تصعد عبر الـ Portal: نتجاهل إرسال نماذج النوافذ المنبثقة
+          // React events bubble through Portals: ignore submissions from nested modal forms
           if (event.target !== event.currentTarget) return
           event.preventDefault()
           if (isBusy) return
@@ -1136,7 +1138,7 @@ export default function ProductForm({
         )}
 
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-          {/* على الجوال: contents + order لترتيب البطاقات، وعلى الشاشات الكبيرة: عمودان */}
+          {/* Mobile: contents + order for card ordering; Desktop: 2-column layout */}
           <div className="contents lg:col-span-2 lg:flex lg:min-w-0 lg:flex-col lg:gap-6">
             {/* Basic Information */}
             <div className="order-1 min-w-0 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-none">
@@ -1154,6 +1156,7 @@ export default function ProductForm({
 
               <FieldGroup className="space-y-4">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {/* Product Name */}
                   <Controller
                     name="name"
                     control={control}
@@ -1167,10 +1170,13 @@ export default function ProductForm({
                           {...field}
                           id="product-name"
                           placeholder={t("PRODUCT_NAME_PLACEHOLDER")}
-                          className="h-9 text-xs"
+                          className="text-xs"
                           onChange={(e) => {
                             field.onChange(e)
-                            if (!isSlugLockedRef.current) {
+                            if (
+                              !isEditing &&
+                              (!dirtyFields.slug || !isSlugLockedRef.current)
+                            ) {
                               setValue("slug", generateSlug(e.target.value), {
                                 shouldValidate: true,
                                 shouldDirty: true,
@@ -1185,6 +1191,7 @@ export default function ProductForm({
                     )}
                   />
 
+                  {/* URL Slug */}
                   <Controller
                     name="slug"
                     control={control}
@@ -1197,11 +1204,11 @@ export default function ProductForm({
                         <Input
                           {...field}
                           id="product-slug"
-                          placeholder="premium-oxford-cotton-shirt"
-                          className="h-9 font-mono text-xs"
+                          placeholder={t("URL_SLUG_PLACEHOLDER")}
+                          className="font-mono text-xs"
                           dir="ltr"
                           onChange={(e) => {
-                            // إفراغ الحقل يعيد التوليد التلقائي في المنتج الجديد
+                            // Clearing the field re-enables auto-generation for new products
                             isSlugLockedRef.current =
                               isEditing || e.target.value !== ""
                             field.onChange(e)
@@ -1222,6 +1229,7 @@ export default function ProductForm({
                   />
                 </div>
 
+                {/* Description */}
                 <Controller
                   name="description"
                   control={control}
@@ -1303,6 +1311,7 @@ export default function ProductForm({
                     control={control}
                     setValue={setValue}
                     getValues={getValues}
+                    trigger={trigger}
                     totalVariants={variantFields.length}
                     onRemove={() => handleRemoveVariant(index)}
                   />
@@ -1357,7 +1366,7 @@ export default function ProductForm({
 
           {/* Sidebar */}
           <div className="contents lg:col-span-1 lg:flex lg:min-w-0 lg:flex-col lg:gap-6">
-            {/* Status Card */}
+            {/* Product Status */}
             <div className="order-5 min-w-0 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-none">
               <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
                 <SparklesIcon className="size-4 text-primary" />
@@ -1372,6 +1381,7 @@ export default function ProductForm({
               </div>
 
               <div className="space-y-3">
+                {/* Active */}
                 <Controller
                   name="is_active"
                   control={control}
@@ -1393,6 +1403,7 @@ export default function ProductForm({
                   )}
                 />
 
+                {/* Featured */}
                 <Controller
                   name="is_featured"
                   control={control}
@@ -1416,7 +1427,7 @@ export default function ProductForm({
               </div>
             </div>
 
-            {/* Organization Card: نسخة واحدة فقط لكل الشاشات */}
+            {/* Organization */}
             <div className="order-2 min-w-0 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-none">
               <div className="mb-4 flex items-center gap-2 border-b border-border/60 pb-3">
                 <TagIcon className="size-4 text-primary" />
@@ -1432,7 +1443,7 @@ export default function ProductForm({
               {renderOrganizationFields()}
             </div>
 
-            {/* SEO Details Card */}
+            {/* SEO Details */}
             <div className="order-6 min-w-0 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-none">
               <div className="mb-4 flex items-center justify-between border-b border-border/60 pb-3">
                 <div className="flex items-center gap-2">
@@ -1460,6 +1471,7 @@ export default function ProductForm({
               </div>
 
               <FieldGroup className="space-y-3.5">
+                {/* Meta Title */}
                 <Controller
                   name="meta_title"
                   control={control}
@@ -1481,7 +1493,7 @@ export default function ProductForm({
                         value={field.value ?? ""}
                         placeholder={t("META_TITLE_PLACEHOLDER")}
                         maxLength={70}
-                        className="h-9 text-xs"
+                        className="text-xs"
                       />
                       {fieldState.invalid && (
                         <ProductFieldError error={fieldState.error} />
@@ -1490,6 +1502,7 @@ export default function ProductForm({
                   )}
                 />
 
+                {/* Meta Description */}
                 <Controller
                   name="meta_description"
                   control={control}
@@ -1531,7 +1544,7 @@ export default function ProductForm({
               </FieldGroup>
             </div>
 
-            {/* Actions Card */}
+            {/* Actions */}
             <div className="order-7 min-w-0 rounded-xl border border-border bg-card p-5 shadow-xs lg:order-none">
               <div className="mb-4 border-b border-border/60 pb-3">
                 <h2 className="text-sm font-semibold text-card-foreground">
@@ -1545,7 +1558,7 @@ export default function ProductForm({
                 <Button
                   type="submit"
                   disabled={isBusy}
-                  className="h-9 w-full cursor-pointer text-xs shadow-xs"
+                  className="w-full cursor-pointer text-xs shadow-xs"
                 >
                   {isBusy ? (
                     <>
@@ -1562,7 +1575,7 @@ export default function ProductForm({
                   variant="outline"
                   disabled={isBusy}
                   onClick={handleDiscard}
-                  className="h-9 w-full text-xs"
+                  className="w-full text-xs"
                 >
                   {t("DISCARD_CHANGES")}
                 </Button>
@@ -1611,6 +1624,7 @@ interface VariantCardProps {
   control: Control<FormValues>
   setValue: UseFormSetValue<FormValues>
   getValues: UseFormGetValues<FormValues>
+  trigger: UseFormTrigger<FormValues>
   totalVariants: number
   onRemove: () => void
 }
@@ -1620,6 +1634,7 @@ function VariantCard({
   control,
   setValue,
   getValues,
+  trigger,
   totalVariants,
   onRemove,
 }: VariantCardProps) {
@@ -1634,12 +1649,11 @@ function VariantCard({
   )
   const variantName = useWatch({ control, name: `variants.${index}.name` })
   const productName = useWatch({ control, name: "name" })
-  const price = useWatch({ control, name: `variants.${index}.price` })
   const tracksInventory = useWatch({
     control,
     name: `variants.${index}.track_inventory`,
   })
-  // الصور المرتبطة بهذا المتغير، تُلتقط عند بدء تعديل الـ SKU
+  // Linked images for this variant, captured before SKU edits
   const linkedImagesRef = React.useRef<number[]>([])
 
   const captureLinkedImages = () => {
@@ -1697,6 +1711,7 @@ function VariantCard({
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {/* SKU Code */}
         <Controller
           name={`variants.${index}.sku`}
           control={control}
@@ -1715,7 +1730,7 @@ function VariantCard({
                   onChange={(e) => {
                     const input = e.target
                     const caret = input.selectionStart
-                    // القيمة المحفوظة تطابق المعروضة (أحرف كبيرة وبلا فراغات)
+                    // Stored value matches displayed format (uppercase without spaces)
                     const sku = input.value.replace(/\s/g, "-").toUpperCase()
                     field.onChange(sku)
                     syncLinkedImages(sku)
@@ -1745,6 +1760,7 @@ function VariantCard({
           )}
         />
 
+        {/* Variant Name (Optional) */}
         <Controller
           name={`variants.${index}.name`}
           control={control}
@@ -1768,6 +1784,7 @@ function VariantCard({
       </div>
 
       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {/* Price */}
         <Controller
           name={`variants.${index}.price`}
           control={control}
@@ -1779,7 +1796,10 @@ function VariantCard({
               <NumberInput
                 {...field}
                 emptyValue={0}
-                onValueChange={field.onChange}
+                onValueChange={(val) => {
+                  field.onChange(val)
+                  void trigger(`variants.${index}.compare_at_price`)
+                }}
                 step="0.01"
                 min="0"
                 inputMode="decimal"
@@ -1792,6 +1812,7 @@ function VariantCard({
           )}
         />
 
+        {/* Compare-at Price */}
         <Controller
           name={`variants.${index}.compare_at_price`}
           control={control}
@@ -1810,11 +1831,6 @@ function VariantCard({
                 placeholder={t("OPTIONAL")}
                 className="h-8 text-xs"
               />
-              {field.value != null && field.value <= price && (
-                <p className="text-[11px] text-amber-600 dark:text-amber-500">
-                  {t("COMPARE_AT_PRICE_HINT")}
-                </p>
-              )}
               {fieldState.invalid && (
                 <ProductFieldError error={fieldState.error} />
               )}
@@ -1824,6 +1840,7 @@ function VariantCard({
       </div>
 
       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {/* Stock Quantity */}
         <Controller
           name={`variants.${index}.stock_quantity`}
           control={control}
@@ -1850,6 +1867,7 @@ function VariantCard({
           )}
         />
 
+        {/* Expiration date (optional) */}
         <Controller
           name={`variants.${index}.expiration_date`}
           control={control}
@@ -1927,6 +1945,7 @@ function VariantCard({
       </div>
 
       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {/* Track inventory & Active variant */}
         {(
           [
             ["track_inventory", "TRACK_INVENTORY"],
@@ -1949,6 +1968,7 @@ function VariantCard({
           />
         ))}
 
+        {/* Low stock threshold */}
         {tracksInventory && (
           <Controller
             name={`variants.${index}.low_stock_threshold`}
@@ -1976,13 +1996,14 @@ function VariantCard({
         )}
       </div>
 
+      {/* Variant Attributes (e.g., Color, Size, Weight) */}
       <div className="mt-3 pt-1">
         <Controller
           name={`variants.${index}.attributes`}
           control={control}
           render={({ field }) => (
             <VariantAttributesManager
-              attributes={(field.value as Record<string, string>) || {}}
+              attributes={field.value ?? {}}
               onChange={field.onChange}
             />
           )}
@@ -2025,7 +2046,7 @@ function ImageCard({
     .filter((sku): sku is string => Boolean(sku))
   const isPrimary = watchedImages[index]?.is_primary ?? false
   const isGeneralImage = !selectedVariantSku?.trim()
-  // نحفظ الرابط الذي فشل، فتعود المعاينة تلقائياً عند تغييره
+  // Store failed URL so preview automatically recovers when changed
   const [failedUrl, setFailedUrl] = React.useState<string | null>(null)
   const hasImageError = Boolean(currentUrl) && failedUrl === currentUrl
 
@@ -2065,6 +2086,7 @@ function ImageCard({
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-border bg-muted/10 p-4 sm:flex-row">
+      {/* Preview */}
       <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-background text-muted-foreground">
         <AspectRatio
           ratio={1 / 1}
@@ -2078,6 +2100,7 @@ function ImageCard({
               src={currentUrl}
               alt={t("IMAGE_PREVIEW")}
               className="size-full object-cover"
+              onLoad={() => setFailedUrl(null)}
               onError={() => setFailedUrl(currentUrl)}
             />
           ) : (
@@ -2104,7 +2127,7 @@ function ImageCard({
           </Button>
         </div>
 
-        {/* 📌 إرشادات مرئية للمستخدم في الواجهة باستخدام مفاتيح الترجمة */}
+        {/* Product Image Guidelines */}
         {index === 0 && (
           <div className="space-y-1 rounded-md border border-primary/20 bg-primary/5 p-2.5 text-[11px] text-muted-foreground">
             <p className="font-medium text-foreground">
@@ -2118,6 +2141,7 @@ function ImageCard({
           </div>
         )}
 
+        {/* Image URL */}
         <Controller
           name={`images.${index}.url`}
           control={control}
@@ -2126,13 +2150,17 @@ function ImageCard({
               <Input
                 {...field}
                 value={field.value ?? ""}
+                onChange={(e) => {
+                  setFailedUrl(null)
+                  field.onChange(e)
+                }}
                 placeholder="https://example.com/images/product.jpg"
                 className="h-8 text-xs"
                 type="url"
                 dir="ltr"
                 aria-label={t("IMAGE_URL")}
               />
-              {hasImageError && (
+              {hasImageError && !fieldState.invalid && (
                 <p className="text-[11px] text-destructive">
                   {t("IMAGE_LOAD_ERROR")}
                 </p>
@@ -2145,6 +2173,7 @@ function ImageCard({
         />
 
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+          {/* Link to Variant */}
           <Controller
             name={`images.${index}.variant_sku`}
             control={control}
@@ -2161,7 +2190,7 @@ function ImageCard({
                   }}
                   value={field.value || "none"}
                 >
-                  <SelectTrigger className="h-8 text-xs">
+                  <SelectTrigger className="w-full text-xs data-[size=default]:h-7.5 ">
                     <SelectValue placeholder={t("LINK_TO_VARIANT")} />
                   </SelectTrigger>
                   <SelectContent>
@@ -2176,7 +2205,7 @@ function ImageCard({
                         currentSku !== field.value
 
                       const attrSummary = v?.attributes
-                        ? Object.values(v.attributes as Record<string, string>)
+                        ? Object.values(v.attributes)
                             .filter(Boolean)
                             .join(" / ")
                         : ""
@@ -2189,7 +2218,7 @@ function ImageCard({
                             ? `SKU: ${currentSku}`
                             : `Variant #${i + 1}`
 
-                      // لا يمكن الربط بمتغير بلا SKU
+                      // Cannot link to a variant without an SKU
                       const itemValue = currentSku || `__no-sku-${i}`
 
                       return (
@@ -2210,6 +2239,7 @@ function ImageCard({
             )}
           />
 
+          {/* Alt Text (accessibility) */}
           <Controller
             name={`images.${index}.alt_text`}
             control={control}
@@ -2245,6 +2275,7 @@ function ImageCard({
           />
         </div>
 
+        {/* Set as primary product thumbnail */}
         <Controller
           name={`images.${index}.is_primary`}
           control={control}
@@ -2253,7 +2284,7 @@ function ImageCard({
               <Switch
                 checked={isPrimary}
                 onCheckedChange={handlePrimaryChange}
-                // لتغيير الصورة الرئيسية فعّل صورة أخرى
+                // To change primary image, enable another general image
                 disabled={!isGeneralImage || isPrimary}
                 id={`primary-${index}`}
               />
@@ -2346,6 +2377,7 @@ function VariantAttributesManager({
       )}
 
       <div className="flex flex-wrap items-center gap-2 pt-1">
+        {/* Select attribute */}
         <Select
           value={selectedKeyType}
           onValueChange={(val) => {
@@ -2370,6 +2402,7 @@ function VariantAttributesManager({
           </SelectContent>
         </Select>
 
+        {/* Attribute name... */}
         {isCustom && (
           <Input
             placeholder={t("ATTRIBUTE_NAME_PLACEHOLDER")}
@@ -2386,6 +2419,7 @@ function VariantAttributesManager({
           />
         )}
 
+        {/* Value... */}
         <Input
           placeholder={t("ATTRIBUTE_VALUE_PLACEHOLDER")}
           value={attrVal}

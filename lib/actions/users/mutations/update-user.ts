@@ -36,7 +36,7 @@ export async function updateUser(
       .update({
         first_name: validatedInput.firstName?.trim() || null,
         last_name: validatedInput.lastName?.trim() || null,
-        phone_number: validatedInput.phoneNumber?.trim() || null,
+        phone: validatedInput.phoneNumber?.trim() || null,
         updated_at: new Date().toISOString(),
       })
       .eq("id", validatedInput.userId)

@@ -56,7 +56,7 @@ export function ProductInfoSection({
           name: t("OPTION", { default: "Option" }),
           values: product.product_variants.map((v) => ({
             id: v.id,
-            name: v.name,
+            name: v.name ?? v.sku,
             isSelected: selectedVariant?.id === v.id,
             isDisabled: v.track_inventory && v.stock_quantity <= 0,
           })),

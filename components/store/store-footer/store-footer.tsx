@@ -11,18 +11,19 @@ import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import { AppLogo } from "@/components/shared/app-logo"
-import { APP_CONFIG } from "@/lib/config/app_config"
+import { APP_CONFIG, STORE_CONTAINER } from "@/lib/config/app_config"
 
 import { footerConfig } from "./footer-config"
 import { ThemeToggle } from "./theme-toggle"
 import { NewsletterSection } from "./newsletter-section"
+import { menuItemClass, navLinkClass } from "./store-footer-shared"
 
-export default function Footer() {
+export function StoreFooter() {
   const t = useTranslations("Footer")
 
   return (
     <footer className="hidden w-full shrink-0 border-t border-border/40 bg-background text-sm text-muted-foreground md:block">
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className={STORE_CONTAINER}>
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* 1. قسم العلامة التجارية والوصف */}
           <div className="flex flex-col gap-4 sm:col-span-2 lg:col-span-1">
@@ -68,7 +69,7 @@ export default function Footer() {
                   <li key={item.key}>
                     <Link
                       href={item.href}
-                      className="text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:underline focus-visible:outline-none"
+                      className={menuItemClass(false)}
                     >
                       {label}
                     </Link>

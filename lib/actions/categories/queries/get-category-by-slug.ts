@@ -8,17 +8,19 @@
 import { unstable_cache } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import type { ApiResult } from "../../types/utils"
+import type { Tables } from "@/lib/database/supabase/types"
 
-export type Category = {
-  id: string
-  name: string
-  name_ar: string | null
-  slug: string
-  description: string | null
-  description_ar: string | null
-  image_alt: string | null
-  image_url: string | null
-}
+export type Category = Pick<
+  Tables<"categories">,
+  | "id"
+  | "name"
+  | "name_ar"
+  | "slug"
+  | "description"
+  | "description_ar"
+  | "image_alt"
+  | "image_url"
+>
 
 // دالة الكاش الداخلية لتخزين بيانات التصنيف على مستوى الخادم
 const getCachedCategoryBySlug = unstable_cache(

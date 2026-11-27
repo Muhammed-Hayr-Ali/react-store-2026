@@ -30,16 +30,6 @@ export interface SimplifiedRootCategory {
   subcategories: StoreSubcategory[]
 }
 
-interface CategoryQueryResult {
-  id: string
-  parent_id: string | null
-  name: string
-  name_ar: string | null
-  slug: string
-  image_url: string | null
-  image_alt: string | null
-}
-
 const getCachedCategoriesTree = unstable_cache(
   async (limit: number): Promise<SimplifiedRootCategory[]> => {
     const supabase = await createPublicServerClient()
@@ -55,7 +45,7 @@ const getCachedCategoriesTree = unstable_cache(
       throw new Error(error.message)
     }
 
-    const rawCategories = (data ?? []) as unknown as CategoryQueryResult[]
+    const rawCategories = data ?? []
 
     // تجميع التصنيفات الفرعية حسب parent_id مع الحفاظ على ترتيب sort_order
     const childrenMap = new Map<string, StoreSubcategory[]>()

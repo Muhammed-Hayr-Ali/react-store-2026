@@ -11,7 +11,7 @@
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
     "email": "email dev --dir lib/services/email/templates",
-    "supabase:types": "npx supabase@latest gen types typescript --project-id kgvgqznqxxflpgewwgpo > lib/actions/types/database.ts",
+    "db:types": "supabase gen types typescript --linked --schema public,graphql_public > lib/database/supabase/database.types.ts",
     "i18n:clean": "node scripts/clean-i18n.js"
   },
   "dependencies": {

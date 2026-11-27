@@ -7,6 +7,7 @@ import { createClient } from "@/lib/database/supabase/server"
 import { NextResponse } from "next/server"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 import { hasPermission, PERMISSIONS } from "@/lib/actions/role"
+import { toRoleRecord } from "@/lib/actions/role/types"
 
 export async function GET() {
   try {
@@ -37,7 +38,8 @@ export async function GET() {
           id,
           name,
           description,
-          permissions
+          permissions,
+          created_at
         )
       `)
       .eq("user_id", currentUser.id)
@@ -51,29 +53,21 @@ export async function GET() {
 
     if (userRolesData) {
       for (const item of userRolesData) {
-        const roleRecord = item.roles as unknown as {
-          id: string
-          name: string
-          description: string | null
-          permissions: string[] | string
-        }
+        if (item.roles) {
+          const roleRecord = toRoleRecord(item.roles)
+          if (!roleRecord) {
+            return NextResponse.json(
+              { success: false, error: "Role permissions data is invalid." },
+              { status: 500 }
+            )
+          }
 
-        if (roleRecord) {
           rolesList.push({
             role_id: roleRecord.id,
             role_name: roleRecord.name,
             description: roleRecord.description,
           })
-
-          // فك الـ permissions سواء كانت مخزنة كـ Array أو JSON String
-          const perms =
-            typeof roleRecord.permissions === "string"
-              ? JSON.parse(roleRecord.permissions)
-              : roleRecord.permissions
-
-          if (Array.isArray(perms)) {
-            allPermissions.push(...perms)
-          }
+          allPermissions.push(...roleRecord.permissions)
         }
       }
     }

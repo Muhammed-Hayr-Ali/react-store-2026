@@ -9,15 +9,12 @@ import { unstable_cache } from "next/cache"
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createPublicServerClient } from "@/lib/database/supabase/public"
 import { CACHE_TAG } from "@/lib/config/app_config"
+import type { Tables } from "@/lib/database/supabase/types"
 
-export interface SimpliCategory {
-  id: string
-  slug: string
-  name: string
-  name_ar?: string
-  description?: string | null
-  description_ar?: string | null
-}
+export type SimpliCategory = Pick<
+  Tables<"categories">,
+  "id" | "slug" | "name" | "name_ar" | "description" | "description_ar"
+>
 
 interface FilterOptions {
   categoryId?: string
@@ -57,7 +54,7 @@ const getCachedCategoryByFilter = unstable_cache(
       throw new Error(error.message)
     }
 
-    return (data as SimpliCategory) || null
+    return data
   },
   
   ["categories"],

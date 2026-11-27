@@ -8,6 +8,7 @@
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
+ import { toRoleRecord } from "@/lib/actions/role/types"
  import type { StaffAccessRole } from "../types"
 
 /**
@@ -31,8 +32,19 @@ export async function getStaffAccessRoles(): Promise<
     }
   }
 
-  return {
-    success: true,
-    data: (data || []) as StaffAccessRole[],
+  const roles: StaffAccessRole[] = []
+  for (const row of data ?? []) {
+    const role = toRoleRecord(row)
+    if (!role) {
+      return {
+        success: false,
+        error: "GET_ALL_ROLES_ERROR",
+        details: { database: [`Role "${row.name}" has invalid permissions.`] },
+      }
+    }
+
+    roles.push(role)
   }
+
+  return { success: true, data: roles }
 }

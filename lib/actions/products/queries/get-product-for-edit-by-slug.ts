@@ -7,7 +7,11 @@
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "../../types/utils"
-import type { ProductWithRelations } from "../types"
+import {
+  isStringAttributes,
+  type ProductVariantItem,
+  type ProductWithRelations,
+} from "../types"
 
 interface GetProductOptions {
   activeOnly?: boolean
@@ -67,11 +71,20 @@ export async function getProductForEditBySlug(
         url,
         alt_text,
         is_primary,
+        sort_order,
         variant_id
       )
     `
     )
     .eq("slug", slug)
+    .order("sort_order", {
+      referencedTable: "product_images",
+      ascending: true,
+    })
+    .order("id", {
+      referencedTable: "product_images",
+      ascending: true,
+    })
 
   if (activeOnly) {
     query = query.eq("is_active", true)
@@ -108,7 +121,33 @@ export async function getProductForEditBySlug(
     }
   }
 
-  const product = productData as unknown as ProductWithRelations
+  const productVariants: ProductVariantItem[] = []
+  for (const variant of productData.product_variants) {
+    if (
+      variant.attributes !== null &&
+      !isStringAttributes(variant.attributes)
+    ) {
+      return {
+        success: false,
+        error: "FETCH_PRODUCT_ERROR",
+        details: {
+          database: [
+            `Product variant "${variant.id}" has invalid attributes data.`,
+          ],
+        },
+      }
+    }
+
+    productVariants.push({
+      ...variant,
+      attributes: variant.attributes ?? {},
+    })
+  }
+
+  const product: ProductWithRelations = {
+    ...productData,
+    product_variants: productVariants,
+  }
 
   return { success: true, data: product }
 }

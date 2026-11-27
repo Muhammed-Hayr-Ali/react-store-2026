@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
+import { createAdminClient } from "@/lib/database/supabase/admin"
 
 interface CityRatePayload {
   buy: number
@@ -33,9 +33,7 @@ function getSupabaseAdminClient() {
     throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY")
   }
 
-  return createClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
+  return createAdminClient()
 }
 
 function isAuthorizedRequest(request: NextRequest): boolean {
@@ -126,7 +124,7 @@ async function handleSync(request: NextRequest) {
       p_currency_code: currencyCode,
       p_raw_buy: Number(damascusRate.buy),
       p_raw_sell: Number(damascusRate.sell),
-      p_source_updated_at: currency.updated_at ?? null,
+      p_source_updated_at: currency.updated_at ?? undefined,
       p_unit: unit,
     })
 

@@ -11,7 +11,7 @@ import { z } from "zod"
 
 const variantBaseSchema = z
   .object({
-    sku: z.string().trim().min(1, "SKU_REQUIRED"),
+    sku: z.string().trim().toUpperCase().min(1, "SKU_REQUIRED"),
     name: z.string().optional().or(z.literal("")),
     attributes: z.record(z.string(), z.string()).optional(),
     price: z.number().min(0, "PRICE_MUST_BE_POSITIVE"),
@@ -50,7 +50,7 @@ const imageBaseSchema = z.object({
   url: z.string().min(1, "IMAGE_LINK_INVALID"),
   alt_text: z.string().optional().or(z.literal("")),
   is_primary: z.boolean(),
-  variant_sku: z.string().trim().optional().or(z.literal("")),
+  variant_sku: z.string().trim().toUpperCase().optional().or(z.literal("")),
 })
 
 // ============================================================================

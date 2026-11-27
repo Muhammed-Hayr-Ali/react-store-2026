@@ -7,13 +7,13 @@
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import type { ApiResult } from "@/lib/actions/types/utils"
-import type { RolesSummary } from "../types"
+import { isAppPermissionArray, type RolesSummary } from "../types"
 
 export async function getRolesSummary(): Promise<ApiResult<RolesSummary>> {
   const supabase = await createServerClient()
   const { data, error } = await supabase
     .from("roles")
-    .select("permissions")
+    .select("name, permissions")
 
   if (error) {
     return {
@@ -23,8 +23,22 @@ export async function getRolesSummary(): Promise<ApiResult<RolesSummary>> {
     }
   }
 
-  const roles = (data ?? []) as Array<{ permissions: string[] }>
-  const active = roles.filter((role) => role.permissions.length > 0).length
+  const roles = data ?? []
+  let active = 0
+
+  for (const role of roles) {
+    if (!isAppPermissionArray(role.permissions)) {
+      return {
+        success: false,
+        error: "GET_ROLES_ERROR",
+        details: {
+          database: ["A role has invalid permissions data."],
+        },
+      }
+    }
+
+    if (role.permissions.length > 0) active += 1
+  }
 
   return {
     success: true,

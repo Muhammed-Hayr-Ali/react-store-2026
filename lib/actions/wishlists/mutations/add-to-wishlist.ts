@@ -9,15 +9,15 @@ import { revalidatePath } from "next/cache"
 
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
+import type { Tables } from "@/lib/database/supabase/types"
 import { getValidationDetails } from "@/lib/actions/validation"
 
 import { wishlistSchema, type WishlistInput } from "../schemas"
-import type { Wishlist } from "../types"
 import { getCurrentUser } from "../../users/queries/get-current-user"
 
 export async function addToWishlist(
   input: WishlistInput
-): Promise<ApiResult<Wishlist>> {
+): Promise<ApiResult<Tables<"wishlists">>> {
   const validation = wishlistSchema.safeParse(input)
   if (!validation.success) {
     console.error("Wishlist Validation Error:", validation.error)
@@ -32,7 +32,7 @@ export async function addToWishlist(
 
   const result = await getCurrentUser()
 
-  if (!result.success) {
+  if (!result.success || !result.data) {
     return { success: false, error: "AUTH_REQUIRED" }
   }
 
@@ -73,5 +73,5 @@ export async function addToWishlist(
   }
 
   revalidatePath("/", "layout")
-  return { success: true, data: data as Wishlist }
+  return { success: true, data }
 }

@@ -279,7 +279,7 @@ export default function ProductForm({
     return product.product_variants.map((v, idx) => ({
       sku: v.sku,
       name: v.name || "",
-      attributes: (v.attributes as Record<string, string>) || {},
+      attributes: v.attributes,
       price: Number(v.price) / 100,
       compare_at_price: v.compare_at_price
         ? Number(v.compare_at_price) / 100
@@ -1498,7 +1498,7 @@ function VariantCard({
           control={control}
           render={({ field }) => (
             <VariantAttributesManager
-              attributes={(field.value as Record<string, string>) || {}}
+              attributes={field.value ?? {}}
               onChange={field.onChange}
             />
           )}
@@ -1702,7 +1702,7 @@ function ImageCard({
                         currentSku !== field.value
 
                       const attrSummary = v?.attributes
-                        ? Object.values(v.attributes as Record<string, string>)
+                        ? Object.values(v.attributes)
                             .filter(Boolean)
                             .join(" / ")
                         : ""

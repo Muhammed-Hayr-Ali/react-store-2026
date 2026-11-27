@@ -8,92 +8,60 @@
 import { unstable_cache } from "next/cache"
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createPublicServerClient } from "@/lib/database/supabase/public"
+import { CACHE_TAG } from "@/lib/config/app_config"
+import type { Tables } from "@/lib/database/supabase/types"
+import { isProductAttributes } from "@/lib/actions/products/types"
 
-export interface ProductVariantDetail {
-  id: string
-  sku: string
-  name: string
-  price: number
-  compare_at_price: number | null
-  stock_quantity: number
-  track_inventory: boolean
-  is_active: boolean
+export type ProductVariantDetail = Omit<
+  Pick<
+    Tables<"product_variants">,
+    | "id"
+    | "sku"
+    | "name"
+    | "price"
+    | "compare_at_price"
+    | "stock_quantity"
+    | "track_inventory"
+    | "is_active"
+    | "attributes"
+  >,
+  "attributes"
+> & {
   attributes: Record<string, string | number | boolean> | null
 }
 
-export interface ProductImageDetail {
-  id: string
-  url: string
-  alt_text: string | null
-  is_primary: boolean
-  variant_id: string | null
-}
+export type ProductImageDetail = Pick<
+  Tables<"product_images">,
+  "id" | "url" | "alt_text" | "is_primary" | "sort_order" | "variant_id"
+>
 
-export interface CategoryDetail {
-  id: string
-  name: string
-  name_ar: string | null
-  slug: string
-  parent_id: string | null
-}
+export type CategoryDetail = Pick<
+  Tables<"categories">,
+  "id" | "name" | "name_ar" | "slug" | "parent_id"
+>
 
-export interface BrandDetail {
-  id: string
-  name: string
-  name_ar: string | null
-  slug: string
-  image_url?: string | null
-  image_alt?: string | null
-}
+export type BrandDetail = Pick<
+  Tables<"brands">,
+  "id" | "name" | "name_ar" | "slug" | "image_url" | "image_alt"
+>
 
-export interface FullProductDetails {
-  id: string
-  name: string
-  slug: string
-  description: string | null
-  is_active: boolean
-  is_featured: boolean
-  created_at: string
+export type FullProductDetails = Pick<
+  Tables<"products">,
+  | "id"
+  | "name"
+  | "slug"
+  | "description"
+  | "is_active"
+  | "is_featured"
+  | "created_at"
+  | "meta_title"
+  | "meta_description"
+> & {
   category: CategoryDetail | null
   parent_category: CategoryDetail | null
   brand: BrandDetail | null
   product_variants: ProductVariantDetail[]
   product_images: ProductImageDetail[]
-  meta_title: string
-  meta_description: string
-}
-
-interface DatabaseCategoryQueryResult {
-  id: string
-  name: string
-  name_ar: string | null
-  slug: string
-  parent_id: string | null
-}
-
-interface DatabaseBrandQueryResult {
-  id: string
-  name: string
-  name_ar: string | null
-  slug: string
-  image_url?: string | null
-  image_alt?: string | null
-}
-
-interface DatabaseProductQueryResult {
-  id: string
-  name: string
-  slug: string
-  description: string | null
-  is_active: boolean
-  is_featured: boolean
-  created_at: string
-  meta_title: string
-  meta_description: string
-  category: DatabaseCategoryQueryResult[] | DatabaseCategoryQueryResult | null
-  brand: DatabaseBrandQueryResult[] | DatabaseBrandQueryResult | null
-  product_variants: ProductVariantDetail[] | null
-  product_images: ProductImageDetail[] | null
 }
 
 const getCachedProductDetails = unstable_cache(
@@ -144,19 +112,28 @@ const getCachedProductDetails = unstable_cache(
           url,
           alt_text,
           is_primary,
+          sort_order,
           variant_id
         )
       `
       )
       .eq("slug", slug)
       .eq("is_active", true)
+      .order("sort_order", {
+        referencedTable: "product_images",
+        ascending: true,
+      })
+      .order("id", {
+        referencedTable: "product_images",
+        ascending: true,
+      })
       .maybeSingle()
 
     if (error || !productData) {
       return null
     }
 
-    const rawProduct = productData as unknown as DatabaseProductQueryResult
+    const rawProduct = productData
 
     let processedCategory: CategoryDetail | null = null
     if (rawProduct.category) {
@@ -184,7 +161,7 @@ const getCachedProductDetails = unstable_cache(
         .maybeSingle()
 
       if (parentData) {
-        parentCategory = parentData as CategoryDetail
+        parentCategory = parentData
       }
     }
 
@@ -206,10 +183,29 @@ const getCachedProductDetails = unstable_cache(
       }
     }
 
-    const allImages = rawProduct.product_images ?? []
+    const allImages = [...(rawProduct.product_images ?? [])].sort(
+      (a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id)
+    )
     const variantSpecificImages = allImages.filter(
       (img) => img.variant_id !== null
     )
+
+    const productVariants: ProductVariantDetail[] = []
+    for (const variant of rawProduct.product_variants ?? []) {
+      if (
+        variant.attributes !== null &&
+        !isProductAttributes(variant.attributes)
+      ) {
+        throw new Error(
+          `Product variant "${variant.id}" has invalid attributes data.`
+        )
+      }
+
+      productVariants.push({
+        ...variant,
+        attributes: variant.attributes,
+      })
+    }
 
     const formattedProduct: FullProductDetails = {
       id: rawProduct.id,
@@ -224,7 +220,7 @@ const getCachedProductDetails = unstable_cache(
       category: processedCategory,
       parent_category: parentCategory,
       brand: processedBrand,
-      product_variants: rawProduct.product_variants ?? [],
+      product_variants: productVariants,
       product_images: variantSpecificImages,
     }
 
@@ -233,7 +229,7 @@ const getCachedProductDetails = unstable_cache(
   ["product-details-cache"],
   {
     revalidate: 3600,
-    tags: ["products"],
+    tags: [CACHE_TAG.PRODUCTS],
   }
 )
 
@@ -272,7 +268,6 @@ export async function getProductDetails(
     return {
       success: false,
       error: "FETCH_PRODUCT_ERROR",
-      details: { database: [errorMessage] },
     }
   }
 }

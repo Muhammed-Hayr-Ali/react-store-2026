@@ -67,5 +67,5 @@ export async function createCategory(
   revalidateTag(CACHE_TAG.CATEGORIES, { expire: 0 })
   revalidatePath("/", "layout")
   
-  return { success: true, data: data as Category }
+  return { success: true, data }
 }

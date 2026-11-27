@@ -15,7 +15,7 @@ import {
   updateRolePermissionsSchema,
   type UpdateRolePermissionsInput,
 } from "../schemas"
-import type { RoleRecord } from "../types"
+import { toRoleRecord, type RoleRecord } from "../types"
 
 export async function updateRole(
   input: UpdateRolePermissionsInput
@@ -58,10 +58,18 @@ export async function updateRole(
     }
   }
 
+  const role = updatedRole ? toRoleRecord(updatedRole) : null
+  if (!role) {
+    return {
+      success: false,
+      error: "UPDATE_ROLE_ERROR",
+      details: {
+        database: ["The updated role has invalid permissions or was not returned."],
+      },
+    }
+  }
+
   revalidatePath("/", "layout")
 
-  return {
-    success: true,
-    data: updatedRole as RoleRecord,
-  }
+  return { success: true, data: role }
 }

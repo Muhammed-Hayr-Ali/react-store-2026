@@ -7,13 +7,9 @@
 
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
+import { toRoleRecord } from "@/lib/actions/role/types"
 
 import type { StaffAccessRole, UserWithRoles } from "../types"
-
-interface UserRoleRow {
-  user_id: string
-  roles: StaffAccessRole | null
-}
 
 /**
  * تجلب المستخدمين مع الأدوار المسندة إليهم لإدارة الوصول.
@@ -67,12 +63,23 @@ export async function getStaffAccessUsersWithRoles(): Promise<
   }
 
   const rolesMap = new Map<string, StaffAccessRole[]>()
-  const rawUserRoles = (userRolesData ?? []) as unknown as UserRoleRow[]
 
-  for (const row of rawUserRoles) {
+  for (const row of userRolesData ?? []) {
     if (!row.roles) continue
+
+    const role = toRoleRecord(row.roles)
+    if (!role) {
+      return {
+        success: false,
+        error: "GET_USER_ROLES_ERROR",
+        details: {
+          database: [`Role "${row.roles.name}" has invalid permissions.`],
+        },
+      }
+    }
+
     const current = rolesMap.get(row.user_id) ?? []
-    current.push(row.roles)
+    current.push(role)
     rolesMap.set(row.user_id, current)
   }
 

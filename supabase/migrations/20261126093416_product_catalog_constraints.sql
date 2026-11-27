@@ -13,6 +13,29 @@ DELETE FROM public.product_reviews;
 DELETE FROM public.product_variants;
 DELETE FROM public.products;
 
+ALTER TABLE public.product_images
+  ADD COLUMN IF NOT EXISTS variant_id uuid;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'product_images'
+      AND column_name = 'variant_sku'
+  ) THEN
+    EXECUTE $migration$
+      UPDATE public.product_images AS images
+      SET variant_id = variants.id
+      FROM public.product_variants AS variants
+      WHERE images.variant_id IS NULL
+        AND variants.sku = images.variant_sku
+    $migration$;
+  END IF;
+END;
+$$;
+
 DO $$
 BEGIN
   IF EXISTS (
@@ -50,8 +73,8 @@ BEGIN
     SELECT 1
     FROM public.product_images AS images
     LEFT JOIN public.product_variants AS variants
-      ON variants.sku = images.variant_sku
-    WHERE images.variant_sku IS NOT NULL
+      ON variants.id = images.variant_id
+    WHERE images.variant_id IS NOT NULL
       AND (
         variants.id IS NULL
         OR variants.product_id <> images.product_id
@@ -74,25 +97,72 @@ ALTER TABLE public.products
     REFERENCES public.brands(id)
     ON DELETE RESTRICT;
 
-ALTER TABLE public.product_variants
-  ADD CONSTRAINT product_variants_id_product_id_key
-    UNIQUE (id, product_id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conrelid = 'public.product_variants'::regclass
+      AND conname = 'product_variants_id_product_id_key'
+      AND contype = 'u'
+  ) THEN
+    ALTER TABLE public.product_variants
+      ADD CONSTRAINT product_variants_id_product_id_key
+      UNIQUE (id, product_id);
+  END IF;
+END;
+$$;
 
-ALTER TABLE public.product_images
-  ADD COLUMN variant_id uuid;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'product_images'
+      AND column_name = 'variant_sku'
+  ) THEN
+    ALTER TABLE public.product_images
+      DROP CONSTRAINT IF EXISTS product_images_variant_sku_fkey,
+      DROP COLUMN variant_sku;
+  END IF;
 
-UPDATE public.product_images AS images
-SET variant_id = variants.id
-FROM public.product_variants AS variants
-WHERE variants.sku = images.variant_sku;
+  ALTER TABLE public.product_images
+    DROP CONSTRAINT IF EXISTS product_images_variant_product_fkey;
 
-ALTER TABLE public.product_images
-  DROP CONSTRAINT IF EXISTS product_images_variant_sku_fkey,
-  DROP COLUMN variant_sku,
-  ADD CONSTRAINT product_images_variant_product_fkey
-    FOREIGN KEY (variant_id, product_id)
-    REFERENCES public.product_variants(id, product_id)
-    ON DELETE CASCADE;
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conrelid = 'public.product_images'::regclass
+      AND contype = 'f'
+      AND conkey = ARRAY[
+        (SELECT attnum FROM pg_attribute
+         WHERE attrelid = 'public.product_images'::regclass
+           AND attname = 'variant_id' AND NOT attisdropped),
+        (SELECT attnum FROM pg_attribute
+         WHERE attrelid = 'public.product_images'::regclass
+           AND attname = 'product_id' AND NOT attisdropped)
+      ]::smallint[]
+      AND confrelid = 'public.product_variants'::regclass
+      AND confkey = ARRAY[
+        (SELECT attnum FROM pg_attribute
+         WHERE attrelid = 'public.product_variants'::regclass
+           AND attname = 'id' AND NOT attisdropped),
+        (SELECT attnum FROM pg_attribute
+         WHERE attrelid = 'public.product_variants'::regclass
+           AND attname = 'product_id' AND NOT attisdropped)
+      ]::smallint[]
+      AND confdeltype = 'c'
+      AND convalidated
+  ) THEN
+    ALTER TABLE public.product_images
+      ADD CONSTRAINT product_images_variant_product_fkey
+      FOREIGN KEY (variant_id, product_id)
+      REFERENCES public.product_variants(id, product_id)
+      ON DELETE CASCADE;
+  END IF;
+END;
+$$;
 
 CREATE UNIQUE INDEX IF NOT EXISTS product_images_one_primary_per_product_idx
   ON public.product_images (product_id)

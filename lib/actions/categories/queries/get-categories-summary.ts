@@ -25,7 +25,7 @@ export async function getCategoriesSummary(): Promise<
     }
   }
 
-  const categories = (data ?? []) as Array<{ is_active: boolean }>
+  const categories = data ?? []
   const active = categories.filter((category) => category.is_active).length
 
   return {

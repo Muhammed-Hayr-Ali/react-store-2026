@@ -25,7 +25,7 @@ export async function getReviewsSummary(): Promise<
     }
   }
 
-  const reviews = (data ?? []) as Array<{ is_approved: boolean }>
+  const reviews = data ?? []
   const approved = reviews.filter((review) => review.is_approved).length
 
   return {

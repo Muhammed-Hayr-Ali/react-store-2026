@@ -6,26 +6,29 @@
 "use server"
 
 import { cache } from "react"
+import { z } from "zod"
 
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
-// ,"email_verified":false,"phone_verified":null}
-export type CurrentUser = {
-  id: string
-  first_name: string | null
-  last_name: string | null
-  email: string | null
-  phone: string | null
-  avatar: string | null
-  gender: "male" | "female" | "other" | null
-  status: string | null
-  email_verified: boolean
-  phone_verified: boolean
-  created_at: string | null
-  updated_at: string | null
-  role: string
-  permissions: string[]
-}
+
+const currentUserSchema = z.object({
+  id: z.string(),
+  first_name: z.string().nullable(),
+  last_name: z.string().nullable(),
+  email: z.string().nullable(),
+  phone: z.string().nullable(),
+  avatar: z.string().nullable(),
+  gender: z.enum(["male", "female", "other"]).nullable(),
+  status: z.string().nullable(),
+  email_verified: z.boolean(),
+  phone_verified: z.boolean(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+  role: z.string(),
+  permissions: z.array(z.string()),
+})
+
+export type CurrentUser = z.infer<typeof currentUserSchema>
 
 /** ترجع ملف المستخدم الحالي وصلاحياته مرة واحدة ضمن الطلب نفسه. */
 export const getCurrentUser = cache(
@@ -43,10 +46,18 @@ export const getCurrentUser = cache(
         }
       }
 
-      return {
-        success: true,
-        data: data ? (data as CurrentUser) : null,
+      const currentUser = currentUserSchema.safeParse(data)
+      if (!currentUser.success) {
+        return {
+          success: false,
+          error: "GET_CURRENT_USER_ERROR",
+          details: {
+            database: ["The current-user function returned invalid data."],
+          },
+        }
       }
+
+      return { success: true, data: currentUser.data }
     } catch (error) {
       console.error("Unexpected error fetching current user:", error)
       return {

@@ -10,27 +10,6 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "../../types/utils"
 import { AdminProductSummary } from "../types"
 
-// ============================================================================
-// Internal Query Types
-// ============================================================================
-
-type AdminProductQueryRecord = Pick<
-  AdminProductSummary,
-  "id" | "name" | "slug" | "is_active"
-> & {
-  category: { name: string | null; name_ar: string | null } | null
-  brand: { name: string | null; name_ar: string | null } | null
-  product_variants: Array<{
-    price: number | string | null
-    stock_quantity: number | null
-    expiration_date: string | null
-  }> | null
-}
-
-// ============================================================================
-// Main Query Function
-// ============================================================================
-
 export async function getAdminProductsList(): Promise<
   ApiResult<AdminProductSummary[]>
 > {
@@ -69,9 +48,7 @@ export async function getAdminProductsList(): Promise<
     }
   }
 
-  const rawProducts = (data ?? []) as unknown as AdminProductQueryRecord[]
-
-  const products: AdminProductSummary[] = rawProducts.map((prod) => {
+  const products: AdminProductSummary[] = (data ?? []).map((prod) => {
     const variants = prod.product_variants ?? []
 
     // حساب العدد الأقل للمتغيرات (Minimum Stock Quantity)

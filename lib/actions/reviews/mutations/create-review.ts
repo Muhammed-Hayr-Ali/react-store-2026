@@ -57,5 +57,5 @@ export async function createReview(
 
   // 4. تحديث الكاش ليظهر التعليق في لوحة التحكم فوراً للمراجعة
   revalidatePath("/", "layout")
-  return { success: true, data: data as ProductReview }
+  return { success: true, data }
 }

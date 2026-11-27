@@ -11,7 +11,7 @@ import {
   confirmPasswordResetSchema,
   authCallbackSchema,
 } from "./schemas"
-import type { Json } from "../types/database"
+import type { Json, Tables } from "@/lib/database/supabase/types"
 
 export type { ApiResult } from "../types/utils"
 
@@ -29,12 +29,10 @@ export interface AuthSignInResult {
   url: string
 }
 
-export interface AuthenticatedUser {
-  id: string
-  email: string
-  first_name: string | null
-  last_name: string | null
-  avatar: string | null
+export type AuthenticatedUser = Pick<
+  Tables<"profiles">,
+  "id" | "email" | "first_name" | "last_name" | "avatar"
+> & {
   // These fields are populated from raw_app_meta_data by the database trigger.
   role?: string
   permissions?: Json

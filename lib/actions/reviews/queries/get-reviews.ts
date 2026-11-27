@@ -60,5 +60,5 @@ export async function getReviews(
     }
   }
 
-  return { success: true, data: (data ?? []) as ReviewWithUser[] }
+  return { success: true, data: data ?? [] }
 }

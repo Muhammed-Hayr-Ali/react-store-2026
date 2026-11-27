@@ -3,16 +3,6 @@
  * @description Main storefront layout with sticky top navbar, scrollable content, footer, and a Tailwind-gradient fading bottom navigation for mobile.
  */
 
-import * as React from "react"
-import Navbar from "@/components/store/navbar/navbar"
-import Footer from "@/components/store/footer/footer"
-import { StoreHeader } from "@/components/store/store-header/store-header"
-
-interface StoreLayoutProps {
-  children: React.ReactNode
-  params: Promise<{ locale: string }>
-}
-
 export default function StoreLayout({
   children,
 }: {
@@ -30,8 +20,6 @@ export default function StoreLayout({
       </a>
 
       {children}
-
-     
     </div>
   )
 }

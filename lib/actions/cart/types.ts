@@ -3,50 +3,28 @@
  * @description TypeScript types and interfaces for Cart system with variant-specific image support.
  */
 
-export interface CartRecord {
-  id: string
-  user_id: string
-  created_at: string
-  updated_at: string
-}
+import type { Tables } from "@/lib/database/supabase/types"
 
-export interface CartItemRecord {
-  id: string
-  cart_id: string
-  product_id: string
-  variant_id: string
-  quantity: number
-  created_at: string
-  updated_at: string
-}
+export type CartRecord = Tables<"carts">
+export type CartItemRecord = Tables<"cart_items">
 
-export interface CartItemQueryResult extends CartItemRecord {
-  products: {
-    id: string
-    name: string
-    description?: string | null
-    slug: string
-    product_images: {
-      url: string
-      is_primary: boolean
-      variant_id?: string | null
-    }[]
-    brand?: {
-      name: string
-      name_ar?: string | null
-    } | null
+export type CartItemQueryResult = CartItemRecord & {
+  products: Pick<
+    Tables<"products">,
+    "id" | "name" | "description" | "slug"
+  > & {
+    product_images: Pick<
+      Tables<"product_images">,
+      "url" | "is_primary" | "variant_id"
+    >[]
   }
-  product_variants: {
-    id: string
-    price: number
-    stock_quantity: number
-    track_inventory: boolean
-    sku: string
-    attributes?: Record<string, string> | null
-  }
+  product_variants: Pick<
+    Tables<"product_variants">,
+    "id" | "price" | "stock_quantity" | "track_inventory" | "sku"
+  >
   resolved_image_url: string | null
 }
 
-export interface CartQueryResult extends CartRecord {
+export type CartQueryResult = CartRecord & {
   items: CartItemQueryResult[]
 }

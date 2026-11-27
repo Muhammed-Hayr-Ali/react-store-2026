@@ -67,7 +67,7 @@ export async function createUser(
         email: safeData.email,
         first_name: safeData.firstName || null,
         last_name: safeData.lastName || null,
-        phone_number: safeData.phoneNumber || null,
+        phone: safeData.phoneNumber || null,
         status: "active",
         created_at: new Date().toISOString(),
       })
@@ -84,7 +84,7 @@ export async function createUser(
       first_name: safeData.firstName || null,
       last_name: safeData.lastName || null,
       phone_number: safeData.phoneNumber || null,
-      avatar: profileData?.avatar || null,
+      profile_image: profileData?.avatar ?? null,
       status: "active",
       ban_reason: null,
       banned_at: null,

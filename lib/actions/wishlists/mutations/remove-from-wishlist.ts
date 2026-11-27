@@ -30,7 +30,7 @@ export async function removeFromWishlist(
 
   const result = await getCurrentUser()
 
-  if (!result.success) {
+  if (!result.success || !result.data) {
     return { success: false, error: "AUTH_REQUIRED" }
   }
 

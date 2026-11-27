@@ -5,16 +5,21 @@
 
 import FeaturedHeroSlider from "@/components/store/featured-hero-slider/featured-hero-slider"
 
-import { APP_CONFIG, COOKIES_KEYS, PRODUCT_MODE } from "@/lib/config/app_config"
+import {
+  APP_CONFIG,
+  COOKIES_KEYS,
+  PRODUCT_MODE,
+  STORE_CONTAINER,
+} from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { cookies } from "next/headers"
 import { getTranslations } from "next-intl/server"
 import { getFilteredProducts } from "@/lib/actions/store/queries/get_filtered_products"
 import HomeClientWrapper from "@/components/store/client-wrapper/home-client-wrapper"
-import { StoreHeader } from "@/components/store/store-header/store-header"
 import { getAllCategories } from "@/lib/actions/store/queries/get-all-categories"
-import { storeContainer } from "@/components/store/store-header/store-header-shared"
 import { cn } from "@/lib/utils"
+import { StoreHeader } from "@/components/store/store-header/store-header"
+import { StoreFooter } from "@/components/store/store-footer/store-footer"
 
 interface PageProps {
   params: Promise<{ locale: string }>
@@ -72,7 +77,10 @@ export default async function Page() {
       <main id="main-content" className="w-full flex-1">
         {/* الحاوية نفسها المستخدمة في الهيدر والفوتر */}
         <div
-          className={cn(storeContainer, "space-y-8 py-4 md:space-y-12 md:py-6")}
+          className={cn(
+            STORE_CONTAINER,
+            "space-y-8 py-4 md:space-y-12 md:py-6"
+          )}
         >
           {/* 1. السلايدر التفاعلي للمنتجات المميزة */}
           <FeaturedHeroSlider slides={slides} />
@@ -81,32 +89,12 @@ export default async function Page() {
           <HomeClientWrapper
             viewMode={viewMode}
             initialProducts={initialProducts}
-            categories={categories}
           />
         </div>
       </main>
 
       {/* 4. الفوتر */}
-      <footer className="border-t border-border bg-muted/30">
-        <div className={cn(storeContainer, "py-12")}>
-          {/* شبكة روابط الفوتر: تتجاوب من عمود واحد إلى 4 أعمدة */}
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            <div>
-              <h3 className="mb-4 text-lg font-semibold">عن المتجر</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                وصف مختصر عن المتجر ورسالته للعملاء.
-              </p>
-            </div>
-            {/* يمكنك إضافة أعمدة أخرى للروابط والدعم هنا */}
-          </div>
-
-          {/* حقوق الملكية والسوشيال ميديا */}
-          <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 text-sm text-muted-foreground sm:flex-row">
-            <p>© {new Date().getFullYear()} Store. جميع الحقوق محفوظة.</p>
-            <div className="flex gap-4">{/* أيقونات السوشيال ميديا هنا */}</div>
-          </div>
-        </div>
-      </footer>
+      <StoreFooter />
     </>
   )
 }

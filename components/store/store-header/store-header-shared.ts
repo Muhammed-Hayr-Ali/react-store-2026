@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils"
+ import { cn } from "@/lib/utils"
 
 /* -------------------------------------------------------------------------- */
 /* أدوات وأنماط مشتركة بين مكوّنات الهيدر (كانت مكررة في 4 ملفات)             */
@@ -50,5 +50,4 @@ export const navLinkClass = cn(
 export const hideScrollbar =
   "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
 
-/** حاوية المتجر الموحدة: المصدر الوحيد للعرض الأقصى والهوامش الجانبية */
-export const storeContainer = "mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8"
+  

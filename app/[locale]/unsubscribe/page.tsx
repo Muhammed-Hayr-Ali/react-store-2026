@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 
-import { NewsletterUnsubscribeForm } from "@/components/store/footer/newsletter-unsubscribe-form"
+import { NewsletterUnsubscribeForm } from "@/components/store/store-footer/newsletter-unsubscribe-form"
 import { readNewsletterUnsubscribeToken } from "@/lib/actions/newsletter_subscribers/unsubscribe-token"
 
 export const metadata: Metadata = {

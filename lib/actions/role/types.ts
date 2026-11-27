@@ -4,6 +4,7 @@
  */
 
 import * as z from "zod"
+import type { Json, Tables } from "@/lib/database/supabase/types"
 
 export const ROLES = {
   ADMIN: "admin",
@@ -92,12 +93,28 @@ export const PERMISSIONS = {
 
 export type AppPermission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]
 
-export interface RoleRecord {
-  id: string
-  name: string
-  description: string | null
+const appPermissionValues: ReadonlySet<string> = new Set(
+  Object.values(PERMISSIONS)
+)
+
+function isAppPermission(value: Json): value is AppPermission {
+  return typeof value === "string" && appPermissionValues.has(value)
+}
+
+export function isAppPermissionArray(
+  value: Json
+): value is AppPermission[] {
+  return Array.isArray(value) && value.every(isAppPermission)
+}
+
+export type RoleRecord = Omit<Tables<"roles">, "permissions"> & {
   permissions: AppPermission[]
-  created_at: string
+}
+
+export function toRoleRecord(role: Tables<"roles">): RoleRecord | null {
+  return isAppPermissionArray(role.permissions)
+    ? { ...role, permissions: role.permissions }
+    : null
 }
 
 export interface RolesSummary {

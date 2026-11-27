@@ -12,72 +12,84 @@ export type { CreateProductInput, UpdateProductInput } from "./schemas"
 // Relational Entity Types (للاستخدام في الواجهات والمكونات Client/Server)
 // ============================================================================
 
-export interface ProductVariantItem {
-  id: string
-  sku: string
-  name: string | null
+import type { Json, Tables } from "@/lib/database/supabase/types"
+
+type ProductVariantColumns = Pick<
+  Tables<"product_variants">,
+  | "id"
+  | "sku"
+  | "name"
+  | "attributes"
+  | "price"
+  | "compare_at_price"
+  | "stock_quantity"
+  | "track_inventory"
+  | "low_stock_threshold"
+  | "expiration_date"
+  | "is_active"
+  | "sort_order"
+>
+
+export type ProductVariantItem = Omit<ProductVariantColumns, "attributes"> & {
   attributes: Record<string, string>
-  price: number
-  compare_at_price: number | null
-  stock_quantity: number
-  track_inventory: boolean
-  low_stock_threshold: number
-  expiration_date: string | null
-  is_active: boolean
-  sort_order: number
 }
 
-export interface ProductImageItem {
-  id: string
-  url: string
-  alt_text: string | null
-  is_primary: boolean
-  variant_id: string | null
-}
+export type ProductImageItem = Pick<
+  Tables<"product_images">,
+  "id" | "url" | "alt_text" | "is_primary" | "sort_order" | "variant_id"
+>
 
-export interface ProductWithRelations {
-  id: string
-  brand_id: string
-  category_id: string
-  name: string
-  slug: string
-  description: string | null
-  meta_title: string | null
-  meta_description: string | null
-  is_active: boolean
-  is_featured: boolean
-  created_at: string
-  updated_at: string
-  category: {
-    id: string
-    name: string
-    name_ar: string | null
-    slug: string
-    parent_id?: string | null
-  } | null
-  brand: {
-    id: string
-    name: string
-    name_ar?: string | null
-    slug: string
-    image_url?: string | null
-  } | null
+export type ProductWithRelations = Tables<"products"> & {
+  category: Pick<
+    Tables<"categories">,
+    "id" | "name" | "name_ar" | "slug" | "parent_id"
+  > | null
+  brand: Pick<
+    Tables<"brands">,
+    "id" | "name" | "name_ar" | "slug" | "image_url"
+  > | null
   product_variants: ProductVariantItem[]
   product_images: ProductImageItem[]
 }
 
 /** Lightweight product data returned to the dashboard products table. */
-export interface AdminProductSummary {
-  id: string
-  name: string
-  slug: string
-  is_active: boolean
+export type AdminProductSummary = Pick<
+  Tables<"products">,
+  "id" | "name" | "slug" | "is_active"
+> & {
   category_name: string | null
   brand_name: string | null
   nearest_expiration_date: string | null
   total_stock: number
   min_price: number
   max_price: number
+}
+
+export function isStringAttributes(
+  value: Json | null
+): value is Record<string, string> {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    Object.values(value).every((item) => typeof item === "string")
+  )
+}
+
+export function isProductAttributes(
+  value: Json | null
+): value is Record<string, string | number | boolean> {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    Object.values(value).every(
+      (item) =>
+        typeof item === "string" ||
+        typeof item === "number" ||
+        typeof item === "boolean"
+    )
+  )
 }
 
 /** Aggregate counts displayed above the products dashboard table. */

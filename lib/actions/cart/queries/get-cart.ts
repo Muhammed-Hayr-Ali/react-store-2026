@@ -9,12 +9,6 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 import type { CartQueryResult, CartItemQueryResult } from "../types"
 
-interface ProductImageRecord {
-  url: string
-  is_primary: boolean
-  variant_id?: string | null
-}
-
 export async function getCart(): Promise<ApiResult<CartQueryResult | null>> {
   const supabase = await createServerClient()
 
@@ -92,14 +86,10 @@ export async function getCart(): Promise<ApiResult<CartQueryResult | null>> {
 
   // 3. معالجة العناصر وجلب صورة المتغير الخاصة فقط (أو null إذا لم توجد)
   const processedItems: CartItemQueryResult[] = (items || []).map((item) => {
-    const rawProduct = item.products
-    const rawVariant = item.product_variants
+    const product = item.products
+    const variant = item.product_variants
 
-    const product = Array.isArray(rawProduct) ? rawProduct[0] : rawProduct
-    const variant = Array.isArray(rawVariant) ? rawVariant[0] : rawVariant
-
-    const productImages = (product?.product_images ??
-      []) as ProductImageRecord[]
+    const productImages = product?.product_images ?? []
     const variantId = variant?.id ?? null
 
     // تصفية الصور الخاصة بهذا المتغير فقط عبر variant_id

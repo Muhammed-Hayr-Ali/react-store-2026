@@ -34,6 +34,6 @@ export async function getNewsletterSubscribers(): Promise<
 
   return {
     success: true,
-    data: (data ?? []) as NewsletterSubscriber[],
+    data: data ?? [],
   }
 }

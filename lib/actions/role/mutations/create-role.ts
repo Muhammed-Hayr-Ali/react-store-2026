@@ -11,7 +11,7 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
 import { getValidationDetails } from "../../validation"
- import type { RoleRecord } from "../types"
+ import { toRoleRecord, type RoleRecord } from "../types"
 import { createRoleSchema, type CreateRoleInput } from "../schemas"
 
 export async function createRole(
@@ -60,10 +60,18 @@ export async function createRole(
     }
   }
 
+  const role = newRole ? toRoleRecord(newRole) : null
+  if (!role) {
+    return {
+      success: false,
+      error: "CREATE_ROLE_ERROR",
+      details: {
+        database: ["The created role has invalid permissions or was not returned."],
+      },
+    }
+  }
+
   revalidatePath("/", "layout")
 
-  return {
-    success: true,
-    data: newRole as RoleRecord,
-  }
+  return { success: true, data: role }
 }

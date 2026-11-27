@@ -9,51 +9,45 @@ import { unstable_cache } from "next/cache"
 import type { ApiResult } from "../../types/utils"
 import { createPublicServerClient } from "@/lib/database/supabase/public"
 import { CACHE_TAG } from "@/lib/config/app_config"
+import type { Tables } from "@/lib/database/supabase/types"
 
-interface ProductVariantRecord {
-  id: string
-  sku: string
-  price: number | string
-  compare_at_price: number | string | null
-  stock_quantity: number
-  track_inventory: boolean
-  is_active: boolean
-  sort_order: number
-}
+type ProductVariantRecord = Pick<
+  Tables<"product_variants">,
+  | "id"
+  | "sku"
+  | "price"
+  | "compare_at_price"
+  | "stock_quantity"
+  | "track_inventory"
+  | "is_active"
+  | "sort_order"
+>
 
-interface ProductImageRecord {
-  url: string
-  alt_text: string | null
-  is_primary: boolean
-  variant_id: string | null
-}
+type ProductImageRecord = Pick<
+  Tables<"product_images">,
+  "url" | "alt_text" | "is_primary" | "sort_order" | "variant_id"
+>
 
-interface NamedRelationRecord {
-  id: string
-  name: string
-  name_ar: string | null
-  slug: string
-  is_active: boolean | null
-}
+type NamedRelationRecord = Pick<
+  Tables<"categories"> | Tables<"brands">,
+  "id" | "name" | "name_ar" | "slug" | "is_active"
+>
 
-interface ProductQueryResult {
-  id: string
-  name: string
-  slug: string
-  description: string | null
+type ProductQueryResult = Pick<
+  Tables<"products">,
+  "id" | "name" | "slug" | "description"
+> & {
   product_variants: ProductVariantRecord[] | null
   product_images: ProductImageRecord[] | null
-  product_reviews: { rating: number }[] | null
+  product_reviews: Pick<Tables<"product_reviews">, "rating">[] | null
   categories: NamedRelationRecord | null
   brands: NamedRelationRecord | null
 }
 
-interface CategoryNode {
-  id: string
-  parent_id: string | null
-  slug: string
-  is_active: boolean | null
-}
+type CategoryNode = Pick<
+  Tables<"categories">,
+  "id" | "parent_id" | "slug" | "is_active"
+>
 
 export interface SimpliProduct {
   id: string
@@ -100,6 +94,7 @@ interface QueryParams {
   limit: number
   page: number
   activeOnly: boolean
+  today: string
 }
 
 const DEFAULT_LIMIT = 12
@@ -168,7 +163,10 @@ function pickVariant(variants: ProductVariantRecord[]) {
 }
 
 /** صورة المتغير المعروض أو صورة عامة، ولا نلجأ لصورة متغير آخر إلا أخيراً */
-function pickImage(images: ProductImageRecord[], variantId: string | undefined) {
+function pickImage(
+  images: ProductImageRecord[],
+  variantId: string | undefined
+) {
   const own = variantId ? images.filter((i) => i.variant_id === variantId) : []
   const general = images.filter((i) => !i.variant_id)
 
@@ -251,6 +249,7 @@ const getCachedFilteredProducts = unstable_cache(
       limit,
       page,
       activeOnly,
+      today,
     } = params
 
     const supabase = await createPublicServerClient()
@@ -264,7 +263,7 @@ const getCachedFilteredProducts = unstable_cache(
 
       if (error) throw new Error(error.message)
 
-      categoryIds = collectCategoryIds((data ?? []) as CategoryNode[], params)
+      categoryIds = collectCategoryIds(data ?? [], params)
       if (categoryIds.length === 0) return []
     }
 
@@ -289,6 +288,7 @@ const getCachedFilteredProducts = unstable_cache(
           url,
           alt_text,
           is_primary,
+          sort_order,
           variant_id
         ),
         product_reviews (
@@ -324,7 +324,7 @@ const getCachedFilteredProducts = unstable_cache(
         .eq("is_active", true)
         .eq("product_variants.is_active", true)
         // استبعاد المتغيرات منتهية الصلاحية
-        .or(`expiration_date.is.null,expiration_date.gte.${todayInStore()}`, {
+        .or(`expiration_date.is.null,expiration_date.gte.${today}`, {
           referencedTable: "product_variants",
         })
 
@@ -336,7 +336,11 @@ const getCachedFilteredProducts = unstable_cache(
       .order("created_at", { ascending: false })
       .order("id", { ascending: false })
       // ترتيب ثابت للصور حتى لا تتغير الصورة المختارة بين طلب وآخر
-      .order("created_at", {
+      .order("sort_order", {
+        referencedTable: "product_images",
+        ascending: true,
+      })
+      .order("id", {
         referencedTable: "product_images",
         ascending: true,
       })
@@ -344,7 +348,7 @@ const getCachedFilteredProducts = unstable_cache(
 
     if (error) throw new Error(error.message)
 
-    return ((data ?? []) as unknown as ProductQueryResult[]).map((product) =>
+    return (data ?? []).map((product) =>
       toSimpliProduct(product, activeOnly)
     )
   },
@@ -368,6 +372,7 @@ export async function getFilteredProducts(
     page: clampInt(options.page, 1, 10_000),
     // لا يُلغى الفلتر إلا بقيمة false صريحة
     activeOnly: options.activeOnly !== false,
+    today: todayInStore(),
   }
 
   try {

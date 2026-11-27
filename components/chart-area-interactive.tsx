@@ -25,10 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 export const description = "An interactive area chart"
 
@@ -142,13 +139,11 @@ const chartConfig = {
 
 export function ChartAreaInteractive() {
   const isMobile = useIsMobile()
-  const [timeRange, setTimeRange] = React.useState("90d")
-
-  React.useEffect(() => {
-    if (isMobile) {
-      setTimeRange("7d")
-    }
-  }, [isMobile])
+  const [selectedTimeRange, setSelectedTimeRange] = React.useState<
+    string | null
+  >(null)
+  const timeRange = selectedTimeRange ?? (isMobile ? "7d" : "90d")
+  const setTimeRange = (range: string) => setSelectedTimeRange(range)
 
   const filteredData = chartData.filter((item) => {
     const date = new Date(item.date)

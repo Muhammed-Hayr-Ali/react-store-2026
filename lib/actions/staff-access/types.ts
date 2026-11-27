@@ -3,20 +3,15 @@
  * @description أنواع بيانات إدارة وصول الموظفين.
  */
 
-export interface StaffAccessRole {
-  id: string
-  name: string
-  description: string | null
-  permissions: string[]
-  created_at: string
-}
+import type { Tables } from "@/lib/database/supabase/types"
+import type { RoleRecord } from "@/lib/actions/role/types"
 
-export interface UserWithRoles {
-  id: string
-  first_name: string | null
-  last_name: string | null
-  email: string | null
-  avatar: string | null
+export type StaffAccessRole = RoleRecord
+
+export type UserWithRoles = Pick<
+  Tables<"profiles">,
+  "id" | "first_name" | "last_name" | "email" | "avatar"
+> & {
   roles: StaffAccessRole[]
 }
 

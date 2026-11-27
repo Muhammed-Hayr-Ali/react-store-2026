@@ -72,5 +72,5 @@ export async function updateBrand(
   revalidateTag(CACHE_TAG.BRANDS, { expire: 0 })
   revalidatePath("/", "layout")
   
-  return { success: true, data: data as BrandRecord }
+  return { success: true, data }
 }

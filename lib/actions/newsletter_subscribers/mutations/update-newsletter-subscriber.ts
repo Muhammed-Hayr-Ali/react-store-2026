@@ -57,5 +57,5 @@ export async function updateNewsletterSubscriberStatus(
     }
   }
 
-  return { success: true, data: data as NewsletterSubscriber }
+  return { success: true, data }
 }

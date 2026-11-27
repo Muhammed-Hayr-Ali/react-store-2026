@@ -9,15 +9,12 @@ import { unstable_cache } from "next/cache"
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { CACHE_TAG } from "@/lib/config/app_config"
+import type { Tables } from "@/lib/database/supabase/types"
 
-export interface SimpliBrand {
-  id: string
-  slug: string
-  name: string
-  name_ar?: string
-  description?: string | null
-  description_ar?: string | null
-}
+export type SimpliBrand = Pick<
+  Tables<"brands">,
+  "id" | "slug" | "name" | "name_ar" | "description" | "description_ar"
+>
 
 interface FilterOptions {
   brandId?: string
@@ -54,7 +51,7 @@ export const getCachedBrandByFilter = unstable_cache(
       throw new Error(error.message)
     }
 
-    return (data as SimpliBrand) || null
+    return data
   },
 
   ["brands"],

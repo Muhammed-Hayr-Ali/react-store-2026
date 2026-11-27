@@ -65,7 +65,7 @@ export async function updateReview(
     .from("product_reviews")
     .update({
       rating,
-      content: content ?? null,
+      content: content?.trim() ?? "",
       updated_at: new Date().toISOString(),
     })
     .eq("id", reviewId)

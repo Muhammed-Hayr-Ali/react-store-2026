@@ -27,7 +27,7 @@ export async function getNewsletterSubscribersSummary(): Promise<
     }
   }
 
-  const subscribers = (data ?? []) as Array<{ status: string | null }>
+  const subscribers = data ?? []
   const active = subscribers.filter((subscriber) => subscriber.status === "active").length
 
   return {

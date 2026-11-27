@@ -61,7 +61,7 @@ export async function getCategories(
       }
     }
 
-    const page = (data ?? []) as Category[]
+    const page = data ?? []
     categories.push(...page)
 
     if (page.length < CATEGORIES_PAGE_SIZE) break

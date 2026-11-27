@@ -8,7 +8,6 @@
 
 import { revalidatePath, revalidateTag } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
-import type { ProductVariantItem, ProductImageItem } from "../types"
 import { CACHE_TAG } from "@/lib/config/app_config"
 
 export type DuplicateProductResult =
@@ -61,8 +60,7 @@ export async function duplicateProduct(
     }
 
     const variantIdMapping = new Map<string, string>()
-    const typedVariants = originalProduct.product_variants as
-      ProductVariantItem[] | undefined
+    const typedVariants = originalProduct.product_variants ?? []
 
     if (typedVariants && typedVariants.length > 0) {
       const originalVariantIdByNewSku = new Map<string, string>()
@@ -115,21 +113,23 @@ export async function duplicateProduct(
       }
     }
 
-    const typedImages = originalProduct.product_images as
-      ProductImageItem[] | undefined
+    const typedImages = originalProduct.product_images ?? []
 
     if (typedImages && typedImages.length > 0) {
-      const imagesToInsert = typedImages.map((img) => {
-        return {
-          product_id: newProduct.id,
-          url: img.url,
-          alt_text: img.alt_text,
-          is_primary: img.is_primary,
-          variant_id: img.variant_id
-            ? (variantIdMapping.get(img.variant_id) ?? null)
-            : null,
-        }
-      })
+      const imagesToInsert = [...typedImages]
+        .sort((a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id))
+        .map((img, sort_order) => {
+          return {
+            product_id: newProduct.id,
+            url: img.url,
+            alt_text: img.alt_text,
+            is_primary: img.is_primary,
+            sort_order,
+            variant_id: img.variant_id
+              ? (variantIdMapping.get(img.variant_id) ?? null)
+              : null,
+          }
+        })
 
       if (
         typedImages.some(

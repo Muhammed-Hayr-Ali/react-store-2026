@@ -4,7 +4,7 @@
  */
 
 import { NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
+import { createAdminClient } from "@/lib/database/supabase/admin"
 
 const CURRENCY_METADATA: Record<
   string,
@@ -62,9 +62,7 @@ export async function GET() {
       )
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: { persistSession: false },
-    })
+    const supabase = createAdminClient()
 
     const currencyRecords = []
 

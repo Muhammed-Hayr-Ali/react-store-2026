@@ -1,3 +1,5 @@
+import { cn } from "../utils"
+
 export const APP_NAME = "Marketna"
 
 export const APP_CONFIG = {
@@ -51,3 +53,7 @@ export const CACHE_TAG = {
   WISHLIST: "wishlist",
   cart: "cart",
 } as const
+
+
+
+export const STORE_CONTAINER = "mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8"

@@ -3,24 +3,15 @@
  * @description TypeScript interfaces for product reviews returned by Supabase.
  */
 
-export interface ProductReview {
-  id: string
-  product_id: string
-  user_id: string | null
-  rating: number
-  content: string
-  is_approved: boolean
-  created_at: string
-  updated_at: string
-}
+import type { Tables } from "@/lib/database/supabase/types"
 
-// تحديث الواجهة لتطابق أعمدة جدول profiles الحقيقية
-export interface ReviewWithUser extends ProductReview {
-  user?: {
-    first_name?: string | null
-    last_name?: string | null
-    avatar?: string | null
-  } | null
+export type ProductReview = Tables<"product_reviews">
+
+export type ReviewWithUser = ProductReview & {
+  user: Pick<
+    Tables<"profiles">,
+    "first_name" | "last_name" | "avatar"
+  > | null
 }
 
 export interface ReviewsSummary {

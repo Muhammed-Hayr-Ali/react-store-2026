@@ -8,8 +8,7 @@
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 
-import { hasPermission } from "../permission-checker"
-import { PERMISSIONS, type RoleRecord } from "../types"
+import { toRoleRecord, type RoleRecord } from "../types"
 
 /**
  * تجلب جميع الأدوار مرتبة حسب تاريخ الإنشاء.
@@ -31,8 +30,19 @@ export async function getRoles(): Promise<ApiResult<RoleRecord[]>> {
     }
   }
 
-  return {
-    success: true,
-    data: (data || []) as RoleRecord[],
+  const roles: RoleRecord[] = []
+  for (const row of data ?? []) {
+    const role = toRoleRecord(row)
+    if (!role) {
+      return {
+        success: false,
+        error: "GET_ALL_ROLES_ERROR",
+        details: { database: [`Role "${row.name}" has invalid permissions.`] },
+      }
+    }
+
+    roles.push(role)
   }
+
+  return { success: true, data: roles }
 }
