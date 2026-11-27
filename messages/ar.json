@@ -201,6 +201,7 @@
     "search": "بحث",
     "dashboard": "لوحة التحكم"
   },
+
   "AuthLayout": {
     "TERMS_PREFIX": "بالمتابعة، فإنك توافق على",
     "TERMS_OF_SERVICE": "شروط الخدمة",
@@ -306,7 +307,6 @@
     "TITLE": "سلة التسوق",
     "EMPTY": "سلة التسوق فارغة",
     "EMPTY_DESC": "أضف بعض المنتجات لبدء التسوق",
-    "SUBTOTAL": "المجموع الفرعي",
     "CHECKOUT": "إتمام الطلب",
     "ITEM_UPDATED": "تم تحديث السلة",
     "GENERAL_ERROR": "حدث خطأ ما",
@@ -318,7 +318,12 @@
     "title": "سلة التسوق",
     "description": "استعرض وأدر المنتجات الموجودة في سلة تسوقك في ماركتنا.",
     "emptyTitle": "سلة التسوق فارغة",
-    "emptyDescription": "يبدو أنك لم تضف أي منتجات إلى سلة تسوقك بعد."
+    "emptyDescription": "يبدو أنك لم تضف أي منتجات إلى سلة تسوقك بعد.",
+    "EMPTY_CART": "سلة التسوق فارغة",
+    "DECREASE_QUANTITY": "إنقاص الكمية",
+    "INCREASE_QUANTITY": "زيادة الكمية",
+    "SUBTOTAL": "الإجمالي الفرعي",
+    "VIEW_FULL_CART": "عرض السلة الكاملة"
   },
   "Category": {
     "META_TITLE": "منتجات {category}",

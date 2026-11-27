@@ -149,6 +149,8 @@ function SlideItem({
     ? Math.floor(((compareAtPrice - price) / compareAtPrice) * 100)
     : 0
 
+  const productHref = `/product/${slide.slug}`
+
   return (
     <div
       role="group"
@@ -222,14 +224,7 @@ function SlideItem({
               "line-clamp-2 text-xl leading-snug font-semibold text-balance text-foreground delay-75 md:line-clamp-3 md:text-2xl md:leading-snug lg:text-3xl lg:leading-snug"
             )}
           >
-            {/* after: يجعل البطاقة كلها قابلة للنقر برابط واحد */}
-            <Link
-              href={`/product/${slide.slug}`}
-              draggable={false}
-              className="outline-none after:absolute after:inset-0 after:z-10 after:rounded-2xl focus-visible:after:ring-2 focus-visible:after:ring-primary focus-visible:after:ring-inset"
-            >
-              {slide.name}
-            </Link>
+            {slide.name}
           </h2>
 
           {description && (
@@ -294,14 +289,19 @@ function SlideItem({
               </p>
             )}
 
-            {/* مظهر زر فقط: النقر يمر عبر رابط العنوان */}
-            <span
-              aria-hidden="true"
-              className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground shadow-md shadow-primary/20 md:h-11 md:px-6"
+            {/* after: يوسّع مساحة النقر لتشمل كامل البطاقة */}
+            <Link
+              href={productHref}
+              draggable={false}
+              tabIndex={isActive ? 0 : -1}
+              className={cn(
+                "inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground shadow-md shadow-primary/20 transition-colors hover:bg-primary/90 after:absolute after:inset-0 after:z-10 after:rounded-2xl md:h-11 md:px-6",
+                focusRing
+              )}
             >
               {slide.inStock ? t("shopNow") : t("viewProduct")}
               <ArrowIcon className="size-4 transition-transform group-hover/card:translate-x-1 rtl:group-hover/card:-translate-x-1" />
-            </span>
+            </Link>
           </div>
         </div>
       </article>
@@ -648,7 +648,7 @@ export default function FeaturedHeroSlider({
             )}
 
             {rateRow && (
-              <div className="flex flex-col text-xs gap-1">
+              <div className="flex flex-col gap-1 text-xs">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-foreground">{t("currencyPair")}</span>
 
@@ -669,7 +669,6 @@ export default function FeaturedHeroSlider({
                   </div>
                 </div>
 
-              
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-muted-foreground">
                     {updatedLabel ?? ""}

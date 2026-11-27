@@ -201,6 +201,7 @@
     "search": "Search",
     "dashboard": "Dashboard"
   },
+
   "AuthLayout": {
     "TERMS_PREFIX": "By continuing, you agree to our",
     "TERMS_OF_SERVICE": "Terms of Service",
@@ -306,7 +307,6 @@
     "TITLE": "Shopping Cart",
     "EMPTY": "Your cart is empty",
     "EMPTY_DESC": "Add some products to start shopping",
-    "SUBTOTAL": "Subtotal",
     "CHECKOUT": "Proceed to Checkout",
     "ITEM_UPDATED": "Cart updated",
     "GENERAL_ERROR": "An error occurred",
@@ -318,7 +318,12 @@
     "title": "Shopping Cart",
     "description": "View and manage items in your shopping cart at Marketna.",
     "emptyTitle": "Your cart is empty",
-    "emptyDescription": "Looks like you haven't added anything to your cart yet."
+    "emptyDescription": "Looks like you haven't added anything to your cart yet.",
+    "EMPTY_CART": "Your cart is empty",
+    "DECREASE_QUANTITY": "Decrease quantity",
+    "INCREASE_QUANTITY": "Increase quantity",
+    "SUBTOTAL": "Subtotal",
+    "VIEW_FULL_CART": "View full cart"
   },
   "Category": {
     "META_TITLE": "{category} Products",
