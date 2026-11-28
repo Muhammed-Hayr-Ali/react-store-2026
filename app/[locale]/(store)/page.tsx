@@ -14,6 +14,7 @@ import { LatestProductsSkeleton } from "@/components/store/latest-products/lates
 import { getTranslations } from "next-intl/server"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { APP_CONFIG } from "@/lib/config/app_config"
+import PromoModal from "@/components/store/promo-modal/promo-modal"
 
 export async function generateMetadata() {
   const t = await getTranslations("Home")
@@ -28,6 +29,9 @@ export async function generateMetadata() {
 export default function HomePage() {
   return (
     <>
+      <Suspense fallback={null}>
+        <PromoModal />
+      </Suspense>
       {/* 1. سلايدر المنتجات المميزة */}
       <Suspense fallback={<FeaturedHeroSliderSkeleton />}>
         <FeaturedHeroSlider />

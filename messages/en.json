@@ -1596,6 +1596,11 @@
   "StoreLayout": {
     "skipToContent": "Skip To Content"
   },
+  "PromoModal": {
+    "CLOSE": "Close promotion",
+    "DISMISS": "Maybe later",
+    "DEFAULT_CTA": "Explore Offers"
+  },
   "log_out": "Log Out",
   "profile": "Profile",
   "my_orders": "My Orders",

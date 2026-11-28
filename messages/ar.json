@@ -1590,6 +1590,11 @@
   "StoreLayout": {
     "skipToContent": "تخطي الى المحتوى"
   },
+  "PromoModal": {
+    "CLOSE": "إغلاق الإعلان",
+    "DISMISS": "لاحقاً",
+    "DEFAULT_CTA": "اكتشف العروض"
+  },
   "log_out": "تسجيل الخروج",
   "profile": "الملف الشخصي",
   "my_orders": "طلباتي",
