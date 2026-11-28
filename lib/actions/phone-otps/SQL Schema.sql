@@ -3,7 +3,7 @@
 -- ==========================================
 CREATE TABLE IF NOT EXISTS public.phone_otps (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  phone_number TEXT NOT NULL,
+  phone TEXT NOT NULL,
   code TEXT NOT NULL,
   expires_at TIMESTAMPTZ NOT NULL,
   used BOOLEAN DEFAULT false,
@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS public.phone_otps (
 );
 
 
--- إذا لم يكن phone_number فريداً، قم بإضافة قيد فريد (أو اجعله مفتاحاً فريداً حسب تصميم جدولك)
-ALTER TABLE public.phone_otps ADD CONSTRAINT phone_otps_phone_number_key UNIQUE (phone_number);
+-- إذا لم يكن phone فريداً، قم بإضافة قيد فريد (أو اجعله مفتاحاً فريداً حسب تصميم جدولك)
+ALTER TABLE public.phone_otps ADD CONSTRAINT phone_otps_phone_number_key UNIQUE (phone);
 
 
 

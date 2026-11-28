@@ -39,7 +39,7 @@ export async function verifyPhoneOtp(
   const { data: record, error: fetchError } = await supabase
     .from("phone_otps")
     .select("*")
-    .eq("phone_number", cleanDigits)
+    .eq("phone", cleanDigits)
     .eq("code", code)
     .eq("used", false)
     .gt("expires_at", new Date().toISOString())
@@ -63,6 +63,6 @@ export async function verifyPhoneOtp(
 
   return {
     success: true,
-    data: { phoneNumber: record.phone_number },
+    data: { phoneNumber: record.phone },
   }
 }

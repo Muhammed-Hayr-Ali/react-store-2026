@@ -58,7 +58,7 @@ export function EditUserDialog({
       userId: user.id,
       firstName: user.first_name || "",
       lastName: user.last_name || "",
-      phoneNumber: user.phone_number || "",
+      phoneNumber: user.phone || "",
     },
   })
 
@@ -77,7 +77,7 @@ export function EditUserDialog({
         ...user,
         first_name: data.firstName || null,
         last_name: data.lastName || null,
-        phone_number: data.phoneNumber || null,
+        phone: data.phoneNumber || null,
       }
       toast.success(t("USER_UPDATED_SUCCESS"))
       onSuccess?.(updatedUser)

@@ -37,6 +37,13 @@ export async function getAdminUsers(
     })
 
     if (error) {
+      console.error("get_admin_users_list RPC failed:", {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      })
+
       return {
         success: false,
         error: "GET_USERS_ERROR",
@@ -47,6 +54,10 @@ export async function getAdminUsers(
     const users: AdminUserSummary[] = []
     for (const user of data ?? []) {
       if (!isUserStatus(user.status)) {
+        console.error("get_admin_users_list returned an invalid status:", {
+          status: user.status,
+        })
+
         return {
           success: false,
           error: "GET_USERS_ERROR",

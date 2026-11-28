@@ -34,11 +34,12 @@ export default async function Page() {
   }
 
   const t = await getTranslations("UsersManagement")
+  const errorT = await getTranslations("ActionErrors")
 
   const pageDataResult = await getUsersPageData()
   if (!pageDataResult.success) {
     throw new Error(
-      t(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
+      errorT(getActionErrorKey(pageDataResult.error ?? "UNEXPECTED_ERROR"))
     )
   }
 

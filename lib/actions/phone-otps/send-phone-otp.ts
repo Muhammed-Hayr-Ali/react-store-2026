@@ -50,14 +50,14 @@ export async function sendPhoneOtp(
   // Upsert the OTP record in the database to ensure only one active OTP per phone number
   const { error: dbError } = await supabase.from("phone_otps").upsert(
     {
-      phone_number: cleanDigits,
+      phone: cleanDigits,
       code: verificationCode,
       expires_at: expiresAt,
       used: false,
       created_at: new Date().toISOString(),
     },
     {
-      onConflict: "phone_number",
+      onConflict: "phone",
     }
   )
 

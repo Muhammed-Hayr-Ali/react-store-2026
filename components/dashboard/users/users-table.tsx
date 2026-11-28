@@ -86,7 +86,7 @@ import { CreateUserSheet } from "./create-user-sheet"
 import { EditUserDialog } from "./edit-user-dialog"
 
 // Columns that can be hidden from the table settings.
-const HIDEABLE_COLUMNS = ["phone_number", "roles", "status", "created_at"]
+const HIDEABLE_COLUMNS = ["phone", "roles", "status", "created_at"]
 
 // Initial data and options accepted by the table.
 interface UsersTableProps {
@@ -126,7 +126,7 @@ export function UsersTable({
         .join(" ")
         .toLowerCase()
       const email = (item.email || "").toLowerCase()
-      const phone = (item.phone_number || "").toLowerCase()
+      const phone = (item.phone || "").toLowerCase()
 
       return (
         fullName.includes(query) ||
@@ -200,9 +200,9 @@ export function UsersTable({
           return (
             <div className="flex items-center gap-2.5">
               <Avatar className="size-7 shrink-0 rounded-lg after:rounded-lg">
-                {row.original.profile_image && (
+                {row.original.avatar && (
                   <AvatarImage
-                    src={row.original.profile_image}
+                    src={row.original.avatar}
                     alt={fullName || t("ANONYMOUS_USER")}
                     className="rounded-lg"
                   />
@@ -229,13 +229,13 @@ export function UsersTable({
       },
       // 2. Phone Number (Hideable)
       {
-        id: "phone_number",
-        accessorKey: "phone_number",
+        id: "phone",
+        accessorKey: "phone",
         header: t("COLUMN_PHONE"),
         enableHiding: true,
         cell: ({ row }) => (
           <span className="text-xs text-muted-foreground">
-            {row.original.phone_number || "—"}
+            {row.original.phone || "—"}
           </span>
         ),
       },
@@ -460,7 +460,7 @@ export function UsersTable({
   // Column labels shown in the visibility menu.
   const columnLabelsMap: Record<string, string> = {
     user: t("COLUMN_USER"),
-    phone_number: t("COLUMN_PHONE"),
+    phone: t("COLUMN_PHONE"),
     roles: t("COLUMN_ROLES"),
     status: t("COLUMN_STATUS"),
     created_at: t("COLUMN_JOINED"),

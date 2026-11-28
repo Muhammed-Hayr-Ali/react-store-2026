@@ -15,24 +15,23 @@ type RawFunctionReturns =
     ? R
     : never
 
-type AdminUserRow =
-  RawFunctionReturns extends readonly (infer T)[]
+type AdminUserRow = RawFunctionReturns extends readonly (infer T)[]
+  ? T
+  : RawFunctionReturns extends (infer T)[]
     ? T
-    : RawFunctionReturns extends (infer T)[]
-      ? T
-      : {
-          id: string
-          created_at: string
-          roles?: string[] | null
-        }
+    : {
+        id: string
+        created_at: string
+        roles?: string[] | null
+      }
 
 export type AdminUserSummary = Omit<
   AdminUserRow,
   | "first_name"
   | "last_name"
   | "email"
-  | "phone_number"
-  | "profile_image"
+  | "phone"
+  | "avatar"
   | "status"
   | "ban_reason"
   | "banned_at"
@@ -43,8 +42,8 @@ export type AdminUserSummary = Omit<
   first_name: string | null
   last_name: string | null
   email: string | null
-  phone_number: string | null
-  profile_image: string | null
+  phone: string | null
+  avatar: string | null
   status: UserStatus
   ban_reason: string | null
   banned_at: string | null
