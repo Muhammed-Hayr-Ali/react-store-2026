@@ -270,7 +270,7 @@ const BottomSheetContent = ({
         aria-label={ariaLabel}
         tabIndex={-1}
         className={cn(
-          "relative z-10 flex max-h-[88dvh] w-full flex-col rounded-t-3xl border-t border-white/25 bg-background/80 shadow-[0_-12px_40px_-8px_rgb(0_0_0/0.18)] backdrop-blur-2xl backdrop-saturate-150 outline-none dark:border-white/10 dark:bg-background/75",
+          "relative z-10 flex max-h-[88dvh] w-full flex-col rounded-t-3xl border-0 bg-background/80 shadow-[0_-12px_40px_-8px_rgb(0_0_0/0.18)] backdrop-blur-2xl backdrop-saturate-150 outline-none dark:bg-background/75",
           "transition-[translate,transform,opacity] will-change-[translate,opacity]",
           open
             ? "translate-y-0 opacity-100 duration-280 ease-[cubic-bezier(0.16,1,0.3,1)] starting:translate-y-8"
@@ -325,7 +325,7 @@ const BottomSheetHeader = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "flex shrink-0 flex-col border-b border-border/50 px-4 pt-2.5 pb-3.5",
+          "flex shrink-0 flex-col border-0 px-4 pt-2.5 pb-2",
           className
         )}
         {...props}
@@ -369,7 +369,7 @@ const BottomSheetBody = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4",
+      "min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3",
       className
     )}
     {...props}
@@ -386,7 +386,7 @@ const BottomSheetFooter = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "mt-auto shrink-0 border-t border-border/50 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]",
+      "mt-auto shrink-0 border-0 px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))]",
       className
     )}
     {...props}

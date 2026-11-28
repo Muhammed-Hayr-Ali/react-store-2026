@@ -891,7 +891,14 @@
     "HOURS_AGO": "{count} h ago",
     "DAYS_AGO": "{count} d ago",
     "MONTHS_AGO": "{count} mo ago",
-    "YEARS_AGO": "{count} y ago"
+    "YEARS_AGO": "{count} y ago",
+    "FETCH_REVIEWS_ERROR": "Couldn't load reviews.",
+    "RETRY_BUTTON": "Try again",
+    "SUBMIT_REVIEW_BUTTON": "Submit review",
+    "RATING_ARIA": "Rated {rating} out of 5",
+    "STAR_OPTION_ARIA": "Select {rating} out of 5 stars",
+    "RATING_BAR_ARIA": "{rating} out of 5, number of reviews: {count}",
+    "CONTENT_TOO_LONG": "Comment must be {max} characters or fewer."
   },
   "ProductsManagement": {
     "PAGE_TITLE": "Products Management",

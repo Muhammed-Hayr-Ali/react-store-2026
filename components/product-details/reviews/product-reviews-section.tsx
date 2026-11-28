@@ -2,45 +2,53 @@
 
 /**
  * @file components/store/product-details/reviews/product-reviews-section.tsx
- * @description Main container wrapping header, summary card, and reviews list with the new data structure.
+ * @description Main container wrapping header, summary card, and reviews list, with a dedicated load-error state.
  */
 
+import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
+
+import { Button } from "@/components/ui/button"
 import { ReviewsHeader } from "./reviews-header"
 import { ReviewsSummaryCard } from "./reviews-summary-card"
 import { EmptyReviews } from "./empty-reviews"
 import { ReviewCard } from "./review-card"
 
-import type {
-  ProductReviewItem,
-  ProductReviewsResult,
-} from "@/lib/actions/store/product-details/reviews/queries/get-product-reviews"
+import type { ProductReviewsResult } from "@/lib/actions/store/product-details/reviews/queries/get-product-reviews"
 
 interface ProductReviewsSectionProps {
+  /** null يعني أن جلب البيانات فشل */
   reviewsData: ProductReviewsResult | null
 }
 
 export function ProductReviewsSection({
   reviewsData,
 }: ProductReviewsSectionProps) {
-  const productId = reviewsData?.productId ?? ""
-  const currentUserId = reviewsData?.currentUserId ?? null
-  const hasUserReviewed = reviewsData?.hasUserReviewed ?? false
+  const t = useTranslations("ProductReviews")
+  const router = useRouter()
 
-  const summary = reviewsData?.summary ?? {
-    averageRating: 0,
-    totalReviews: 0,
-    ratingBreakdown: [5, 4, 3, 2, 1].map((r) => ({
-      rating: r,
-      count: 0,
-      percentage: 0,
-    })),
+  // لا نعرض "لا توجد تقييمات" عندما يكون السبب الحقيقي خطأ في الجلب
+  if (!reviewsData) {
+    return (
+      <div
+        role="alert"
+        className="mt-6 flex flex-col items-center gap-3 rounded-2xl border border-border bg-muted/30 p-8 text-center"
+      >
+        <p className="text-sm text-muted-foreground">
+          {t("FETCH_REVIEWS_ERROR")}
+        </p>
+        <Button variant="outline" onClick={() => router.refresh()}>
+          {t("RETRY_BUTTON")}
+        </Button>
+      </div>
+    )
   }
 
-  const reviews: ProductReviewItem[] = reviewsData?.reviews ?? []
+  const { productId, currentUserId, hasUserReviewed, reviews, summary } =
+    reviewsData
 
   return (
-    <div className="space-y-6 pt-6">
-      {/* Header */}
+    <section className="space-y-6 pt-6">
       <ReviewsHeader
         productId={productId}
         currentUserId={currentUserId}
@@ -48,9 +56,9 @@ export function ProductReviewsSection({
         totalReviews={summary.totalReviews}
       />
 
-      <ReviewsSummaryCard summary={summary} />
+      {summary.totalReviews > 0 && <ReviewsSummaryCard summary={summary} />}
 
-      {reviews.length === 0 ? (
+      {summary.totalReviews === 0 ? (
         <EmptyReviews
           productId={productId}
           currentUserId={currentUserId}
@@ -63,6 +71,6 @@ export function ProductReviewsSection({
           ))}
         </div>
       )}
-    </div>
+    </section>
   )
 }

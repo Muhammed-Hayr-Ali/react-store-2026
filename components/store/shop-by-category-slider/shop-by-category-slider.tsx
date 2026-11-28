@@ -103,8 +103,8 @@ export default function CategoryCarousel({
       <Carousel
         opts={{
           align: "start",
+          slidesToScroll: 1,
           containScroll: "trimSnaps",
-          dragFree: true,
           direction: isRtl ? "rtl" : "ltr",
         }}
         className="w-full space-y-4"

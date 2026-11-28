@@ -31,7 +31,10 @@ export function ReviewsHeader({
   const t = useTranslations("ProductReviews")
   const [isOpen, setIsOpen] = React.useState(false)
 
-  const canReview = currentUserId && !hasUserReviewed
+  // عند عدم وجود تقييمات يظهر الزر داخل الحالة الفارغة فقط، لتجنب تكراره
+  const canReview = Boolean(
+    currentUserId && !hasUserReviewed && totalReviews > 0
+  )
 
   return (
     <div className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
@@ -46,7 +49,7 @@ export function ReviewsHeader({
 
       {hasUserReviewed && (
         <Alert className="w-full sm:w-fit">
-          <CheckCircle2Icon />
+          <CheckCircle2Icon aria-hidden="true" />
           <AlertDescription>{t("ALREADY_REVIEWED_MESSAGE")}</AlertDescription>
         </Alert>
       )}
@@ -58,16 +61,9 @@ export function ReviewsHeader({
           mode="create"
           open={isOpen}
           onOpenChange={setIsOpen}
-          onSuccess={() => {
-            setIsOpen(false)
-            onReviewCreated?.()
-          }}
+          onSuccess={onReviewCreated}
         >
-          <Button
-            variant="outline"
-            className="text-xs"
-            aria-label={t("WRITE_REVIEW_BUTTON")}
-          >
+          <Button variant="outline" className="w-full text-xs sm:w-auto">
             {t("WRITE_REVIEW_BUTTON")}
           </Button>
         </ReviewDialog>

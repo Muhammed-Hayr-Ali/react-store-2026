@@ -240,7 +240,7 @@ export function ProductGallery({
             {images.length > 1 && (
               <div
                 onClick={(e) => e.stopPropagation()}
-                className="mx-auto flex max-w-full shrink-0 scrollbar-none items-center justify-center gap-3 overflow-x-auto scroll-smooth rounded-xl bg-muted/50 p-2.5 backdrop-blur-xl [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                className="mx-auto flex max-w-full shrink-0 scrollbar-none items-center justify-center gap-3 overflow-x-auto scroll-smooth rounded-xl bg-muted/50 p-3 backdrop-blur-xl [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
               >
                 {images.map((img) => {
                   const isSelected = activeImageData?.id === img.id
@@ -255,8 +255,8 @@ export function ProductGallery({
                       aria-pressed={isSelected}
                       className={`group relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-lg bg-muted transition-all duration-300 ${
                         isSelected
-                          ? "opacity-100 ring-2 ring-primary ring-offset-2"
-                          : "opacity-40 hover:opacity-100"
+                          ? "opacity-100 ring-2 ring-primary ring-offset-2 ring-offset-background"
+                          : "opacity-45 hover:opacity-100"
                       }`}
                     >
                       {!isFailed ? (
@@ -367,7 +367,7 @@ export function ProductGallery({
         {/* 2. قسم شريط الصور المصغرة للتنقل (Thumbnails Carousel Section) */}
         {/* ================================================================= */}
         {images.length > 1 && (
-          <div className="flex touch-pan-x scrollbar-none items-center gap-3 overflow-x-auto scroll-smooth p-1 xl:max-h-[36rem] xl:shrink-0 xl:flex-col xl:overflow-y-auto [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex touch-pan-x scrollbar-none items-center gap-3 overflow-x-auto scroll-smooth p-1.5 xl:max-h-[36rem] xl:shrink-0 xl:flex-col xl:overflow-y-auto [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {images.map((img) => {
               const isSelected = activeImageData?.id === img.id
               const isFailed = Boolean(failedImages[img.url])
@@ -379,7 +379,7 @@ export function ProductGallery({
                   onClick={() => handleImageChange(img)}
                   className={`group relative size-18 shrink-0 cursor-pointer overflow-hidden rounded-xl bg-muted transition-all duration-300 ${
                     isSelected
-                      ? "opacity-100 ring-2 ring-foreground ring-inset"
+                      ? "opacity-100 ring-2 ring-primary ring-offset-2 ring-offset-background"
                       : "opacity-60 hover:opacity-100"
                   }`}
                   aria-label={t("SELECT_PRODUCT_IMAGE")}

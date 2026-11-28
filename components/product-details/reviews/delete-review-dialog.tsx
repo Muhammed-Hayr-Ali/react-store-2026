@@ -6,6 +6,7 @@
  */
 
 import * as React from "react"
+import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 
@@ -23,7 +24,7 @@ import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { deleteReview } from "@/lib/actions/store/product-details/reviews/mutations/delete-review"
 import { getActionErrorKey } from "@/lib/actions/error-keys"
-import { ProductReviewItem } from "@/lib/actions/store/product-details/reviews/queries/get-product-reviews"
+import type { ProductReviewItem } from "@/lib/actions/store/product-details/reviews/queries/get-product-reviews"
 
 interface DeleteReviewDialogProps {
   review: ProductReviewItem
@@ -39,6 +40,7 @@ export function DeleteReviewDialog({
   children,
 }: DeleteReviewDialogProps) {
   const t = useTranslations("ProductReviews")
+  const router = useRouter()
   const [isPending, startTransition] = React.useTransition()
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -47,6 +49,8 @@ export function DeleteReviewDialog({
   }
 
   const handleDelete = () => {
+    if (isPending) return
+
     startTransition(async () => {
       try {
         const result = await deleteReview(review.id)
@@ -61,6 +65,7 @@ export function DeleteReviewDialog({
 
         onOpenChange(false)
         toast.success(t("DELETE_REVIEW_SUCCESS"))
+        router.refresh()
       } catch {
         toast.error(t("DELETE_REVIEW_ERROR"))
       }
@@ -68,12 +73,7 @@ export function DeleteReviewDialog({
   }
 
   return (
-    <AlertDialog
-      open={open}
-      onOpenChange={(nextOpen) => {
-        if (nextOpen || !isPending) handleOpenChange(nextOpen)
-      }}
-    >
+    <AlertDialog open={open} onOpenChange={handleOpenChange}>
       {children && <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>}
       <AlertDialogContent
         onEscapeKeyDown={(event) => {
@@ -98,6 +98,7 @@ export function DeleteReviewDialog({
             variant="destructive"
             onClick={handleDelete}
             disabled={isPending}
+            aria-busy={isPending}
             className="text-xs"
           >
             {isPending ? (

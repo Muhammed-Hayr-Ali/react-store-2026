@@ -889,7 +889,14 @@
     "HOURS_AGO": "منذ {count} س",
     "DAYS_AGO": "منذ {count} ي",
     "MONTHS_AGO": "منذ {count} ش",
-    "YEARS_AGO": "منذ {count} سنة"
+    "YEARS_AGO": "منذ {count} سنة",
+    "FETCH_REVIEWS_ERROR": "تعذّر تحميل التقييمات.",
+    "RETRY_BUTTON": "إعادة المحاولة",
+    "SUBMIT_REVIEW_BUTTON": "إرسال التقييم",
+    "RATING_ARIA": "التقييم {rating} من 5",
+    "STAR_OPTION_ARIA": "اختيار {rating} من 5 نجوم",
+    "RATING_BAR_ARIA": "تقييم {rating} من 5، عدد التقييمات: {count}",
+    "CONTENT_TOO_LONG": "يجب ألا يتجاوز التعليق {max} حرف."
   },
   "ProductsManagement": {
     "PAGE_TITLE": "إدارة المنتجات",

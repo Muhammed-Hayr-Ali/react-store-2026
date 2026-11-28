@@ -1,9 +1,9 @@
 /**
- * @file lib/actions/store/product-details/queries/get-product-reviews.ts
+ * @file lib/actions/store/product-details/reviews/queries/get-product-reviews.ts
  * @description Retrieves approved product reviews along with reviewer profile details, rating summary statistics, and current user ownership status.
  */
 
-"use server"
+import "server-only"
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
@@ -43,8 +43,11 @@ export interface ProductReviewsResult {
 }
 
 interface GetProductReviewsOptions {
+  /** Max number of reviews to return. 0 (default) means no explicit limit. */
   limit?: number
 }
+
+const STARS = [5, 4, 3, 2, 1] as const
 
 export async function getProductReviews(
   productId: string,
@@ -62,12 +65,16 @@ export async function getProductReviews(
 
   const supabase = await createServerClient()
 
-  // 1. جلب بيانات المستخدم الحالي بالتوازي مع جلب التعليقات لتحسين الأداء
-  const [reviewsResponse, currentUserResult] = await Promise.all([
-    supabase
-      .from("product_reviews")
-      .select(
-        `
+  const currentUserResult = await getCurrentUser()
+  const currentUserId =
+    currentUserResult.success && currentUserResult.data
+      ? currentUserResult.data.id
+      : null
+
+  let listQuery = supabase
+    .from("product_reviews")
+    .select(
+      `
         id,
         rating,
         content,
@@ -81,14 +88,42 @@ export async function getProductReviews(
           avatar
         )
       `
+    )
+    .eq("product_id", productId)
+    .eq("is_approved", true)
+    .order("created_at", { ascending: false })
+
+  if (Number.isInteger(limit) && limit > 0) {
+    listQuery = listQuery.limit(limit)
+  }
+
+  const [listResponse, starResponses, ownReviewResponse] = await Promise.all([
+    listQuery,
+    // عدّ كل فئة نجوم داخل قاعدة البيانات (دون جلب الصفوف) لتبقى الإحصائيات دقيقة مهما كثرت التقييمات
+    Promise.all(
+      STARS.map((star) =>
+        supabase
+          .from("product_reviews")
+          .select("id", { count: "exact", head: true })
+          .eq("product_id", productId)
+          .eq("is_approved", true)
+          .eq("rating", star)
       )
-      .eq("product_id", productId)
-      .eq("is_approved", true)
-      .order("created_at", { ascending: false }),
-    getCurrentUser(),
+    ),
+    // يشمل التقييمات غير المعتمدة بعد، لمنع إرسال تقييم ثانٍ
+    currentUserId
+      ? supabase
+          .from("product_reviews")
+          .select("id", { count: "exact", head: true })
+          .eq("product_id", productId)
+          .eq("user_id", currentUserId)
+      : null,
   ])
 
-  const { data, error } = reviewsResponse
+  const error =
+    listResponse.error ??
+    starResponses.find((response) => response.error)?.error ??
+    ownReviewResponse?.error
 
   if (error) {
     console.error("[getProductReviews] Database query failed", {
@@ -99,82 +134,46 @@ export async function getProductReviews(
     return {
       success: false,
       error: "FETCH_REVIEWS_ERROR",
-      details: { database: [error.message] },
+      // لا نمرّر رسالة قاعدة البيانات الداخلية إلى المستدعي
+      details: { database: ["Failed to fetch reviews."] },
     }
   }
 
-  const rawReviews = data ?? []
-  const currentUserId =
-    currentUserResult.success && currentUserResult.data
-      ? currentUserResult.data.id
-      : null
+  const counts = STARS.map((star, index) => ({
+    rating: star,
+    count: starResponses[index]?.count ?? 0,
+  }))
 
-  // 2. حساب إحصائيات الملخص (Summary)
-  const totalReviews = rawReviews.length
-
-  // التحقق مما إذا كان المستخدم الحالي قد علق مسبقاً ضمن قائمة التعليقات المعتمدة أو البحث المباشر
-  const hasUserReviewed = currentUserId
-    ? rawReviews.some((review) => review.user_id === currentUserId)
-    : false
-
-  // تهيئة عدادات النجوم من 1 إلى 5
-  const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
-  let sumRatings = 0
-
-  rawReviews.forEach((review) => {
-    const r = Math.round(review.rating)
-    if (r >= 1 && r <= 5) {
-      counts[r] = (counts[r] || 0) + 1
-    }
-    sumRatings += review.rating
-  })
+  const totalReviews = counts.reduce((sum, item) => sum + item.count, 0)
+  const sumRatings = counts.reduce(
+    (sum, item) => sum + item.rating * item.count,
+    0
+  )
 
   const averageRating =
     totalReviews > 0 ? Number((sumRatings / totalReviews).toFixed(1)) : 0
 
-  const ratingBreakdown: RatingBreakdownItem[] = [5, 4, 3, 2, 1].map((star) => {
-    const count = counts[star] || 0
-    const percentage =
-      totalReviews > 0 ? Number(((count / totalReviews) * 100).toFixed(1)) : 0
-    return {
-      rating: star,
+  const ratingBreakdown: RatingBreakdownItem[] = counts.map(
+    ({ rating, count }) => ({
+      rating,
       count,
-      percentage,
-    }
-  })
-
-  // 3. تنسيق قائمة التعليقات مع تطبيق الـ limit المطلوب للعرض
-  const limitedRawReviews = limit > 0 ? rawReviews.slice(0, limit) : rawReviews
-
-  const formattedReviews: ProductReviewItem[] = limitedRawReviews.map(
-    (review) => {
-      let reviewer: ReviewerProfile | null = null
-      if (review.user) reviewer = review.user
-
-      return {
-        id: review.id,
-        rating: review.rating,
-        content: review.content,
-        is_approved: review.is_approved,
-        created_at: review.created_at,
-        user_id: review.user_id,
-        user: reviewer,
-      }
-    }
+      percentage:
+        totalReviews > 0
+          ? Number(((count / totalReviews) * 100).toFixed(1))
+          : 0,
+    })
   )
+
+  const reviews: ProductReviewItem[] = listResponse.data ?? []
 
   return {
     success: true,
     data: {
       productId,
       currentUserId,
-      hasUserReviewed,
-      reviews: formattedReviews,
-      summary: {
-        averageRating,
-        totalReviews,
-        ratingBreakdown,
-      },
+      hasUserReviewed: (ownReviewResponse?.count ?? 0) > 0,
+      reviews,
+      summary: { averageRating, totalReviews, ratingBreakdown },
     },
   }
 }

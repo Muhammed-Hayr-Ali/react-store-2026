@@ -7,7 +7,7 @@
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
-import { MessageSquareWarningIcon } from "lucide-react"
+import { MessageSquareTextIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { ReviewDialog } from "./review-dialog"
@@ -16,13 +16,13 @@ interface EmptyReviewsProps {
   productId: string
   currentUserId: string | null | undefined
   hasUserReviewed: boolean | undefined
- }
+}
 
 export function EmptyReviews({
   productId,
   currentUserId,
   hasUserReviewed,
- }: EmptyReviewsProps) {
+}: EmptyReviewsProps) {
   const t = useTranslations("ProductReviews")
   const [isOpen, setIsOpen] = React.useState(false)
 
@@ -32,7 +32,7 @@ export function EmptyReviews({
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 p-8 text-center">
       <div className="mb-3 flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
-        <MessageSquareWarningIcon className="size-6" />
+        <MessageSquareTextIcon aria-hidden="true" className="size-6" />
       </div>
       <h4 className="font-semibold text-foreground">{t("NO_REVIEWS_TITLE")}</h4>
       <p className="mt-1 max-w-sm text-xs text-muted-foreground">
@@ -45,15 +45,8 @@ export function EmptyReviews({
           mode="create"
           open={isOpen}
           onOpenChange={setIsOpen}
-          onSuccess={() => {
-            setIsOpen(false)
-          }}
         >
-          <Button
-            variant="outline"
-            className="mt-4 text-xs"
-            aria-label={t("WRITE_FIRST_REVIEW_BUTTON")}
-          >
+          <Button variant="outline" className="mt-4 text-xs">
             {t("WRITE_FIRST_REVIEW_BUTTON")}
           </Button>
         </ReviewDialog>
