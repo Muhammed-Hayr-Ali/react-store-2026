@@ -1592,5 +1592,8 @@
     "CURRENT_PRICE_LABEL": "Current price:",
     "OLD_PRICE_LABEL": "Previous price:"
   },
-  "lastUpdatedAgo": "Last Updated Ago"
+  "lastUpdatedAgo": "Last Updated Ago",
+  "StoreLayout": {
+    "skipToContent": "Skip To Content"
+  }
 }

@@ -525,11 +525,7 @@
   },
   "Home": {
     "META_TITLE": "الرئيسية",
-    "META_DESCRIPTION": "مرحباً بك في متجرنا. استكشف منتجاتنا المميزة وتصنيفاتنا وأحدث الوصولات.",
-    "NEW_ARRIVALS": "وصل حديثاً",
-    "NEW_ARRIVALS_DESC": "استكشف أحدث إضافاتنا ومستلزماتك اليومية.",
-    "NO_PRODUCTS_AVAILABLE": "لا توجد منتجات متوفرة.",
-    "LOADING": "جارٍ تحميل المزيد من المنتجات..."
+    "META_DESCRIPTION": "مرحباً بك في متجرنا. استكشف منتجاتنا المميزة وتصنيفاتنا وأحدث الوصولات."
   },
   "LoginForm": {
     "META_TITLE": "تسجيل الدخول",
@@ -1590,5 +1586,8 @@
     "CURRENT_PRICE_LABEL": "السعر الحالي:",
     "OLD_PRICE_LABEL": "السعر السابق:"
   },
-  "lastUpdatedAgo": "آخر تحديث منذ"
+  "lastUpdatedAgo": "آخر تحديث منذ",
+  "StoreLayout": {
+    "skipToContent": "تخطي الى المحتوى"
+  }
 }

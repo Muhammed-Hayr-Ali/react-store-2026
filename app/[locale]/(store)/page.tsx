@@ -11,30 +11,37 @@ import CategoryCarousel from "@/components/store/shop-by-category-slider/categor
 import { CategoryCarouselSkeleton } from "@/components/store/shop-by-category-slider/category-carousel-skeleton"
 import { LatestProductsSection } from "@/components/store/latest-products/latest-products-section"
 import { LatestProductsSkeleton } from "@/components/store/latest-products/latest-products-skeleton"
-import { STORE_CONTAINER } from "@/lib/config/app_config"
+import { getTranslations } from "next-intl/server"
+import { createMetadata } from "@/lib/config/metadata_generator"
+import { APP_CONFIG } from "@/lib/config/app_config"
+
+export async function generateMetadata() {
+  const t = await getTranslations("Home")
+
+  return createMetadata({
+    siteName: APP_CONFIG.NAME,
+    title: t("META_TITLE"),
+    description: t("META_DESCRIPTION"),
+  })
+}
 
 export default function HomePage() {
   return (
-    <main id="main-content" className="w-full flex-1">
-      {/* الحاوية نفسها المستخدمة في الهيدر والفوتر */}
-      <div
-        className={`${STORE_CONTAINER} space-y-8 py-4 md:space-y-12 md:py-6`}
-      >
-        {/* 1. سلايدر المنتجات المميزة */}
-        <Suspense fallback={<FeaturedHeroSliderSkeleton />}>
-          <FeaturedHeroSlider />
-        </Suspense>
+    <>
+      {/* 1. سلايدر المنتجات المميزة */}
+      <Suspense fallback={<FeaturedHeroSliderSkeleton />}>
+        <FeaturedHeroSlider />
+      </Suspense>
 
-        {/* 2. شريط التصنيفات الرئيسية */}
-        <Suspense fallback={<CategoryCarouselSkeleton />}>
-          <CategoryCarousel />
-        </Suspense>
+      {/* 2. شريط التصنيفات الرئيسية */}
+      <Suspense fallback={<CategoryCarouselSkeleton />}>
+        <CategoryCarousel />
+      </Suspense>
 
-        {/* 3. أحدث المنتجات */}
-        <Suspense fallback={<LatestProductsSkeleton showViewAll />}>
-          <LatestProductsSection viewAllHref="/products" />
-        </Suspense>
-      </div>
-    </main>
+      {/* 3. أحدث المنتجات */}
+      <Suspense fallback={<LatestProductsSkeleton showViewAll />}>
+        <LatestProductsSection viewAllHref="/products" />
+      </Suspense>
+    </>
   )
 }
