@@ -18,6 +18,8 @@ import { getFilteredProducts } from "@/lib/actions/store/queries/get_filtered_pr
 import HomeClientWrapper from "@/components/store/client-wrapper/home-client-wrapper"
 import { cn } from "@/lib/utils"
 import { getStoreExchangeRate } from "@/lib/actions/store/queries/get-exchange-rate"
+import CategoryCarousel from "@/components/store/shop-by-category-slider/shop-by-category-slider"
+import { getAllCategories } from "@/lib/actions/store/queries/get-all-categories"
 
 interface PageProps {
   params: Promise<{ locale: string }>
@@ -49,13 +51,14 @@ export default async function Page() {
 
   const exchangeRate = getStoreExchangeRate("USD", "new")
 
-  const [featuredResult, latestResult] = await Promise.all([
+  const [featuredResult, categoriesResult, latestResult] = await Promise.all([
     getFilteredProducts({
       limit: FEATURED_LIMET,
       page: PAGE_NUMBER,
       activeOnly: ACTIVE_ONLY,
       is_featured: FEATURED_PRODUCTS,
     }),
+    getAllCategories(),
     getFilteredProducts({
       limit: LATEST_LIMIT,
       page: PAGE_NUMBER,
@@ -65,6 +68,7 @@ export default async function Page() {
   ])
 
   const slides = featuredResult.success ? featuredResult.data : []
+  const categories = categoriesResult.success ? categoriesResult.data : []
   const initialProducts = latestResult.success ? latestResult.data : []
   const resolvedExchangeRate = await exchangeRate
 
@@ -84,6 +88,9 @@ export default async function Page() {
             slides={slides}
             exchangeRate={resolvedExchangeRate}
           />
+
+          {/* 2. شريط التصنيفات الرئيسية */}
+          <CategoryCarousel categories={categories} />
 
           {/* 2. شريط التصنيفات الرئيسية */}
           <HomeClientWrapper
