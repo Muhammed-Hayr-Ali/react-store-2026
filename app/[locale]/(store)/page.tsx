@@ -5,17 +5,10 @@
 
 import FeaturedHeroSlider from "@/components/store/featured-hero-slider/featured-hero-slider"
 
-import {
-  APP_CONFIG,
-  COOKIES_KEYS,
-  PRODUCT_MODE,
-  STORE_CONTAINER,
-} from "@/lib/config/app_config"
+import { APP_CONFIG, STORE_CONTAINER } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
-import { cookies } from "next/headers"
 import { getTranslations } from "next-intl/server"
 import { getFilteredProducts } from "@/lib/actions/store/queries/get_filtered_products"
-import HomeClientWrapper from "@/components/store/client-wrapper/home-client-wrapper"
 import { cn } from "@/lib/utils"
 import { getStoreExchangeRate } from "@/lib/actions/store/queries/get-exchange-rate"
 import CategoryCarousel from "@/components/store/shop-by-category-slider/shop-by-category-slider"
@@ -37,12 +30,6 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function Page() {
-  const cookieStore = await cookies()
-
-  const viewModeCookie = cookieStore.get(COOKIES_KEYS.PRODUCT_MODE)?.value
-  const viewMode =
-    viewModeCookie === PRODUCT_MODE.LIST ? PRODUCT_MODE.LIST : PRODUCT_MODE.GRID
-
   const FEATURED_PRODUCTS = true
   const FEATURED_LIMET = 5
   const LATEST_LIMIT = 12
@@ -91,8 +78,6 @@ export default async function Page() {
 
           {/* 2. شريط التصنيفات الرئيسية */}
           <CategoryCarousel categories={categories} />
-
-          
         </div>
       </main>
     </>
