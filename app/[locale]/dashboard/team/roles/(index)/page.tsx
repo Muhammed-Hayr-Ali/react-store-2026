@@ -33,12 +33,13 @@ export async function generateMetadata({ params }: PageProps) {
 export default async function Page({ params }: PageProps) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "RolesManagement" })
+  const errorT = await getTranslations({ locale, namespace: "ActionErrors" })
 
   // استدعاء دالة جلب البيانات والمعالجة المستقلة
   const pageDataResult = await getRolesPageData()
   if (!pageDataResult.success) {
     throw new Error(
-      t(getActionErrorKey(pageDataResult.error) ?? t("UNEXPECTED_ERROR"))
+      errorT(getActionErrorKey(pageDataResult.error))
     )
   }
 

@@ -7,7 +7,7 @@
 
 import { createServerClient } from "@/lib/database/supabase/server"
 import type { ApiResult } from "@/lib/actions/types/utils"
-import { isAppPermissionArray, type RolesSummary } from "../types"
+import { normalizeRolePermissions, type RolesSummary } from "../types"
 
 export async function getRolesSummary(): Promise<ApiResult<RolesSummary>> {
   const supabase = await createServerClient()
@@ -27,7 +27,8 @@ export async function getRolesSummary(): Promise<ApiResult<RolesSummary>> {
   let active = 0
 
   for (const role of roles) {
-    if (!isAppPermissionArray(role.permissions)) {
+    const permissions = normalizeRolePermissions(role.permissions)
+    if (!permissions) {
       return {
         success: false,
         error: "GET_ROLES_ERROR",
@@ -37,7 +38,7 @@ export async function getRolesSummary(): Promise<ApiResult<RolesSummary>> {
       }
     }
 
-    if (role.permissions.length > 0) active += 1
+    if (permissions.length > 0) active += 1
   }
 
   return {

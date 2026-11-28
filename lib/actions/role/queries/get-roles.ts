@@ -23,6 +23,12 @@ export async function getRoles(): Promise<ApiResult<RoleRecord[]>> {
     .order("created_at", { ascending: true })
 
   if (error) {
+    console.error("[getRoles] Failed to query roles", {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    })
     return {
       success: false,
       error: "GET_ALL_ROLES_ERROR",
@@ -34,6 +40,10 @@ export async function getRoles(): Promise<ApiResult<RoleRecord[]>> {
   for (const row of data ?? []) {
     const role = toRoleRecord(row)
     if (!role) {
+      console.error(
+        "[getRoles] Role contains invalid permissions data",
+        JSON.stringify({ roleId: row.id, permissions: row.permissions })
+      )
       return {
         success: false,
         error: "GET_ALL_ROLES_ERROR",

@@ -34,6 +34,10 @@ export const PERMISSIONS = {
   DELETE_CATEGORY: "delete_category",
   MANAGE_CATEGORIES: "manage_categories",
 
+  // --- Promotional Banners Management ---
+  VIEW_PROMO_BANNERS_DASHBOARD: "view_promo_banners_dashboard",
+  MANAGE_PROMO_BANNERS: "manage_promo_banners",
+
   // --- 3. Products Management ---
   VIEW_PRODUCTS_DASHBOARD: "view_products_dashboard",
   READ_PRODUCTS: "read_products",
@@ -93,26 +97,34 @@ export const PERMISSIONS = {
 
 export type AppPermission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]
 
-const appPermissionValues: ReadonlySet<string> = new Set(
-  Object.values(PERMISSIONS)
-)
-
-function isAppPermission(value: Json): value is AppPermission {
-  return typeof value === "string" && appPermissionValues.has(value)
-}
-
-export function isAppPermissionArray(value: Json): value is AppPermission[] {
-  return Array.isArray(value) && value.every(isAppPermission)
-}
-
 export type RoleRecord = Omit<Tables<"roles">, "permissions"> & {
-  permissions: AppPermission[]
+  permissions: string[]
+}
+
+export function normalizeRolePermissions(value: Json): string[] | null {
+  if (Array.isArray(value)) {
+    const permissions = value.filter(
+      (permission: Json): permission is string =>
+        typeof permission === "string"
+    )
+    return permissions.length === value.length ? permissions : null
+  }
+
+  if (value && typeof value === "object") {
+    const entries = Object.entries(value)
+    if (entries.every(([, enabled]) => typeof enabled === "boolean")) {
+      return entries.flatMap(([permission, enabled]) =>
+        enabled === true ? [permission] : []
+      )
+    }
+  }
+
+  return null
 }
 
 export function toRoleRecord(role: Tables<"roles">): RoleRecord | null {
-  return isAppPermissionArray(role.permissions)
-    ? { ...role, permissions: role.permissions }
-    : null
+  const permissions = normalizeRolePermissions(role.permissions)
+  return permissions ? { ...role, permissions } : null
 }
 
 export interface RolesSummary {

@@ -32,6 +32,7 @@ export const APP_ROUTES = {
     OVERVIEW: "/dashboard",
     CATEGORIES: "/dashboard/categories",
     BRANDS: "/dashboard/brands",
+    PROMO_BANNERS: "/dashboard/promo-banners",
     PRODUCTS: "/dashboard/products",
     REVIEWS: "/dashboard/reviews",
     USERS: "/dashboard/users",

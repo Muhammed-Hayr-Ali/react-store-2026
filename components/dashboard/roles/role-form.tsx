@@ -57,7 +57,7 @@ export function RoleForm({ initialData, roleId }: RoleFormProps) {
     initialData?.description || ""
   )
   const [selectedPermissions, setSelectedPermissions] = React.useState<
-    AppPermission[]
+    string[]
   >(initialData?.permissions ?? [])
 
   const totalPossiblePermissions = React.useMemo(() => {
@@ -77,7 +77,12 @@ export function RoleForm({ initialData, roleId }: RoleFormProps) {
     )
     if (isAllSelected) {
       setSelectedPermissions((prev) =>
-        prev.filter((p) => !groupPermissions.includes(p))
+        prev.filter(
+          (permission) =>
+            !groupPermissions.some(
+              (groupPermission) => groupPermission === permission
+            )
+        )
       )
     } else {
       setSelectedPermissions((prev) =>

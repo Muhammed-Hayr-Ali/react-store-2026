@@ -112,6 +112,23 @@ export const PERMISSION_GROUPS = [
     ],
   },
 
+  {
+    id: "promo_banners_group",
+    label: "promo_banners_group",
+    permissions: [
+      {
+        key: PERMISSIONS.VIEW_PROMO_BANNERS_DASHBOARD,
+        label: "view_promo_banners_dashboard",
+        description: "view_promo_banners_dashboard_desc",
+      },
+      {
+        key: PERMISSIONS.MANAGE_PROMO_BANNERS,
+        label: "manage_promo_banners",
+        description: "manage_promo_banners_desc",
+      },
+    ],
+  },
+
   // ==========================================
   // 3. Products Management
   // ==========================================

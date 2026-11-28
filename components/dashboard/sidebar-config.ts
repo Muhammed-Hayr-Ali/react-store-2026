@@ -8,6 +8,7 @@ import {
   Mail,
   PackageIcon,
   MessageSquareIcon, // <-- 1. أضفنا هذه الأيقونة
+  Megaphone,
 } from "lucide-react"
 import { PERMISSIONS, AppPermission } from "@/lib/actions/role"
 import { APP_ROUTES } from "@/lib/config/app-routes"
@@ -61,6 +62,13 @@ export const SIDEBAR_CONFIG: SidebarConfig = {
       url: APP_ROUTES.DASHBOARD.BRANDS,
       icon: Tags,
       requiredPermission: PERMISSIONS.VIEW_BRANDS_DASHBOARD,
+    },
+    {
+      key: "promo-banners-management",
+      label: "PROMO_BANNERS_MANAGEMENT",
+      url: APP_ROUTES.DASHBOARD.PROMO_BANNERS,
+      icon: Megaphone,
+      requiredPermission: PERMISSIONS.VIEW_PROMO_BANNERS_DASHBOARD,
     },
     {
       key: "products-management",
