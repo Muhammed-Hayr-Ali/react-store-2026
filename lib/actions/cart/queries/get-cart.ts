@@ -9,6 +9,12 @@ import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 import type { CartQueryResult, CartItemQueryResult } from "../types"
 
+interface CartProductImageRow {
+  url: string
+  is_primary: boolean | null
+  variant_id: string | null
+}
+
 export async function getCart(): Promise<ApiResult<CartQueryResult | null>> {
   const supabase = await createServerClient()
 
@@ -60,8 +66,8 @@ export async function getCart(): Promise<ApiResult<CartQueryResult | null>> {
         id,
         name,
         slug,
-         description,
-     product_images (url, is_primary, variant_id)
+        description,
+        product_images (url, is_primary, variant_id)
       ),
       product_variants (
         id,
@@ -89,17 +95,25 @@ export async function getCart(): Promise<ApiResult<CartQueryResult | null>> {
     const product = item.products
     const variant = item.product_variants
 
-    const productImages = product?.product_images ?? []
+    const productImages: CartProductImageRow[] = Array.isArray(
+      product?.product_images
+    )
+      ? (product.product_images as CartProductImageRow[])
+      : []
     const variantId = variant?.id ?? null
 
     // تصفية الصور الخاصة بهذا المتغير فقط عبر variant_id
-    const variantImages = variantId
-      ? productImages.filter((img) => img.variant_id === variantId)
+    const variantImages: CartProductImageRow[] = variantId
+      ? productImages.filter(
+          (img: CartProductImageRow) => img.variant_id === variantId
+        )
       : []
 
     // البحث عن الصورة الأساسية للمتغير أو أول صورة للمتغير (وإلا إرجاع null تماماً)
     const matchedImage =
-      variantImages.find((img) => img.is_primary) || variantImages[0] || null
+      variantImages.find((img: CartProductImageRow) => Boolean(img.is_primary)) ||
+      variantImages[0] ||
+      null
 
     return {
       id: item.id,
@@ -114,9 +128,9 @@ export async function getCart(): Promise<ApiResult<CartQueryResult | null>> {
         name: product?.name ?? "",
         slug: product?.slug ?? "",
         description: product?.description ?? "",
-        product_images: productImages.map((img) => ({
+        product_images: productImages.map((img: CartProductImageRow) => ({
           url: img.url,
-          is_primary: img.is_primary,
+          is_primary: Boolean(img.is_primary),
           variant_id: img.variant_id,
         })),
       },

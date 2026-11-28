@@ -9,7 +9,7 @@ import { revalidatePath } from "next/cache"
 
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
-import type { Tables } from "@/lib/database/supabase/types"
+import type { Tables } from "@/lib/database/supabase/database.types"
 import { getValidationDetails } from "@/lib/actions/validation"
 
 import { wishlistSchema, type WishlistInput } from "../schemas"

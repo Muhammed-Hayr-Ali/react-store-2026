@@ -9,7 +9,7 @@ import { unstable_cache } from "next/cache"
 import type { ApiResult } from "../../types/utils"
 import { createPublicServerClient } from "@/lib/database/supabase/public"
 import { CACHE_TAG } from "@/lib/config/app_config"
-import type { Tables } from "@/lib/database/supabase/types"
+import type { Tables } from "@/lib/database/supabase/database.types"
 
 type ProductVariantRecord = Pick<
   Tables<"product_variants">,
@@ -348,9 +348,7 @@ const getCachedFilteredProducts = unstable_cache(
 
     if (error) throw new Error(error.message)
 
-    return (data ?? []).map((product) =>
-      toSimpliProduct(product, activeOnly)
-    )
+    return (data ?? []).map((product) => toSimpliProduct(product, activeOnly))
   },
   // مفتاح جديد لأن شكل البيانات تغير
   ["filtered-products-v2"],

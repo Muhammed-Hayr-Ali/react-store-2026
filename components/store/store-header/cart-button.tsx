@@ -39,6 +39,28 @@ interface CartButtonProps {
   className?: string
 }
 
+interface HeaderCartImage {
+  url: string
+  is_primary?: boolean | null
+}
+
+interface HeaderCartItem {
+  id: string
+  quantity: number | string
+  resolved_image_url?: string | null
+  products: {
+    name: string
+    slug: string
+    product_images: HeaderCartImage[]
+  }
+  product_variants?: {
+    price?: number | string | null
+    sku?: string | null
+    track_inventory?: boolean | null
+    stock_quantity?: number | null
+  } | null
+}
+
 /** شارة عدد السلة: تختفي عند الصفر وتُختصر فوق 99 */
 function CartBadge({ count, className }: { count: number; className: string }) {
   if (count <= 0) return null
@@ -82,20 +104,20 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
     pathname.startsWith(`${APP_ROUTES.CART}/`) ||
     pathname.startsWith("/checkout")
 
-  const cartLabel =
-     t("cartAriaLabel")
+  const cartLabel = t("cartAriaLabel")
 
-  const items = React.useMemo(() => cart?.items ?? [], [cart?.items])
+  const items: HeaderCartItem[] = Array.isArray(cart?.items)
+    ? (cart.items as HeaderCartItem[])
+    : []
 
   // الأسعار مخزنة بالسنتات، فتمرر إلى formatPrice كما هي
-  const subtotalInCents = React.useMemo(
-    () =>
-      items.reduce((acc, item) => {
-        const unitPriceInCents = Number(item.product_variants?.price ?? 0)
-        const quantity = drafts[item.id] ?? Number(item.quantity)
-        return acc + unitPriceInCents * quantity
-      }, 0),
-    [items, drafts]
+  const subtotalInCents: number = items.reduce(
+    (acc: number, item: HeaderCartItem) => {
+      const unitPriceInCents = Number(item.product_variants?.price ?? 0)
+      const quantity = drafts[item.id] ?? Number(item.quantity)
+      return acc + unitPriceInCents * quantity
+    },
+    0
   )
 
   const buttonContent =
@@ -179,14 +201,16 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
               </div>
             ) : (
               <ul className="divide-y divide-border/50">
-                {items.map((item) => {
+                {items.map((item: HeaderCartItem) => {
                   const serverQty = Number(item.quantity)
                   const qty = drafts[item.id] ?? serverQty
                   const product = item.products
                   const variantInfo = item.product_variants
                   const imageUrl =
                     item.resolved_image_url ??
-                    product.product_images.find((img) => img.is_primary)?.url ??
+                    product.product_images.find(
+                      (img: HeaderCartImage) => img.is_primary
+                    )?.url ??
                     product.product_images[0]?.url ??
                     null
 
@@ -345,13 +369,15 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
         ) : (
           <>
             <ul className="max-h-64 space-y-2.5 overflow-y-auto">
-              {items.map((item) => {
+              {items.map((item: HeaderCartItem) => {
                 const qty = drafts[item.id] ?? Number(item.quantity)
                 const product = item.products
                 const variantInfo = item.product_variants
                 const imageUrl =
                   item.resolved_image_url ??
-                  product.product_images.find((img) => img.is_primary)?.url ??
+                  product.product_images.find(
+                    (img: HeaderCartImage) => img.is_primary
+                  )?.url ??
                   product.product_images[0]?.url ??
                   null
 
@@ -448,4 +474,4 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
       </PopoverContent>
     </Popover>
   )
-}
+}

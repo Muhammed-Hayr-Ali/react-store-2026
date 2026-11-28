@@ -4,7 +4,7 @@
  */
 
 import * as z from "zod"
-import type { Json, Tables } from "@/lib/database/supabase/types"
+import type { Json, Tables } from "@/lib/database/supabase/database.types"
 
 export const ROLES = {
   ADMIN: "admin",
@@ -101,9 +101,7 @@ function isAppPermission(value: Json): value is AppPermission {
   return typeof value === "string" && appPermissionValues.has(value)
 }
 
-export function isAppPermissionArray(
-  value: Json
-): value is AppPermission[] {
+export function isAppPermissionArray(value: Json): value is AppPermission[] {
   return Array.isArray(value) && value.every(isAppPermission)
 }
 

@@ -75,9 +75,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Can } from "@/components/shared/can"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { PERMISSIONS } from "@/lib/actions/role"
 import { useIsMobile } from "@/hooks/use-mobile"
 
 // User types and account management dialogs.
@@ -247,28 +245,34 @@ export function UsersTable({
         accessorKey: "roles",
         header: t("COLUMN_ROLES"),
         enableHiding: true,
-        cell: ({ row }) => (
-          <div className="flex flex-wrap gap-1">
-            {row.original.roles && row.original.roles.length > 0 ? (
-              row.original.roles.map((r) => (
+        cell: ({ row }) => {
+          const roles = Array.isArray(row.original.roles)
+            ? (row.original.roles as string[])
+            : []
+
+          return (
+            <div className="flex flex-wrap gap-1">
+              {roles.length > 0 ? (
+                roles.map((r: string) => (
+                  <Badge
+                    key={r}
+                    variant="secondary"
+                    className="truncate px-1.5 py-0.5 text-xs leading-tight font-normal text-muted-foreground"
+                  >
+                    {r}
+                  </Badge>
+                ))
+              ) : (
                 <Badge
-                  key={r}
                   variant="secondary"
                   className="truncate px-1.5 py-0.5 text-xs leading-tight font-normal text-muted-foreground"
                 >
-                  {r}
+                  {t("NO_ROLES")}
                 </Badge>
-              ))
-            ) : (
-              <Badge
-                variant="secondary"
-                className="truncate px-1.5 py-0.5 text-xs leading-tight font-normal text-muted-foreground"
-              >
-                {t("NO_ROLES")}
-              </Badge>
-            )}
-          </div>
-        ),
+              )}
+            </div>
+          )
+        },
       },
       // 4. Moderation Status Badge (Hideable)
       {

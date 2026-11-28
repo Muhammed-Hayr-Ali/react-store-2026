@@ -9,7 +9,7 @@ import { unstable_cache } from "next/cache"
 import { createClient } from "@supabase/supabase-js"
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { CACHE_TAG } from "@/lib/config/app_config"
-import type { Database, Tables } from "@/lib/database/supabase/types"
+import type { Database, Tables } from "@/lib/database/supabase/database.types"
 import { isProductAttributes } from "@/lib/actions/products/types"
 
 export type ProductVariantDetail = Omit<
@@ -178,7 +178,10 @@ const getCachedProductDetails = unstable_cache(
         ascending: true,
       })
       .order("id", { referencedTable: "product_variants", ascending: true })
-      .order("sort_order", { referencedTable: "product_images", ascending: true })
+      .order("sort_order", {
+        referencedTable: "product_images",
+        ascending: true,
+      })
       .order("id", { referencedTable: "product_images", ascending: true })
       .maybeSingle()
 

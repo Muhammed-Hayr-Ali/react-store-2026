@@ -10,6 +10,11 @@ import { addDays, format, startOfToday } from "date-fns"
 import type { ApiResult } from "../../types/utils"
 import type { AdminProductsSummary } from "../types"
 
+interface SummaryProductVariantRow {
+  stock_quantity: number | string | null
+  expiration_date: string | null
+}
+
 export async function getAdminProductsSummary(): Promise<
   ApiResult<AdminProductsSummary>
 > {
@@ -42,26 +47,38 @@ export async function getAdminProductsSummary(): Promise<
     data: {
       active: products.filter((product) => product.is_active).length,
       lowStock: products.filter((product) => {
-        const variants = product.product_variants ?? []
+        const variants: SummaryProductVariantRow[] = Array.isArray(
+          product.product_variants
+        )
+          ? (product.product_variants as SummaryProductVariantRow[])
+          : []
+
         if (variants.length === 0) return true // إذا لم تكن هناك متغيرات يعتبر مخزون منخفض
 
         // استخراج جميع الكميات وحساب الحد الأدنى (أقل كمية متوفرة بين المتغيرات)
         const stockQuantities = variants
-          .map((v) => Number(v.stock_quantity))
-          .filter((s) => !isNaN(s))
+          .map((v: SummaryProductVariantRow) => Number(v.stock_quantity))
+          .filter((s: number) => !isNaN(s))
 
-        const minStock = stockQuantities.length > 0 ? Math.min(...stockQuantities) : 0
-        
+        const minStock =
+          stockQuantities.length > 0 ? Math.min(...stockQuantities) : 0
+
         return minStock <= 10
       }).length,
-      expiringSoon: products.filter((product) =>
-        (product.product_variants ?? []).some(
-          (variant) =>
+      expiringSoon: products.filter((product) => {
+        const variants: SummaryProductVariantRow[] = Array.isArray(
+          product.product_variants
+        )
+          ? (product.product_variants as SummaryProductVariantRow[])
+          : []
+
+        return variants.some(
+          (variant: SummaryProductVariantRow) =>
             Boolean(variant.expiration_date) &&
             variant.expiration_date! >= todayValue &&
             variant.expiration_date! <= expirationLimitValue
         )
-      ).length,
+      }).length,
     },
   }
 }

@@ -3,8 +3,9 @@
  * @description TypeScript types and interfaces for Brands entity.
  */
 
-import type { Tables } from "@/lib/database/supabase/types"
+import { Tables } from "@/lib/database/supabase/database.types"
 
+ 
 export type BrandRecord = Tables<"brands">
 
 export interface BrandsSummary {

@@ -100,6 +100,28 @@ import { AspectRatio } from "@/components/ui/aspect-ratio"
 
 type FormValues = CreateProductInput
 
+type ProductVariantItem = {
+  id: string
+  sku: string
+  name?: string | null
+  attributes?: Record<string, string> | null
+  price: number | string
+  compare_at_price?: number | string | null
+  stock_quantity?: number | null
+  track_inventory?: boolean | null
+  low_stock_threshold?: number | null
+  expiration_date?: string | null
+  is_active?: boolean | null
+  sort_order?: number | null
+}
+
+type ProductImageItem = {
+  url: string
+  alt_text?: string | null
+  is_primary?: boolean | null
+  variant_id?: string | null
+}
+
 interface CategoryTreeRow {
   category: Category
   depth: number
@@ -327,15 +349,9 @@ export default function ProductForm({
 
   const isEditing = Boolean(product)
 
-  const categoriesList = React.useMemo(
-    () => initialCategories ?? [],
-    [initialCategories]
-  )
-  const categoryTree = React.useMemo(
-    () => flattenCategoryTree(categoriesList),
-    [categoriesList]
-  )
-  const brandsList = React.useMemo(() => initialBrands ?? [], [initialBrands])
+  const categoriesList = initialCategories ?? []
+  const categoryTree = flattenCategoryTree(categoriesList)
+  const brandsList = initialBrands ?? []
 
   const [brandModal, setBrandModal] = React.useState<{
     type: "create" | "update" | "delete" | null
@@ -347,54 +363,58 @@ export default function ProductForm({
     data: Category | null
   }>({ type: null, data: null })
 
-  const initialImages = React.useMemo(() => {
-    if (!product?.product_images || product.product_images.length === 0) {
-      return [DEFAULT_IMAGE]
-    }
-    const variantSkuById = new Map(
-      (product.product_variants ?? []).map((variant) => [
-        variant.id,
-        variant.sku.toUpperCase(),
-      ])
-    )
+  const rawImages = (product?.product_images ?? []) as ProductImageItem[]
+  const rawVariants = (product?.product_variants ?? []) as ProductVariantItem[]
 
-    return normalizeGeneralImagePrimary(
-      product.product_images.map((img) => {
-        return {
-          url: img.url,
-          alt_text: img.alt_text || "",
-          is_primary: img.is_primary,
-          variant_sku: img.variant_id
-            ? (variantSkuById.get(img.variant_id) ?? "")
-            : "",
-        }
-      })
-    )
-  }, [product])
+  const initialImages =
+    rawImages.length === 0
+      ? [DEFAULT_IMAGE]
+      : (() => {
+          const variantSkuById = new Map<string, string>(
+            rawVariants.map((variant: ProductVariantItem) => [
+              String(variant.id),
+              String(variant.sku).toUpperCase(),
+            ])
+          )
 
-  const initialVariants = React.useMemo(() => {
-    if (!product?.product_variants || product.product_variants.length === 0) {
-      return [DEFAULT_VARIANT]
-    }
-    // Order matters: sort_order is recalculated from item index on save
-    const sortedVariants = [...product.product_variants].sort(
-      (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)
-    )
-    return sortedVariants.map((v, idx) => ({
-      sku: v.sku.toUpperCase(),
-      name: v.name || "",
-      attributes: v.attributes,
-      price: Number(v.price) / 100,
-      compare_at_price:
-        v.compare_at_price != null ? Number(v.compare_at_price) / 100 : null,
-      stock_quantity: v.stock_quantity,
-      track_inventory: v.track_inventory,
-      low_stock_threshold: v.low_stock_threshold,
-      expiration_date: v.expiration_date ?? "",
-      is_active: v.is_active,
-      sort_order: v.sort_order || idx + 1,
-    }))
-  }, [product])
+          return normalizeGeneralImagePrimary(
+            rawImages.map((img: ProductImageItem) => ({
+              url: String(img.url),
+              alt_text: img.alt_text || "",
+              is_primary: Boolean(img.is_primary),
+              variant_sku: img.variant_id
+                ? (variantSkuById.get(String(img.variant_id)) ?? "")
+                : "",
+            }))
+          )
+        })()
+
+  const initialVariants =
+    rawVariants.length === 0
+      ? [DEFAULT_VARIANT]
+      : (() => {
+          // Order matters: sort_order is recalculated from item index on save
+          const sortedVariants = [...rawVariants].sort(
+            (a: ProductVariantItem, b: ProductVariantItem) =>
+              (a.sort_order ?? 0) - (b.sort_order ?? 0)
+          )
+          return sortedVariants.map((v: ProductVariantItem, idx: number) => ({
+            sku: String(v.sku).toUpperCase(),
+            name: v.name || "",
+            attributes: (v.attributes ?? {}) as Record<string, string>,
+            price: Number(v.price) / 100,
+            compare_at_price:
+              v.compare_at_price != null
+                ? Number(v.compare_at_price) / 100
+                : null,
+            stock_quantity: Number(v.stock_quantity ?? 0),
+            track_inventory: Boolean(v.track_inventory),
+            low_stock_threshold: Number(v.low_stock_threshold ?? 5),
+            expiration_date: v.expiration_date ?? "",
+            is_active: Boolean(v.is_active),
+            sort_order: v.sort_order || idx + 1,
+          }))
+        })()
 
   const form = useForm<FormValues>({
     resolver: zodResolver(createProductSchema),
@@ -523,13 +543,11 @@ export default function ProductForm({
   const selectedBrandId = useWatch({ control, name: "brand_id" })
   const selectedCategoryId = useWatch({ control, name: "category_id" })
 
-  const selectedCategoryObject = React.useMemo(() => {
-    return categoriesList.find((cat) => cat.id === selectedCategoryId) || null
-  }, [categoriesList, selectedCategoryId])
+  const selectedCategoryObject =
+    categoriesList.find((cat) => cat.id === selectedCategoryId) || null
 
-  const selectedBrandObject = React.useMemo(() => {
-    return brandsList.find((b) => b.id === selectedBrandId) || null
-  }, [brandsList, selectedBrandId])
+  const selectedBrandObject =
+    brandsList.find((b) => b.id === selectedBrandId) || null
 
   const handleGenerateAllSeo = () => {
     if (!currentProductName.trim()) {
@@ -864,7 +882,7 @@ export default function ProductForm({
                     variant="outline"
                     title={t("CREATE_CATEGORY")}
                     aria-label={t("CREATE_CATEGORY")}
-                    className="size- shrink-0 cursor-pointer"
+                    className="shrink-0 cursor-pointer"
                   >
                     <PlusIcon className="size-3.5" />
                   </Button>
@@ -894,8 +912,8 @@ export default function ProductForm({
                     }}
                     trigger={
                       <Button
-                        type="button"                    size="icon"
-
+                        type="button"
+                        size="icon"
                         variant="outline"
                         title={t("EDIT_CATEGORY")}
                         aria-label={t("EDIT_CATEGORY")}
@@ -933,8 +951,8 @@ export default function ProductForm({
                     }}
                   >
                     <Button
-                      type="button"                    size="icon"
-
+                      type="button"
+                      size="icon"
                       variant="outline"
                       title={t("DELETE_CATEGORY")}
                       aria-label={t("DELETE_CATEGORY")}
@@ -1012,8 +1030,8 @@ export default function ProductForm({
                 }}
                 trigger={
                   <Button
-                    type="button"                    size="icon"
-
+                    type="button"
+                    size="icon"
                     variant="outline"
                     title={t("CREATE_BRAND")}
                     aria-label={t("CREATE_BRAND")}
@@ -1046,8 +1064,8 @@ export default function ProductForm({
                     }}
                     trigger={
                       <Button
-                        type="button"                    size="icon"
-
+                        type="button"
+                        size="icon"
                         variant="outline"
                         title={t("EDIT_BRAND")}
                         aria-label={t("EDIT_BRAND")}
@@ -1083,8 +1101,8 @@ export default function ProductForm({
                     }}
                   >
                     <Button
-                      type="button"                    size="icon"
-
+                      type="button"
+                      size="icon"
                       variant="outline"
                       title={t("DELETE_BRAND")}
                       aria-label={t("DELETE_BRAND")}
@@ -1642,11 +1660,8 @@ function VariantCard({
   const locale = useLocale()
   const [isExpirationPickerOpen, setIsExpirationPickerOpen] =
     React.useState(false)
-  const expirationMinDate = React.useMemo(() => startOfToday(), [])
-  const expirationMaxDate = React.useMemo(
-    () => addYears(expirationMinDate, 10),
-    [expirationMinDate]
-  )
+  const expirationMinDate = startOfToday()
+  const expirationMaxDate = addYears(expirationMinDate, 10)
   const variantName = useWatch({ control, name: `variants.${index}.name` })
   const productName = useWatch({ control, name: "name" })
   const tracksInventory = useWatch({
@@ -2095,6 +2110,7 @@ function ImageCard({
           {hasImageError ? (
             <ImageOffIcon className="size-6 stroke-[1.5] text-destructive" />
           ) : currentUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               key={currentUrl}
               src={currentUrl}
@@ -2190,7 +2206,7 @@ function ImageCard({
                   }}
                   value={field.value || "none"}
                 >
-                  <SelectTrigger className="w-full text-xs data-[size=default]:h-7.5 ">
+                  <SelectTrigger className="w-full text-xs data-[size=default]:h-7.5">
                     <SelectValue placeholder={t("LINK_TO_VARIANT")} />
                   </SelectTrigger>
                   <SelectContent>

@@ -1,6 +1,6 @@
 import { createBrowserClient as supabaseCreateBrowserClient } from "@supabase/ssr"
 import { SUPABASE_COOKIE_OPTIONS } from "./cookie-options"
-import type { Database } from "./types"
+import { Database } from "./database.types"
 
 export function createBrowserClient() {
   return supabaseCreateBrowserClient<Database>(

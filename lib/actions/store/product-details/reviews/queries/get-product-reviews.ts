@@ -8,7 +8,7 @@ import "server-only"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { getCurrentUser } from "@/lib/actions/users/queries/get-current-user"
 import type { ApiResult } from "@/lib/actions/types/utils"
-import type { Tables } from "@/lib/database/supabase/types"
+import type { Tables } from "@/lib/database/supabase/database.types"
 
 export type ReviewerProfile = Pick<
   Tables<"profiles">,

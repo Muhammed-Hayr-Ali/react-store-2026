@@ -12,7 +12,7 @@ export type { CreateProductInput, UpdateProductInput } from "./schemas"
 // Relational Entity Types (للاستخدام في الواجهات والمكونات Client/Server)
 // ============================================================================
 
-import type { Json, Tables } from "@/lib/database/supabase/types"
+import type { Json, Tables } from "@/lib/database/supabase/database.types"
 
 type ProductVariantColumns = Pick<
   Tables<"product_variants">,

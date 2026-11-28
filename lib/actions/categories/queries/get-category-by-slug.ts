@@ -8,8 +8,8 @@
 import { unstable_cache } from "next/cache"
 import { createServerClient } from "@/lib/database/supabase/server"
 import type { ApiResult } from "../../types/utils"
-import type { Tables } from "@/lib/database/supabase/types"
-
+import { Tables } from "@/lib/database/supabase/database.types"
+ 
 export type Category = Pick<
   Tables<"categories">,
   | "id"

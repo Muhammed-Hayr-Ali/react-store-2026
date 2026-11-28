@@ -35,6 +35,53 @@ interface FilterOptions {
   activeOnly?: boolean
 }
 
+interface WishlistVariantRow {
+  id: string
+  sku: string
+  price: number
+  compare_at_price: number | null
+  stock_quantity: number
+  track_inventory: boolean
+}
+
+interface WishlistImageRow {
+  url: string
+  alt_text: string | null
+  is_primary: boolean
+  variant_id: string | null
+}
+
+interface WishlistReviewRow {
+  rating: number
+}
+
+interface WishlistRelationRef {
+  id: string
+  name: string
+  name_ar: string | null
+  slug: string
+}
+
+interface WishlistProductRow {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  is_active: boolean
+  product_variants: WishlistVariantRow[] | null
+  product_images: WishlistImageRow[] | null
+  product_reviews: WishlistReviewRow[] | null
+  categories: WishlistRelationRef | WishlistRelationRef[] | null
+  brands: WishlistRelationRef | WishlistRelationRef[] | null
+}
+
+function normalizeRelationRef(
+  rel: WishlistRelationRef | WishlistRelationRef[] | null | undefined
+): WishlistRelationRef | null {
+  if (!rel) return null
+  return Array.isArray(rel) ? (rel[0] ?? null) : rel
+}
+
 export async function getWishlistProducts(
   options: FilterOptions = {}
 ): Promise<ApiResult<WishlistProduct[]>> {
@@ -124,74 +171,100 @@ export async function getWishlistProducts(
   }
 
   // استخراج المنتج من كل صف مفضلة وتجاهل أي منتج فارغ
-  const rawProducts = (rows ?? [])
-    .map((row) => row.products)
-    .filter((product) => product !== null)
+  const rawProducts: WishlistProductRow[] = (rows ?? [])
+    .map((row) => row.products as WishlistProductRow | null)
+    .filter((product): product is WishlistProductRow => product !== null)
 
-  const data: WishlistProduct[] = rawProducts.map((product) => {
-    const variants = product.product_variants ?? []
-    const images = product.product_images ?? []
-    const reviews = product.product_reviews ?? []
+  const data: WishlistProduct[] = rawProducts.map(
+    (product: WishlistProductRow) => {
+      const variants: WishlistVariantRow[] = Array.isArray(
+        product.product_variants
+      )
+        ? product.product_variants
+        : []
+      const images: WishlistImageRow[] = Array.isArray(product.product_images)
+        ? product.product_images
+        : []
+      const reviews: WishlistReviewRow[] = Array.isArray(
+        product.product_reviews
+      )
+        ? product.product_reviews
+        : []
 
-    // متوسط التقييم وعدد التقييمات
-    const reviewCount = reviews.length
-    const rating =
-      reviewCount > 0
-        ? Number(
-            (
-              reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviewCount
-            ).toFixed(1)
-          )
-        : 0
+      // متوسط التقييم وعدد التقييمات
+      const reviewCount = reviews.length
+      const rating =
+        reviewCount > 0
+          ? Number(
+              (
+                reviews.reduce(
+                  (acc: number, curr: WishlistReviewRow) =>
+                    acc + Number(curr.rating || 0),
+                  0
+                ) / reviewCount
+              ).toFixed(1)
+            )
+          : 0
 
-    // المتغير الأرخص
-    const cheapestVariant =
-      variants.length > 0
-        ? variants.reduce((prev, curr) =>
-            curr.price < prev.price ? curr : prev
-          )
-        : null
+      // المتغير الأرخص
+      const cheapestVariant: WishlistVariantRow | null =
+        variants.length > 0
+          ? variants.reduce(
+              (prev: WishlistVariantRow, curr: WishlistVariantRow) =>
+                Number(curr.price) < Number(prev.price) ? curr : prev
+            )
+          : null
 
-    // الصورة: رئيسية/عامة أولاً، ثم صورة المتغير الأرخص، ثم أول صورة
-    const selectedImage =
-      images.find(
-        (img) =>
-          img.is_primary &&
-          (!img.variant_id || img.variant_id === cheapestVariant?.id)
-      ) ||
-      images.find((img) => img.is_primary) ||
-      images.find((img) => !img.variant_id) ||
-      (cheapestVariant?.id
-        ? images.find((img) => img.variant_id === cheapestVariant.id)
-        : undefined) ||
-      images[0] ||
-      null
+      // الصورة: رئيسية/عامة أولاً، ثم صورة المتغير الأرخص، ثم أول صورة
+      const selectedImage: WishlistImageRow | null =
+        images.find(
+          (img: WishlistImageRow) =>
+            img.is_primary &&
+            (!img.variant_id || img.variant_id === cheapestVariant?.id)
+        ) ||
+        images.find((img: WishlistImageRow) => img.is_primary) ||
+        images.find((img: WishlistImageRow) => !img.variant_id) ||
+        (cheapestVariant?.id
+          ? images.find(
+              (img: WishlistImageRow) => img.variant_id === cheapestVariant.id
+            )
+          : undefined) ||
+        images[0] ||
+        null
 
-    return {
-      id: product.id,
-      name: product.name,
-      slug: product.slug,
-      description: product.description,
-      variantId: cheapestVariant?.id ?? null,
-      price: cheapestVariant?.price ?? null,
-      compareAtPrice: cheapestVariant?.compare_at_price ?? null,
-      inStock: cheapestVariant
-        ? !cheapestVariant.track_inventory || cheapestVariant.stock_quantity > 0
-        : false,
-      imageUrl: selectedImage?.url ?? null,
-      imageAlt: selectedImage?.alt_text ?? null,
-      rating,
-      reviewCount,
-      categoryId: product.categories?.id ?? "",
-      categoryName: product.categories?.name ?? "",
-      categoryNameAr: product.categories?.name_ar ?? "",
-      categorySlug: product.categories?.slug ?? "",
-      brandId: product.brands?.id ?? "",
-      brandName: product.brands?.name ?? "",
-      brandNameAr: product.brands?.name_ar ?? "",
-      brandSlug: product.brands?.slug ?? "",
+      const categoryRef = normalizeRelationRef(product.categories)
+      const brandRef = normalizeRelationRef(product.brands)
+
+      return {
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        description: product.description,
+        variantId: cheapestVariant?.id ?? null,
+        price: cheapestVariant ? Number(cheapestVariant.price) : null,
+        compareAtPrice:
+          cheapestVariant?.compare_at_price != null
+            ? Number(cheapestVariant.compare_at_price)
+            : null,
+        inStock: cheapestVariant
+          ? !cheapestVariant.track_inventory ||
+            Number(cheapestVariant.stock_quantity) > 0
+          : false,
+        imageUrl: selectedImage?.url ?? null,
+        imageAlt: selectedImage?.alt_text ?? null,
+        rating,
+        reviewCount,
+        categoryId: categoryRef?.id ?? "",
+        categoryName: categoryRef?.name ?? "",
+        categoryNameAr: categoryRef?.name_ar ?? "",
+        categorySlug: categoryRef?.slug ?? "",
+        brandId: brandRef?.id ?? "",
+        brandName: brandRef?.name ?? "",
+        brandNameAr: brandRef?.name_ar ?? "",
+        brandSlug: brandRef?.slug ?? "",
+      }
     }
-  })
+  )
 
   return { success: true, data }
 }

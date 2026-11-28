@@ -11,8 +11,8 @@ import {
   confirmPasswordResetSchema,
   authCallbackSchema,
 } from "./schemas"
-import type { Json, Tables } from "@/lib/database/supabase/types"
-
+import { Json, Tables } from "@/lib/database/supabase/database.types"
+ 
 export type { ApiResult } from "../types/utils"
 
 export type SignInWithPasswordInput = z.infer<typeof signInWithPasswordSchema>

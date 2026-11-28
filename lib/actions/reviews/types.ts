@@ -3,15 +3,12 @@
  * @description TypeScript interfaces for product reviews returned by Supabase.
  */
 
-import type { Tables } from "@/lib/database/supabase/types"
+import type { Tables } from "@/lib/database/supabase/database.types"
 
 export type ProductReview = Tables<"product_reviews">
 
 export type ReviewWithUser = ProductReview & {
-  user: Pick<
-    Tables<"profiles">,
-    "first_name" | "last_name" | "avatar"
-  > | null
+  user: Pick<Tables<"profiles">, "first_name" | "last_name" | "avatar"> | null
 }
 
 export interface ReviewsSummary {

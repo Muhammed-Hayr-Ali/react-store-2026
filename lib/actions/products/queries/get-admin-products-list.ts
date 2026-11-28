@@ -10,6 +10,12 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { ApiResult } from "../../types/utils"
 import { AdminProductSummary } from "../types"
 
+interface AdminProductVariantRow {
+  price: number | string | null
+  stock_quantity: number | string | null
+  expiration_date: string | null
+}
+
 export async function getAdminProductsList(): Promise<
   ApiResult<AdminProductSummary[]>
 > {
@@ -49,25 +55,31 @@ export async function getAdminProductsList(): Promise<
   }
 
   const products: AdminProductSummary[] = (data ?? []).map((prod) => {
-    const variants = prod.product_variants ?? []
+    const variants: AdminProductVariantRow[] = Array.isArray(
+      prod.product_variants
+    )
+      ? (prod.product_variants as AdminProductVariantRow[])
+      : []
 
     // حساب العدد الأقل للمتغيرات (Minimum Stock Quantity)
     const stockQuantities = variants
-      .map((v) => Number(v.stock_quantity))
-      .filter((s) => !isNaN(s))
-    
-    const minStock = stockQuantities.length > 0 ? Math.min(...stockQuantities) : 0
+      .map((v: AdminProductVariantRow) => Number(v.stock_quantity))
+      .filter((s: number) => !isNaN(s))
+
+    const minStock =
+      stockQuantities.length > 0 ? Math.min(...stockQuantities) : 0
 
     // حساب الأسعار
     const prices = variants
-      .map((v) => Number(v.price))
-      .filter((p) => !isNaN(p) && p > 0)
+      .map((v: AdminProductVariantRow) => Number(v.price))
+      .filter((p: number) => !isNaN(p) && p > 0)
 
     // حساب التاريخ الأقرب لانتهاء الصلاحية (Nearest Expiration Date)
-    const nearestExpirationDate = variants
-      .map((variant) => variant.expiration_date)
-      .filter((date): date is string => Boolean(date))
-      .sort()[0] ?? null
+    const nearestExpirationDate =
+      variants
+        .map((variant: AdminProductVariantRow) => variant.expiration_date)
+        .filter((date): date is string => Boolean(date))
+        .sort()[0] ?? null
 
     return {
       id: prod.id,

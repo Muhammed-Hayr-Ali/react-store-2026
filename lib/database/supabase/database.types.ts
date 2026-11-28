@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -11,31 +11,6 @@ export type Database = {
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
-  }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
   }
   public: {
     Tables: {
@@ -218,36 +193,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      currencies: {
-        Row: {
-          code: string
-          is_active: boolean | null
-          name: string
-          name_ar: string
-          rate_factor: number
-          symbol: string
-          updated_at: string
-        }
-        Insert: {
-          code: string
-          is_active?: boolean | null
-          name: string
-          name_ar: string
-          rate_factor: number
-          symbol: string
-          updated_at?: string
-        }
-        Update: {
-          code?: string
-          is_active?: boolean | null
-          name?: string
-          name_ar?: string
-          rate_factor?: number
-          symbol?: string
-          updated_at?: string
-        }
-        Relationships: []
       }
       exchange_rates: {
         Row: {
@@ -642,6 +587,69 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_banners: {
+        Row: {
+          badge_text: string | null
+          badge_text_ar: string | null
+          created_at: string
+          cta_href: string | null
+          cta_label: string | null
+          cta_label_ar: string | null
+          ends_at: string | null
+          id: string
+          image_alt: string | null
+          image_url: string | null
+          is_active: boolean
+          priority: number
+          starts_at: string | null
+          subtitle: string | null
+          subtitle_ar: string | null
+          title: string
+          title_ar: string | null
+          updated_at: string
+        }
+        Insert: {
+          badge_text?: string | null
+          badge_text_ar?: string | null
+          created_at?: string
+          cta_href?: string | null
+          cta_label?: string | null
+          cta_label_ar?: string | null
+          ends_at?: string | null
+          id?: string
+          image_alt?: string | null
+          image_url?: string | null
+          is_active?: boolean
+          priority?: number
+          starts_at?: string | null
+          subtitle?: string | null
+          subtitle_ar?: string | null
+          title: string
+          title_ar?: string | null
+          updated_at?: string
+        }
+        Update: {
+          badge_text?: string | null
+          badge_text_ar?: string | null
+          created_at?: string
+          cta_href?: string | null
+          cta_label?: string | null
+          cta_label_ar?: string | null
+          ends_at?: string | null
+          id?: string
+          image_alt?: string | null
+          image_url?: string | null
+          is_active?: boolean
+          priority?: number
+          starts_at?: string | null
+          subtitle?: string | null
+          subtitle_ar?: string | null
+          title?: string
+          title_ar?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       roles: {
         Row: {
           created_at: string
@@ -772,6 +780,7 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: Json
       }
+      seed_50_non_featured_products_ar: { Args: never; Returns: number }
       seed_admin_role: { Args: never; Returns: undefined }
       seed_supermarket_categories: { Args: never; Returns: number }
       upsert_exchange_rate: {
@@ -937,9 +946,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       flash_sale_discount_type: [

@@ -3,7 +3,7 @@
  * @description أنواع بيانات إدارة وصول الموظفين.
  */
 
-import type { Tables } from "@/lib/database/supabase/types"
+import type { Tables } from "@/lib/database/supabase/database.types"
 import type { RoleRecord } from "@/lib/actions/role/types"
 
 export type StaffAccessRole = RoleRecord

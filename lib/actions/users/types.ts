@@ -3,11 +3,28 @@
  * @description Type definitions for user management.
  */
 
+import type { Database } from "@/lib/database/supabase/database.types"
+
 export type UserStatus = "active" | "suspended" | "banned"
 
-import type { DbFunctionReturns } from "@/lib/database/supabase/types"
+type RawFunctionReturns =
+  Database["public"]["Functions"] extends Record<
+    "get_admin_users_list",
+    { Returns: infer R }
+  >
+    ? R
+    : never
 
-type AdminUserRow = DbFunctionReturns<"get_admin_users_list">[number]
+type AdminUserRow =
+  RawFunctionReturns extends readonly (infer T)[]
+    ? T
+    : RawFunctionReturns extends (infer T)[]
+      ? T
+      : {
+          id: string
+          created_at: string
+          roles?: string[] | null
+        }
 
 export type AdminUserSummary = Omit<
   AdminUserRow,
@@ -20,6 +37,9 @@ export type AdminUserSummary = Omit<
   | "ban_reason"
   | "banned_at"
 > & {
+  id: string
+  created_at: string
+  roles?: string[] | null
   first_name: string | null
   last_name: string | null
   email: string | null

@@ -1,7 +1,7 @@
 "use server"
 
 /**
- * @file lib/actions/products/duplicate.ts
+ * @file lib/actions/products/mutations/duplicate.ts
  * @description Server action for duplicating an existing product along with its variants and images.
  * Generates unique slugs and SKUs for the new copy and correctly remaps image-to-variant relationships.
  */
@@ -11,7 +11,32 @@ import { createServerClient } from "@/lib/database/supabase/server"
 import { CACHE_TAG } from "@/lib/config/app_config"
 
 export type DuplicateProductResult =
-  { success: true } | { success: false; error: string }
+  | { success: true }
+  | { success: false; error: string }
+
+interface DuplicatedVariantRow {
+  id: string
+  sku: string
+  name: string | null
+  attributes: Record<string, string> | null
+  price: number
+  compare_at_price: number | null
+  stock_quantity: number
+  track_inventory: boolean
+  low_stock_threshold: number
+  expiration_date: string | null
+  is_active: boolean
+  sort_order: number
+}
+
+interface DuplicatedImageRow {
+  id: string
+  url: string
+  alt_text: string | null
+  is_primary: boolean
+  sort_order: number
+  variant_id: string | null
+}
 
 export async function duplicateProduct(
   productId: string
@@ -60,29 +85,35 @@ export async function duplicateProduct(
     }
 
     const variantIdMapping = new Map<string, string>()
-    const typedVariants = originalProduct.product_variants ?? []
+    const typedVariants: DuplicatedVariantRow[] = Array.isArray(
+      originalProduct.product_variants
+    )
+      ? (originalProduct.product_variants as DuplicatedVariantRow[])
+      : []
 
-    if (typedVariants && typedVariants.length > 0) {
+    if (typedVariants.length > 0) {
       const originalVariantIdByNewSku = new Map<string, string>()
-      const variantsToInsert = typedVariants.map((variant) => {
-        const newSku = `${variant.sku}-COPY-${uniqueSuffix}`
-        originalVariantIdByNewSku.set(newSku, variant.id)
+      const variantsToInsert = typedVariants.map(
+        (variant: DuplicatedVariantRow) => {
+          const newSku = `${variant.sku}-COPY-${uniqueSuffix}`
+          originalVariantIdByNewSku.set(newSku, variant.id)
 
-        return {
-          product_id: newProduct.id,
-          sku: newSku,
-          name: variant.name,
-          attributes: variant.attributes,
-          price: variant.price,
-          compare_at_price: variant.compare_at_price,
-          stock_quantity: variant.stock_quantity,
-          track_inventory: variant.track_inventory,
-          low_stock_threshold: variant.low_stock_threshold,
-          expiration_date: variant.expiration_date,
-          is_active: variant.is_active,
-          sort_order: variant.sort_order,
+          return {
+            product_id: newProduct.id,
+            sku: newSku,
+            name: variant.name,
+            attributes: variant.attributes,
+            price: variant.price,
+            compare_at_price: variant.compare_at_price,
+            stock_quantity: variant.stock_quantity,
+            track_inventory: variant.track_inventory,
+            low_stock_threshold: variant.low_stock_threshold,
+            expiration_date: variant.expiration_date,
+            is_active: variant.is_active,
+            sort_order: variant.sort_order,
+          }
         }
-      })
+      )
 
       const { data: insertedVariants, error: variantsError } = await supabase
         .from("product_variants")
@@ -113,12 +144,19 @@ export async function duplicateProduct(
       }
     }
 
-    const typedImages = originalProduct.product_images ?? []
+    const typedImages: DuplicatedImageRow[] = Array.isArray(
+      originalProduct.product_images
+    )
+      ? (originalProduct.product_images as DuplicatedImageRow[])
+      : []
 
-    if (typedImages && typedImages.length > 0) {
+    if (typedImages.length > 0) {
       const imagesToInsert = [...typedImages]
-        .sort((a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id))
-        .map((img, sort_order) => {
+        .sort(
+          (a: DuplicatedImageRow, b: DuplicatedImageRow) =>
+            a.sort_order - b.sort_order || a.id.localeCompare(b.id)
+        )
+        .map((img: DuplicatedImageRow, sort_order: number) => {
           return {
             product_id: newProduct.id,
             url: img.url,
@@ -133,7 +171,8 @@ export async function duplicateProduct(
 
       if (
         typedImages.some(
-          (img) => img.variant_id && !variantIdMapping.has(img.variant_id)
+          (img: DuplicatedImageRow) =>
+            img.variant_id && !variantIdMapping.has(img.variant_id)
         )
       ) {
         console.error(

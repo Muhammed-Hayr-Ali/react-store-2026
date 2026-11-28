@@ -9,7 +9,7 @@ import { unstable_cache } from "next/cache"
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createServerClient } from "@/lib/database/supabase/server"
 import { CACHE_TAG } from "@/lib/config/app_config"
-import type { Tables } from "@/lib/database/supabase/types"
+import type { Tables } from "@/lib/database/supabase/database.types"
 
 export type SimpliBrand = Pick<
   Tables<"brands">,

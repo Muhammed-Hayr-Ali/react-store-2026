@@ -3,7 +3,7 @@
  * @description TypeScript types for newsletter subscribers and action inputs.
  */
 
-import type { Tables } from "@/lib/database/supabase/types"
+import type { Tables } from "@/lib/database/supabase/database.types"
 
 export type { NewsletterStatus } from "./schemas"
 

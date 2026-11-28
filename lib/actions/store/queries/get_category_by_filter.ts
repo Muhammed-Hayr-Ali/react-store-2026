@@ -9,7 +9,7 @@ import { unstable_cache } from "next/cache"
 import type { ApiResult } from "@/lib/actions/types/utils"
 import { createPublicServerClient } from "@/lib/database/supabase/public"
 import { CACHE_TAG } from "@/lib/config/app_config"
-import type { Tables } from "@/lib/database/supabase/types"
+import type { Tables } from "@/lib/database/supabase/database.types"
 
 export type SimpliCategory = Pick<
   Tables<"categories">,
@@ -56,7 +56,7 @@ const getCachedCategoryByFilter = unstable_cache(
 
     return data
   },
-  
+
   ["categories"],
   {
     revalidate: 3600,

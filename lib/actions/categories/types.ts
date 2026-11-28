@@ -5,8 +5,8 @@
  */
 
 import { z } from "zod"
-import type { Tables } from "@/lib/database/supabase/types"
-import { categoryFormSchema } from "./schemas"
+ import { categoryFormSchema } from "./schemas"
+import { Tables } from "@/lib/database/supabase/database.types"
 
 export type Category = Tables<"categories">
 

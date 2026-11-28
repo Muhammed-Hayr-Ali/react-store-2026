@@ -1,6 +1,6 @@
 import { cache } from "react"
 import { createServerClient } from "@/lib/database/supabase/server"
-import type { Tables } from "@/lib/database/supabase/types"
+import type { Tables } from "@/lib/database/supabase/database.types"
 
 export type ExchangeRateRow = Tables<"exchange_rates">
 

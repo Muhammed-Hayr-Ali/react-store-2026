@@ -3,8 +3,9 @@
  * @description TypeScript types and interfaces for Cart system with variant-specific image support.
  */
 
-import type { Tables } from "@/lib/database/supabase/types"
+import { Tables } from "@/lib/database/supabase/database.types"
 
+ 
 export type CartRecord = Tables<"carts">
 export type CartItemRecord = Tables<"cart_items">
 
