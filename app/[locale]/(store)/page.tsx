@@ -3,8 +3,6 @@
  * @description Storefront home page displaying the featured hero slider, root categories, and latest regular products grid.
  */
 
-import FeaturedHeroSlider from "@/components/store/featured-hero-slider/featured-hero-slider"
-
 import { APP_CONFIG, STORE_CONTAINER } from "@/lib/config/app_config"
 import { createMetadata } from "@/lib/config/metadata_generator"
 import { getTranslations } from "next-intl/server"
@@ -14,7 +12,9 @@ import { getStoreExchangeRate } from "@/lib/actions/store/queries/get-exchange-r
 import CategoryCarousel from "@/components/store/shop-by-category-slider/shop-by-category-slider"
 import { getAllCategories } from "@/lib/actions/store/queries/get-all-categories"
 import { LatestProductsSection } from "@/components/store/latest-products/latest-products-section"
- 
+import { Suspense } from "react"
+import FeaturedHeroSlider from "@/components/store/featured-hero-slider/featured-hero-slider"
+
 interface PageProps {
   params: Promise<{ locale: string }>
 }
@@ -39,7 +39,7 @@ export default async function Page() {
 
   const exchangeRate = getStoreExchangeRate("USD", "new")
 
-  const [featuredResult, categoriesResult, latestResult] = await Promise.all([
+  const [featuredResult, categoriesResult] = await Promise.all([
     getFilteredProducts({
       limit: FEATURED_LIMET,
       page: PAGE_NUMBER,
@@ -57,7 +57,6 @@ export default async function Page() {
 
   const slides = featuredResult.success ? featuredResult.data : []
   const categories = categoriesResult.success ? categoriesResult.data : []
-  const initialProducts = latestResult.success ? latestResult.data : []
   const resolvedExchangeRate = await exchangeRate
 
   return (
@@ -72,10 +71,7 @@ export default async function Page() {
           )}
         >
           {/* 1. السلايدر التفاعلي للمنتجات المميزة */}
-          <FeaturedHeroSlider
-            slides={slides}
-            exchangeRate={resolvedExchangeRate}
-          />
+          <FeaturedHeroSlider />
 
           {/* 2. شريط التصنيفات الرئيسية */}
           <CategoryCarousel categories={categories} />
