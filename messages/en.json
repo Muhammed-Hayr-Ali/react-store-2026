@@ -1591,5 +1591,6 @@
     "PRICE_UNAVAILABLE": "Price unavailable",
     "CURRENT_PRICE_LABEL": "Current price:",
     "OLD_PRICE_LABEL": "Previous price:"
-  }
+  },
+  "lastUpdatedAgo": "Last Updated Ago"
 }
