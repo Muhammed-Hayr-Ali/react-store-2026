@@ -18,12 +18,8 @@ import WelcomeEmail from "@/lib/services/email/templates/welcome-email"
 
 import { getValidationDetails } from "../../validation"
 import { signUpWithPasswordSchema } from "../schemas"
-import { createOpenWAClient } from "@/lib/openwa/openWAClient"
-import {
-  APP_CONFIG,
-  COOKIES_KEYS,
-  LOGIN_METHODS,
-} from "@/lib/config/app_config"
+// import { createOpenWAClient } from "@/lib/openwa/openWAClient"
+import { COOKIES_KEYS, LOGIN_METHODS } from "@/lib/config/app_config"
 
 /**
  * تنشئ حسابًا جديدًا بالبريد الإلكتروني وكلمة المرور.
@@ -97,28 +93,28 @@ export async function signUpWithPassword(
     console.error("Non-blocking email delivery error:", emailError)
   }
 
-  if (phone && phone_verified) {
-    const sessionId = process.env.OPENWA_SESSION_ID
-    if (!sessionId) {
-      console.error("WhatsApp session ID is not configured.")
-      return { success: false, error: "WHATSAPP_SESSION_NOT_CONFIGURED" }
-    }
+  // if (phone && phone_verified) {
+  //   const sessionId = process.env.OPENWA_SESSION_ID
+  //   if (!sessionId) {
+  //     console.error("WhatsApp session ID is not configured.")
+  //     return { success: false, error: "WHATSAPP_SESSION_NOT_CONFIGURED" }
+  //   }
 
-    const messageText =
-      locale === "ar"
-        ? `مرحبًا ${firstName} ${lastName}! شكرًا لانضمامك إلى Marketna. نحن متحمسون لمساعدتك في اكتشاف أفضل العروض وإدارة طلباتك بسهولة.`
-        : `Hello ${firstName} ${lastName}! Thank you for joining Marketna. We're excited to help you discover the best deals and manage your orders with ease.`
+  //   const messageText =
+  //     locale === "ar"
+  //       ? `مرحبًا ${firstName} ${lastName}! شكرًا لانضمامك إلى Marketna. نحن متحمسون لمساعدتك في اكتشاف أفضل العروض وإدارة طلباتك بسهولة.`
+  //       : `Hello ${firstName} ${lastName}! Thank you for joining Marketna. We're excited to help you discover the best deals and manage your orders with ease.`
 
-    try {
-      const openWA = createOpenWAClient()
-      await openWA.messages.sendText(sessionId, {
-        chatId: `${phone.replace(/[^0-9]/g, "")}@c.us`,
-        text: messageText,
-      })
-    } catch (whatsappError) {
-      console.error("Non-blocking WhatsApp delivery error:", whatsappError)
-    }
-  }
+  //   try {
+  //     const openWA = createOpenWAClient()
+  //     await openWA.messages.sendText(sessionId, {
+  //       chatId: `${phone.replace(/[^0-9]/g, "")}@c.us`,
+  //       text: messageText,
+  //     })
+  //   } catch (whatsappError) {
+  //     console.error("Non-blocking WhatsApp delivery error:", whatsappError)
+  //   }
+  // }
 
   const cookieStore = await cookies()
   cookieStore.set(COOKIES_KEYS.LOGIN_METHOD, LOGIN_METHODS.EMAIL)
