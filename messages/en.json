@@ -1387,7 +1387,15 @@
       "delete_role_desc": "Remove and delete custom roles.",
       "manage_roles": "Full Roles Management",
       "manage_roles_desc": "Comprehensive administrative control over security and roles.",
-      "AUTH_REQUIRED": "Sign in required"
+      "AUTH_REQUIRED": "Sign in required",
+      "read_promo_banners": "Read Promo Banners",
+      "read_promo_banners_desc": "Allow viewing promotional banner records",
+      "create_promo_banner": "Create Promo Banner",
+      "create_promo_banner_desc": "Allow creating new promotional banners",
+      "update_promo_banner": "Update Promo Banner",
+      "update_promo_banner_desc": "Allow editing promotional banners, status, and schedule",
+      "delete_promo_banner": "Delete Promo Banner",
+      "delete_promo_banner_desc": "Allow deleting promotional banners"
     },
     "no_roles_found": "No roles found",
     "NO_DESCRIPTION": "No description.",

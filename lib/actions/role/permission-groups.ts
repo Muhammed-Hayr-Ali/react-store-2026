@@ -16,9 +16,8 @@ export interface PermissionGroup {
 }
 
 export const PERMISSION_GROUPS = [
-
-    // ==========================================
-  // 1. Brands Management
+  // ==========================================
+  // 0. General Dashboard
   // ==========================================
   {
     id: "general_group",
@@ -112,6 +111,9 @@ export const PERMISSION_GROUPS = [
     ],
   },
 
+  // ==========================================
+  // 2.5 Promotional Banners Management
+  // ==========================================
   {
     id: "promo_banners_group",
     label: "promo_banners_group",
@@ -120,6 +122,26 @@ export const PERMISSION_GROUPS = [
         key: PERMISSIONS.VIEW_PROMO_BANNERS_DASHBOARD,
         label: "view_promo_banners_dashboard",
         description: "view_promo_banners_dashboard_desc",
+      },
+      {
+        key: PERMISSIONS.READ_PROMO_BANNERS,
+        label: "read_promo_banners",
+        description: "read_promo_banners_desc",
+      },
+      {
+        key: PERMISSIONS.CREATE_PROMO_BANNER,
+        label: "create_promo_banner",
+        description: "create_promo_banner_desc",
+      },
+      {
+        key: PERMISSIONS.UPDATE_PROMO_BANNER,
+        label: "update_promo_banner",
+        description: "update_promo_banner_desc",
+      },
+      {
+        key: PERMISSIONS.DELETE_PROMO_BANNER,
+        label: "delete_promo_banner",
+        description: "delete_promo_banner_desc",
       },
       {
         key: PERMISSIONS.MANAGE_PROMO_BANNERS,

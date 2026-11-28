@@ -1381,7 +1381,15 @@
       "delete_role_desc": "إزالة وحذف الأدوار المخصصة.",
       "manage_roles": "إدارة كاملة للأدوار",
       "manage_roles_desc": "تحكم إداري شامل في الأمان والأدوار.",
-      "AUTH_REQUIRED": "تسجيل الدخول مطلوب"
+      "AUTH_REQUIRED": "تسجيل الدخول مطلوب",
+      "read_promo_banners": "قراءة البنرات الترويجية",
+      "read_promo_banners_desc": "السماح باستعراض بيانات البنرات الترويجية",
+      "create_promo_banner": "إضافة بنر ترويجي",
+      "create_promo_banner_desc": "السماح بإنشاء بنر ترويجي جديد",
+      "update_promo_banner": "تعديل بنر ترويجي",
+      "update_promo_banner_desc": "السماح بتعديل البنرات الترويجية وحالتها وجدولتها",
+      "delete_promo_banner": "حذف بنر ترويجي",
+      "delete_promo_banner_desc": "السماح بحذف البنرات الترويجية"
     },
     "no_roles_found": "لم يتم العثور على أدوار",
     "NO_DESCRIPTION": "لا يوجد وصف.",

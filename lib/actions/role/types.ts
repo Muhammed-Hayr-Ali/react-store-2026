@@ -36,6 +36,10 @@ export const PERMISSIONS = {
 
   // --- Promotional Banners Management ---
   VIEW_PROMO_BANNERS_DASHBOARD: "view_promo_banners_dashboard",
+  READ_PROMO_BANNERS: "read_promo_banners",
+  CREATE_PROMO_BANNER: "create_promo_banner",
+  UPDATE_PROMO_BANNER: "update_promo_banner",
+  DELETE_PROMO_BANNER: "delete_promo_banner",
   MANAGE_PROMO_BANNERS: "manage_promo_banners",
 
   // --- 3. Products Management ---
@@ -104,8 +108,7 @@ export type RoleRecord = Omit<Tables<"roles">, "permissions"> & {
 export function normalizeRolePermissions(value: Json): string[] | null {
   if (Array.isArray(value)) {
     const permissions = value.filter(
-      (permission: Json): permission is string =>
-        typeof permission === "string"
+      (permission: Json): permission is string => typeof permission === "string"
     )
     return permissions.length === value.length ? permissions : null
   }
