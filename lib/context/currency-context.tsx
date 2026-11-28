@@ -148,7 +148,7 @@ export function CurrencyProvider({
 
   // إنشاء المنسق مكلف، لذلك ننشئه مرة واحدة لكل عملة ولغة
   const formatters = React.useMemo(() => {
-    const numberLocale = isSyp && locale === "ar" ? "ar-SY" : "en-US"
+    const numberLocale = isSyp && locale === "ar" ? "en-USSY" : "en-US"
     const decimals = isSyp ? 0 : 2
     const options: Intl.NumberFormatOptions = {
       minimumFractionDigits: decimals,
