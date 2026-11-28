@@ -247,13 +247,14 @@ const BottomSheetContent = ({
           : "pointer-events-none invisible transition-[visibility] duration-300"
       )}
     >
+      {/* خلفية معتمة بتأثير زجاجي مصنفر */}
       <div
         aria-hidden="true"
         onClick={() => {
           if (closeOnBackdropClick) setOpen(false)
         }}
         className={cn(
-          "fixed inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity",
+          "fixed inset-0 bg-black/35 backdrop-blur-md backdrop-saturate-150 transition-opacity",
           open
             ? "opacity-100 duration-280 ease-out starting:opacity-0"
             : "opacity-0 duration-180 ease-out",
@@ -261,6 +262,7 @@ const BottomSheetContent = ({
         )}
       />
 
+      {/* لوحة الـ BottomSheet بتأثير زجاجي شفاف */}
       <div
         ref={panelRef}
         role="dialog"
@@ -268,7 +270,7 @@ const BottomSheetContent = ({
         aria-label={ariaLabel}
         tabIndex={-1}
         className={cn(
-          "relative z-10 flex max-h-[88dvh] w-full flex-col rounded-t-3xl border-t bg-background/95 shadow-2xl backdrop-blur-xl outline-none",
+          "relative z-10 flex max-h-[88dvh] w-full flex-col rounded-t-3xl border-t border-white/25 bg-background/80 shadow-[0_-12px_40px_-8px_rgb(0_0_0/0.18)] backdrop-blur-2xl backdrop-saturate-150 outline-none dark:border-white/10 dark:bg-background/75",
           "transition-[translate,transform,opacity] will-change-[translate,opacity]",
           open
             ? "translate-y-0 opacity-100 duration-280 ease-[cubic-bezier(0.16,1,0.3,1)] starting:translate-y-8"
@@ -323,7 +325,7 @@ const BottomSheetHeader = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "flex shrink-0 flex-col border-b px-4 pt-2.5 pb-3.5",
+          "flex shrink-0 flex-col border-b border-border/50 px-4 pt-2.5 pb-3.5",
           className
         )}
         {...props}
@@ -332,7 +334,7 @@ const BottomSheetHeader = React.forwardRef<
           <div className="flex w-full justify-center pb-2">
             <span
               aria-hidden="true"
-              className="h-1 w-10 shrink-0 rounded-full bg-muted-foreground/25"
+              className="h-1 w-10 shrink-0 rounded-full bg-muted-foreground/30"
             />
           </div>
         )}
@@ -348,7 +350,7 @@ const BottomSheetHeader = React.forwardRef<
               type="button"
               onClick={handleClose}
               aria-label="Close sheet"
-              className="absolute inset-e-0 -top-0.5 flex size-8 items-center justify-center rounded-full text-muted-foreground transition-[background-color,color,scale] hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-95"
+              className="absolute inset-e-0 -top-0.5 flex size-8 items-center justify-center rounded-full text-muted-foreground transition-[background-color,color,scale] hover:bg-muted/70 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-95"
             >
               <XIcon aria-hidden="true" className="size-4" />
             </button>
@@ -384,7 +386,7 @@ const BottomSheetFooter = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "mt-auto shrink-0 border-t border-muted px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]",
+      "mt-auto shrink-0 border-t border-border/50 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]",
       className
     )}
     {...props}
