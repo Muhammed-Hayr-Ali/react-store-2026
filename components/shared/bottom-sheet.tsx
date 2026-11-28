@@ -338,8 +338,8 @@ const BottomSheetHeader = React.forwardRef<
         )}
         <div
           className={cn(
-            "relative flex items-center gap-2",
-            showCloseButton && "min-h-8 pe-10"
+            "relative flex flex-col items-start gap-1 text-start",
+            showCloseButton && "min-h-8 pe-11"
           )}
         >
           {children}
@@ -348,7 +348,7 @@ const BottomSheetHeader = React.forwardRef<
               type="button"
               onClick={handleClose}
               aria-label="Close sheet"
-              className="absolute inset-e-0 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-[background-color,color,scale] hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-95"
+              className="absolute inset-e-0 -top-0.5 flex size-8 items-center justify-center rounded-full text-muted-foreground transition-[background-color,color,scale] hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-95"
             >
               <XIcon aria-hidden="true" className="size-4" />
             </button>

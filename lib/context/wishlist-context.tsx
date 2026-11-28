@@ -12,46 +12,41 @@ import {
   getWishlistProductIds,
 } from "@/lib/actions/wishlists"
 
-/**
- * @interface ToggleWishlistResult
- * @description يحدد النتيجة المرتجعة من دالة تبديل المفضلة لضمان أمان الأنواع بدلاً من استخدام any.
- */
+/** نتيجة تبديل حالة منتج في المفضلة. */
 export interface ToggleWishlistResult {
+  /** هل نجحت العملية على الخادم؟ */
   success: boolean
+  /** رمز الخطأ عند الفشل. */
   error?: string
 }
 
-/**
- * @interface WishlistContextType
- * @description يحدد بنية البيانات والدوال المتاحة عبر السياق (Context).
- */
 interface WishlistContextType {
-  /**
-   * قائمة معرفات المنتجات الموجودة حالياً في مفضلة المستخدم.
-   * @returns {string[]} مصفوفة تحتوي على معرفات المنتجات.
-   */
+  /** معرفات المنتجات في المفضلة، وتشمل التغييرات التي لم يؤكدها الخادم بعد. */
   wishlistIds: string[]
-
   /**
-   * دالة للتحقق السريع مما إذا كان منتج معين موجوداً في المفضلة أم لا.
-   * @param {string} productId - معرف المنتج المراد التحقق منه.
-   * @returns {boolean} تعيد true إذا كان موجوداً، وإلا false.
+   * هل المنتج في المفضلة؟ مناسب لتلوين أيقونة القلب.
+   *
+   * @param productId - معرف المنتج.
    */
   isInWishlist: (productId: string) => boolean
-
   /**
-   * دالة لتبديل حالة المنتج (إضافة/إزالة) مع تحديث متفائل (Optimistic Update).
+   * يضيف المنتج أو يزيله. تتغير الواجهة فوراً، ثم تتراجع إذا فشل الطلب.
+   * الضغط المتكرر أثناء الإرسال لا يرسل طلباً جديداً، بل يعيد وعد الطلب الجاري.
+   * لا يعرض إشعارات؛ اعرضها حسب النتيجة.
    *
-   * @param {string} productId - معرف المنتج المراد تبديل حالته.
-   * @returns {Promise<ToggleWishlistResult>} تعيد وعداً (Promise) يحمل كائن النتيجة:
-   * - `success: true` في حال نجاح العملية على الخادم وتحديث القائمة.
-   * - `success: false` مع خصائص الخطأ (مثل `error`) في حال فشل المصادقة أو حدوث مشكلة تقنية.
+   * @param productId - معرف المنتج.
+   * @returns `success` و`error` عند الفشل. **لا يرمي خطأ**.
    */
   toggleWishlist: (productId: string) => Promise<ToggleWishlistResult>
-
   /**
-   * دالة لجلب أحدث معرفات المفضلة من السيرفر ومزامنتها محلياً.
-   * @returns {Promise<void>}
+   * هل يوجد طلب جارٍ لهذا المنتج؟ مناسب لتعطيل زر المفضلة مؤقتاً.
+   *
+   * @param productId - معرف المنتج.
+   */
+  isWishlistPending: (productId: string) => boolean
+  /**
+   * يجلب المفضلة من الخادم ويزامنها.
+   * عند الفشل تبقى القائمة الحالية كما هي.
    */
   refreshWishlist: () => Promise<void>
 }
@@ -60,6 +55,15 @@ const WishlistContext = React.createContext<WishlistContextType | undefined>(
   undefined
 )
 
+const setMembership = (ids: string[], productId: string, included: boolean) => {
+  const others = ids.filter((id) => id !== productId)
+  return included ? [...others, productId] : others
+}
+
+/**
+ * يوفر المفضلة لكل المكونات الفرعية.
+ * تتم مزامنتها تلقائياً عند وصول `initialWishlistIds` جديدة من الخادم.
+ */
 export function WishlistProvider({
   initialWishlistIds,
   children,
@@ -67,83 +71,132 @@ export function WishlistProvider({
   initialWishlistIds: string[]
   children: React.ReactNode
 }) {
-  const [wishlistIds, setWishlistIds] =
-    React.useState<string[]>(initialWishlistIds)
-
-  /**
-   * مهمة الارجاع: التحقق من وجود المنتج في مصفوفة الـ IDs.
-   */
-  const isInWishlist = React.useCallback(
-    (productId: string) => wishlistIds.includes(productId),
-    [wishlistIds]
+  // ما أكده الخادم
+  const [savedIds, setSavedIds] = React.useState(initialWishlistIds)
+  // التغييرات المتفائلة: معرف المنتج ← الحالة المطلوبة
+  const [optimistic, setOptimistic] = React.useState<Record<string, boolean>>(
+    {}
+  )
+  const requestsRef = React.useRef(
+    new Map<string, Promise<ToggleWishlistResult>>()
   )
 
-  /**
-   * مهمة الارجاع: جلب أحدث قائمة من السيرفر وتحديث الحالة المحلية.
-   */
-  const refreshWishlist = async () => {
-    const result = await getWishlistProductIds()
-    if (result.success && result.data) {
-      setWishlistIds(result.data)
-    }
+  // دون هذه المزامنة تبقى مفضلة المستخدم السابق بعد تسجيل الخروج
+  const [prevInitialIds, setPrevInitialIds] = React.useState(initialWishlistIds)
+  if (prevInitialIds !== initialWishlistIds) {
+    setPrevInitialIds(initialWishlistIds)
+    setSavedIds(initialWishlistIds)
   }
 
-  /**
-   * مهمة الارجاع:
-   * 1. تنفيذ التحديث المتفائل (Optimistic Update) محلياً لاستجابة فورية.
-   * 2. تنفيذ إجراء الخادم (إضافة أو إزالة).
-   * 3. التراجع عن التعديل (Rollback) في حال فشل الطلب.
-   * 4. إرجاع كائن نتيجة محدد الأنواع (`ToggleWishlistResult`) للـ UI.
-   */
-  const toggleWishlist = async (
-    productId: string
-  ): Promise<ToggleWishlistResult> => {
-    const exists = isInWishlist(productId)
+  const wishlistIds = React.useMemo(
+    () =>
+      Object.entries(optimistic).reduce(
+        (ids, [productId, included]) => setMembership(ids, productId, included),
+        savedIds
+      ),
+    [savedIds, optimistic]
+  )
 
-    let result: ToggleWishlistResult
-    if (exists) {
-      result = await removeFromWishlist({ product_id: productId })
-    } else {
-      result = await addToWishlist({ product_id: productId })
+  const idSet = React.useMemo(() => new Set(wishlistIds), [wishlistIds])
+
+  const isInWishlist = React.useCallback(
+    (productId: string) => idSet.has(productId),
+    [idSet]
+  )
+
+  const isWishlistPending = React.useCallback(
+    (productId: string) => productId in optimistic,
+    [optimistic]
+  )
+
+  const refreshWishlist = React.useCallback(async () => {
+    try {
+      const result = await getWishlistProductIds()
+      if (result.success && result.data) {
+        setSavedIds(result.data)
+      }
+    } catch (error) {
+      console.error("[wishlist] refresh failed", error)
     }
+  }, [])
 
+  const toggleWishlist = React.useCallback(
+    (productId: string): Promise<ToggleWishlistResult> => {
+      const running = requestsRef.current.get(productId)
+      if (running) return running
 
-    // إذا فشل الطلب، نتراجع عن التحديث المتفائل
-    if (result.success) {
-      setWishlistIds((prev) =>
-        exists ? prev.filter((id) => id !== productId) : [...prev, productId]
-      )
-      await refreshWishlist()
-    }
+      const shouldAdd = !idSet.has(productId)
+      setOptimistic((current) => ({ ...current, [productId]: shouldAdd }))
 
-    // إرجاع النتيجة للـ UI للتعامل مع الإشعارات بدقة
-    return result
-  }
+      const request = (async (): Promise<ToggleWishlistResult> => {
+        try {
+          const result: ToggleWishlistResult = shouldAdd
+            ? await addToWishlist({ product_id: productId })
+            : await removeFromWishlist({ product_id: productId })
+
+          if (result.success) {
+            setSavedIds((ids) => setMembership(ids, productId, shouldAdd))
+          }
+          return result
+        } catch (error) {
+          console.error("[wishlist]", error)
+          return { success: false, error: "UNEXPECTED_ERROR" }
+        } finally {
+          // إزالة التغيير المتفائل: عند الفشل يعني هذا التراجع
+          setOptimistic((current) => {
+            const next = { ...current }
+            delete next[productId]
+            return next
+          })
+        }
+      })()
+
+      requestsRef.current.set(productId, request)
+      void request.finally(() => requestsRef.current.delete(productId))
+      return request
+    },
+    [idSet]
+  )
+
+  const value = React.useMemo<WishlistContextType>(
+    () => ({
+      wishlistIds,
+      isInWishlist,
+      toggleWishlist,
+      isWishlistPending,
+      refreshWishlist,
+    }),
+    [
+      wishlistIds,
+      isInWishlist,
+      toggleWishlist,
+      isWishlistPending,
+      refreshWishlist,
+    ]
+  )
 
   return (
-    <WishlistContext.Provider
-      value={{
-        wishlistIds,
-        isInWishlist,
-        toggleWishlist,
-        refreshWishlist,
-      }}
-    >
+    <WishlistContext.Provider value={value}>
       {children}
     </WishlistContext.Provider>
   )
 }
 
 /**
- * هوك لاستخدام سياق المفضلة مع التأكد من نطاق الـ Provider.
- * @throws {Error} إذا تم استخدامه خارج نطاق `WishlistProvider`.
- * @returns {WishlistContextType} يعيد كائن السياق الذي يحتوي على:
- * - `wishlistIds`: مصفوفة معرفات المنتجات الموجودة في المفضلة.
- * - `isInWishlist`: دالة للتحقق مما إذا كان المنتج موجوداً في المفضلة.
- * - `toggleWishlist`: دالة لتبديل حالة المنتج (إضافة/إزالة) مع تحديث متفائل وإرجاع نتيجة العملية.
- * - `refreshWishlist`: دالة لمزامنة وجلب أحدث معرفات المفضلة من الخادم.
+ * قائمة المفضلة وعملياتها.
+ *
+ * - `wishlistIds`: معرفات المنتجات المفضلة.
+ * - `isInWishlist`: هل المنتج مفضل.
+ * - `toggleWishlist`: إضافة أو إزالة مع استجابة فورية.
+ * - `isWishlistPending`: هل طلب المنتج جارٍ.
+ * - `refreshWishlist`: مزامنة مع الخادم.
+ *
+ * @example
+ * const { isInWishlist, toggleWishlist } = useWishlist()
+ * const result = await toggleWishlist(product.id)
+ *
+ * @throws {Error} إذا استخدم خارج `WishlistProvider`.
  */
-
 export function useWishlist() {
   const context = React.useContext(WishlistContext)
   if (!context) {

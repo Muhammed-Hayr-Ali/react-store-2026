@@ -7,100 +7,112 @@
 
 import { cn } from "@/lib/utils"
 
-interface ProductVariantsProps {
-  options: Array<{
+export interface VariantOption {
+  id: string
+  name: string
+  values: Array<{
     id: string
     name: string
-    values: Array<{
-      id: string
-      name: string
-      isSelected: boolean
-      isDisabled?: boolean
-    }>
+    isSelected: boolean
+    isDisabled?: boolean
   }>
+}
+
+interface ProductVariantsProps {
+  options: VariantOption[]
   onSelectOption: (optionId: string, valueId: string) => void
+}
+
+// أسماء CSS الشائعة فقط؛ أي قيمة أخرى (مثل "أحمر" أو "Midnight Blue") تعرض كنص
+const NAMED_COLORS = new Set(
+  "black white red green blue yellow orange purple pink brown gray grey silver gold beige navy teal maroon olive cyan magenta ivory khaki violet indigo turquoise coral crimson lavender".split(
+    " "
+  )
+)
+
+function isCssColor(value: string): boolean {
+  const color = value.trim().toLowerCase()
+  return (
+    NAMED_COLORS.has(color) ||
+    /^#([\da-f]{3,4}|[\da-f]{6}|[\da-f]{8})$/.test(color) ||
+    /^(rgb|hsl)a?\([\d\s.,%/]+\)$/.test(color)
+  )
 }
 
 export function ProductVariants({
   options,
   onSelectOption,
 }: ProductVariantsProps) {
-  if (!options || options.length === 0) return null
+  if (options.length === 0) return null
 
   return (
-    <div className="space-y-6 py-2">
+    <div className="space-y-5">
       {options.map((option) => {
-        const optionKey = option.id.toLowerCase()
-        const optionName = option.name.toLowerCase()
-
+        const key = option.id.toLowerCase()
         const isColor =
-          optionKey.includes("color") ||
-          optionName.includes("color") ||
-          optionName.includes("لون")
+          key.includes("color") ||
+          key.includes("colour") ||
+          key.includes("لون")
+        const selected = option.values.find((v) => v.isSelected)
 
         return (
-          <div key={option.id}>
-            {/* عنوان الخاصية بتصميم خفيف ونظيف */}
-            <label className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
-              {option.name}
-            </label>
+          <fieldset key={option.id} className="min-w-0">
+            <legend className="mb-2.5 text-xs text-muted-foreground">
+              <span className="flex items-center gap-2">
+                <bdi className="font-medium tracking-wider uppercase">
+                  {option.name}
+                </bdi>
+                {selected && (
+                  <bdi className="font-semibold text-foreground">
+                    {selected.name}
+                  </bdi>
+                )}
+              </span>
+            </legend>
 
-            {/* الخيارات */}
             <div className="flex flex-wrap gap-2.5">
               {option.values.map((val) => {
-                const isSelected = val.isSelected
+                const isSwatch = isColor && isCssColor(val.name)
 
-                {
-                  /* 1. عرض الألوان: دوائر نقية وبسيطة */
-                }
-                if (isColor) {
-                  return (
-                    <button
-                      key={val.id}
-                      type="button"
-                      onClick={() => onSelectOption(option.id, val.id)}
-                      disabled={val.isDisabled}
-                      title={val.name}
-                      className={cn(
-                        "relative flex size-8 items-center justify-center rounded-full transition-transform duration-500 outline-none",
-                        isSelected
-                          ? "ring-1 ring-muted-foreground/50 ring-offset-2"
-                          : "opacity-80 hover:scale-95 hover:opacity-100",
-                        val.isDisabled && "cursor-not-allowed opacity-20"
-                      )}
-                    >
-                      <span
-                        className="size-full rounded-full border border-black/10"
-                        style={{ backgroundColor: val.name }}
-                      />
-                    </button>
-                  )
-                }
-
-                {
-                  /* 2. عرض النصوص البسيطة (المقاسات، الأوزان، النكهات، المواد) بأقصى بساطة */
-                }
                 return (
                   <button
                     key={val.id}
                     type="button"
                     onClick={() => onSelectOption(option.id, val.id)}
-                    disabled={val.isDisabled}
+                    // الخيار المختار يبقى مفعّلاً حتى لو نفد
+                    disabled={val.isDisabled && !val.isSelected}
+                    aria-pressed={val.isSelected}
+                    aria-label={val.name}
+                    title={val.name}
                     className={cn(
-                      "h-8 rounded-sm px-3.5 text-xs  transition-transform duration-500  outline-none",
-                      isSelected
-                        ? "border border-transparent bg-foreground text-background shadow-sm"
-                        : "border bg-muted/40 text-foreground hover:bg-muted/80",
-                      val.isDisabled &&
-                        "cursor-not-allowed line-through opacity-30"
+                      "transition outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-35",
+                      isSwatch
+                        ? "size-9 rounded-full p-0.5 ring-offset-background"
+                        : "h-10 min-w-12 rounded-full border px-4 text-sm",
+                      isSwatch &&
+                        (val.isSelected
+                          ? "ring-2 ring-foreground ring-offset-2"
+                          : "hover:scale-105"),
+                      !isSwatch &&
+                        (val.isSelected
+                          ? "border-foreground bg-foreground font-medium text-background"
+                          : "border-border bg-background text-foreground hover:border-foreground/50"),
+                      !isSwatch && val.isDisabled && "line-through"
                     )}
                   >
-                    {val.name}
+                    {isSwatch ? (
+                      <span
+                        className="block size-full rounded-full border border-foreground/15"
+                        style={{ backgroundColor: val.name }}
+                      />
+                    ) : (
+                      val.name
+                    )}
                   </button>
                 )
               })}
             </div>
-          </div>
+          </fieldset>
         )
       })}
     </div>

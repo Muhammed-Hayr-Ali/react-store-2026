@@ -17,6 +17,7 @@ import { APP_ROUTES } from "@/lib/config/app-routes"
 import { useCart } from "@/lib/context/cart-context"
 import { useCurrency } from "@/lib/context/currency-context"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { useDebouncedCartQuantity } from "@/hooks/use-debounced-cart-quantity"
 import { Button } from "@/components/ui/button"
 import {
   Popover,
@@ -64,6 +65,16 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
   const { cart, totalItemsCount, updateItemQuantity, removeItem, isPending } =
     useCart()
   const { formatPrice } = useCurrency()
+  const { drafts, setQuantity, remove, flush } = useDebouncedCartQuantity({
+    updateItemQuantity,
+    removeItem,
+  })
+
+  // عند إغلاق اللوحة (أو الانتقال منها) نرسل التعديلات المؤجلة فوراً
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) flush()
+    setOpen(nextOpen)
+  }
 
   // إذا كان المستخدم في صفحة السلة أو إتمام الطلب، نبقيه رابطاً مباشراً دون فتح لوحة
   const isCartOrCheckoutPage =
@@ -72,22 +83,19 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
     pathname.startsWith("/checkout")
 
   const cartLabel =
-    totalItemsCount > 0
-      ? `${t("cartAriaLabel")} (${totalItemsCount})`
-      : t("cartAriaLabel")
+     t("cartAriaLabel")
 
   const items = React.useMemo(() => cart?.items ?? [], [cart?.items])
 
-  // حساب الإجمالي الفرعي بالسنتات لتمريره إلى formatPrice
+  // الأسعار مخزنة بالسنتات، فتمرر إلى formatPrice كما هي
   const subtotalInCents = React.useMemo(
     () =>
       items.reduce((acc, item) => {
-        const unitPriceInCents = Math.round(
-          Number(item.product_variants?.price ?? 0) * 100
-        )
-        return acc + unitPriceInCents * Number(item.quantity)
+        const unitPriceInCents = Number(item.product_variants?.price ?? 0)
+        const quantity = drafts[item.id] ?? Number(item.quantity)
+        return acc + unitPriceInCents * quantity
       }, 0),
-    [items]
+    [items, drafts]
   )
 
   const buttonContent =
@@ -141,7 +149,7 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
   // على الجوال: BottomSheet مريح للمس
   if (isMobile) {
     return (
-      <BottomSheet open={open} onOpenChange={setOpen}>
+      <BottomSheet open={open} onOpenChange={handleOpenChange}>
         <BottomSheetTrigger asChild>{triggerButton}</BottomSheetTrigger>
 
         <BottomSheetContent ariaLabel={cartLabel}>
@@ -172,7 +180,8 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
             ) : (
               <ul className="divide-y divide-border/50">
                 {items.map((item) => {
-                  const qty = Number(item.quantity)
+                  const serverQty = Number(item.quantity)
+                  const qty = drafts[item.id] ?? serverQty
                   const product = item.products
                   const variantInfo = item.product_variants
                   const imageUrl =
@@ -186,11 +195,9 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
                     typeof variantInfo.stock_quantity === "number"
                       ? variantInfo.stock_quantity
                       : Infinity
-                  const canIncrease = !isPending && qty < maxStock
+                  const canIncrease = qty < maxStock
 
-                  const unitPriceInCents = Math.round(
-                    Number(variantInfo?.price ?? 0) * 100
-                  )
+                  const unitPriceInCents = Number(variantInfo?.price ?? 0)
 
                   return (
                     <li
@@ -199,7 +206,7 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
                     >
                       <Link
                         href={`/product/${product.slug}`}
-                        onClick={() => setOpen(false)}
+                        onClick={() => handleOpenChange(false)}
                         className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/50 bg-muted/40"
                       >
                         {imageUrl ? (
@@ -222,7 +229,7 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
                       <div className="min-w-0 flex-1">
                         <Link
                           href={`/product/${product.slug}`}
-                          onClick={() => setOpen(false)}
+                          onClick={() => handleOpenChange(false)}
                           className="block truncate text-sm font-normal text-foreground transition-colors hover:text-primary"
                         >
                           {product.name}
@@ -245,14 +252,14 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
                       <div className="flex shrink-0 items-center gap-2">
                         <button
                           type="button"
-                          disabled={isPending}
+                          disabled={qty <= 1 && isPending}
                           aria-label={tCart("DECREASE_QUANTITY", {
                             default: "إنقاص الكمية",
                           })}
                           onClick={() =>
                             qty <= 1
-                              ? removeItem(item.id)
-                              : updateItemQuantity(item.id, qty - 1)
+                              ? remove(item.id)
+                              : setQuantity(item.id, qty - 1, serverQty)
                           }
                           className="flex size-9 items-center justify-center rounded-xl border border-border/60 text-foreground transition-colors hover:bg-muted active:scale-95 disabled:opacity-50"
                         >
@@ -273,7 +280,9 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
                           aria-label={tCart("INCREASE_QUANTITY", {
                             default: "زيادة الكمية",
                           })}
-                          onClick={() => updateItemQuantity(item.id, qty + 1)}
+                          onClick={() =>
+                            setQuantity(item.id, qty + 1, serverQty)
+                          }
                           className="flex size-9 items-center justify-center rounded-xl border border-border/60 text-foreground transition-colors hover:bg-muted active:scale-95 disabled:opacity-50"
                         >
                           <Plus className="size-4" />
@@ -297,7 +306,7 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
             )}
 
             <Button asChild size="lg" className="h-11 w-full rounded-xl text-sm">
-              <Link href={APP_ROUTES.CART} onClick={() => setOpen(false)}>
+              <Link href={APP_ROUTES.CART} onClick={() => handleOpenChange(false)}>
                 {tCart("VIEW_FULL_CART", { default: "عرض سلة التسوق" })}
               </Link>
             </Button>
@@ -309,7 +318,7 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
 
   // على سطح المكتب: Popover متوازن ومضغوط
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
 
       <PopoverContent
@@ -337,7 +346,7 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
           <>
             <ul className="max-h-64 space-y-2.5 overflow-y-auto">
               {items.map((item) => {
-                const qty = Number(item.quantity)
+                const qty = drafts[item.id] ?? Number(item.quantity)
                 const product = item.products
                 const variantInfo = item.product_variants
                 const imageUrl =
@@ -346,15 +355,13 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
                   product.product_images[0]?.url ??
                   null
 
-                const unitPriceInCents = Math.round(
-                  Number(variantInfo?.price ?? 0) * 100
-                )
+                const unitPriceInCents = Number(variantInfo?.price ?? 0)
 
                 return (
                   <li key={item.id} className="flex items-center gap-2.5">
                     <Link
                       href={`/product/${product.slug}`}
-                      onClick={() => setOpen(false)}
+                      onClick={() => handleOpenChange(false)}
                       className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/40 bg-muted/35 p-1"
                     >
                       {imageUrl ? (
@@ -377,7 +384,7 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
                     <div className="min-w-0 flex-1 text-start">
                       <Link
                         href={`/product/${product.slug}`}
-                        onClick={() => setOpen(false)}
+                        onClick={() => handleOpenChange(false)}
                         className="line-clamp-2 text-xs leading-snug text-foreground transition-colors hover:text-primary"
                       >
                         {product.name}
@@ -398,7 +405,7 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
                       aria-label={tCart("REMOVE_ITEM", {
                         default: "إزالة المنتج",
                       })}
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => remove(item.id)}
                       className="flex size-6 shrink-0 items-center justify-center rounded-full text-foreground/75 transition-colors hover:bg-muted hover:text-destructive disabled:opacity-50"
                     >
                       <XIcon aria-hidden="true" className="size-3.5" />
@@ -420,7 +427,7 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
             <div className="mt-3 flex flex-col items-start gap-2 text-xs">
               <Link
                 href={APP_ROUTES.CART}
-                onClick={() => setOpen(false)}
+                onClick={() => handleOpenChange(false)}
                 className="text-primary transition-opacity hover:opacity-80"
               >
                 {tCart("VIEW_FULL_CART", { default: "عرض سلة التسوق" })}
@@ -428,7 +435,7 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
 
               <Link
                 href="/checkout"
-                onClick={() => setOpen(false)}
+                onClick={() => handleOpenChange(false)}
                 className="text-primary transition-opacity hover:opacity-80"
               >
                 {tCart("PROCEED_TO_CHECKOUT", {
@@ -441,4 +448,4 @@ export function CartButton({ variant = "header", className }: CartButtonProps) {
       </PopoverContent>
     </Popover>
   )
-}
+}

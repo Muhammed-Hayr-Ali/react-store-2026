@@ -201,7 +201,6 @@
     "search": "Search",
     "dashboard": "Dashboard"
   },
-
   "AuthLayout": {
     "TERMS_PREFIX": "By continuing, you agree to our",
     "TERMS_OF_SERVICE": "Terms of Service",
@@ -326,7 +325,8 @@
     "REMOVE_ITEM": "Remove Item",
     "SUBTOTAL": "Subtotal",
     "VIEW_FULL_CART": "View Shopping Cart",
-    "PROCEED_TO_CHECKOUT": "Proceed to Checkout"
+    "PROCEED_TO_CHECKOUT": "Proceed to Checkout",
+    "cartAriaLabel": "Shopping cart"
   },
   "Category": {
     "META_TITLE": "{category} Products",
@@ -680,14 +680,13 @@
     "FAILED_TITLE": "Authentication failed",
     "RETURN_TO_LOGIN": "Return to login"
   },
-
   "ProductDetails": {
     "ADDING_TO_CART": "Adding...",
-    "ADD_MULTIPLE_TO_CART": "Add {count} to Bag",
     "ADD_TO_CART": "Add to Bag",
     "AVAILABLE_COUNT": "{count} available",
     "CLOSE_GALLERY": "Close",
     "DECREASE_QUANTITY": "Decrease quantity",
+    "DESCRIPTION": "Description",
     "EASY_RETURNS": "Easy Returns",
     "EDIT_PRODUCT": "Edit product",
     "FAST_DISPATCH": "Fast Dispatch",
@@ -697,6 +696,8 @@
     "IN_STOCK": "In stock",
     "LOW_STOCK": "Low stock",
     "NEXT_IMAGE": "Next image",
+    "NOT_FOUND_DESCRIPTION": "The requested product could not be found.",
+    "NOT_FOUND_TITLE": "Product Not Found",
     "NO_IMAGE": "No image available",
     "OFF": "OFF",
     "OPTION": "Option",
@@ -709,9 +710,10 @@
     "SKU_LABEL": "SKU",
     "TOTAL_PRICE": "Total",
     "UNAVAILABLE_PRODUCT": "Currently unavailable",
-    "VIEW_FULL_SCREEN": "Fullscreen"
+    "VIEW_FULL_SCREEN": "Fullscreen",
+    "REMOVE_FROM_WISHLIST": "Remove from favorites",
+    "ADD_TO_WISHLIST": "Add to favorites"
   },
-
   "ProductForm": {
     "ALERT_TITLE": "Action Required",
     "CLOSE_ERROR_ALERT": "Close error alert",

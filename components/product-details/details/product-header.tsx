@@ -1,28 +1,20 @@
-"use client"
-
 /**
  * @file components/store/product-details/details/product-header.tsx
- * @description Apple-inspired minimalist product header and description.
+ * @description Apple-inspired minimalist product title.
  */
-
-import * as React from "react"
 
 interface ProductHeaderProps {
   name: string
-  description?: string | null
 }
 
-export function ProductHeader({ name, description }: ProductHeaderProps) {
+export function ProductHeader({ name }: ProductHeaderProps) {
   return (
-    <div className="space-y-2">
-      <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-        {name}
-      </h1>
-      {description && (
-        <p className="text-sm leading-relaxed text-muted-foreground/90">
-          {description}
-        </p>
-      )}
-    </div>
+    // dir="auto" لأن جدول products لا يحتوي على ترجمة، فقد تختلف لغة النص عن لغة الواجهة
+    <h1
+      dir="auto"
+      className="text-2xl leading-tight font-semibold tracking-tight text-balance text-foreground sm:text-3xl lg:text-4xl"
+    >
+      {name}
+    </h1>
   )
 }

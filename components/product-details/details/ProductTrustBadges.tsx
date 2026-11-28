@@ -1,31 +1,30 @@
 "use client"
 
 /**
- * @file components/store/product-details/details/product-trust-badges.tsx
+ * @file components/store/product-details/details/ProductTrustBadges.tsx
  * @description Apple-inspired minimalist trust badges section featuring shipping, returns, and secure checkout.
  */
 
-import * as React from "react"
 import { useTranslations } from "next-intl"
 import { TruckIcon, RotateCcwIcon, ShieldCheckIcon } from "lucide-react"
+
+const BADGES = [
+  { key: "FAST_DISPATCH", Icon: TruckIcon },
+  { key: "EASY_RETURNS", Icon: RotateCcwIcon },
+  { key: "SECURE_CHECKOUT", Icon: ShieldCheckIcon },
+] as const
 
 export function ProductTrustBadges() {
   const t = useTranslations("ProductDetails")
 
   return (
-    <div className="grid grid-cols-3 gap-2 border-t border-border/40 pt-6 text-center text-xs text-muted-foreground/90">
-      <div className="flex flex-col items-center gap-1.5 transition-colors hover:text-foreground">
-        <TruckIcon className="size-4 stroke-[1.5] text-foreground/70" />
-        <span>{t("FAST_DISPATCH", { default: "Fast Dispatch" })}</span>
-      </div>
-      <div className="flex flex-col items-center gap-1.5 transition-colors hover:text-foreground">
-        <RotateCcwIcon className="size-4 stroke-[1.5] text-foreground/70" />
-        <span>{t("EASY_RETURNS", { default: "Easy Returns" })}</span>
-      </div>
-      <div className="flex flex-col items-center gap-1.5 transition-colors hover:text-foreground">
-        <ShieldCheckIcon className="size-4 stroke-[1.5] text-foreground/70" />
-        <span>{t("SECURE_CHECKOUT", { default: "Secure Checkout" })}</span>
-      </div>
-    </div>
+    <ul className="grid grid-cols-3 divide-x divide-border/60 rounded-2xl border border-border/60 py-4 text-center text-xs text-muted-foreground">
+      {BADGES.map(({ key, Icon }) => (
+        <li key={key} className="flex flex-col items-center gap-2 px-2">
+          <Icon aria-hidden className="size-5 stroke-[1.5] text-foreground" />
+          <span>{t(key)}</span>
+        </li>
+      ))}
+    </ul>
   )
 }

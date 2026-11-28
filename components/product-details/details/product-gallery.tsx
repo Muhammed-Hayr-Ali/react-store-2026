@@ -51,11 +51,34 @@ export function ProductGallery({
   // تحديد هل نحن في المتصفح أم لا (بدون useEffect)
   const isBrowser = typeof window !== "undefined"
 
-  const primaryImage = images.find((img) => img.is_primary) || images[0]
-  const activeVariantImage = images.find(
-    (img) => img.variant_id === selectedVariantId
+  // الصورة المناسبة للمتغير: صورته، ثم صورة عامة رئيسية، ثم أي صورة
+  const getVariantImage = (variantId?: string) => {
+    const own = images.filter((img) => img.variant_id === variantId)
+    const general = images.filter((img) => !img.variant_id)
+    const pick = (list: ProductImageDetail[]) =>
+      list.find((img) => img.is_primary) ?? list[0]
+    return pick(own) ?? pick(general) ?? pick(images)
+  }
+
+  // نخزن الصورة المختارة حتى تعمل الصور العامة والصور المتعددة للمتغير الواحد
+  const [selectedImageId, setSelectedImageId] = React.useState(
+    () => getVariantImage(selectedVariantId)?.id
   )
-  const activeImage = activeVariantImage?.url || primaryImage?.url || ""
+
+  const [prevVariantId, setPrevVariantId] = React.useState(selectedVariantId)
+  if (prevVariantId !== selectedVariantId) {
+    setPrevVariantId(selectedVariantId)
+    const current = images.find((img) => img.id === selectedImageId)
+    if (current?.variant_id !== selectedVariantId) {
+      setSelectedImageId(getVariantImage(selectedVariantId)?.id)
+    }
+  }
+
+  const activeImageData =
+    images.find((img) => img.id === selectedImageId) ??
+    getVariantImage(selectedVariantId)
+  const activeImage = activeImageData?.url ?? ""
+  const activeAlt = activeImageData?.alt_text || productName
 
   const markImageAsFailed = (url: string) => {
     setFailedImages((prev) => ({ ...prev, [url]: true }))
@@ -63,14 +86,19 @@ export function ProductGallery({
 
   const isMainImageFailed = Boolean(failedImages[activeImage])
 
-  const currentIndex = React.useMemo(() => {
-    const idx = images.findIndex((img) => img.url === activeImage)
-    return idx >= 0 ? idx : 0
-  }, [images, activeImage])
+  const currentIndex = Math.max(
+    0,
+    images.findIndex((img) => img.id === activeImageData?.id)
+  )
 
   const handleImageChange = React.useCallback(
     (targetImage: ProductImageDetail) => {
-      if (targetImage?.variant_id) {
+      setSelectedImageId(targetImage.id)
+
+      if (
+        targetImage.variant_id &&
+        targetImage.variant_id !== selectedVariantId
+      ) {
         const matchedVariant = variants.find(
           (v) => v.id === targetImage.variant_id
         )
@@ -79,7 +107,7 @@ export function ProductGallery({
         }
       }
     },
-    [variants, onVariantSelect]
+    [variants, selectedVariantId, onVariantSelect]
   )
 
   const handlePrev = React.useCallback(
@@ -100,27 +128,31 @@ export function ProductGallery({
     [currentIndex, images, handleImageChange]
   )
 
-  // الاستماع لاختصارات لوحة المفاتيح فقط عند فتح المعرض
+  // اختصارات لوحة المفاتيح، مع مراعاة اتجاه الصفحة
   React.useEffect(() => {
     if (!isOpen) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      const isRtl = document.documentElement.dir === "rtl"
       if (e.key === "Escape") setIsOpen(false)
-      if (e.key === "ArrowLeft") handlePrev()
-      if (e.key === "ArrowRight") handleNext()
+      if (images.length < 2) return
+      if (e.key === (isRtl ? "ArrowRight" : "ArrowLeft")) handlePrev()
+      if (e.key === (isRtl ? "ArrowLeft" : "ArrowRight")) handleNext()
     }
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isOpen, handlePrev, handleNext])
+  }, [isOpen, images.length, handlePrev, handleNext])
 
-  // التحكم في السكرول مباشرة عند تغيير حالة الـ isOpen عبر الأحداث
-  const toggleLightbox = (open: boolean) => {
-    setIsOpen(open)
-    if (isBrowser) {
-      document.body.style.overflow = open ? "hidden" : "unset"
+  // قفل التمرير: يستعاد دائماً عند الإغلاق (بما فيه Escape) أو إزالة المكوّن
+  React.useEffect(() => {
+    if (!isOpen) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = previousOverflow
     }
-  }
+  }, [isOpen])
 
   // =================================================================
   // 3. قسم نافذة المعرض بملء الشاشة (Fullscreen Lightbox Portal)
@@ -131,7 +163,8 @@ export function ProductGallery({
           <div
             role="dialog"
             aria-modal="true"
-            onClick={() => toggleLightbox(false)}
+            aria-label={productName}
+            onClick={() => setIsOpen(false)}
             className="fixed inset-0 z-50 flex h-dvh animate-in flex-col justify-between bg-background/95 p-4 backdrop-blur-2xl duration-300 fade-in sm:p-6"
           >
             {/* شريط رأس النافذة (عداد الصور وزر الإغلاق) */}
@@ -145,9 +178,10 @@ export function ProductGallery({
                 type="button"
                 variant="ghost"
                 size="icon"
-                onClick={() => toggleLightbox(false)}
+                onClick={() => setIsOpen(false)}
                 className="size-10 rounded-full bg-muted text-foreground transition-transform hover:scale-105 active:scale-95"
-                aria-label={t("CLOSE_GALLERY", { default: "Close" })}
+                autoFocus
+                aria-label={t("CLOSE_GALLERY")}
               >
                 <XIcon className="size-5" />
               </Button>
@@ -164,7 +198,7 @@ export function ProductGallery({
                   variant="ghost"
                   onClick={handlePrev}
                   className="absolute inset-s-2 z-10 size-11 rounded-full bg-muted/80 text-foreground backdrop-blur-md transition-all hover:scale-105 active:scale-95 sm:inset-s-6"
-                  aria-label={t("PREVIOUS_IMAGE", { default: "Previous" })}
+                  aria-label={t("PREVIOUS_IMAGE")}
                 >
                   <ChevronLeftIcon className="size-6 rtl:rotate-180" />
                 </Button>
@@ -175,7 +209,7 @@ export function ProductGallery({
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={activeImage}
-                    alt={productName}
+                    alt={activeAlt}
                     onError={() => markImageAsFailed(activeImage)}
                     className="max-h-[75vh] max-w-full object-contain object-center transition-transform duration-500"
                   />
@@ -183,7 +217,7 @@ export function ProductGallery({
                   <div className="flex size-64 flex-col items-center justify-center text-muted-foreground">
                     <ImageIcon className="size-16 stroke-[1.5]" />
                     <span className="mt-2 text-sm">
-                      {t("IMAGE_UNAVAILABLE", { default: "Unavailable" })}
+                      {t("IMAGE_UNAVAILABLE")}
                     </span>
                   </div>
                 )}
@@ -195,7 +229,7 @@ export function ProductGallery({
                   variant="ghost"
                   onClick={handleNext}
                   className="absolute inset-e-2 z-10 size-11 rounded-full bg-muted/80 text-foreground backdrop-blur-md transition-all hover:scale-105 active:scale-95 sm:inset-e-6"
-                  aria-label={t("NEXT_IMAGE", { default: "Next" })}
+                  aria-label={t("NEXT_IMAGE")}
                 >
                   <ChevronRightIcon className="size-6 rtl:rotate-180" />
                 </Button>
@@ -209,7 +243,7 @@ export function ProductGallery({
                 className="mx-auto flex max-w-full shrink-0 scrollbar-none items-center justify-center gap-3 overflow-x-auto scroll-smooth rounded-xl bg-muted/50 p-2.5 backdrop-blur-xl [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
               >
                 {images.map((img) => {
-                  const isSelected = activeImage === img.url
+                  const isSelected = activeImageData?.id === img.id
                   const isFailed = Boolean(failedImages[img.url])
 
                   return (
@@ -217,6 +251,8 @@ export function ProductGallery({
                       key={img.id}
                       type="button"
                       onClick={() => handleImageChange(img)}
+                      aria-label={t("SELECT_PRODUCT_IMAGE")}
+                      aria-pressed={isSelected}
                       className={`group relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-lg bg-muted transition-all duration-300 ${
                         isSelected
                           ? "opacity-100 ring-2 ring-primary ring-offset-2"
@@ -248,15 +284,12 @@ export function ProductGallery({
 
   return (
     <>
-      <div className="w-full space-y-4">
+      <div className="flex w-full flex-col gap-3 xl:flex-row-reverse xl:items-start">
         {/* ================================================================= */}
         {/* 1. قسم عرض الصورة الرئيسية (Main Product Image Section) */}
         {/* ================================================================= */}
         <div
-          onClick={() =>
-            activeImage && !isMainImageFailed && toggleLightbox(true)
-          }
-          className={`group relative aspect-square w-full overflow-hidden rounded-lg bg-muted transition-all duration-500 ${
+          className={`group relative aspect-square w-full min-w-0 overflow-hidden rounded-3xl border border-border/50 bg-muted/60 xl:flex-1 ${
             activeImage && !isMainImageFailed ? "cursor-zoom-in" : ""
           }`}
         >
@@ -265,29 +298,67 @@ export function ProductGallery({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={activeImage}
-                alt={productName}
+                alt={activeAlt}
                 onError={() => markImageAsFailed(activeImage)}
                 className="size-full object-contain object-center transition-transform duration-700 ease-out group-hover:scale-105"
               />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/5 opacity-0 backdrop-blur-[2px] transition-all duration-300 group-hover:opacity-100">
-                <span className="inline-flex translate-y-1 items-center gap-2 rounded-full bg-background/90 px-4 py-2 text-xs font-medium text-foreground shadow-sm backdrop-blur-md transition-transform duration-300 group-hover:translate-y-0">
+              {/* زر حقيقي يغطي الصورة: يعمل باللمس ولوحة المفاتيح */}
+              <button
+                type="button"
+                onClick={() => setIsOpen(true)}
+                aria-label={t("VIEW_FULL_SCREEN")}
+                className="absolute inset-0 flex cursor-zoom-in items-end justify-end rounded-3xl p-4 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+              >
+                <span className="inline-flex items-center gap-2 rounded-full bg-background/90 p-2.5 sm:px-3.5 sm:py-2 text-xs font-medium text-foreground shadow-sm backdrop-blur-md transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-100">
                   <ExpandIcon className="size-3.5 text-muted-foreground" />
-                  <span>
-                    {t("VIEW_FULL_SCREEN", { default: "Fullscreen" })}
+                  <span className="hidden sm:inline">
+                    {t("VIEW_FULL_SCREEN")}
                   </span>
                 </span>
-              </div>
+              </button>
             </>
           ) : (
             <div className="flex size-full flex-col items-center justify-center text-sm text-muted-foreground">
               <AlertCircleIcon className="mb-2 size-8 opacity-30" />
-              <span>{t("NO_IMAGE", { default: "No image available" })}</span>
+              <span>{t("NO_IMAGE")}</span>
             </div>
           )}
 
-          {!isOutOfStock && discountPercentage && (
-            <span className="absolute inset-s-5 top-5 z-10 rounded-full bg-foreground px-3.5 py-1 text-[11px] font-semibold text-background shadow-sm">
-              {discountPercentage}% {t("OFF", { default: "OFF" })}
+          {images.length > 1 && (
+            <>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={handlePrev}
+                aria-label={t("PREVIOUS_IMAGE")}
+                className="absolute inset-s-3 top-1/2 z-10 size-10 -translate-y-1/2 rounded-full bg-background/85 shadow-sm backdrop-blur-md md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
+              >
+                <ChevronLeftIcon className="size-5 rtl:rotate-180" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={handleNext}
+                aria-label={t("NEXT_IMAGE")}
+                className="absolute inset-e-3 top-1/2 z-10 size-10 -translate-y-1/2 rounded-full bg-background/85 shadow-sm backdrop-blur-md md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
+              >
+                <ChevronRightIcon className="size-5 rtl:rotate-180" />
+              </Button>
+              <span
+                className="pointer-events-none absolute inset-s-4 bottom-4 rounded-full bg-background/85 px-3 py-1 text-xs font-medium tabular-nums backdrop-blur-md"
+              >
+                <bdi dir="ltr">
+                  {currentIndex + 1} / {images.length}
+                </bdi>
+              </span>
+            </>
+          )}
+
+          {!isOutOfStock && discountPercentage !== null && (
+            <span className="absolute inset-s-5 top-5 z-10 rounded-full bg-destructive px-3.5 py-1 text-xs font-semibold text-white shadow-sm">
+              {discountPercentage}% {t("OFF")}
             </span>
           )}
         </div>
@@ -296,9 +367,9 @@ export function ProductGallery({
         {/* 2. قسم شريط الصور المصغرة للتنقل (Thumbnails Carousel Section) */}
         {/* ================================================================= */}
         {images.length > 1 && (
-          <div className="flex touch-pan-x scrollbar-none items-center gap-3 overflow-x-auto scroll-smooth p-1 [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex touch-pan-x scrollbar-none items-center gap-3 overflow-x-auto scroll-smooth p-1 xl:max-h-[36rem] xl:shrink-0 xl:flex-col xl:overflow-y-auto [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {images.map((img) => {
-              const isSelected = activeImage === img.url
+              const isSelected = activeImageData?.id === img.id
               const isFailed = Boolean(failedImages[img.url])
 
               return (
@@ -306,14 +377,13 @@ export function ProductGallery({
                   key={img.id}
                   type="button"
                   onClick={() => handleImageChange(img)}
-                  className={`group relative size-16 shrink-0 cursor-pointer overflow-hidden rounded-md bg-muted transition-all duration-300 ${
+                  className={`group relative size-18 shrink-0 cursor-pointer overflow-hidden rounded-xl bg-muted transition-all duration-300 ${
                     isSelected
-                      ? "opacity-100 ring-1 ring-muted-foreground/50 ring-offset-1"
-                      : "opacity-40 hover:opacity-100"
+                      ? "opacity-100 ring-2 ring-foreground ring-inset"
+                      : "opacity-60 hover:opacity-100"
                   }`}
-                  aria-label={t("SELECT_PRODUCT_IMAGE", {
-                    default: "Select image",
-                  })}
+                  aria-label={t("SELECT_PRODUCT_IMAGE")}
+                  aria-pressed={isSelected}
                 >
                   {!isFailed ? (
                     /* eslint-disable-next-line @next/next/no-img-element */

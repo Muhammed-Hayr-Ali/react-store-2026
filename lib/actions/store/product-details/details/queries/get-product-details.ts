@@ -24,6 +24,8 @@ export type ProductVariantDetail = Omit<
     | "track_inventory"
     | "is_active"
     | "attributes"
+    | "low_stock_threshold"
+    | "sort_order"
   >,
   "attributes"
 > & {
@@ -37,12 +39,12 @@ export type ProductImageDetail = Pick<
 
 export type CategoryDetail = Pick<
   Tables<"categories">,
-  "id" | "name" | "name_ar" | "slug" | "parent_id"
+  "id" | "name" | "name_ar" | "slug" | "parent_id" | "is_active"
 >
 
 export type BrandDetail = Pick<
   Tables<"brands">,
-  "id" | "name" | "name_ar" | "slug" | "image_url" | "image_alt"
+  "id" | "name" | "name_ar" | "slug" | "image_url" | "image_alt" | "is_active"
 >
 
 export type FullProductDetails = Pick<
@@ -132,7 +134,8 @@ const getCachedProductDetails = unstable_cache(
           name,
           name_ar,
           slug,
-          parent_id
+          parent_id,
+          is_active
         ),
         brand:brands!products_brand_id_fkey (
           id,
@@ -140,7 +143,8 @@ const getCachedProductDetails = unstable_cache(
           name_ar,
           slug,
           image_url,
-          image_alt
+          image_alt,
+          is_active
         ),
         product_variants (
           id,
@@ -151,7 +155,9 @@ const getCachedProductDetails = unstable_cache(
           stock_quantity,
           track_inventory,
           is_active,
-          attributes
+          attributes,
+          low_stock_threshold,
+          sort_order
         ),
         product_images (
           id,
@@ -165,25 +171,39 @@ const getCachedProductDetails = unstable_cache(
       )
       .eq("slug", slug)
       .eq("is_active", true)
+      // فلترة المتغيرات غير المفعّلة دون استبعاد المنتج نفسه
+      .eq("product_variants.is_active", true)
+      .order("sort_order", {
+        referencedTable: "product_variants",
+        ascending: true,
+      })
+      .order("id", { referencedTable: "product_variants", ascending: true })
       .order("sort_order", { referencedTable: "product_images", ascending: true })
       .order("id", { referencedTable: "product_images", ascending: true })
       .maybeSingle()
 
-    if (error || !data) return null
+    // رمي الخطأ يمنع تخزين فشل مؤقت في الكاش على أنه "منتج غير موجود"
+    if (error) throw new Error(error.message)
+    if (!data) return null
 
     const category = firstOrNull(data.category)
     const brand = firstOrNull(data.brand)
 
     let parentCategory: CategoryDetail | null = null
     if (category?.parent_id) {
-      const { data: parentData } = await supabase
+      const { data: parentData, error: parentError } = await supabase
         .from("categories")
-        .select("id, name, name_ar, slug, parent_id")
+        .select("id, name, name_ar, slug, parent_id, is_active")
         .eq("id", category.parent_id)
         .maybeSingle()
 
+      if (parentError) throw new Error(parentError.message)
+
       parentCategory = parentData ?? null
     }
+
+    const variants = parseVariants(data.product_variants)
+    const activeVariantIds = new Set(variants.map((v) => v.id))
 
     return {
       id: data.id,
@@ -195,14 +215,19 @@ const getCachedProductDetails = unstable_cache(
       created_at: data.created_at,
       meta_title: data.meta_title,
       meta_description: data.meta_description,
-      category,
-      parent_category: parentCategory,
-      brand,
-      product_variants: parseVariants(data.product_variants),
-      product_images: data.product_images ?? [],
+      // is_active في categories يقبل null، لذلك نستبعد false فقط
+      category: category?.is_active === false ? null : category,
+      parent_category:
+        parentCategory?.is_active === false ? null : parentCategory,
+      brand: brand?.is_active ? brand : null,
+      product_variants: variants,
+      // استبعاد صور المتغيرات غير المفعّلة
+      product_images: (data.product_images ?? []).filter(
+        (img) => !img.variant_id || activeVariantIds.has(img.variant_id)
+      ),
     }
   },
-  ["product-details-cache"],
+  ["product-details-cache-v2"],
   {
     revalidate: 3600,
     tags: [CACHE_TAG.PRODUCTS],
@@ -232,7 +257,8 @@ export async function getProductDetails(
     }
 
     return { success: true, data: product }
-  } catch {
+  } catch (error) {
+    console.error("[getProductDetails]", slug, error)
     return {
       success: false,
       error: "FETCH_PRODUCT_ERROR",

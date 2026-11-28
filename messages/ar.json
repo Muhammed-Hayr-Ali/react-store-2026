@@ -201,7 +201,6 @@
     "search": "بحث",
     "dashboard": "لوحة التحكم"
   },
-
   "AuthLayout": {
     "TERMS_PREFIX": "بالمتابعة، فإنك توافق على",
     "TERMS_OF_SERVICE": "شروط الخدمة",
@@ -326,7 +325,8 @@
     "REMOVE_ITEM": "إزالة المنتج",
     "SUBTOTAL": "المجموع الفرعي",
     "VIEW_FULL_CART": "عرض سلة التسوق",
-    "PROCEED_TO_CHECKOUT": "المتابعة لإتمام الشراء"
+    "PROCEED_TO_CHECKOUT": "المتابعة لإتمام الشراء",
+    "cartAriaLabel": "سلة التسوق"
   },
   "Category": {
     "META_TITLE": "منتجات {category}",
@@ -680,14 +680,13 @@
     "FAILED_TITLE": "فشلت المصادقة",
     "RETURN_TO_LOGIN": "العودة إلى تسجيل الدخول"
   },
-
   "ProductDetails": {
     "ADDING_TO_CART": "جارٍ الإضافة...",
-    "ADD_MULTIPLE_TO_CART": "أضف {count} إلى السلة",
     "ADD_TO_CART": "أضف إلى السلة",
     "AVAILABLE_COUNT": "المتاح: {count}",
     "CLOSE_GALLERY": "إغلاق",
     "DECREASE_QUANTITY": "إنقاص الكمية",
+    "DESCRIPTION": "وصف المنتج",
     "EASY_RETURNS": "إرجاع سهل",
     "EDIT_PRODUCT": "تعديل المنتج",
     "FAST_DISPATCH": "شحن سريع",
@@ -697,6 +696,8 @@
     "IN_STOCK": "متوفر",
     "LOW_STOCK": "كمية محدودة",
     "NEXT_IMAGE": "الصورة التالية",
+    "NOT_FOUND_DESCRIPTION": "تعذر العثور على المنتج المطلوب.",
+    "NOT_FOUND_TITLE": "المنتج غير موجود",
     "NO_IMAGE": "لا توجد صورة",
     "OFF": "خصم",
     "OPTION": "الخيار",
@@ -709,7 +710,9 @@
     "SKU_LABEL": "رمز المنتج",
     "TOTAL_PRICE": "الإجمالي",
     "UNAVAILABLE_PRODUCT": "غير متاح حالياً",
-    "VIEW_FULL_SCREEN": "عرض بملء الشاشة"
+    "VIEW_FULL_SCREEN": "عرض بملء الشاشة",
+    "REMOVE_FROM_WISHLIST": "إزالة من المفضلة",
+    "ADD_TO_WISHLIST": "إضافة إلى المفضلة"
   },
   "ProductForm": {
     "ALERT_TITLE": "إجراء مطلوب",

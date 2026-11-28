@@ -16,7 +16,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { CategoryDetail } from "@/lib/actions/store/product-details/details/queries/get-product-details"
+import type { CategoryDetail } from "@/lib/actions/store/product-details/details/queries/get-product-details"
 import { APP_ROUTES } from "@/lib/config/app-routes"
 
 interface ProductBreadcrumbProps {
@@ -33,9 +33,11 @@ export function ProductBreadcrumb({
   const t = useTranslations("ProductDetails")
   const locale = useLocale()
 
-  const rootCategory = locale === "ar" ? category?.name_ar : category?.name
-  const parentCat =
-    locale === "ar" ? parentCategory?.name_ar : parentCategory?.name
+  const localizedName = (item?: CategoryDetail | null) =>
+    locale === "ar" ? item?.name_ar || item?.name : item?.name
+
+  const categoryName = localizedName(category)
+  const parentName = localizedName(parentCategory)
 
   return (
     <Breadcrumb>
@@ -46,7 +48,7 @@ export function ProductBreadcrumb({
             <Link href={APP_ROUTES.HOME}>{t("HOME")}</Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
-        <BreadcrumbSeparator />
+        <BreadcrumbSeparator className="rtl:[&>svg]:rotate-180" />
 
         {/* التصنيف الأب (إن وجد) مع استخدام الـ slug والـ locale الصحيح */}
         {parentCategory && (
@@ -54,11 +56,11 @@ export function ProductBreadcrumb({
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
                 <Link href={`${APP_ROUTES.CATEGORIES}/${parentCategory.slug}`}>
-                  {parentCat}
+                  {parentName}
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator />
+            <BreadcrumbSeparator className="rtl:[&>svg]:rotate-180" />
           </>
         )}
 
@@ -68,11 +70,11 @@ export function ProductBreadcrumb({
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
                 <Link href={`${APP_ROUTES.CATEGORIES}/${category.slug}`}>
-                  {rootCategory}
+                  {categoryName}
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator />
+            <BreadcrumbSeparator className="rtl:[&>svg]:rotate-180" />
           </>
         )}
 

@@ -5,10 +5,11 @@
  * @description Apple-inspired minimalist price, inventory status, and SKU display with full localization.
  */
 
-import * as React from "react"
 import { useTranslations } from "next-intl"
-import { ProductVariantDetail } from "@/lib/actions/store/product-details/details/queries/get-product-details"
+import type { ProductVariantDetail } from "@/lib/actions/store/product-details/details/queries/get-product-details"
 import { useCurrency } from "@/lib/context/currency-context"
+import { cn } from "@/lib/utils"
+import { getDiscountPercentage, isVariantOutOfStock } from "./variant-utils"
 
 interface ProductPriceStockProps {
   variant: ProductVariantDetail
@@ -18,58 +19,78 @@ export function ProductPriceStock({ variant }: ProductPriceStockProps) {
   const t = useTranslations("ProductDetails")
   const { formatRawPrice, currentCurrency } = useCurrency()
 
-  const isOutOfStock = variant.track_inventory && variant.stock_quantity <= 0
+  const isOutOfStock = isVariantOutOfStock(variant)
+  const isLowStock =
+    !isOutOfStock &&
+    variant.track_inventory &&
+    variant.stock_quantity <= variant.low_stock_threshold
+  const discount = getDiscountPercentage(variant)
+
+  const status = isOutOfStock
+    ? {
+        label: t("OUT_OF_STOCK"),
+        badge: "bg-destructive/10 text-destructive",
+        dot: "bg-destructive",
+      }
+    : isLowStock
+      ? {
+          label: t("LOW_STOCK"),
+          badge: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
+          dot: "bg-amber-500",
+        }
+      : {
+          label: t("IN_STOCK"),
+          badge: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+          dot: "bg-emerald-500",
+        }
 
   return (
-    <div className="space-y-3 py-1">
-      {/* السعر الرئيسي بنمط أبل البارز والهادئ */}
-      <div className="flex items-baseline gap-1.5">
-        <span className="text-3xl font-semibold text-foreground sm:text-4xl">
-          {formatRawPrice(variant.price)}
-        </span>
-        <span className="text-sm font-medium text-muted-foreground">
-          {currentCurrency.symbol}
-        </span>
+    <div className="space-y-4 border-b border-border/60 pb-6">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-3xl font-semibold tracking-tight text-foreground tabular-nums sm:text-4xl">
+            {formatRawPrice(variant.price)}
+          </span>
+          <span className="text-sm font-medium text-muted-foreground">
+            {currentCurrency.symbol}
+          </span>
+        </div>
 
-        {/* السعر القديم قبل الخصم إن وجد */}
-        {variant.compare_at_price &&
-          variant.compare_at_price > variant.price && (
-            <span className="ms-3 text-sm text-destructive/50">
+        {discount !== null && variant.compare_at_price !== null && (
+          <>
+            <del className="text-base text-muted-foreground/70 tabular-nums">
               {formatRawPrice(variant.compare_at_price)}{" "}
               {currentCurrency.symbol}
+            </del>
+            <span className="rounded-full bg-destructive/10 px-2.5 py-0.5 text-xs font-semibold text-destructive">
+              {discount}% {t("OFF")}
             </span>
-          )}
+          </>
+        )}
       </div>
 
-      {/* الحالة والـ SKU بتصميم نظيف ومترجم بالكامل */}
-      <div className="flex flex-wrap items-center gap-4 text-xs">
-        {isOutOfStock ? (
-          <span className="font-medium text-destructive">
-            {t("OUT_OF_STOCK", { default: "Out of stock" })}
-          </span>
-        ) : (
-          <span className="flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
-            <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
-            {t("IN_STOCK", { default: "In stock" })}
-            {variant.track_inventory && (
-              <span className="font-normal text-muted-foreground">
-                (
-                {t("AVAILABLE_COUNT", {
-                  count: variant.stock_quantity,
-                  default: `${variant.stock_quantity} available`,
-                })}
-                )
-              </span>
+      <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-medium",
+              status.badge
             )}
+          >
+            <span className={cn("size-1.5 rounded-full", status.dot)} />
+            {status.label}
           </span>
-        )}
+          {!isOutOfStock && variant.track_inventory && (
+            <span className="text-muted-foreground">
+              {t("AVAILABLE_COUNT", { count: variant.stock_quantity })}
+            </span>
+          )}
+        </div>
 
-        {variant.sku && (
-          <span className="text-muted-foreground/80">
-            {t("SKU_LABEL", { default: "SKU" })}:{" "}
-            <span className="font-mono text-foreground">{variant.sku}</span>
-          </span>
-        )}
+        <span className="text-muted-foreground/80">
+          {t("SKU_LABEL")}:{" "}
+          <bdi className="font-mono text-foreground">{variant.sku}</bdi>
+        </span>
       </div>
     </div>
   )

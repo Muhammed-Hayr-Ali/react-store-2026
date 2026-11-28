@@ -7,7 +7,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import {
+import type {
   BrandDetail,
   CategoryDetail,
 } from "@/lib/actions/store/product-details/details/queries/get-product-details"
@@ -15,7 +15,8 @@ import { Button } from "@/components/ui/button"
 import { PenLineIcon } from "lucide-react"
 import { Can } from "@/components/shared/can"
 import { PERMISSIONS } from "@/lib/actions/role"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
+import { APP_ROUTES } from "@/lib/config/app-routes"
 
 interface ProductCategoryBrandProps {
   slug: string
@@ -29,8 +30,7 @@ export function ProductCategoryBrand({
   brand,
 }: ProductCategoryBrandProps) {
   const locale = useLocale()
-
-  if (!category && !brand) return null
+  const t = useTranslations("ProductDetails")
 
   const categoryName = category
     ? locale === "ar"
@@ -45,12 +45,12 @@ export function ProductCategoryBrand({
     : null
 
   return (
-    <div className="flex justify-between">
-      <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground/80">
+    <div className="flex min-h-8 items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground/80">
         {/* رابط التصنيف */}
         {category && categoryName && (
           <Link
-            href={`/${locale}/categories/${category.slug}`}
+            href={`${APP_ROUTES.CATEGORIES}/${category.slug}`}
             className="tracking-wide uppercase underline-offset-4 transition-colors hover:text-primary hover:underline"
           >
             {categoryName}
@@ -64,7 +64,7 @@ export function ProductCategoryBrand({
         {/* رابط العلامة التجارية */}
         {brand && brandName && (
           <Link
-            href={`/${locale}/brands/${brand.slug}`}
+            href={`/brands/${brand.slug}`}
             className="font-semibold tracking-wide text-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
           >
             {brandName}
@@ -77,7 +77,10 @@ export function ProductCategoryBrand({
           className="rounded-full bg-foreground shadow-none"
           asChild
         >
-          <Link href={`/dashboard/products/${slug}/edit`}>
+          <Link
+            aria-label={t("EDIT_PRODUCT")}
+            href={`/dashboard/products/${slug}/edit`}
+          >
             <PenLineIcon className="text-background" />
           </Link>
         </Button>

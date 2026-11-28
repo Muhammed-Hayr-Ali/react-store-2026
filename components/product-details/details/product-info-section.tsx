@@ -6,180 +6,162 @@
  */
 
 import * as React from "react"
+import { useTranslations } from "next-intl"
 import { ProductHeader } from "./product-header"
+import { ProductDescription } from "./product-description"
 import { ProductGallery } from "./product-gallery"
-import { ProductVariants } from "./product-variants"
+import { ProductVariants, type VariantOption } from "./product-variants"
 import { ProductPriceStock } from "./product-price-stock"
 import { ProductActions } from "./product-actions"
 import { ProductCategoryBrand } from "./product-category-brand"
 import { ProductTrustBadges } from "./ProductTrustBadges"
+import {
+  findBestVariant,
+  getAttribute,
+  getDiscountPercentage,
+  isVariantOutOfStock,
+} from "./variant-utils"
 import type {
   FullProductDetails,
   ProductVariantDetail,
 } from "@/lib/actions/store/product-details/details/queries/get-product-details"
-import { useTranslations } from "next-intl"
+
+const DEFAULT_OPTION_ID = "default-variant"
 
 interface ProductInfoSectionProps {
   product: FullProductDetails
-  onSelectVariants: (selectedVariant: ProductVariantDetail) => void
 }
 
-export function ProductInfoSection({
-  product,
-  onSelectVariants,
-}: ProductInfoSectionProps) {
+export function ProductInfoSection({ product }: ProductInfoSectionProps) {
   const t = useTranslations("ProductDetails")
-  const [selectedVariant, setSelectedVariant] =
-    React.useState<ProductVariantDetail>(product.product_variants[0])
+  const variants = product.product_variants
 
-  /**
-   * استخراج الخصائص (Attributes) ديناميكياً من الـ variants (مثل size, weight)
-   * وعرضها كخيارات مستقلة ودقيقة للمستخدم.
-   */
-  const variantOptions = React.useMemo(() => {
-    if (!product.product_variants || product.product_variants.length === 0)
-      return []
+  // نخزن المعرّف فقط، حتى تبقى بيانات المتغير (السعر والمخزون) محدثة دائماً
+  const [selectedId, setSelectedId] = React.useState<string | undefined>(
+    () => (variants.find((v) => !isVariantOutOfStock(v)) ?? variants[0])?.id
+  )
+  const selectedVariant =
+    variants.find((v) => v.id === selectedId) ?? variants[0]
 
-    // تجميع الخصائص الفريدة من جميع الـ variants (مثلاً: استخراج مفاتيح الـ attributes مثل size)
-    const attributeKeys = new Set<string>()
-    product.product_variants.forEach((v) => {
-      if (v.attributes && typeof v.attributes === "object") {
-        Object.keys(v.attributes).forEach((key) => attributeKeys.add(key))
-      }
-    })
+  const variantOptions = React.useMemo<VariantOption[]>(() => {
+    if (!selectedVariant) return []
 
-    // إذا لم تكن هناك attributes مفصلة، نرجع النكهة/الاسم الأساسي كخيار
-    if (attributeKeys.size === 0) {
+    const attributeKeys = Array.from(
+      new Set(variants.flatMap((v) => Object.keys(v.attributes ?? {})))
+    )
+
+    // لا توجد attributes: نعرض أسماء المتغيرات نفسها
+    if (attributeKeys.length === 0) {
+      if (variants.length < 2) return []
       return [
         {
-          id: "default-variant",
-          name: t("OPTION", { default: "Option" }),
-          values: product.product_variants.map((v) => ({
+          id: DEFAULT_OPTION_ID,
+          name: t("OPTION"),
+          values: variants.map((v) => ({
             id: v.id,
             name: v.name ?? v.sku,
-            isSelected: selectedVariant?.id === v.id,
-            isDisabled: v.track_inventory && v.stock_quantity <= 0,
+            isSelected: selectedVariant.id === v.id,
+            isDisabled: isVariantOutOfStock(v),
           })),
         },
       ]
     }
 
-    // بناء قائمة الخيارات بناءً على كل attribute تم العثور عليه (مثل Size و Weight)
-    const options: Array<{
-      id: string
-      name: string
-      values: Array<{
-        id: string
-        name: string
-        isSelected: boolean
-        isDisabled?: boolean
-      }>
-    }> = []
+    return attributeKeys.map((key) => {
+      const values = Array.from(
+        new Set(
+          variants
+            .map((v) => getAttribute(v, key))
+            .filter((value): value is string => value !== null)
+        )
+      )
 
-    attributeKeys.forEach((attrKey) => {
-      // جمع القيم الفريدة لكل خاصية
-      const uniqueValues = new Map<
-        string,
-        { id: string; name: string; isDisabled: boolean }
-      >()
-
-      product.product_variants.forEach((v) => {
-        const attrVal = v.attributes?.[attrKey]
-        if (attrVal) {
-          const stringVal = String(attrVal)
-          if (!uniqueValues.has(stringVal)) {
-            uniqueValues.set(stringVal, {
-              id: v.id, // ربط القيمة بأول variant يمتلكها أو معالجتها حسب منطق التصفية
-              name: stringVal,
-              isDisabled: v.track_inventory && v.stock_quantity <= 0,
-            })
+      return {
+        id: key,
+        name: key,
+        values: values.map((value) => {
+          const matches = variants.filter((v) => getAttribute(v, key) === value)
+          return {
+            id: value,
+            name: value,
+            isSelected: getAttribute(selectedVariant, key) === value,
+            // معطّل فقط إذا نفدت كل المتغيرات التي تحمل هذه القيمة
+            isDisabled: matches.every(isVariantOutOfStock),
           }
-        }
-      })
-
-      if (uniqueValues.size > 0) {
-        options.push({
-          id: attrKey,
-          name: attrKey.toUpperCase(), // عرض اسم الخاصية مثل SIZE أو WEIGHT
-          values: Array.from(uniqueValues.entries()).map(([valStr, data]) => ({
-            id: data.id,
-            name: valStr,
-            isSelected: selectedVariant?.attributes?.[attrKey] === valStr,
-            isDisabled: data.isDisabled,
-          })),
-        })
+        }),
       }
     })
+  }, [variants, selectedVariant, t])
 
-    return options
-  }, [product.product_variants, selectedVariant, t])
+  const handleSelectVariant = React.useCallback(
+    (variant: ProductVariantDetail) => setSelectedId(variant.id),
+    []
+  )
 
-  const handleSelectedVariant = (variants: ProductVariantDetail) => {
-    setSelectedVariant(variants)
-    onSelectVariants(variants)
+  const handleSelectOption = (optionId: string, valueId: string) => {
+    if (!selectedVariant) return
+    const found =
+      optionId === DEFAULT_OPTION_ID
+        ? variants.find((v) => v.id === valueId)
+        : findBestVariant(variants, selectedVariant, optionId, valueId)
+    if (found) handleSelectVariant(found)
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      {/* تخطيط الشبكة الرئيسي */}
-      <div className="grid grid-cols-1 items-start gap-12 md:grid-cols-12">
-        {/* ================================================================= */}
-        {/* 1. قسم معرض الصور الفاخر */}
-        {/* ================================================================= */}
-        <div className="md:col-span-6">
-          <ProductGallery
-            images={product.product_images}
-            variants={product.product_variants}
-            productName={product.name}
-            selectedVariantId={selectedVariant?.id}
-            isOutOfStock={
-              selectedVariant?.track_inventory &&
-              selectedVariant?.stock_quantity <= 0
-            }
-            onVariantSelect={handleSelectedVariant}
-          />
-        </div>
+    <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-12 lg:gap-14">
+      {/* معرض الصور: يبقى ظاهراً أثناء التمرير على الشاشات الكبيرة */}
+      <div className="min-w-0 md:sticky md:top-24 md:col-span-6 lg:col-span-7">
+        <ProductGallery
+          images={product.product_images}
+          variants={variants}
+          productName={product.name}
+          selectedVariantId={selectedVariant?.id}
+          isOutOfStock={
+            selectedVariant ? isVariantOutOfStock(selectedVariant) : false
+          }
+          discountPercentage={
+            selectedVariant ? getDiscountPercentage(selectedVariant) : null
+          }
+          onVariantSelect={handleSelectVariant}
+        />
+      </div>
 
-        {/* ================================================================= */}
-        {/* 2. قسم المعلومات والخيارات وأزرار الشراء */}
-        {/* ================================================================= */}
-        <div className="flex flex-col gap-6 md:col-span-6">
+      {/* المعلومات والخيارات وشريط الشراء */}
+      <div className="flex min-w-0 flex-col gap-6 md:col-span-6 lg:col-span-5">
+        <div className="space-y-2">
           <ProductCategoryBrand
             slug={product.slug}
             category={product.category}
             brand={product.brand}
           />
+          <ProductHeader name={product.name} />
+        </div>
 
-          <ProductHeader
-            name={product.name}
-            description={product.description}
-          />
-
-          {selectedVariant && <ProductPriceStock variant={selectedVariant} />}
-
-          {/* خيارات المنتج المستخرجة بدقة من السمات (Attributes) */}
-          <ProductVariants
-            options={variantOptions}
-            onSelectOption={(_optionId, valueId) => {
-              const found = product.product_variants.find(
-                (v) => v.id === valueId
-              )
-              if (found) {
-                handleSelectedVariant(found)
-              }
-            }}
-          />
-
-          {selectedVariant && (
+        {selectedVariant ? (
+          <>
+            <ProductPriceStock variant={selectedVariant} />
+            <ProductVariants
+              options={variantOptions}
+              onSelectOption={handleSelectOption}
+            />
             <ProductActions
               productId={product.id}
               variant={selectedVariant}
               isProductActive={product.is_active}
             />
-          )}
+          </>
+        ) : (
+          <p className="rounded-2xl bg-muted/50 p-4 text-sm text-muted-foreground">
+            {t("UNAVAILABLE_PRODUCT")}
+          </p>
+        )}
 
-          <ProductTrustBadges />
-        </div>
+        <ProductTrustBadges />
+
+        {/* الوصف بعد الشراء حتى لا يدفع النص الطويل الخيارات إلى الأسفل */}
+        {product.description && (
+          <ProductDescription description={product.description} />
+        )}
       </div>
     </div>
   )

@@ -1,81 +1,33 @@
 /**
  * @file app/[locale]/(store)/product-details/[slug]/loading.tsx
- * @description Loading skeleton for the product details page matching the exact two-column layout.
+ * @description Skeleton shown while the product details page is loading.
  */
+
+import { STORE_CONTAINER } from "@/lib/config/app_config"
+import { cn } from "@/lib/utils"
+
+function Block({ className }: { className: string }) {
+  return <div className={cn("rounded-2xl bg-muted", className)} />
+}
 
 export default function ProductDetailsLoading() {
   return (
-    <div className="flex animate-pulse flex-col gap-8 px-4 pb-16 sm:px-6 lg:px-8 pt-8">
-      {/* 0. مسار التنقل الوهمي (Breadcrumb Skeleton) */}
-      <div className="flex items-center gap-2">
-        <div className="h-4 w-12 rounded bg-muted/60" />
-        <div className="h-3 w-3 rounded-full bg-muted/40" />
-        <div className="h-4 w-20 rounded bg-muted/60" />
-        <div className="h-3 w-3 rounded-full bg-muted/40" />
-        <div className="h-4 w-32 rounded bg-muted/60" />
-      </div>
-
-      {/* تخطيط الشبكة الرئيسي (مطابق لـ ProductInfoSection) */}
-      <div className="grid grid-cols-1 items-start gap-12 md:grid-cols-12">
-        {/* 1. قسم معرض الصور الوهمي (Gallery Skeleton) */}
-        <div className="space-y-4 md:col-span-6">
-          {/* الصورة الرئيسية الكبيرة */}
-          <div className="aspect-square w-full rounded-2xl bg-muted/60" />
-          {/* صور مصغرة تحتها */}
-          <div className="flex gap-4">
-            <div className="size-20 rounded-xl bg-muted/60" />
-            <div className="size-20 rounded-xl bg-muted/60" />
-            <div className="size-20 rounded-xl bg-muted/60" />
-          </div>
-        </div>
-
-        {/* 2. قسم المعلومات والخيارات الوهمي (Details Skeleton) */}
-        <div className="flex flex-col gap-6 md:col-span-6">
-          {/* التصنيف والبراند */}
-          <div className="h-4 w-36 rounded-md bg-muted/60" />
-
-          {/* العنوان والوصف */}
-          <div className="space-y-3">
-            <div className="h-8 w-3/4 rounded-lg bg-muted/60" />
-            <div className="h-4 w-full rounded-md bg-muted/40" />
-            <div className="h-4 w-5/6 rounded-md bg-muted/40" />
-          </div>
-
-          {/* السعر والمخزون */}
-          <div className="h-10 w-40 rounded-lg bg-muted/60" />
-
-          {/* خيارات المنتجات (Variations) */}
-          <div className="space-y-3 border-t border-border/40 pt-4">
-            <div className="h-4 w-24 rounded bg-muted/60" />
-            <div className="flex gap-3">
-              <div className="h-10 w-16 rounded-xl bg-muted/60" />
-              <div className="h-10 w-16 rounded-xl bg-muted/40" />
-              <div className="h-10 w-16 rounded-xl bg-muted/40" />
-            </div>
-          </div>
-
-          {/* أزرار الشراء */}
-          <div className="flex gap-4 pt-4">
-            <div className="h-12 flex-1 rounded-xl bg-muted/60" />
-            <div className="size-12 rounded-xl bg-muted/60" />
-          </div>
-
-          {/* شارات الثقة الوهمية */}
-          <div className="grid grid-cols-2 gap-4 border-t border-border/40 pt-6">
-            <div className="h-10 rounded-lg bg-muted/40" />
-            <div className="h-10 rounded-lg bg-muted/40" />
-          </div>
+    <main
+      aria-busy="true"
+      className={cn(STORE_CONTAINER, "flex animate-pulse flex-col gap-6 py-6 md:py-8")}
+    >
+      <Block className="h-4 w-56" />
+      <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-12 lg:gap-14">
+        <Block className="aspect-square w-full rounded-3xl md:col-span-6 lg:col-span-7" />
+        <div className="space-y-6 md:col-span-6 lg:col-span-5">
+          <Block className="h-4 w-32" />
+          <Block className="h-9 w-4/5" />
+          <Block className="h-12 w-1/2" />
+          <Block className="h-24 w-full" />
+          <Block className="h-14 w-full rounded-full" />
+          <Block className="h-40 w-full" />
         </div>
       </div>
-
-      {/* 3. قسم التقييمات الوهمي (Reviews Section Skeleton) */}
-      <div className="space-y-6 border-t border-border/40 pt-12">
-        <div className="flex items-center justify-between">
-          <div className="h-6 w-36 rounded-md bg-muted/60" />
-          <div className="h-10 w-32 rounded-xl bg-muted/60" />
-        </div>
-        <div className="h-32 w-full rounded-2xl bg-muted/60" />
-      </div>
-    </div>
+    </main>
   )
 }
