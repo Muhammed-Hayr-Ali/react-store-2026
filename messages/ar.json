@@ -1578,5 +1578,16 @@
     "viewAll": "عرض الكل",
     "prev": "القسم السابق",
     "next": "القسم التالي"
-  }
+  },
+ "LatestProducts": {
+      "SECTION_TITLE": "أحدث المنتجات",
+      "SECTION_DESCRIPTION": "اكتشف آخر ما وصل إلى متجرنا",
+      "VIEW_ALL_BUTTON": "عرض الكل",
+      "OUT_OF_STOCK_BADGE": "نفد المخزون",
+      "DISCOUNT_BADGE": "خصم {percent}",
+      "RATING_SUMMARY": "التقييم {rating} من 5، عدد التقييمات: {count}",
+      "PRICE_UNAVAILABLE": "السعر غير متوفر",
+      "CURRENT_PRICE_LABEL": "السعر الحالي:",
+      "OLD_PRICE_LABEL": "السعر السابق:"
+    }
 }

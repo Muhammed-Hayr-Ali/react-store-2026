@@ -1580,5 +1580,16 @@
     "viewAll": "View All",
     "prev": "Previous categories",
     "next": "Next categories"
+  },
+  "LatestProducts": {
+    "SECTION_TITLE": "Latest products",
+    "SECTION_DESCRIPTION": "Discover what's new in our store",
+    "VIEW_ALL_BUTTON": "View all",
+    "OUT_OF_STOCK_BADGE": "Out of stock",
+    "DISCOUNT_BADGE": "{percent} off",
+    "RATING_SUMMARY": "Rated {rating} out of 5, number of reviews: {count}",
+    "PRICE_UNAVAILABLE": "Price unavailable",
+    "CURRENT_PRICE_LABEL": "Current price:",
+    "OLD_PRICE_LABEL": "Previous price:"
   }
 }

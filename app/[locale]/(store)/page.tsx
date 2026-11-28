@@ -13,7 +13,8 @@ import { cn } from "@/lib/utils"
 import { getStoreExchangeRate } from "@/lib/actions/store/queries/get-exchange-rate"
 import CategoryCarousel from "@/components/store/shop-by-category-slider/shop-by-category-slider"
 import { getAllCategories } from "@/lib/actions/store/queries/get-all-categories"
-
+import { LatestProductsSection } from "@/components/store/latest-products/latest-products-section"
+ 
 interface PageProps {
   params: Promise<{ locale: string }>
 }
@@ -78,6 +79,9 @@ export default async function Page() {
 
           {/* 2. شريط التصنيفات الرئيسية */}
           <CategoryCarousel categories={categories} />
+
+          {/* 3. أحدث المنتجات */}
+          <LatestProductsSection />
         </div>
       </main>
     </>
