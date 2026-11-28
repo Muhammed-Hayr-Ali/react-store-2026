@@ -92,11 +92,7 @@ export default async function Page() {
           {/* 2. شريط التصنيفات الرئيسية */}
           <CategoryCarousel categories={categories} />
 
-          {/* 2. شريط التصنيفات الرئيسية */}
-          <HomeClientWrapper
-            viewMode={viewMode}
-            initialProducts={initialProducts}
-          />
+          
         </div>
       </main>
     </>
