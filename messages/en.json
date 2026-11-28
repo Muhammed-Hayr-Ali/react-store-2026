@@ -1595,5 +1595,11 @@
   "lastUpdatedAgo": "Last Updated Ago",
   "StoreLayout": {
     "skipToContent": "Skip To Content"
-  }
+  },
+  "log_out": "Log Out",
+  "profile": "Profile",
+  "my_orders": "My Orders",
+  "dashboard": "Dashboard",
+  "signIn": "Sign In",
+  "CONTINUE_WITH_GOOGLE": "Continue With Google"
 }

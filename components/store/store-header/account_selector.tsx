@@ -172,14 +172,14 @@ function AccountMenuContent({
         >
           <span
             className={cn(
-              "flex items-center group-hover:text-destructive",
+              "flex items-center text-destructive",
               isMobile ? "gap-3" : "gap-2.5"
             )}
           >
             <LogOutIcon
               aria-hidden="true"
               className={cn(
-                "shrink-0 text-muted-foreground group-hover:text-destructive",
+                "shrink-0 text-destructive",
                 isMobile ? "size-4" : "size-3.5"
               )}
             />

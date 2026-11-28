@@ -1589,5 +1589,11 @@
   "lastUpdatedAgo": "آخر تحديث منذ",
   "StoreLayout": {
     "skipToContent": "تخطي الى المحتوى"
-  }
+  },
+  "log_out": "تسجيل الخروج",
+  "profile": "الملف الشخصي",
+  "my_orders": "طلباتي",
+  "dashboard": "لوحة التحكم",
+  "signIn": "تسجيل الدخول",
+  "CONTINUE_WITH_GOOGLE": "المتابعة باستخدام Google"
 }
